@@ -1,0 +1,62 @@
+{
+  "name": "jsthermalcomfort",
+  "version": "0.0.0",
+  "description": "A JavaScript package to calculate thermal comfort indices (e.g., Predicted Mean Vote, Standard Effective Temperature, Predicted Heat Strain).",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
+  "types": "./lib/cjs/types/index.d.ts",
+  "main": "./lib/cjs/index.js",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./lib",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
+    "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
+    "test": "mocha",
+    "semantic-release": "semantic-release",
+    "prepack": "npm run build"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FedericoTartarini/jsthermalcomfort.git"
+  },
+  "keywords": [
+    "thermal comfort",
+    "heat stress",
+    "predicted mean vote",
+    "human thermophysiological modeling"
+  ],
+  "author": "Federico Tartarini",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FedericoTartarini/jsthermalcomfort/issues"
+  },
+  "homepage": "https://github.com/FedericoTartarini/jsthermalcomfort#readme",
+  "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.1"
+  }
+}

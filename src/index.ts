@@ -1,7 +1,10 @@
 /**
  * Calculates vapour pressure of water at different temperatures
+ *
  * @param {number} tdb - air temperature, [°C]
- * @returns {number} - operative temperature, [Pa]
+ * @returns {number} - vapour pressure of water, [Pa]
+ *
+ * @category Psychrometrics
  */
 export function p_sat(tdb: number): number {
   const c_to_k = 273.15;
@@ -58,6 +61,8 @@ interface HeatIndexOptions {
  *
  * @example
  * const hi = heatIndex(25, 50); // returns 25.9
+ *
+ * @category Thermophysiological models
  */
 export function heatIndex(
   tdb: number,
@@ -118,6 +123,7 @@ export function heatIndex(
  * of skin temperature, heat accumulation associated with the metabolic rate, maximum
  * evaporative heat flow at the skin surface, predicted sweat rate, predicted evaporative
  * heat flow, and rectal temperature.
+ *
  * @param {number} tdb - dry bulb air temperature, default in [°C]
  * @param {number} tr - mean radiant temperature, default in [°C]
  * @param {number} v - air speed, default in [m/s]
@@ -141,7 +147,8 @@ export function heatIndex(
  * @param {number} t_re - mean rectal temperature when worker starts working, [°C], default false
  * @param {number} t_cr_eq - mean core temperature as a function of met when worker starts working, [°C], default false
  * @param {number} sweat_rate - default 0
- * @returns {[number]} - an array of the following results:
+ *
+ * @category Thermophysiological models
  */
 export function phs(
   tdb: number,

@@ -26,7 +26,8 @@
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "test": "mocha",
     "semantic-release": "semantic-release",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "docs": "jsdoc --readme README.md -c jsdoc.json"
   },
   "release": {
     "branches": [
@@ -55,8 +56,11 @@
   "devDependencies": {
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
+    "better-docs": "^2.7.2",
     "chai": "^4.3.7",
+    "jsdoc": "^4.0.2",
     "mocha": "^10.2.0",
+    "taffydb": "^2.7.3",
     "ts-node": "^10.9.1"
   }
 }

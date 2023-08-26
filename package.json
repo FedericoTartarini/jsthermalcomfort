@@ -23,7 +23,7 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "build": "npm run clean && npm run build:types",
-    "build:types": "tsc -p ./configs/tsconfig.json",
+    "build:types": "tsc -p ./tsconfig.json",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "semantic-release": "semantic-release",
     "docs": "jsdoc --readme README.md -c jsdoc.json"

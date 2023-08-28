@@ -5,28 +5,27 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./lib/esm/types/index.d.ts",
-        "default": "./lib/esm/index.mjs"
+        "types": "./dist/index.d.ts",
+        "default": "./src/index.js"
       },
       "require": {
-        "types": "./lib/cjs/types/index.d.ts",
-        "default": "./lib/cjs/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./src/index.js"
       }
     }
   },
-  "types": "./lib/cjs/types/index.d.ts",
-  "main": "./lib/cjs/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "main": "./src/index.js",
   "files": [
     "lib/**/*"
   ],
   "scripts": {
-    "clean": "rm -rf ./lib",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
-    "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
-    "test": "mocha",
+    "clean": "rm -rf ./dist",
+    "build": "npm run clean && npm run build:types",
+    "build:types": "tsc -p ./tsconfig.json",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "semantic-release": "semantic-release",
-    "prepack": "npm run build",
     "docs": "jsdoc --readme README.md -c jsdoc.json"
   },
   "release": {
@@ -54,13 +53,10 @@
   },
   "homepage": "https://github.com/FedericoTartarini/jsthermalcomfort#readme",
   "devDependencies": {
-    "@types/chai": "^4.3.4",
-    "@types/mocha": "^10.0.1",
     "better-docs": "^2.7.2",
-    "chai": "^4.3.7",
+    "jest": "^29.6.2",
     "jsdoc": "^4.0.2",
-    "mocha": "^10.2.0",
-    "taffydb": "^2.7.3",
-    "ts-node": "^10.9.1"
+    "prettier": "3.0.2",
+    "typescript": "^5.1.6"
   }
 }

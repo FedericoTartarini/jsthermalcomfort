@@ -26,7 +26,8 @@
     "build:types": "tsc -p ./tsconfig.json",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "semantic-release": "semantic-release",
-    "docs": "jsdoc --readme README.md -c jsdoc.json"
+    "docs": "jsdoc --readme README.md -c jsdoc.json",
+    "format": "npx prettier . --write"
   },
   "release": {
     "branches": [

@@ -7,8 +7,13 @@ import {
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
+  check_standard_compliance_array,
 } from "../../src/utilities/utilities";
-import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
+import {
+  deep_close_to_array,
+  deep_close_to_obj,
+  deep_close_to_obj_arrays,
+} from "../test_utilities";
 
 describe("body_surface_area", () => {
   it.each([
@@ -307,6 +312,142 @@ describe("valid_range", () => {
     ({ range, valid, expected }) => {
       const result = valid_range(range, valid);
       expect(result).toStrictEqual(expected);
+    },
+  );
+});
+
+describe("check_standard_compliance_array", () => {
+  it.each([
+    {
+      standard: "fan_heatwaves",
+      kwargs: {
+        tdb: [15, 30, 60],
+        tr: [15, 30, 60],
+        v: [0, 2, 5],
+        rh: [-1, 50, 150],
+        met: [0, 1, 3],
+        clo: [-1, 0.5, 2],
+      },
+      expected: {
+        tdb: [NaN, 30, NaN],
+        tr: [NaN, 30, NaN],
+        v: [NaN, 2, NaN],
+        rh: [NaN, 50, NaN],
+        met: [NaN, 1, NaN],
+        clo: [NaN, 0.5, NaN],
+      },
+    },
+    {
+      standard: "iso",
+      kwargs: {
+        tdb: [9, 20, 31],
+        tr: [9, 25, 41],
+        v: [-1, 0.5, 1.1],
+        met: [0.7, 0.9, 4.1],
+        clo: [-1, 0.5, 2.1],
+      },
+      expected: {
+        tdb: [NaN, 20, NaN],
+        tr: [NaN, 25, NaN],
+        v: [NaN, 0.5, NaN],
+        met: [NaN, 0.9, NaN],
+        clo: [NaN, 0.5, NaN],
+      },
+    },
+    {
+      standard: "ashrae",
+      kwargs: {
+        tdb: [9, 20, 41],
+        tr: [9, 25, 41],
+        v: [-1, 0.5, 2.1],
+        met: [0.9, 3, 4.1],
+        clo: [-1, 0.5, 1.6],
+      },
+      expected: {
+        tdb: [NaN, 20, NaN],
+        tr: [NaN, 25, NaN],
+        v: [NaN, 0.5, NaN],
+        met: [NaN, 3, NaN],
+        clo: [NaN, 0.5, NaN],
+      },
+    },
+    {
+      standard: "ashrae",
+      kwargs: {
+        tdb: [9, 20, 41],
+        tr: [9, 25, 41],
+        v: [-1, 0.9, 2.1],
+        met: [0.9, 1.2, 4.1],
+        clo: [-1, 0.5, 1.6],
+        airspeed_control: false,
+      },
+      expected: {
+        tdb: [NaN, 20, NaN],
+        tr: [NaN, 25, NaN],
+        v: [NaN, NaN, NaN],
+        met: [NaN, 1.2, NaN],
+        clo: [NaN, 0.5, NaN],
+      },
+    },
+    {
+      standard: "ashrae",
+      kwargs: {
+        tdb: [9, 20, 41],
+        tr: [9, 25, 41],
+        v: [-1, 0.3, 2.1],
+        met: [0.9, 1.2, 4.1],
+        clo: [-1, 0.5, 1.6],
+        airspeed_control: false,
+      },
+      expected: {
+        tdb: [NaN, 20, NaN],
+        tr: [NaN, 25, NaN],
+        v: [NaN, NaN, NaN],
+        met: [NaN, 1.2, NaN],
+        clo: [NaN, 0.5, NaN],
+      },
+    },
+    {
+      standard: "ashrae",
+      kwargs: {
+        tdb: [9, 20, 41],
+        tr: [9, 39, 41],
+        v: [-1, 0.9, 2.1],
+        met: [0.9, 1.2, 4.1],
+        clo: [-1, 0.5, 1.6],
+        airspeed_control: false,
+      },
+      expected: {
+        tdb: [NaN, 20, NaN],
+        tr: [NaN, 39, NaN],
+        v: [NaN, NaN, NaN],
+        met: [NaN, 1.2, NaN],
+        clo: [NaN, 0.5, NaN],
+      },
+    },
+    {
+      standard: "ashrae",
+      kwargs: {
+        tdb: [9, 20, 41],
+        tr: [9, 25, 41],
+        v: [-1, 0.9, 2.1],
+        met: [0.9, 1.2, 4.1],
+        clo: [-1, 0.8, 1.6],
+        airspeed_control: false,
+      },
+      expected: {
+        tdb: [NaN, 20, NaN],
+        tr: [NaN, 25, NaN],
+        v: [NaN, 0.9, NaN],
+        met: [NaN, 1.2, NaN],
+        clo: [NaN, 0.8, NaN],
+      },
+    },
+  ])(
+    "returns $expected when standard is $standard and kwargs is $kwargs",
+    ({ standard, kwargs, expected }) => {
+      const result = check_standard_compliance_array(standard, kwargs);
+      deep_close_to_obj_arrays(result, expected, 2);
     },
   );
 });

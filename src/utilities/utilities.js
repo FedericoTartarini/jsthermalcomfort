@@ -95,24 +95,29 @@ export function check_standard_compliance_array(standard, kwargs) {
       // based on table 7.3.4 ashrae 55 2020
       const tdb = valid_range(kwargs.tdb, [10.0, 40.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);
+      let original_v = kwargs.v || [];
       let v = valid_range(kwargs.v, [0.0, 2.0]);
       if (!kwargs.airspeed_control) {
         const met_aux = kwargs.met || [];
         const clo_aux = kwargs.clo || [];
         v = v.map((_v, index) =>
-          _v > 0.8 && clo_aux[index] < 0.7 && met_aux[index] < 1.3 ? NaN : _v,
+          original_v[index] > 0.8 &&
+          clo_aux[index] < 0.7 &&
+          met_aux[index] < 1.3
+            ? NaN
+            : _v,
         );
-        const to = t_o_array(tdb, tr, v);
+        const to = t_o_array(tdb, tr, original_v);
         v = v.map((_v, index) => {
           const limit =
             50.49 - 4.4047 * to[index] + 0.096425 * to[index] * to[index];
           return (23 < to[index] &&
             to[index] < 25.5 &&
-            _v > limit &&
+            original_v[index] > limit &&
             clo_aux[index] < 0.7 &&
             met_aux[index] < 1.3) ||
             (to[index] <= 23 &&
-              _v > 0.2 &&
+              original_v[index] > 0.2 &&
               clo_aux[index] < 0.7 &&
               met_aux[index] < 1.3)
             ? NaN

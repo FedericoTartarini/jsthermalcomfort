@@ -27,7 +27,8 @@
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "semantic-release": "semantic-release",
     "docs": "jsdoc --readme README.md -c jsdoc.json",
-    "format": "npx prettier . --write"
+    "format": "npx prettier . --write",
+    "check:format": "npx prettier . --check"
   },
   "release": {
     "branches": [

@@ -1,5 +1,6 @@
 import { expect, describe, it } from "@jest/globals";
-import { t_o } from "../../src/psychrometrics/t_o";
+import { t_o, t_o_array } from "../../src/psychrometrics/t_o";
+import { deep_close_to_array } from "../test_utilities";
 
 describe("t_o", () => {
   it.each([
@@ -103,4 +104,29 @@ describe("t_o", () => {
       "standard must be one of ISO or ASHRAE",
     );
   });
+});
+
+describe("t_o_array", () => {
+  it.each([
+    {
+      tdb: [0, 1, -1, -273, 0],
+      tr: [0, 1, -1, 0, -273],
+      v: [0, 1, 1, 1, 1],
+      standard: "ISO",
+      expected: [0, 1, -1, -207.4109, -65.589],
+    },
+    {
+      tdb: [0, 1, -1, -273, 0],
+      tr: [0, 1, -1, -1, -273],
+      v: [0, 1, 1, 1, 1],
+      standard: "ASHRAE",
+      expected: [0, 1, -1, -191.4, -81.9],
+    },
+  ])(
+    "returns $expected when tdb is $tdb, tr is $tr, v is $v and standard is $standard",
+    ({ tdb, tr, v, standard, expected }) => {
+      const result = t_o_array(tdb, tr, v, standard);
+      deep_close_to_array(result, expected, 2);
+    },
+  );
 });

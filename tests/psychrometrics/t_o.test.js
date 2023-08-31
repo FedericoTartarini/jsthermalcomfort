@@ -95,7 +95,7 @@ describe("t_o", () => {
   );
 
   it("throws an error if the airSpeed is negative", () => {
-    expect(() => t_o(0, 0, -1, "ISO")).toThrow("airSpeed cannot be negative");
+    expect(() => t_o(0, 0, -1, "ISO")).toThrow("v cannot be negative");
   });
 
   it("throws an error if standard is not valid", () => {

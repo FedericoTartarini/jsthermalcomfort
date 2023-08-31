@@ -295,12 +295,12 @@ describe("valid_range", () => {
     {
       range: [10, 20, 30, 40, 50, 60],
       valid: [15, 55],
-      expected: [20, 30, 40, 50],
+      expected: [NaN, 20, 30, 40, 50, NaN],
     },
     {
       range: [1, 2, 3, 4, 5, 6],
       valid: [2, 5],
-      expected: [2, 3, 4, 5],
+      expected: [NaN, 2, 3, 4, 5, NaN],
     },
   ])(
     "returns $expected when valid is $valid and range is $range",

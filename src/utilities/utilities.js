@@ -1,4 +1,5 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
+import { t_o_array } from "../psychrometrics/t_o.js";
 
 /**
  * Rounds a number to the given precision.
@@ -25,9 +26,24 @@ export function round(number, precision) {
  */
 
 /**
+ * @typedef {Object} ComplianceKwargsArray
+ * @property {number[]} [met]
+ * @property {number[]} [clo]
+ * @property {number[]} [tdb]
+ * @property {number[]} [tr]
+ * @property {number[]} [v]
+ * @property {number[]} [v_limited]
+ * @property {number[]} [rh]
+ */
+
+/**
+ * @typedef {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} Standard
+ */
+
+/**
  * Check that the values comply with the standard provided
  *
- * @param {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} standard
+ * @param {Standard} standard
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted
@@ -44,6 +60,95 @@ export function check_standard_compliance(standard, kwargs) {
       return _iso7933_compliance(kwargs);
     default:
       throw new Error("Unknown standard");
+  }
+}
+
+/**
+ * @typedef {Object.<string, number[]>} CheckStandardComplianceResult
+ * @property {number[]} tdb
+ * @property {number[]} tr
+ * @property {number[]} v
+ * @property {number[]} [met]
+ * @property {number[]} [clo]
+ * @property {number[]} [rh]
+ */
+
+/**
+ * Check that the values as an array comply with the standard provided and returns arrays where
+ * the values that do not comply are NaN
+ * @see {@link check_standard_compliance} for scalar variant that returns warnings
+ *
+ * @param {Standard | "fan_heatwaves"} standard - standard to check compliance with
+ * @param {ComplianceKwargsArray & {airspeed_control?: boolean}} kwargs - values to check compliance against
+ *
+ * @returns {CheckStandardComplianceResult} filtered arrays based on compliance limits
+ */
+export function check_standard_compliance_array(standard, kwargs) {
+  const default_kwargs = { airspeed_control: true };
+  kwargs = Object.assign(default_kwargs, kwargs);
+
+  switch (standard) {
+    case "ISO7933":
+    case "ankle_draft":
+      throw new Error(`Unsupported standard ${standard}`);
+    case "ashrae": {
+      // based on table 7.3.4 ashrae 55 2020
+      const tdb = valid_range(kwargs.tdb, [10.0, 40.0]);
+      const tr = valid_range(kwargs.tr, [10.0, 40.0]);
+      let original_v = kwargs.v || [];
+      let v = valid_range(kwargs.v, [0.0, 2.0]);
+      if (!kwargs.airspeed_control) {
+        const met_aux = kwargs.met || [];
+        const clo_aux = kwargs.clo || [];
+        v = v.map((_v, index) =>
+          original_v[index] > 0.8 &&
+          clo_aux[index] < 0.7 &&
+          met_aux[index] < 1.3
+            ? NaN
+            : _v,
+        );
+        const to = t_o_array(tdb, tr, original_v);
+        v = v.map((_v, index) => {
+          const limit =
+            50.49 - 4.4047 * to[index] + 0.096425 * to[index] * to[index];
+          return (23 < to[index] &&
+            to[index] < 25.5 &&
+            original_v[index] > limit &&
+            clo_aux[index] < 0.7 &&
+            met_aux[index] < 1.3) ||
+            (to[index] <= 23 &&
+              original_v[index] > 0.2 &&
+              clo_aux[index] < 0.7 &&
+              met_aux[index] < 1.3)
+            ? NaN
+            : _v;
+        });
+      }
+      if (kwargs.met !== undefined) {
+        const met = valid_range(kwargs.met, [1.0, 4.0]);
+        const clo = valid_range(kwargs.clo, [0.0, 1.5]);
+        return { tdb, tr, v, met, clo };
+      }
+      return { tdb, tr, v };
+    }
+    case "fan_heatwaves": {
+      const tdb = valid_range(kwargs.tdb, [20.0, 50.0]);
+      const tr = valid_range(kwargs.tr, [20.0, 50.0]);
+      const v = valid_range(kwargs.v, [0.1, 4.5]);
+      const rh = valid_range(kwargs.rh, [0, 100]);
+      const met = valid_range(kwargs.met, [0.7, 2]);
+      const clo = valid_range(kwargs.clo, [0.0, 1]);
+      return { tdb, tr, v, rh, met, clo };
+    }
+    case "iso": {
+      // based on ISO 7730:2005 page 3
+      const tdb = valid_range(kwargs.tdb, [10.0, 30.0]);
+      const tr = valid_range(kwargs.tr, [10.0, 40.0]);
+      const v = valid_range(kwargs.v, [0.0, 1.0]);
+      const met = valid_range(kwargs.met, [0.8, 4.0]);
+      const clo = valid_range(kwargs.clo, [0.0, 2]);
+      return { tdb, tr, v, met, clo };
+    }
   }
 }
 
@@ -389,12 +494,13 @@ export function f_svv(w, h, d) {
 }
 
 /**
- * Filter values based on a valid range
+ * Filter values based on a valid range (It turns the filtered values to NaNs)
  *
- * @param {number[]} range - the range to limit
+ * @param {number[]} [range] - the range to limit
  * @param {[number, number]} valid - the [min, max] to constrian the range to
- * @returns {number[]} the constrained range
+ * @returns {number[]} the constrained range with NaNs for values that are outside the min, max range
  */
 export function valid_range(range, [min, max]) {
-  return range.filter((n) => n >= min && n <= max);
+  if (range === undefined) return [];
+  return range.map((n) => (n >= min && n <= max ? n : NaN));
 }

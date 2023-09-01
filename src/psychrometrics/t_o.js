@@ -1,36 +1,78 @@
 /**
  * Calculates operative temperature in accordance with ISO 7726:1998.
+ * @see {@link t_o_array} for a version that supports arrays
  *
- *
- * @param {number} airTemperature - air temperature [C]
- * @param {number} meanRadiantTemperature - mean radiant temperature [C]
- * @param {number} airSpeed - air speed [m/s]
+ * @param {number} tdb - air temperature [C]
+ * @param {number} tr - mean radiant temperature [C]
+ * @param {number} v - air speed [m/s]
  * @param {("ISO" | "ASHRAE")} standard - the standard to use
  * @returns {number} operative temperature [C]
  */
-export function t_o(
-  airTemperature,
-  meanRadiantTemperature,
-  airSpeed,
-  standard = "ISO",
-) {
-  if (airSpeed < 0) {
-    throw new Error("airSpeed cannot be negative");
+export function t_o(tdb, tr, v, standard = "ISO") {
+  if (v < 0) {
+    throw new Error("v cannot be negative");
   }
 
   switch (standard) {
     case "ISO":
-      return (
-        (airTemperature * Math.sqrt(10 * airSpeed) + meanRadiantTemperature) /
-        (1 + Math.sqrt(10 * airSpeed))
-      );
+      return _t_o_calculation_iso(tdb, tr, v);
     case "ASHRAE":
-      let adjustment = airSpeed < 0.6 ? 0.6 : 0.7;
-      adjustment = airSpeed < 0.2 ? 0.5 : adjustment;
-      return (
-        adjustment * airTemperature + (1 - adjustment) * meanRadiantTemperature
-      );
+      return _t_o_calculation_ashrae(tdb, tr, v);
     default:
       throw new Error("standard must be one of ISO or ASHRAE");
   }
+}
+
+/**
+ * Calculates operative temperature in accordance with ISO 7726:1998.
+ * Accepts array arguments. @see {@link t_o} for scalar arguments
+ *
+ * @param {number[]} tdb - air temperature [C]
+ * @param {number[]} tr - mean radiant temperature [C]
+ * @param {number[]} v - air speed [m/s]
+ * @param {("ISO" | "ASHRAE")} standard - the standard to use
+ * @returns {number[]} operative temperature [C]
+ */
+export function t_o_array(tdb, tr, v, standard = "ISO") {
+  if (tdb.length !== tr.length || tr.length !== v.length) {
+    throw new Error("Provided arrays are not the same lengths");
+  }
+  if (standard === "ISO")
+    return tdb.map((_tdb, index) =>
+      _t_o_calculation_iso(_tdb, tr[index], v[index]),
+    );
+  if (standard === "ASHRAE")
+    return tdb.map((_tdb, index) =>
+      _t_o_calculation_ashrae(_tdb, tr[index], v[index]),
+    );
+
+  throw new Error("standard must be one of ISO or ASHRAE");
+}
+
+/**
+ * Runs the ISO t_o calculation for scalar values
+ *
+ * @param {number} tdb
+ * @param {number} tr
+ * @param {number} v
+ *
+ * @returns {number} t_o calculation using ISO
+ */
+function _t_o_calculation_iso(tdb, tr, v) {
+  return (tdb * Math.sqrt(10 * v) + tr) / (1 + Math.sqrt(10 * v));
+}
+
+/**
+ * Runs ASHRAE t_o calculation for scalar values
+ *
+ * @param {number} tdb
+ * @param {number} tr
+ * @param {number} v
+ *
+ * @returns {number} t_o calculation using ASHRAE
+ */
+function _t_o_calculation_ashrae(tdb, tr, v) {
+  let adjustment = v < 0.6 ? 0.6 : 0.7;
+  adjustment = v < 0.2 ? 0.5 : adjustment;
+  return adjustment * tdb + (1 - adjustment) * tr;
 }

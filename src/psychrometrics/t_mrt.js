@@ -6,11 +6,11 @@ const cp_air = 1004;
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
- * @param {Number | Array} tg - globe temperature, [°C]
- * @param {Number | Array} tdb - air temperature, [°C]
- * @param {Number | Array} v - air speed, [m/s]
- * @param {Number | Array} d - diameter of the globe, [m] default 0.15 m
- * @param {Number | Array} emissivity - emissivity of the globe temperature sensor, default 0.95
+ * @param {Number | Number[]} tg - globe temperature, [°C]
+ * @param {Number | Number[]} tdb - air temperature, [°C]
+ * @param {Number | Number[]} v - air speed, [m/s]
+ * @param {Number | Number[]} d - diameter of the globe, [m] default 0.15 m
+ * @param {Number | Number[]} emissivity - emissivity of the globe temperature sensor, default 0.95
 * @param {String} standard - {"Mixed Convection", "ISO"} either choose between the Mixed Convection and ISO formulations.
         The Mixed Convection formulation has been proposed by Teitelbaum E. et al. (2022)
         to better determine the free and forced convection coefficient used in the

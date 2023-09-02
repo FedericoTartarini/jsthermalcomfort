@@ -7,14 +7,14 @@ describe("p_sat", () => {
   });
 
   it.each([
-    { airTemperature: 0, expected: 611.2 },
-    { airTemperature: 1, expected: 657.1 },
-    { airTemperature: -1, expected: 562.7 },
-    { airTemperature: -273, expected: 0.0 },
+    { tdb: 0, expected: 611.2 },
+    { tdb: 1, expected: 657.1 },
+    { tdb: -1, expected: 562.7 },
+    { tdb: -273, expected: 0.0 },
   ])(
     "returns $expected when airTemperature is $airTemperature",
-    ({ airTemperature, expected }) => {
-      const result = p_sat(airTemperature);
+    ({ tdb, expected }) => {
+      const result = p_sat(tdb);
       expect(result).toBeCloseTo(expected);
     },
   );

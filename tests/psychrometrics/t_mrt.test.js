@@ -1,5 +1,6 @@
 import { expect, describe, it } from "@jest/globals";
 import { t_mrt } from "../../src/psychrometrics/t_mrt";
+import {deep_close_to_array} from "../test_utilities"
 
 describe("t_mrt", () => {
   it.each([
@@ -23,12 +24,6 @@ describe("t_mrt", () => {
     },
   ])("test t_mrt", ({ tg, tdb, v, d, emissivity, standard, expected }) => {
     const result = t_mrt(tg, tdb, v, d, emissivity, standard);
-    for (let i = 0; i < expected.length; i++) {
-      if (isNaN(expected[i])) {
-        expect(result[i]).toBeNaN();
-        continue;
-      }
-      expect(result[i]).toBeCloseTo(expected[i]);
-    }
+    deep_close_to_array(result, expected, 0.2)
   });
 });

@@ -15,13 +15,13 @@ import { enthalpy } from "./enthalpy";
 /**
  * Calculates psychrometric values of air based on dry bulb air temperature and
  * relative humidity.
- * 
+ *
  * @param {number} tdb - air temperature, [°C]
  * @param {number} rh - relative humidity, [%]
  * @param {number} [p_atm = 101325] - atmospheric pressure, [Pa]
- * 
+ *
  * @returns {PsyTaRhReturnType} object with calculated psychrometrics values
- * 
+ *
  * @example
  * import { psy_ta_rh } from "jsthermalcomfort";
  * const results = psy_ta_rh(21, 56);

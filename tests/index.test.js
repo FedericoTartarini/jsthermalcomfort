@@ -34,6 +34,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd");
   })
 
+  it("should have models.cooling_effect", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("cooling_effect");
+  })
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

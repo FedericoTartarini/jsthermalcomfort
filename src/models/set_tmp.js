@@ -75,9 +75,7 @@ import {
  * 
  * @example
  * const results = two_nodes(25, 25, 0.3, 50, 1.2, 0.5);
- * console.log(results); // {e_skin: 16.2, e_rsw: 7.0, e_max: 159.9, q_sensible: 47.6, q_skin: 63.8, q_res: 5.2, 
- * t_core: 36.9, t_skin: 33.7, m_bl: 12.9, m_rsw: 10.3, w: 0.1, w_max: 0.6, _set: 23.6, et: 25.0, pmv_gagge: 0.1, 
- * pmv_set: -0.0, disc: 0.1, t_sens: 0.1}
+ * console.log(results); // {e_skin: 16.2, e_rsw: 7.0, e_max: 159.9, q_sensible: 47.6, q_skin: 63.8, q_res: 5.2, t_core: 36.9, t_skin: 33.7, m_bl: 12.9, m_rsw: 10.3, w: 0.1, w_max: 0.6, _set: 23.6, et: 25.0, pmv_gagge: 0.1, pmv_set: -0.0, disc: 0.1, t_sens: 0.1}
  * 
  */
 export function two_nodes(

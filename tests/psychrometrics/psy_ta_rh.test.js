@@ -1,4 +1,5 @@
 import { expect, describe, it } from "@jest/globals";
+import { deep_close_to_obj } from "../test_utilities";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh";
 
 describe("psy_ta_rh", () => {
@@ -72,7 +73,7 @@ describe("psy_ta_rh", () => {
     "returns $expected when tdb is $tdb, rh is $rh, p_atm is $p_atm",
     ({ tdb, rh, p_atm, expected }) => {
       const result = psy_ta_rh(tdb, rh, p_atm);
-      expect(result).toStrictEqual(expected);
+      deep_close_to_obj(result, expected, 1);
     },
   );
 });

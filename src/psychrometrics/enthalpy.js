@@ -1,3 +1,5 @@
+import { round } from "../utilities/utilities";
+
 /**
  * Calculates air enthalpy
  *
@@ -10,7 +12,9 @@ export function enthalpy(tdb, hr) {
   const h_fg = 2501000;
   const cp_vapor = 1805.0;
 
-  let h_dry_air = cp_air * tdb;
-  let h_sat_vap = h_fg + cp_vapor * tdb;
-  return h_dry_air + hr * h_sat_vap;
+  const dryAir = cp_air * tdb;
+  const satVap = h_fg + cp_vapor * tdb;
+  const h = dryAir + hr * satVap;
+
+  return round(h, 2);
 }

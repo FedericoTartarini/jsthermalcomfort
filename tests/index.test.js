@@ -26,6 +26,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("phs");
   });
 
+  it("should have models.humidex", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("humidex");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

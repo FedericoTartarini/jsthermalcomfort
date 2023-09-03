@@ -35,7 +35,7 @@ import { round } from "../utilities/utilities";
  *
  * @returns {HumidexResult} the result given the provided temperature and
  * relative humidity.
- * 
+ *
  * @example
  * const result = humidex(25, 50);
  * console.log(result); // -> { humidex: 28.2, discomfort: "Little or no discomfort" }

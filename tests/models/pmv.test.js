@@ -68,9 +68,9 @@ describe("pmv", () => {
     ({ tdb, tr, vr, rh, met, clo, standard, expect_pmv }) => {
       const result = pmv(tdb, tr, vr, rh, met, clo, 0, standard);
 
-        result.forEach((value) => {
-            expect(value).toBeCloseTo(expect_pmv);
-        });
+      result.forEach((value) => {
+        expect(value).toBeCloseTo(expect_pmv);
+      });
     },
   );
 });

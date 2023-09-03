@@ -81,13 +81,12 @@ describe("pmv_pdd", () => {
       }
 
       result.pmv.forEach((value) => {
-          expect(value).toBeCloseTo(expect_pmv);
+        expect(value).toBeCloseTo(expect_pmv);
       });
 
       result.ppd.forEach((value) => {
-          expect(value).toBeCloseTo(expect_ppd);
+        expect(value).toBeCloseTo(expect_ppd);
       });
-
     },
   );
 });

@@ -82,7 +82,7 @@ export function pmv(
     limit_inputs: true,
     airspeed_control: true,
   };
-  kwargs = Object.assign(default_kwargs,kwargs);
+  kwargs = Object.assign(default_kwargs, kwargs);
 
   const pmv_ppdValue = pmv_ppd(
     tdb,

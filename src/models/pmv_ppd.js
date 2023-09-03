@@ -128,7 +128,7 @@ export function pmv_ppd(
     limit_inputs: true,
     airspeed_control: true,
   };
-  kwargs = Object.assign(default_kwargs,kwargs);
+  kwargs = Object.assign(default_kwargs, kwargs);
 
   if (kwargs.units === "IP") {
     // Conversion from IP to SI units
@@ -248,8 +248,6 @@ export function pmv_ppd(
       }
     }
 
-
-
     const tcl = 100 * xn - 273;
     //heat loss diff. through skin
     const hl1 = 3.05 * 0.001 * (5733 - 6.99 * mw - pa);
@@ -278,7 +276,7 @@ export function pmv_ppd(
   }
 
   let pmv_array = tdb.map((item, i) =>
-      pmv_ppd_optimized(item, tr[i], vr[i], rh, met[i], clo[i], wme[i])
+    pmv_ppd_optimized(item, tr[i], vr[i], rh, met[i], clo[i], wme[i]),
   );
 
   pmv_array = Array.isArray(pmv_array) ? pmv_array : [pmv_array];
@@ -296,9 +294,9 @@ export function pmv_ppd(
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   if (kwargs.limit_inputs) {
     const pmv_valid =
-        standard === "ashrae"
-            ? pmv_array.map((pmvValue) => valid_range([pmvValue], [-100, 100]))
-            : pmv_array.map((pmvValue) => valid_range([pmvValue], [-2, 2])); // this is the ISO limit
+      standard === "ashrae"
+        ? pmv_array.map((pmvValue) => valid_range([pmvValue], [-100, 100]))
+        : pmv_array.map((pmvValue) => valid_range([pmvValue], [-2, 2])); // this is the ISO limit
 
     const all_valid = pmv_valid.every((valid, index) => {
       return (
@@ -318,7 +316,6 @@ export function pmv_ppd(
       }
     }
   }
-
 
   return {
     pmv: pmv_array.map((value) => Math.round(value * 10) / 10), //pmv is number[]

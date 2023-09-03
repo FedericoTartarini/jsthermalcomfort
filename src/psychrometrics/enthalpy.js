@@ -12,9 +12,9 @@ export function enthalpy(tdb, hr) {
   const h_fg = 2501000;
   const cp_vapor = 1805.0;
 
-  const dryAir = cp_air * airTemperature;
-  const satVap = h_fg + cp_vapor * airTemperature;
-  const h = dryAir + humidityRatio * satVap;
+  const dryAir = cp_air * tdb;
+  const satVap = h_fg + cp_vapor * tdb;
+  const h = dryAir + hr * satVap;
 
   return round(h, 2);
 }

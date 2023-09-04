@@ -182,7 +182,7 @@ export function two_nodes(
           m_bl: round(result.m_bl, 1),
           m_rsw: round(result.m_rsw, 1),
           w: round(result.w, 1),
-          w_max: round(result.wMax, 1),
+          w_max: round(result.kwargs.w_max, 1),
           set: round(result.set, 1),
           et: round(result.et, 2),
           pmv_gagge: round(result.pmv_gagge, 1),
@@ -197,13 +197,31 @@ export function two_nodes(
 }
 
 
+/**
+* @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+* @param {number | number[]} tr Mean radiant temperature, default in [°C]
+* @param {number | number[]} v Air speed, default in [m/s]
+* @param {number | number[]} met Metabolic rate, [W/(m2)]
+* @param {number | number[]} clo Clothing insulation, [clo]
+* @param {number | number[]} vaporPressure 
+* @param {number | number[]} wme External work, [W/(m2)] default 0
+* @param {number} bodySurfaceArea Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+* @param {number} pAtmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+* @param {"standing" | "sitting"} bodyPosition Select either “sitting” or “standing”
+* @param {number} [max_skin_blood_flow=90] Maximum blood flow from the core to the skin, [kg/h/m2] default 80
+* @param {TwoNodesKwargs} [kwargs]
+* 
+* @returns {TwoNodesReturnType} object with results of two_nodes
+*/
+
 function calculateTwoNodesOptimized(
     tdb, tr, v, met, clo, 
     vaporPressure, 
     wme, 
     bodySurfaceArea, 
     pAtmospheric, 
-    bodyPosition,  
+    bodyPosition,
+    max_skin_blood_flow = 90,  
     kwargs,
 ) {
 
@@ -242,7 +260,7 @@ function calculateTwoNodesOptimized(
     let cRes = 0; // convective heat loss respiration
 
     const pressureInAtmospheres = pAtmospheric / 101325;
-    const lengthTimeSimulation = 60; // length time simulation
+    const lengthTimeSimulation = 60; 
     let nSimulation = 0;
 
     const rClo = 0.155 * clo; // thermal resistance of clothing, C M^2 /W
@@ -292,36 +310,36 @@ function calculateTwoNodesOptimized(
     while (nSimulation < lengthTimeSimulation) {
         nSimulation += 1;
 
-        const iterationLimit = 150; // for following while loop
+        const iterationLimit = 150; 
         // tCl temperature of the outer surface of clothing
         let tCl = (rA * tSkin + rClo * tOp) / (rA + rClo); 
         let nIterations = 0;
         let tcConverged = false;
 
         while (!tcConverged) {
-        // 0.95 is the clothing emissivity from ASHRAE fundamentals Ch. 9.7 Eq. 35
-        let hR;
-        if (bodyPosition === "sitting") {
-            // 0.7 ratio between radiation area of the body and the body area
-            hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.7;
-        } else {
-            // if standing
-            // 0.73 ratio between radiation area of the body and the body area
-            hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.73;
-        }
-        hT = hR + hCc;
-        rA = 1.0 / (fACl * hT);
-        tOp = (hR * tr + hCc * tdb) / hT;
-        const tClNew = (rA * tSkin + rClo * tOp) / (rA + rClo);
-        if (Math.abs(tClNew - tCl) <= 0.01) {
-            tcConverged = true;
-        }
-        tCl = tClNew;
-        nIterations += 1;
+            // 0.95 is the clothing emissivity from ASHRAE fundamentals Ch. 9.7 Eq. 35
+            let hR;
+            if (bodyPosition === "sitting") {
+                // 0.7 ratio between radiation area of the body and the body area
+                hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.7;
+            } else {
+                // if standing
+                // 0.73 ratio between radiation area of the body and the body area
+                hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.73;
+            }
+            hT = hR + hCc;
+            rA = 1.0 / (fACl * hT);
+            tOp = (hR * tr + hCc * tdb) / hT;
+            const tClNew = (rA * tSkin + rClo * tOp) / (rA + rClo);
+            if (Math.abs(tClNew - tCl) <= 0.01) {
+                tcConverged = true;
+            }
+            tCl = tClNew;
+            nIterations += 1;
 
-        if (nIterations > iterationLimit) {
-            throw new Error("Max iterations exceeded");
-        }
+            if (nIterations > iterationLimit) {
+                throw new Error("Max iterations exceeded");
+            }
         }
 
         qSensible = (tSkin - tOp) / (rA + rClo); // total sensible heat loss, W
@@ -392,8 +410,7 @@ function calculateTwoNodesOptimized(
     const qSkin = qSensible + eSkin; // total heat loss from skin, W
     // pSSk saturation vapour pressure of water of the skin
     const pSSk = Math.exp(18.6686 - 4030.183 / (tSkin + 235.0));
-
-    // standard environment - where _s at end of the variable names stands for standard
+    
     const hRS = hR; // standard environment radiative heat transfer coefficient
 
     let hCS = 3.0 * Math.pow(pressureInAtmospheres, 0.53);
@@ -427,26 +444,90 @@ function calculateTwoNodesOptimized(
     let dx = 100.0;
     let setOld = tSkin - qSkin / hDS;
     while (Math.abs(dx) > 0.01) {
-        const err1 =
-        qSkin -
-        hDS * (tSkin - setOld) -
-        w *
-            hES *
-            (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + 235.0)));
-        const err2 =
-        qSkin -
-        hDS * (tSkin - (setOld + delta)) -
-        w *
-            hES *
-            (pSSk -
-            0.5 * Math.exp(18.6686 - 4030.183 / (setOld + delta + 235.0)));
+        const err1 = qSkin - hDS * (tSkin - setOld) - 
+            w * hES * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + 235.0)));
+        
+        const err2 = qSkin - hDS * (tSkin - (setOld + delta)) -
+            w * hES * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + delta + 235.0)));
         set = setOld - delta * err1 / (err2 - err1);
         dx = set - setOld;
         setOld = set;
     }
-    return set;
 
+    // Calculate Effective Temperature (ET)
+    const hD = 1 / (rA + rClo);
+    const hE = 1 / (rEa + rEcl);
+    let etOld = tSkin - qSkin / hD;
+    delta = 0.0001;
+    dx = 100.0;
+    while (Math.abs(dx) > 0.01) {
+        const err1 =
+            qSkin -
+            hD * (tSkin - etOld) -
+            w *
+            hE *
+            (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + 235.0)));
+
+        const err2 =
+            qSkin -
+            hD * (tSkin - (etOld + delta)) -
+            w *
+            hE *
+            (pSSk -
+                0.5 * Math.exp(18.6686 - 4030.183 / (etOld + delta + 235.0)));
+
+        et = etOld - delta * err1 / (err2 - err1);
+        dx = et - etOld;
+        etOld = et;
+    }
+
+    const tbmL = (0.194 / 58.15) * rm + 36.301; 
+    const tbmH = (0.347 / 58.15) * rm + 36.669; 
+
+    let tSens = 0.4685 * (tBody - tbmL); 
+    if (tBody >= tbmL && tBody < tbmH) {
+        tSens = (kwargs.w_max * 4.7 * (tBody - tbmL)) / (tbmH - tbmL);
+    } 
+    else if (tBody >= tbmH) {
+        tSens = kwargs.w_max * 4.7 + 0.4685 * (tBody - tbmH);
+    }
+
+    let disc = (4.7 * (eRsw - eComfort)) / (eMax * kwargs.w_max - eComfort - eDiff); // predicted thermal discomfort
+    if (disc <= 0) {
+        disc = tSens;
+    }
+
+    // PMV Gagge
+    const pmvGagge = (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReq - eComfort - eDiff);
+
+    // PMV SET
+    const drySet = hDS * (tSkin - set);
+    const eReqSet = rm - cRes - qRes - drySet;
+    const pmvSet = (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReqSet - eComfort - eDiff);
+
+    // Predicted Percent Satisfied With the Level of Air Movement
+    const ps = 100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
+
+    result = 
+        [set,
+        eSkin,
+        eRsw,
+        eMax,
+        qSensible,
+        qSkin,
+        qRes,
+        tCore,
+        tSkin,
+        mBl,
+        mRsw,
+        w,
+        kwargs.w_max,
+        et,
+        pmvGagge,
+        pmvSet,
+        disc,
+        tSens];
     
     return result;
-  }
+}
 

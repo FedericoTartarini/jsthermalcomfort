@@ -8,7 +8,6 @@ import {
 import {
     two_nodes
 } from "../src/models"
-import { join } from "path";
 
 
 /**
@@ -100,7 +99,7 @@ export function set_tmp(
     const cloArray = Array.isArray(clo) ? clo : [clo];
     const wmeArray = Array.isArray(wme) ? wme : [wme];
 
-    const setArray = two_nodes(
+    let setArray = two_nodes(
         tdb=tdbArray,
         tr=trArray,
         v=vArray,
@@ -114,11 +113,15 @@ export function set_tmp(
         joint_kwargs.calculate_ce=false,
         joint_kwargs.round=false,
     ).set;
+    console.log(setArray)
 
     if (units === "IP") {
         const convertedSetArray = units_converter(setArray, "SI");
         setArray = convertedSetArray[0];
     }
+
+    // setArray = Array.isArray(setArray) ? setArray : [setArray];
+    // console.log(setArray);
 
     if (limit_inputs) {
         const {
@@ -127,7 +130,7 @@ export function set_tmp(
           v: vValid,
           met: metValid,
           clo: cloValid,
-        } = check_standard_compliance_array("ashrae", {tdb,tr,v,met,clo,});
+        } = check_standard_compliance_array("ashrae", {tdb,tr,v,met,clo});
       
         const allValid = !(
           tdbValid.includes(NaN) ||
@@ -137,10 +140,11 @@ export function set_tmp(
           cloValid.includes(NaN)
         );
       
-        setArray = setArray.map((value, index) =>
-          allValid[index] ? value : NaN
-        );
-      }
+        // setArray = setArray.map((value, index) => {
+        //   allValid[index] ? value : NaN;
+        // });
+    }
+
     if (joint_kwargs.round) {
         return round(setArray, 1)
     }

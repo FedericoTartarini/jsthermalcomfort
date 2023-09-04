@@ -34,6 +34,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("net");
   });
 
+  it("should have models.wbgt", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("wbgt");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

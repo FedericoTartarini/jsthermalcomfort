@@ -1,9 +1,8 @@
 import {
-    units_converter,
     _ankle_draft_compliance,
-    check_standard_compliance_array,
     _ashrae_compliance,
-    _iso7933_compliance
+    _iso7933_compliance,
+    round,
   } from "../src/utilities";
 import {
     p_sat_torr
@@ -12,27 +11,24 @@ import {
 
 /**
  * @typedef {Object} TwoNodesReturnType
- * @property {number | number[]} e_skin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
- * @property {number | number[]} e_rsw (float or array-like) – Rate of evaporative heat loss from sweat evaporation, [W/m2]
- * @property {number | number[]} e_diff (float or array-like) – Rate of evaporative heat loss from moisture diffused through the skin, [W/m2]
- * @property {number | number[]} e_max (float or array-like) – Maximum rate of evaporative heat loss from skin, [W/m2]
- * @property {number | number[]} q_sensible (float or array-like) – Sensible heat loss from skin, [W/m2]
- * @property {number | number[]} q_skin (float or array-like) – Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
- * @property {number | number[]} q_res (float or array-like) – Total rate of heat loss through respiration, [W/m2]
- * @property {number | number[]} t_core (float or array-like) – Core temperature, [°C]
- * @property {number | number[]} t_skin (float or array-like) – Skin temperature, [°C]
- * @property {number | number[]} m_bl (float or array-like) – Skin blood flow, [kg/h/m2]
- * @property {number | number[]} m_rsw (float or array-like) – Rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number | number[]} eSkin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
+ * @property {number | number[]} eRsw (float or array-like) – Rate of evaporative heat loss from sweat evaporation, [W/m2]
+ * @property {number | number[]} eMax (float or array-like) – Maximum rate of evaporative heat loss from skin, [W/m2]
+ * @property {number | number[]} qSensible (float or array-like) – Sensible heat loss from skin, [W/m2]
+ * @property {number | number[]} qSkin (float or array-like) – Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
+ * @property {number | number[]} qRes (float or array-like) – Total rate of heat loss through respiration, [W/m2]
+ * @property {number | number[]} tCore (float or array-like) – Core temperature, [°C]
+ * @property {number | number[]} tSkin (float or array-like) – Skin temperature, [°C]
+ * @property {number | number[]} mBl (float or array-like) – Skin blood flow, [kg/h/m2]
+ * @property {number | number[]} mRsw (float or array-like) – Rate at which regulatory sweat is generated, [kg/h/m2]
  * @property {number | number[]} w (float or array-like) – Skin wettedness, adimensional. Ranges from 0 and 1.
  * @property {number | number[]} w_max (float or array-like) – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
  * @property {number | number[]} set (float or array-like) – Standard Effective Temperature (SET)
  * @property {number | number[]} et (float or array-like) – New Effective Temperature (ET)
- * @property {number | number[]} pmv_gagge (float or array-like) – PMV Gagge
- * @property {number | number[]} pmv_set (float or array-like) – PMV SET
- * @property {number | number[]} pd (float or array-like) – Predicted Percent Dissatisfied Due to Draft”
- * @property {number | number[]} ps (float or array-like) – Predicted Percent Satisfied With the Level of Air Movement
+ * @property {number | number[]} pmvGagge (float or array-like) – PMV Gagge
+ * @property {number | number[]} pmvSet (float or array-like) – PMV SET
  * @property {number | number[]} disc (float or array-like) – Thermal discomfort
- * @property {number | number[]} t_sens (float or array-like) – Predicted Thermal Sensation
+ * @property {number | number[]} tSens (float or array-like) – Predicted Thermal Sensation
  */
 
 /**
@@ -105,7 +101,7 @@ export function two_nodes(
     clo, 
     wme = 0, 
     body_surface_area = 1.8258, 
-    p_atm = 101325, 
+    p_atmospheric = 101325, 
     body_position = 'standing', 
     max_skin_blood_flow = 90, 
     kwargs = {}
@@ -119,6 +115,16 @@ export function two_nodes(
 
     let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
 
+    // const tbdIsArray = Array.isArray(tdb);
+    // if (!tbdIsArray) {
+    //     const vapor_pressure = rh * p_sat_torr(tdb) / 100
+    // }
+    // else{
+    //     const vapor_pressure = rhArray.map((_rh, index) => (
+    //         _rh * p_sat_torr(tdbArray[index]) / 100
+    //     ));
+    // }
+
     const tdbArray = Array.isArray(tdb) ? tdb : [tdb];
     const trArray = Array.isArray(tr) ? tr : [tr];
     const vArray = Array.isArray(v) ? v : [v];
@@ -129,29 +135,9 @@ export function two_nodes(
     const bodyPositionArray = Array.isArray(body_position) ? body_position : [body_position];
 
     const vapor_pressure = rhArray.map((_rh, index) => (
-        _rh * p_sat_torr(tdbArray[index]) / 100
+            _rh * p_sat_torr(tdbArray[index]) / 100
     ));
-
-    // const output = {
-    //     "e_skin": e_skin,
-    //     "e_rsw": e_rsw,
-    //     "e_max": e_max,
-    //     "q_sensible": q_sensible,
-    //     "q_skin": q_skin,
-    //     "q_res": q_res,
-    //     "t_core": t_core,
-    //     "t_skin": t_skin,
-    //     "m_bl": m_bl,
-    //     "m_rsw": m_rsw,
-    //     "w": w,
-    //     "w_max": w_max,
-    //     "_set": _set,
-    //     "et": et,
-    //     "pmv_gagge": pmv_gagge,
-    //     "pmv_set": pmv_set,
-    //     "disc": disc,
-    //     "t_sens": t_sens,
-    // };
+    
 
     const result = calculateTwoNodesOptimized(
         tdb,
@@ -170,27 +156,24 @@ export function two_nodes(
 
     if (joint_kwargs.round) {
         return {
-          e_skin: round(result.e_skin, 1),
-          e_rsw: round(result.e_rsw, 1),
-          e_diff: round(result.e_diff, 1),
-          e_max: round(result.e_max, 1),
-          q_sensible: round(result.q_sensible, 2),
-          q_skin: round(result.q_skin, 1),
-          q_res: round(result.q_res, 1),
-          t_core: round(result.t_core, 1),
-          t_skin: round(result.t_skin, 1),
-          m_bl: round(result.m_bl, 1),
-          m_rsw: round(result.m_rsw, 1),
+          e_skin: round(result.eSkin, 1),
+          e_rsw: round(result.eRsw, 1),
+          e_max: round(result.eMax, 1),
+          q_sensible: round(result.qSensible, 1),
+          q_skin: round(result.qSkin, 1),
+          q_res: round(result.qRes, 1),
+          t_core: round(result.tCore, 1),
+          t_skin: round(result.tSkin, 1),
+          m_bl: round(result.mBl, 1),
+          m_rsw: round(result.mRsw, 1),
           w: round(result.w, 1),
           w_max: round(result.kwargs.w_max, 1),
           set: round(result.set, 1),
-          et: round(result.et, 2),
-          pmv_gagge: round(result.pmv_gagge, 1),
-          pmv_set: round(result.pmv_set, 1),
-          pd: round(result.pd, 1),
-          ps: round(result.ps, 1),
+          et: round(result.et, 1),
+          pmv_gagge: round(result.pmvGagge, 1),
+          pmv_set: round(result.pmvSet, 1),
           disc: round(result.disc, 1),
-          t_sens: round(result.t_sens, 1),
+          t_sens: round(result.tSens, 1),
         };
       }
       return result;
@@ -208,10 +191,8 @@ export function two_nodes(
 * @param {number} bodySurfaceArea Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
 * @param {number} pAtmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
 * @param {"standing" | "sitting"} bodyPosition Select either “sitting” or “standing”
-* @param {number} [max_skin_blood_flow=90] Maximum blood flow from the core to the skin, [kg/h/m2] default 80
 * @param {TwoNodesKwargs} [kwargs]
 * 
-* @returns {TwoNodesReturnType} object with results of two_nodes
 */
 
 function calculateTwoNodesOptimized(
@@ -220,8 +201,7 @@ function calculateTwoNodesOptimized(
     wme, 
     bodySurfaceArea, 
     pAtmospheric, 
-    bodyPosition,
-    max_skin_blood_flow = 90,  
+    bodyPosition, 
     kwargs,
 ) {
 
@@ -286,9 +266,7 @@ function calculateTwoNodesOptimized(
         }
     }
 
-    // hCc corrected convective heat transfer coefficient
     let hCc = 3.0 * Math.pow(pressureInAtmospheres, 0.53);
-    // hFc forced convective heat transfer coefficient, W/(m2 °C)
     const hFc = 8.600001 * Math.pow(airSpeed * pressureInAtmospheres, 0.53);
     hCc = Math.max(hCc, hFc);
     if (!kwargs.calculate_ce && met > 0.85) {
@@ -311,7 +289,6 @@ function calculateTwoNodesOptimized(
         nSimulation += 1;
 
         const iterationLimit = 150; 
-        // tCl temperature of the outer surface of clothing
         let tCl = (rA * tSkin + rClo * tOp) / (rA + rClo); 
         let nIterations = 0;
         let tcConverged = false;
@@ -323,7 +300,6 @@ function calculateTwoNodesOptimized(
                 // 0.7 ratio between radiation area of the body and the body area
                 hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.7;
             } else {
-                // if standing
                 // 0.73 ratio between radiation area of the body and the body area
                 hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.73;
             }

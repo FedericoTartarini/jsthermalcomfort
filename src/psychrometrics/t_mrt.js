@@ -42,6 +42,7 @@ export function t_mrt(
       "Your paramater tg is a number, your other paramaters can only be number",
     );
   }
+
   if (tg.length > 1) {
     const tg_len = tg.length;
     if (

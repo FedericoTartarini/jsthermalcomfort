@@ -3,7 +3,7 @@ import {
     _ashrae_compliance,
     _iso7933_compliance,
     round,
-  } from "../src/utilities";
+} from "../src/utilities";
 import {
     p_sat_torr
 } from "../src/psychrometrics"
@@ -80,7 +80,7 @@ import {
  * @param {number | number[]} clo Clothing insulation, [clo]
  * @param {number | number[]} wme External work, [W/(m2)] default 0
  * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number} p_atm Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {number} p_atmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
  * @param {number} max_skin_blood_flow Maximum blood flow from the core to the skin, [kg/h/m2] default 80
  * @param {TwoNodesKwargs} [kwargs]
@@ -248,6 +248,7 @@ function calculateTwoNodesOptimized(
     const lr = 2.2 / pressureInAtmospheres; // Lewis ratio
     const rm = (met - wme) * metFactor; // metabolic rate
     const m = met * metFactor; // metabolic rate
+    let wMax = 0;
 
     const eComfort = 0.42 * (rm - metFactor); // evaporative heat loss during comfort
     if (eComfort < 0) {
@@ -261,8 +262,10 @@ function calculateTwoNodesOptimized(
 
     if (!kwargs.w_max) {
         kwargs.w_max = 0.38 * Math.pow(airSpeed, -0.29); // critical skin wettedness naked
+        wMax = kwargs.w_max;
         if (clo > 0) {
         kwargs.w_max = 0.59 * Math.pow(airSpeed, -0.08); // critical skin wettedness clothed
+        wMax = kwargs.w_max;
         }
     }
 
@@ -484,8 +487,8 @@ function calculateTwoNodesOptimized(
     // Predicted Percent Satisfied With the Level of Air Movement
     const ps = 100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
 
-    result = 
-        [set,
+    return {
+        set,
         eSkin,
         eRsw,
         eMax,
@@ -497,13 +500,12 @@ function calculateTwoNodesOptimized(
         mBl,
         mRsw,
         w,
-        kwargs.w_max,
+        wMax,
         et,
         pmvGagge,
         pmvSet,
         disc,
-        tSens];
-    
-    return result;
+        tSens
+      };
 }
 

@@ -4,13 +4,24 @@ import {
     check_standard_compliance_array,
     _ashrae_compliance,
     _iso7933_compliance
-  } from "../src/utilities";
+} from "../src/utilities";
 import {
-    p_sat_torr
-} from "../src/psychrometrics"
+    two_nodes
+} from "../src/models"
+import { join } from "path";
 
 
+/**
+ * @typedef {Object} SetTmpKwargs
+ * @property {boolean} [round=true] 
+ * @property {boolean} [calculate_ce=false] 
+ */
 
+/**
+ * @typedef {Object} SetTmpKwargsRequired
+ * @property {boolean} round
+ * @property {boolean} calculate_ce
+ */
 /**
  * Calculates the Standard Effective Temperature (SET). The SET is the 
  * temperature of a hypothetical isothermal environment at 50% (rh), 
@@ -29,11 +40,10 @@ import {
  * @param {number | number[]} wme External work, [W/(m2)] default 0
  * @param {number | number[]} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number | number[]} p_atm Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {string} body_position Select either “sitting” or “standing”
+ * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
  * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values. 
- * @param {Object} [options] (Optional) Other parameters.
- * @param  {...any} kwargs
+ * @param {SetTmpKwargs} [kwargs]
  * @returns {number | number[]} SET (float or array-like) – Standard effective temperature, [°C]
  * 
  * @example
@@ -52,14 +62,14 @@ export function set_tmp(
     body_position = 'standing', 
     units = "SI",
     limit_inputs = true,
-    options = { round: true, calculate_ce: false }
+    kwargs = {}
 ){
-    // const default_kwargs = {
-    //     round: true,
-    //     calculate_ce: false,
-    // };
-    
-    // let kwargs = { ...default_kwargs, ...kwargs };
+    const defaults_kwargs = {
+        calculate_ce: false,
+        round: true,
+    };
+
+    let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
 
     if (units === "IP") {
         if (body_surface_area === 1.8258) {
@@ -82,28 +92,57 @@ export function set_tmp(
         p_atm = unit_convert.pressure;
     }
 
-    const tdbArr = [...tdb];
-    const trArr = [...tr];
-    const vArr = [...v];
-    const rhArr = [...rh];
-    const metArr = [...met];
-    const cloArr = [...clo];
-    const wmeArr = [...wme];
+    const tdbArray = Array.isArray(tdb) ? tdb : [tdb];
+    const trArray = Array.isArray(tr) ? tr : [tr];
+    const vArray = Array.isArray(v) ? v : [v];
+    const rhArray = Array.isArray(rh) ? rh : [rh];
+    const metArray = Array.isArray(met) ? met : [met];
+    const cloArray = Array.isArray(clo) ? clo : [clo];
+    const wmeArray = Array.isArray(wme) ? wme : [wme];
 
-    set_array = two_nodes(
-        tdb=tdbArr,
-        tr=trArr,
-        v=vArr,
-        rh=rhArr,
-        met=metArr,
-        clo=cloArr,
-        wme=wmeArr,
+    const setArray = two_nodes(
+        tdb=tdbArray,
+        tr=trArray,
+        v=vArray,
+        rh=rhArray,
+        met=metArray,
+        clo=cloArray,
+        wme=wmeArray,
         body_surface_area=body_surface_area,
         p_atmospheric=p_atm,
         body_position=body_position,
-        calculate_ce=false,
-        round=false,
-    )._set;
-    
-    return options.round === undefined || options.round ? round(set_array, 1) : set_array;
+        joint_kwargs.calculate_ce=false,
+        joint_kwargs.round=false,
+    ).set;
+
+    if (units === "IP") {
+        const convertedSetArray = units_converter(setArray, "SI");
+        setArray = convertedSetArray[0];
+    }
+
+    if (limit_inputs) {
+        const {
+          tdb: tdbValid,
+          tr: trValid,
+          v: vValid,
+          met: metValid,
+          clo: cloValid,
+        } = check_standard_compliance_array("ashrae", {tdb,tr,v,met,clo,});
+      
+        const allValid = !(
+          tdbValid.includes(NaN) ||
+          trValid.includes(NaN) ||
+          vValid.includes(NaN) ||
+          metValid.includes(NaN) ||
+          cloValid.includes(NaN)
+        );
+      
+        setArray = setArray.map((value, index) =>
+          allValid[index] ? value : NaN
+        );
+      }
+    if (joint_kwargs.round) {
+        return round(setArray, 1)
+    }
+    return setArray
 }

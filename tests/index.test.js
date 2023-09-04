@@ -38,8 +38,16 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("v_relative");
   });
 
+  it("should have utilities.v_relative_array", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("v_relative_array");
+  });
+
   it("should have utilities.clo_dynamic", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic");
+  });
+
+  it("should have utilities.clo_dynamic_array", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_array");
   });
 
   it("should have utilities.units_converter", () => {
@@ -64,7 +72,15 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr");
   });
 
+  it("should have psychrometrics.p_sat_torr_array", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr_array");
+  });
+
   it("should have psychrometrics.t_o", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
+  });
+
+  it("should have psychrometrics.t_o_array", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
   });
 

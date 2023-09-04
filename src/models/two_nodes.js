@@ -216,7 +216,7 @@ function calculateTwoNodesOptimized(
 
     const tempSkinNeutral = 33.7;
     const tempCoreNeutral = 36.8;
-    const alfa = 0.1;
+    let alfa = 0.1;
     const tempBodyNeutral = alfa * tempSkinNeutral + (1 - alfa) * tempCoreNeutral;
     const skinBloodFlowNeutral = 6.3;
 
@@ -246,8 +246,8 @@ function calculateTwoNodesOptimized(
     const rClo = 0.155 * clo; // thermal resistance of clothing, C M^2 /W
     const fACl = 1.0 + 0.15 * clo; // increase in body surface area due to clothing
     const lr = 2.2 / pressureInAtmospheres; // Lewis ratio
-    const rm = (met - wme) * metFactor; // metabolic rate
-    const m = met * metFactor; // metabolic rate
+    let rm = (met - wme) * metFactor; // metabolic rate
+    let m = met * metFactor; // metabolic rate
     let wMax = 0;
 
     const eComfort = 0.42 * (rm - metFactor); // evaporative heat loss during comfort
@@ -278,13 +278,12 @@ function calculateTwoNodesOptimized(
     }
 
     const hR = 4.7; // linearized radiative heat transfer coefficient
-    const hT = hR + hCc; // sum of convective and radiant heat transfer coefficient W/(m2*K)
-    const rA = 1.0 / (fACl * hT); // resistance of air layer to dry heat
-    const tOp = (hR * tr + hCc * tdb) / hT; // operative temperature
+    let hT = hR + hCc; // sum of convective and radiant heat transfer coefficient W/(m2*K)
+    let rA = 1.0 / (fACl * hT); // resistance of air layer to dry heat
+    let tOp = (hR * tr + hCc * tdb) / hT; // operative temperature
 
-    const tBody = alfa * tSkin + (1 - alfa) * tCore; // mean body temperature, °C
+    let tBody = alfa * tSkin + (1 - alfa) * tCore; // mean body temperature, °C
 
-    // respiration
     qRes = 0.0023 * m * (44.0 - vaporPressure); // latent heat loss due to respiration
     cRes = 0.0014 * m * (34.0 - tdb); // sensible convective heat loss respiration
 
@@ -486,6 +485,8 @@ function calculateTwoNodesOptimized(
 
     // Predicted Percent Satisfied With the Level of Air Movement
     const ps = 100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
+
+    // console.log(two_nodes(25, 25, 0.3, 50, 1.2, 0.5));
 
     return {
         set,

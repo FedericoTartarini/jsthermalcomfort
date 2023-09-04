@@ -373,6 +373,7 @@ function _v_relative_single(v, met) {
  * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+ * @see {@link clo_dynamic_array} for a version that supports array arguments
  *
  * @param {number} clo - clothing insulation, [clo]
  * @param {number} met - metabolic rate, [met]
@@ -396,6 +397,7 @@ export function clo_dynamic(clo, met, standard = "ASHRAE") {
  * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+ * @see {@link clo_dynamic} for a version that supports scalar arguments
  *
  * @param {number[]} clo - clothing insulation, [clo]
  * @param {number[]} met - metabolic rate, [met]

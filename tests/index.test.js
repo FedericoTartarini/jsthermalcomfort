@@ -33,4 +33,12 @@ describe("NPM Package", () => {
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });
+
+  it("should have models.set_tmp", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("set_tmp");
+  });
+
+  it("should have models.two_nodes", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
+  });
 });

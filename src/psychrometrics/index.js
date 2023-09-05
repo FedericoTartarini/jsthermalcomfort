@@ -16,5 +16,5 @@ export default {
   t_wb,
   t_dp,
   t_mrt,
-  t_mrt_array
+  t_mrt_array,
 };

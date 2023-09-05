@@ -129,6 +129,38 @@ function get_tr_mixed_convection(_tg, _tdb, _v, _d, _emissivity) {
 function get_tr_iso(_tg, _tdb, _v, _d, _emissivity) {
   _tg += c_to_k;
   _tdb += c_to_k;
+}
+
+function get_tr_mixed_convection(_tg, _tdb, _v, _d, _emissivity) {
+  const ra = (g * beta * Math.abs(_tg - _tdb) * _d * _d * _d) / nu / alpha;
+  const re = (_v * _d) / nu;
+  const n = 1.27 * _d + 0.57;
+
+  const nu_natural =
+    2 +
+    (0.589 * Math.pow(ra, 1 / 4)) /
+      Math.pow(1 + Math.pow(0.469 / pr, 9 / 16), 4 / 9);
+  const nu_forced =
+    2 +
+    (0.4 * Math.pow(re, 0.5) + 0.06 * Math.pow(re, 2 / 3)) * Math.pow(pr, 0.4);
+
+  const tr =
+    Math.pow(
+      Math.pow(_tg + 273.15, 4) -
+        (((Math.pow(Math.pow(nu_forced, n) + Math.pow(nu_natural, n), 1 / n) *
+          k_air) /
+          _d) *
+          (-_tg + _tdb)) /
+          _emissivity /
+          o,
+      0.25,
+    ) - 273.15;
+  return tr;
+}
+
+function get_tr_iso(_tg, _tdb, _v, _d, _emissivity) {
+  _tg += c_to_k;
+  _tdb += c_to_k;
 
   // calculate heat transfer coefficient
   const h_n = Math.pow(1.4 * (Math.abs(_tg - _tdb) / _d), 0.25); // natural convection

@@ -3,15 +3,15 @@ import { round } from "../utilities/utilities.js";
 /**
  * Calculates vapour pressure of water at different temperatures
  *
- * @param {number} airTemperature - air temperature, [°C]
+ * @param {number} tdb - air temperature, [°C]
  * @returns {number} - vapour pressure of water, [Pa]
  *
  * @category Psychrometrics
  */
-export function p_sat(airTemperature) {
+export function p_sat(tdb) {
   const c_to_k = 273.15;
 
-  const ta_k = airTemperature + c_to_k;
+  const ta_k = tdb + c_to_k;
   const c1 = -5674.5359;
   const c2 = 6.3925247;
   const c3 = -0.009677843; // = -0.9677843 * math.pow(10, -2)

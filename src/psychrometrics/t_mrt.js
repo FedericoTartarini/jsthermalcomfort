@@ -13,6 +13,8 @@ const o = 0.0000000567;
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
+ * @see {@link t_mrt_array} for a version that supports arrays
+ * 
  * @param {number} tg - globe temperature, [°C]
  * @param {number} tdb - air temperature, [°C]
  * @param {number} v - air speed, [m/s]
@@ -40,26 +42,29 @@ export function t_mrt(
   let tr = 0;
   if (standard === "mixed convection") {
     tr = get_tr_mixed_convection(tg, tdb, v, d, emissivity);
-    const d_valid = valid_range([d], [0.04, 0.15]);
-    return isNaN(d_valid[0]) ? NaN : round(tr, 1);
+    return d >= 0.04 && d <= 0.15 ? round(tr, 1) : NaN;
   }
 
   if (standard === "iso") {
     return get_tr_iso(tg, tdb, v, d, emissivity);
   }
+  throw new Error(
+    "No standard found, please choose standard from ISO and Mixed Convectioin",
+  );
 }
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
+ * @see {@link t_mrt} for scalar arguments. Accepts array arguments.
+ *
  * @param {number[]} tg - globe temperature, [°C]
  * @param {number[]} tdb - air temperature, [°C]
  * @param {number[]} v - air speed, [m/s]
  * @param {number[]} d - diameter of the globe, [m] default 0.15 m
  * @param {number[]} emissivity - emissivity of the globe temperature sensor, default 0.95
-* @param {"Mixed Convection" | "ISO"} standard - either choose between the Mixed Convection and ISO formulations.
-refers to documentation of t_mrt function
-* @returns {number[]}
-*/
+ * @param {"Mixed Convection" | "ISO"} standard - either choose between the Mixed Convection and ISO formulations. Refers to t_mrt function
+ * @returns {number[]}
+ */
 
 export function t_mrt_array(
   tg,
@@ -89,6 +94,41 @@ export function t_mrt_array(
     });
     return tr_array;
   }
+  throw new Error(
+    "No standard found, please choose standard from ISO and Mixed Convectioin",
+  );
+}
+
+function get_tr_mixed_convection(_tg, _tdb, _v, _d, _emissivity) {
+  const ra = (g * beta * Math.abs(_tg - _tdb) * _d * _d * _d) / nu / alpha;
+  const re = (_v * _d) / nu;
+  const n = 1.27 * _d + 0.57;
+
+  const nu_natural =
+    2 +
+    (0.589 * Math.pow(ra, 1 / 4)) /
+      Math.pow(1 + Math.pow(0.469 / pr, 9 / 16), 4 / 9);
+  const nu_forced =
+    2 +
+    (0.4 * Math.pow(re, 0.5) + 0.06 * Math.pow(re, 2 / 3)) * Math.pow(pr, 0.4);
+
+  const tr =
+    Math.pow(
+      Math.pow(_tg + 273.15, 4) -
+        (((Math.pow(Math.pow(nu_forced, n) + Math.pow(nu_natural, n), 1 / n) *
+          k_air) /
+          _d) *
+          (-_tg + _tdb)) /
+          _emissivity /
+          o,
+      0.25,
+    ) - 273.15;
+  return tr;
+}
+
+function get_tr_iso(_tg, _tdb, _v, _d, _emissivity) {
+  _tg += c_to_k;
+  _tdb += c_to_k;
 }
 
 function get_tr_mixed_convection(_tg, _tdb, _v, _d, _emissivity) {

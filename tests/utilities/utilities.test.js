@@ -3,11 +3,13 @@ import {
   body_surface_area,
   v_relative,
   clo_dynamic,
+  clo_dynamic_array,
   units_converter,
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
   check_standard_compliance_array,
+  v_relative_array,
 } from "../../src/utilities/utilities";
 import {
   deep_close_to_array,
@@ -39,15 +41,22 @@ describe("body_surface_area", () => {
 describe("v_relative", () => {
   it.each([
     { v: 2.0, met: 1.0, expected: 2.0 },
-    { v: [1.0, 2.0, 3.0], met: 2.0, expected: [1.3, 2.3, 3.3] },
     { v: -1.5, met: 1.5, expected: -1.5 + 0.3 * 0.5 },
   ])(
     "returns $expected when v is $v and met is $met",
     ({ v, met, expected }) => {
       const result = v_relative(v, met);
+      expect(result).toBeCloseTo(expected, 4);
+    },
+  );
+});
 
-      if (Array.isArray(v)) deep_close_to_array(result, expected, 4);
-      else expect(result).toBeCloseTo(expected, 4);
+describe("v_relative_array", () => {
+  it.each([{ v: [1.0, 2.0, 3.0], met: 2.0, expected: [1.3, 2.3, 3.3] }])(
+    "returns $expected when v is $v and met is $met",
+    ({ v, met, expected }) => {
+      const result = v_relative_array(v, met);
+      deep_close_to_array(result, expected, 4);
     },
   );
 });
@@ -76,13 +85,6 @@ describe("clo_dynamic", () => {
       tolerance: 4,
     },
     {
-      clo: [1, 1, 2],
-      met: [1, 0.5, 0.5],
-      standard: "ASHRAE",
-      expected: [1, 1, 2],
-      tolerance: 4,
-    },
-    {
       clo: 1,
       met: 1,
       standard: undefined,
@@ -104,13 +106,6 @@ describe("clo_dynamic", () => {
       tolerance: 4,
     },
     {
-      clo: [1, 1, 1],
-      met: [1, 1.2, 2.0],
-      standard: undefined,
-      expected: [1, 1, 0.8],
-      tolerance: 4,
-    },
-    {
       clo: 1.0,
       met: 1.0,
       standard: "ISO",
@@ -124,6 +119,35 @@ describe("clo_dynamic", () => {
       expected: 0.8,
       tolerance: 4,
     },
+  ])(
+    "returns $expected when clo is $clo, met is $met, and the standard is $standard",
+    ({ clo, met, standard, expected, tolerance }) => {
+      const result = clo_dynamic(clo, met, standard);
+      expect(result).toBeCloseTo(expected, tolerance);
+    },
+  );
+
+  it("throws an error when standard is invalid", () => {
+    expect(() => clo_dynamic(1.0, 1.0, "invalid")).toThrow();
+  });
+});
+
+describe("clo_dynamic_array", () => {
+  it.each([
+    {
+      clo: [1, 1, 2],
+      met: [1, 0.5, 0.5],
+      standard: "ASHRAE",
+      expected: [1, 1, 2],
+      tolerance: 4,
+    },
+    {
+      clo: [1, 1, 1],
+      met: [1, 1.2, 2.0],
+      standard: undefined,
+      expected: [1, 1, 0.8],
+      tolerance: 4,
+    },
     {
       clo: [1.0, 1.0],
       met: [1.0, 2.0],
@@ -134,14 +158,13 @@ describe("clo_dynamic", () => {
   ])(
     "returns $expected when clo is $clo, met is $met, and the standard is $standard",
     ({ clo, met, standard, expected, tolerance }) => {
-      const result = clo_dynamic(clo, met, standard);
-      if (Array.isArray(clo)) deep_close_to_array(result, expected, tolerance);
-      else expect(result).toBeCloseTo(expected, tolerance);
+      const result = clo_dynamic_array(clo, met, standard);
+      deep_close_to_array(result, expected, tolerance);
     },
   );
 
   it("throws an error when standard is invalid", () => {
-    expect(() => clo_dynamic(1.0, 1.0, "invalid")).toThrow();
+    expect(() => clo_dynamic_array([1.0], [1.0], "invalid")).toThrow();
   });
 });
 

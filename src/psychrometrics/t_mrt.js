@@ -12,8 +12,8 @@ const pr = (cp_air * mu) / k_air; // Prandtl constants, number
 const o = 0.0000000567;
 
 /**
- * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
  * @see {@link t_mrt_array} for a version that supports arrays
+ * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
  * 
  * @param {number} tg - globe temperature, [°C]
  * @param {number} tdb - air temperature, [°C]
@@ -54,8 +54,8 @@ export function t_mrt(
 }
 
 /**
- * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
  * Accepts array arguments. @see {@link t_mrt} for scalar arguments
+ * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
  *
  * @param {number[]} tg - globe temperature, [°C]
  * @param {number[]} tdb - air temperature, [°C]

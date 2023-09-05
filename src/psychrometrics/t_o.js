@@ -25,7 +25,7 @@ export function t_o(tdb, tr, v, standard = "ISO") {
 
 /**
  * Calculates operative temperature in accordance with ISO 7726:1998.
- * Accepts array arguments. @see {@link t_o} for scalar arguments
+ * @see {@link t_o} for a version that supports scalar arguments
  *
  * @param {number[]} tdb - air temperature [C]
  * @param {number[]} tr - mean radiant temperature [C]

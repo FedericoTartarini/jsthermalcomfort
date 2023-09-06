@@ -330,21 +330,20 @@ export function body_surface_area(weight, height, formula = "dubois") {
  * space plus the relative air speed caused by the body movement. Vag is assumed
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
  * Vag = 0.3 (M - 1) (m/s)
+ * @see {@link v_relative_array} for a version that supports array arguments
  *
- * @template {(number | number[])} T
- * @param {T} v - air spped measured by the sensor, [m/s]
+ * @param {number} v - air spped measured by the sensor, [m/s]
  * @param {number} met - metabolic rate, [met]
- * @returns {T} relative air speed, [m/s]
+ * @returns {number} relative air speed, [m/s]
  */
 export function v_relative(v, met) {
   if (met <= 1) return v;
-  if (Array.isArray(v)) {
-    return v.map((_v) => _v_relative_single(_v, met));
-  }
   return _v_relative_single(v, met);
 }
 
 /**
+
+
  * @param {number} v
  * @param {number} met
  * @returns {number}
@@ -360,31 +359,20 @@ function _v_relative_single(v, met) {
  * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+
+ * @see {@link clo_dynamic_array} for a version that supports array arguments
  *
- * @template {(number | number[])} T
- * @param {T} clo - clothing insulation, [clo]
- * @param {T} met - metabolic rate, [met]
+ * @param {number} clo - clothing insulation, [clo]
+ * @param {number} met - metabolic rate, [met]
  * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
- * @returns {T} dunamic clothing insulation, [clo]
+ * @returns {number} dunamic clothing insulation, [clo]
+
  */
 export function clo_dynamic(clo, met, standard = "ASHRAE") {
   if (standard !== "ASHRAE" && standard !== "ISO")
     throw new Error(
       "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
     );
-  if (Array.isArray(clo) !== Array.isArray(met))
-    throw new Error("clo and met should both be arrays or numbers");
-
-  if (Array.isArray(clo)) {
-    if (standard === "ASHRAE")
-      return met.map((_met, index) =>
-        _met > 1.2 ? _clo_dynamic_single(clo[index], _met) : clo[index],
-      );
-    if (standard === "ISO")
-      return met.map((_met, index) =>
-        _met > 1 ? _clo_dynamic_single(clo[index], _met) : clo[index],
-      );
-  }
 
   if ((standard === "ASHRAE" && met <= 1.2) || (standard === "ISO" && met <= 1))
     return clo;

@@ -26,7 +26,9 @@
     "build:types": "tsc -p ./tsconfig.json",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "semantic-release": "semantic-release",
-    "docs": "jsdoc --readme README.md -c jsdoc.json"
+    "docs": "npx documentation build ./src/index.js -f html --github -o docs",
+    "format": "npx prettier . --write",
+    "check:format": "npx prettier . --check"
   },
   "release": {
     "branches": [
@@ -53,7 +55,7 @@
   },
   "homepage": "https://github.com/FedericoTartarini/jsthermalcomfort#readme",
   "devDependencies": {
-    "better-docs": "^2.7.2",
+    "documentation": "^14.0.2",
     "jest": "^29.6.2",
     "jsdoc": "^4.0.2",
     "prettier": "3.0.2",

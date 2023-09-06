@@ -89,7 +89,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
  * import { phs } from "jsthermalcomfort";
  * const results = phs(40, 40, 33.85, 0.3, 150, 0.5, 2);
  * console.log(results); // {t_re: 37.5, d_lim_loss_50: 440, d_lim_loss_95: 298, d_lim_t_re: 480, water_loss: 6166.0}
- * 
+ *
  * @category Thermophysiological models
  */
 export function phs(tdb, tr, v, rh, met, clo, posture, wme = 0, kwargs = {}) {

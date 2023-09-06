@@ -21,23 +21,7 @@ import { round } from "../utilities/utilities";
  */
 export function discomfort_index(tdb, rh) {
   const di = tdb - 0.55 * (1 - 0.01 * rh) * (tdb - 14.5);
-
-  const diCategories = {
-    21: "No discomfort",
-    24: "Less than 50% feels discomfort",
-    27: "More than 50% feels discomfort",
-    29: "Most of the population feels discomfort",
-    32: "Everyone feels severe stress",
-    99: "State of medical emergency",
-  };
-
-  let condition = "default";
-  for (const key in diCategories) {
-    if (di <= key) {
-      condition = diCategories[key];
-      break;
-    }
-  }
+  const condition = check_categories(di);
 
   return {
     di: round(di, 1),
@@ -63,7 +47,6 @@ export function discomfort_index(tdb, rh) {
  * @returns {DiscomfortIndexArrayReturnType} object with results of DI
  */
 export function discomfort_index_array(tdb, rh) {
-
   const di = tdb.map((temperature, index) => {
     const relativeHumidity = rh[index];
     return (
@@ -71,6 +54,22 @@ export function discomfort_index_array(tdb, rh) {
     );
   });
 
+  const discomfortCondition = di.map((value) => check_categories(value));
+
+  return {
+    di: di.map((value) => Math.round(value * 10) / 10),
+    discomfort_condition: discomfortCondition,
+  };
+}
+
+/**
+ *
+ * Determine the discomfort categories based on DI.
+ *
+ * @param {number} di - Discomfort Index (DI)
+ * @returns {string} Discomfort condition
+ */
+function check_categories(di) {
   const diCategories = {
     21: "No discomfort",
     24: "Less than 50% feels discomfort",
@@ -80,19 +79,13 @@ export function discomfort_index_array(tdb, rh) {
     99: "State of medical emergency",
   };
 
-  const discomfortCondition = di.map((value) => {
-    let condition = "Default";
-    for (const key in diCategories) {
-      if (value <= key) {
-        condition = diCategories[key];
-        break;
-      }
+  let condition = "default";
+  for (const key in diCategories) {
+    if (di <= key) {
+      condition = diCategories[key];
+      break;
     }
-    return condition;
-  });
+  }
 
-  return {
-    di: di.map((value) => Math.round(value * 10) / 10),
-    discomfort_condition: discomfortCondition,
-  };
+  return condition;
 }

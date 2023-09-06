@@ -82,7 +82,9 @@ describe("discomfortIndex_array", () => {
     },
   ])("returns", ({ tdb, rh, expected }) => {
     const result = discomfort_index_array(tdb, rh);
-    deep_close_to_array(result.di, expected.di, 2)
-    expect(result.discomfort_condition).toStrictEqual(expected.discomfort_condition);
+    deep_close_to_array(result.di, expected.di, 2);
+    expect(result.discomfort_condition).toStrictEqual(
+      expected.discomfort_condition,
+    );
   });
 });

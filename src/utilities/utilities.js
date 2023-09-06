@@ -342,8 +342,22 @@ export function v_relative(v, met) {
 }
 
 /**
+ * Estimates the relative air speed which combines the average air speed of the
+ * space plus the relative air speed caused by the body movement. Vag is assumed
+ * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
+ * Vag = 0.3 (M - 1) (m/s)
+ * @see {@link v_relative} for a version that supports scalar arguments
+ *
+ * @param {number[]} v - air spped measured by the sensor, [m/s]
+ * @param {number} met - metabolic rate, [met]
+ * @returns {number[]} relative air speed, [m/s]
+ */
+export function v_relative_array(v, met) {
+  if (met <= 1) return v;
+  return v.map((_v) => _v_relative_single(_v, met));
+}
 
-
+/**
  * @param {number} v
  * @param {number} met
  * @returns {number}
@@ -359,24 +373,49 @@ function _v_relative_single(v, met) {
  * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
-
  * @see {@link clo_dynamic_array} for a version that supports array arguments
  *
  * @param {number} clo - clothing insulation, [clo]
  * @param {number} met - metabolic rate, [met]
  * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
  * @returns {number} dunamic clothing insulation, [clo]
-
  */
 export function clo_dynamic(clo, met, standard = "ASHRAE") {
   if (standard !== "ASHRAE" && standard !== "ISO")
     throw new Error(
       "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
     );
-
   if ((standard === "ASHRAE" && met <= 1.2) || (standard === "ISO" && met <= 1))
     return clo;
   return _clo_dynamic_single(clo, met);
+}
+
+/**
+ * Estimates the dynamic clothing insulation of a moving occupant. The activity as
+ * well as the air speed modify the insulation characteristics of the clothing and the
+ * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
+ * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
+ * of the body movement for met equal or higher than 1.2 met using the equation
+ * clo = Icl × (0.6 + 0.4/met)
+ * @see {@link clo_dynamic} for a version that supports scalar arguments
+ *
+ * @param {number[]} clo - clothing insulation, [clo]
+ * @param {number[]} met - metabolic rate, [met]
+ * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
+ * @returns {number[]} dunamic clothing insulation, [clo]
+ */
+export function clo_dynamic_array(clo, met, standard = "ASHRAE") {
+  if (standard === "ASHRAE")
+    return met.map((_met, index) =>
+      _met > 1.2 ? _clo_dynamic_single(clo[index], _met) : clo[index],
+    );
+  if (standard === "ISO")
+    return met.map((_met, index) =>
+      _met > 1 ? _clo_dynamic_single(clo[index], _met) : clo[index],
+    );
+  throw new Error(
+    "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
+  );
 }
 
 /**
@@ -489,6 +528,9 @@ export function f_svv(w, h, d) {
  * @returns {number[]} the constrained range with NaNs for values that are outside the min, max range
  */
 export function valid_range(range, [min, max]) {
+  if (!Array.isArray(range)) {
+    return range >= min && range <= max ? range : NaN;
+  }
   if (range === undefined) return [];
   return range.map((n) => (n >= min && n <= max ? n : NaN));
 }

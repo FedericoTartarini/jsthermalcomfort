@@ -38,6 +38,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("wbgt");
   });
 
+  it("should have models.two_nodes", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
+  });
+
+  it("should have models.set_tmp", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("set_tmp");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });
@@ -75,7 +83,6 @@ describe("NPM Package", () => {
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });
-
 
   it("should have psychrometrics.p_sat_torr", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr");

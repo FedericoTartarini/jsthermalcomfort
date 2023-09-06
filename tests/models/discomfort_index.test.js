@@ -1,5 +1,5 @@
 import { expect, describe, it } from "@jest/globals";
-import { discomfort_index, discomfort_index_array } from "../../src/model/discomfort_index";
+import { discomfort_index, discomfortIndex_array } from "../../src/models/discomfort_index";
 
 describe("discomfort_index", () => {
   it.each([
@@ -60,7 +60,7 @@ describe("discomfort_index", () => {
   );
 });
 
-describe("discomfort_index_array", () => {
+describe("discomfortIndex_array", () => {
     it.each([
         {
           tdb: [25, 28, 30],
@@ -82,7 +82,7 @@ describe("discomfort_index_array", () => {
 (
     "returns",
     ({ tdb, rh, expected }) => {
-      const result = discomfort_index_array(tdb, rh);
+      const result = discomfortIndex_array(tdb, rh);
       expect(result).toStrictEqual(expected, 1);
     },
   );

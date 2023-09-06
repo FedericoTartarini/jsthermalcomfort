@@ -4,7 +4,8 @@ import { round } from "../utilities/utilities.js";
  * Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 [18]_.
  * @param {number} tdb - dry bulb air temperature,[°C]
  * @param {number} v - wind speed 10m above ground level, [m/s]
- * @param {object} ifRound - default True, if True rounds output value, if False it does not round it
+ * @param {Object} [kwargs] (Optional) Other parameters.
+ * @param {boolean} [kwargs.round=true] - If True rounds output value, if False it does not round it.
  * @returns {object} {"wci": wci} - wind chill index, [W/m2)]
  */
 

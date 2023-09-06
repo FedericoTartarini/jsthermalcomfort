@@ -3,7 +3,7 @@ import { phs } from "./phs";
 import { humidex } from "./humidex";
 import { net } from "./net";
 import { wbgt } from "./wbgt";
-import { discomfort_index, discomfortIndex_array } from "./discomfort_index";
+import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 
 export default {
   heat_index,
@@ -12,5 +12,5 @@ export default {
   net,
   wbgt,
   discomfort_index,
-  discomfortIndex_array,
+  discomfort_index_array,
 };

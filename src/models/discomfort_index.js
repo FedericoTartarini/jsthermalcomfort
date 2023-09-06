@@ -1,12 +1,13 @@
 import { round } from "../utilities/utilities";
 
 /**
- * @typedef {Object} discomfortIndexReturnType
+ * @typedef {Object} DiscomfortIndexReturnType
  * @property {number} di – Discomfort Index(DI)
  * @property {string} discomfort_condition Classification of the thermal comfort conditions according to the discomfort index
  */
 
 /**
+ * @public
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
  * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments.
  * @see {@link discomfort_index_array} for a version that supports arrays
@@ -14,7 +15,7 @@ import { round } from "../utilities/utilities";
  * @param {number} tdb - air temperature [C]
  * @param {number} rh - relative humidity [%]
  *
- * @returns {discomfortIndexReturnType} object with results of DI
+ * @returns {DiscomfortIndexReturnType} object with results of DI
  * @example
  * const DI = discomfort_index(25, 50); // returns { di: 22.1, discomfort_condition: 'Less than 50% feels discomfort' }
  */
@@ -45,12 +46,13 @@ export function discomfort_index(tdb, rh) {
 }
 
 /**
- * @typedef {Object} discomfortIndexArrayReturnType
+ * @typedef {Object} DiscomfortIndexArrayReturnType
  * @property {number[]} di – Discomfort Index(DI) Array
  * @property {string[]} discomfort_condition Classification of the thermal comfort conditions in array
  */
 
 /**
+ * @public
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
  * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments.
  * @see {@link discomfort_index} for a version that supports scalar arguments
@@ -58,11 +60,9 @@ export function discomfort_index(tdb, rh) {
  * @param {number[]} tdb - air temperature [C]
  * @param {number[]} rh - relative humidity [%]
  *
- * @returns {discomfortIndexArrayReturnType} object with results of DI
+ * @returns {DiscomfortIndexArrayReturnType} object with results of DI
  */
-export function discomfortIndex_array(tdb, rh) {
-  tdb = Array.isArray(tdb) ? tdb : [tdb];
-  rh = Array.isArray(rh) ? rh : [rh];
+export function discomfort_index_array(tdb, rh) {
 
   const di = tdb.map((temperature, index) => {
     const relativeHumidity = rh[index];

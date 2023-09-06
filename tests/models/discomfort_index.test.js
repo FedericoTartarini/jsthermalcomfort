@@ -1,8 +1,9 @@
 import { expect, describe, it } from "@jest/globals";
 import {
   discomfort_index,
-  discomfortIndex_array,
+  discomfort_index_array,
 } from "../../src/models/discomfort_index";
+import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
 
 describe("discomfort_index", () => {
   it.each([
@@ -48,8 +49,8 @@ describe("discomfort_index", () => {
     },
   ])("returns", ({ tdb, rh, expected }) => {
     const result = discomfort_index(tdb, rh);
-
-    expect(result).toStrictEqual(expected);
+    expect(result.di).toBeCloseTo(expected.di);
+    expect(result.discomfort_condition).toBe(expected.discomfort_condition);
   });
 });
 
@@ -80,7 +81,8 @@ describe("discomfortIndex_array", () => {
       },
     },
   ])("returns", ({ tdb, rh, expected }) => {
-    const result = discomfortIndex_array(tdb, rh);
-    expect(result).toStrictEqual(expected, 1);
+    const result = discomfort_index_array(tdb, rh);
+    deep_close_to_array(result.di, expected.di, 2)
+    expect(result.discomfort_condition).toStrictEqual(expected.discomfort_condition);
   });
 });

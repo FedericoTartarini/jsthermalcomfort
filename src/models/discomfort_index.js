@@ -70,22 +70,19 @@ export function discomfort_index_array(tdb, rh) {
  * @returns {string} Discomfort condition
  */
 function check_categories(di) {
-  const diCategories = {
-    21: "No discomfort",
-    24: "Less than 50% feels discomfort",
-    27: "More than 50% feels discomfort",
-    29: "Most of the population feels discomfort",
-    32: "Everyone feels severe stress",
-    99: "State of medical emergency",
-  };
+  const threshold = [21, 24, 27, 29, 32, 99];
+  const condition = [
+    "No discomfort",
+    "Less than 50% feels discomfort",
+    "More than 50% feels discomfort",
+    "Most of the population feels discomfort",
+    "Everyone feels severe stress",
+    "State of medical emergency",
+  ];
 
-  let condition = "default";
-  for (const key in diCategories) {
-    if (di <= key) {
-      condition = diCategories[key];
-      break;
+  for (let index = 0; index < threshold.length; index++) {
+    if (di <= threshold[index]) {
+      return condition[index];
     }
   }
-
-  return condition;
 }

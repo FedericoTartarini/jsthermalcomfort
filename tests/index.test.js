@@ -42,6 +42,7 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("wbgt");
   });
 
+
   it("should have models.discomfort_index", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });
@@ -60,6 +61,14 @@ describe("NPM Package", () => {
 
   it("should have models.at", () => {
     expect(jsthermalcomfort.models).toHaveProperty("at");
+  });
+
+  it("should have models.athb", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("athb");
+  });
+
+  it("should have models.athb_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("athb_array");
   });
 
   it("should have utilities.body_surface_area", () => {

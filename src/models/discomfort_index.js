@@ -1,7 +1,8 @@
 import { round } from "../utilities/utilities";
 
 /**
- * @typedef {Object} DiscomfortIndexReturnType
+ * @typedef {Object} DiscomfortIndexReturnType - a result set containing the discomfort index and the classification of the
+ * thermal comfort conditions
  * @property {number} di – Discomfort Index(DI)
  * @property {string} discomfort_condition Classification of the thermal comfort conditions according to the discomfort index
  */
@@ -30,7 +31,8 @@ export function discomfort_index(tdb, rh) {
 }
 
 /**
- * @typedef {Object} DiscomfortIndexArrayReturnType
+ * @typedef {Object} DiscomfortIndexArrayReturnType - a result set containing an array of discomfort index and an array
+ * of classification of the thermal comfort conditions
  * @property {number[]} di – Discomfort Index(DI) Array
  * @property {string[]} discomfort_condition Classification of the thermal comfort conditions in array
  */

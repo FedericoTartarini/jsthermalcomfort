@@ -8,11 +8,11 @@ import { round } from "../utilities/utilities.js";
  * @returns {object} {"wci": wci} - wind chill index, [W/m2)]
  */
 
-export function wc(tdb, v, { ifRound } = { ifRound: true }) {
+export function wc(tdb, v, kwargs = { round: true }) {
   let wci = (10.45 + 10 * Math.pow(v, 0.5) - v) * (33 - tdb);
   // the factor 1.163 is used to convert to W/m2
   wci = wci * 1.163;
-  if (ifRound.ifRound) {
+  if (kwargs.round) {
     wci = round(wci, 1);
   }
   return { wci: wci };

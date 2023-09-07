@@ -40,11 +40,25 @@
                   <% if (doc.members.static && doc.members.static.length) { %>
                   <ul class='list-reset py1-ul pl1'>
                     <% doc.members.static.forEach(function(member) { %>
+                      <% var memberHasMembers = member.members.static.length %>
                       <li><a
                         href='#<%=slug(member.namespace)%>'
-                        class='regular pre-open'>
+                        class='regular pre-open<% if (memberHasMembers) { %> toggle-sibling<% } %>'>
                         <%- member.docname !== undefined ? member.docname : member.name %>
-                      </a></li>
+                        <% if (memberHasMembers) { %><span class='icon'>▸</span><% } %>
+                      </a>
+                      <% if (memberHasMembers) { %>
+                      <div class='toggle-target display-none'>
+                        <ul class='list-reset py1-ul pl2'>
+                        <% member.members.static.forEach(function(memberInner) { %>
+                          <li><a
+                            href='#<%=slug(memberInner.name)%>'
+                            class='regular pre-open'>
+                            <%- memberInner.docname !== undefined ? memberInner.docname : memberInner.name %>
+                          </a></li>
+                        <% }) %>
+                        </ul>
+                      <% } %></li>
                     <% }) %>
                     </ul>
                   <% } %>

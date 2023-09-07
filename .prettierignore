@@ -3,3 +3,5 @@
 **/.hg
 **/node_modules
 docs
+docs_theme
+!docs_theme/index.js

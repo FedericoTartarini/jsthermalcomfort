@@ -1,5 +1,6 @@
 import { expect, describe, it } from "@jest/globals";
 import { two_nodes } from "../../src/models/two_nodes.js";
+import { deep_close_to_obj } from "../test_utilities";
 
 describe("two_nodes", () => {
   it("should be a function", () => {

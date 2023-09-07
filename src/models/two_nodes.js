@@ -1,7 +1,4 @@
 import {
-  // _ankle_draft_compliance,
-  // _ashrae_compliance,
-  // _iso7933_compliance,
   round,
 } from "../utilities/utilities.js";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";

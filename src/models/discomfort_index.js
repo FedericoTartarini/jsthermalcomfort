@@ -21,7 +21,7 @@ import { round } from "../utilities/utilities";
  * const DI = discomfort_index(25, 50); // returns { di: 22.1, discomfort_condition: 'Less than 50% feels discomfort' }
  */
 export function discomfort_index(tdb, rh) {
-  const di = tdb - 0.55 * (1 - 0.01 * rh) * (tdb - 14.5);
+  const di = calculate_di(tdb, rh);
   const condition = check_categories(di);
 
   return {
@@ -49,12 +49,9 @@ export function discomfort_index(tdb, rh) {
  * @returns {DiscomfortIndexArrayReturnType} object with results of DI
  */
 export function discomfort_index_array(tdb, rh) {
-  const di = tdb.map((temperature, index) => {
-    const relativeHumidity = rh[index];
-    return (
-      temperature - 0.55 * (1 - 0.01 * relativeHumidity) * (temperature - 14.5)
-    );
-  });
+  const di = tdb.map((temperature, index) =>
+    calculate_di(temperature, rh[index]),
+  );
 
   const discomfortCondition = di.map((value) => check_categories(value));
 
@@ -87,4 +84,15 @@ function check_categories(di) {
       return condition[index];
     }
   }
+}
+
+/**
+ * Calculate Discomfort Index (DI) based on air temperature and relative humidity.
+ *
+ * @param {number} tdb - air temperature [C]
+ * @param {number} rh - relative humidity [%]
+ * @returns {number} Discomfort Index (DI)
+ */
+function calculate_di(tdb, rh) {
+  return tdb - 0.55 * (1 - 0.01 * rh) * (tdb - 14.5);
 }

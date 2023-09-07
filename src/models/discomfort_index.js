@@ -8,10 +8,13 @@ import { round } from "../utilities/utilities";
  */
 
 /**
- * @public
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
  * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments.
  * @see {@link discomfort_index_array} for a version that supports arrays
+ *
+ * @public
+ * @memberof models
+ * @docname Discomfort Index
  *
  * @param {number} tdb - air temperature [C]
  * @param {number} rh - relative humidity [%]
@@ -38,10 +41,13 @@ export function discomfort_index(tdb, rh) {
  */
 
 /**
- * @public
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
  * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments.
  * @see {@link discomfort_index} for a version that supports scalar arguments
+ *
+ * @public
+ * @memberof models
+ * @docname Discomfort Index (array version)
  *
  * @param {number[]} tdb - air temperature [C]
  * @param {number[]} rh - relative humidity [%]

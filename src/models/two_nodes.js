@@ -1,7 +1,4 @@
 import {
-  // _ankle_draft_compliance,
-  // _ashrae_compliance,
-  // _iso7933_compliance,
   round,
 } from "../utilities/utilities.js";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
@@ -123,22 +120,23 @@ export function two_nodes(
   //     ));
   // }
 
-  const tdbArray = Array.isArray(tdb) ? tdb : [tdb];
-  const trArray = Array.isArray(tr) ? tr : [tr];
-  const vArray = Array.isArray(v) ? v : [v];
-  const rhArray = Array.isArray(rh) ? rh : [rh];
-  const metArray = Array.isArray(met) ? met : [met];
-  const cloArray = Array.isArray(clo) ? clo : [clo];
-  const wmeArray = Array.isArray(wme) ? wme : [wme];
-  const bodyPositionArray = Array.isArray(body_position)
-    ? body_position
-    : [body_position];
+  // const tdbArray = Array.isArray(tdb) ? tdb : [tdb];
+  // const trArray = Array.isArray(tr) ? tr : [tr];
+  // const vArray = Array.isArray(v) ? v : [v];
+  // const rhArray = Array.isArray(rh) ? rh : [rh];
+  // const metArray = Array.isArray(met) ? met : [met];
+  // const cloArray = Array.isArray(clo) ? clo : [clo];
+  // const wmeArray = Array.isArray(wme) ? wme : [wme];
+  // const bodyPositionArray = Array.isArray(body_position)
+  //   ? body_position
+  //   : [body_position];
 
-  const vapor_pressure = rhArray.map(
-    (_rh, index) => (_rh * p_sat_torr(tdbArray[index])) / 100,
-  );
+  // const vapor_pressure = rhArray.map(
+  //   (_rh, index) => (_rh * p_sat_torr(tdbArray[index])) / 100,
+  // );
+  const vapor_pressure = cal_vapor_pressure(tdb, rh);
 
-  const result = calculateTwoNodesOptimized(
+  const result = calculate_two_nodes(
     tdb,
     tr,
     v,
@@ -193,7 +191,7 @@ export function two_nodes(
  *
  */
 
-function calculateTwoNodesOptimized(
+function calculate_two_nodes(
   tdb,
   tr,
   v,
@@ -204,16 +202,17 @@ function calculateTwoNodesOptimized(
   bodySurfaceArea,
   pAtmospheric,
   bodyPosition,
+  maxSkinBloodFlow,
   kwargs,
 ) {
   const airSpeed = Math.max(v, 0.1);
   const kClo = 0.25;
-  const bodyWeight = 70; // body weight in kg
-  const metFactor = 58.2; // met conversion factor
-  const sbc = 0.000000056697; // Stefan-Boltzmann constant (W/m2K4)
-  const cSw = 170; // driving coefficient for regulatory sweating
-  const cDil = 120; // driving coefficient for vasodilation ashrae says 50 see page 9.19
-  const cStr = 0.5; // driving coefficient for vasoconstriction
+  const bodyWeight = 70; 
+  const metFactor = 58.2; 
+  const sbc = 0.000000056697; 
+  const cSw = 170; 
+  const cDil = 120; 
+  const cStr = 0.5; 
 
   const tempSkinNeutral = 33.7;
   const tempCoreNeutral = 36.8;
@@ -512,4 +511,15 @@ function calculateTwoNodesOptimized(
     disc,
     tSens,
   };
+}
+
+/**
+ * Calculate vapor pressure based on air temperature and relative humidity.
+ *
+ * @param {number} tdb - air temperature [C]
+ * @param {number} rh - relative humidity [%]
+ * @returns {number} vapor pressure
+ */
+function cal_vapor_pressure(tdb, rh){
+  return rh * p_sat_torr(tdb) / 100;
 }

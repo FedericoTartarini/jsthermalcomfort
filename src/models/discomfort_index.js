@@ -14,7 +14,7 @@ import { round } from "../utilities/utilities";
  *
  * @public
  * @memberof models
- * @docname Discomfort Index
+ * @docname Discomfort Index (DI)
  *
  * @param {number} tdb - air temperature [C]
  * @param {number} rh - relative humidity [%]
@@ -47,7 +47,7 @@ export function discomfort_index(tdb, rh) {
  *
  * @public
  * @memberof models
- * @docname Discomfort Index (array version)
+ * @docname Discomfort Index (DI) (array version)
  *
  * @param {number[]} tdb - air temperature [C]
  * @param {number[]} rh - relative humidity [%]

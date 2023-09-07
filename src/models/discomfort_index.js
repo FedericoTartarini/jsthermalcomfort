@@ -56,7 +56,7 @@ export function discomfort_index_array(tdb, rh) {
   const discomfortCondition = di.map((value) => check_categories(value));
 
   return {
-    di: di.map((value) => Math.round(value * 10) / 10),
+    di: di.map((value) => round(value, 1)),
     discomfort_condition: discomfortCondition,
   };
 }

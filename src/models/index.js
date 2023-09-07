@@ -4,4 +4,9 @@ import { humidex } from "./humidex";
 import { net } from "./net";
 import { wbgt } from "./wbgt";
 
+/**
+ * @public
+ * @name models
+ * @docname Comfort Models
+ */
 export default { heat_index, phs, humidex, net, wbgt };

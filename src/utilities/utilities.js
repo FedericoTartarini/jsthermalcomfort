@@ -303,6 +303,11 @@ function _iso7933_compliance(kwargs) {
 
 /**
  * Returns the body surface area in square meters
+ *
+ * @public
+ * @memberof utilities
+ * @docname Body Surface Area
+ *
  * @param {number} weight - body weight, [kg]
  * @param {number} height - height, [m]
  * @param {("dubois" | "takahira" | "fujimoto" | "kurazumi")} [formula="dubois"] - formula used to calculate the body surface area. default="dubois"
@@ -330,6 +335,11 @@ export function body_surface_area(weight, height, formula = "dubois") {
  * space plus the relative air speed caused by the body movement. Vag is assumed
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
  * Vag = 0.3 (M - 1) (m/s)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Relative air speed
+ *
  * @see {@link v_relative_array} for a version that supports array arguments
  *
  * @param {number} v - air spped measured by the sensor, [m/s]
@@ -346,6 +356,11 @@ export function v_relative(v, met) {
  * space plus the relative air speed caused by the body movement. Vag is assumed
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
  * Vag = 0.3 (M - 1) (m/s)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Relative air speed (array version)
+ *
  * @see {@link v_relative} for a version that supports scalar arguments
  *
  * @param {number[]} v - air spped measured by the sensor, [m/s]
@@ -373,6 +388,11 @@ function _v_relative_single(v, met) {
  * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Dynamic clothing
+ *
  * @see {@link clo_dynamic_array} for a version that supports array arguments
  *
  * @param {number} clo - clothing insulation, [clo]
@@ -397,6 +417,11 @@ export function clo_dynamic(clo, met, standard = "ASHRAE") {
  * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Dynamic clothing (array version)
+ *
  * @see {@link clo_dynamic} for a version that supports scalar arguments
  *
  * @param {number[]} clo - clothing insulation, [clo]
@@ -434,6 +459,10 @@ function _clo_dynamic_single(clo, met) {
 /**
  * Converts IP values to SI units
  *
+ * @public
+ * @memberof utilities
+ * @docname Units converter
+ *
  * @template {Object.<string, number>} T
  * @param {T} kwargs - [t, v] units to convert
  * @param {UnitSystem} [from_units="IP"] - specify system to convert from
@@ -469,6 +498,10 @@ export function units_converter(kwargs, from_units = "IP") {
 // FIXME: find how to write math notation inside JSDocs
 /**
  * Estimates the running mean temperature also known as prevailing mean outdoor temperature
+ *
+ * @public
+ * @memberof utilities
+ * @docname Running mean outdoor temperature
  *
  * @param {number[]} temp_array - array containing the mean daily temperature in descending order (i.e. from
  * newest/yestedayr to oldest) :math:`[t_{day-1}, t_{day-2}, ... , t_{day-n}]`,
@@ -507,6 +540,10 @@ export function running_mean_outdoor_temperature(
 
 /**
  * Calculates the sky-vault view fraction
+ *
+ * @public
+ * @memberof utilities
+ * @docname Sky-vault view fraction
  *
  * @param {number} w - width of the window, [m]
  * @param {number} h - height of the window, [m]

@@ -23,6 +23,8 @@ import { round } from "../utilities/utilities";
  *     56, 515–535. DOI: doi.org/10.1007/s00484-011-0453-2
  *
  * @public
+ * @memberof models
+ * @docname Normal Effective Temperature (NET)
  *
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]

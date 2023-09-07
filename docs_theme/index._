@@ -112,14 +112,15 @@
       <div id='split-right' class='relative overflow-auto height-viewport-100'>
         <% docs.forEach(function(s) { %>
           <% if (s.kind === 'note' && !s.children) { %>
-            <div class='keyline-top-not py2'><%=renderNote({ note: s })%></div>
+            <div class='keyline-top-not py2'><%=renderNote({ note: s, levelIndex: 1 })%></div>
           <% } else { %>
             <div class='keyline-top-not py2'>
               <%= renderSection({
                 section: s,
                 renderSection: renderSection,
                 renderSectionList: renderSectionList,
-                renderParamProperty: renderParamProperty
+                renderParamProperty: renderParamProperty,
+                levelIndex: 1,
               }) %>
           </div>
           <% } %>

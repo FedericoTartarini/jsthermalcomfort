@@ -90,6 +90,16 @@ code,
   font-size: 14px;
 }
 
+.levelIndex1 {
+  font-size: 4rem;
+}
+.levelIndex2 {
+  font-size: 3rem;
+}
+.levelIndex3 {
+  font-size: 2rem;
+}
+
 .fill-light {
   background: #f9f9f9;
 }

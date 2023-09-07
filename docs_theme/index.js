@@ -123,6 +123,7 @@ export default async function (comments, config) {
         }
         return prefix + section.name + formatters.parameters(section) + returns;
       },
+      isFunction,
       md(ast, inline, related) {
         if (related) {
           ast.children[0].children[0].url =

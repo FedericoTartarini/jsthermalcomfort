@@ -4,6 +4,7 @@ import { humidex } from "./humidex";
 import { net } from "./net";
 import { wbgt } from "./wbgt";
 import { discomfort_index, discomfort_index_array } from "./discomfort_index";
+import { wc } from "./wc";
 
 /**
  * @public
@@ -18,4 +19,5 @@ export default {
   wbgt,
   discomfort_index,
   discomfort_index_array,
+  wc,
 };

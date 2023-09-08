@@ -111,6 +111,12 @@
                           </a></li>
                         
                           <li><a
+                            href='#wc'
+                            class='regular pre-open'>
+                            Wind chill index
+                          </a></li>
+                        
+                          <li><a
                             href='#discomfort_index'
                             class='regular pre-open'>
                             Discomfort Index (DI)
@@ -270,6 +276,16 @@
                 
                 </li>
               
+                
+                <li><a
+                  href='#wcresult'
+                  class="">
+                  WcResult
+                  
+                </a>
+                
+                </li>
+              
             </ul>
           </div>
           <div class='mt1 h6 quiet'>
@@ -377,7 +393,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/index.js#L13-L21'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/index.js#L15-L24'>
       <span>src/models/index.js</span>
       </a>
     
@@ -426,7 +442,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/heat_index.js#L23-L56'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/heat_index.js#L23-L56'>
       <span>src/models/heat_index.js</span>
       </a>
     
@@ -574,7 +590,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/phs.js#L99-L171'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/phs.js#L99-L171'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -747,7 +763,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/humidex.js#L45-L69'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/humidex.js#L45-L69'>
       <span>src/models/humidex.js</span>
       </a>
     
@@ -894,7 +910,7 @@ relative humidity.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/net.js#L42-L54'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/net.js#L42-L54'>
       <span>src/models/net.js</span>
       </a>
     
@@ -1056,7 +1072,7 @@ false, it does not.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/wbgt.js#L57-L77'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/wbgt.js#L57-L77'>
       <span>src/models/wbgt.js</span>
       </a>
     
@@ -1223,6 +1239,133 @@ setting
     </div>
   </div>
   
+  <div class="border-bottom" id="wc">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong truncate levelIndex3">
+          Wind chill index
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/wc.js#L23-L31'>
+      <span>src/models/wc.js</span>
+      </a>
+    
+  </div>
+  
+
+  <p>Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 [18]_.</p>
+
+  <div class='pre p1 fill-light mt0'>wc(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): {wci: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>}</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    dry bulb air temperature,[°C]
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>v</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    wind speed 10m above ground level, [m/s]
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?
+            = <code>{round:true}</code>)</code>
+	    (Optional) Other parameters.
+
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>kwargs.round</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>true</code>)
+  </td>
+  <td class='break-word'><span>If True rounds output value, if False it does not round it.
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>{wci: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>}</code>:
+        wind chill index, [W/m2]
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
   <div class="border-bottom" id="discomfort_index">
     <div class="clearfix small pointer">
       <div class="py1 contain">
@@ -1238,7 +1381,7 @@ setting
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/discomfort_index.js#L26-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/discomfort_index.js#L26-L34'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -1344,7 +1487,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/models/discomfort_index.js#L57-L68'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/discomfort_index.js#L57-L68'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -1458,7 +1601,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/index.js#L15-L27'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/index.js#L15-L27'>
       <span>src/psychrometrics/index.js</span>
       </a>
     
@@ -1507,7 +1650,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/p_sat.js#L14-L51'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/p_sat.js#L14-L51'>
       <span>src/psychrometrics/p_sat.js</span>
       </a>
     
@@ -1588,7 +1731,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/p_sat_torr.js#L12-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/p_sat_torr.js#L12-L14'>
       <span>src/psychrometrics/p_sat_torr.js</span>
       </a>
     
@@ -1678,7 +1821,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/p_sat_torr.js#L28-L30'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/p_sat_torr.js#L28-L30'>
       <span>src/psychrometrics/p_sat_torr.js</span>
       </a>
     
@@ -1768,7 +1911,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/t_o.js#L15-L28'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/t_o.js#L15-L28'>
       <span>src/psychrometrics/t_o.js</span>
       </a>
     
@@ -1886,7 +2029,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/t_o.js#L44-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/t_o.js#L44-L58'>
       <span>src/psychrometrics/t_o.js</span>
       </a>
     
@@ -2004,7 +2147,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/enthalpy.js#L13-L23'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/enthalpy.js#L13-L23'>
       <span>src/psychrometrics/enthalpy.js</span>
       </a>
     
@@ -2094,7 +2237,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/t_wb.js#L11-L23'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/t_wb.js#L11-L23'>
       <span>src/psychrometrics/t_wb.js</span>
       </a>
     
@@ -2184,7 +2327,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/t_mrt.js#L36-L57'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/t_mrt.js#L36-L57'>
       <span>src/psychrometrics/t_mrt.js</span>
       </a>
     
@@ -2327,7 +2470,7 @@ been validated for globe sensors with a diameter between 0.04 and 0.15 m.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/t_mrt.js#L76-L107'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/t_mrt.js#L76-L107'>
       <span>src/psychrometrics/t_mrt.js</span>
       </a>
     
@@ -2462,7 +2605,7 @@ been validated for globe sensors with a diameter between 0.04 and 0.15 m.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/psychrometrics/psy_ta_rh.js#L33-L49'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/psychrometrics/psy_ta_rh.js#L33-L49'>
       <span>src/psychrometrics/psy_ta_rh.js</span>
       </a>
     
@@ -2585,7 +2728,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/index.js#L17-L26'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/index.js#L17-L26'>
       <span>src/utilities/index.js</span>
       </a>
     
@@ -2634,7 +2777,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L318-L331'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L318-L331'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -2734,7 +2877,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L349-L352'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L349-L352'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -2836,7 +2979,7 @@ Vag = 0.3 (M - 1) (m/s)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L370-L373'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L370-L373'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -2938,7 +3081,7 @@ Vag = 0.3 (M - 1) (m/s)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L403-L411'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L403-L411'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -3052,7 +3195,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L432-L444'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L432-L444'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -3166,7 +3309,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L471-L496'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L471-L496'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -3257,7 +3400,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L522-L539'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L522-L539'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -3370,7 +3513,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1e5bf3683131ff690c09304116603f72fb9cd35f/src/utilities/utilities.js#L554-L558'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/utilities/utilities.js#L554-L558'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -3469,6 +3612,78 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   </div>
   
 </div>
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          </div>
+          
+        
+          
+            <div class='keyline-top-not py2'>
+              <section class='py2 clearfix'>
+
+  
+  <div class='clearfix'>
+    
+    <h1 class='mt0 levelIndex1' id='wcresult'>
+      WcResult
+    </h1>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/79c7dd9ae906fa28ee414869eea7e02b8a8d7902/src/models/wc.js#L3-L8'>
+      <span>src/models/wc.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  <div class='pre p1 fill-light mt0'>WcResult</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>wci</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : wind chill index, [W/m2]
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
 
   
 

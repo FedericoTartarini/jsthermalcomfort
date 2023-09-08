@@ -15,7 +15,7 @@ import {
  * @name utilities
  * @docname Utilities
  */
-export default {
+export {
   body_surface_area,
   v_relative,
   v_relative_array,
@@ -24,5 +24,14 @@ export default {
   units_converter,
   running_mean_outdoor_temperature,
   f_svv,
-  met_typical_tasks,
 };
+
+/**
+ * @public
+ * @name reference_values
+ * @docname Reference values clo and met
+ */
+
+export {
+  met_typical_tasks
+}

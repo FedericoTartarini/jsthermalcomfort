@@ -16,7 +16,7 @@
   <% } %>
 
   <%= md(section.description) %>
-  <% if (isFunction(section) || section.type) { %><div class='pre p1 fill-light mt0'><%= signature(section) %></div><% } %>
+  <% if (isFunction(section)) { %><div class='pre p1 fill-light mt0'><%= signature(section) %></div><% } %>
   <% if (section.type) { %>
     <p>
       Type:
@@ -112,6 +112,11 @@
         <%= md(ret.description, true) %>
       <% }%>
     <% }) %>
+  <% } %>
+  
+  <% if (section.types && section.types.length) { %>
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <%= renderSectionList({ members: section.types, renderSection: renderSection, renderParamProperty: renderParamProperty, noun: 'Static Member', levelIndex: levelIndex+1 }) %>
   <% } %>
 
   <% if (section.sees && section.sees.length) { %>

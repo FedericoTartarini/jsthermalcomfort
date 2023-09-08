@@ -5,6 +5,7 @@ import { round } from "../utilities/utilities";
  * thermal comfort conditions
  * @property {number} di – Discomfort Index(DI)
  * @property {string} discomfort_condition Classification of the thermal comfort conditions according to the discomfort index
+ * @public
  */
 
 /**
@@ -38,6 +39,7 @@ export function discomfort_index(tdb, rh) {
  * of classification of the thermal comfort conditions
  * @property {number[]} di – Discomfort Index(DI) Array
  * @property {string[]} discomfort_condition Classification of the thermal comfort conditions in array
+ * @public
  */
 
 /**

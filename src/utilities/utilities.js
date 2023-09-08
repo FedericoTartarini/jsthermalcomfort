@@ -6,7 +6,7 @@ import { t_o_array } from "../psychrometrics/t_o.js";
  *
  * @param {number} number - the number to round
  * @param {number} precision - the number of decimal places to round to
- * @returns the rounded result
+ * @returns {number} the rounded result
  */
 export function round(number, precision) {
   const smudge = 10 ** precision;
@@ -453,19 +453,15 @@ function _clo_dynamic_single(clo, met) {
 }
 
 /**
- * @typedef {("IP" | "SI")} UnitSystem
- */
-
-/**
  * Converts IP values to SI units
  *
- * @public
  * @memberof utilities
  * @docname Units converter
+ * @public
  *
  * @template {Object.<string, number>} T
  * @param {T} kwargs - [t, v] units to convert
- * @param {UnitSystem} [from_units="IP"] - specify system to convert from
+ * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
  * @returns {T} converted values in SI units
  */
 export function units_converter(kwargs, from_units = "IP") {
@@ -515,7 +511,7 @@ export function units_converter(kwargs, from_units = "IP") {
  * could be more appropriate for climates in which synoptic-scale (day-to-day)
  * temperature dynamics are relatively minor, sich as the humid tropics.
  *
- * @param {UnitSystem} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {"IP" | "SI"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  *
  * @returns {number} running mean outdoor temperature
  */

@@ -7,6 +7,7 @@ import { round } from "../utilities/utilities";
  * air temperature and relative humidity.
  * @property {string} discomfort - a human description of how the weather
  * would be felt by the average person.
+ * @public
  */
 
 /**

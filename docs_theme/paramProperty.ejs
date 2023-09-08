@@ -7,7 +7,7 @@
 </tr>
 <% if(property.properties && property.properties.length) { %>
   <% property.properties.forEach(function(childProperty) { %>
-    <%= renderParamProperty({
+    <%- renderParamProperty({
       property: childProperty,
       renderParamProperty: renderParamProperty
     }) %>

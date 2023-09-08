@@ -73,6 +73,10 @@ import { p_sat } from "../psychrometrics/p_sat.js";
  * evaporative heat flow at the skin surface, predicted sweat rate, predicted evaporative
  * heat flow, and rectal temperature.
  *
+ * @public
+ * @memberof models
+ * @docname Predicted Heat Strain (PHS) Index
+ *
  * @param {number} tdb - dry bulb air temperature, default in [°C]
  * @param {number} tr - mean radiant temperature, default in [°C]
  * @param {number} v - air speed, default in [m/s]

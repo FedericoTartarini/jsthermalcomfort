@@ -26,6 +26,8 @@ import { round } from "../utilities/utilities";
  *     DOI: doi.org/10.1002/cphy.c140051
  *
  * @public
+ * @memberof models
+ * @docname Humidex
  *
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]

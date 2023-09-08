@@ -16,6 +16,9 @@ import { enthalpy } from "./enthalpy";
  * Calculates psychrometric values of air based on dry bulb air temperature and
  * relative humidity.
  *
+ * @public
+ * @memberof psychrometrics
+ *
  * @param {number} tdb - air temperature, [°C]
  * @param {number} rh - relative humidity, [%]
  * @param {number} [p_atm = 101325] - atmospheric pressure, [Pa]

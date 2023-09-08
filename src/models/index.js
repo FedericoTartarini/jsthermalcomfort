@@ -5,6 +5,11 @@ import { net } from "./net";
 import { wbgt } from "./wbgt";
 import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 
+/**
+ * @public
+ * @name models
+ * @docname Comfort Models
+ */
 export default {
   heat_index,
   phs,

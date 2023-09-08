@@ -3,6 +3,10 @@ import { round } from "../utilities/utilities";
 /**
  * Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.
  *
+ * @public
+ * @memberof models
+ * @docname Heat Index
+ *
  * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
  * @param {number} rh Relative humidity, [%].
  * @param {Object} [options] (Optional) Other parameters.

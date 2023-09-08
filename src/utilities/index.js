@@ -32,6 +32,4 @@ export {
  * @docname Reference values clo and met
  */
 
-export {
-  met_typical_tasks
-}
+export { met_typical_tasks };

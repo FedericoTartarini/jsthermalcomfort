@@ -574,8 +574,11 @@ export function valid_range(range, [min, max]) {
  * @public
  * @memberof reference_values
  * @docname Met typical tasks, [met]
- * @constant met_typical_tasks
+ * @constant
  * @type {Object}
+ * @property {number} Sleeping - 0.7
+ * @property {number} Reclining - 0.8,
+ * @property {number} Seated\u002ACquiet - 1.0
  */
 export const met_typical_tasks = {
   Sleeping: 0.7,

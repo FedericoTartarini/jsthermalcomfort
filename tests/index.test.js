@@ -84,6 +84,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("f_svv");
   });
 
+  it("should have utilities.met_typical_tasks", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("met_typical_tasks");
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });
@@ -101,7 +105,7 @@ describe("NPM Package", () => {
   });
 
   it("should have psychrometrics.t_o_array", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o_array");
   });
 
   it("should have psychrometrics.enthalpy", () => {
@@ -114,5 +118,13 @@ describe("NPM Package", () => {
 
   it("should have psychrometrics.t_dp", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_dp");
+  });
+
+  it("should have psychrometrics.t_mrt", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_mrt");
+  });
+
+  it("should have psychrometrics.t_mrt_array", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_mrt_array");
   });
 });

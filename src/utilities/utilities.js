@@ -568,3 +568,38 @@ export function valid_range(range, [min, max]) {
   if (range === undefined) return [];
   return range.map((n) => (n >= min && n <= max ? n : NaN));
 }
+
+// Met values of typical tasks.
+export const met_typical_tasks = {
+  "Sleeping": 0.7,
+  "Reclining": 0.8,
+  "Seated, quiet": 1.0,
+  "Reading, seated": 1.0,
+  "Writing": 1.0,
+  "Typing": 1.1,
+  "Standing, relaxed": 1.2,
+  "Filing, seated": 1.2,
+  "Flying aircraft, routine": 1.2,
+  "Filing, standing": 1.4,
+  "Driving a car": 1.5,
+  "Walking about": 1.7,
+  "Cooking": 1.8,
+  "Table sawing": 1.8,
+  "Walking 2mph (3.2kmh)": 2.0,
+  "Lifting/packing": 2.1,
+  "Seated, heavy limb movement": 2.2,
+  "Light machine work": 2.2,
+  "Flying aircraft, combat": 2.4,
+  "Walking 3mph (4.8kmh)": 2.6,
+  "House cleaning": 2.7,
+  "Driving, heavy vehicle": 3.2,
+  "Dancing": 3.4,
+  "Calisthenics": 3.5,
+  "Walking 4mph (6.4kmh)": 3.8,
+  "Tennis": 3.8,
+  "Heavy machine work": 4.0,
+  "Handling 100lb (45 kg) bags": 4.0,
+  "Pick and shovel work": 4.4,
+  "Basketball": 6.3,
+  "Wrestling": 7.8,
+}

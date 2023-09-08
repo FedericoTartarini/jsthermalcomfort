@@ -9,6 +9,11 @@ import {
   f_svv,
 } from "./utilities";
 
+/**
+ * @public
+ * @name utilities
+ * @docname Utilities
+ */
 export default {
   body_surface_area,
   v_relative,

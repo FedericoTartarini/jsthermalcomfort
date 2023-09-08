@@ -29,6 +29,8 @@ const optionDefaults = {
  *     of heat stress using the WBGT (wet bulb globe temperature) index.
  *
  * @public
+ * @memberof models
+ * @docname Wet Bulb Globe Temperature Index (WBGT)
  *
  * @param {number} twb - natural (no forced air flow) wet bulb temperature, [°C]
  * @param {number} tg - globe temperature, [°C]

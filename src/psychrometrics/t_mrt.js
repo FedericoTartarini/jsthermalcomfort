@@ -13,6 +13,10 @@ const o = 0.0000000567;
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
+ * 
+ * @public
+ * @memberof psychrometrics
+ * 
  * @see {@link t_mrt_array} for a version that supports arrays
  * 
  * @param {number} tg - globe temperature, [°C]
@@ -29,7 +33,6 @@ const o = 0.0000000567;
         been validated for globe sensors with a diameter between 0.04 and 0.15 m.
 * @returns {number}
 */
-
 export function t_mrt(
   tg,
   tdb,
@@ -55,6 +58,10 @@ export function t_mrt(
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard [5]_.
+ *
+ * @public
+ * @memberof psychrometrics
+ *
  * @see {@link t_mrt} for scalar arguments. Accepts array arguments.
  *
  * @param {number[]} tg - globe temperature, [°C]

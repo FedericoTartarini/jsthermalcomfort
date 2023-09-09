@@ -17,6 +17,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
  * @property {number} d_lim_t_re - maximum allowable exposure time for heat storage, [minutes]
  * @property {number} water_loss_watt - maximum water loss in watts, [W]
  * @property {number} water_loss - maximum water loss, [g]
+ * @public
  */
 
 /**
@@ -37,6 +38,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
  * @property {number} [t_cr_eq] -  mean core temperature as a function of met when worker starts working, [°C]
  * @property {number} [sweat_rate=0] - sweat rate
  * @property {boolean} [round=true] - round the result of the PHS model
+ * @public
  */
 
 /**
@@ -61,7 +63,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
 
 /**
  * Calculates the Predicted Heat Strain (PHS) index based in compliace with
- * the ISO 7933:2004 Standard [8]_. The ISO 7933 provides a method for the
+ * the ISO 7933:2004 Standard {@link /#ref_8|[8]}. The ISO 7933 provides a method for the
  * analytical evaluation and interpretation of the thermal stress experienced
  * by a subject in a hot environment. It describes a method for predicting the
  * sweat rate and the internal core temperature that the human body will
@@ -93,8 +95,6 @@ import { p_sat } from "../psychrometrics/p_sat.js";
  * import { phs } from "jsthermalcomfort";
  * const results = phs(40, 40, 33.85, 0.3, 150, 0.5, 2);
  * console.log(results); // {t_re: 37.5, d_lim_loss_50: 440, d_lim_loss_95: 298, d_lim_t_re: 480, water_loss: 6166.0}
- *
- * @category Thermophysiological models
  */
 export function phs(tdb, tr, v, rh, met, clo, posture, wme = 0, kwargs = {}) {
   const defaults_kwargs = {

@@ -10,6 +10,7 @@ import { enthalpy } from "./enthalpy";
  * @property {number} t_wb - wet bulb temperature, [°C]
  * @property {number} t_dp - dew point temperature, [°C]
  * @property {number} h - enthalpy [J/kg dry air]
+ * @public
  */
 
 /**

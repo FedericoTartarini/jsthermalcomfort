@@ -2,6 +2,8 @@ import { round } from "../utilities/utilities";
 
 /**
  * Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.
+ * The HI equation {@link /#ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
+ * of Steadman’s (1979) apparent temperature (AT) {@link /#ref_13|[13]}.
  *
  * @public
  * @memberof models

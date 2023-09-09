@@ -6,7 +6,7 @@ import { t_o_array } from "../psychrometrics/t_o.js";
  *
  * @param {number} number - the number to round
  * @param {number} precision - the number of decimal places to round to
- * @returns the rounded result
+ * @returns {number} the rounded result
  */
 export function round(number, precision) {
   const smudge = 10 ** precision;
@@ -385,7 +385,7 @@ function _v_relative_single(v, met) {
  * Estimates the dynamic clothing insulation of a moving occupant. The activity as
  * well as the air speed modify the insulation characteristics of the clothing and the
  * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
+ * shall be corrected {@link /#ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
  *
@@ -414,7 +414,7 @@ export function clo_dynamic(clo, met, standard = "ASHRAE") {
  * Estimates the dynamic clothing insulation of a moving occupant. The activity as
  * well as the air speed modify the insulation characteristics of the clothing and the
  * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
+ * shall be corrected {@link /#ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
  *
@@ -453,19 +453,15 @@ function _clo_dynamic_single(clo, met) {
 }
 
 /**
- * @typedef {("IP" | "SI")} UnitSystem
- */
-
-/**
  * Converts IP values to SI units
  *
- * @public
  * @memberof utilities
  * @docname Units converter
+ * @public
  *
  * @template {Object.<string, number>} T
  * @param {T} kwargs - [t, v] units to convert
- * @param {UnitSystem} [from_units="IP"] - specify system to convert from
+ * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
  * @returns {T} converted values in SI units
  */
 export function units_converter(kwargs, from_units = "IP") {
@@ -496,6 +492,7 @@ export function units_converter(kwargs, from_units = "IP") {
 }
 
 // FIXME: find how to write math notation inside JSDocs
+
 /**
  * Estimates the running mean temperature also known as prevailing mean outdoor temperature
  *
@@ -506,16 +503,16 @@ export function units_converter(kwargs, from_units = "IP") {
  * @param {number[]} temp_array - array containing the mean daily temperature in descending order (i.e. from
  * newest/yestedayr to oldest) :math:`[t_{day-1}, t_{day-2}, ... , t_{day-n}]`,
  * Where :math:`t_{day-1}` is yesterday's daily mean temperature. The EN
- * 16798-1 2019 [3]_ states that n should be equal to 7
+ * 16798-1 2019 {@link /#ref_3|[3]} states that n should be equal to 7
  *
- * @param {number} [alpha=0.8] - constant between 0 and 1. The EN 16798-1 2019 [3]_ recommends a value of 0.8,
+ * @param {number} [alpha=0.8] - constant between 0 and 1. The EN 16798-1 2019 {@link /#ref_3|[3]} recommends a value of 0.8,
  * while the ASHRAE 55 2020 recommends to choose values between 0.9 and 0.6,
  * corresponding to a slow- and fast- response running mean, respectively.
  * Adaptive comfort theory suggest that a slow-response running mean (alpha = 0.9)
  * could be more appropriate for climates in which synoptic-scale (day-to-day)
  * temperature dynamics are relatively minor, sich as the humid tropics.
  *
- * @param {UnitSystem} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {"IP" | "SI"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  *
  * @returns {number} running mean outdoor temperature
  */

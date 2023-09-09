@@ -9,3 +9,5 @@ toc:
       - models
       - psychrometrics
       - utilities
+  - name: References
+    file: docs_theme/references.md

@@ -28,6 +28,7 @@
           <div id='toc'>
             <ul class='list-reset h5 py1-ul'>
               <% docs.forEach(function(doc) { %>
+                <% if (!isType(doc)) { %>
                 <% var hasMembers = doc.members.static.length || doc.members.instance.length %>
                 <li><a
                   href='#<%=slug(doc.namespace)%>'
@@ -101,6 +102,7 @@
                 </div>
                 <% } %>
                 </li>
+              <% } %>
               <% }) %>
             </ul>
           </div>
@@ -112,8 +114,8 @@
       <div id='split-right' class='relative overflow-auto height-viewport-100'>
         <% docs.forEach(function(s) { %>
           <% if (s.kind === 'note' && !s.children) { %>
-            <div class='keyline-top-not py2'><%=renderNote({ note: s, levelIndex: 1 })%></div>
-          <% } else { %>
+            <div class='keyline-top-not py2'><%=renderNote({ note: s, levelIndex: 1, isReferenceSection: isReferenceSection })%></div>
+          <% } else if (!isType(s)) { %>
             <div class='keyline-top-not py2'>
               <%= renderSection({
                 section: s,

@@ -578,12 +578,12 @@ export function valid_range(range, [min, max]) {
  * @type {Object}
  * @property {number} Sleeping - 0.7
  * @property {number} Reclining - 0.8,
- * @property {number} Seated\u002ACquiet - 1.0
+ * @property {number} Seated_Cquiet - 1.0
  */
 export const met_typical_tasks = {
   Sleeping: 0.7,
   Reclining: 0.8,
-  "Seated, quiet": 1.0,
+  Seated_Cquiet: 1.0,
   "Reading, seated": 1.0,
   Writing: 1.0,
   Typing: 1.1,

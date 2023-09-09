@@ -1,5 +1,5 @@
 /**
- * Calculates the wet-bulb temperature using the Stull equation {@link /#ref_6|[6]}.
+ * Calculates the wet-bulb temperature using the Stull equation {@link #ref_6|[6]}.
  *
  * @public
  * @memberof psychrometrics

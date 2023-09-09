@@ -13,7 +13,7 @@ const o = 0.0000000567;
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection
- * developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard {@link /#ref_5|[5]}.
+ * developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard {@link #ref_5|[5]}.
  *
  * @public
  * @memberof psychrometrics
@@ -59,7 +59,7 @@ export function t_mrt(
 
 /**
  * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection
- * developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard {@link /#ref_5|[5]}.
+ * developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard {@link #ref_5|[5]}.
  *
  * @public
  * @memberof psychrometrics

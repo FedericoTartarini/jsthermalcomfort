@@ -1,7 +1,7 @@
 import { round } from "../utilities/utilities.js";
 
 /**
- * Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 {@link /#ref_18|[18]}.
+ * Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 {@link #ref_18|[18]}.
  *
  * The wind chill index (WCI) is an empirical index based on cooling measurements taken on a cylindrical flask partially
  * filled with water in Antarctica (Siple and Passel 1945). For a surface temperature of 33°C, the index describes the
@@ -11,7 +11,7 @@ import { round } from "../utilities/utilities.js";
  * exposed flesh, which differs from plastic in terms of curvature, roughness, and radiation exchange qualities, and is
  * always below 33°C in a cold environment. Furthermore, the equation’s values peak at 90 km/h and then decline as velocity
  * increases. Nonetheless, this score reliably represents the combined effects of temperature and wind on subjective discomfort
- * for velocities below 80 km/h {@link /#ref_18|[18]}.
+ * for velocities below 80 km/h {@link #ref_18|[18]}.
  *
  * @public
  * @memberof models

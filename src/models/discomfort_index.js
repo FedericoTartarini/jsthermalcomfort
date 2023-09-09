@@ -10,7 +10,15 @@ import { round } from "../utilities/utilities";
 
 /**
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
- * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments.
+ * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. {@link /#ref_24|[24]}
+ *
+ * - class 1 - DI < 21 °C - No discomfort
+ * - class 2 - 21 <= DI < 24 °C - Less than 50% feels discomfort
+ * - class 3 - 24 <= DI < 27 °C - More than 50% feels discomfort
+ * - class 4 - 27 <= DI < 29 °C - Most of the population feels discomfort
+ * - class 5 - 29 <= DI < 32 °C - Everyone feels severe stress
+ * - class 6 - DI >= 32 °C - State of medical emergency
+ *
  * @see {@link discomfort_index_array} for a version that supports arrays
  *
  * @public
@@ -44,7 +52,15 @@ export function discomfort_index(tdb, rh) {
 
 /**
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
- * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments.
+ * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. {@link /#ref_24|[24]}
+ *
+ * - class 1 - DI < 21 °C - No discomfort
+ * - class 2 - 21 <= DI < 24 °C - Less than 50% feels discomfort
+ * - class 3 - 24 <= DI < 27 °C - More than 50% feels discomfort
+ * - class 4 - 27 <= DI < 29 °C - Most of the population feels discomfort
+ * - class 5 - 29 <= DI < 32 °C - Everyone feels severe stress
+ * - class 6 - DI >= 32 °C - State of medical emergency
+ *
  * @see {@link discomfort_index} for a version that supports scalar arguments
  *
  * @public

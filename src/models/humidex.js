@@ -13,18 +13,10 @@ import { round } from "../utilities/utilities";
 /**
  * Calculates the humidex (short for "humidity index"). It has been
  * developed by the Canadian Meteorological service. It was introduced in 1965
- * and then it was revised by Masterson and Richardson (1979) [1]. It aims
+ * and then it was revised by Masterson and Richardson (1979) {@link /#ref_14|[14]}. It aims
  * to describe how hot, humid weather is felt by the average person. The
  * Humidex differs from the heat index in being related to the dew point
- * rather than relative humidity [2].
- *
- * [1] Masterton JM, Richardson FA. Humidex, a method of quantifying human
- *     discomfort due to excessive heat and humidity. Downsview, Ontario:
- *     CLI 1-79, Environment Canada, Atmospheric Environment Service, 1979.
- *
- * [2] Havenith, G., Fiala, D., 2016. Thermal indices and thermophysiological
- *     modeling for heat stress. Compr. Physiol. 6, 255–302.
- *     DOI: doi.org/10.1002/cphy.c140051
+ * rather than relative humidity {@link /#ref_15|[15]}.
  *
  * @public
  * @memberof models

@@ -5,11 +5,6 @@ import { round } from "../utilities/utilities";
  * The HI equation {@link /#ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
  * of Steadman’s (1979) apparent temperature (AT) {@link /#ref_13|[13]}.
  *
- * [12]	Rothfusz LP (1990) The heat index equation. NWS Southern Region Technical Attachment, SR/SSD 90–23, Fort Worth, Texas
- *
- * [13]	Steadman RG (1979) The assessment of sultriness. Part I: A temperature-humidity index based on human physiology and
- *      clothing science. J Appl Meteorol 18:861–873
- *
  * @public
  * @memberof models
  * @docname Heat Index

@@ -3,8 +3,14 @@
   <h1 id='<%- slug(note.namespace) %>' class='mt0 levelIndex<%= levelIndex %>'>
     <%- note.name %>
   </h1>
-
-  <% if (note.description) { %>
+  
+  <% if (isReferenceSection(note)) { %>
+    <% note.description.children.forEach(function(reference) { %>
+      <div id="<%= reference.id %>">
+        <%= md(reference) %>
+      </div>
+    <% }) %>
+  <% } else if (note.description) { %>
     <%= md(note.description) %>
   <% } %>
 </section>

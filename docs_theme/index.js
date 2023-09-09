@@ -147,6 +147,29 @@ function walkComments(entry) {
   }
 }
 
+/**
+ * @param {string} refText
+ * @returns {string}
+ */
+function getReferenceId(refText) {
+  const second = refText.indexOf("]");
+  if (refText.indexOf("[") !== 0 || second <= 1) {
+    console.error(`Missing [ or ] for reference with text: ${refText}`);
+    process.exit(1);
+  }
+  return `ref_${refText.slice(1, second)}`;
+}
+
+function setUpReferencesWithId(referencesEntry) {
+  for (let reference of referencesEntry.description.children) {
+    reference.id = getReferenceId(reference.children[0].value);
+  }
+}
+
+function isReferenceSection(entry) {
+  return entry.kind === "note" && entry.name === "References";
+}
+
 let topLevelTitles = new Set();
 let types = new Map();
 
@@ -179,6 +202,9 @@ export default async function (comments, config) {
 
   for (let comment of comments) {
     walkComments(comment);
+    if (isReferenceSection(comment)) {
+      setUpReferencesWithId(comment);
+    }
   }
 
   var formatters = createFormatters(linkerStack.link);
@@ -214,6 +240,7 @@ export default async function (comments, config) {
       },
       isFunction,
       isType,
+      isReferenceSection,
       md(ast, inline, related) {
         if (related) {
           ast.children[0].children[0].url =

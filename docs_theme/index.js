@@ -138,41 +138,9 @@ function tryInjectDependentTypes(entry) {
   if (entryTypes.length > 0) entry.types = entryTypes;
 }
 
-function getNameInQuotes(entry, description) {
-  const secondIndex = description.slice(1).indexOf('"');
-  if (description.indexOf('"') !== 0 || secondIndex === -1) {
-    console.error(
-      `Failed while trying to fix property with space for property in ${entry.name} at ${entry.context.file}`,
-    );
-    console.error(`Prop with description of ${description}`);
-    process.exit(1);
-  }
-  // include quotes and secondIndex will be one off due to slicing in above line
-  return description.slice(0, secondIndex + 2);
-}
-
-function getPropertyDescription(description) {
-  const startOfDescription = description.indexOf("- ");
-  if (startOfDescription < 0) return "";
-  return description.slice(startOfDescription + 2);
-}
-
-function tryFixPropertiesWithSpaces(entry) {
-  if (entry.properties === undefined) return;
-  for (let property of entry.properties) {
-    if (property.name !== "null") continue;
-    const description = property.description.children[0].children[0].value;
-    const propertyName = getNameInQuotes(entry, description);
-    const propertyDescription = getPropertyDescription(description);
-    property.name = propertyName;
-    property.description.children[0].children[0].value = propertyDescription;
-  }
-}
-
 function walkComments(entry) {
   tryInjectDocname(entry);
   tryInjectDependentTypes(entry);
-  tryFixPropertiesWithSpaces(entry);
   if (entry.members.static.length === 0) return;
   for (const member of entry.members.static) {
     walkComments(member);

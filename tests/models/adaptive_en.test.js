@@ -1,5 +1,6 @@
 import { expect, describe, it } from "@jest/globals";
-import { adaptive_en } from "../../src/models/adaptive_en";
+import { adaptive_en, adaptive_en_array } from "../../src/models/adaptive_en";
+import { deep_close_to_array } from "../test_utilities";
 
 describe("adaptive_en", () => {
   it.each([
@@ -108,6 +109,61 @@ describe("adaptive_en", () => {
       expect(result.acceptability_cat_i).toBe(expected.acceptability_cat_i);
       expect(result.acceptability_cat_ii).toBe(expected.acceptability_cat_ii);
       expect(result.acceptability_cat_iii).toBe(expected.acceptability_cat_iii);
+    },
+  );
+});
+
+describe("adaptive_en_array", () => {
+  it.each([
+    {
+      tdb: [25, 25, 23.5],
+      tr: [25, 25, 23.5],
+      t_running_mean: [9, 20, 28],
+      v: [0.1, 0.1, 0.1],
+      expected: {
+        tmp_cmf: [NaN, 25.4, 28.0],
+        acceptability_cat_i: [false, true, false],
+        acceptability_cat_ii: [false, true, false],
+        acceptability_cat_iii: [false, true, true],
+        tmp_cmf_cat_i_up: [NaN, 27.4, 30.0],
+        tmp_cmf_cat_ii_up: [NaN, 28.4, 31.0],
+        tmp_cmf_cat_iii_up: [NaN, 29.4, 32.0],
+        tmp_cmf_cat_i_low: [NaN, 22.4, 25.0],
+        tmp_cmf_cat_ii_low: [NaN, 21.4, 24.0],
+        tmp_cmf_cat_iii_low: [NaN, 20.4, 23.0],
+      },
+    },
+  ])(
+    "returns $expected when tdb is $tdb, tr is $tr, t_running_mean is $t_running_mean and v is $v",
+    ({ tdb, tr, t_running_mean, v, expected }) => {
+      const result = adaptive_en_array(tdb, tr, t_running_mean, v);
+
+      deep_close_to_array(result.tmp_cmf, expected.tmp_cmf);
+      deep_close_to_array(result.tmp_cmf_cat_i_up, expected.tmp_cmf_cat_i_up);
+      deep_close_to_array(result.tmp_cmf_cat_ii_up, expected.tmp_cmf_cat_ii_up);
+      deep_close_to_array(
+        result.tmp_cmf_cat_iii_up,
+        expected.tmp_cmf_cat_iii_up,
+      );
+      deep_close_to_array(result.tmp_cmf_cat_i_low, expected.tmp_cmf_cat_i_low);
+      deep_close_to_array(
+        result.tmp_cmf_cat_ii_low,
+        expected.tmp_cmf_cat_ii_low,
+      );
+      deep_close_to_array(
+        result.tmp_cmf_cat_iii_low,
+        expected.tmp_cmf_cat_iii_low,
+      );
+
+      expect(result.acceptability_cat_i).toStrictEqual(
+        expected.acceptability_cat_i,
+      );
+      expect(result.acceptability_cat_ii).toStrictEqual(
+        expected.acceptability_cat_ii,
+      );
+      expect(result.acceptability_cat_iii).toStrictEqual(
+        expected.acceptability_cat_iii,
+      );
     },
   );
 });

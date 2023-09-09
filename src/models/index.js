@@ -5,7 +5,7 @@ import { net } from "./net";
 import { wbgt } from "./wbgt";
 import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 import { wc } from "./wc";
-import { adaptive_en } from "./adaptive_en";
+import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 
 /**
  * @public
@@ -22,4 +22,5 @@ export default {
   discomfort_index_array,
   wc,
   adaptive_en,
+  adaptive_en_array,
 };

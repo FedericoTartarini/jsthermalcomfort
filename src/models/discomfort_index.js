@@ -10,7 +10,7 @@ import { round } from "../utilities/utilities";
 
 /**
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
- * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. {@link /#ref_24|[24]}
+ * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. {@link #ref_24|[24]}
  *
  * - class 1 - DI < 21 °C - No discomfort
  * - class 2 - 21 <= DI < 24 °C - Less than 50% feels discomfort
@@ -52,7 +52,7 @@ export function discomfort_index(tdb, rh) {
 
 /**
  * Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
- * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. {@link /#ref_24|[24]}
+ * The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. {@link #ref_24|[24]}
  *
  * - class 1 - DI < 21 °C - No discomfort
  * - class 2 - 21 <= DI < 24 °C - Less than 50% feels discomfort

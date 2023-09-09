@@ -63,7 +63,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
 
 /**
  * Calculates the Predicted Heat Strain (PHS) index based in compliace with
- * the ISO 7933:2004 Standard {@link /#ref_8|[8]}. The ISO 7933 provides a method for the
+ * the ISO 7933:2004 Standard {@link #ref_8|[8]}. The ISO 7933 provides a method for the
  * analytical evaluation and interpretation of the thermal stress experienced
  * by a subject in a hot environment. It describes a method for predicting the
  * sweat rate and the internal core temperature that the human body will

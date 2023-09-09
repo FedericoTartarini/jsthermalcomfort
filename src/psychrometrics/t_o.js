@@ -1,5 +1,5 @@
 /**
- * Calculates operative temperature in accordance with ISO 7726:1998 {@link /#ref_5|[5]}.
+ * Calculates operative temperature in accordance with ISO 7726:1998 {@link #ref_5|[5]}.
  *
  * @public
  * @memberof psychrometrics
@@ -28,7 +28,7 @@ export function t_o(tdb, tr, v, standard = "ISO") {
 }
 
 /**
- * Calculates operative temperature in accordance with ISO 7726:1998 {@link /#ref_5|[5]}.
+ * Calculates operative temperature in accordance with ISO 7726:1998 {@link #ref_5|[5]}.
  *
  * @public
  * @memberof psychrometrics

@@ -56,6 +56,9 @@ describe("NPM Package", () => {
 
   it("should have models.adaptive_en_array", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_en_array");
+
+  it("should have models.at", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("at");
   });
 
   it("should have utilities.body_surface_area", () => {

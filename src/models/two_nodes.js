@@ -194,6 +194,123 @@ export function two_nodes(
 }
 
 
+/**
+ * 
+ * @param {number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number[]} tr Mean radiant temperature, default in [°C]
+ * @param {number[]} v Air speed, default in [m/s]
+ * @param {number[]} rh Relative humidity, [%].
+ * @param {number[]} met Metabolic rate, [W/(m2)]
+ * @param {number[]} clo Clothing insulation, [clo]
+ * @param {number[]} wme External work, [W/(m2)] default 0
+ * @param {number[]} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number[]} p_atmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
+ * @param {number[]} max_skin_blood_flow Maximum blood flow from the core to the skin, [kg/h/m2] default 80
+ * @param {TwoNodesKwargs} [kwargs]
+ *
+ * @returns {TwoNodesReturnType} object with results of two_nodes
+ *
+ * @example
+ * const results = two_nodes_array(25, 25, 0.3, 50, 1.2, 0.5);
+ * console.log(results); // {
+  e_skin: 16.2,
+  e_rsw: 7,
+  e_max: 159.9,
+  q_sensible: 47.6,
+  q_skin: 63.8,
+  q_res: 5.2,
+  t_core: 36.9,
+  t_skin: 33.7,
+  m_bl: 12.9,
+  m_rsw: 10.3,
+  w: 0.1,
+  w_max: 0.6,
+  set: 23.6,
+  et: 25,
+  pmv_gagge: 0.1,
+  pmv_set: -0,
+  disc: 0.1,
+  t_sens: 0.1
+}
+ *
+ */
+export function two_nodes_array(
+  tdbArray,
+  trArray,
+  vArray,
+  rhArray,
+  metArray,
+  cloArray,
+  wme = [0],
+  body_surface_area = [1.8258],
+  p_atmospheric= [101325],
+  body_position = ["standing"],
+  max_skin_blood_flow = [90],
+  kwargs = {},
+) {
+  const defaults_kwargs = {
+    calculate_ce: false,
+    round: true,
+    max_sweating: 500,
+    w_max: false,
+  };
+
+  let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  const vaporPressureArray = rhArray.map((_rh, index) =>
+    cal_vapor_pressure(tdbArray[index], _rh),
+  );
+  const wmeArray = fill_array(wme, tdbArray);
+  const bodySurfaceArray = fill_array(body_surface_area, tdbArray);
+  const pAtmArray = fill_array(p_atmospheric, tdbArray);
+  const bodyPositionArray = fill_array(body_position, tdbArray);
+  const maxSkinBloodFlowArray = fill_array(max_skin_blood_flow, tdbArray);
+
+  // return bodyPositionArray;
+
+// console.log(two_nodes_array([25,50], [25,25], [0.3,0.3], [60,50], 
+//   [1.2,1.2], [0.5, 0.5], [0], [1.8258], [101325], ["standing", "sitting"], [90]))
+
+  const result = calculate_two_nodes(
+    tdbArray,
+    trArray,
+    vArray,
+    metArray,
+    cloArray,
+    vaporPressureArray,
+    wmeArray,
+    bodySurfaceArray,
+    pAtmArray,
+    bodyPositionArray,
+    joint_kwargs,
+  );
+
+  if (joint_kwargs.round) {
+    return {
+      e_skin: round(result.eSkin, 1),
+      e_rsw: round(result.eRsw, 1),
+      e_max: round(result.eMax, 1),
+      q_sensible: round(result.qSensible, 1),
+      q_skin: round(result.qSkin, 1),
+      q_res: round(result.qRes, 1),
+      t_core: round(result.tCore, 1),
+      t_skin: round(result.tSkin, 1),
+      m_bl: round(result.mBl, 1),
+      m_rsw: round(result.mRsw, 1),
+      w: round(result.w, 1),
+      w_max: round(result.wMax, 1),
+      set: round(result.set, 1),
+      et: round(result.et, 1),
+      pmv_gagge: round(result.pmvGagge, 1),
+      pmv_set: round(result.pmvSet, 1),
+      disc: round(result.disc, 1),
+      t_sens: round(result.tSens, 1),
+    };
+  }
+  return result;
+}
+
 const kClo = 0.25;
 const bodyWeight = 70; 
 const metFactor = 58.2; 
@@ -410,6 +527,13 @@ function calculate_percent_satisfied(tOp, v) {
   return 100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
 }
 
+function fill_array(newArray, tdbArray){
+  const requiredLen = tdbArray.length
+  if (newArray.length < requiredLen) {
+    newArray = Array(requiredLen).fill(newArray[0]);
+  }
+  return newArray;
+}
 
 /**
  * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.

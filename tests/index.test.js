@@ -42,7 +42,6 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("wbgt");
   });
 
-
   it("should have models.discomfort_index", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });

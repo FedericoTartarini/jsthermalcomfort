@@ -27,5 +27,5 @@ export default {
   adaptive_en_array,
   at,
   athb,
-  athb_array
+  athb_array,
 };

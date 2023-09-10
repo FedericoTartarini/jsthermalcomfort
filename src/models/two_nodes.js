@@ -127,31 +127,6 @@ export function two_nodes(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
-
-  // const tbdIsArray = Array.isArray(tdb);
-  // if (!tbdIsArray) {
-  //     const vapor_pressure = rh * p_sat_torr(tdb) / 100
-  // }
-  // else{
-  //     const vapor_pressure = rhArray.map((_rh, index) => (
-  //         _rh * p_sat_torr(tdbArray[index]) / 100
-  //     ));
-  // }
-
-  // const tdbArray = Array.isArray(tdb) ? tdb : [tdb];
-  // const trArray = Array.isArray(tr) ? tr : [tr];
-  // const vArray = Array.isArray(v) ? v : [v];
-  // const rhArray = Array.isArray(rh) ? rh : [rh];
-  // const metArray = Array.isArray(met) ? met : [met];
-  // const cloArray = Array.isArray(clo) ? clo : [clo];
-  // const wmeArray = Array.isArray(wme) ? wme : [wme];
-  // const bodyPositionArray = Array.isArray(body_position)
-  //   ? body_position
-  //   : [body_position];
-
-  // const vapor_pressure = rhArray.map(
-  //   (_rh, index) => (_rh * p_sat_torr(tdbArray[index])) / 100,
-  // );
   const vapor_pressure = cal_vapor_pressure(tdb, rh);
 
   const result = calculate_two_nodes(
@@ -193,6 +168,16 @@ export function two_nodes(
   return result;
 }
 
+const kClo = 0.25;
+const bodyWeight = 70; 
+const metFactor = 58.2; 
+const sbc = 0.000000056697; 
+const cSw = 170; 
+const cDil = 120; 
+const cStr = 0.5; 
+const tempSkinNeutral = 33.7;
+const tempCoreNeutral = 36.8;
+const skinBloodFlowNeutral = 6.3;
 
 /**
  * 
@@ -267,60 +252,114 @@ export function two_nodes_array(
   const bodyPositionArray = fill_array(body_position, tdbArray);
   const maxSkinBloodFlowArray = fill_array(max_skin_blood_flow, tdbArray);
 
-  // return bodyPositionArray;
-
-// console.log(two_nodes_array([25,50], [25,25], [0.3,0.3], [60,50], 
-//   [1.2,1.2], [0.5, 0.5], [0], [1.8258], [101325], ["standing", "sitting"], [90]))
-
-  const result = calculate_two_nodes(
-    tdbArray,
-    trArray,
-    vArray,
-    metArray,
-    cloArray,
-    vaporPressureArray,
-    wmeArray,
-    bodySurfaceArray,
-    pAtmArray,
-    bodyPositionArray,
+  const setArray = [];
+  const eSkinArray = [];
+  const eRswArray = [];
+  const eMaxArray = [];
+  const qSensArray = [];
+  const qSkinArray = [];
+  const qResArray = [];
+  const tCoreArray = [];
+  const tSkinArray = [];
+  const mBlArray = [];
+  const mRswArray = [];
+  const wArray = [];
+  const wMaxArray = [];
+  const etArray = [];
+  const pmvGaggeArray = [];
+  const pmvSetArray = [];
+  const discArray = [];
+  const tSensArray = [];
+  for (let index = 0; index < tdbArray.length; index++) {
+    const result = calculate_two_nodes(
+    tdbArray[index],
+    trArray[index],
+    vArray[index],
+    metArray[index],
+    cloArray[index],
+    vaporPressureArray[index],
+    wmeArray[index],
+    bodySurfaceArray[index],
+    pAtmArray[index],
+    bodyPositionArray[index],
     joint_kwargs,
-  );
+    );    
+    setArray.push(result.set)
+     eSkinArray.push(result.eSkin);
+     eRswArray.push(result.eRsw);
+     eMaxArray.push(result.eMax);
+     qSensArray.push(result.qSensible);
+     qSkinArray.push(result.qSkin);
+     qResArray.push(result.qRes);
+     tCoreArray.push(result.tCore);
+     tSkinArray.push(result.tSkin);
+     mBlArray.push(result.mBl);
+     mRswArray.push(result.mRsw);
+     wArray.push(result.w);
+     wMaxArray.push(result.wMax);
+     etArray.push(result.et);
+     pmvGaggeArray.push(result.pmvGagge);
+     pmvSetArray.push(result.pmvSet);
+     discArray.push(result.disc);
+     tSensArray.push(result.tSens);
+  }
+  // console.log(wMaxArray)
 
   if (joint_kwargs.round) {
     return {
-      e_skin: round(result.eSkin, 1),
-      e_rsw: round(result.eRsw, 1),
-      e_max: round(result.eMax, 1),
-      q_sensible: round(result.qSensible, 1),
-      q_skin: round(result.qSkin, 1),
-      q_res: round(result.qRes, 1),
-      t_core: round(result.tCore, 1),
-      t_skin: round(result.tSkin, 1),
-      m_bl: round(result.mBl, 1),
-      m_rsw: round(result.mRsw, 1),
-      w: round(result.w, 1),
-      w_max: round(result.wMax, 1),
-      set: round(result.set, 1),
-      et: round(result.et, 1),
-      pmv_gagge: round(result.pmvGagge, 1),
-      pmv_set: round(result.pmvSet, 1),
-      disc: round(result.disc, 1),
-      t_sens: round(result.tSens, 1),
+      e_skin: roundArray(eSkinArray, 1),
+      e_rsw: roundArray(eRswArray, 1),
+      e_max: roundArray(eMaxArray, 1),
+      q_sensible: roundArray(qSensArray, 1),
+      q_skin: roundArray(qSkinArray, 1),
+      q_res: roundArray(qResArray, 1),
+      t_core: roundArray(tCoreArray, 1),
+      t_skin: roundArray(tSkinArray, 1),
+      m_bl: roundArray(mBlArray, 1),
+      m_rsw: roundArray(mRswArray, 1),
+      w: roundArray(wArray, 1),
+      w_max: roundArray(wMaxArray, 1),
+      set: roundArray(setArray, 1),
+      et: roundArray(etArray, 1),
+      pmv_gagge: roundArray(pmvGaggeArray, 1),
+      pmv_set: roundArray(pmvSetArray, 1),
+      disc: roundArray(discArray, 1),
+      t_sens: roundArray(tSensArray, 1),
     };
   }
-  return result;
-}
 
-const kClo = 0.25;
-const bodyWeight = 70; 
-const metFactor = 58.2; 
-const sbc = 0.000000056697; 
-const cSw = 170; 
-const cDil = 120; 
-const cStr = 0.5; 
-const tempSkinNeutral = 33.7;
-const tempCoreNeutral = 36.8;
-const skinBloodFlowNeutral = 6.3;
+  else{
+    return{
+      e_skin: eSkinArray,
+      e_rsw: eRswArray,
+      e_max: eMaxArray,
+      q_sensible: qSensArray,
+      q_skin: qSkinArray,
+      q_res: qResArray,
+      t_core: tCoreArray,
+      t_skin: tSkinArray,
+      m_bl: mBlArray,
+      m_rsw: mRswArray,
+      w: wArray,
+      w_max: wMaxArray,
+      set: setArray,
+      et: etArray,
+      pmv_gagge: pmvGaggeArray,
+      pmv_set: pmvSetArray,
+      disc: discArray,
+      t_sens: tSensArray,
+    }
+  }
+}
+console.log(two_nodes_array([25,30], [25,35], [0.3,0.5], [50,60], 
+  [1.2,1.5], [0.5, 0.3], [0], [1.8258], [101325], ["standing"], [90]))
+
+// two_nodes_array([25,50], [25,25], [0.3,0.3], [50,60], 
+//     [1.2,1.2], [0.5, 0.5], [0], [1.8258], [101325], ["standing"], [90])
+
+function roundArray(array, precision) {
+  return array.map((value) => round(value, precision));
+}
 
 /**
  * Calculate vapor pressure based on air temperature and relative humidity.
@@ -332,6 +371,19 @@ const skinBloodFlowNeutral = 6.3;
 function cal_vapor_pressure(tdb, rh){
   return rh * p_sat_torr(tdb) / 100;
 }
+
+
+function fill_array(newArray, tdbArray){
+  const requiredLen = tdbArray.length
+  if (newArray.length < requiredLen) {
+    newArray = Array(requiredLen).fill(newArray[0]);
+  }
+  return newArray;
+}
+
+
+
+
 
 /**
  * Calculate metabolic rate based on metabolic [W/(m2)] and external work.
@@ -527,13 +579,7 @@ function calculate_percent_satisfied(tOp, v) {
   return 100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
 }
 
-function fill_array(newArray, tdbArray){
-  const requiredLen = tdbArray.length
-  if (newArray.length < requiredLen) {
-    newArray = Array(requiredLen).fill(newArray[0]);
-  }
-  return newArray;
-}
+
 
 /**
  * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.

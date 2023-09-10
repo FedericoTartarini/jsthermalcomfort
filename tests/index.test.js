@@ -62,6 +62,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("at");
   });
 
+  it("should have models.athb", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("athb");
+  });
+
+  it("should have models.athb_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("athb_array");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

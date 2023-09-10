@@ -21,6 +21,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * @property {number} pmvSet  – PMV SET
  * @property {number} disc  – Thermal discomfort
  * @property {number} tSens  – Predicted Thermal Sensation
+ * @public
  */
 
 /**
@@ -29,6 +30,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * @property {boolean} [calculate_ce=false]
  * @property {number} [max_sweating]
  * @property {number} [w_max]
+ * @public
  */
 
 /**
@@ -40,7 +42,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  */
 
 /**
- * @public
+ * 
  * Two-node model of human temperature regulation:
  * this model it can be used to calculate a variety of indices, including:
  * Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
@@ -63,6 +65,9 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * The Predicted Thermal Sensation (TSENS)
  * The Predicted Percent Dissatisfied Due to Draft (PD)
  * Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * @public
+ * @memberof models
+ * 
  * @see {@link two_nodes_array} for a version that supports arrays
  *
  * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
@@ -198,6 +203,7 @@ const skinBloodFlowNeutral = 6.3;
  * @property {number[]} pmvSet  – Array of PMV SET
  * @property {number[]} disc  – Array of Thermal discomfort
  * @property {number[]} tSens  – Array of Predicted Thermal Sensation
+ * @public
  */
 
 /**
@@ -206,6 +212,7 @@ const skinBloodFlowNeutral = 6.3;
  * @property {boolean} [calculate_ce=false]
  * @property {number[]} [max_sweating]
  * @property {number[]} [w_max]
+ * @public
  */
 
 /**
@@ -217,8 +224,11 @@ const skinBloodFlowNeutral = 6.3;
  */
 
 /**
- * @public
+ * 
  * Compute two nodes model when the input parameters are arrays. 
+ * @public
+ * @memberof models
+ * 
  * @see {@link two_nodes} for a version that supports scalar arguments
  * 
  * @param {number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.

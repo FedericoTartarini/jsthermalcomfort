@@ -44,8 +44,7 @@ import {
  * with fans or personal systems providing building occupants with personal
  * control over air speed at occupant level.
  * For operative temperatures above 25°C the comfort zone upper limit can be
- * increased by 1.2 °C (0.6 < v < 0.9 m/s), 1.8 °C (0.9 < v < 1.2 m/s), 2.2 °C ( v
- * > 1.2 m/s)
+ * increased by 1.2 °C (0.6 < v < 0.9 m/s), 1.8 °C (0.9 < v < 1.2 m/s), 2.2 °C (v > 1.2 m/s)
  *
  * @param {"IP" | "SI"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param {boolean} [limit_inputs=true] - By default, if the inputs are outsude the standard applicability limits the

@@ -182,38 +182,38 @@ const skinBloodFlowNeutral = 6.3;
  * @typedef {Object} TwoNodesArrayReturnType
  * @property {number[]} eSkin – Array of total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
  * @property {number[]} eRsw  – Array of rate of evaporative heat loss from sweat evaporation, [W/m2]
- * @property { number[]} eMax  – Array of maximum rate of evaporative heat loss from skin, [W/m2]
- * @property { number[]} qSensible  – Array of sensible heat loss from skin, [W/m2]
- * @property { number[]} qSkin  – Array of total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
- * @property { number[]} qRes  – Array of total rate of heat loss through respiration, [W/m2]
- * @property { number[]} tCore  – Array of core temperature, [°C]
- * @property { number[]} tSkin  – Array of skin temperature, [°C]
- * @property { number[]} mBl  – Array of skin blood flow, [kg/h/m2]
- * @property { number[]} mRsw  – Array of rate at which regulatory sweat is generated, [kg/h/m2]
- * @property { number[]} w  – Array of skin wettedness, adimensional. Ranges from 0 and 1.
- * @property { number[]} w_max  – Array of skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
- * @property { number[]} set  – Array of standard Effective Temperature (SET)
- * @property { number[]} et  – Array of new Effective Temperature (ET)
- * @property { number[]} pmvGagge  – Array of PMV Gagge
- * @property { number[]} pmvSet  – Array of PMV SET
- * @property { number[]} disc  – Array of Thermal discomfort
- * @property { number[]} tSens  – Array of Predicted Thermal Sensation
+ * @property {number[]} eMax  – Array of maximum rate of evaporative heat loss from skin, [W/m2]
+ * @property {number[]} qSensible  – Array of sensible heat loss from skin, [W/m2]
+ * @property {number[]} qSkin  – Array of total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
+ * @property {number[]} qRes  – Array of total rate of heat loss through respiration, [W/m2]
+ * @property {number[]} tCore  – Array of core temperature, [°C]
+ * @property {number[]} tSkin  – Array of skin temperature, [°C]
+ * @property {number[]} mBl  – Array of skin blood flow, [kg/h/m2]
+ * @property {number[]} mRsw  – Array of rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number[]} w  – Array of skin wettedness, adimensional. Ranges from 0 and 1.
+ * @property {number[]} w_max  – Array of skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
+ * @property {number[]} set  – Array of standard Effective Temperature (SET)
+ * @property {number[]} et  – Array of new Effective Temperature (ET)
+ * @property {number[]} pmvGagge  – Array of PMV Gagge
+ * @property {number[]} pmvSet  – Array of PMV SET
+ * @property {number[]} disc  – Array of Thermal discomfort
+ * @property {number[]} tSens  – Array of Predicted Thermal Sensation
  */
 
 /**
  * @typedef {Object} TwoNodesArrayKwargs
  * @property {boolean} [round=true]
  * @property {boolean} [calculate_ce=false]
- * @property { number[]} [max_sweating]
- * @property { number[]} [w_max]
+ * @property {number[]} [max_sweating]
+ * @property {number[]} [w_max]
  */
 
 /**
  * @typedef {Object} TwoNodesArrayKwargsRequired
  * @property {boolean} round
  * @property {boolean} calculate_ce
- * @property { number[]} max_sweating
- * @property { number[]} w_max
+ * @property {number[]} max_sweating
+ * @property {number[]} w_max
  */
 
 /**

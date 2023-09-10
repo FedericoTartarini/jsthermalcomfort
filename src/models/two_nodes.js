@@ -1,8 +1,5 @@
-import {
-  round,
-} from "../utilities/utilities.js";
+import { round } from "../utilities/utilities.js";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
-
 
 /**
  * @typedef {Object} TwoNodesReturnType
@@ -169,12 +166,12 @@ export function two_nodes(
 }
 
 const kClo = 0.25;
-const bodyWeight = 70; 
-const metFactor = 58.2; 
-const sbc = 0.000000056697; 
-const cSw = 170; 
-const cDil = 120; 
-const cStr = 0.5; 
+const bodyWeight = 70;
+const metFactor = 58.2;
+const sbc = 0.000000056697;
+const cSw = 170;
+const cDil = 120;
+const cStr = 0.5;
 const tempSkinNeutral = 33.7;
 const tempCoreNeutral = 36.8;
 const skinBloodFlowNeutral = 6.3;
@@ -197,26 +194,26 @@ const skinBloodFlowNeutral = 6.3;
  * @returns {TwoNodesReturnType} object with results of two_nodes
  *
  * @example
- * const results = two_nodes_array(25, 25, 0.3, 50, 1.2, 0.5);
+ * const results = two_nodes_array([25,30], [25,35], [0.3,0.5], [50,60], [1.2,1.5], [0.5, 0.3], [0], [1.8258], [101325], ["standing"], [90])
  * console.log(results); // {
-  e_skin: 16.2,
-  e_rsw: 7,
-  e_max: 159.9,
-  q_sensible: 47.6,
-  q_skin: 63.8,
-  q_res: 5.2,
-  t_core: 36.9,
-  t_skin: 33.7,
-  m_bl: 12.9,
-  m_rsw: 10.3,
-  w: 0.1,
-  w_max: 0.6,
-  set: 23.6,
-  et: 25,
-  pmv_gagge: 0.1,
-  pmv_set: -0,
-  disc: 0.1,
-  t_sens: 0.1
+  e_skin: [ 16.2, 60.4 ],
+  e_rsw: [ 7, 51.9 ],
+  e_max: [ 159.9, 193.8 ],
+  q_sensible: [ 47.6, 21.1 ],
+  q_skin: [ 63.8, 81.5 ],
+  q_res: [ 5.2, 5 ],
+  t_core: [ 36.9, 37 ],
+  t_skin: [ 33.7, 35.1 ],
+  m_bl: [ 12.9, 31.6 ],
+  m_rsw: [ 10.3, 76.3 ],
+  w: [ 0.1, 0.3 ],
+  w_max: [ 0.6, 0.6 ],
+  set: [ 23.6, 29.3 ],
+  et: [ 25, 32.5 ],
+  pmv_gagge: [ 0.1, 1.6 ],
+  pmv_set: [ -0, 1.1 ],
+  disc: [ 0.1, 1.9 ],
+  t_sens: [ 0.1, 1.4 ]
 }
  *
  */
@@ -229,7 +226,7 @@ export function two_nodes_array(
   cloArray,
   wme = [0],
   body_surface_area = [1.8258],
-  p_atmospheric= [101325],
+  p_atmospheric = [101325],
   body_position = ["standing"],
   max_skin_blood_flow = [90],
   kwargs = {},
@@ -270,40 +267,40 @@ export function two_nodes_array(
   const pmvSetArray = [];
   const discArray = [];
   const tSensArray = [];
+
   for (let index = 0; index < tdbArray.length; index++) {
     const result = calculate_two_nodes(
-    tdbArray[index],
-    trArray[index],
-    vArray[index],
-    metArray[index],
-    cloArray[index],
-    vaporPressureArray[index],
-    wmeArray[index],
-    bodySurfaceArray[index],
-    pAtmArray[index],
-    bodyPositionArray[index],
-    joint_kwargs,
-    );    
-    setArray.push(result.set)
-     eSkinArray.push(result.eSkin);
-     eRswArray.push(result.eRsw);
-     eMaxArray.push(result.eMax);
-     qSensArray.push(result.qSensible);
-     qSkinArray.push(result.qSkin);
-     qResArray.push(result.qRes);
-     tCoreArray.push(result.tCore);
-     tSkinArray.push(result.tSkin);
-     mBlArray.push(result.mBl);
-     mRswArray.push(result.mRsw);
-     wArray.push(result.w);
-     wMaxArray.push(result.wMax);
-     etArray.push(result.et);
-     pmvGaggeArray.push(result.pmvGagge);
-     pmvSetArray.push(result.pmvSet);
-     discArray.push(result.disc);
-     tSensArray.push(result.tSens);
+      tdbArray[index],
+      trArray[index],
+      vArray[index],
+      metArray[index],
+      cloArray[index],
+      vaporPressureArray[index],
+      wmeArray[index],
+      bodySurfaceArray[index],
+      pAtmArray[index],
+      bodyPositionArray[index],
+      joint_kwargs,
+    );
+    setArray.push(result.set);
+    eSkinArray.push(result.eSkin);
+    eRswArray.push(result.eRsw);
+    eMaxArray.push(result.eMax);
+    qSensArray.push(result.qSensible);
+    qSkinArray.push(result.qSkin);
+    qResArray.push(result.qRes);
+    tCoreArray.push(result.tCore);
+    tSkinArray.push(result.tSkin);
+    mBlArray.push(result.mBl);
+    mRswArray.push(result.mRsw);
+    wArray.push(result.w);
+    wMaxArray.push(result.wMax);
+    etArray.push(result.et);
+    pmvGaggeArray.push(result.pmvGagge);
+    pmvSetArray.push(result.pmvSet);
+    discArray.push(result.disc);
+    tSensArray.push(result.tSens);
   }
-  // console.log(wMaxArray)
 
   if (joint_kwargs.round) {
     return {
@@ -326,10 +323,8 @@ export function two_nodes_array(
       disc: roundArray(discArray, 1),
       t_sens: roundArray(tSensArray, 1),
     };
-  }
-
-  else{
-    return{
+  } else {
+    return {
       e_skin: eSkinArray,
       e_rsw: eRswArray,
       e_max: eMaxArray,
@@ -348,15 +343,32 @@ export function two_nodes_array(
       pmv_set: pmvSetArray,
       disc: discArray,
       t_sens: tSensArray,
-    }
+    };
   }
 }
-console.log(two_nodes_array([25,30], [25,35], [0.3,0.5], [50,60], 
-  [1.2,1.5], [0.5, 0.3], [0], [1.8258], [101325], ["standing"], [90]))
+console.log(
+  two_nodes_array(
+    [25, 30],
+    [25, 35],
+    [0.3, 0.5],
+    [50, 60],
+    [1.2, 1.5],
+    [0.5, 0.3],
+    [0],
+    [1.8258],
+    [101325],
+    ["standing"],
+    [90],
+  ),
+);
 
-// two_nodes_array([25,50], [25,25], [0.3,0.3], [50,60], 
-//     [1.2,1.2], [0.5, 0.5], [0], [1.8258], [101325], ["standing"], [90])
-
+/**
+ * Round all elments in a given array to the given precision.
+ *
+ * @param {number[]} array - the array to round
+ * @param {number} precision - the number of decimal places to round to
+ * @returns the rounded result
+ */
 function roundArray(array, precision) {
   return array.map((value) => round(value, precision));
 }
@@ -368,22 +380,24 @@ function roundArray(array, precision) {
  * @param {number} rh - relative humidity [%]
  * @returns {number} vapor pressure
  */
-function cal_vapor_pressure(tdb, rh){
-  return rh * p_sat_torr(tdb) / 100;
+function cal_vapor_pressure(tdb, rh) {
+  return (rh * p_sat_torr(tdb)) / 100;
 }
 
-
-function fill_array(newArray, tdbArray){
-  const requiredLen = tdbArray.length
+/**
+ * Fill the array to the required input format
+ *
+ * @param {number[]} newArray - the array to fill
+ * @param {number[]} tdbArray - the array with required proper length
+ * @returns the filled array
+ */
+function fill_array(newArray, tdbArray) {
+  const requiredLen = tdbArray.length;
   if (newArray.length < requiredLen) {
     newArray = Array(requiredLen).fill(newArray[0]);
   }
   return newArray;
 }
-
-
-
-
 
 /**
  * Calculate metabolic rate based on metabolic [W/(m2)] and external work.
@@ -407,12 +421,10 @@ function calculate_metabolic_rate(met, wme) {
 function calculate_w_max(airSpeed, clo, kwargs) {
   let wMax = 0;
   if (!kwargs.w_max) {
-      kwargs.w_max = 0.38 * Math.pow(airSpeed, -0.29); 
-      wMax = kwargs.w_max;
-      if (clo > 0) {
-        kwargs.w_max = 0.59 * Math.pow(airSpeed, -0.08); 
-        wMax = kwargs.w_max;
-      }
+    wMax = 0.38 * Math.pow(airSpeed, -0.29);
+    if (clo > 0) {
+      wMax = 0.59 * Math.pow(airSpeed, -0.08);
+    }
   }
   return wMax;
 }
@@ -439,7 +451,7 @@ function calculate_thermal_sansation(tBody, rm, wMax) {
 }
 
 /**
- * Calculate standard effective temperature 
+ * Calculate standard effective temperature
  *
  * @param {number} tSkin skin temperature
  * @param {number} qSkin total heat loss from skin
@@ -454,20 +466,20 @@ function calculate_set(tSkin, qSkin, hDS, pSSk, w, hES) {
   let dx = 100.0;
   let setOld = tSkin - qSkin / hDS;
   let set = 0;
-  
+
   while (Math.abs(dx) > 0.01) {
     const err1 =
       qSkin -
       hDS * (tSkin - setOld) -
       w * hES * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + 235.0)));
-    
+
     const err2 =
       qSkin -
       hDS * (tSkin - (setOld + delta)) -
       w *
         hES *
         (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + delta + 235.0)));
-    
+
     set = setOld - (delta * err1) / (err2 - err1);
     dx = set - setOld;
     setOld = set;
@@ -476,7 +488,7 @@ function calculate_set(tSkin, qSkin, hDS, pSSk, w, hES) {
 }
 
 /**
- * Calculate effective temperature 
+ * Calculate effective temperature
  *
  * @param {number} tSkin skin temperature
  * @param {number} qSkin total heat loss from skin
@@ -495,20 +507,20 @@ function calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl) {
   let delta = 0.0001;
   let dx = 100.0;
   let et = 0;
-  
+
   while (Math.abs(dx) > 0.01) {
     const err1 =
       qSkin -
       hD * (tSkin - etOld) -
       w * hE * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + 235.0)));
-    
+
     const err2 =
       qSkin -
       hD * (tSkin - (etOld + delta)) -
       w *
         hE *
         (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + delta + 235.0)));
-    
+
     et = etOld - (delta * err1) / (err2 - err1);
     dx = et - etOld;
     etOld = et;
@@ -554,7 +566,7 @@ function calculate_pmv_gagge(m, eReq, eComfort, eDiff) {
  * @param {number} m metabolic rate
  * @param {number} eComfort evaporative heat loss during comfort
  * @param {number} eDiff rate of evaporative heat loss from moisture diffused through the skin
- * @param {number} hDS 
+ * @param {number} hDS
  * @param {number} tSkin skin temperature
  * @param {number} set SET
  * @param {number} rm metabolic rate
@@ -562,7 +574,17 @@ function calculate_pmv_gagge(m, eReq, eComfort, eDiff) {
  * @param {number} qRes heat loss due to respiration
  * @returns {number} PMV SET
  */
-function calculate_pmv_set(m, eComfort, eDiff, hDS, tSkin, set, rm, cRes, qRes) {
+function calculate_pmv_set(
+  m,
+  eComfort,
+  eDiff,
+  hDS,
+  tSkin,
+  set,
+  rm,
+  cRes,
+  qRes,
+) {
   const drySet = hDS * (tSkin - set);
   const eReqSet = rm - cRes - qRes - drySet;
   return (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReqSet - eComfort - eDiff);
@@ -576,10 +598,10 @@ function calculate_pmv_set(m, eComfort, eDiff, hDS, tSkin, set, rm, cRes, qRes) 
  * @returns {number} predicted percent satisfied
  */
 function calculate_percent_satisfied(tOp, v) {
-  return 100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
+  return (
+    100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v)
+  );
 }
-
-
 
 /**
  * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
@@ -608,11 +630,10 @@ function calculate_two_nodes(
   bodyPosition,
   kwargs,
 ) {
-
   const airSpeed = Math.max(v, 0.1);
-  let alfa = 0.1;    
+  let alfa = 0.1;
   const tempBodyNeutral = alfa * tempSkinNeutral + (1 - alfa) * tempCoreNeutral;
-  
+
   let tSkin = tempSkinNeutral;
   let tCore = tempCoreNeutral;
   let mBl = skinBloodFlowNeutral;
@@ -639,16 +660,16 @@ function calculate_two_nodes(
   const fACl = 1.0 + 0.15 * clo; // increase in body surface area due to clothing
   const lr = 2.2 / pressureInAtmospheres; // Lewis ratio
   let rm = calculate_metabolic_rate(met, wme);
-  let m = met * metFactor; 
+  let m = met * metFactor;
 
-  const eComfort = 0.42 * (rm - metFactor); 
+  const eComfort = 0.42 * (rm - metFactor);
   if (eComfort < 0) {
     eComfort = 0;
   }
 
-  let iCl = 1.0; 
+  let iCl = 1.0;
   if (clo > 0) {
-    iCl = 0.45; 
+    iCl = 0.45;
   }
 
   const wMax = calculate_w_max(airSpeed, clo, kwargs);
@@ -661,15 +682,15 @@ function calculate_two_nodes(
     hCc = Math.max(hCc, hCMet);
   }
 
-  let hR = 4.7; 
-  let hT = hR + hCc; 
-  let rA = 1.0 / (fACl * hT); 
-  let tOp = (hR * tr + hCc * tdb) / hT; 
+  let hR = 4.7;
+  let hT = hR + hCc;
+  let rA = 1.0 / (fACl * hT);
+  let tOp = (hR * tr + hCc * tdb) / hT;
 
-  let tBody = alfa * tSkin + (1 - alfa) * tCore; 
+  let tBody = alfa * tSkin + (1 - alfa) * tCore;
 
-  qRes = 0.0023 * m * (44.0 - vaporPressure); 
-  cRes = 0.0014 * m * (34.0 - tdb); 
+  qRes = 0.0023 * m * (44.0 - vaporPressure);
+  cRes = 0.0014 * m * (34.0 - tdb);
   while (nSimulation < lengthTimeSimulation) {
     nSimulation += 1;
 
@@ -679,12 +700,9 @@ function calculate_two_nodes(
     let tcConverged = false;
 
     while (!tcConverged) {
-
       if (bodyPosition === "sitting") {
-
         hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.7;
       } else {
-
         hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.73;
       }
       hT = hR + hCc;
@@ -702,7 +720,7 @@ function calculate_two_nodes(
       }
     }
 
-    qSensible = (tSkin - tOp) / (rA + rClo); 
+    qSensible = (tSkin - tOp) / (rA + rClo);
     const hfCs = (tCore - tSkin) * (5.28 + 1.163 * mBl);
     const sCore = m - hfCs - qRes - cRes - wme; // rate of energy storage in the core
     const sSkin = hfCs - qSensible - eSkin; // rate of energy storage in the skin
@@ -728,44 +746,44 @@ function calculate_two_nodes(
     if (mBl < 0.5) {
       mBl = 0.5;
     }
-    mRsw = cSw * warmB * Math.exp(warmSk / 10.7); 
+    mRsw = cSw * warmB * Math.exp(warmSk / 10.7);
     if (mRsw > kwargs.max_sweating) {
       mRsw = kwargs.max_sweating;
     }
-    eRsw = 0.68 * mRsw; 
-    rEa = 1.0 / (lr * fACl * hCc); 
+    eRsw = 0.68 * mRsw;
+    rEa = 1.0 / (lr * fACl * hCc);
     rEcl = rClo / (lr * iCl);
-    eReq = rm - qRes - cRes - qSensible; 
+    eReq = rm - qRes - cRes - qSensible;
     eMax =
       (Math.exp(18.6686 - 4030.183 / (tSkin + 235.0)) - vaporPressure) /
       (rEa + rEcl);
-    const pRsw = eRsw / eMax; 
-    w = 0.06 + 0.94 * pRsw; 
-    eDiff = w * eMax - eRsw; 
-    if (w > kwargs.w_max) {
-      w = kwargs.w_max;
-      const pRsw = kwargs.w_max / 0.94;
+    const pRsw = eRsw / eMax;
+    w = 0.06 + 0.94 * pRsw;
+    eDiff = w * eMax - eRsw;
+    if (w > wMax) {
+      w = wMax;
+      const pRsw = wMax / 0.94;
       eRsw = pRsw * eMax;
       eDiff = 0.06 * (1.0 - pRsw) * eMax;
     }
     if (eMax < 0) {
       eDiff = 0;
       eRsw = 0;
-      w = kwargs.w_max;
+      w = wMax;
     }
-    
-    eSkin = eRsw + eDiff; 
-    mRsw = eRsw / 0.68; 
-    const metShivering = 19.4 * colds * cCold; 
+
+    eSkin = eRsw + eDiff;
+    mRsw = eRsw / 0.68;
+    const metShivering = 19.4 * colds * cCold;
     m = rm + metShivering;
     alfa = 0.0417737 + 0.7451833 / (mBl + 0.585417);
   }
 
-  const qSkin = qSensible + eSkin; 
+  const qSkin = qSensible + eSkin;
 
   const pSSk = Math.exp(18.6686 - 4030.183 / (tSkin + 235.0));
 
-  const hRS = hR; 
+  const hRS = hR;
   let hCS = 3.0 * Math.pow(pressureInAtmospheres, 0.53);
   if (!kwargs.calculate_ce && met > 0.85) {
     const hCMet = 5.66 * Math.pow(met - 0.85, 0.39);
@@ -787,13 +805,23 @@ function calculate_two_nodes(
   const rEclS = rClS / (lr * iClS);
   const hDS = 1.0 / (rAS + rClS);
   const hES = 1.0 / (rEaS + rEclS);
- 
+
   set = calculate_set(tSkin, qSkin, hDS, pSSk, w, hES);
   et = calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl);
   const tSens = calculate_thermal_sansation(tBody, rm, wMax);
   const disc = calculate_discomfort(eRsw, eComfort, eMax, wMax, eDiff, tSens);
   const pmvGagge = calculate_pmv_gagge(m, eReq, eComfort, eDiff);
-  const pmvSet = calculate_pmv_set(m, eComfort, eDiff, hDS, tSkin, set, rm, cRes, qRes);
+  const pmvSet = calculate_pmv_set(
+    m,
+    eComfort,
+    eDiff,
+    hDS,
+    tSkin,
+    set,
+    rm,
+    cRes,
+    qRes,
+  );
   const ps = calculate_percent_satisfied(tOp, v);
 
   return {
@@ -817,15 +845,3 @@ function calculate_two_nodes(
     tSens,
   };
 }
-
-// console.log(two_nodes(30,
-//   35,
-//   0.5,
-//   60,
-//   1.5,
-//   0.3,
-//   0, 
-//   1.8258,
-//   101325, 
-//   undefined,
-//   80))

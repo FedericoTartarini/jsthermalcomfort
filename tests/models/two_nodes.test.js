@@ -15,11 +15,11 @@ describe("two_nodes", () => {
       rh: 50,
       met: 1.2,
       clo: 0.5,
-      wme: undefined, 
+      wme: undefined,
       body_surface_area: undefined,
-      p_atmospheric: undefined, 
+      p_atmospheric: undefined,
       body_position: undefined,
-      max_skin_blood_flow: undefined, 
+      max_skin_blood_flow: undefined,
       kwargs: undefined,
       expected: {
         e_skin: 16.2,
@@ -39,7 +39,7 @@ describe("two_nodes", () => {
         pmv_gagge: 0.1,
         pmv_set: -0,
         disc: 0.1,
-        t_sens: 0.1
+        t_sens: 0.1,
       },
     },
     {
@@ -49,11 +49,11 @@ describe("two_nodes", () => {
       rh: 60,
       met: 1.5,
       clo: 0.3,
-      wme: 0, 
+      wme: 0,
       body_surface_area: 1.8258,
-      p_atmospheric: 101325, 
+      p_atmospheric: 101325,
       body_position: "standing",
-      max_skin_blood_flow: 90, 
+      max_skin_blood_flow: 90,
       kwargs: undefined,
       expected: {
         e_skin: 60.4,
@@ -73,7 +73,7 @@ describe("two_nodes", () => {
         pmv_gagge: 1.6,
         pmv_set: 1.1,
         disc: 1.9,
-        t_sens: 1.4
+        t_sens: 1.4,
       },
     },
     {
@@ -83,11 +83,11 @@ describe("two_nodes", () => {
       rh: 60,
       met: 1.5,
       clo: 0.3,
-      wme: 0, 
+      wme: 0,
       body_surface_area: 1.8258,
-      p_atmospheric: 101325, 
+      p_atmospheric: 101325,
       body_position: "sitting",
-      max_skin_blood_flow: 90, 
+      max_skin_blood_flow: 90,
       kwargs: undefined,
       expected: {
         e_skin: 60.3,
@@ -107,7 +107,7 @@ describe("two_nodes", () => {
         pmv_gagge: 1.6,
         pmv_set: 1.1,
         disc: 1.9,
-        t_sens: 1.4
+        t_sens: 1.4,
       },
     },
     {
@@ -117,11 +117,11 @@ describe("two_nodes", () => {
       rh: 60,
       met: 1.5,
       clo: 0.3,
-      wme: 0, 
+      wme: 0,
       body_surface_area: 1.8258,
-      p_atmospheric: 101325, 
+      p_atmospheric: 101325,
       body_position: undefined,
-      max_skin_blood_flow: 80, 
+      max_skin_blood_flow: 80,
       kwargs: undefined,
       expected: {
         e_skin: 60.4,
@@ -141,14 +141,40 @@ describe("two_nodes", () => {
         pmv_gagge: 1.6,
         pmv_set: 1.1,
         disc: 1.9,
-        t_sens: 1.4
+        t_sens: 1.4,
       },
     },
-
   ])(
     "returns $expected when tdb is $tdb, tr is $tr, v is $v, rh is $rh, met is $met, clo is $clo ",
-    ({ tdb, tr, v, rh, met, clo, wme, body_surface_area, p_atmospheric, body_position, max_skin_blood_flow, kwargs, expected }) => {
-      const result = two_nodes(tdb, tr, v, rh, met, clo, wme, body_surface_area, p_atmospheric, body_position, max_skin_blood_flow, kwargs);
+    ({
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      body_position,
+      max_skin_blood_flow,
+      kwargs,
+      expected,
+    }) => {
+      const result = two_nodes(
+        tdb,
+        tr,
+        v,
+        rh,
+        met,
+        clo,
+        wme,
+        body_surface_area,
+        p_atmospheric,
+        body_position,
+        max_skin_blood_flow,
+        kwargs,
+      );
       deep_close_to_obj(result, expected, 1);
     },
   );

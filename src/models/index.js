@@ -5,6 +5,7 @@ import { net } from "./net";
 import { wbgt } from "./wbgt";
 import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 import { wc } from "./wc";
+import { at } from "./at";
 
 /**
  * @public
@@ -20,4 +21,5 @@ export default {
   discomfort_index,
   discomfort_index_array,
   wc,
+  at,
 };

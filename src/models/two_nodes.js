@@ -346,21 +346,6 @@ export function two_nodes_array(
     };
   }
 }
-console.log(
-  two_nodes_array(
-    [25, 30],
-    [25, 35],
-    [0.3, 0.5],
-    [50, 60],
-    [1.2, 1.5],
-    [0.5, 0.3],
-    [0],
-    [1.8258],
-    [101325],
-    ["standing"],
-    [90],
-  ),
-);
 
 /**
  * Round all elments in a given array to the given precision.

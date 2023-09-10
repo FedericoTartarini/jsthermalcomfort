@@ -8,7 +8,7 @@ const optionDefaults = {
 
 /**
  * Calculates the Wet Bulb Globe Temperature (WBGT) index calculated in
- * compliance with the ISO 7243 [1]. The WBGT is a heat stress index that
+ * compliance with the ISO 7243 {@link #ref_11|[11]}. The WBGT is a heat stress index that
  * measures the thermal environment to which a person is exposed. In most
  * situations, this index is simple to calculate. It should be used as a
  * screening tool to determine whether heat stress is present. The PHS model
@@ -19,16 +19,15 @@ const optionDefaults = {
  * a working day (up to 8 h). It does not apply to very brief heat exposures.
  * It pertains to the evaluation of male and female people who are fit for work
  * in both indoor and outdoor occupational environments, as well as other sorts
- * of surroundings [1].
+ * of surroundings {@link #ref_11|[11]}.
  *
  * The WBGT is defined as a function of only twb and tg if the person is not
  * exposed to direct radiant heat from the sun. When a person is exposed to
  * direct radiant heat, tdb must also be specified.
  *
- * [1] ISO, 2017. ISO 7243 - Ergonomics of the thermal environment — Assessment
- *     of heat stress using the WBGT (wet bulb globe temperature) index.
- *
  * @public
+ * @memberof models
+ * @docname Wet Bulb Globe Temperature Index (WBGT)
  *
  * @param {number} twb - natural (no forced air flow) wet bulb temperature, [°C]
  * @param {number} tg - globe temperature, [°C]

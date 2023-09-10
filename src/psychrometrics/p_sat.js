@@ -3,6 +3,9 @@ import { round } from "../utilities/utilities.js";
 /**
  * Calculates vapour pressure of water at different temperatures
  *
+ * @public
+ * @memberof psychrometrics
+ *
  * @param {number} tdb - air temperature, [°C]
  * @returns {number} - vapour pressure of water, [Pa]
  *

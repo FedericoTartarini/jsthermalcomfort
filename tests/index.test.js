@@ -22,6 +22,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("heat_index");
   });
 
+  it("should have models.wc", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("wc");
+  });
+
   it("should have models.phs", () => {
     expect(jsthermalcomfort.models).toHaveProperty("phs");
   });
@@ -46,8 +50,21 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index_array");
   });
 
+
   it("should have models.two_nodes", () => {
     expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
+
+  it("should have models.adaptive_en", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("adaptive_en");
+  });
+
+  it("should have models.adaptive_en_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("adaptive_en_array");
+  });
+
+  it("should have models.at", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("at");
+
   });
 
   it("should have utilities.body_surface_area", () => {
@@ -72,6 +89,10 @@ describe("NPM Package", () => {
 
   it("should have utilities.units_converter", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("units_converter");
+  });
+
+  it("should have utilities.units_converter_array", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("units_converter_array");
   });
 
   it("should have utilities.running_mean_outdoor_temperature", () => {

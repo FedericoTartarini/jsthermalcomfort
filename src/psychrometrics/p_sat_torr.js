@@ -1,6 +1,9 @@
 /**
- * @public
  * Estimates the saturation vapour pressure in [torr].
+ *
+ * @public
+ * @memberof psychrometrics
+ *
  * @see {@link p_sat_torr_array} for a version that supports arrays
  *
  * @param {number} tdb  - dry bulb air temperature [C]
@@ -11,8 +14,12 @@ export function p_sat_torr(tdb) {
 }
 
 /**
- * @public
  * Estimates the saturation vapour pressure in [torr].
+ *
+ *
+ * @public
+ * @memberof psychrometrics
+ *
  * @see {@link p_sat_torr} for a version that supports scalar arguments
  *
  * @param {number[]} tdb  - dry bulb air temperature [C]

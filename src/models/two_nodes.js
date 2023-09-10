@@ -44,14 +44,14 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
 /**
  * 
  * Two-node model of human temperature regulation:
- * this model it can be used to calculate a variety of indices, including:
+ * This model can be used to calculate a variety of indices, including:
  * Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
  * the Fanger’s PMV equations but it replaces the heat loss and gain terms
  * with those calculated by the two node model PMV SET and the predicted
  * thermal sensation based on SET. This function is similar in all aspects
- * to the pythermalcomfort.models.pmv_gagge() however, it uses the
+ * to the pythermalcomfort.models.pmv_gagge(). However, it uses the
  * pythermalcomfort.models.set() equation to calculate the dry heat loss by
- * convection.
+ * convection {@link #ref_25|[25]}.
  * Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
  * to restore a state of comfort and thermal equilibrium by sweating. DISC is
  * described numerically as: comfortable and pleasant (0), slightly
@@ -65,6 +65,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * The Predicted Thermal Sensation (TSENS)
  * The Predicted Percent Dissatisfied Due to Draft (PD)
  * Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * 
  * @public
  * @memberof models
  * 

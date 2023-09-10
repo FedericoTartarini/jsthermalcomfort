@@ -3,43 +3,44 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
 
 /**
  * @typedef {Object} TwoNodesReturnType
- * @property {number | number[]} eSkin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
- * @property {number | number[]} eRsw (float or array-like) – Rate of evaporative heat loss from sweat evaporation, [W/m2]
- * @property {number | number[]} eMax (float or array-like) – Maximum rate of evaporative heat loss from skin, [W/m2]
- * @property {number | number[]} qSensible (float or array-like) – Sensible heat loss from skin, [W/m2]
- * @property {number | number[]} qSkin (float or array-like) – Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
- * @property {number | number[]} qRes (float or array-like) – Total rate of heat loss through respiration, [W/m2]
- * @property {number | number[]} tCore (float or array-like) – Core temperature, [°C]
- * @property {number | number[]} tSkin (float or array-like) – Skin temperature, [°C]
- * @property {number | number[]} mBl (float or array-like) – Skin blood flow, [kg/h/m2]
- * @property {number | number[]} mRsw (float or array-like) – Rate at which regulatory sweat is generated, [kg/h/m2]
- * @property {number | number[]} w (float or array-like) – Skin wettedness, adimensional. Ranges from 0 and 1.
- * @property {number | number[]} w_max (float or array-like) – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
- * @property {number | number[]} set (float or array-like) – Standard Effective Temperature (SET)
- * @property {number | number[]} et (float or array-like) – New Effective Temperature (ET)
- * @property {number | number[]} pmvGagge (float or array-like) – PMV Gagge
- * @property {number | number[]} pmvSet (float or array-like) – PMV SET
- * @property {number | number[]} disc (float or array-like) – Thermal discomfort
- * @property {number | number[]} tSens (float or array-like) – Predicted Thermal Sensation
+ * @property {number} eSkin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
+ * @property {number} eRsw  – Rate of evaporative heat loss from sweat evaporation, [W/m2]
+ * @property {number} eMax  – Maximum rate of evaporative heat loss from skin, [W/m2]
+ * @property {number} qSensible  – Sensible heat loss from skin, [W/m2]
+ * @property {number} qSkin  – Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
+ * @property {number} qRes  – Total rate of heat loss through respiration, [W/m2]
+ * @property {number} tCore  – Core temperature, [°C]
+ * @property {number} tSkin  – Skin temperature, [°C]
+ * @property {number} mBl  – Skin blood flow, [kg/h/m2]
+ * @property {number} mRsw  – Rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number} w  – Skin wettedness, adimensional. Ranges from 0 and 1.
+ * @property {number} w_max  – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
+ * @property {number} set  – Standard Effective Temperature (SET)
+ * @property {number} et  – New Effective Temperature (ET)
+ * @property {number} pmvGagge  – PMV Gagge
+ * @property {number} pmvSet  – PMV SET
+ * @property {number} disc  – Thermal discomfort
+ * @property {number} tSens  – Predicted Thermal Sensation
  */
 
 /**
  * @typedef {Object} TwoNodesKwargs
  * @property {boolean} [round=true]
  * @property {boolean} [calculate_ce=false]
- * @property {number | number[]} [max_sweating]
- * @property {number | number[]} [w_max]
+ * @property {number} [max_sweating]
+ * @property {number} [w_max]
  */
 
 /**
  * @typedef {Object} TwoNodesKwargsRequired
  * @property {boolean} round
  * @property {boolean} calculate_ce
- * @property {number | number[]} max_sweating
- * @property {number | number[]} w_max
+ * @property {number} max_sweating
+ * @property {number} w_max
  */
 
 /**
+ * @public
  * Two-node model of human temperature regulation:
  * this model it can be used to calculate a variety of indices, including:
  * Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
@@ -62,14 +63,15 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * The Predicted Thermal Sensation (TSENS)
  * The Predicted Percent Dissatisfied Due to Draft (PD)
  * Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * @see {@link two_nodes_array} for a version that supports arrays
  *
- * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
- * @param {number | number[]} tr Mean radiant temperature, default in [°C]
- * @param {number | number[]} v Air speed, default in [m/s]
- * @param {number | number[]} rh Relative humidity, [%].
- * @param {number | number[]} met Metabolic rate, [W/(m2)]
- * @param {number | number[]} clo Clothing insulation, [clo]
- * @param {number | number[]} wme External work, [W/(m2)] default 0
+ * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number} tr Mean radiant temperature, default in [°C]
+ * @param {number} v Air speed, default in [m/s]
+ * @param {number} rh Relative humidity, [%].
+ * @param {number} met Metabolic rate, [W/(m2)]
+ * @param {number} clo Clothing insulation, [clo]
+ * @param {number} wme External work, [W/(m2)] default 0
  * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} p_atmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
@@ -177,6 +179,47 @@ const tempCoreNeutral = 36.8;
 const skinBloodFlowNeutral = 6.3;
 
 /**
+ * @typedef {Object} TwoNodesArrayReturnType
+ * @property {number[]} eSkin – Array of total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
+ * @property {number[]} eRsw  – Array of rate of evaporative heat loss from sweat evaporation, [W/m2]
+ * @property { number[]} eMax  – Array of maximum rate of evaporative heat loss from skin, [W/m2]
+ * @property { number[]} qSensible  – Array of sensible heat loss from skin, [W/m2]
+ * @property { number[]} qSkin  – Array of total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
+ * @property { number[]} qRes  – Array of total rate of heat loss through respiration, [W/m2]
+ * @property { number[]} tCore  – Array of core temperature, [°C]
+ * @property { number[]} tSkin  – Array of skin temperature, [°C]
+ * @property { number[]} mBl  – Array of skin blood flow, [kg/h/m2]
+ * @property { number[]} mRsw  – Array of rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property { number[]} w  – Array of skin wettedness, adimensional. Ranges from 0 and 1.
+ * @property { number[]} w_max  – Array of skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
+ * @property { number[]} set  – Array of standard Effective Temperature (SET)
+ * @property { number[]} et  – Array of new Effective Temperature (ET)
+ * @property { number[]} pmvGagge  – Array of PMV Gagge
+ * @property { number[]} pmvSet  – Array of PMV SET
+ * @property { number[]} disc  – Array of Thermal discomfort
+ * @property { number[]} tSens  – Array of Predicted Thermal Sensation
+ */
+
+/**
+ * @typedef {Object} TwoNodesArrayKwargs
+ * @property {boolean} [round=true]
+ * @property {boolean} [calculate_ce=false]
+ * @property { number[]} [max_sweating]
+ * @property { number[]} [w_max]
+ */
+
+/**
+ * @typedef {Object} TwoNodesArrayKwargsRequired
+ * @property {boolean} round
+ * @property {boolean} calculate_ce
+ * @property { number[]} max_sweating
+ * @property { number[]} w_max
+ */
+
+/**
+ * @public
+ * Compute two nodes model when the input parameters are arrays. 
+ * @see {@link two_nodes} for a version that supports scalar arguments
  * 
  * @param {number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
  * @param {number[]} tr Mean radiant temperature, default in [°C]
@@ -191,7 +234,7 @@ const skinBloodFlowNeutral = 6.3;
  * @param {number[]} max_skin_blood_flow Maximum blood flow from the core to the skin, [kg/h/m2] default 80
  * @param {TwoNodesKwargs} [kwargs]
  *
- * @returns {TwoNodesReturnType} object with results of two_nodes
+ * @returns {TwoNodesArrayReturnType} object with results of two_nodes_array
  *
  * @example
  * const results = two_nodes_array([25,30], [25,35], [0.3,0.5], [50,60], [1.2,1.5], [0.5, 0.3], [0], [1.8258], [101325], ["standing"], [90])
@@ -589,13 +632,13 @@ function calculate_percent_satisfied(tOp, v) {
 }
 
 /**
- * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
- * @param {number | number[]} tr Mean radiant temperature, default in [°C]
- * @param {number | number[]} v Air speed, default in [m/s]
- * @param {number | number[]} met Metabolic rate, [W/(m2)]
- * @param {number | number[]} clo Clothing insulation, [clo]
- * @param {number | number[]} vaporPressure
- * @param {number | number[]} wme External work, [W/(m2)] default 0
+ * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number} tr Mean radiant temperature, default in [°C]
+ * @param {number} v Air speed, default in [m/s]
+ * @param {number} met Metabolic rate, [W/(m2)]
+ * @param {number} clo Clothing insulation, [clo]
+ * @param {number} vaporPressure
+ * @param {number} wme External work, [W/(m2)] default 0
  * @param {number} bodySurfaceArea Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} pAtmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPosition Select either “sitting” or “standing”

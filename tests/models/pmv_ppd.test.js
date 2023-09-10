@@ -1,5 +1,9 @@
 import { expect, describe, it } from "@jest/globals";
-import { pmv_ppd, pmv_ppd_array } from "../../src/models/pmv_ppd.js";
+import {
+  pmv_ppd,
+  pmv_ppd_array,
+  pmv_calculation,
+} from "../../src/models/pmv_ppd.js";
 import { deep_close_to_array } from "../test_utilities.js";
 
 describe("pmv_pdd", () => {
@@ -228,4 +232,25 @@ describe("pmv_ppd_array", () => {
     deep_close_to_array(result.pmv, [2.4, 2.4], 1);
     deep_close_to_array(result.ppd, [91, 91], 1);
   });
+});
+
+describe("pmv_calculation", () => {
+  it.each([
+    {
+      tdb: 25,
+      tr: 25,
+      vr: 0.3,
+      rh: 50,
+      met: 1.5,
+      clo: 0.7,
+      wme: 0,
+      expected: 0.55,
+    },
+  ])(
+    "returns $expected when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo",
+    ({ tdb, tr, vr, rh, met, clo, wme, expected }) => {
+      const result = pmv_calculation(tdb, tr, vr, rh, met, clo, wme);
+      expect(result).toBeCloseTo(expected, 1);
+    },
+  );
 });

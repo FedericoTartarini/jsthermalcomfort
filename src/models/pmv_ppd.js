@@ -94,8 +94,8 @@ import { cooling_effect } from "./cooling_effect.js";
  * @see {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
  *
  * @example
- * import { pmv_pdd } from "./models.js";
- * import {v_relative, clo_dynamic} from "./utilities.js"
+ * import { pmv_pdd } from "./models/pmv_ppd.js";
+ * import {v_relative, clo_dynamic} from "./utilities/utilities.js"
  *
  * const tdb = 25;
  * const tr = 25;
@@ -267,8 +267,8 @@ export function pmv_ppd(
  * @see {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
  *
  * @example
- * import { pmv_pdd_array } from "./models.js";
- * import {v_relative_array, clo_dynamic_array} from "./utilities.js"
+ * import { pmv_pdd_array } from "./models/pmv_ppd.js";
+ * import {v_relative_array, clo_dynamic_array} from "./utilities/utilities.js"
  *
  * const tdb = [22, 25];
  * const tr = [25, 25];
@@ -416,7 +416,18 @@ export function pmv_ppd_array(
   };
 }
 
-function pmv_calculation(tdb, tr, vr, rh, met, clo, wme) {
+/**
+ * @param {number} tdb
+ * @param {number} tr
+ * @param {number} vr
+ * @param {number} rh
+ * @param {number} met
+ * @param {number} clo
+ * @param {number} wme
+ *
+ * @returns {number} _pmv
+ */
+export function pmv_calculation(tdb, tr, vr, rh, met, clo, wme) {
   const pa = rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
 
   const icl = 0.155 * clo; //thermal insulation of the clothing in M2K/W

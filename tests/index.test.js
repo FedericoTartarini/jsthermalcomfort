@@ -22,6 +22,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("heat_index");
   });
 
+  it("should have models.wc", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("wc");
+  });
+
   it("should have models.phs", () => {
     expect(jsthermalcomfort.models).toHaveProperty("phs");
   });
@@ -34,6 +38,26 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("net");
   });
 
+  it("should have models.clo_tout", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("clo_tout");
+  });
+
+  it("should have models.clo_tout_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("clo_tout_array");
+  });
+
+  it("should have models.wbgt", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("wbgt");
+  });
+
+  it("should have models.discomfort_index", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
+  });
+
+  it("should have models.discomfort_index", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("discomfort_index_array");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });
@@ -42,8 +66,16 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("v_relative");
   });
 
+  it("should have utilities.v_relative_array", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("v_relative_array");
+  });
+
   it("should have utilities.clo_dynamic", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic");
+  });
+
+  it("should have utilities.clo_dynamic_array", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_array");
   });
 
   it("should have utilities.units_converter", () => {
@@ -68,7 +100,15 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr");
   });
 
+  it("should have psychrometrics.p_sat_torr_array", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr_array");
+  });
+
   it("should have psychrometrics.t_o", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
+  });
+
+  it("should have psychrometrics.t_o_array", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
   });
 

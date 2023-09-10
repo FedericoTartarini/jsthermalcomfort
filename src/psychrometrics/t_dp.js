@@ -2,6 +2,7 @@ import { round } from "../utilities/utilities";
 
 /**
  * Calculates the dew point temperature.
+ *
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]
  * @returns {number} - dew point temperature, [°C]

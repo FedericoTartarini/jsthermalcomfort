@@ -6,7 +6,7 @@ import { t_o_array } from "../psychrometrics/t_o.js";
  *
  * @param {number} number - the number to round
  * @param {number} precision - the number of decimal places to round to
- * @returns the rounded result
+ * @returns {number} the rounded result
  */
 export function round(number, precision) {
   const smudge = 10 ** precision;
@@ -303,6 +303,11 @@ function _iso7933_compliance(kwargs) {
 
 /**
  * Returns the body surface area in square meters
+ *
+ * @public
+ * @memberof utilities
+ * @docname Body Surface Area
+ *
  * @param {number} weight - body weight, [kg]
  * @param {number} height - height, [m]
  * @param {("dubois" | "takahira" | "fujimoto" | "kurazumi")} [formula="dubois"] - formula used to calculate the body surface area. default="dubois"
@@ -331,17 +336,40 @@ export function body_surface_area(weight, height, formula = "dubois") {
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
  * Vag = 0.3 (M - 1) (m/s)
  *
- * @template {(number | number[])} T
- * @param {T} v - air spped measured by the sensor, [m/s]
+ * @public
+ * @memberof utilities
+ * @docname Relative air speed
+ *
+ * @see {@link v_relative_array} for a version that supports array arguments
+ *
+ * @param {number} v - air spped measured by the sensor, [m/s]
  * @param {number} met - metabolic rate, [met]
- * @returns {T} relative air speed, [m/s]
+ * @returns {number} relative air speed, [m/s]
  */
 export function v_relative(v, met) {
   if (met <= 1) return v;
-  if (Array.isArray(v)) {
-    return v.map((_v) => _v_relative_single(_v, met));
-  }
   return _v_relative_single(v, met);
+}
+
+/**
+ * Estimates the relative air speed which combines the average air speed of the
+ * space plus the relative air speed caused by the body movement. Vag is assumed
+ * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
+ * Vag = 0.3 (M - 1) (m/s)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Relative air speed (array version)
+ *
+ * @see {@link v_relative} for a version that supports scalar arguments
+ *
+ * @param {number[]} v - air spped measured by the sensor, [m/s]
+ * @param {number} met - metabolic rate, [met]
+ * @returns {number[]} relative air speed, [m/s]
+ */
+export function v_relative_array(v, met) {
+  if (met <= 1) return v;
+  return v.map((_v) => _v_relative_single(_v, met));
 }
 
 /**
@@ -357,38 +385,62 @@ function _v_relative_single(v, met) {
  * Estimates the dynamic clothing insulation of a moving occupant. The activity as
  * well as the air speed modify the insulation characteristics of the clothing and the
  * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
+ * shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
  *
- * @template {(number | number[])} T
- * @param {T} clo - clothing insulation, [clo]
- * @param {T} met - metabolic rate, [met]
+ * @public
+ * @memberof utilities
+ * @docname Dynamic clothing
+ *
+ * @see {@link clo_dynamic_array} for a version that supports array arguments
+ *
+ * @param {number} clo - clothing insulation, [clo]
+ * @param {number} met - metabolic rate, [met]
  * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
- * @returns {T} dunamic clothing insulation, [clo]
+ * @returns {number} dunamic clothing insulation, [clo]
  */
 export function clo_dynamic(clo, met, standard = "ASHRAE") {
   if (standard !== "ASHRAE" && standard !== "ISO")
     throw new Error(
       "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
     );
-  if (Array.isArray(clo) !== Array.isArray(met))
-    throw new Error("clo and met should both be arrays or numbers");
-
-  if (Array.isArray(clo)) {
-    if (standard === "ASHRAE")
-      return met.map((_met, index) =>
-        _met > 1.2 ? _clo_dynamic_single(clo[index], _met) : clo[index],
-      );
-    if (standard === "ISO")
-      return met.map((_met, index) =>
-        _met > 1 ? _clo_dynamic_single(clo[index], _met) : clo[index],
-      );
-  }
-
   if ((standard === "ASHRAE" && met <= 1.2) || (standard === "ISO" && met <= 1))
     return clo;
   return _clo_dynamic_single(clo, met);
+}
+
+/**
+ * Estimates the dynamic clothing insulation of a moving occupant. The activity as
+ * well as the air speed modify the insulation characteristics of the clothing and the
+ * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
+ * shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
+ * of the body movement for met equal or higher than 1.2 met using the equation
+ * clo = Icl × (0.6 + 0.4/met)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Dynamic clothing (array version)
+ *
+ * @see {@link clo_dynamic} for a version that supports scalar arguments
+ *
+ * @param {number[]} clo - clothing insulation, [clo]
+ * @param {number[]} met - metabolic rate, [met]
+ * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
+ * @returns {number[]} dunamic clothing insulation, [clo]
+ */
+export function clo_dynamic_array(clo, met, standard = "ASHRAE") {
+  if (standard === "ASHRAE")
+    return met.map((_met, index) =>
+      _met > 1.2 ? _clo_dynamic_single(clo[index], _met) : clo[index],
+    );
+  if (standard === "ISO")
+    return met.map((_met, index) =>
+      _met > 1 ? _clo_dynamic_single(clo[index], _met) : clo[index],
+    );
+  throw new Error(
+    "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
+  );
 }
 
 /**
@@ -401,15 +453,15 @@ function _clo_dynamic_single(clo, met) {
 }
 
 /**
- * @typedef {("IP" | "SI")} UnitSystem
- */
-
-/**
  * Converts IP values to SI units
+ *
+ * @memberof utilities
+ * @docname Units converter
+ * @public
  *
  * @template {Object.<string, number>} T
  * @param {T} kwargs - [t, v] units to convert
- * @param {UnitSystem} [from_units="IP"] - specify system to convert from
+ * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
  * @returns {T} converted values in SI units
  */
 export function units_converter(kwargs, from_units = "IP") {
@@ -440,22 +492,27 @@ export function units_converter(kwargs, from_units = "IP") {
 }
 
 // FIXME: find how to write math notation inside JSDocs
+
 /**
  * Estimates the running mean temperature also known as prevailing mean outdoor temperature
+ *
+ * @public
+ * @memberof utilities
+ * @docname Running mean outdoor temperature
  *
  * @param {number[]} temp_array - array containing the mean daily temperature in descending order (i.e. from
  * newest/yestedayr to oldest) :math:`[t_{day-1}, t_{day-2}, ... , t_{day-n}]`,
  * Where :math:`t_{day-1}` is yesterday's daily mean temperature. The EN
- * 16798-1 2019 [3]_ states that n should be equal to 7
+ * 16798-1 2019 {@link #ref_3|[3]} states that n should be equal to 7
  *
- * @param {number} [alpha=0.8] - constant between 0 and 1. The EN 16798-1 2019 [3]_ recommends a value of 0.8,
+ * @param {number} [alpha=0.8] - constant between 0 and 1. The EN 16798-1 2019 {@link #ref_3|[3]} recommends a value of 0.8,
  * while the ASHRAE 55 2020 recommends to choose values between 0.9 and 0.6,
  * corresponding to a slow- and fast- response running mean, respectively.
  * Adaptive comfort theory suggest that a slow-response running mean (alpha = 0.9)
  * could be more appropriate for climates in which synoptic-scale (day-to-day)
  * temperature dynamics are relatively minor, sich as the humid tropics.
  *
- * @param {UnitSystem} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {"IP" | "SI"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  *
  * @returns {number} running mean outdoor temperature
  */
@@ -480,6 +537,10 @@ export function running_mean_outdoor_temperature(
 
 /**
  * Calculates the sky-vault view fraction
+ *
+ * @public
+ * @memberof utilities
+ * @docname Sky-vault view fraction
  *
  * @param {number} w - width of the window, [m]
  * @param {number} h - height of the window, [m]

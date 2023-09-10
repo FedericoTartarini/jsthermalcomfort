@@ -1,5 +1,9 @@
 import { expect, describe, it } from "@jest/globals";
-import { p_sat_torr } from "../../src/psychrometrics/p_sat_torr.js";
+import {
+  p_sat_torr,
+  p_sat_torr_array,
+} from "../../src/psychrometrics/p_sat_torr.js";
+import { deep_close_to_array } from "../test_utilities.js";
 
 describe("p_sat_torr", () => {
   it.each([
@@ -16,6 +20,21 @@ describe("p_sat_torr", () => {
     ({ tdb, expected }) => {
       const result = p_sat_torr(tdb);
       expect(result).toBeCloseTo(expected);
+    },
+  );
+});
+
+describe("p_sat_torr_array", () => {
+  it.each([
+    {
+      tdb: [0, 1, -1, -273.15],
+      expected: [4.5671, 4.911372, 4.2443798, 9.699125053317317e53],
+    },
+  ])(
+    "returns $expected when dryBulbAirTemp is $dryBulbAirTemp",
+    ({ tdb, expected }) => {
+      const result = p_sat_torr_array(tdb);
+      deep_close_to_array(result, expected, 2);
     },
   );
 });

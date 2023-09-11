@@ -127,13 +127,16 @@ export function set_tmp(
   }
 
   if (limit_inputs) {
-    const warnings = check_standard_compliance("ashrae", {
+    let warnings = check_standard_compliance("ashrae", {
       tdb,
       tr,
       v,
       met,
       clo,
     });
+    if (warnings.length != 0) {
+      set_tmp = NaN;
+    }
   }
 
   if (joint_kwargs.round) {

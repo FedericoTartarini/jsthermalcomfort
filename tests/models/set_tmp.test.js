@@ -21,6 +21,7 @@ describe("set_tmp", () => {
       body_position: undefined,
       units: undefined,
       limit_inputs: undefined,
+      kwargs: undefined,
       expected: 24.3,
     },
     {
@@ -36,6 +37,7 @@ describe("set_tmp", () => {
       body_position: undefined,
       units: "IP",
       limit_inputs: undefined,
+      kwargs: undefined,
       expected: 75.8,
     },
     {
@@ -50,8 +52,25 @@ describe("set_tmp", () => {
       p_atm: undefined,
       body_position: undefined,
       units: "SI",
-      limit_inputs: undefined,
-      expected: 41.9,
+      limit_inputs: true,
+      kwargs: undefined,
+      expected: NaN,
+    },
+    {
+      tdb: 27,
+      tr: 30,
+      v: 0.328,
+      rh: 50,
+      met: 1.2,
+      clo: 0.5,
+      wme: 0,
+      body_surface_area: undefined,
+      p_atm: undefined,
+      body_position: undefined,
+      units: "SI",
+      limit_inputs: true,
+      kwargs: undefined,
+      expected: 26.6,
     },
     {
       tdb: 77,
@@ -60,13 +79,30 @@ describe("set_tmp", () => {
       rh: 50,
       met: 1.2,
       clo: 0.5,
-      wme: undefined,
+      wme: 0,
       body_surface_area: undefined,
       p_atm: undefined,
       body_position: "sitting",
       units: "SI",
-      limit_inputs: undefined,
+      limit_inputs: false,
+      kwargs: undefined,
       expected: 38.2,
+    },
+    {
+      tdb: 77,
+      tr: 77,
+      v: 0.328,
+      rh: 50,
+      met: 1.2,
+      clo: 0.5,
+      wme: 0,
+      body_surface_area: 1.8258,
+      p_atm: 101325,
+      body_position: "standing",
+      units: "SI",
+      limit_inputs: false,
+      kwargs: undefined,
+      expected: 41.9,
     },
   ])(
     "returns $expected when tdb is $tdb, tr is $tr, v is $v, rh is $rh, met is $met, clo is $clo and units is $units",
@@ -101,7 +137,11 @@ describe("set_tmp", () => {
         limit_inputs,
         kwargs,
       );
-      expect(result).toBeCloseTo(expected, 1);
+      if (isNaN(expected)) {
+        expect(result).toBeNaN();
+      } else {
+        expect(result).toBeCloseTo(expected, 1);
+      }
     },
   );
 });

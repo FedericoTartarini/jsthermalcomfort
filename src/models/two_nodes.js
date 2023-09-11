@@ -408,7 +408,7 @@ export function two_nodes_array(
  * @param {number} precision - the number of decimal places to round to
  * @returns the rounded result
  */
-function roundArray(array, precision) {
+export function roundArray(array, precision) {
   return array.map((value) => round(value, precision));
 }
 
@@ -430,7 +430,7 @@ function cal_vapor_pressure(tdb, rh) {
  * @param {number[]} tdbArray - the array with required proper length
  * @returns the filled array
  */
-function fill_array(newArray, tdbArray) {
+export function fill_array(newArray, tdbArray) {
   const requiredLen = tdbArray.length;
   if (newArray.length < requiredLen) {
     newArray = Array(requiredLen).fill(newArray[0]);

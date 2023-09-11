@@ -1,0 +1,13 @@
+toc:
+  - name: Overview
+    file: docs_theme/overview.md
+  - name: Installation
+    file: docs_theme/installation.md
+  - name: Examples and Tutorials
+  - name: Functions Documentation
+    children:
+      - models
+      - psychrometrics
+      - utilities
+  - name: References
+    file: docs_theme/references.md

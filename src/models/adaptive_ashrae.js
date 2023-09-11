@@ -48,6 +48,8 @@ import { get_ce } from "./adaptive_en";
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
  *
+ * @returns {AdaptiveAshraeResult} set containing results for the model
+ *
  * The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
  * 0 < vr [m/s] < 2, 10 < t running mean [°C] < 33.5
  *
@@ -209,6 +211,8 @@ export function adaptive_ashrae(
  * @param {boolean} limit_inputs - By default, if the inputs are outsude the standard applicability limits the
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
+ *
+ * @returns {AdaptiveAshraeArrayResult} set containing results for the model
  *
  * The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
  * 0 < vr [m/s] < 2, 10 < t running mean [°C] < 33.5

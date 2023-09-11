@@ -7,8 +7,8 @@ import {
 import { cooling_effect } from "./cooling_effect.js";
 
 /**
- * @typedef {Object} pmv_ppdKwargs
- * @property {'SI', 'si', 'IP', 'ip'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @typedef {Object} Pmv_ppdKwargs
+ * @property {'SI', 'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
@@ -31,13 +31,24 @@ import { cooling_effect } from "./cooling_effect.js";
  * Standards. The PMV is an index that predicts the mean value of the thermal
  * sensation votes (self-reported perceptions) of a large group of people on a
  * sensation scale expressed from –3 to +3 corresponding to the categories:
- * cold, cool, slightly cool, neutral, slightly warm, warm, and hot. [1]
+ * cold, cool, slightly cool, neutral, slightly warm, warm, and hot. {@link #ref_1|[1]}
  *
  * While the PMV equation is the same for both the ISO and ASHRAE standards, in the
  * ASHRAE 55 PMV equation, the SET is used to calculate the cooling effect first,
  * this is then subtracted from both the air and mean radiant temperatures, and the
  * differences are used as input to the PMV model, while the airspeed is set to 0.1m/s.
  * Please read more in the Note below.
+ *
+ * Notes:
+ * You can use this function to calculate the `PMV` and `PPD` in accordance with
+ * either the ASHRAE 55 2020 Standard {@link #ref_1|[1]} or the ISO 7730 Standard {@link #ref_2|[2]}.
+ *
+ * _PMV:
+ * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ * _PPD:
+ * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD}
+ * _Addendum C to Standard 55-2020:
+ * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
  *
  * This is a version that supports scalar arguments.
  * @see {@link pmv_ppd_array} for a version that supports arrays.
@@ -59,44 +70,25 @@ import { cooling_effect } from "./cooling_effect.js";
  * @param { number } clo - clothing insulation
  * Note: The activity as well as the air speed modify the insulation characteristics
  * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
- * the clothing insulation shall be corrected [2]. The ASHRAE 55 Standard corrects
+ * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
  * @param { number } wme - external work, wme default 0
- * @param {"ISO"|"ASHRAE"|"iso"|"ashrae"} standard - comfort standard used for calculation
+ * @param { "ISO"|"ASHRAE" } standard - comfort standard used for calculation
  * - If "ISO", then the ISO Equation is used
  * - If "ASHRAE", then the ASHRAE Equation is used
  * Note: While the PMV equation is the same for both the ISO and ASHRAE standards,
  * the ASHRAE Standard Use of the PMV model is limited to air speeds below 0.10m/s (20 fpm).
  * When air speeds exceed 0.10 m/s (20 fpm), the comfort zone boundaries are adjusted based on the SET model.
  * This change was introduced by the `Addendum C to Standard 55-2020`_
- * @param { pmv_ppdKwargs }kwargs - additional arguments
+ * @param { Pmv_ppdKwargs }kwargs - additional arguments
  *
  * @returns { Object } - Result of pmv and ppd
  * @property { number } pmv - Predicted Mean Vote
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  *
- * Notes:
- * You can use this function to calculate the `PMV` and `PPD` in accordance with
- * either the ASHRAE 55 2020 Standard [1] or the ISO 7730 Standard [2].
- *
- * [1]	ANSI, & ASHRAE. (2020). Thermal Environmental Conditions for Human Occupancy. Atlanta.
- *
- * [2]	ISO. (2005). ISO 7730 - Ergonomics of the thermal environment — Analytical determination and interpretation
- *      of thermal comfort using calculation of the PMV and PPD indices and local thermal comfort criteria.
- *
- * _PMV:
- * @see {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
- * _PPD:
- * @see {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD}
- * _Addendum C to Standard 55-2020:
- * @see {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
- *
  * @example
- * import { pmv_pdd } from "./models/pmv_ppd.js";
- * import {v_relative, clo_dynamic} from "./utilities/utilities.js"
- *
  * const tdb = 25;
  * const tr = 25;
  * const rh = 50;
@@ -204,13 +196,24 @@ export function pmv_ppd(
  * Standards. The PMV is an index that predicts the mean value of the thermal
  * sensation votes (self-reported perceptions) of a large group of people on a
  * sensation scale expressed from –3 to +3 corresponding to the categories:
- * cold, cool, slightly cool, neutral, slightly warm, warm, and hot. [1]
+ * cold, cool, slightly cool, neutral, slightly warm, warm, and hot. {@link #ref_1|[1]}
  *
  * While the PMV equation is the same for both the ISO and ASHRAE standards, in the
  * ASHRAE 55 PMV equation, the SET is used to calculate the cooling effect first,
  * this is then subtracted from both the air and mean radiant temperatures, and the
  * differences are used as input to the PMV model, while the airspeed is set to 0.1m/s.
  * Please read more in the Note below.
+ *
+ * Notes:
+ * You can use this function to calculate the `PMV` and `PPD` in accordance with
+ * either the ASHRAE 55 2020 Standard {@link #ref_1|[1]} or the ISO 7730 Standard {@link #ref_2|[2]}.
+ *
+ * _PMV:
+ * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ * _PPD:
+ * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD}
+ * _Addendum C to Standard 55-2020:
+ * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
  *
  * This is a version that supports arrays.
  * @see {@link pmv_ppd} for a version that supports scalar arguments.
@@ -232,44 +235,25 @@ export function pmv_ppd(
  * @param { number[] } clo - clothing insulation, [clo]
  * Note: The activity as well as the air speed modify the insulation characteristics
  * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
- * the clothing insulation shall be corrected [2]. The ASHRAE 55 Standard corrects
+ * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
  * @param { number[] } wme - external work, wme default 0
- * @param {"ISO"|"ASHRAE"|"iso"|"ashrae"} standard - comfort standard used for calculation
+ * @param { "ISO"|"ASHRAE" } standard - comfort standard used for calculation
  * - If "ISO", then the ISO Equation is used
  * - If "ASHRAE", then the ASHRAE Equation is used
  * Note: While the PMV equation is the same for both the ISO and ASHRAE standards,
  * the ASHRAE Standard Use of the PMV model is limited to air speeds below 0.10m/s (20 fpm).
  * When air speeds exceed 0.10 m/s (20 fpm), the comfort zone boundaries are adjusted based on the SET model.
  * This change was introduced by the `Addendum C to Standard 55-2020`_
- * @param { pmv_ppdKwargs }kwargs - additional arguments
+ * @param { Pmv_ppdKwargs }kwargs - additional arguments
  *
  * @returns {Object} - Result of pmv and ppd
  * @property { number[] } pmv - Predicted Mean Vote
  * @property { number[] } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  *
- * Notes:
- * You can use this function to calculate the `PMV` and `PPD` in accordance with
- * either the ASHRAE 55 2020 Standard [1] or the ISO 7730 Standard [2].
- *
- * [1]	ANSI, & ASHRAE. (2020). Thermal Environmental Conditions for Human Occupancy. Atlanta.
- *
- * [2]	ISO. (2005). ISO 7730 - Ergonomics of the thermal environment — Analytical determination and interpretation
- *      of thermal comfort using calculation of the PMV and PPD indices and local thermal comfort criteria.
- *
- * _PMV:
- * @see {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
- * _PPD:
- * @see {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD}
- * _Addendum C to Standard 55-2020:
- * @see {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
- *
  * @example
- * import { pmv_pdd_array } from "./models/pmv_ppd.js";
- * import {v_relative_array, clo_dynamic_array} from "./utilities/utilities.js"
- *
  * const tdb = [22, 25];
  * const tr = [25, 25];
  * const rh = [50, 50];
@@ -293,7 +277,7 @@ export function pmv_ppd_array(
   rh,
   met,
   clo,
-  wme = [],
+  wme,
   standard = "ISO",
   kwargs = {},
 ) {
@@ -305,10 +289,8 @@ export function pmv_ppd_array(
   kwargs = Object.assign(default_kwargs, kwargs);
 
   // default wme is an array of 0
-  if (wme.length === 0) {
-    for (let i = 0; i < tdb.length; i++) {
-      wme[i] = 0;
-    }
+  if (wme === undefined) {
+    wme = tdb.map(() => 0);
   }
 
   if (kwargs.units && kwargs.units.toLowerCase() === "ip") {
@@ -411,8 +393,8 @@ export function pmv_ppd_array(
   }
 
   return {
-    pmv: pmv_array.map((value) => Math.round(value * 100) / 100), //pmv is number[]
-    ppd: ppd_array.map((value) => Math.round(value * 10) / 10), //ppd is number[]
+    pmv: pmv_array.map((value) => round(value, 2)),
+    ppd: ppd_array.map((value) => round(value, 1)),
   };
 }
 

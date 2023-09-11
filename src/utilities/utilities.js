@@ -712,7 +712,7 @@ export function valid_range(range, [min, max]) {
  * @property {number} Basketball - 6.3
  * @property {number} Wrestling - 7.8
  * @example
- * import {met_typical_tasks} from "./src/utilities/utilities.js"; //The path to utilities.js
+ * import { met_typical_tasks } from "jsthermalcomfort/utilities"; //The path to utilities
  * console.log(met_typical_tasks['Seated_Cquiet']);
  * // output 1.0
  */

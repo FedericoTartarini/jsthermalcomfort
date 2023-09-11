@@ -7,6 +7,7 @@ import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 import { at } from "./at";
+import { pmv, pmv_array } from "./pmv.js";
 
 /**
  * @public
@@ -25,4 +26,6 @@ export default {
   adaptive_en,
   adaptive_en_array,
   at,
+  pmv,
+  pmv_array,
 };

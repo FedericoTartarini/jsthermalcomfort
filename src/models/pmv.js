@@ -1,8 +1,8 @@
 import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
 
 /**
- * @typedef {Object} pmvKwargs
- * @property {'SI', 'si', 'IP', 'ip'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @typedef {Object} PmvKwargs
+ * @property {'SI','IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property {boolean} limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
@@ -24,17 +24,18 @@ import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
  *
  * The PMV is an index that predicts the mean value of the thermal sensation votes (self-reported perceptions)
  * of a large group of people on a sensation scale expressed from –3 to +3 corresponding to the categories: cold, cool,
- * slightly cool, neutral, slightly warm, warm, and hot. [1]_
+ * slightly cool, neutral, slightly warm, warm, and hot. {@link #ref_1|[1]}
  *
  * While the PMV equation is the same for both the ISO and ASHRAE standards, in the ASHRAE 55 PMV equation, the SET is
  * used to calculate the cooling effect first, this is then subtracted from both the air and mean radiant temperatures,
  * and the differences are used as input to the PMV model, while the airspeed is set to 0.1m/s. Please read more in the
  * Note below.
  *
- * [1]    ANSI, & ASHRAE. (2020). Thermal Environmental Conditions for Human Occupancy. Atlanta.
- *
- * [2]    ISO. (2005). ISO 7730 - Ergonomics of the thermal environment — Analytical determination and interpretation
- *      of thermal comfort using calculation of the PMV and PPD indices and local thermal comfort criteria.
+ * You can use this function to calculate the `PMV` {@link #ref_1|[1]} {@link #ref_2|[2]}
+ * _PMV:
+ * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method}
+ * _Addendum C to Standard 55-2020:
+ * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
  *
  * This is a version that supports scalar arguments.
  * @see {@link pmv_array} for a version that supports arrays.
@@ -50,21 +51,12 @@ import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
  * @param {number} met - metabolic rate
  * @param {number} clo - clothing insulation
  * @param {number} wme - external work, wme default 0
- * @param {"ISO"|"ASHRAE"|"iso"|"ashrae"} standard - comfort standard used for calculation
- * @param {pmvKwargs} kwargs - additional arguments
+ * @param {"ISO"|"ASHRAE"} standard - comfort standard used for calculation
+ * @param {PmvKwargs} kwargs - additional arguments
  *
  * @returns {number} pmv - Predicted Mean Vote
  *
- * @notes You can use this function to calculate the `PMV`_ [1]_ [2]_.
- * _PMV:
- * @see {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method}
- * _Addendum C to Standard 55-2020:
- * @see  {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
- *
  * @example
- * import {pmv} from "./models/pmv.js";
- * import {v_relative, clo_dynamic} from "./utilities/utilities.js";
- *
  * const tdb = 25;
  * const tr = 25;
  * const rh = 50;
@@ -122,17 +114,18 @@ export function pmv(
  *
  * The PMV is an index that predicts the mean value of the thermal sensation votes (self-reported perceptions)
  * of a large group of people on a sensation scale expressed from –3 to +3 corresponding to the categories: cold, cool,
- * slightly cool, neutral, slightly warm, warm, and hot. [1]_
+ * slightly cool, neutral, slightly warm, warm, and hot.{@link #ref_1|[1]}
  *
  * While the PMV equation is the same for both the ISO and ASHRAE standards, in the ASHRAE 55 PMV equation, the SET is
  * used to calculate the cooling effect first, this is then subtracted from both the air and mean radiant temperatures,
  * and the differences are used as input to the PMV model, while the airspeed is set to 0.1m/s. Please read more in the
  * Note below.
  *
- * [1]    ANSI, & ASHRAE. (2020). Thermal Environmental Conditions for Human Occupancy. Atlanta.
- *
- * [2]    ISO. (2005). ISO 7730 - Ergonomics of the thermal environment — Analytical determination and interpretation
- *      of thermal comfort using calculation of the PMV and PPD indices and local thermal comfort criteria.
+ * You can use this function to calculate the `PMV` {@link #ref_1|[1]} {@link #ref_2|[2]}
+ * _PMV:
+ * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method}
+ * _Addendum C to Standard 55-2020:
+ * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
  *
  * This is a version that supports arrays.
  * @see {@link pmv} for a version that supports scalar arguments.
@@ -148,21 +141,12 @@ export function pmv(
  * @param {number[]} met - metabolic rate, [met]
  * @param {number[]} clo - clothing insulation, [clo]
  * @param {number[]} wme - external work, [met] default 0
- * @param {"ISO"|"ASHRAE"|"iso"|"ashrae"} standard - comfort standard used for calculation
- * @param {pmvKwargs} kwargs - additional arguments
+ * @param {"ISO"|"ASHRAE"} standard - comfort standard used for calculation
+ * @param {PmvKwargs} kwargs - additional arguments
  *
  * @returns {number[]} pmv - Predicted Mean Vote
  *
- * @notes You can use this function to calculate the `PMV`_ [1]_ [2]_.
- * _PMV:
- * @see {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method}
- * _Addendum C to Standard 55-2020:
- * @see  {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
- *
  * @example
- * import {pmv_array} from "./models/pmv.js";
- * import {v_relative_array, clo_dynamic_array} from "./utilities/utilities.js";
- *
  * const tdb = [22, 25];
  * const tr = [25, 25];
  * const rh = [50, 50];
@@ -185,7 +169,7 @@ export function pmv_array(
   rh,
   met,
   clo,
-  wme = [],
+  wme,
   standard = "ISO",
   kwargs = {},
 ) {

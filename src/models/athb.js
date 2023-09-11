@@ -1,8 +1,9 @@
 import { pmv_calculation } from "./pmv_ppd.js";
+import { round } from "../utilities/utilities.js";
 
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
- * Framework [27]_. The adaptive thermal heat balance (ATHB) framework
+ * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework
  * introduced a method to account for the three adaptive principals, namely
  * physiological, behavioral, and psychological adaptation, individually
  * within existing heat balance models. The objective is a predictive model of
@@ -36,9 +37,6 @@ import { pmv_calculation } from "./pmv_ppd.js";
  * @returns { number } athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
  *
  * @example
- * // Import the athb function from the jsthermalcomfort module
- * import { athb } from "./models/athb.js";
- *
  * // Where tdb is 25, tr is 25, vr is 0.1, rh is 50, met is 1.1, t_running_mean is 20
  * console.log(athb(25, 25, 0.1, 50, 1.1, 20)); // Output: 0.2
  */
@@ -57,22 +55,21 @@ export function athb(tdb, tr, vr, rh, met, t_running_mean) {
   const ts = 0.303 * Math.exp(-0.036 * met_adapted * 58.15) + 0.028;
   const l_adapted = pmv_res / ts;
 
-  return parseFloat(
-    (
-      1.484 +
+  return round(
+    1.484 +
       0.0276 * l_adapted -
       0.9602 * met_adapted -
       0.0342 * t_running_mean +
       0.0002264 * l_adapted * t_running_mean +
       0.018696 * met_adapted * t_running_mean -
-      0.0002909 * l_adapted * met_adapted * t_running_mean
-    ).toFixed(3),
+      0.0002909 * l_adapted * met_adapted * t_running_mean,
+    3,
   );
 }
 
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
- * Framework [27]_. The adaptive thermal heat balance (ATHB) framework
+ * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework
  * introduced a method to account for the three adaptive principals, namely
  * physiological, behavioral, and psychological adaptation, individually
  * within existing heat balance models. The objective is a predictive model of
@@ -107,9 +104,6 @@ export function athb(tdb, tr, vr, rh, met, t_running_mean) {
  * @returns { number[] } athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
  *
  * @example
- * // Import the athb_array function from the jsthermalcomfort module
- * import { athb_array } from "./models/athb.js";
- *
  * // Where tdb is [25, 27], tr is [25, 25], vr is [0.1, 0.1], rh is [50, 50], met is [1.1, 1.1], t_running_mean is [20, 20]
  * console.log(athb_array([25, 27], [25, 25], [0.1, 0.1], [50, 50], [1.1, 1.1], [20, 20])); // Output: [0.2, 0.209]
  */
@@ -147,17 +141,16 @@ export function athb_array(tdb, tr, vr, rh, met, t_running_mean) {
 
   const l_adapted = pmv_res.map((pmv_res_Value, i) => pmv_res_Value / ts[i]);
 
-  return l_adapted.map((lValue, index) =>
-    parseFloat(
-      (
-        1.484 +
+  return l_adapted.map((lValue, i) =>
+    round(
+      1.484 +
         0.0276 * lValue -
-        0.9602 * met_adapted[index] -
-        0.0342 * t_running_mean[index] +
-        0.0002264 * lValue * t_running_mean[index] +
-        0.018696 * met_adapted[index] * t_running_mean[index] -
-        0.0002909 * lValue * met_adapted[index] * t_running_mean[index]
-      ).toFixed(3),
+        0.9602 * met_adapted[i] -
+        0.0342 * t_running_mean[i] +
+        0.0002264 * lValue * t_running_mean[i] +
+        0.018696 * met_adapted[i] * t_running_mean[i] -
+        0.0002909 * lValue * met_adapted[i] * t_running_mean[i],
+      3,
     ),
   );
 }

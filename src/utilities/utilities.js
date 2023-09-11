@@ -463,32 +463,139 @@ function _clo_dynamic_single(clo, met) {
  * @param {T} kwargs - [t, v] units to convert
  * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
  * @returns {T} converted values in SI units
+ *
+ * @see {@link units_converter_array} for a version that supports array parameters
  */
 export function units_converter(kwargs, from_units = "IP") {
   let result = { ...kwargs };
   if (from_units === "IP") {
     for (const [key, value] of Object.entries(result)) {
       if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = ((value - 32) * 5) / 9;
+        result[key] = _temp_ip_to_si(value);
       else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = value / 3.281;
-      else if (key === "area") result[key] = value / 10.764;
-      else if (key === "pressure") result[key] = value * 101325;
+        result[key] = _vel_ip_to_si(value);
+      else if (key === "area") result[key] = _area_ip_to_si(value);
+      else if (key === "pressure") result[key] = _pressure_ip_to_si(value);
     }
   } else if (from_units === "SI") {
     for (const [key, value] of Object.entries(result)) {
       if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = (value * 9) / 5 + 32;
+        result[key] = _temp_si_to_ip(value);
       else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = value * 3.281;
-      else if (key === "area") result[key] = value * 10.764;
-      else if (key === "pressure") result[key] = value / 101325;
+        result[key] = _vel_si_to_ip(value);
+      else if (key === "area") result[key] = _area_si_to_ip(value);
+      else if (key === "pressure") result[key] = _pressure_si_to_ip(value);
     }
   } else {
     throw new Error(`Unknown system ${from_units}`);
   }
 
   return result;
+}
+
+/**
+ * Converts IP values to SI units
+ *
+ * @memberof utilities
+ * @docname Units converter (array version)
+ * @public
+ *
+ * @template {Object.<string, number[]>} T
+ * @param {T} kwargs - [t, v] units to convert
+ * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
+ * @returns {T} converted values in SI units
+ *
+ * @see {@link units_converter} for a version that supports scalar parameters
+ */
+export function units_converter_array(kwargs, from_units = "IP") {
+  let result = {};
+  if (from_units === "IP") {
+    for (const [key, value] of Object.entries(kwargs)) {
+      if (key.includes("tmp") || key === "tr" || key === "tdb")
+        result[key] = value.map(_temp_ip_to_si);
+      else if (key === "v" || key === "vr" || key === "vel")
+        result[key] = value.map(_vel_ip_to_si);
+      else if (key === "area") result[key] = value.map(_area_ip_to_si);
+      else if (key === "pressure") result[key] = value.map(_pressure_ip_to_si);
+    }
+  } else if (from_units === "SI") {
+    for (const [key, value] of Object.entries(kwargs)) {
+      if (key.includes("tmp") || key === "tr" || key === "tdb")
+        result[key] = value.map(_temp_si_to_ip);
+      else if (key === "v" || key === "vr" || key === "vel")
+        result[key] = value.map(_vel_si_to_ip);
+      else if (key === "area") result[key] = value.map(_area_si_to_ip);
+      else if (key === "pressure") result[key] = value.map(_pressure_si_to_ip);
+    }
+  } else {
+    throw new Error(`Unknown system ${from_units}`);
+  }
+
+  return result;
+}
+
+/**
+ * @param {number} pressure
+ * @returns {number}
+ */
+function _pressure_ip_to_si(pressure) {
+  return pressure * 101325;
+}
+
+/**
+ * @param {number} pressure
+ * @returns {number}
+ */
+function _pressure_si_to_ip(pressure) {
+  return pressure / 101325;
+}
+
+/**
+ * @param {number} area
+ * @returns {number}
+ */
+function _area_ip_to_si(area) {
+  return area / 10.764;
+}
+
+/**
+ * @param {number} area
+ * @returns {number}
+ */
+function _area_si_to_ip(area) {
+  return area * 10.764;
+}
+
+/**
+ * @param {number} vel
+ * @returns {number}
+ */
+function _vel_ip_to_si(vel) {
+  return vel / 3.281;
+}
+
+/**
+ * @param {number} vel
+ * @returns {number}
+ */
+function _vel_si_to_ip(vel) {
+  return vel * 3.281;
+}
+
+/**
+ * @param {number} temp
+ * @returns {number}
+ */
+function _temp_ip_to_si(temp) {
+  return ((temp - 32) * 5) / 9;
+}
+
+/**
+ * @param {number} temp
+ * @returns {number}
+ */
+function _temp_si_to_ip(temp) {
+  return (temp * 9) / 5 + 32;
 }
 
 // FIXME: find how to write math notation inside JSDocs

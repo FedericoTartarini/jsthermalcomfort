@@ -5,6 +5,7 @@ import {
   clo_dynamic,
   clo_dynamic_array,
   units_converter,
+  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
 } from "./utilities";
@@ -21,6 +22,7 @@ export default {
   clo_dynamic,
   clo_dynamic_array,
   units_converter,
+  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
 };

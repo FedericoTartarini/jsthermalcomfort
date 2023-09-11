@@ -97,7 +97,9 @@ function tryInjectDependentTypes(entry) {
         // kind of suss that we just assume it will be a "NameExpression" but
         // I am fine with this, if we ever hit the case where we need more
         // than this then we can add more complete handling (recurssion)
-        name = par.type.expression.name;
+        if (par.type.expression.type === "NameExpression") {
+          name = par.type.expression.name;
+        }
       } else {
         continue;
       }
@@ -121,7 +123,8 @@ function tryInjectDependentTypes(entry) {
   }
 
   for (const posType of possibleTypes) {
-    if (javascriptTypes.has(posType.toLowerCase())) continue;
+    if (posType === undefined || javascriptTypes.has(posType.toLowerCase()))
+      continue;
     const entryType = types.get(posType);
     if (entryType === undefined) {
       console.error(

@@ -68,7 +68,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * 
  * @public
  * @memberof models
- * @docname Two-node model
+ * @docname Gagge et al. two-node model
  * 
  * @see {@link two_nodes_array} for a version that supports arrays
  *
@@ -230,7 +230,7 @@ const skinBloodFlowNeutral = 6.3;
  * Compute two nodes model when the input parameters are arrays. 
  * @public
  * @memberof models
- * @docname Two-node model (array version)
+ * @docname Gagge et al. two-node model (array version)
  * 
  * @see {@link two_nodes} for a version that supports scalar arguments
  * 

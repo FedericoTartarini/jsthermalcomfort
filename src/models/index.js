@@ -10,7 +10,6 @@ import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 import { at } from "./at";
 
-
 /**
  * @public
  * @name models

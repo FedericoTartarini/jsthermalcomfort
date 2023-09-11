@@ -1,4 +1,5 @@
 import {
+  transpose_sharp_altitude,
   body_surface_area,
   v_relative,
   v_relative_array,
@@ -16,6 +17,7 @@ import {
  * @docname Utilities
  */
 export default {
+  transpose_sharp_altitude,
   body_surface_area,
   v_relative,
   v_relative_array,

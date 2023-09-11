@@ -43,7 +43,8 @@ export function deep_close_to_array(array, expected, tolerance) {
       expect(value).toBeCloseTo(expected[index], tolerance);
       continue;
     }
-    if (isNaN(value) !== isNaN(expected[index]))
+    if (isNaN(value) !== isNaN(expected[index])) {
       throw new Error("one value is NaN but the other is not");
+    }
   }
 }

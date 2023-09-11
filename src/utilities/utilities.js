@@ -40,6 +40,33 @@ export function round(number, precision) {
  * @typedef {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} Standard
  */
 
+function degrees_to_radians(degrees) {
+  var pi = Math.PI;
+  return degrees * (pi / 180);
+}
+
+function radians_to_degrees(radians) {
+  var pi = Math.PI;
+  return radians * (180 / pi);
+}
+//There is no documentation of this function
+export function transpose_sharp_altitude(sharp, altitude) {
+  const altitude_new = radians_to_degrees(
+    Math.asin(
+      Math.sin(degrees_to_radians(Math.abs(sharp - 90))) *
+        Math.cos(degrees_to_radians(altitude)),
+    ),
+  );
+  sharp = radians_to_degrees(
+    Math.atan(
+      Math.sin(degrees_to_radians(sharp)) *
+        Math.tan(degrees_to_radians(90 - altitude)),
+    ),
+  );
+  const sol_altitude = altitude_new;
+  return [round(sharp, 3), round(sol_altitude, 3)];
+}
+
 /**
  * Check that the values comply with the standard provided
  *

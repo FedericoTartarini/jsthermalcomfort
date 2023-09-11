@@ -212,7 +212,7 @@ const skinBloodFlowNeutral = 6.3;
  * @typedef {Object} TwoNodesArrayKwargs
  * @property {boolean} [round=true]
  * @property {boolean} [calculate_ce=false]
- * @property {number[]} [max_sweating=500]
+ * @property {number[]} [max_sweating]
  * @property {number[]} [w_max]
  * @public
  */

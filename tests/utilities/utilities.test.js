@@ -422,7 +422,7 @@ describe("valid_range", () => {
 describe("check_standard_compliance_array", () => {
   it.each([
     {
-      standard: "fan_heatwaves",
+      standard: "FAN_HEATWAVES",
       kwargs: {
         tdb: [15, 30, 60],
         tr: [15, 30, 60],
@@ -441,7 +441,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "iso",
+      standard: "ISO",
       kwargs: {
         tdb: [9, 20, 31],
         tr: [9, 25, 41],
@@ -458,7 +458,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -475,7 +475,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -493,7 +493,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -511,7 +511,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 39, 41],
@@ -529,7 +529,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],

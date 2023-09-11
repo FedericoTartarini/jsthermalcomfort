@@ -9,6 +9,7 @@ import {
   units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
+  met_typical_tasks,
 } from "./utilities";
 
 /**
@@ -27,4 +28,11 @@ export default {
   units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
+  met_typical_tasks,
 };
+
+/**
+ * @public
+ * @name reference_values
+ * @docname Reference values clo and met
+ */

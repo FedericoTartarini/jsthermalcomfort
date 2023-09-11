@@ -712,8 +712,8 @@ export function valid_range(range, [min, max]) {
  * @property {number} Basketball - 6.3
  * @property {number} Wrestling - 7.8
  * @example
- * from pythermalcomfort.utilities import met_typical_tasks
- * print(met_typical_tasks['Seated_Cquiet']);
+ * import {met_typical_tasks} from "./src/utilities/utilities.js";
+ * console.log(met_typical_tasks['Seated_Cquiet']);
  * // output 1.0
  */
 export const met_typical_tasks = {

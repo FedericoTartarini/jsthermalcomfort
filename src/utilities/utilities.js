@@ -6,7 +6,7 @@ import { t_o_array } from "../psychrometrics/t_o.js";
  *
  * @param {number} number - the number to round
  * @param {number} precision - the number of decimal places to round to
- * @returns the rounded result
+ * @returns {number} the rounded result
  */
 export function round(number, precision) {
   const smudge = 10 ** precision;
@@ -303,6 +303,11 @@ function _iso7933_compliance(kwargs) {
 
 /**
  * Returns the body surface area in square meters
+ *
+ * @public
+ * @memberof utilities
+ * @docname Body Surface Area
+ *
  * @param {number} weight - body weight, [kg]
  * @param {number} height - height, [m]
  * @param {("dubois" | "takahira" | "fujimoto" | "kurazumi")} [formula="dubois"] - formula used to calculate the body surface area. default="dubois"
@@ -330,6 +335,11 @@ export function body_surface_area(weight, height, formula = "dubois") {
  * space plus the relative air speed caused by the body movement. Vag is assumed
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
  * Vag = 0.3 (M - 1) (m/s)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Relative air speed
+ *
  * @see {@link v_relative_array} for a version that supports array arguments
  *
  * @param {number} v - air spped measured by the sensor, [m/s]
@@ -346,6 +356,11 @@ export function v_relative(v, met) {
  * space plus the relative air speed caused by the body movement. Vag is assumed
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
  * Vag = 0.3 (M - 1) (m/s)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Relative air speed (array version)
+ *
  * @see {@link v_relative} for a version that supports scalar arguments
  *
  * @param {number[]} v - air spped measured by the sensor, [m/s]
@@ -370,9 +385,14 @@ function _v_relative_single(v, met) {
  * Estimates the dynamic clothing insulation of a moving occupant. The activity as
  * well as the air speed modify the insulation characteristics of the clothing and the
  * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
+ * shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Dynamic clothing
+ *
  * @see {@link clo_dynamic_array} for a version that supports array arguments
  *
  * @param {number} clo - clothing insulation, [clo]
@@ -394,9 +414,14 @@ export function clo_dynamic(clo, met, standard = "ASHRAE") {
  * Estimates the dynamic clothing insulation of a moving occupant. The activity as
  * well as the air speed modify the insulation characteristics of the clothing and the
  * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected [2]_. The ASHRAE 55 Standard corrects for the effect
+ * shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
  * of the body movement for met equal or higher than 1.2 met using the equation
  * clo = Icl × (0.6 + 0.4/met)
+ *
+ * @public
+ * @memberof utilities
+ * @docname Dynamic clothing (array version)
+ *
  * @see {@link clo_dynamic} for a version that supports scalar arguments
  *
  * @param {number[]} clo - clothing insulation, [clo]
@@ -428,36 +453,38 @@ function _clo_dynamic_single(clo, met) {
 }
 
 /**
- * @typedef {("IP" | "SI")} UnitSystem
- */
-
-/**
  * Converts IP values to SI units
+ *
+ * @memberof utilities
+ * @docname Units converter
+ * @public
  *
  * @template {Object.<string, number>} T
  * @param {T} kwargs - [t, v] units to convert
- * @param {UnitSystem} [from_units="IP"] - specify system to convert from
+ * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
  * @returns {T} converted values in SI units
+ *
+ * @see {@link units_converter_array} for a version that supports array parameters
  */
 export function units_converter(kwargs, from_units = "IP") {
   let result = { ...kwargs };
   if (from_units === "IP") {
     for (const [key, value] of Object.entries(result)) {
       if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = ((value - 32) * 5) / 9;
+        result[key] = _temp_ip_to_si(value);
       else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = value / 3.281;
-      else if (key === "area") result[key] = value / 10.764;
-      else if (key === "pressure") result[key] = value * 101325;
+        result[key] = _vel_ip_to_si(value);
+      else if (key === "area") result[key] = _area_ip_to_si(value);
+      else if (key === "pressure") result[key] = _pressure_ip_to_si(value);
     }
   } else if (from_units === "SI") {
     for (const [key, value] of Object.entries(result)) {
       if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = (value * 9) / 5 + 32;
+        result[key] = _temp_si_to_ip(value);
       else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = value * 3.281;
-      else if (key === "area") result[key] = value * 10.764;
-      else if (key === "pressure") result[key] = value / 101325;
+        result[key] = _vel_si_to_ip(value);
+      else if (key === "area") result[key] = _area_si_to_ip(value);
+      else if (key === "pressure") result[key] = _pressure_si_to_ip(value);
     }
   } else {
     throw new Error(`Unknown system ${from_units}`);
@@ -466,23 +493,133 @@ export function units_converter(kwargs, from_units = "IP") {
   return result;
 }
 
+/**
+ * Converts IP values to SI units
+ *
+ * @memberof utilities
+ * @docname Units converter (array version)
+ * @public
+ *
+ * @template {Object.<string, number[]>} T
+ * @param {T} kwargs - [t, v] units to convert
+ * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
+ * @returns {T} converted values in SI units
+ *
+ * @see {@link units_converter} for a version that supports scalar parameters
+ */
+export function units_converter_array(kwargs, from_units = "IP") {
+  let result = {};
+  if (from_units === "IP") {
+    for (const [key, value] of Object.entries(kwargs)) {
+      if (key.includes("tmp") || key === "tr" || key === "tdb")
+        result[key] = value.map(_temp_ip_to_si);
+      else if (key === "v" || key === "vr" || key === "vel")
+        result[key] = value.map(_vel_ip_to_si);
+      else if (key === "area") result[key] = value.map(_area_ip_to_si);
+      else if (key === "pressure") result[key] = value.map(_pressure_ip_to_si);
+    }
+  } else if (from_units === "SI") {
+    for (const [key, value] of Object.entries(kwargs)) {
+      if (key.includes("tmp") || key === "tr" || key === "tdb")
+        result[key] = value.map(_temp_si_to_ip);
+      else if (key === "v" || key === "vr" || key === "vel")
+        result[key] = value.map(_vel_si_to_ip);
+      else if (key === "area") result[key] = value.map(_area_si_to_ip);
+      else if (key === "pressure") result[key] = value.map(_pressure_si_to_ip);
+    }
+  } else {
+    throw new Error(`Unknown system ${from_units}`);
+  }
+
+  return result;
+}
+
+/**
+ * @param {number} pressure
+ * @returns {number}
+ */
+function _pressure_ip_to_si(pressure) {
+  return pressure * 101325;
+}
+
+/**
+ * @param {number} pressure
+ * @returns {number}
+ */
+function _pressure_si_to_ip(pressure) {
+  return pressure / 101325;
+}
+
+/**
+ * @param {number} area
+ * @returns {number}
+ */
+function _area_ip_to_si(area) {
+  return area / 10.764;
+}
+
+/**
+ * @param {number} area
+ * @returns {number}
+ */
+function _area_si_to_ip(area) {
+  return area * 10.764;
+}
+
+/**
+ * @param {number} vel
+ * @returns {number}
+ */
+function _vel_ip_to_si(vel) {
+  return vel / 3.281;
+}
+
+/**
+ * @param {number} vel
+ * @returns {number}
+ */
+function _vel_si_to_ip(vel) {
+  return vel * 3.281;
+}
+
+/**
+ * @param {number} temp
+ * @returns {number}
+ */
+function _temp_ip_to_si(temp) {
+  return ((temp - 32) * 5) / 9;
+}
+
+/**
+ * @param {number} temp
+ * @returns {number}
+ */
+function _temp_si_to_ip(temp) {
+  return (temp * 9) / 5 + 32;
+}
+
 // FIXME: find how to write math notation inside JSDocs
+
 /**
  * Estimates the running mean temperature also known as prevailing mean outdoor temperature
+ *
+ * @public
+ * @memberof utilities
+ * @docname Running mean outdoor temperature
  *
  * @param {number[]} temp_array - array containing the mean daily temperature in descending order (i.e. from
  * newest/yestedayr to oldest) :math:`[t_{day-1}, t_{day-2}, ... , t_{day-n}]`,
  * Where :math:`t_{day-1}` is yesterday's daily mean temperature. The EN
- * 16798-1 2019 [3]_ states that n should be equal to 7
+ * 16798-1 2019 {@link #ref_3|[3]} states that n should be equal to 7
  *
- * @param {number} [alpha=0.8] - constant between 0 and 1. The EN 16798-1 2019 [3]_ recommends a value of 0.8,
+ * @param {number} [alpha=0.8] - constant between 0 and 1. The EN 16798-1 2019 {@link #ref_3|[3]} recommends a value of 0.8,
  * while the ASHRAE 55 2020 recommends to choose values between 0.9 and 0.6,
  * corresponding to a slow- and fast- response running mean, respectively.
  * Adaptive comfort theory suggest that a slow-response running mean (alpha = 0.9)
  * could be more appropriate for climates in which synoptic-scale (day-to-day)
  * temperature dynamics are relatively minor, sich as the humid tropics.
  *
- * @param {UnitSystem} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {"IP" | "SI"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  *
  * @returns {number} running mean outdoor temperature
  */
@@ -508,6 +645,10 @@ export function running_mean_outdoor_temperature(
 /**
  * Calculates the sky-vault view fraction
  *
+ * @public
+ * @memberof utilities
+ * @docname Sky-vault view fraction
+ *
  * @param {number} w - width of the window, [m]
  * @param {number} h - height of the window, [m]
  * @param {number} d - distance between the occupant and the window, [m]
@@ -528,9 +669,6 @@ export function f_svv(w, h, d) {
  * @returns {number[]} the constrained range with NaNs for values that are outside the min, max range
  */
 export function valid_range(range, [min, max]) {
-  if (!Array.isArray(range)) {
-    return range >= min && range <= max ? range : NaN;
-  }
   if (range === undefined) return [];
   return range.map((n) => (n >= min && n <= max ? n : NaN));
 }

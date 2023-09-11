@@ -14,15 +14,13 @@ import { round } from "../utilities/utilities";
  * (37°C). The NET is still in use in Germany, where medical check-ups for
  * subjects working in the heat are decided on by prevailing levels of ET,
  * depending on metabolic rates. The NET is also constantly monitored by the
- * Hong Kong Observatory [1]. In central Europe the following thresholds are
+ * Hong Kong Observatory {@link #ref_16|[16]}. In central Europe the following thresholds are
  * in use: <1°C = very cold; 1–9 = cold; 9–17 = cool; 17–21 = fresh;
  * 21–23 = comfortable; 23–27 = warm; >27°C = hot [1].
  *
- * [1] Blazejczyk, K., Epstein, Y., Jendritzky, G., Staiger, H., Tinz, B., 2012.
- *     Comparison of UTCI to selected thermal indices. Int. J. Biometeorol.
- *     56, 515–535. DOI: doi.org/10.1007/s00484-011-0453-2
- *
  * @public
+ * @memberof models
+ * @docname Normal Effective Temperature (NET)
  *
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]

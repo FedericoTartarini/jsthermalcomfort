@@ -5,6 +5,7 @@ import {
   clo_dynamic,
   clo_dynamic_array,
   units_converter,
+  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
@@ -243,6 +244,85 @@ describe("units_converter", () => {
     ({ args, from_units, expected }) => {
       const result = units_converter(args, from_units);
       deep_close_to_obj(result, expected, 2);
+    },
+  );
+});
+
+describe("units_converter_array", () => {
+  it.each([
+    {
+      args: {
+        tdb: [77],
+        tr: [77],
+        v: [3.2],
+      },
+      from_units: "IP",
+      expected: {
+        tdb: [25.0],
+        tr: [25.0],
+        v: [0.975312],
+      },
+    },
+    {
+      args: {
+        pressure: [1],
+        area: [1 / 0.09],
+      },
+      from_units: "IP",
+      expected: {
+        pressure: [101325],
+        area: [1.03224],
+      },
+    },
+    {
+      args: {
+        tdb: [77],
+        v: [10],
+      },
+      from_units: "IP",
+      expected: {
+        tdb: [25.0],
+        v: [3.047],
+      },
+    },
+    {
+      args: {
+        tdb: [20],
+        v: [2],
+      },
+      from_units: "SI",
+      expected: {
+        tdb: [68],
+        v: [6.562],
+      },
+    },
+    {
+      args: {
+        area: [100],
+        pressure: [14.7],
+      },
+      from_units: "IP",
+      expected: {
+        area: [9.29],
+        pressure: [1489477.5],
+      },
+    },
+    {
+      args: {
+        area: [50],
+        pressure: [101325],
+      },
+      from_units: "SI",
+      expected: {
+        area: [538.199],
+        pressure: [1],
+      },
+    },
+  ])(
+    "returns $expected when args are $args and from_units is $from_units",
+    ({ args, from_units, expected }) => {
+      const result = units_converter_array(args, from_units);
+      deep_close_to_obj_arrays(result, expected, 2);
     },
   );
 });

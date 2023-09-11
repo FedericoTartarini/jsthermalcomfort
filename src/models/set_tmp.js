@@ -1,13 +1,11 @@
 import {
     units_converter,
-    _ankle_draft_compliance,
     check_standard_compliance_array,
-    _ashrae_compliance,
-    _iso7933_compliance
-} from "../src/utilities";
+    round
+} from "../utilities/utilities.js";
 import {
     two_nodes
-} from "../src/models"
+} from "../models/two_nodes.js"
 
 
 /**
@@ -30,20 +28,20 @@ import {
  * that from a person in the actual environment with actual clothing 
  * and activity level.
  * 
- * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
- * @param {number | number[]} tr Mean radiant temperature, default in [°C]
- * @param {number | number[]} v Air speed, default in [m/s]
- * @param {number | number[]} rh Relative humidity, [%].
- * @param {number | number[]} met Metabolic rate, [W/(m2)]
- * @param {number | number[]} clo Clothing insulation, [clo]
- * @param {number | number[]} wme External work, [W/(m2)] default 0
- * @param {number | number[]} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number | number[]} p_atm Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
+ * @param {number[]} tdbArray Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number[]} trArray Mean radiant temperature, default in [°C]
+ * @param {number[]} vArray Air speed, default in [m/s]
+ * @param {number[]} rhArray Relative humidity, [%].
+ * @param {number[]} metArray Metabolic rate, [W/(m2)]
+ * @param {number[]} cloArray Clothing insulation, [clo]
+ * @param {number[]} wmeArray External work, [W/(m2)] default 0
+ * @param {number[]} bodySurfaceArray Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number[]} pAtmArray Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {"standing" | "sitting"} bodyPositionArray Select either “sitting” or “standing”
  * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values. 
  * @param {SetTmpKwargs} [kwargs]
- * @returns {number | number[]} SET (float or array-like) – Standard effective temperature, [°C]
+ * @returns {number[]} SET Array – Standard effective temperature in array, [°C]
  * 
  * @example
  * const set = set_tmp(25, 25, 0.1, 50, 1.2, 0.5); // returns 24.3 

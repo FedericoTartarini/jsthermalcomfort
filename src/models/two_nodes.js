@@ -1,58 +1,57 @@
-import {
-  round,
-} from "../utilities/utilities.js";
+import { round } from "../utilities/utilities.js";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
-
-two_nodes(25, 25, 0.3, 50, 1.2, 0.5);
 
 /**
  * @typedef {Object} TwoNodesReturnType
- * @property {number | number[]} eSkin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
- * @property {number | number[]} eRsw (float or array-like) – Rate of evaporative heat loss from sweat evaporation, [W/m2]
- * @property {number | number[]} eMax (float or array-like) – Maximum rate of evaporative heat loss from skin, [W/m2]
- * @property {number | number[]} qSensible (float or array-like) – Sensible heat loss from skin, [W/m2]
- * @property {number | number[]} qSkin (float or array-like) – Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
- * @property {number | number[]} qRes (float or array-like) – Total rate of heat loss through respiration, [W/m2]
- * @property {number | number[]} tCore (float or array-like) – Core temperature, [°C]
- * @property {number | number[]} tSkin (float or array-like) – Skin temperature, [°C]
- * @property {number | number[]} mBl (float or array-like) – Skin blood flow, [kg/h/m2]
- * @property {number | number[]} mRsw (float or array-like) – Rate at which regulatory sweat is generated, [kg/h/m2]
- * @property {number | number[]} w (float or array-like) – Skin wettedness, adimensional. Ranges from 0 and 1.
- * @property {number | number[]} w_max (float or array-like) – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
- * @property {number | number[]} set (float or array-like) – Standard Effective Temperature (SET)
- * @property {number | number[]} et (float or array-like) – New Effective Temperature (ET)
- * @property {number | number[]} pmvGagge (float or array-like) – PMV Gagge
- * @property {number | number[]} pmvSet (float or array-like) – PMV SET
- * @property {number | number[]} disc (float or array-like) – Thermal discomfort
- * @property {number | number[]} tSens (float or array-like) – Predicted Thermal Sensation
+ * @property {number} eSkin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
+ * @property {number} eRsw  – Rate of evaporative heat loss from sweat evaporation, [W/m2]
+ * @property {number} eMax  – Maximum rate of evaporative heat loss from skin, [W/m2]
+ * @property {number} qSensible  – Sensible heat loss from skin, [W/m2]
+ * @property {number} qSkin  – Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
+ * @property {number} qRes  – Total rate of heat loss through respiration, [W/m2]
+ * @property {number} tCore  – Core temperature, [°C]
+ * @property {number} tSkin  – Skin temperature, [°C]
+ * @property {number} mBl  – Skin blood flow, [kg/h/m2]
+ * @property {number} mRsw  – Rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number} w  – Skin wettedness, adimensional. Ranges from 0 and 1.
+ * @property {number} w_max  – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
+ * @property {number} set  – Standard Effective Temperature (SET)
+ * @property {number} et  – New Effective Temperature (ET)
+ * @property {number} pmvGagge  – PMV Gagge
+ * @property {number} pmvSet  – PMV SET
+ * @property {number} disc  – Thermal discomfort
+ * @property {number} tSens  – Predicted Thermal Sensation
+ * @public
  */
 
 /**
  * @typedef {Object} TwoNodesKwargs
  * @property {boolean} [round=true]
  * @property {boolean} [calculate_ce=false]
- * @property {number | number[]} [max_sweating]
- * @property {number | number[]} [w_max]
+ * @property {number} [max_sweating]
+ * @property {number} [w_max]
+ * @public
  */
 
 /**
  * @typedef {Object} TwoNodesKwargsRequired
  * @property {boolean} round
  * @property {boolean} calculate_ce
- * @property {number | number[]} max_sweating
- * @property {number | number[]} w_max
+ * @property {number} max_sweating
+ * @property {number} w_max
  */
 
 /**
+ * 
  * Two-node model of human temperature regulation:
- * this model it can be used to calculate a variety of indices, including:
+ * This model can be used to calculate a variety of indices, including:
  * Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
  * the Fanger’s PMV equations but it replaces the heat loss and gain terms
  * with those calculated by the two node model PMV SET and the predicted
  * thermal sensation based on SET. This function is similar in all aspects
- * to the pythermalcomfort.models.pmv_gagge() however, it uses the
+ * to the pythermalcomfort.models.pmv_gagge(). However, it uses the
  * pythermalcomfort.models.set() equation to calculate the dry heat loss by
- * convection.
+ * convection {@link #ref_25|[25]}.
  * Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
  * to restore a state of comfort and thermal equilibrium by sweating. DISC is
  * described numerically as: comfortable and pleasant (0), slightly
@@ -66,14 +65,19 @@ two_nodes(25, 25, 0.3, 50, 1.2, 0.5);
  * The Predicted Thermal Sensation (TSENS)
  * The Predicted Percent Dissatisfied Due to Draft (PD)
  * Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * 
+ * @public
+ * @memberof models
+ * 
+ * @see {@link two_nodes_array} for a version that supports arrays
  *
- * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
- * @param {number | number[]} tr Mean radiant temperature, default in [°C]
- * @param {number | number[]} v Air speed, default in [m/s]
- * @param {number | number[]} rh Relative humidity, [%].
- * @param {number | number[]} met Metabolic rate, [W/(m2)]
- * @param {number | number[]} clo Clothing insulation, [clo]
- * @param {number | number[]} wme External work, [W/(m2)] default 0
+ * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number} tr Mean radiant temperature, default in [°C]
+ * @param {number} v Air speed, default in [m/s]
+ * @param {number} rh Relative humidity, [%].
+ * @param {number} met Metabolic rate, [W/(m2)]
+ * @param {number} clo Clothing insulation, [clo]
+ * @param {number} wme External work, [W/(m2)] default 0
  * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} p_atmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
@@ -84,7 +88,26 @@ two_nodes(25, 25, 0.3, 50, 1.2, 0.5);
  *
  * @example
  * const results = two_nodes(25, 25, 0.3, 50, 1.2, 0.5);
- * console.log(results); // {e_skin: 16.2, e_rsw: 7.0, e_max: 159.9, q_sensible: 47.6, q_skin: 63.8, q_res: 5.2, t_core: 36.9, t_skin: 33.7, m_bl: 12.9, m_rsw: 10.3, w: 0.1, w_max: 0.6, _set: 23.6, et: 25.0, pmv_gagge: 0.1, pmv_set: -0.0, disc: 0.1, t_sens: 0.1}
+ * console.log(results); // {
+  e_skin: 16.2,
+  e_rsw: 7,
+  e_max: 159.9,
+  q_sensible: 47.6,
+  q_skin: 63.8,
+  q_res: 5.2,
+  t_core: 36.9,
+  t_skin: 33.7,
+  m_bl: 12.9,
+  m_rsw: 10.3,
+  w: 0.1,
+  w_max: 0.6,
+  set: 23.6,
+  et: 25,
+  pmv_gagge: 0.1,
+  pmv_set: -0,
+  disc: 0.1,
+  t_sens: 0.1
+}
  *
  */
 export function two_nodes(
@@ -104,38 +127,14 @@ export function two_nodes(
   const defaults_kwargs = {
     calculate_ce: false,
     round: true,
-    max_sweating: 0.97,
+    max_sweating: 500,
     w_max: false,
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+  const vapor_pressure = cal_vapor_pressure(tdb, rh);
 
-  // const tbdIsArray = Array.isArray(tdb);
-  // if (!tbdIsArray) {
-  //     const vapor_pressure = rh * p_sat_torr(tdb) / 100
-  // }
-  // else{
-  //     const vapor_pressure = rhArray.map((_rh, index) => (
-  //         _rh * p_sat_torr(tdbArray[index]) / 100
-  //     ));
-  // }
-
-  const tdbArray = Array.isArray(tdb) ? tdb : [tdb];
-  const trArray = Array.isArray(tr) ? tr : [tr];
-  const vArray = Array.isArray(v) ? v : [v];
-  const rhArray = Array.isArray(rh) ? rh : [rh];
-  const metArray = Array.isArray(met) ? met : [met];
-  const cloArray = Array.isArray(clo) ? clo : [clo];
-  const wmeArray = Array.isArray(wme) ? wme : [wme];
-  const bodyPositionArray = Array.isArray(body_position)
-    ? body_position
-    : [body_position];
-
-  const vapor_pressure = rhArray.map(
-    (_rh, index) => (_rh * p_sat_torr(tdbArray[index])) / 100,
-  );
-
-  const result = calculateTwoNodesOptimized(
+  const result = calculate_two_nodes(
     tdb,
     tr,
     v,
@@ -148,7 +147,6 @@ export function two_nodes(
     body_position,
     joint_kwargs,
   );
-  //console.log(result)
 
   if (joint_kwargs.round) {
     return {
@@ -175,22 +173,490 @@ export function two_nodes(
   return result;
 }
 
+const kClo = 0.25;
+const bodyWeight = 70;
+const metFactor = 58.2;
+const sbc = 0.000000056697;
+const cSw = 170;
+const cDil = 120;
+const cStr = 0.5;
+const tempSkinNeutral = 33.7;
+const tempCoreNeutral = 36.8;
+const skinBloodFlowNeutral = 6.3;
+
 /**
- * @param {number | number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
- * @param {number | number[]} tr Mean radiant temperature, default in [°C]
- * @param {number | number[]} v Air speed, default in [m/s]
- * @param {number | number[]} met Metabolic rate, [W/(m2)]
- * @param {number | number[]} clo Clothing insulation, [clo]
- * @param {number | number[]} vaporPressure
- * @param {number | number[]} wme External work, [W/(m2)] default 0
+ * @typedef {Object} TwoNodesArrayReturnType
+ * @property {number[]} eSkin – Array of total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
+ * @property {number[]} eRsw  – Array of rate of evaporative heat loss from sweat evaporation, [W/m2]
+ * @property {number[]} eMax  – Array of maximum rate of evaporative heat loss from skin, [W/m2]
+ * @property {number[]} qSensible  – Array of sensible heat loss from skin, [W/m2]
+ * @property {number[]} qSkin  – Array of total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin
+ * @property {number[]} qRes  – Array of total rate of heat loss through respiration, [W/m2]
+ * @property {number[]} tCore  – Array of core temperature, [°C]
+ * @property {number[]} tSkin  – Array of skin temperature, [°C]
+ * @property {number[]} mBl  – Array of skin blood flow, [kg/h/m2]
+ * @property {number[]} mRsw  – Array of rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number[]} w  – Array of skin wettedness, adimensional. Ranges from 0 and 1.
+ * @property {number[]} w_max  – Array of skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
+ * @property {number[]} set  – Array of standard Effective Temperature (SET)
+ * @property {number[]} et  – Array of new Effective Temperature (ET)
+ * @property {number[]} pmvGagge  – Array of PMV Gagge
+ * @property {number[]} pmvSet  – Array of PMV SET
+ * @property {number[]} disc  – Array of Thermal discomfort
+ * @property {number[]} tSens  – Array of Predicted Thermal Sensation
+ * @public
+ */
+
+/**
+ * @typedef {Object} TwoNodesArrayKwargs
+ * @property {boolean} [round=true]
+ * @property {boolean} [calculate_ce=false]
+ * @property {number[]} [max_sweating]
+ * @property {number[]} [w_max]
+ * @public
+ */
+
+/**
+ * @typedef {Object} TwoNodesArrayKwargsRequired
+ * @property {boolean} round
+ * @property {boolean} calculate_ce
+ * @property {number[]} max_sweating
+ * @property {number[]} w_max
+ */
+
+/**
+ * 
+ * Compute two nodes model when the input parameters are arrays. 
+ * @public
+ * @memberof models
+ * 
+ * @see {@link two_nodes} for a version that supports scalar arguments
+ * 
+ * @param {number[]} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number[]} tr Mean radiant temperature, default in [°C]
+ * @param {number[]} v Air speed, default in [m/s]
+ * @param {number[]} rh Relative humidity, [%].
+ * @param {number[]} met Metabolic rate, [W/(m2)]
+ * @param {number[]} clo Clothing insulation, [clo]
+ * @param {number[]} wme External work, [W/(m2)] default 0
+ * @param {number[]} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number[]} p_atmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
+ * @param {number[]} max_skin_blood_flow Maximum blood flow from the core to the skin, [kg/h/m2] default 80
+ * @param {TwoNodesKwargs} [kwargs]
+ *
+ * @returns {TwoNodesArrayReturnType} object with results of two_nodes_array
+ *
+ * @example
+ * const results = two_nodes_array([25,30], [25,35], [0.3,0.5], [50,60], [1.2,1.5], [0.5, 0.3], [0], [1.8258], [101325], ["standing"], [90])
+ * console.log(results); // {
+  e_skin: [ 16.2, 60.4 ],
+  e_rsw: [ 7, 51.9 ],
+  e_max: [ 159.9, 193.8 ],
+  q_sensible: [ 47.6, 21.1 ],
+  q_skin: [ 63.8, 81.5 ],
+  q_res: [ 5.2, 5 ],
+  t_core: [ 36.9, 37 ],
+  t_skin: [ 33.7, 35.1 ],
+  m_bl: [ 12.9, 31.6 ],
+  m_rsw: [ 10.3, 76.3 ],
+  w: [ 0.1, 0.3 ],
+  w_max: [ 0.6, 0.6 ],
+  set: [ 23.6, 29.3 ],
+  et: [ 25, 32.5 ],
+  pmv_gagge: [ 0.1, 1.6 ],
+  pmv_set: [ -0, 1.1 ],
+  disc: [ 0.1, 1.9 ],
+  t_sens: [ 0.1, 1.4 ]
+}
+ *
+ */
+export function two_nodes_array(
+  tdbArray,
+  trArray,
+  vArray,
+  rhArray,
+  metArray,
+  cloArray,
+  wme = [0],
+  body_surface_area = [1.8258],
+  p_atmospheric = [101325],
+  body_position = ["standing"],
+  max_skin_blood_flow = [90],
+  kwargs = {},
+) {
+  const defaults_kwargs = {
+    calculate_ce: false,
+    round: true,
+    max_sweating: 500,
+    w_max: false,
+  };
+
+  let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  const vaporPressureArray = rhArray.map((_rh, index) =>
+    cal_vapor_pressure(tdbArray[index], _rh),
+  );
+  const wmeArray = fill_array(wme, tdbArray);
+  const bodySurfaceArray = fill_array(body_surface_area, tdbArray);
+  const pAtmArray = fill_array(p_atmospheric, tdbArray);
+  const bodyPositionArray = fill_array(body_position, tdbArray);
+  const maxSkinBloodFlowArray = fill_array(max_skin_blood_flow, tdbArray);
+
+  const setArray = [];
+  const eSkinArray = [];
+  const eRswArray = [];
+  const eMaxArray = [];
+  const qSensArray = [];
+  const qSkinArray = [];
+  const qResArray = [];
+  const tCoreArray = [];
+  const tSkinArray = [];
+  const mBlArray = [];
+  const mRswArray = [];
+  const wArray = [];
+  const wMaxArray = [];
+  const etArray = [];
+  const pmvGaggeArray = [];
+  const pmvSetArray = [];
+  const discArray = [];
+  const tSensArray = [];
+
+  for (let index = 0; index < tdbArray.length; index++) {
+    const result = calculate_two_nodes(
+      tdbArray[index],
+      trArray[index],
+      vArray[index],
+      metArray[index],
+      cloArray[index],
+      vaporPressureArray[index],
+      wmeArray[index],
+      bodySurfaceArray[index],
+      pAtmArray[index],
+      bodyPositionArray[index],
+      joint_kwargs,
+    );
+    setArray.push(result.set);
+    eSkinArray.push(result.eSkin);
+    eRswArray.push(result.eRsw);
+    eMaxArray.push(result.eMax);
+    qSensArray.push(result.qSensible);
+    qSkinArray.push(result.qSkin);
+    qResArray.push(result.qRes);
+    tCoreArray.push(result.tCore);
+    tSkinArray.push(result.tSkin);
+    mBlArray.push(result.mBl);
+    mRswArray.push(result.mRsw);
+    wArray.push(result.w);
+    wMaxArray.push(result.wMax);
+    etArray.push(result.et);
+    pmvGaggeArray.push(result.pmvGagge);
+    pmvSetArray.push(result.pmvSet);
+    discArray.push(result.disc);
+    tSensArray.push(result.tSens);
+  }
+
+  if (joint_kwargs.round) {
+    return {
+      e_skin: roundArray(eSkinArray, 1),
+      e_rsw: roundArray(eRswArray, 1),
+      e_max: roundArray(eMaxArray, 1),
+      q_sensible: roundArray(qSensArray, 1),
+      q_skin: roundArray(qSkinArray, 1),
+      q_res: roundArray(qResArray, 1),
+      t_core: roundArray(tCoreArray, 1),
+      t_skin: roundArray(tSkinArray, 1),
+      m_bl: roundArray(mBlArray, 1),
+      m_rsw: roundArray(mRswArray, 1),
+      w: roundArray(wArray, 1),
+      w_max: roundArray(wMaxArray, 1),
+      set: roundArray(setArray, 1),
+      et: roundArray(etArray, 1),
+      pmv_gagge: roundArray(pmvGaggeArray, 1),
+      pmv_set: roundArray(pmvSetArray, 1),
+      disc: roundArray(discArray, 1),
+      t_sens: roundArray(tSensArray, 1),
+    };
+  } else {
+    return {
+      e_skin: eSkinArray,
+      e_rsw: eRswArray,
+      e_max: eMaxArray,
+      q_sensible: qSensArray,
+      q_skin: qSkinArray,
+      q_res: qResArray,
+      t_core: tCoreArray,
+      t_skin: tSkinArray,
+      m_bl: mBlArray,
+      m_rsw: mRswArray,
+      w: wArray,
+      w_max: wMaxArray,
+      set: setArray,
+      et: etArray,
+      pmv_gagge: pmvGaggeArray,
+      pmv_set: pmvSetArray,
+      disc: discArray,
+      t_sens: tSensArray,
+    };
+  }
+}
+
+/**
+ * Round all elments in a given array to the given precision.
+ *
+ * @param {number[]} array - the array to round
+ * @param {number} precision - the number of decimal places to round to
+ * @returns the rounded result
+ */
+function roundArray(array, precision) {
+  return array.map((value) => round(value, precision));
+}
+
+/**
+ * Calculate vapor pressure based on air temperature and relative humidity.
+ *
+ * @param {number} tdb - air temperature [C]
+ * @param {number} rh - relative humidity [%]
+ * @returns {number} vapor pressure
+ */
+function cal_vapor_pressure(tdb, rh) {
+  return (rh * p_sat_torr(tdb)) / 100;
+}
+
+/**
+ * Fill the array to the required input format
+ *
+ * @param {number[]} newArray - the array to fill
+ * @param {number[]} tdbArray - the array with required proper length
+ * @returns the filled array
+ */
+function fill_array(newArray, tdbArray) {
+  const requiredLen = tdbArray.length;
+  if (newArray.length < requiredLen) {
+    newArray = Array(requiredLen).fill(newArray[0]);
+  }
+  return newArray;
+}
+
+/**
+ * Calculate metabolic rate based on metabolic [W/(m2)] and external work.
+ *
+ * @param {number} met - Metabolic rate, [W/(m2)]
+ * @param {number} wme - External work, default 0
+ * @returns {number} metabolic rate
+ */
+function calculate_metabolic_rate(met, wme) {
+  return (met - wme) * metFactor;
+}
+
+/**
+ * Calculate wettedness (w) practical upper limit based on airspeed and clothing insulation
+ *
+ * @param {number} airSpeed Airspeed
+ * @param {number} clo Clothing insulation, [clo]
+ * @param {TwoNodesKwargs} [kwargs]
+ * @returns {number} wettedness practical upper limit
+ */
+function calculate_w_max(airSpeed, clo, kwargs) {
+  let wMax = 0;
+  if (!kwargs.w_max) {
+    wMax = 0.38 * Math.pow(airSpeed, -0.29);
+    if (clo > 0) {
+      wMax = 0.59 * Math.pow(airSpeed, -0.08);
+    }
+  }
+  return wMax;
+}
+
+/**
+ * Calculate Predicted Thermal Sensation based on max wettedness, metabolic rate and mean body temperature
+ *
+ * @param {number} tBody mean body temperature
+ * @param {number} rm retabolic rate
+ * @param {number} wMax wettedness practical upper limit
+ * @returns {number} thermal sansation
+ */
+function calculate_thermal_sansation(tBody, rm, wMax) {
+  const tbmL = (0.194 / 58.15) * rm + 36.301;
+  const tbmH = (0.347 / 58.15) * rm + 36.669;
+
+  let tSens = 0.4685 * (tBody - tbmL);
+  if (tBody >= tbmL && tBody < tbmH) {
+    tSens = (wMax * 4.7 * (tBody - tbmL)) / (tbmH - tbmL);
+  } else if (tBody >= tbmH) {
+    tSens = wMax * 4.7 + 0.4685 * (tBody - tbmH);
+  }
+  return tSens;
+}
+
+/**
+ * Calculate standard effective temperature
+ *
+ * @param {number} tSkin skin temperature
+ * @param {number} qSkin total heat loss from skin
+ * @param {number} hDS
+ * @param {number} pSSk saturation vapour pressure of water of the skin
+ * @param {number} w skin wettness
+ * @param {number} hES
+ * @returns {number} SET
+ */
+function calculate_set(tSkin, qSkin, hDS, pSSk, w, hES) {
+  let delta = 0.0001;
+  let dx = 100.0;
+  let setOld = tSkin - qSkin / hDS;
+  let set = 0;
+
+  while (Math.abs(dx) > 0.01) {
+    const err1 =
+      qSkin -
+      hDS * (tSkin - setOld) -
+      w * hES * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + 235.0)));
+
+    const err2 =
+      qSkin -
+      hDS * (tSkin - (setOld + delta)) -
+      w *
+        hES *
+        (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + delta + 235.0)));
+
+    set = setOld - (delta * err1) / (err2 - err1);
+    dx = set - setOld;
+    setOld = set;
+  }
+  return set;
+}
+
+/**
+ * Calculate effective temperature
+ *
+ * @param {number} tSkin skin temperature
+ * @param {number} qSkin total heat loss from skin
+ * @param {number} pSSk saturation vapour pressure of water of the skin
+ * @param {number} w skin wettness
+ * @param {number} rA
+ * @param {number} rA
+ * @param {number} rEa
+ * @param {number} rEcl
+ * @returns {number} ET
+ */
+function calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl) {
+  const hD = 1 / (rA + rClo);
+  const hE = 1 / (rEa + rEcl);
+  let etOld = tSkin - qSkin / hD;
+  let delta = 0.0001;
+  let dx = 100.0;
+  let et = 0;
+
+  while (Math.abs(dx) > 0.01) {
+    const err1 =
+      qSkin -
+      hD * (tSkin - etOld) -
+      w * hE * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + 235.0)));
+
+    const err2 =
+      qSkin -
+      hD * (tSkin - (etOld + delta)) -
+      w *
+        hE *
+        (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + delta + 235.0)));
+
+    et = etOld - (delta * err1) / (err2 - err1);
+    dx = et - etOld;
+    etOld = et;
+  }
+  return et;
+}
+
+/**
+ * Calculate thermal discomfort
+ *
+ * @param {number} eRsw rate of evaporative heat loss from sweat evaporation
+ * @param {number} eComfort evaporative heat loss during comfort
+ * @param {number} eMax maximum rate of evaporative heat loss from skin
+ * @param {number} wMax maximum skin wettness
+ * @param {number} eDiff rate of evaporative heat loss from moisture diffused through the skin
+ * @param {number} tSens thermal sansation
+ * @returns {number} Thermal discomfort
+ */
+function calculate_discomfort(eRsw, eComfort, eMax, wMax, eDiff, tSens) {
+  let disc = (4.7 * (eRsw - eComfort)) / (eMax * wMax - eComfort - eDiff);
+  if (disc <= 0) {
+    disc = tSens;
+  }
+  return disc;
+}
+
+/**
+ * Calculate PMV Gagge
+ *
+ * @param {number} m metabolic rate
+ * @param {number} eReq evaporative heat loss required for tmp regulation
+ * @param {number} eComfort evaporative heat loss during comfort
+ * @param {number} eDiff rate of evaporative heat loss from moisture diffused through the skin
+ * @returns {number} PMV Gagge
+ */
+function calculate_pmv_gagge(m, eReq, eComfort, eDiff) {
+  return (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReq - eComfort - eDiff);
+}
+
+/**
+ * Calculate PMV SET
+ *
+ * @param {number} m metabolic rate
+ * @param {number} eComfort evaporative heat loss during comfort
+ * @param {number} eDiff rate of evaporative heat loss from moisture diffused through the skin
+ * @param {number} hDS
+ * @param {number} tSkin skin temperature
+ * @param {number} set SET
+ * @param {number} rm metabolic rate
+ * @param {number} cRes convective heat loss respiration
+ * @param {number} qRes heat loss due to respiration
+ * @returns {number} PMV SET
+ */
+function calculate_pmv_set(
+  m,
+  eComfort,
+  eDiff,
+  hDS,
+  tSkin,
+  set,
+  rm,
+  cRes,
+  qRes,
+) {
+  const drySet = hDS * (tSkin - set);
+  const eReqSet = rm - cRes - qRes - drySet;
+  return (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReqSet - eComfort - eDiff);
+}
+
+/**
+ * Calculate Predicted  Percent  Satisfied  With  the  Level  of  Air  Movement
+ *
+ * @param {number} tOp operative temperature
+ * @param {number} v Air speed, default in [m/s]
+ * @returns {number} predicted percent satisfied
+ */
+function calculate_percent_satisfied(tOp, v) {
+  return (
+    100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v)
+  );
+}
+
+/**
+ * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number} tr Mean radiant temperature, default in [°C]
+ * @param {number} v Air speed, default in [m/s]
+ * @param {number} met Metabolic rate, [W/(m2)]
+ * @param {number} clo Clothing insulation, [clo]
+ * @param {number} vaporPressure
+ * @param {number} wme External work, [W/(m2)] default 0
  * @param {number} bodySurfaceArea Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} pAtmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPosition Select either “sitting” or “standing”
  * @param {TwoNodesKwargs} [kwargs]
  *
  */
-
-function calculateTwoNodesOptimized(
+function calculate_two_nodes(
   tdb,
   tr,
   v,
@@ -204,24 +670,12 @@ function calculateTwoNodesOptimized(
   kwargs,
 ) {
   const airSpeed = Math.max(v, 0.1);
-  const kClo = 0.25;
-  const bodyWeight = 70; // body weight in kg
-  const metFactor = 58.2; // met conversion factor
-  const sbc = 0.000000056697; // Stefan-Boltzmann constant (W/m2K4)
-  const cSw = 170; // driving coefficient for regulatory sweating
-  const cDil = 120; // driving coefficient for vasodilation ashrae says 50 see page 9.19
-  const cStr = 0.5; // driving coefficient for vasoconstriction
-
-  const tempSkinNeutral = 33.7;
-  const tempCoreNeutral = 36.8;
   let alfa = 0.1;
   const tempBodyNeutral = alfa * tempSkinNeutral + (1 - alfa) * tempCoreNeutral;
-  const skinBloodFlowNeutral = 6.3;
 
   let tSkin = tempSkinNeutral;
   let tCore = tempCoreNeutral;
   let mBl = skinBloodFlowNeutral;
-
   let eSkin = 0.1 * met; // total evaporative heat loss, W
   let qSensible = 0; // total sensible heat loss, W
   let w = 0; // skin wettedness
@@ -244,28 +698,20 @@ function calculateTwoNodesOptimized(
   const rClo = 0.155 * clo; // thermal resistance of clothing, C M^2 /W
   const fACl = 1.0 + 0.15 * clo; // increase in body surface area due to clothing
   const lr = 2.2 / pressureInAtmospheres; // Lewis ratio
-  let rm = (met - wme) * metFactor; // metabolic rate
-  let m = met * metFactor; // metabolic rate
-  let wMax = 0;
+  let rm = calculate_metabolic_rate(met, wme);
+  let m = met * metFactor;
 
-  const eComfort = 0.42 * (rm - metFactor); // evaporative heat loss during comfort
+  const eComfort = 0.42 * (rm - metFactor);
   if (eComfort < 0) {
     eComfort = 0;
   }
 
-  let iCl = 1.0; // permeation efficiency of water vapour naked skin
+  let iCl = 1.0;
   if (clo > 0) {
-    iCl = 0.45; // permeation efficiency of water vapour through the clothing layer
+    iCl = 0.45;
   }
 
-  if (!kwargs.w_max) {
-    kwargs.w_max = 0.38 * Math.pow(airSpeed, -0.29); // critical skin wettedness naked
-    wMax = kwargs.w_max;
-    if (clo > 0) {
-      kwargs.w_max = 0.59 * Math.pow(airSpeed, -0.08); // critical skin wettedness clothed
-      wMax = kwargs.w_max;
-    }
-  }
+  const wMax = calculate_w_max(airSpeed, clo, kwargs);
 
   let hCc = 3.0 * Math.pow(pressureInAtmospheres, 0.53);
   const hFc = 8.600001 * Math.pow(airSpeed * pressureInAtmospheres, 0.53);
@@ -275,16 +721,15 @@ function calculateTwoNodesOptimized(
     hCc = Math.max(hCc, hCMet);
   }
 
-  const hR = 4.7; // linearized radiative heat transfer coefficient
-  let hT = hR + hCc; // sum of convective and radiant heat transfer coefficient W/(m2*K)
-  let rA = 1.0 / (fACl * hT); // resistance of air layer to dry heat
-  let tOp = (hR * tr + hCc * tdb) / hT; // operative temperature
+  let hR = 4.7;
+  let hT = hR + hCc;
+  let rA = 1.0 / (fACl * hT);
+  let tOp = (hR * tr + hCc * tdb) / hT;
 
-  let tBody = alfa * tSkin + (1 - alfa) * tCore; // mean body temperature, °C
+  let tBody = alfa * tSkin + (1 - alfa) * tCore;
 
-  qRes = 0.0023 * m * (44.0 - vaporPressure); // latent heat loss due to respiration
-  cRes = 0.0014 * m * (34.0 - tdb); // sensible convective heat loss respiration
-
+  qRes = 0.0023 * m * (44.0 - vaporPressure);
+  cRes = 0.0014 * m * (34.0 - tdb);
   while (nSimulation < lengthTimeSimulation) {
     nSimulation += 1;
 
@@ -294,13 +739,9 @@ function calculateTwoNodesOptimized(
     let tcConverged = false;
 
     while (!tcConverged) {
-      // 0.95 is the clothing emissivity from ASHRAE fundamentals Ch. 9.7 Eq. 35
-      let hR;
       if (bodyPosition === "sitting") {
-        // 0.7 ratio between radiation area of the body and the body area
         hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.7;
       } else {
-        // 0.73 ratio between radiation area of the body and the body area
         hR = 4.0 * 0.95 * sbc * ((tCl + tr) / 2.0 + 273.15) ** 3.0 * 0.73;
       }
       hT = hR + hCc;
@@ -318,10 +759,7 @@ function calculateTwoNodesOptimized(
       }
     }
 
-    qSensible = (tSkin - tOp) / (rA + rClo); // total sensible heat loss, W
-    // hfCs rate of energy transport between core and skin, W
-    // 5.28 is the average body tissue conductance in W/(m2 C)
-    // 1.163 is the thermal capacity of blood in Wh/(L C)
+    qSensible = (tSkin - tOp) / (rA + rClo);
     const hfCs = (tCore - tSkin) * (5.28 + 1.163 * mBl);
     const sCore = m - hfCs - qRes - cRes - wme; // rate of energy storage in the core
     const sSkin = hfCs - qSensible - eSkin; // rate of energy storage in the skin
@@ -332,17 +770,12 @@ function calculateTwoNodesOptimized(
     tSkin = tSkin + dTSk;
     tCore = tCore + dTCr;
     tBody = alfa * tSkin + (1 - alfa) * tCore;
-    // skSig thermoregulatory control signal from the skin
     const skSig = tSkin - tempSkinNeutral;
     const warmSk = (skSig > 0) * skSig; // vasodilation signal
     const colds = (-1.0 * skSig > 0) * (-1.0 * skSig); // vasoconstriction signal
-    // cRegSig thermoregulatory control signal from the skin, °C
     const cRegSig = tCore - tempCoreNeutral;
-    // cWarm vasodilation signal
     const cWarm = (cRegSig > 0) * cRegSig;
-    // cCold vasoconstriction signal
     const cCold = (-1.0 * cRegSig > 0) * (-1.0 * cRegSig);
-    // bdSig thermoregulatory control signal from the body
     const bdSig = tBody - tempBodyNeutral;
     const warmB = (bdSig > 0) * bdSig;
     mBl = (skinBloodFlowNeutral + cDil * cWarm) / (1 + cStr * colds);
@@ -352,44 +785,44 @@ function calculateTwoNodesOptimized(
     if (mBl < 0.5) {
       mBl = 0.5;
     }
-    mRsw = cSw * warmB * Math.exp(warmSk / 10.7); // regulatory sweating
+    mRsw = cSw * warmB * Math.exp(warmSk / 10.7);
     if (mRsw > kwargs.max_sweating) {
       mRsw = kwargs.max_sweating;
     }
-    eRsw = 0.68 * mRsw; // heat lost by vaporization sweat
-    rEa = 1.0 / (lr * fACl * hCc); // evaporative resistance air layer
+    eRsw = 0.68 * mRsw;
+    rEa = 1.0 / (lr * fACl * hCc);
     rEcl = rClo / (lr * iCl);
-    eReq = rm - qRes - cRes - qSensible; // evaporative heat loss required for tmp regulation
+    eReq = rm - qRes - cRes - qSensible;
     eMax =
       (Math.exp(18.6686 - 4030.183 / (tSkin + 235.0)) - vaporPressure) /
       (rEa + rEcl);
-    const pRsw = eRsw / eMax; // ratio heat loss sweating to max heat loss sweating
-    w = 0.06 + 0.94 * pRsw; // skin wetness
-    eDiff = w * eMax - eRsw; // vapor diffusion through skin
-    if (w > kwargs.w_max) {
-      w = kwargs.w_max;
-      const pRsw = kwargs.w_max / 0.94;
+    const pRsw = eRsw / eMax;
+    w = 0.06 + 0.94 * pRsw;
+    eDiff = w * eMax - eRsw;
+    if (w > wMax) {
+      w = wMax;
+      const pRsw = wMax / 0.94;
       eRsw = pRsw * eMax;
       eDiff = 0.06 * (1.0 - pRsw) * eMax;
     }
     if (eMax < 0) {
       eDiff = 0;
       eRsw = 0;
-      w = kwargs.w_max;
+      w = wMax;
     }
-    eSkin = eRsw + eDiff; // total evaporative heat loss sweating and vapor diffusion
-    mRsw = eRsw / 0.68; // back calculating the mass of regulatory sweating as a function of eRsw
-    const metShivering = 19.4 * colds * cCold; // met shivering W/m2
+
+    eSkin = eRsw + eDiff;
+    mRsw = eRsw / 0.68;
+    const metShivering = 19.4 * colds * cCold;
     m = rm + metShivering;
     alfa = 0.0417737 + 0.7451833 / (mBl + 0.585417);
   }
 
-  const qSkin = qSensible + eSkin; // total heat loss from skin, W
-  // pSSk saturation vapour pressure of water of the skin
+  const qSkin = qSensible + eSkin;
+
   const pSSk = Math.exp(18.6686 - 4030.183 / (tSkin + 235.0));
 
-  const hRS = hR; // standard environment radiative heat transfer coefficient
-
+  const hRS = hR;
   let hCS = 3.0 * Math.pow(pressureInAtmospheres, 0.53);
   if (!kwargs.calculate_ce && met > 0.85) {
     const hCMet = 5.66 * Math.pow(met - 0.85, 0.39);
@@ -412,82 +845,23 @@ function calculateTwoNodesOptimized(
   const hDS = 1.0 / (rAS + rClS);
   const hES = 1.0 / (rEaS + rEclS);
 
-  // calculate Standard Effective Temperature (SET)
-  let delta = 0.0001;
-  let dx = 100.0;
-  let setOld = tSkin - qSkin / hDS;
-  while (Math.abs(dx) > 0.01) {
-    const err1 =
-      qSkin -
-      hDS * (tSkin - setOld) -
-      w * hES * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + 235.0)));
-
-    const err2 =
-      qSkin -
-      hDS * (tSkin - (setOld + delta)) -
-      w *
-        hES *
-        (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (setOld + delta + 235.0)));
-    set = setOld - (delta * err1) / (err2 - err1);
-    dx = set - setOld;
-    setOld = set;
-  }
-
-  // Calculate Effective Temperature (ET)
-  const hD = 1 / (rA + rClo);
-  const hE = 1 / (rEa + rEcl);
-  let etOld = tSkin - qSkin / hD;
-  delta = 0.0001;
-  dx = 100.0;
-  while (Math.abs(dx) > 0.01) {
-    const err1 =
-      qSkin -
-      hD * (tSkin - etOld) -
-      w * hE * (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + 235.0)));
-
-    const err2 =
-      qSkin -
-      hD * (tSkin - (etOld + delta)) -
-      w *
-        hE *
-        (pSSk - 0.5 * Math.exp(18.6686 - 4030.183 / (etOld + delta + 235.0)));
-
-    et = etOld - (delta * err1) / (err2 - err1);
-    dx = et - etOld;
-    etOld = et;
-  }
-
-  const tbmL = (0.194 / 58.15) * rm + 36.301;
-  const tbmH = (0.347 / 58.15) * rm + 36.669;
-
-  let tSens = 0.4685 * (tBody - tbmL);
-  if (tBody >= tbmL && tBody < tbmH) {
-    tSens = (kwargs.w_max * 4.7 * (tBody - tbmL)) / (tbmH - tbmL);
-  } else if (tBody >= tbmH) {
-    tSens = kwargs.w_max * 4.7 + 0.4685 * (tBody - tbmH);
-  }
-
-  let disc =
-    (4.7 * (eRsw - eComfort)) / (eMax * kwargs.w_max - eComfort - eDiff); // predicted thermal discomfort
-  if (disc <= 0) {
-    disc = tSens;
-  }
-
-  // PMV Gagge
-  const pmvGagge =
-    (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReq - eComfort - eDiff);
-
-  // PMV SET
-  const drySet = hDS * (tSkin - set);
-  const eReqSet = rm - cRes - qRes - drySet;
-  const pmvSet =
-    (0.303 * Math.exp(-0.036 * m) + 0.028) * (eReqSet - eComfort - eDiff);
-
-  // Predicted Percent Satisfied With the Level of Air Movement
-  const ps =
-    100 * (1.13 * Math.sqrt(tOp) - 0.24 * tOp + 2.7 * Math.sqrt(v) - 0.99 * v);
-
-  // console.log(two_nodes(25, 25, 0.3, 50, 1.2, 0.5));
+  set = calculate_set(tSkin, qSkin, hDS, pSSk, w, hES);
+  et = calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl);
+  const tSens = calculate_thermal_sansation(tBody, rm, wMax);
+  const disc = calculate_discomfort(eRsw, eComfort, eMax, wMax, eDiff, tSens);
+  const pmvGagge = calculate_pmv_gagge(m, eReq, eComfort, eDiff);
+  const pmvSet = calculate_pmv_set(
+    m,
+    eComfort,
+    eDiff,
+    hDS,
+    tSkin,
+    set,
+    rm,
+    cRes,
+    qRes,
+  );
+  const ps = calculate_percent_satisfied(tOp, v);
 
   return {
     set,

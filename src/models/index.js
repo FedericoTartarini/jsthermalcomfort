@@ -3,7 +3,30 @@ import { phs } from "./phs";
 import { humidex } from "./humidex";
 import { net } from "./net";
 import { wbgt } from "./wbgt";
-import { two_nodes } from "./two_nodes";
-import { set_tmp } from "./set_tmp";
+import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 
-export default { heat_index, phs, humidex, net, wbgt, two_nodes, set_tmp };
+import { two_nodes, two_nodes_array } from "./two_nodes";
+import { wc } from "./wc";
+import { adaptive_en, adaptive_en_array } from "./adaptive_en";
+import { at } from "./at";
+
+/**
+ * @public
+ * @name models
+ * @docname Comfort Models
+ */
+export default {
+  heat_index,
+  phs,
+  humidex,
+  net,
+  wbgt,
+  discomfort_index,
+  discomfort_index_array,
+  two_nodes,
+  two_nodes_array,
+  wc,
+  adaptive_en,
+  adaptive_en_array,
+  at,
+};

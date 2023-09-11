@@ -100,6 +100,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("f_svv");
   });
 
+  it("should have utilities.met_typical_tasks", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("met_typical_tasks");
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });

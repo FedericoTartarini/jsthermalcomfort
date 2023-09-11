@@ -4,7 +4,6 @@ import { humidex } from "./humidex";
 import { net } from "./net";
 import { wbgt } from "./wbgt";
 import { discomfort_index, discomfort_index_array } from "./discomfort_index";
-
 import { two_nodes, two_nodes_array } from "./two_nodes";
 import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";

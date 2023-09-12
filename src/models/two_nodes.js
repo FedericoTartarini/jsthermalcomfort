@@ -892,18 +892,3 @@ function calculate_two_nodes(
     tSens,
   };
 }
-console.log(
-  two_nodes_array(
-    [40, 40, 40, 40],
-    [45, 45, 45, 45],
-    [0.2, 0.2, 0.2, 0.2],
-    [50, 50, 50, 50],
-    [1.2, 1.2, 1.2, 1.2],
-    [0.5, 0.5, 0.5, 0.5],
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    [70, 80, 90, 100],
-  ),
-);

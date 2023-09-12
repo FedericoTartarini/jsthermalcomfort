@@ -8,9 +8,9 @@ import {
 import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
 
 /**
- * @typedef {Object} SetTmpKwargs
- * @property {boolean} [round=true]
- * @property {boolean} [calculate_ce=false]
+ * @typedef {Object} SetTmpKwargs - a keywords argument set containing the additional arguments for Standard Effective Temperature calculation
+ * @property {boolean} [round=true] - round the result of the SET
+ * @property {boolean} [calculate_ce=false] - select if SET is used to calculate Cooling Effect
  * @public
  */
 
@@ -39,12 +39,12 @@ import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
  * @param {number} rh Relative humidity, [%].
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
- * @param {number} [wme=0] External work, [W/(m2)] default 0
- * @param {number} [body_surface_area=1.8258] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number} [p_atm=101325] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
- * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
+ * @param {number} wme External work, [W/(m2)] default 0
+ * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number} p_atm Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
+ * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
  * @returns {number} SET – Standard effective temperature in array, [°C]
  *
@@ -58,12 +58,12 @@ export function set_tmp(
   rh,
   met,
   clo,
-  wme = 0,
-  body_surface_area = 1.8258,
-  p_atm = 101325,
-  body_position = "standing",
-  units = "SI",
-  limit_inputs = true,
+  wme,
+  body_surface_area,
+  p_atm,
+  body_position,
+  units,
+  limit_inputs,
   kwargs = {},
 ) {
   const defaults_kwargs = {
@@ -72,6 +72,30 @@ export function set_tmp(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  if (wme === undefined) {
+    wme = 0;
+  }
+
+  if (body_position === undefined) {
+    body_position = "standing";
+  }
+
+  if (body_surface_area === undefined) {
+    body_surface_area = 1.8258;
+  }
+
+  if (p_atm === undefined) {
+    p_atm = 101325;
+  }
+
+  if (units === undefined) {
+    units = "SI";
+  }
+
+  if (limit_inputs === undefined) {
+    limit_inputs = true;
+  }
 
   if (units === "IP") {
     if (body_surface_area === 1.8258) {
@@ -108,18 +132,12 @@ export function set_tmp(
     body_surface_area,
     p_atm,
     body_position,
-    90,
+    undefined,
     { round: false },
   ).set;
 
   if (units === "IP") {
-    const convertedSet = units_converter(
-      {
-        tmp: set_tmp,
-      },
-      "SI",
-    );
-    set_tmp = convertedSet.tmp;
+    ({ tmp: set_tmp } = units_converter({ tmp: set_tmp }, "SI"));
   }
 
   if (limit_inputs) {
@@ -142,9 +160,9 @@ export function set_tmp(
 }
 
 /**
- * @typedef {Object} SetTmpArrayKwargs
- * @property {boolean} [round=true]
- * @property {boolean} [calculate_ce=false]
+ * @typedef {Object} SetTmpArrayKwargs - a keywords argument set containing the additional arguments for SET array calculation
+ * @property {boolean} [round=true] - round the result of the SET
+ * @property {boolean} [calculate_ce=false] - select if SET array is used to calculate Cooling Effect
  * @public
  */
 
@@ -172,8 +190,8 @@ export function set_tmp(
  * @param {number[]} bodySurfaceArray Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number[]} pAtmArray Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPositionArray Select either “sitting” or “standing”
- * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
+ * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
  * @returns {number[]} SET Array – Standard effective temperature in array, [°C]
  *
@@ -191,8 +209,8 @@ export function set_tmp_array(
   bodySurfaceArray,
   pAtmArray,
   bodyPositionArray,
-  units = "SI",
-  limit_inputs = true,
+  units,
+  limit_inputs,
   kwargs = {},
 ) {
   const defaults_kwargs = {
@@ -208,6 +226,14 @@ export function set_tmp_array(
 
   if (bodyPositionArray === undefined) {
     bodyPositionArray = tdbArray.map((_) => "standing");
+  }
+
+  if (units === undefined) {
+    units = "SI";
+  }
+
+  if (limit_inputs === undefined) {
+    limit_inputs = true;
   }
 
   let body_surface_area = 1.8258;
@@ -255,7 +281,7 @@ export function set_tmp_array(
     bodySurfaceArray,
     pAtmArray,
     bodyPositionArray,
-    [90],
+    undefined,
     { round: false },
   ).set;
 

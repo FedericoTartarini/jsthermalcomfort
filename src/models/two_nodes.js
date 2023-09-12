@@ -424,7 +424,7 @@ export function two_nodes_array(
  * @param {number} precision - the number of decimal places to round to
  * @returns the rounded result
  */
-function roundArray(array, precision) {
+export function roundArray(array, precision) {
   for (let index = 0; index < array.length; ++index) {
     array[index] = round(array[index], precision);
   }

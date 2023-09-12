@@ -5,12 +5,7 @@ import {
   check_standard_compliance_array,
   round,
 } from "../utilities/utilities.js";
-import {
-  two_nodes,
-  two_nodes_array,
-  fill_array,
-  roundArray,
-} from "../models/two_nodes.js";
+import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
 
 /**
  * @typedef {Object} SetTmpKwargs
@@ -34,6 +29,7 @@ import {
  * and activity level.
  * @public
  * @memberof models
+ * @docname Standard Effective Temperature (SET)
  *
  * @see {@link set_tmp_array} for a version that supports arrays
  *
@@ -162,6 +158,7 @@ export function set_tmp(
  * Calculates the SET when the input parameters are arrays
  * @public
  * @memberof models
+ * @docname Standard Effective Temperature (array version)
  *
  * @see {@link set_tmp} for a version that supports scalar arguments
  *
@@ -171,12 +168,12 @@ export function set_tmp(
  * @param {number[]} rhArray Relative humidity, [%].
  * @param {number[]} metArray Metabolic rate, [W/(m2)]
  * @param {number[]} cloArray Clothing insulation, [clo]
- * @param {number[]} [wme=[0]] External work, [W/(m2)] default 0
- * @param {number} [body_surface_area=1.8258] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number} [p_atm=101325] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {number[]} wmeArray External work, [W/(m2)] default 0
+ * @param {number[]} bodySurfaceArray Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number[]} pAtmArray Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPositionArray Select either “sitting” or “standing”
- * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
+ * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
  * @returns {number[]} SET Array – Standard effective temperature in array, [°C]
  *
@@ -190,10 +187,10 @@ export function set_tmp_array(
   rhArray,
   metArray,
   cloArray,
-  wme = [0],
-  body_surface_area = 1.8258,
-  p_atm = 101325,
-  body_position = ["standing"],
+  wmeArray,
+  bodySurfaceArray,
+  pAtmArray,
+  bodyPositionArray,
   units = "SI",
   limit_inputs = true,
   kwargs = {},
@@ -205,10 +202,23 @@ export function set_tmp_array(
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
 
-  const wmeArray = fill_array(wme, tdbArray);
-  const bodySurfaceArray = fill_array([body_surface_area], tdbArray);
-  const pAtmArray = fill_array([p_atm], tdbArray);
-  const bodyPositionArray = fill_array(body_position, tdbArray);
+  if (wmeArray === undefined) {
+    wmeArray = tdbArray.map((_) => 0);
+  }
+
+  if (bodyPositionArray === undefined) {
+    bodyPositionArray = tdbArray.map((_) => "standing");
+  }
+
+  let body_surface_area = 1.8258;
+  if (bodySurfaceArray === undefined) {
+    bodySurfaceArray = tdbArray.map((_) => 1.8258);
+  }
+
+  let p_atm = 101325;
+  if (pAtmArray === undefined) {
+    pAtmArray = tdbArray.map((_) => 101325);
+  }
 
   if (units === "IP") {
     if (body_surface_area === 1.8258) {

@@ -2,6 +2,7 @@ import {
   check_standard_compliance_array,
   round,
   units_converter,
+  units_converter_array,
   valid_range,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
@@ -295,15 +296,11 @@ export function pmv_ppd_array(
 
   if (kwargs.units && kwargs.units.toLowerCase() === "ip") {
     // Conversion from IP to SI units
-    for (let i = 0; i < tdb.length; i++) {
-      const result = units_converter(
-        { tdb: tdb[i], tr: tr[i], vr: vr[i] },
-        "IP",
-      );
-      tdb[i] = result.tdb;
-      tr[i] = result.tr;
-      vr[i] = result.vr;
-    }
+    const result = units_converter_array({ tdb: tdb, tr: tr, vr: vr }, "IP");
+
+    tdb = result.tdb;
+    tr = result.tr;
+    vr = result.vr;
   }
 
   standard = standard.toLowerCase();

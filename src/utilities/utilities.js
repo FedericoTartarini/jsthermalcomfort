@@ -40,16 +40,34 @@ export function round(number, precision) {
  * @typedef {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} Standard
  */
 
+/**
+ * Converts degrees to radians unit
+ *
+ * @param {number} degrees
+ *
+ * @returns {number} - radians
+ */
 function degrees_to_radians(degrees) {
-  var pi = Math.PI;
-  return degrees * (pi / 180);
+  return degrees * (Math.PI / 180);
 }
 
+/**
+ * Converts radians to degree unit
+ *
+ * @param {number} radians
+ *
+ * @returns {number} - degrees
+ */
 function radians_to_degrees(radians) {
-  var pi = Math.PI;
-  return radians * (180 / pi);
+  return radians * (180 / Math.PI);
 }
-//There is no documentation of this function
+
+/**
+ * Converts sharp and altittude from radians to degree unit
+ * @param {number} sharp
+ * @param {number} altitude
+ * @returns {number}
+ */
 export function transpose_sharp_altitude(sharp, altitude) {
   const altitude_new = radians_to_degrees(
     Math.asin(
@@ -63,8 +81,7 @@ export function transpose_sharp_altitude(sharp, altitude) {
         Math.tan(degrees_to_radians(90 - altitude)),
     ),
   );
-  const sol_altitude = altitude_new;
-  return [round(sharp, 3), round(sol_altitude, 3)];
+  return [round(sharp, 3), round(altitude_new, 3)];
 }
 
 /**

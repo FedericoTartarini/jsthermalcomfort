@@ -35,7 +35,7 @@ describe("transpose_sharp_altitude", () => {
     "returns $expected when sharp is $sharp and altitude is $altitude",
     ({ sharp, altitude, expected }) => {
       const result = transpose_sharp_altitude(sharp, altitude);
-      deep_close_to_array(result, expected, 0.02);
+      deep_close_to_array(result, expected, 0);
     },
   );
 });

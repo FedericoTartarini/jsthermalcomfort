@@ -120,6 +120,22 @@ describe("set_tmp", () => {
       kwargs: undefined,
       expected: NaN,
     },
+    {
+      tdb: 25,
+      tr: 25,
+      v: 0.1,
+      rh: 50,
+      met: 1.2,
+      clo: 0.5,
+      wme: undefined,
+      body_surface_area: undefined,
+      p_atm: undefined,
+      body_position: undefined,
+      units: undefined,
+      limit_inputs: undefined,
+      kwargs: { round: false },
+      expected: 24.31487798647244,
+    },
   ])(
     "returns $expected when tdb is $tdb, tr is $tr, v is $v, rh is $rh, met is $met, clo is $clo and units is $units",
     ({

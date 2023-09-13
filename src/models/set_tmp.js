@@ -141,16 +141,28 @@ export function set_tmp(
   }
 
   if (limit_inputs) {
-    let warnings = check_standard_compliance("ashrae", {
-      tdb,
-      tr,
-      v,
-      met,
-      clo,
+    const {
+      tdb: tdb_valid,
+      tr: tr_valid,
+      v: v_valid,
+      met: met_valid,
+      clo: clo_valid,
+    } = check_standard_compliance_array("ashrae", {
+      tdb: [tdb],
+      tr: [tr],
+      v: [v],
+      met: [met],
+      clo: [clo],
     });
-    if (warnings.length != 0) {
+
+    if (
+      isNaN(tdb_valid) ||
+      isNaN(tr_valid) ||
+      isNaN(v_valid) ||
+      isNaN(met_valid) ||
+      isNaN(clo_valid)
+    )
       set_tmp = NaN;
-    }
   }
 
   if (joint_kwargs.round) {
@@ -310,26 +322,15 @@ export function set_tmp_array(
       clo: cloArray,
     });
 
-    const allValid = !(
-      tdbValid.includes(NaN) ||
-      trValid.includes(NaN) ||
-      vValid.includes(NaN) ||
-      metValid.includes(NaN) ||
-      cloValid.includes(NaN)
-    );
-    if (allValid) {
-      setArray = setArray;
-    } else {
-      for (let index = 0; index < tdbArray.length; index++) {
-        if (
-          isNaN(tdbValid[index]) ||
-          isNaN(trValid[index]) ||
-          isNaN(vValid[index]) ||
-          isNaN(metValid[index]) ||
-          isNaN(cloValid[index])
-        ) {
-          setArray[index] = NaN;
-        }
+    for (let index = 0; index < tdbArray.length; index++) {
+      if (
+        isNaN(tdbValid[index]) ||
+        isNaN(trValid[index]) ||
+        isNaN(vValid[index]) ||
+        isNaN(metValid[index]) ||
+        isNaN(cloValid[index])
+      ) {
+        setArray[index] = NaN;
       }
     }
   }

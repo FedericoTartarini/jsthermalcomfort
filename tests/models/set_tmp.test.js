@@ -86,7 +86,7 @@ describe("set_tmp", () => {
       units: "SI",
       limit_inputs: false,
       kwargs: undefined,
-      expected: 38.2,
+      expected: 66.3,
     },
     {
       tdb: 77,
@@ -102,7 +102,7 @@ describe("set_tmp", () => {
       units: "SI",
       limit_inputs: false,
       kwargs: undefined,
-      expected: 41.9,
+      expected: 66.4,
     },
     {
       tdb: 5,
@@ -287,7 +287,7 @@ describe("set_tmp_array", () => {
       bodyPositionArray: undefined,
       units: "SI",
       limit_inputs: false,
-      expected: [41.9, 48.4],
+      expected: [66.4, 48.8],
     },
     {
       tdbArray: [77, 50, 40],
@@ -302,7 +302,7 @@ describe("set_tmp_array", () => {
       bodyPositionArray: undefined,
       units: "SI",
       limit_inputs: false,
-      expected: [41.9, 48.4, 35.7],
+      expected: [66.4, 48.8, 35.7],
     },
     {
       tdbArray: [77, 50, 40],

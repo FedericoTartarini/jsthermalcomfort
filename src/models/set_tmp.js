@@ -161,8 +161,9 @@ export function set_tmp(
       isNaN(v_valid) ||
       isNaN(met_valid) ||
       isNaN(clo_valid)
-    )
+    ) {
       set_tmp = NaN;
+    }
   }
 
   if (joint_kwargs.round) {

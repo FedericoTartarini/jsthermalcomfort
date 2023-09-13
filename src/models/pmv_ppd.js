@@ -126,7 +126,10 @@ export function pmv_ppd(
 
   if (kwargs.units && kwargs.units.toLowerCase() === "ip") {
     // Conversion from IP to SI units
-    ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
+    const result = units_converter({ tdb, tr, vr }, "IP");
+    tdb = result.tdb;
+    tr = result.tr;
+    vr = result.vr;
   }
 
   standard = standard.toLowerCase();

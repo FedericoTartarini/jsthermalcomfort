@@ -122,7 +122,7 @@ export function two_nodes(
   body_surface_area = 1.8258,
   p_atmospheric = 101325,
   body_position = "standing",
-  max_skin_blood_flow = 90,
+  max_skin_blood_flow = 80,
   kwargs = {},
 ) {
   const defaults_kwargs = {
@@ -146,6 +146,7 @@ export function two_nodes(
     body_surface_area,
     p_atmospheric,
     body_position,
+    max_skin_blood_flow,
     joint_kwargs,
   );
 
@@ -350,6 +351,7 @@ export function two_nodes_array(
       bodySurfaceArray[index],
       pAtmArray[index],
       bodyPositionArray[index],
+      maxSkinBloodFlowArray[index],
       joint_kwargs,
     );
     setArray[index] = result.set;
@@ -424,7 +426,7 @@ export function two_nodes_array(
  * @param {number} precision - the number of decimal places to round to
  * @returns the rounded result
  */
-function roundArray(array, precision) {
+export function roundArray(array, precision) {
   for (let index = 0; index < array.length; ++index) {
     array[index] = round(array[index], precision);
   }
@@ -652,11 +654,12 @@ function calculate_percent_satisfied(tOp, v) {
  * @param {number} v Air speed, default in [m/s]
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
- * @param {number} vaporPressure
+ * @param {number} vaporPressure Vapor pressure
  * @param {number} wme External work, [W/(m2)] default 0
  * @param {number} bodySurfaceArea Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} pAtmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPosition Select either “sitting” or “standing”
+ * @param {number} maxSkinBloodFlow Maximum blood flow from the core to the skin, [kg/h/m2] default 80
  * @param {TwoNodesKwargs} [kwargs]
  *
  */
@@ -671,6 +674,7 @@ function calculate_two_nodes(
   bodySurfaceArea,
   pAtmospheric,
   bodyPosition,
+  maxSkinBloodFlow,
   kwargs,
 ) {
   const airSpeed = Math.max(v, 0.1);
@@ -783,8 +787,8 @@ function calculate_two_nodes(
     const bdSig = tBody - tempBodyNeutral;
     const warmB = (bdSig > 0) * bdSig;
     mBl = (skinBloodFlowNeutral + cDil * cWarm) / (1 + cStr * colds);
-    if (mBl > kwargs.max_skin_blood_flow) {
-      mBl = kwargs.max_skin_blood_flow;
+    if (mBl > maxSkinBloodFlow) {
+      mBl = maxSkinBloodFlow;
     }
     if (mBl < 0.5) {
       mBl = 0.5;

@@ -8,6 +8,7 @@ import { two_nodes, two_nodes_array } from "./two_nodes";
 import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 import { at } from "./at";
+import { vertical_tmp_grad_ppd } from './vertical_tmp_grad_ppd';
 
 /**
  * @public
@@ -28,4 +29,5 @@ export default {
   adaptive_en,
   adaptive_en_array,
   at,
+  vertical_tmp_grad_ppd,
 };

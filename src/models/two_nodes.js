@@ -52,6 +52,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * to the pythermalcomfort.models.pmv_gagge(). However, it uses the
  * pythermalcomfort.models.set() equation to calculate the dry heat loss by
  * convection {@link #ref_25|[25]}.
+ * 
  * Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
  * to restore a state of comfort and thermal equilibrium by sweating. DISC is
  * described numerically as: comfortable and pleasant (0), slightly
@@ -59,11 +60,17 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * very uncomfortable (3), limited tolerance (4), and intolerable (S).
  * The range of each category is ± 0.5 numerically. In the cold, the classical
  * negative category descriptions used for Fanger’s PMV apply.
+ * 
  * Heat gains and losses via convection, radiation and conduction.
+ * 
  * The Standard Effective Temperature (SET)
+ * 
  * The New Effective Temperature (ET)
+ * 
  * The Predicted Thermal Sensation (TSENS)
+ * 
  * The Predicted Percent Dissatisfied Due to Draft (PD)
+ * 
  * Predicted Percent Satisfied With the Level of Air Movement” (PS)
  * 
  * @public

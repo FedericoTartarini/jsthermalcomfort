@@ -25,11 +25,11 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  */
 
 /**
- * @typedef {Object} TwoNodesKwargs
- * @property {boolean} [round=true]
- * @property {boolean} [calculate_ce=false]
- * @property {number} [max_sweating]
- * @property {number} [w_max]
+ * @typedef {Object} TwoNodesKwargs - a keywords argument set containing the additional arguments for Two nodes model calculation
+ * @property {boolean} [round=true] - round the result of two nodes model
+ * @property {boolean} [calculate_ce=false] - select if SET is used to calculate Cooling Effect
+ * @property {number} [max_sweating] - maximum rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number} [w_max]  – maximum skin wettedness (w) adimensional. Ranges from 0 and 1
  * @public
  */
 
@@ -78,11 +78,11 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * @param {number} rh Relative humidity, [%].
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
- * @param {number} [wme=0] External work, [W/(m2)] default 0
- * @param {number} [body_surface_area=1.8258] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number} [p_atmospheric=101325] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
- * @param {number} [max_skin_blood_flow=80] Maximum blood flow from the core to the skin, [kg/h/m2] default 80
+ * @param {number} wme External work, [W/(m2)] default 0
+ * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number} p_atmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
+ * @param {number} max_skin_blood_flow Maximum blood flow from the core to the skin, [kg/h/m2] default 80
  * @param {TwoNodesKwargs} [kwargs]
  *
  * @returns {TwoNodesReturnType} object with results of two_nodes
@@ -118,11 +118,11 @@ export function two_nodes(
   rh,
   met,
   clo,
-  wme = 0,
-  body_surface_area = 1.8258,
-  p_atmospheric = 101325,
-  body_position = "standing",
-  max_skin_blood_flow = 80,
+  wme,
+  body_surface_area,
+  p_atmospheric,
+  body_position,
+  max_skin_blood_flow,
   kwargs = {},
 ) {
   const defaults_kwargs = {
@@ -133,6 +133,27 @@ export function two_nodes(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  if (wme === undefined) {
+    wme = 0;
+  }
+
+  if (body_position === undefined) {
+    body_position = "standing";
+  }
+
+  if (body_surface_area === undefined) {
+    body_surface_area = 1.8258;
+  }
+
+  if (p_atmospheric === undefined) {
+    p_atmospheric = 101325;
+  }
+
+  if (max_skin_blood_flow === undefined) {
+    max_skin_blood_flow = 80;
+  }
+
   const vapor_pressure = cal_vapor_pressure(tdb, rh);
 
   if (joint_kwargs.calculate_ce) {

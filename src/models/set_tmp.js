@@ -1,7 +1,6 @@
 import {
   units_converter,
   units_converter_array,
-  check_standard_compliance,
   check_standard_compliance_array,
   round,
 } from "../utilities/utilities.js";
@@ -133,7 +132,7 @@ export function set_tmp(
     p_atm,
     body_position,
     undefined,
-    { round: false },
+    { round: false, calculate_ce: joint_kwargs.calculate_ce },
   ).set;
 
   if (units === "IP") {
@@ -295,7 +294,7 @@ export function set_tmp_array(
     pAtmArray,
     bodyPositionArray,
     undefined,
-    { round: false },
+    { round: false, calculate_ce: joint_kwargs.calculate_ce },
   ).set;
 
   if (units === "IP") {

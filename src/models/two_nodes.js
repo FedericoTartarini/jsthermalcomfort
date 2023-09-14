@@ -135,6 +135,26 @@ export function two_nodes(
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
   const vapor_pressure = cal_vapor_pressure(tdb, rh);
 
+  if (joint_kwargs.calculate_ce) {
+    const ce_set_result = calculate_two_nodes(
+      tdb,
+      tr,
+      v,
+      met,
+      clo,
+      vapor_pressure,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      body_position,
+      max_skin_blood_flow,
+      { calculate_ce: true },
+    );
+    return {
+      set: ce_set_result.set,
+    };
+  }
+
   const result = calculate_two_nodes(
     tdb,
     tr,
@@ -318,6 +338,31 @@ export function two_nodes_array(
 
   if (maxSkinBloodFlowArray === undefined) {
     maxSkinBloodFlowArray = tdbArray.map((_) => 80);
+  }
+
+  if (joint_kwargs.calculate_ce) {
+    const ceSetArray = new Array(tdbArray.length);
+    for (let index = 0; index < tdbArray.length; index++) {
+      const ceSetResult = calculate_two_nodes(
+        tdbArray[index],
+        trArray[index],
+        vArray[index],
+        metArray[index],
+        cloArray[index],
+        vaporPressureArray[index],
+        wmeArray[index],
+        bodySurfaceArray[index],
+        pAtmArray[index],
+        bodyPositionArray[index],
+        maxSkinBloodFlowArray[index],
+        { calculate_ce: true },
+      );
+      ceSetArray[index] = ceSetResult.set;
+    }
+
+    return {
+      set: ceSetArray,
+    };
   }
 
   const setArray = new Array(tdbArray.length);

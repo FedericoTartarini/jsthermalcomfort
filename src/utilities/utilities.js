@@ -749,3 +749,38 @@ export const met_typical_tasks = {
   Basketball: 6.3,
   Wrestling: 7.8,
 };
+
+
+/**
+ * Total Clothing insulation of typical ensembles
+ * @public
+ * @memberof reference_values
+ * @docname Typical ensembles insulation, [clo]
+ * @constant
+ * @type {Object}
+ * @property {number} "Walking shorts, short-sleeve shirt" - 0.7
+ * @property {number} "Typical summer indoor clothing" - 0.5
+ * @property {number} "Knee-length skirt, short-sleeve shirt, sandals, underwear" - 0.54
+ * @property {number} "Trousers, short-sleeve shirt, socks, shoes, underwear" - 0.57
+ * @property {number} "Trousers, long-sleeve shirt" - 0.61
+ * @property {number} "Knee-length skirt, long-sleeve shirt, full slip" - 0.67
+ * @property {number} "Sweat pants, long-sleeve sweatshirt" - 0.74
+ * @property {number} "Jacket, Trousers, long-sleeve shirt" - 0.96
+ * @property {number} "Typical winter indoor clothing" - 1.0
+ * @example
+ * import { met_typical_tasks } from "jsthermalcomfort/utilities"; //The path to utilities
+ * console.log(clo_typical_ensembles['Trousers, long-sleeve shirt']);
+ * // output 0.61
+ */
+
+export const clo_typical_ensembles = {
+  "Walking shorts, short-sleeve shirt": 0.36,
+  "Typical summer indoor clothing": 0.5,
+  "Knee-length skirt, short-sleeve shirt, sandals, underwear": 0.54,
+  "Trousers, short-sleeve shirt, socks, shoes, underwear": 0.57,
+  "Trousers, long-sleeve shirt": 0.61,
+  "Knee-length skirt, long-sleeve shirt, full slip": 0.67,
+  "Sweat pants, long-sleeve sweatshirt": 0.74,
+  "Jacket, Trousers, long-sleeve shirt": 0.96,
+  "Typical winter indoor clothing": 1.0,
+}

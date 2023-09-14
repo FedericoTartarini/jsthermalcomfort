@@ -112,6 +112,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("met_typical_tasks");
   });
 
+  it("should have utilities.clo_typical_ensembles", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_typical_ensembles");
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });

@@ -9,6 +9,7 @@ import { set_tmp, set_tmp_array } from "./set_tmp";
 import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 import { at } from "./at";
+import { adaptive_ashrae, adaptive_ashrae_array } from "./adaptive_ashrae";
 
 /**
  * @public
@@ -31,4 +32,6 @@ export default {
   at,
   set_tmp,
   set_tmp_array,
+  adaptive_ashrae,
+  adaptive_ashrae_array,
 };

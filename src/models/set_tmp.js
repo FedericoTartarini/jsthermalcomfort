@@ -38,12 +38,12 @@ import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
  * @param {number} rh Relative humidity, [%].
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
- * @param {number} wme External work, [W/(m2)] default 0
+ * @param {number} [wme=0] External work, [W/(m2)] default 0
  * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} p_atm Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} body_position Select either “sitting” or “standing”
- * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
+ * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
+ * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
  * @returns {number} SET – Standard effective temperature in array, [°C]
  *
@@ -57,12 +57,12 @@ export function set_tmp(
   rh,
   met,
   clo,
-  wme,
+  wme = 0,
   body_surface_area,
   p_atm,
-  body_position,
-  units,
-  limit_inputs,
+  body_position = "standing",
+  units = "SI",
+  limit_inputs = true,
   kwargs = {},
 ) {
   const defaults_kwargs = {
@@ -71,22 +71,6 @@ export function set_tmp(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
-
-  if (wme === undefined) {
-    wme = 0;
-  }
-
-  if (body_position === undefined) {
-    body_position = "standing";
-  }
-
-  if (units === undefined) {
-    units = "SI";
-  }
-
-  if (limit_inputs === undefined) {
-    limit_inputs = true;
-  }
 
   body_surface_area = units === "SI" ? 1.8258 : 19.65;
   p_atm = units === "SI" ? 101325 : 1;
@@ -191,8 +175,8 @@ export function set_tmp(
  * @param {number[]} bodySurfaceArray Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number[]} pAtmArray Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPositionArray Select either “sitting” or “standing”
- * @param {"SI" | "IP"} units Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} limit_inputs By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
+ * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
  * @returns {number[]} SET Array – Standard effective temperature in array, [°C]
  *
@@ -210,8 +194,8 @@ export function set_tmp_array(
   bodySurfaceArray,
   pAtmArray,
   bodyPositionArray,
-  units,
-  limit_inputs,
+  units = "SI",
+  limit_inputs = true,
   kwargs = {},
 ) {
   const defaults_kwargs = {
@@ -229,24 +213,8 @@ export function set_tmp_array(
     bodyPositionArray = tdbArray.map((_) => "standing");
   }
 
-  if (units === undefined) {
-    units = "SI";
-  }
-
-  if (limit_inputs === undefined) {
-    limit_inputs = true;
-  }
-
-  if (bodySurfaceArray === undefined) {
-    bodySurfaceArray = tdbArray.map((_) => 1.8258);
-  }
-
-  if (pAtmArray === undefined) {
-    pAtmArray = tdbArray.map((_) => 101325);
-  }
-
-  let body_surface_area = units === "SI" ? 1.8258 : 19.65;
-  let p_atm = units === "SI" ? 101325 : 1;
+  bodySurfaceArray = tdbArray.map((_) => (units === "SI" ? 1.8258 : 19.65));
+  pAtmArray = tdbArray.map((_) => (units === "SI" ? 101325 : 1));
 
   if (units === "IP") {
     const unit_convert = units_converter_array(
@@ -262,8 +230,8 @@ export function set_tmp_array(
     tdbArray = unit_convert.tdb;
     trArray = unit_convert.tr;
     vArray = unit_convert.v;
-    body_surface_area = unit_convert.area;
-    p_atm = unit_convert.pressure;
+    bodySurfaceArray = unit_convert.area;
+    pAtmArray = unit_convert.pressure;
   }
 
   let setArray = two_nodes_array(

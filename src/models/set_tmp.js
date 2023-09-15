@@ -80,14 +80,6 @@ export function set_tmp(
     body_position = "standing";
   }
 
-  if (body_surface_area === undefined) {
-    body_surface_area = 1.8258;
-  }
-
-  if (p_atm === undefined) {
-    p_atm = 101325;
-  }
-
   if (units === undefined) {
     units = "SI";
   }
@@ -96,13 +88,10 @@ export function set_tmp(
     limit_inputs = true;
   }
 
+  body_surface_area = units === "SI" ? 1.8258 : 19.65;
+  p_atm = units === "SI" ? 101325 : 1;
+
   if (units === "IP") {
-    if (body_surface_area === 1.8258) {
-      body_surface_area = 19.65;
-    }
-    if (p_atm === 101325) {
-      p_atm = 1;
-    }
     const unit_convert = units_converter(
       {
         tdb: tdb,
@@ -155,11 +144,11 @@ export function set_tmp(
     });
 
     if (
-      isNaN(tdb_valid) ||
-      isNaN(tr_valid) ||
-      isNaN(v_valid) ||
-      isNaN(met_valid) ||
-      isNaN(clo_valid)
+      isNaN(tdb_valid[0]) ||
+      isNaN(tr_valid[0]) ||
+      isNaN(v_valid[0]) ||
+      isNaN(met_valid[0]) ||
+      isNaN(clo_valid[0])
     ) {
       set_tmp = NaN;
     }
@@ -248,23 +237,18 @@ export function set_tmp_array(
     limit_inputs = true;
   }
 
-  let body_surface_area = 1.8258;
   if (bodySurfaceArray === undefined) {
     bodySurfaceArray = tdbArray.map((_) => 1.8258);
   }
 
-  let p_atm = 101325;
   if (pAtmArray === undefined) {
     pAtmArray = tdbArray.map((_) => 101325);
   }
 
+  let body_surface_area = units === "SI" ? 1.8258 : 19.65;
+  let p_atm = units === "SI" ? 101325 : 1;
+
   if (units === "IP") {
-    if (body_surface_area === 1.8258) {
-      body_surface_area = 19.65;
-    }
-    if (p_atm === 101325) {
-      p_atm = 1;
-    }
     const unit_convert = units_converter_array(
       {
         tdb: tdbArray,

@@ -266,7 +266,7 @@ export function set_tmp_array(
       v: vValid,
       met: metValid,
       clo: cloValid,
-    } = check_standard_compliance_array("ashrae", {
+    } = check_standard_compliance_array("ASHRAE", {
       tdb: tdbArray,
       tr: trArray,
       v: vArray,

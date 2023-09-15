@@ -756,7 +756,16 @@ export const met_typical_tasks = {
  * @memberof reference_values
  * @docname Typical ensembles insulation, [clo]
  *
- * @param {string} ensembles - Typical ensembles
+ * @param {string} ensembles - Typical ensembles. Should be one of:
+ *   - "Walking shorts, short-sleeve shirt"
+ *   - "Typical summer indoor clothing"
+ *   - "Knee-length skirt, short-sleeve shirt, sandals, underwear"
+ *   - "Trousers, short-sleeve shirt, socks, shoes, underwear"
+ *   - "Trousers, long-sleeve shirt"
+ *   - "Knee-length skirt, long-sleeve shirt, full slip"
+ *   - "Sweat pants, long-sleeve sweatshirt"
+ *   - "Jacket, Trousers, long-sleeve shirt"
+ *   - "Typical winter indoor clothing"
  *
  * @returns {number} - Clothing insulation of the given ensembles
  * @example

@@ -72,8 +72,9 @@ export function set_tmp(
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
 
-  body_surface_area = units === "SI" ? 1.8258 : 19.65;
-  p_atm = units === "SI" ? 101325 : 1;
+  if (body_surface_area === undefined)
+    body_surface_area = units === "SI" ? 1.8258 : 19.65;
+  if (p_atm === undefined) p_atm = units === "SI" ? 101325 : 1;
 
   if (units === "IP") {
     const unit_convert = units_converter(
@@ -171,9 +172,9 @@ export function set_tmp(
  * @param {number[]} rhArray Relative humidity, [%].
  * @param {number[]} metArray Metabolic rate, [W/(m2)]
  * @param {number[]} cloArray Clothing insulation, [clo]
- * @param {number[]} wmeArray External work, [W/(m2)] default 0
- * @param {number[]} bodySurfaceArray Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number[]} pAtmArray Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {number[]} [wmeArray] External work, [W/(m2)] default 0
+ * @param {number[]} [bodySurfaceArray] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number[]} [pAtmArray] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPositionArray Select either “sitting” or “standing”
  * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
@@ -213,8 +214,10 @@ export function set_tmp_array(
     bodyPositionArray = tdbArray.map((_) => "standing");
   }
 
-  bodySurfaceArray = tdbArray.map((_) => (units === "SI" ? 1.8258 : 19.65));
-  pAtmArray = tdbArray.map((_) => (units === "SI" ? 101325 : 1));
+  if (bodyPositionArray === undefined)
+    bodySurfaceArray = tdbArray.map((_) => (units === "SI" ? 1.8258 : 19.65));
+  if (pAtmArray === undefined)
+    pAtmArray = tdbArray.map((_) => (units === "SI" ? 101325 : 1));
 
   if (units === "IP") {
     const unit_convert = units_converter_array(

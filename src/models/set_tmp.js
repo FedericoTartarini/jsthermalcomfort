@@ -214,7 +214,7 @@ export function set_tmp_array(
     bodyPositionArray = tdbArray.map((_) => "standing");
   }
 
-  if (bodyPositionArray === undefined)
+  if (bodySurfaceArray === undefined)
     bodySurfaceArray = tdbArray.map((_) => (units === "SI" ? 1.8258 : 19.65));
   if (pAtmArray === undefined)
     pAtmArray = tdbArray.map((_) => (units === "SI" ? 101325 : 1));

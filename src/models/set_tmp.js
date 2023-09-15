@@ -119,7 +119,7 @@ export function set_tmp(
       v: v_valid,
       met: met_valid,
       clo: clo_valid,
-    } = check_standard_compliance_array("ashrae", {
+    } = check_standard_compliance_array("ASHRAE", {
       tdb: [tdb],
       tr: [tr],
       v: [v],

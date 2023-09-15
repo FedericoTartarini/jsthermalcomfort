@@ -39,7 +39,7 @@ import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
  * @param {number} [wme=0] External work, [W/(m2)] default 0
- * @param {number} body_surface_area Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * @param {number} [body_surface_area] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
  * @param {number} [p_atm] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
  * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.

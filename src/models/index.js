@@ -5,6 +5,7 @@ import { net } from "./net";
 import { wbgt } from "./wbgt";
 import { discomfort_index, discomfort_index_array } from "./discomfort_index";
 import { two_nodes, two_nodes_array } from "./two_nodes";
+import { set_tmp, set_tmp_array } from "./set_tmp";
 import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 import { at } from "./at";
@@ -29,6 +30,8 @@ export default {
   adaptive_en,
   adaptive_en_array,
   at,
+  set_tmp,
+  set_tmp_array,
   adaptive_ashrae,
   adaptive_ashrae_array,
 };

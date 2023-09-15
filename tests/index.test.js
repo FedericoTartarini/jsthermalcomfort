@@ -46,7 +46,7 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });
 
-  it("should have models.discomfort_index", () => {
+  it("should have models.discomfort_index_array", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index_array");
   });
 
@@ -54,8 +54,16 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
   });
 
-  it("should have models.two_nodes", () => {
+  it("should have models.two_nodes_array", () => {
     expect(jsthermalcomfort.models).toHaveProperty("two_nodes_array");
+  });
+
+  it("should have models.set_tmp", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("set_tmp");
+  });
+
+  it("should have models.set_tmp_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("set_tmp_array");
   });
 
   it("should have models.adaptive_en", () => {

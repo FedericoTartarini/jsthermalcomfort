@@ -750,37 +750,40 @@ export const met_typical_tasks = {
   Wrestling: 7.8,
 };
 
-
 /**
  * Total Clothing insulation of typical ensembles
  * @public
  * @memberof reference_values
  * @docname Typical ensembles insulation, [clo]
- * @constant
- * @type {Object}
- * @property {number} "Walking shorts, short-sleeve shirt" - 0.7
- * @property {number} "Typical summer indoor clothing" - 0.5
- * @property {number} "Knee-length skirt, short-sleeve shirt, sandals, underwear" - 0.54
- * @property {number} "Trousers, short-sleeve shirt, socks, shoes, underwear" - 0.57
- * @property {number} "Trousers, long-sleeve shirt" - 0.61
- * @property {number} "Knee-length skirt, long-sleeve shirt, full slip" - 0.67
- * @property {number} "Sweat pants, long-sleeve sweatshirt" - 0.74
- * @property {number} "Jacket, Trousers, long-sleeve shirt" - 0.96
- * @property {number} "Typical winter indoor clothing" - 1.0
+ *
+ * @param {string} ensembles - Typical ensembles
+ *
+ * @returns {number} - Clothing insulation of the given ensembles
  * @example
- * import { met_typical_tasks } from "jsthermalcomfort/utilities"; //The path to utilities
- * console.log(clo_typical_ensembles['Trousers, long-sleeve shirt']);
- * // output 0.61
+ * const result = clo_typical_ensembles("Trousers, long-sleeve shirt"); // returns 0.61
  */
 
-export const clo_typical_ensembles = {
-  "Walking shorts, short-sleeve shirt": 0.36,
-  "Typical summer indoor clothing": 0.5,
-  "Knee-length skirt, short-sleeve shirt, sandals, underwear": 0.54,
-  "Trousers, short-sleeve shirt, socks, shoes, underwear": 0.57,
-  "Trousers, long-sleeve shirt": 0.61,
-  "Knee-length skirt, long-sleeve shirt, full slip": 0.67,
-  "Sweat pants, long-sleeve sweatshirt": 0.74,
-  "Jacket, Trousers, long-sleeve shirt": 0.96,
-  "Typical winter indoor clothing": 1.0,
+export function clo_typical_ensembles(ensembles) {
+  switch (ensembles) {
+    case "Walking shorts, short-sleeve shirt":
+      return 0.36;
+    case "Typical summer indoor clothing":
+      return 0.5;
+    case "Knee-length skirt, short-sleeve shirt, sandals, underwear":
+      return 0.54;
+    case "Trousers, short-sleeve shirt, socks, shoes, underwear":
+      return 0.57;
+    case "Trousers, long-sleeve shirt":
+      return 0.61;
+    case "Knee-length skirt, long-sleeve shirt, full slip":
+      return 0.67;
+    case "Sweat pants, long-sleeve sweatshirt":
+      return 0.74;
+    case "Jacket, Trousers, long-sleeve shirt":
+      return 0.96;
+    case "Typical winter indoor clothing":
+      return 1.0;
+    default:
+      throw new Error("No such ensemble");
+  }
 }

@@ -11,6 +11,7 @@ import {
   valid_range,
   check_standard_compliance_array,
   v_relative_array,
+  clo_typical_ensembles,
 } from "../../src/utilities/utilities";
 import {
   deep_close_to_array,
@@ -553,4 +554,25 @@ describe("check_standard_compliance_array", () => {
       deep_close_to_obj_arrays(result, expected, 2);
     },
   );
+});
+
+describe("clo_typical_ensembles", () => {
+  it.each([
+    { ensembles: "Walking shorts, short-sleeve shirt", expected: 0.36 },
+    { ensembles: "Trousers, long-sleeve shirt", expected: 0.61 },
+    { ensembles: "Sweat pants, long-sleeve sweatshirt", expected: 0.74 },
+    { ensembles: "Typical winter indoor clothing", expected: 1.0 },
+  ])(
+    "returns $expected when ensemble is $ensembles",
+    ({ ensembles, expected }) => {
+      const result = clo_typical_ensembles(ensembles);
+      expect(result).toBeCloseTo(expected, 2);
+    },
+  );
+
+  it("throws an error if the ensemble is not valid", () => {
+    expect(() =>
+      clo_typical_ensembles("Sweet pants, short-sleeve shirt"),
+    ).toThrow();
+  });
 });

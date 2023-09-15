@@ -37,7 +37,7 @@ export function round(number, precision) {
  */
 
 /**
- * @typedef {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} Standard
+ * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "ISO" | "ISO7933"} Standard
  */
 
 /**
@@ -50,11 +50,11 @@ export function round(number, precision) {
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case "ankle_draft":
+    case "ANKLE_DRAFT":
       return _ankle_draft_compliance(kwargs);
-    case "ashrae":
+    case "ASHRAE":
       return _ashrae_compliance(kwargs);
-    case "iso":
+    case "ISO":
       return _iso_compliance(kwargs);
     case "ISO7933":
       return _iso7933_compliance(kwargs);
@@ -78,7 +78,7 @@ export function check_standard_compliance(standard, kwargs) {
  * the values that do not comply are NaN
  * @see {@link check_standard_compliance} for scalar variant that returns warnings
  *
- * @param {Standard | "fan_heatwaves"} standard - standard to check compliance with
+ * @param {Standard | "FAN_HEATWAVES"} standard - standard to check compliance with
  * @param {ComplianceKwargsArray & {airspeed_control?: boolean}} kwargs - values to check compliance against
  *
  * @returns {CheckStandardComplianceResult} filtered arrays based on compliance limits
@@ -89,9 +89,9 @@ export function check_standard_compliance_array(standard, kwargs) {
 
   switch (standard) {
     case "ISO7933":
-    case "ankle_draft":
+    case "ANKLE_DRAFT":
       throw new Error(`Unsupported standard ${standard}`);
-    case "ashrae": {
+    case "ASHRAE": {
       // based on table 7.3.4 ashrae 55 2020
       const tdb = valid_range(kwargs.tdb, [10.0, 40.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);
@@ -131,7 +131,7 @@ export function check_standard_compliance_array(standard, kwargs) {
       }
       return { tdb, tr, v };
     }
-    case "fan_heatwaves": {
+    case "FAN_HEATWAVES": {
       const tdb = valid_range(kwargs.tdb, [20.0, 50.0]);
       const tr = valid_range(kwargs.tr, [20.0, 50.0]);
       const v = valid_range(kwargs.v, [0.1, 4.5]);
@@ -140,7 +140,7 @@ export function check_standard_compliance_array(standard, kwargs) {
       const clo = valid_range(kwargs.clo, [0.0, 1]);
       return { tdb, tr, v, rh, met, clo };
     }
-    case "iso": {
+    case "ISO": {
       // based on ISO 7730:2005 page 3
       const tdb = valid_range(kwargs.tdb, [10.0, 30.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);

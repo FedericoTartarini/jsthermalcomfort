@@ -25,7 +25,7 @@ import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
  * total heat loss from the skin of an imaginary occupant wearing
  * clothing, standardized for the activity concerned is the same as
  * that from a person in the actual environment with actual clothing
- * and activity level.
+ * and activity level {@link #ref_25|[25]}.
  * @public
  * @memberof models
  * @docname Standard Effective Temperature (SET)
@@ -159,7 +159,13 @@ export function set_tmp(
  */
 /**
  *
- * Calculates the SET when the input parameters are arrays
+ * Calculates the SET when the input parameters are arrays. The SET is the
+ * temperature of a hypothetical isothermal environment at 50% (rh),
+ * <0.1 m/s (20 fpm) average air speed (v), and tr = tdb, in which the
+ * total heat loss from the skin of an imaginary occupant wearing
+ * clothing, standardized for the activity concerned is the same as
+ * that from a person in the actual environment with actual clothing
+ * and activity level {@link #ref_25|[25]}.
  * @public
  * @memberof models
  * @docname Standard Effective Temperature (array version)

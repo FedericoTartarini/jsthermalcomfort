@@ -37,7 +37,7 @@ import { set_tmp } from "./set_tmp.js";
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
  *
  * @param {number} [wme=0] - external work
- * @param {'SI','IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {'SI','IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @returns {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
  *
  * @example

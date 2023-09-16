@@ -66,7 +66,7 @@ function radians_to_degrees(radians) {
  * Converts sharp and altittude from radians to degree unit
  * @param {number} sharp
  * @param {number} altitude
- * @returns {number}
+ * @returns {[number, number]}
  */
 export function transpose_sharp_altitude(sharp, altitude) {
   const altitude_new = radians_to_degrees(

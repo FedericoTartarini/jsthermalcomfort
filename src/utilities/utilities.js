@@ -793,3 +793,53 @@ export const met_typical_tasks = {
   Basketball: 6.3,
   Wrestling: 7.8,
 };
+
+/**
+ * Total Clothing insulation of typical ensembles
+ * @public
+ * @memberof reference_values
+ * @docname Typical ensembles insulation, [clo]
+ *
+ * @param {"Walking shorts, short-sleeve shirt" | "Typical summer indoor clothing" |
+ * "Knee-length skirt, short-sleeve shirt, sandals, underwear" | "Trousers, long-sleeve shirt" |
+ * "Knee-length skirt, long-sleeve shirt, full slip" | "Sweat pants, long-sleeve sweatshirt" |
+ * "Jacket, Trousers, long-sleeve shirt" | "Typical winter indoor clothing"} ensembles - Typical ensembles. One of:
+ *   - "Walking shorts, short-sleeve shirt"
+ *   - "Typical summer indoor clothing"
+ *   - "Knee-length skirt, short-sleeve shirt, sandals, underwear"
+ *   - "Trousers, short-sleeve shirt, socks, shoes, underwear"
+ *   - "Trousers, long-sleeve shirt"
+ *   - "Knee-length skirt, long-sleeve shirt, full slip"
+ *   - "Sweat pants, long-sleeve sweatshirt"
+ *   - "Jacket, Trousers, long-sleeve shirt"
+ *   - "Typical winter indoor clothing"
+ *
+ * @returns {number} - Clothing insulation of the given ensembles
+ * @example
+ * const result = clo_typical_ensembles("Trousers, long-sleeve shirt"); // returns 0.61
+ */
+
+export function clo_typical_ensembles(ensembles) {
+  switch (ensembles) {
+    case "Walking shorts, short-sleeve shirt":
+      return 0.36;
+    case "Typical summer indoor clothing":
+      return 0.5;
+    case "Knee-length skirt, short-sleeve shirt, sandals, underwear":
+      return 0.54;
+    case "Trousers, short-sleeve shirt, socks, shoes, underwear":
+      return 0.57;
+    case "Trousers, long-sleeve shirt":
+      return 0.61;
+    case "Knee-length skirt, long-sleeve shirt, full slip":
+      return 0.67;
+    case "Sweat pants, long-sleeve sweatshirt":
+      return 0.74;
+    case "Jacket, Trousers, long-sleeve shirt":
+      return 0.96;
+    case "Typical winter indoor clothing":
+      return 1.0;
+    default:
+      throw new Error("No such ensemble");
+  }
+}

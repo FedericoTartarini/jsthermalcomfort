@@ -10,6 +10,7 @@ import {
   f_svv,
   met_typical_tasks,
   clo_typical_ensembles,
+  clo_individual_garments,
 } from "./utilities";
 
 /**
@@ -29,6 +30,7 @@ export default {
   f_svv,
   met_typical_tasks,
   clo_typical_ensembles,
+  clo_individual_garments,
 };
 
 /**

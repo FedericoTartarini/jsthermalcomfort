@@ -136,6 +136,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("clo_typical_ensembles");
   });
 
+  it("should have utilities.clo_individual_garments", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty(
+      "clo_individual_garments",
+    );
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });

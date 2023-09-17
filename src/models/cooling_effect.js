@@ -37,7 +37,7 @@ import { set_tmp } from "./set_tmp.js";
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
  *
  * @param {number} [wme=0] - external work
- * @param {'SI','IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {'SI'|'IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @returns {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
  *
  * @example
@@ -113,40 +113,6 @@ export function cooling_effect(
     );
   }
 
-  function findRoot(func, a, b) {
-    const maxIterations = 100; // Set the maximum number of iterations to prevent infinite loop
-    let fa = func(a);
-    let fb = func(b);
-    let c, fc;
-
-    if (Math.sign(fa) === Math.sign(fb)) {
-      throw new Error(
-        "Function has the same sign at both ends of the interval.",
-      );
-    }
-
-    for (let i = 0; i < maxIterations; i++) {
-      // Calculate a new approximation 'c' using the bisection method
-      c = (a + b) / 2;
-      fc = func(c);
-
-      if (Math.abs(fc) < 1e-6) {
-        return c;
-      }
-
-      if (Math.sign(fc) === Math.sign(fa)) {
-        // Update the interval boundaries
-        a = c;
-        fa = fc;
-      } else {
-        b = c;
-        fb = fc;
-      }
-    }
-
-    throw new Error("Maximum number of iterations reached.");
-  }
-
   let ce;
   try {
     // Find a root of a function in a bracketing interval
@@ -166,4 +132,42 @@ export function cooling_effect(
   }
 
   return round(ce, 2);
+}
+
+/**
+ * @param func - the target function for which need to find the root.
+ * @param a - the left boundary of the search interval
+ * @param b - the right boundary of the search interval
+ * @returns {number} - return root if found
+ */
+function findRoot(func, a, b) {
+  const maxIterations = 100; // Set the maximum number of iterations to prevent infinite loop
+  let fa = func(a);
+  let fb = func(b);
+  let c, fc;
+
+  if (Math.sign(fa) === Math.sign(fb)) {
+    throw new Error("Function has the same sign at both ends of the interval.");
+  }
+
+  for (let i = 0; i < maxIterations; i++) {
+    // Calculate a new approximation 'c' using the bisection method
+    c = (a + b) / 2;
+    fc = func(c);
+
+    if (Math.abs(fc) < 1e-6) {
+      return c;
+    }
+
+    if (Math.sign(fc) === Math.sign(fa)) {
+      // Update the interval boundaries
+      a = c;
+      fa = fc;
+    } else {
+      b = c;
+      fb = fc;
+    }
+  }
+
+  throw new Error("Maximum number of iterations reached.");
 }

@@ -27,10 +27,17 @@ import { cooling_effect } from "./cooling_effect.js";
  */
 
 /**
- * Returns Predicted Mean Vote (`PMV`) and Predicted Percentage of
- * Dissatisfied (`PPD`) calculated in accordance with main thermal comfort
- * Standards. The PMV is an index that predicts the mean value of the thermal
- * sensation votes (self-reported perceptions) of a large group of people on a
+ * @typedef {Object} Pmv_ppdReturns
+ * @property { number } pmv - Predicted Mean Vote
+ * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @public
+ */
+
+/**
+ * Returns Predicted Mean Vote ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}) and
+ * Predicted Percentage of Dissatisfied ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD})
+ * calculated in accordance with main thermal comfort Standards. The PMV is an index that predicts the mean
+ * value of the thermal sensation votes (self-reported perceptions) of a large group of people on a
  * sensation scale expressed from –3 to +3 corresponding to the categories:
  * cold, cool, slightly cool, neutral, slightly warm, warm, and hot. {@link #ref_1|[1]}
  *
@@ -41,15 +48,12 @@ import { cooling_effect } from "./cooling_effect.js";
  * Please read more in the Note below.
  *
  * Notes:
- * You can use this function to calculate the `PMV` and `PPD` in accordance with
+ * You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ * and {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD} in accordance with
  * either the ASHRAE 55 2020 Standard {@link #ref_1|[1]} or the ISO 7730 Standard {@link #ref_2|[2]}.
  *
- * _PMV:
- * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
- * _PPD:
- * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD}
  * _Addendum C to Standard 55-2020:
- * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
+ * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
  *
  * This is a version that supports scalar arguments.
  * @see {@link pmv_ppd_array} for a version that supports arrays.
@@ -85,9 +89,7 @@ import { cooling_effect } from "./cooling_effect.js";
  * This change was introduced by the `Addendum C to Standard 55-2020`_
  * @param { Pmv_ppdKwargs }kwargs - additional arguments
  *
- * @returns { Object } - Result of pmv and ppd
- * @property { number } pmv - Predicted Mean Vote
- * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @returns { Pmv_ppdReturns } - Result of pmv and ppd
  *
  * @example
  * const tdb = 25;
@@ -124,10 +126,7 @@ export function pmv_ppd(
 
   if (kwargs.units && kwargs.units === "IP") {
     // Conversion from IP to SI units
-    const result = units_converter({ tdb, tr, vr }, "IP");
-    tdb = result.tdb;
-    tr = result.tr;
-    vr = result.vr;
+    ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
   }
 
   if (standard !== "ISO" && standard !== "ASHRAE") {
@@ -136,7 +135,13 @@ export function pmv_ppd(
     );
   }
 
-  const checkResult = check_standard_compliance_array(standard, {
+  const {
+    tdb: tdb_valid,
+    tr: tr_valid,
+    v: v_valid,
+    met: met_valid,
+    clo: clo_valid,
+  } = check_standard_compliance_array(standard, {
     tdb: [tdb],
     tr: [tr],
     v: [vr],
@@ -144,12 +149,6 @@ export function pmv_ppd(
     clo: [clo],
     airspeed_control: kwargs.airspeed_control,
   });
-
-  const tdb_valid = checkResult.tdb;
-  const tr_valid = checkResult.tr;
-  const v_valid = checkResult.v;
-  const met_valid = checkResult.met;
-  const clo_valid = checkResult.clo;
 
   let ce = 0;
   if (standard === "ASHRAE") {
@@ -169,24 +168,20 @@ export function pmv_ppd(
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   if (kwargs.limit_inputs) {
-    const pmv_array = [pmv];
-
     const pmv_valid =
       standard === "ASHRAE"
-        ? valid_range(pmv_array, [-100, 100])
-        : valid_range(pmv_array, [-2, 2]); // this is the ISO limit
+        ? valid_range([pmv], [-100, 100])
+        : valid_range([pmv], [-2, 2]); // this is the ISO limit
 
-    const all_valid = !(
-      pmv_array.includes(NaN) ||
+    if (
+      isNaN(pmv) ||
       tdb_valid.includes(NaN) ||
       tr_valid.includes(NaN) ||
       v_valid.includes(NaN) ||
       met_valid.includes(NaN) ||
       clo_valid.includes(NaN) ||
       pmv_valid.includes(NaN)
-    );
-
-    if (!all_valid) {
+    ) {
       pmv = NaN;
       ppd = NaN;
     }
@@ -199,10 +194,17 @@ export function pmv_ppd(
 }
 
 /**
- * Returns Predicted Mean Vote (`PMV`) and Predicted Percentage of
- * Dissatisfied (`PPD`) calculated in accordance with main thermal comfort
- * Standards. The PMV is an index that predicts the mean value of the thermal
- * sensation votes (self-reported perceptions) of a large group of people on a
+ * @typedef {Object} Pmv_ppd_arrayReturns
+ * @property { number[] } pmv - Predicted Mean Vote
+ * @property { number[] } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @public
+ */
+
+/**
+ * Returns Predicted Mean Vote ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}) and
+ * Predicted Percentage of Dissatisfied ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD})
+ * calculated in accordance with main thermal comfort Standards. The PMV is an index that predicts the mean
+ * value of the thermal sensation votes (self-reported perceptions) of a large group of people on a
  * sensation scale expressed from –3 to +3 corresponding to the categories:
  * cold, cool, slightly cool, neutral, slightly warm, warm, and hot. {@link #ref_1|[1]}
  *
@@ -213,13 +215,10 @@ export function pmv_ppd(
  * Please read more in the Note below.
  *
  * Notes:
- * You can use this function to calculate the `PMV` and `PPD` in accordance with
+ * You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ * and {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD} in accordance with
  * either the ASHRAE 55 2020 Standard {@link #ref_1|[1]} or the ISO 7730 Standard {@link #ref_2|[2]}.
  *
- * _PMV:
- * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
- * _PPD:
- * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD}
  * _Addendum C to Standard 55-2020:
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum C to Standard 55-2020}
  *
@@ -257,9 +256,7 @@ export function pmv_ppd(
  * This change was introduced by the `Addendum C to Standard 55-2020`_
  * @param { Pmv_ppdKwargs }kwargs - additional arguments
  *
- * @returns {Object} - Result of pmv and ppd
- * @property { number[] } pmv - Predicted Mean Vote
- * @property { number[] } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @returns {Pmv_ppd_arrayReturns} - Result of pmv and ppd
  *
  * @example
  * const tdb = [22, 25];
@@ -301,11 +298,7 @@ export function pmv_ppd_array(
 
   if (kwargs.units && kwargs.units === "IP") {
     // Conversion from IP to SI units
-    const result = units_converter_array({ tdb: tdb, tr: tr, vr: vr }, "IP");
-
-    tdb = result.tdb;
-    tr = result.tr;
-    vr = result.vr;
+    ({ tdb, tr, vr } = units_converter_array({ tdb, tr, vr }, "IP"));
   }
 
   if (standard !== "ISO" && standard !== "ASHRAE") {
@@ -314,7 +307,13 @@ export function pmv_ppd_array(
     );
   }
 
-  const checkResult = check_standard_compliance_array(standard, {
+  const {
+    tdb: tdb_valid,
+    tr: tr_valid,
+    v: v_valid,
+    met: met_valid,
+    clo: clo_valid,
+  } = check_standard_compliance_array(standard, {
     tdb,
     tr,
     v: vr,
@@ -322,12 +321,6 @@ export function pmv_ppd_array(
     clo,
     airspeed_control: kwargs.airspeed_control,
   });
-
-  const tdb_valid = checkResult.tdb;
-  const tr_valid = checkResult.tr;
-  const v_valid = checkResult.v;
-  const met_valid = checkResult.met;
-  const clo_valid = checkResult.clo;
 
   let ce = [];
   if (standard === "ASHRAE") {
@@ -374,29 +367,30 @@ export function pmv_ppd_array(
         ? valid_range(pmv_array, [-100, 100])
         : valid_range(pmv_array, [-2, 2]); // this is the ISO limit
 
-    const all_valid = pmv_array.map((valid, i) => {
-      return !(
-        isNaN(valid) ||
+    for (let i = 0; i < pmv_array.length; ++i) {
+      if (
+        isNaN(pmv_array[i]) ||
         isNaN(tdb_valid[i]) ||
         isNaN(tr_valid[i]) ||
         isNaN(v_valid[i]) ||
         isNaN(met_valid[i]) ||
         isNaN(clo_valid[i]) ||
         isNaN(pmv_valid[i])
-      );
-    });
-
-    for (let i = 0; i < pmv_array.length; i++) {
-      if (!all_valid[i]) {
+      ) {
         pmv_array[i] = NaN;
         ppd_array[i] = NaN;
       }
     }
   }
 
+  for (let i = 0; i < pmv_array.length; ++i) {
+    pmv_array[i] = round(pmv_array[i], 2);
+    ppd_array[i] = round(ppd_array[i], 1);
+  }
+
   return {
-    pmv: pmv_array.map((value) => round(value, 2)),
-    ppd: ppd_array.map((value) => round(value, 1)),
+    pmv: pmv_array,
+    ppd: ppd_array,
   };
 }
 

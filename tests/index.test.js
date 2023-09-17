@@ -86,6 +86,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae_array");
   });
 
+  it("should have models.cooling_effect", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("cooling_effect");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

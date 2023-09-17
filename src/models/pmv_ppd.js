@@ -34,8 +34,8 @@ import { cooling_effect } from "./cooling_effect.js";
  */
 
 /**
- * Returns Predicted Mean Vote ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}) and
- * Predicted Percentage of Dissatisfied ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD})
+ * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and
+ * Predicted Percentage of Dissatisfied ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD} )
  * calculated in accordance with main thermal comfort Standards. The PMV is an index that predicts the mean
  * value of the thermal sensation votes (self-reported perceptions) of a large group of people on a
  * sensation scale expressed from –3 to +3 corresponding to the categories:
@@ -201,8 +201,8 @@ export function pmv_ppd(
  */
 
 /**
- * Returns Predicted Mean Vote ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}) and
- * Predicted Percentage of Dissatisfied ({@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD})
+ * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and
+ * Predicted Percentage of Dissatisfied ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD} )
  * calculated in accordance with main thermal comfort Standards. The PMV is an index that predicts the mean
  * value of the thermal sensation votes (self-reported perceptions) of a large group of people on a
  * sensation scale expressed from –3 to +3 corresponding to the categories:

@@ -41,6 +41,50 @@ export function round(number, precision) {
  */
 
 /**
+ * Converts degrees to radians unit
+ *
+ * @param {number} degrees
+ *
+ * @returns {number} - radians
+ */
+function degrees_to_radians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+/**
+ * Converts radians to degree unit
+ *
+ * @param {number} radians
+ *
+ * @returns {number} - degrees
+ */
+function radians_to_degrees(radians) {
+  return radians * (180 / Math.PI);
+}
+
+/**
+ * Converts sharp and altittude from radians to degree unit
+ * @param {number} sharp
+ * @param {number} altitude
+ * @returns {[number, number]}
+ */
+export function transpose_sharp_altitude(sharp, altitude) {
+  const altitude_new = radians_to_degrees(
+    Math.asin(
+      Math.sin(degrees_to_radians(Math.abs(sharp - 90))) *
+        Math.cos(degrees_to_radians(altitude)),
+    ),
+  );
+  sharp = radians_to_degrees(
+    Math.atan(
+      Math.sin(degrees_to_radians(sharp)) *
+        Math.tan(degrees_to_radians(90 - altitude)),
+    ),
+  );
+  return [round(sharp, 3), round(altitude_new, 3)];
+}
+
+/**
  * Check that the values comply with the standard provided
  *
  * @param {Standard} standard

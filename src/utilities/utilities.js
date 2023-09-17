@@ -37,8 +37,52 @@ export function round(number, precision) {
  */
 
 /**
- * @typedef {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} Standard
+ * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "ISO" | "ISO7933"} Standard
  */
+
+/**
+ * Converts degrees to radians unit
+ *
+ * @param {number} degrees
+ *
+ * @returns {number} - radians
+ */
+function degrees_to_radians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+/**
+ * Converts radians to degree unit
+ *
+ * @param {number} radians
+ *
+ * @returns {number} - degrees
+ */
+function radians_to_degrees(radians) {
+  return radians * (180 / Math.PI);
+}
+
+/**
+ * Converts sharp and altittude from radians to degree unit
+ * @param {number} sharp
+ * @param {number} altitude
+ * @returns {[number, number]}
+ */
+export function transpose_sharp_altitude(sharp, altitude) {
+  const altitude_new = radians_to_degrees(
+    Math.asin(
+      Math.sin(degrees_to_radians(Math.abs(sharp - 90))) *
+        Math.cos(degrees_to_radians(altitude)),
+    ),
+  );
+  sharp = radians_to_degrees(
+    Math.atan(
+      Math.sin(degrees_to_radians(sharp)) *
+        Math.tan(degrees_to_radians(90 - altitude)),
+    ),
+  );
+  return [round(sharp, 3), round(altitude_new, 3)];
+}
 
 /**
  * Check that the values comply with the standard provided
@@ -50,11 +94,11 @@ export function round(number, precision) {
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case "ankle_draft":
+    case "ANKLE_DRAFT":
       return _ankle_draft_compliance(kwargs);
-    case "ashrae":
+    case "ASHRAE":
       return _ashrae_compliance(kwargs);
-    case "iso":
+    case "ISO":
       return _iso_compliance(kwargs);
     case "ISO7933":
       return _iso7933_compliance(kwargs);
@@ -78,7 +122,7 @@ export function check_standard_compliance(standard, kwargs) {
  * the values that do not comply are NaN
  * @see {@link check_standard_compliance} for scalar variant that returns warnings
  *
- * @param {Standard | "fan_heatwaves"} standard - standard to check compliance with
+ * @param {Standard | "FAN_HEATWAVES"} standard - standard to check compliance with
  * @param {ComplianceKwargsArray & {airspeed_control?: boolean}} kwargs - values to check compliance against
  *
  * @returns {CheckStandardComplianceResult} filtered arrays based on compliance limits
@@ -89,9 +133,9 @@ export function check_standard_compliance_array(standard, kwargs) {
 
   switch (standard) {
     case "ISO7933":
-    case "ankle_draft":
+    case "ANKLE_DRAFT":
       throw new Error(`Unsupported standard ${standard}`);
-    case "ashrae": {
+    case "ASHRAE": {
       // based on table 7.3.4 ashrae 55 2020
       const tdb = valid_range(kwargs.tdb, [10.0, 40.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);
@@ -131,7 +175,7 @@ export function check_standard_compliance_array(standard, kwargs) {
       }
       return { tdb, tr, v };
     }
-    case "fan_heatwaves": {
+    case "FAN_HEATWAVES": {
       const tdb = valid_range(kwargs.tdb, [20.0, 50.0]);
       const tr = valid_range(kwargs.tr, [20.0, 50.0]);
       const v = valid_range(kwargs.v, [0.1, 4.5]);
@@ -140,7 +184,7 @@ export function check_standard_compliance_array(standard, kwargs) {
       const clo = valid_range(kwargs.clo, [0.0, 1]);
       return { tdb, tr, v, rh, met, clo };
     }
-    case "iso": {
+    case "ISO": {
       // based on ISO 7730:2005 page 3
       const tdb = valid_range(kwargs.tdb, [10.0, 30.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);
@@ -671,4 +715,131 @@ export function f_svv(w, h, d) {
 export function valid_range(range, [min, max]) {
   if (range === undefined) return [];
   return range.map((n) => (n >= min && n <= max ? n : NaN));
+}
+
+/**
+ * Met values of typical tasks.
+ * @public
+ * @memberof reference_values
+ * @docname Met typical tasks, [met]
+ * @constant
+ * @type {Object}
+ * @property {number} Sleeping - 0.7
+ * @property {number} Reclining - 0.8
+ * @property {number} Seated_Cquiet - 1.0
+ * @property {number} Reading_seated - 1.0
+ * @property {number} Writing - 1.0
+ * @property {number} Reading_seatedTyping - 1.1
+ * @property {number} Standing_relaxed - 1.2
+ * @property {number} Filing_seated - 1.2
+ * @property {number} Flying_aircraft_routine - 1.2
+ * @property {number} Filing_standing - 1.4
+ * @property {number} Driving_a_car - 1.5
+ * @property {number} Walking_about - 1.7
+ * @property {number} Cooking - 1.8
+ * @property {number} Table_sawing - 1.8
+ * @property {number} Walking_2mph_3_2kmh - 2.0
+ * @property {number} Lifting_packing - 2.1
+ * @property {number} Seated_heavy_limb_movement - 2.2
+ * @property {number} Light_machine_work - 2.2
+ * @property {number} Flying_aircraft_combat - 2.4
+ * @property {number} Walking_3mph_4_8kmh - 2.6
+ * @property {number} House_cleaning - 2.7
+ * @property {number} Driving_heavy_vehicle - 3.2
+ * @property {number} Dancing - 3.4
+ * @property {number} Calisthenics - 3.5
+ * @property {number} Walking_4mph_6_4kmh - 3.8
+ * @property {number} Tennis - 3.8
+ * @property {number} Heavy_machine_work - 4.0
+ * @property {number} Handling_100lb_45_kg_bags - 4.0
+ * @property {number} Pick_and_shovel_work - 4.4
+ * @property {number} Basketball - 6.3
+ * @property {number} Wrestling - 7.8
+ * @example
+ * import { met_typical_tasks } from "jsthermalcomfort/utilities"; //The path to utilities
+ * console.log(met_typical_tasks['Seated_Cquiet']);
+ * // output 1.0
+ */
+export const met_typical_tasks = {
+  Sleeping: 0.7,
+  Reclining: 0.8,
+  Seated_Cquiet: 1.0,
+  Reading_seated: 1.0,
+  Writing: 1.0,
+  Typing: 1.1,
+  Standing_relaxed: 1.2,
+  Filing_seated: 1.2,
+  Flying_aircraft_routine: 1.2,
+  Filing_standing: 1.4,
+  Driving_a_car: 1.5,
+  Walking_about: 1.7,
+  Cooking: 1.8,
+  Table_sawing: 1.8,
+  Walking_2mph_3_2kmh: 2.0,
+  Lifting_packing: 2.1,
+  Seated_heavy_limb_movement: 2.2,
+  Light_machine_work: 2.2,
+  Flying_aircraft_combat: 2.4,
+  Walking_3mph_4_8kmh: 2.6,
+  House_cleaning: 2.7,
+  Driving_heavy_vehicle: 3.2,
+  Dancing: 3.4,
+  Calisthenics: 3.5,
+  Walking_4mph_6_4kmh: 3.8,
+  Tennis: 3.8,
+  Heavy_machine_work: 4.0,
+  Handling_100lb_45_kg_bags: 4.0,
+  Pick_and_shovel_work: 4.4,
+  Basketball: 6.3,
+  Wrestling: 7.8,
+};
+
+/**
+ * Total Clothing insulation of typical ensembles
+ * @public
+ * @memberof reference_values
+ * @docname Typical ensembles insulation, [clo]
+ *
+ * @param {"Walking shorts, short-sleeve shirt" | "Typical summer indoor clothing" |
+ * "Knee-length skirt, short-sleeve shirt, sandals, underwear" | "Trousers, long-sleeve shirt" |
+ * "Knee-length skirt, long-sleeve shirt, full slip" | "Sweat pants, long-sleeve sweatshirt" |
+ * "Jacket, Trousers, long-sleeve shirt" | "Typical winter indoor clothing"} ensembles - Typical ensembles. One of:
+ *   - "Walking shorts, short-sleeve shirt"
+ *   - "Typical summer indoor clothing"
+ *   - "Knee-length skirt, short-sleeve shirt, sandals, underwear"
+ *   - "Trousers, short-sleeve shirt, socks, shoes, underwear"
+ *   - "Trousers, long-sleeve shirt"
+ *   - "Knee-length skirt, long-sleeve shirt, full slip"
+ *   - "Sweat pants, long-sleeve sweatshirt"
+ *   - "Jacket, Trousers, long-sleeve shirt"
+ *   - "Typical winter indoor clothing"
+ *
+ * @returns {number} - Clothing insulation of the given ensembles
+ * @example
+ * const result = clo_typical_ensembles("Trousers, long-sleeve shirt"); // returns 0.61
+ */
+
+export function clo_typical_ensembles(ensembles) {
+  switch (ensembles) {
+    case "Walking shorts, short-sleeve shirt":
+      return 0.36;
+    case "Typical summer indoor clothing":
+      return 0.5;
+    case "Knee-length skirt, short-sleeve shirt, sandals, underwear":
+      return 0.54;
+    case "Trousers, short-sleeve shirt, socks, shoes, underwear":
+      return 0.57;
+    case "Trousers, long-sleeve shirt":
+      return 0.61;
+    case "Knee-length skirt, long-sleeve shirt, full slip":
+      return 0.67;
+    case "Sweat pants, long-sleeve sweatshirt":
+      return 0.74;
+    case "Jacket, Trousers, long-sleeve shirt":
+      return 0.96;
+    case "Typical winter indoor clothing":
+      return 1.0;
+    default:
+      throw new Error("No such ensemble");
+  }
 }

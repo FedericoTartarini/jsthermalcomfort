@@ -75,8 +75,8 @@ import { cooling_effect } from "./cooling_effect.js";
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
- * @param { number } wme - external work, wme default 0
- * @param { "ISO"|"ASHRAE" } standard - comfort standard used for calculation
+ * @param { number } [wme=0] - external work, default is 0
+ * @param { "ISO"|"ASHRAE" } [standard="ISO"] - comfort standard used for calculation
  * - If "ISO", then the ISO Equation is used
  * - If "ASHRAE", then the ASHRAE Equation is used
  * Note: While the PMV equation is the same for both the ISO and ASHRAE standards,
@@ -243,8 +243,8 @@ export function pmv_ppd(
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
- * @param { number[] } wme - external work, wme default 0
- * @param { "ISO"|"ASHRAE" } standard - comfort standard used for calculation
+ * @param { number[] } wme - external work, default is array of 0
+ * @param { "ISO"|"ASHRAE" } [standard="ISO"] - comfort standard used for calculation
  * - If "ISO", then the ISO Equation is used
  * - If "ASHRAE", then the ASHRAE Equation is used
  * Note: While the PMV equation is the same for both the ISO and ASHRAE standards,

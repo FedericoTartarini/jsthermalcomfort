@@ -86,6 +86,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae_array");
   });
 
+  it("should have models.cooling_effect", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("cooling_effect");
+  });
+
   it("should have models.solar_gain", () => {
     expect(jsthermalcomfort.models).toHaveProperty("solar_gain");
   });
@@ -130,6 +134,16 @@ describe("NPM Package", () => {
 
   it("should have utilities.met_typical_tasks", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("met_typical_tasks");
+  });
+
+  it("should have utilities.clo_typical_ensembles", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_typical_ensembles");
+  });
+
+  it("should have utilities.clo_individual_garments", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty(
+      "clo_individual_garments",
+    );
   });
 
   it("should have psychrometrics.p_sat", () => {

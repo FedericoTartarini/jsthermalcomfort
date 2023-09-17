@@ -843,3 +843,130 @@ export function clo_typical_ensembles(ensembles) {
       throw new Error("No such ensemble");
   }
 }
+
+/**
+ * Clo values of individual clothing elements. To calculate the total clothing insulation you need to add these values together.
+ * @public
+ * @memberof reference_values
+ * @docname Insulation of individual garments, [clo]
+ * @constant
+ * @type {Object}
+ * @property {number} Metal_chair - 0.0
+ * @property {number} Bra - 0.01
+ * @property {number} Wooden_stool - 0.01
+ * @property {number} Ankle_socks - 0.02
+ * @property {number} Shoes_or_sandals - 0.02
+ * @property {number} Slippers - 0.03
+ * @property {number} Panty_hose - 0.02
+ * @property {number} Calf_length_socks - 0.03
+ * @property {number} Women_underwear - 0.03
+ * @property {number} Men_underwear - 0.04
+ * @property {number} Knee_socks_thick - 0.06
+ * @property {number} Short_shorts - 0.06
+ * @property {number} Walking_shorts: 0.08,
+ * @property {number} T_shirt - 0.08
+ * @property {number} Standard_office_chair - 0.1
+ * @property {number} Executive_chair - 0.15
+ * @property {number} Boots - 0.1
+ * @property {number} Sleeveless_scoop_neck_blouse - 0.12
+ * @property {number} Half_slip - 0.14
+ * @property {number} Long_underwear_bottoms - 0.15
+ * @property {number} Full_slip - 0.16
+ * @property {number} Short_sleeve_knit_shirt - 0.17
+ * @property {number} Sleeveless_vest_thin - 0.1
+ * @property {number} Sleeveless_vest_thick - 0.17
+ * @property {number} Sleeveless_short_gown_thin - 0.18
+ * @property {number} Short_sleeve_dress_shirt - 0.19
+ * @property {number} Sleeveless_long_gown_thin - 0.2
+ * @property {number} Long_underwear_top - 0.2
+ * @property {number} Thick_skirt - 0.23
+ * @property {number} Long_sleeve_dress_shirt - 0.25
+ * @property {number} Long_sleeve_flannel_shirt - 0.34
+ * @property {number} Long_sleeve_sweat_shirt - 0.34
+ * @property {number} Short_sleeve_hospital_gown - 0.31
+ * @property {number} Short_sleeve_short_robe_thin - 0.34
+ * @property {number} Short_sleeve_pajamas - 0.42
+ * @property {number} Long_sleeve_long_gown - 0.46
+ * @property {number} Long_sleeve_short_wrap_robe_thick - 0.48
+ * @property {number} Long_sleeve_pajamas_thick - 0.57
+ * @property {number} Long_sleeve_long_wrap_robe_thick - 0.69
+ * @property {number} Thin_trousers - 0.15
+ * @property {number} Thick_trousers - 0.24
+ * @property {number} Sweatpants - 0.28
+ * @property {number} Overalls - 0.3
+ * @property {number} Coveralls - 0.49
+ * @property {number} Thin_skirt - 0.14
+ * @property {number} Long_sleeve_shirt_dress_thin - 0.33
+ * @property {number} Long_sleeve_shirt_dress_thick - 0.47
+ * @property {number} Short_sleeve_shirt_dress - 0.29
+ * @property {number} Sleeveless_scoop_neck_shirt_thin - 0.23
+ * @property {number} Sleeveless_scoop_neck_shirt_thick - 0.27
+ * @property {number} Long_sleeve_shirt_thin - 0.25
+ * @property {number} Long_sleeve_shirt_thick - 0.36
+ * @property {number} Single_breasted_coat_thin - 0.36
+ * @property {number} Single_breasted_coat_thick - 0.44
+ * @property {number} Double_breasted_coat_thin - 0.42
+ * @property {number} Double_breasted_coat_thick - 0.48
+ * @example
+ * import { clo_individual_garments } from "jsthermalcomfort/utilities"; //The path to utilities
+ * console.log(clo_individual_garments['Metal_chair']);
+ * // output 0.0
+ */
+export const clo_individual_garments = {
+  Metal_chair: 0.0,
+  Bra: 0.01,
+  Wooden_stool: 0.01,
+  Ankle_socks: 0.02,
+  Shoes_or_sandals: 0.02,
+  Slippers: 0.03,
+  Panty_hose: 0.02,
+  Calf_length_socks: 0.03,
+  Women_underwear: 0.03,
+  Men_underwear: 0.04,
+  Knee_socks_thick: 0.06,
+  Short_shorts: 0.06,
+  Walking_shorts: 0.08,
+  T_shirt: 0.08,
+  Standard_office_chair: 0.1,
+  Executive_chair: 0.15,
+  Boots: 0.1,
+  Sleeveless_scoop_neck_blouse: 0.12,
+  Half_slip: 0.14,
+  Long_underwear_bottoms: 0.15,
+  Full_slip: 0.16,
+  Short_sleeve_knit_shirt: 0.17,
+  Sleeveless_vest_thin: 0.1,
+  Sleeveless_vest_thick: 0.17,
+  Sleeveless_short_gown_thin: 0.18,
+  Short_sleeve_dress_shirt: 0.19,
+  Sleeveless_long_gown_thin: 0.2,
+  Long_underwear_top: 0.2,
+  Thick_skirt: 0.23,
+  Long_sleeve_dress_shirt: 0.25,
+  Long_sleeve_flannel_shirt: 0.34,
+  Long_sleeve_sweat_shirt: 0.34,
+  Short_sleeve_hospital_gown: 0.31,
+  Short_sleeve_short_robe_thin: 0.34,
+  Short_sleeve_pajamas: 0.42,
+  Long_sleeve_long_gown: 0.46,
+  Long_sleeve_short_wrap_robe_thick: 0.48,
+  Long_sleeve_pajamas_thick: 0.57,
+  Long_sleeve_long_wrap_robe_thick: 0.69,
+  Thin_trousers: 0.15,
+  Thick_trousers: 0.24,
+  Sweatpants: 0.28,
+  Overalls: 0.3,
+  Coveralls: 0.49,
+  Thin_skirt: 0.14,
+  Long_sleeve_shirt_dress_thin: 0.33,
+  Long_sleeve_shirt_dress_thick: 0.47,
+  Short_sleeve_shirt_dress: 0.29,
+  Sleeveless_scoop_neck_shirt_thin: 0.23,
+  Sleeveless_scoop_neck_shirt_thick: 0.27,
+  Long_sleeve_shirt_thin: 0.25,
+  Long_sleeve_shirt_thick: 0.36,
+  Single_breasted_coat_thin: 0.36,
+  Single_breasted_coat_thick: 0.44,
+  Double_breasted_coat_thin: 0.42,
+  Double_breasted_coat_thick: 0.48,
+};

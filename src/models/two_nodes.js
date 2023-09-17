@@ -45,20 +45,20 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  * 
  * Two-node model of human temperature regulation Gagge et al. (1986).
  * 
- * {@link #ref_25|[25]} This model can be used to calculate a variety of indices, including:
+ * {@link #ref_10|[10]} This model can be used to calculate a variety of indices, including:
  * 
  *  - Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
  * the Fanger’s PMV equations but it replaces the heat loss and gain terms
- * with those calculated by the two node model developed by Gagge et al. (1986) {@link #ref_25|[25]}.
- *  - PMV SET and the predicted thermal sensation based on SET {@link #ref_25|[25]}. This function is 
+ * with those calculated by the two node model developed by Gagge et al. (1986) {@link #ref_10|[10]}.
+ *  - PMV SET and the predicted thermal sensation based on SET {@link #ref_10|[10]}. This function is 
  * similar in all aspects to the pythermalcomfort.models.pmv_gagge(). However, it uses the 
  * pythermalcomfort.models.set() equation to calculate the dry heat loss by convection.
  *  - Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
- * to restore a state of comfort and thermal equilibrium by sweating {@link #ref_25|[25]}. DISC is
+ * to restore a state of comfort and thermal equilibrium by sweating {@link #ref_10|[10]}. DISC is
  * described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1), 
  * uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (S).
  * The range of each category is ± 0.5 numerically. In the cold, the classical negative category 
- * descriptions used for Fanger’s PMV apply {@link #ref_25|[25]}.
+ * descriptions used for Fanger’s PMV apply {@link #ref_10|[10]}.
  *  - Heat gains and losses via convection, radiation and conduction.
  *  - The Standard Effective Temperature (SET)
  *  - The New Effective Temperature (ET)
@@ -251,20 +251,20 @@ const skinBloodFlowNeutral = 6.3;
  * 
  * Two nodes model of human temperature regulation Gagge et al. when the input parameters are arrays. 
  * 
- * {@link #ref_25|[25]} This model can be used to calculate a variety of indices, including:
+ * {@link #ref_10|[10]} This model can be used to calculate a variety of indices, including:
  * 
  *  - Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
  * the Fanger’s PMV equations but it replaces the heat loss and gain terms
- * with those calculated by the two node model developed by Gagge et al. (1986) {@link #ref_25|[25]}.
- *  - PMV SET and the predicted thermal sensation based on SET {@link #ref_25|[25]}. This function is 
+ * with those calculated by the two node model developed by Gagge et al. (1986) {@link #ref_10|[10]}.
+ *  - PMV SET and the predicted thermal sensation based on SET {@link #ref_10|[10]}. This function is 
  * similar in all aspects to the pythermalcomfort.models.pmv_gagge(). However, it uses the 
  * pythermalcomfort.models.set() equation to calculate the dry heat loss by convection.
  *  - Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
- * to restore a state of comfort and thermal equilibrium by sweating {@link #ref_25|[25]}. DISC is
+ * to restore a state of comfort and thermal equilibrium by sweating {@link #ref_10|[10]}. DISC is
  * described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1), 
  * uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (S).
  * The range of each category is ± 0.5 numerically. In the cold, the classical negative category 
- * descriptions used for Fanger’s PMV apply {@link #ref_25|[25]}.
+ * descriptions used for Fanger’s PMV apply {@link #ref_10|[10]}.
  *  - Heat gains and losses via convection, radiation and conduction.
  *  - The Standard Effective Temperature (SET)
  *  - The New Effective Temperature (ET)

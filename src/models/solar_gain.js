@@ -43,6 +43,7 @@ const _fp_table = [
  * @property {number} erf - Solar gain to the human body using the Effective Radiant Field [W/m2]
  * @property {number} delta_mrt - Delta mean radiant temperature. The amount by which the mean radiant
  * temperature of the space should be increased if no solar radiation is present.
+ * @public
  */
 
 /**
@@ -55,6 +56,10 @@ const _fp_table = [
  * increased if no solar radiation is present.
  *
  * More information on the calculation procedure can be found in Appendix C of {@link #ref_1|[1]}.
+ *
+ * @memberof models
+ * @public
+ * @docname Solar gain on people
  *
  * @param {number} sol_altitude - Solar altitude, degrees from horizontal [deg]. Ranges between 0 and 90.
  * @param {number} sharp - Solar horizontal angle relative to the front of the person (SHARP) [deg].

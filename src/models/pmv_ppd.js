@@ -9,7 +9,7 @@ import { cooling_effect } from "./cooling_effect.js";
 
 /**
  * @typedef {Object} Pmv_ppdKwargs
- * @property {'SI', 'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
@@ -101,10 +101,8 @@ import { cooling_effect } from "./cooling_effect.js";
  * // Calculate dynamic clothing
  * const clo_d = clo_dynamic(clo, met);
  * const results = pmv_ppd(tdb, tr, v_r, rh, met, clo_d);
- * console.log(results);
- * // Output: { pmv: 0.06, ppd: 5.1 }
- * console.log(results.pmv);
- * // Output: -0.06
+ * console.log(results); // Output: { pmv: 0.06, ppd: 5.1 }
+ * console.log(results.pmv); // Output: -0.06
  */
 export function pmv_ppd(
   tdb,
@@ -124,7 +122,7 @@ export function pmv_ppd(
   };
   kwargs = Object.assign(default_kwargs, kwargs);
 
-  if (kwargs.units && kwargs.units.toLowerCase() === "ip") {
+  if (kwargs.units && kwargs.units === "IP") {
     // Conversion from IP to SI units
     const result = units_converter({ tdb, tr, vr }, "IP");
     tdb = result.tdb;
@@ -132,20 +130,13 @@ export function pmv_ppd(
     vr = result.vr;
   }
 
-  standard = standard.toLowerCase();
-  if (standard !== "iso" && standard !== "ashrae") {
+  if (standard !== "ISO" && standard !== "ASHRAE") {
     throw new Error(
       "PMV calculations can only be performed in compliance with ISO or ASHRAE Standards",
     );
   }
 
-  const {
-    tdb: tdb_valid,
-    tr: tr_valid,
-    v: v_valid,
-    met: met_valid,
-    clo: clo_valid,
-  } = check_standard_compliance_array(standard, {
+  const checkResult = check_standard_compliance_array(standard, {
     tdb: [tdb],
     tr: [tr],
     v: [vr],
@@ -154,8 +145,14 @@ export function pmv_ppd(
     airspeed_control: kwargs.airspeed_control,
   });
 
+  const tdb_valid = checkResult.tdb;
+  const tr_valid = checkResult.tr;
+  const v_valid = checkResult.v;
+  const met_valid = checkResult.met;
+  const clo_valid = checkResult.clo;
+
   let ce = 0;
-  if (standard === "ashrae") {
+  if (standard === "ASHRAE") {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
     ce = vr >= 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme) : 0;
   }
@@ -175,14 +172,21 @@ export function pmv_ppd(
     const pmv_array = [pmv];
 
     const pmv_valid =
-      standard === "ashrae"
+      standard === "ASHRAE"
         ? valid_range(pmv_array, [-100, 100])
         : valid_range(pmv_array, [-2, 2]); // this is the ISO limit
 
-    const all_valid =
-      pmv_valid && tdb_valid && tr_valid && v_valid && met_valid && clo_valid;
+    const all_valid = !(
+      pmv_array.includes(NaN) ||
+      tdb_valid.includes(NaN) ||
+      tr_valid.includes(NaN) ||
+      v_valid.includes(NaN) ||
+      met_valid.includes(NaN) ||
+      clo_valid.includes(NaN) ||
+      pmv_valid.includes(NaN)
+    );
 
-    if (!all_valid || isNaN(pmv)) {
+    if (!all_valid) {
       pmv = NaN;
       ppd = NaN;
     }
@@ -269,10 +273,8 @@ export function pmv_ppd(
  * // Calculate dynamic clothing
  * const clo_d = clo_dynamic_array(clo, met);
  * const arrayResults = pmv_ppd_array(tdb, tr, v_r, rh, met, clo_d);
- * console.log(arrayResults);
- * // Output: { pmv: [-0.47, 0.06], ppd: [9.6, 5.1] }
- * console.log(results.pmv);
- * // Output: [-0.47, 0.06]
+ * console.log(arrayResults); // Output: { pmv: [-0.47, 0.06], ppd: [9.6, 5.1] }
+ * console.log(results.pmv); // Output: [-0.47, 0.06]
  */
 export function pmv_ppd_array(
   tdb,
@@ -297,7 +299,7 @@ export function pmv_ppd_array(
     wme = tdb.map(() => 0);
   }
 
-  if (kwargs.units && kwargs.units.toLowerCase() === "ip") {
+  if (kwargs.units && kwargs.units === "IP") {
     // Conversion from IP to SI units
     const result = units_converter_array({ tdb: tdb, tr: tr, vr: vr }, "IP");
 
@@ -306,20 +308,13 @@ export function pmv_ppd_array(
     vr = result.vr;
   }
 
-  standard = standard.toLowerCase();
-  if (standard !== "iso" && standard !== "ashrae") {
+  if (standard !== "ISO" && standard !== "ASHRAE") {
     throw new Error(
       "PMV calculations can only be performed in compliance with ISO or ASHRAE Standards",
     );
   }
 
-  const {
-    tdb: tdb_valid,
-    tr: tr_valid,
-    v: v_valid,
-    met: met_valid,
-    clo: clo_valid,
-  } = check_standard_compliance_array(standard, {
+  const checkResult = check_standard_compliance_array(standard, {
     tdb,
     tr,
     v: vr,
@@ -328,8 +323,14 @@ export function pmv_ppd_array(
     airspeed_control: kwargs.airspeed_control,
   });
 
+  const tdb_valid = checkResult.tdb;
+  const tr_valid = checkResult.tr;
+  const v_valid = checkResult.v;
+  const met_valid = checkResult.met;
+  const clo_valid = checkResult.clo;
+
   let ce = [];
-  if (standard === "ashrae") {
+  if (standard === "ASHRAE") {
     ce = vr.map((vrValue, i) => {
       //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
       return vrValue >= 0.1
@@ -369,23 +370,24 @@ export function pmv_ppd_array(
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   if (kwargs.limit_inputs) {
     const pmv_valid =
-      standard === "ashrae"
-        ? pmv_array.map((pmvValue) => valid_range([pmvValue], [-100, 100]))
-        : pmv_array.map((pmvValue) => valid_range([pmvValue], [-2, 2])); // this is the ISO limit
+      standard === "ASHRAE"
+        ? valid_range(pmv_array, [-100, 100])
+        : valid_range(pmv_array, [-2, 2]); // this is the ISO limit
 
-    const all_valid = pmv_valid.every((valid, index) => {
-      return (
-        valid &&
-        tdb_valid[index] &&
-        tr_valid[index] &&
-        v_valid[index] &&
-        met_valid[index] &&
-        clo_valid[index]
+    const all_valid = pmv_array.map((valid, i) => {
+      return !(
+        isNaN(valid) ||
+        isNaN(tdb_valid[i]) ||
+        isNaN(tr_valid[i]) ||
+        isNaN(v_valid[i]) ||
+        isNaN(met_valid[i]) ||
+        isNaN(clo_valid[i]) ||
+        isNaN(pmv_valid[i])
       );
     });
 
     for (let i = 0; i < pmv_array.length; i++) {
-      if (!all_valid || isNaN(pmv_array[i])) {
+      if (!all_valid[i]) {
         pmv_array[i] = NaN;
         ppd_array[i] = NaN;
       }

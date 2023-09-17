@@ -77,12 +77,20 @@ describe("pmv_pdd", () => {
   ])(
     "returns $expect_pmv and $expect_ppd when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo, standard is $standard",
     ({ tdb, tr, vr, rh, met, clo, standard, expect_pmv, expect_ppd }) => {
-      const result = pmv_ppd(tdb, tr, vr, rh, met, clo, 0, standard);
+      const result = pmv_ppd(tdb, tr, vr, rh, met, clo, undefined, standard);
 
       expect(result.pmv).toBeCloseTo(expect_pmv, 1);
       expect(result.ppd).toBeCloseTo(expect_ppd, 1);
     },
   );
+
+  it("returns NaN when inputs are not within the bounds accepted by the model", () => {
+    expect(() => {
+      const result = pmv_ppd(31, 20, 0.1, 50, 1.1, 0.5, undefined, "ISO");
+      expect(result.pmv).toBe(NaN);
+      expect(result.ppd).toBe(NaN);
+    });
+  });
 
   it("throws an error if standard are not in compliance with ISO or ASHRAE Standards", () => {
     expect(() => {
@@ -96,46 +104,44 @@ describe("pmv_pdd", () => {
     const kwargs = {
       limit_inputs: false,
     };
-    const result = pmv_ppd(31, 41, 2, 50, 0.7, 2.1, undefined, "iso", kwargs);
+    const result = pmv_ppd(31, 41, 2, 50, 0.7, 2.1, undefined, "ISO", kwargs);
     expect(result.pmv).toBeCloseTo(2.4);
     expect(result.ppd).toBeCloseTo(91);
   });
 });
 
 describe("pmv_ppd_array", () => {
-  // it.each([
-  //   {
-  //     tdb: [26, 24, 22, 26, 24, 22],
-  //     tr: [26, 24, 22, 26, 24, 22],
-  //     vr: [0.9, 0.6, 0.3, 0.9, 0.6, 0.3],
-  //     rh: [50, 50, 50, 50, 50, 50],
-  //     met: [1.1, 1.1, 1.1, 1.3, 1.3, 1.3],
-  //     clo: [0.5, 0.5, 0.5, 0.7, 0.7, 0.7],
-  //     standard: "ASHRAE",
-  //     kwargs: {
-  //       units: undefined,
-  //       limit_inputs: undefined,
-  //       airspeed_control: false,
-  //     },
-  //     expect_pmv: [NaN, NaN, NaN, -0.14, -0.43, -0.57],
-  //   },
-  // ])(
-  //     "returns $expect_pmv when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo, standard is $standard",
-  //     ({ tdb, tr, vr, rh, met, clo, standard, kwargs, expect_pmv }) => {
-  //       const result = pmv_ppd_array(
-  //           tdb,
-  //           tr,
-  //           vr,
-  //           rh,
-  //           met,
-  //           clo,
-  //           undefined,
-  //           standard,
-  //           kwargs,
-  //       );
-  //       deep_close_to_array(result.pmv, expect_pmv, 2);
-  //     },
-  // );
+  it.each([
+    {
+      tdb: [26, 24, 22, 26, 24, 22],
+      tr: [26, 24, 22, 26, 24, 22],
+      vr: [0.9, 0.6, 0.3, 0.9, 0.6, 0.3],
+      rh: [50, 50, 50, 50, 50, 50],
+      met: [1.1, 1.1, 1.1, 1.3, 1.3, 1.3],
+      clo: [0.5, 0.5, 0.5, 0.7, 0.7, 0.7],
+      standard: "ASHRAE",
+      kwargs: {
+        airspeed_control: false,
+      },
+      expect_pmv: [NaN, NaN, NaN, -0.14, -0.43, -0.57],
+    },
+  ])(
+    "returns $expect_pmv when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo, standard is $standard",
+    ({ tdb, tr, vr, rh, met, clo, standard, kwargs, expect_pmv }) => {
+      const result = pmv_ppd_array(
+        tdb,
+        tr,
+        vr,
+        rh,
+        met,
+        clo,
+        undefined,
+        standard,
+        kwargs,
+      );
+      deep_close_to_array(result.pmv, expect_pmv, 2);
+    },
+  );
 
   it.each([
     {
@@ -194,7 +200,7 @@ describe("pmv_ppd_array", () => {
     "returns $expect_pmv when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo",
     ({ tdb, tr, vr, rh, met, clo, expect_pmv }) => {
       const kwargs = {
-        units: "ip",
+        units: "IP",
       };
       const result = pmv_ppd_array(
         tdb,
@@ -225,7 +231,7 @@ describe("pmv_ppd_array", () => {
       [0.7, 0.7],
       [2.1, 2.1],
       undefined,
-      "iso",
+      "ISO",
       kwargs,
     );
 

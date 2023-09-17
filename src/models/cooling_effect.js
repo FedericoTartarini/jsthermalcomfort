@@ -135,9 +135,9 @@ export function cooling_effect(
 }
 
 /**
- * @param func - the target function for which need to find the root.
- * @param a - the left boundary of the search interval
- * @param b - the right boundary of the search interval
+ * @param func - The target function that needs to find the root.
+ * @param a - The left boundary of the search interval
+ * @param b - The right boundary of the search interval
  * @returns {number} - return root if found
  */
 function findRoot(func, a, b) {

@@ -168,7 +168,7 @@ export function set_tmp(
  * and activity level {@link #ref_10|[10]}.
  * @public
  * @memberof models
- * @docname Standard Effective Temperature (array version)
+ * @docname Standard Effective Temperature (SET) (array version)
  *
  * @see {@link set_tmp} for a version that supports scalar arguments
  *

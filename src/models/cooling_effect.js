@@ -2,7 +2,7 @@ import { units_converter, round } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
 
 /**
- * Returns the value of the Cooling Effect ({@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE})
+ * Returns the value of the Cooling Effect ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} )
  * calculated in compliance with the ASHRAE 55 2020 Standard {@link #ref_1|[1]}.
  * The {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} of the elevated air speed
  * is the value that, when subtracted equally from both the average air temperature and the mean radiant temperature,

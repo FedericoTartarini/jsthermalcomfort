@@ -2,7 +2,7 @@ import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
 
 /**
  * @typedef {Object} PmvKwargs
- * @property {'SI','IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property {boolean} limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
@@ -20,20 +20,23 @@ import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
  */
 
 /**
- * Returns Predicted Mean Vote (`PMV`_) calculated in accordance with main thermal comfort Standards.
+ * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) calculated
+ * in accordance with main thermal comfort Standards.
  *
- * The PMV is an index that predicts the mean value of the thermal sensation votes (self-reported perceptions)
- * of a large group of people on a sensation scale expressed from –3 to +3 corresponding to the categories: cold, cool,
- * slightly cool, neutral, slightly warm, warm, and hot. {@link #ref_1|[1]}
+ * The {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} is an index that predicts the
+ * mean value of the thermal sensation votes (self-reported perceptions) of a large group of people on a sensation
+ * scale expressed from –3 to +3 corresponding to the categories: cold, cool, slightly cool, neutral, slightly warm,
+ * warm, and hot. {@link #ref_1|[1]}
  *
  * While the PMV equation is the same for both the ISO and ASHRAE standards, in the ASHRAE 55 PMV equation, the SET is
  * used to calculate the cooling effect first, this is then subtracted from both the air and mean radiant temperatures,
  * and the differences are used as input to the PMV model, while the airspeed is set to 0.1m/s. Please read more in the
  * Note below.
  *
- * You can use this function to calculate the `PMV` {@link #ref_1|[1]} {@link #ref_2|[2]}
- * _PMV:
- * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method}
+ * Notes:
+ * You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ * {@link #ref_1|[1]} {@link #ref_2|[2]}
+ *
  * _Addendum C to Standard 55-2020:
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
  *
@@ -50,8 +53,8 @@ import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
  * @param {number} rh - relative humidity, [%]
  * @param {number} met - metabolic rate
  * @param {number} clo - clothing insulation
- * @param {number} wme - external work, wme default 0
- * @param {"ISO"|"ASHRAE"} standard - comfort standard used for calculation
+ * @param {number} [wme=0] - external work, default is 0
+ * @param {"ISO"|"ASHRAE"} [standard="ISO"] - comfort standard used for calculation
  * @param {PmvKwargs} kwargs - additional arguments
  *
  * @returns {number} pmv - Predicted Mean Vote
@@ -110,20 +113,23 @@ export function pmv(
 }
 
 /**
- * Returns Predicted Mean Vote (`PMV`_) calculated in accordance with main thermal comfort Standards.
+ * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) calculated
+ * in accordance with main thermal comfort Standards.
  *
- * The PMV is an index that predicts the mean value of the thermal sensation votes (self-reported perceptions)
- * of a large group of people on a sensation scale expressed from –3 to +3 corresponding to the categories: cold, cool,
- * slightly cool, neutral, slightly warm, warm, and hot.{@link #ref_1|[1]}
+ * The {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} is an index that predicts the
+ * mean value of the thermal sensation votes (self-reported perceptions) of a large group of people on a sensation
+ * scale expressed from –3 to +3 corresponding to the categories: cold, cool, slightly cool, neutral, slightly warm,
+ * warm, and hot. {@link #ref_1|[1]}
  *
  * While the PMV equation is the same for both the ISO and ASHRAE standards, in the ASHRAE 55 PMV equation, the SET is
  * used to calculate the cooling effect first, this is then subtracted from both the air and mean radiant temperatures,
  * and the differences are used as input to the PMV model, while the airspeed is set to 0.1m/s. Please read more in the
  * Note below.
  *
- * You can use this function to calculate the `PMV` {@link #ref_1|[1]} {@link #ref_2|[2]}
- * _PMV:
- * {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method}
+ * Notes:
+ * You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ * {@link #ref_1|[1]} {@link #ref_2|[2]}
+ *
  * _Addendum C to Standard 55-2020:
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf}
  *
@@ -140,8 +146,8 @@ export function pmv(
  * @param {number[]} rh - relative humidity, [%]
  * @param {number[]} met - metabolic rate, [met]
  * @param {number[]} clo - clothing insulation, [clo]
- * @param {number[]} wme - external work, [met] default 0
- * @param {"ISO"|"ASHRAE"} standard - comfort standard used for calculation
+ * @param {number[]} wme - external work, default is array of 0
+ * @param {"ISO"|"ASHRAE"} [standard="ISO"] - comfort standard used for calculation
  * @param {PmvKwargs} kwargs - additional arguments
  *
  * @returns {number[]} pmv - Predicted Mean Vote

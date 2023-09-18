@@ -15,6 +15,7 @@ import { solar_gain } from "./solar_gain";
 import { cooling_effect } from "./cooling_effect.js";
 import { athb, athb_array } from "./athb.js";
 import { pmv, pmv_array } from "./pmv.js";
+import { a_pmv, a_pmv_array } from "./a_pmv.js";
 
 /**
  * @public
@@ -47,4 +48,6 @@ export default {
   pmv_array,
   athb,
   athb_array,
+  a_pmv,
+  a_pmv_array,
 };

@@ -108,6 +108,7 @@ describe("NPM Package", () => {
 
   it("should have models.athb_array", () => {
     expect(jsthermalcomfort.models).toHaveProperty("athb_array");
+  });
 
   it("should have models.pmv", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pmv");

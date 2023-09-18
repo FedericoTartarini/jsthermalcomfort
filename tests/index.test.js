@@ -46,8 +46,24 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });
 
-  it("should have models.discomfort_index", () => {
+  it("should have models.discomfort_index_array", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index_array");
+  });
+
+  it("should have models.two_nodes", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
+  });
+
+  it("should have models.two_nodes_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("two_nodes_array");
+  });
+
+  it("should have models.set_tmp", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("set_tmp");
+  });
+
+  it("should have models.set_tmp_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("set_tmp_array");
   });
 
   it("should have models.adaptive_en", () => {
@@ -60,6 +76,30 @@ describe("NPM Package", () => {
 
   it("should have models.at", () => {
     expect(jsthermalcomfort.models).toHaveProperty("at");
+  });
+
+  it("should have models.pmv_ppd", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd");
+  });
+
+  it("should have models.pmv_ppd_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd_array");
+  });
+
+  it("should have models.adaptive_ashrae", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae");
+  });
+
+  it("should have models.adaptive_ashrae_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae_array");
+  });
+
+  it("should have models.cooling_effect", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("cooling_effect");
+  });
+
+  it("should have models.solar_gain", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("solar_gain");
   });
 
   it("should have models.pmv", () => {
@@ -106,6 +146,20 @@ describe("NPM Package", () => {
 
   it("should have utilities.f_svv", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("f_svv");
+  });
+
+  it("should have utilities.met_typical_tasks", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("met_typical_tasks");
+  });
+
+  it("should have utilities.clo_typical_ensembles", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_typical_ensembles");
+  });
+
+  it("should have utilities.clo_individual_garments", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty(
+      "clo_individual_garments",
+    );
   });
 
   it("should have psychrometrics.p_sat", () => {

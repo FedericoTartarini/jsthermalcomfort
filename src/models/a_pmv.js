@@ -45,7 +45,7 @@ import { round } from "../utilities/utilities.js";
  *   can be calculated using the function clo_dynamic in utilities.js.
  * @param {number} a_coefficient - Adaptive coefficient
  * @param {number} [wme=0] - External work, default is 0
- * @param {A_pmvKwargs}kwargs - additional arguments
+ * @param {A_pmvKwargs} kwargs - additional arguments
  *
  * @returns {number} pmv - Predicted Mean Vote
  *
@@ -118,7 +118,7 @@ export function a_pmv(
  *   can be calculated using the function clo_dynamic_array in utilities.js.
  * @param {number[]} a_coefficient - Adaptive coefficient
  * @param {number[]} wme - External work, default is array of 0
- * @param {A_pmvKwargs}kwargs - additional arguments
+ * @param {A_pmvKwargs} kwargs - additional arguments
  *
  * @returns {number[]} pmv - Predicted Mean Vote
  *

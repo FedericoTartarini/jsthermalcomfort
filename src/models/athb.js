@@ -37,8 +37,15 @@ import { round } from "../utilities/utilities.js";
  * @returns { number } athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
  *
  * @example
- * // Where tdb is 25, tr is 25, vr is 0.1, rh is 50, met is 1.1, t_running_mean is 20
- * console.log(athb(25, 25, 0.1, 50, 1.1, 20)); // Output: 0.2
+ * const tdb = 25;
+ * const tr = 25;
+ * const vr = 0.1;
+ * const rh = 50;
+ * const met = 1.1;
+ * const t_running_mean = 20;
+ *
+ * const athb_result = athb(tdb, tr, vr, rh, met, t_running_mean);
+ * console.log(athb_result); // Output: 0.2
  */
 export function athb(tdb, tr, vr, rh, met, t_running_mean) {
   const met_adapted = met - (0.234 * t_running_mean) / 58.2;
@@ -104,8 +111,15 @@ export function athb(tdb, tr, vr, rh, met, t_running_mean) {
  * @returns { number[] } athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
  *
  * @example
- * // Where tdb is [25, 27], tr is [25, 25], vr is [0.1, 0.1], rh is [50, 50], met is [1.1, 1.1], t_running_mean is [20, 20]
- * console.log(athb_array([25, 27], [25, 25], [0.1, 0.1], [50, 50], [1.1, 1.1], [20, 20])); // Output: [0.2, 0.209]
+ * const tdb = [25, 27];
+ * const tr = [25, 25];
+ * const vr = [0.1, 0.1];
+ * const rh = [50, 50];
+ * const met = [1.1, 1.1];
+ * const t_running_mean = [20, 20];
+ *
+ * const athb_array_result = athb_array(tdb, tr, vr, rh, met, t_running_mean);
+ * console.log(athb_array_result); // Output: [0.2, 0.209]
  */
 export function athb_array(tdb, tr, vr, rh, met, t_running_mean) {
   //assume all parameters have same length, and it should have same length when use this API

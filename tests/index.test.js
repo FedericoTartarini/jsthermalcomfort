@@ -102,6 +102,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("solar_gain");
   });
 
+  it("should have models.pmv", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv");
+  });
+
+  it("should have models.pmv_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_array");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

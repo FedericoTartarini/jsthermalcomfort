@@ -13,8 +13,8 @@ import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
 import { adaptive_ashrae, adaptive_ashrae_array } from "./adaptive_ashrae";
 import { solar_gain } from "./solar_gain";
 import { cooling_effect } from "./cooling_effect.js";
-import { pmv, pmv_array } from "./pmv.js";
 import { athb, athb_array } from "./athb.js";
+import { pmv, pmv_array } from "./pmv.js";
 
 /**
  * @public

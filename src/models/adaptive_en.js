@@ -91,7 +91,7 @@ export function adaptive_en(
 
   const to = t_o(tdb, tr, v, standard);
 
-  const ce = _get_ce(v, to);
+  const ce = get_ce(v, to);
 
   let t_cmf = 0.33 * t_running_mean + 18.8;
 
@@ -234,7 +234,7 @@ export function adaptive_en_array(
   }
 
   const to = t_o_array(tdb, tr, v, standard);
-  const ce = v.map((_v, index) => _get_ce(_v, to[index]));
+  const ce = v.map((_v, index) => get_ce(_v, to[index]));
 
   let t_cmf = t_running_mean.map(
     (_t_running_mean) => 0.33 * _t_running_mean + 18.8,
@@ -339,7 +339,7 @@ export function adaptive_en_array(
  * @param {number} to
  * @returns {number}
  */
-function _get_ce(v, to) {
+export function get_ce(v, to) {
   let ce = 0;
   if (v >= 0.6 && to >= 25.0) {
     if (v < 0.9) {

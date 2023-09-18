@@ -1,0 +1,3 @@
+[submodule "validation-data-comfort-models"]
+	path = validation-data-comfort-models
+	url = git@github.com:FedericoTartarini/validation-data-comfort-models.git

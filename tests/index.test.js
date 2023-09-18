@@ -78,6 +78,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("at");
   });
 
+  it("should have models.pmv_ppd", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd");
+  });
+
+  it("should have models.pmv_ppd_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd_array");
+  });
+
   it("should have models.adaptive_ashrae", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae");
   });

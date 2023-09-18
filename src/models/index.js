@@ -9,6 +9,7 @@ import { set_tmp, set_tmp_array } from "./set_tmp";
 import { wc } from "./wc";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en";
 import { at } from "./at";
+import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
 import { adaptive_ashrae, adaptive_ashrae_array } from "./adaptive_ashrae";
 import { solar_gain } from "./solar_gain";
 import { cooling_effect } from "./cooling_effect.js";
@@ -38,4 +39,6 @@ export default {
   adaptive_ashrae_array,
   solar_gain,
   cooling_effect,
+  pmv_ppd,
+  pmv_ppd_array,
 };

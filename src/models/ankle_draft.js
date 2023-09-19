@@ -37,27 +37,24 @@ import {
  * @returns {{PPD_ad: number, Acceptability: boolean}}       
  */
 export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
-  let kwargs = {}
-if (units.toLowerCase() == "ip") {
+  let kwargs = {};
+  if (units.toLowerCase() == "ip") {
     kwargs = {
-        tdb: tdb,
-        tr: tr,
-        v: vr,
-       vel: v_ankle,
-    }
+      tdb: tdb,
+      tr: tr,
+      v: vr,
+      vel: v_ankle,
+    };
     const ret = units_converter(kwargs);
-    tdb= ret["tdb"]
-    tr= ret["tr"]
-    vr= ret["v"]
-    v_ankle= ret["vel"]
+    tdb = ret["tdb"];
+    tr = ret["tr"];
+    vr = ret["v"];
+    v_ankle = ret["vel"];
     //console.log(tdb, tr, vr, v_ankle)
   }
 
-  kwargs = {tdb:tdb, tr:tr, v_limited:vr, rh:rh, met:met, clo:clo}
-  check_standard_compliance(
-    "ASHRAE",
-    kwargs,
-  );
+  kwargs = { tdb: tdb, tr: tr, v_limited: vr, rh: rh, met: met, clo: clo };
+  check_standard_compliance("ASHRAE", kwargs);
 
   //console.log(kwargs)
 
@@ -71,8 +68,3 @@ if (units.toLowerCase() == "ip") {
   const acceptability = ppd_val <= 20;
   return { PPD_ad: ppd_val, Acceptability: acceptability };
 }
-//console.log(ankle_draft(25, 25, 0.2, 50, 1.2, 0.5, 0.3)["PPD_ad"]);
-//console.log(ankle_draft(77, 77, 0.2 * 3.28, 50, 1.2, 0.5, 0.4 * 3.28, "IP")["PPD_ad"])
-
-
-//ankle_draft(25, 25, 0.3, 50, 1.2, 0.5, 7)

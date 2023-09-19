@@ -73,13 +73,10 @@ export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
     tr = ret["tr"];
     vr = ret["v"];
     v_ankle = ret["vel"];
-    //console.log(tdb, tr, vr, v_ankle)
   }
 
   kwargs = { tdb: tdb, tr: tr, v_limited: vr, rh: rh, met: met, clo: clo };
   check_standard_compliance("ASHRAE", kwargs);
-
-  //console.log(kwargs)
 
   const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE");
   const ppd_val = round(

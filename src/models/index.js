@@ -16,6 +16,7 @@ import { cooling_effect } from "./cooling_effect.js";
 import { athb, athb_array } from "./athb.js";
 import { pmv, pmv_array } from "./pmv.js";
 import { a_pmv, a_pmv_array } from "./a_pmv.js";
+import { ankle_draft } from "./ankle_draft.js";
 
 /**
  * @public
@@ -50,4 +51,5 @@ export default {
   athb_array,
   a_pmv,
   a_pmv_array,
+  ankle_draft,
 };

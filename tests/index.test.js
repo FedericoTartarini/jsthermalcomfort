@@ -126,6 +126,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("a_pmv_array");
   });
 
+  it("should have models.ankle_draft", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("ankle_draft");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

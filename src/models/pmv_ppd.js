@@ -13,12 +13,14 @@ import { cooling_effect } from "./cooling_effect.js";
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
- *    <br> The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
+ *
+ *    The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
  *    0 < vr [m/s] < 2, 1 < met [met] < 4, and 0 < clo [clo] < 1.5.
  *    The ISO 7730 2005 limits are 10 < tdb [°C] < 30, 10 < tr [°C] < 40,
  *    0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, and -2 < PMV < 2.
  * @property { boolean } airspeed_control - This only applies if standard = "ASHRAE".
- *    <br> Default is True. By default, it is assumed that the occupant has control over the airspeed.
+ *
+ *    Default is True. By default, it is assumed that the occupant has control over the airspeed.
  *    In this case, the ASHRAE 55 Standard does not impose any airspeed limits.
  *    On the other hand, if the occupant has no control over the airspeed,
  *    the ASHRAE 55 imposes an upper limit for v which varies as a function of
@@ -48,7 +50,8 @@ import { cooling_effect } from "./cooling_effect.js";
  * Please read more in the Note below.
  *
  * Notes:
- * <br> You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ *
+ * You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
  * and {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD} in accordance with
  * either the ASHRAE 55 2020 Standard {@link #ref_1|[1]} or the ISO 7730 Standard {@link #ref_2|[2]}.
  *
@@ -62,7 +65,8 @@ import { cooling_effect } from "./cooling_effect.js";
  * @param { number } tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param { number } tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param { number } vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
- * <br> Note: vr is the relative air speed caused by body movement and not the air
+ *
+ * Note: vr is the relative air speed caused by body movement and not the air
  * speed measured by the air speed sensor. The relative air speed is the sum of the
  * average air speed measured by the sensor plus the activity-generated air speed
  * (Vag). Where Vag is the activity-generated air speed caused by motion of
@@ -70,7 +74,8 @@ import { cooling_effect } from "./cooling_effect.js";
  * @param { number } rh - relative humidity, [%]
  * @param { number } met - metabolic rate
  * @param { number } clo - clothing insulation
- * <br> Note: The activity as well as the air speed modify the insulation characteristics
+ *
+ * Note: The activity as well as the air speed modify the insulation characteristics
  * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
  * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
  * for the effect of the body movement for met equal or higher than 1.2 met using
@@ -78,9 +83,12 @@ import { cooling_effect } from "./cooling_effect.js";
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
  * @param { number } [wme=0] - external work
  * @param { "ISO"|"ASHRAE" } [standard="ISO"] - comfort standard used for calculation
- * <br> · If "ISO", then the ISO Equation is used
- * <br> · If "ASHRAE", then the ASHRAE Equation is used
- * <br> Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of
+ *
+ * · If "ISO", then the ISO Equation is used
+ *
+ * · If "ASHRAE", then the ASHRAE Equation is used
+ *
+ * Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of
  * the PMV model is limited to air speeds below 0.10m/s (20 fpm). When air speeds exceed 0.10 m/s (20 fpm), the comfort
  * zone boundaries are adjusted based on the SET model. This change was introduced by the
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum_C to Standard 55-2020}
@@ -212,7 +220,8 @@ export function pmv_ppd(
  * Please read more in the Note below.
  *
  * Notes:
- * <br> You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
+ *
+ * You can use this function to calculate the {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV}
  * and {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PPD} in accordance with
  * either the ASHRAE 55 2020 Standard {@link #ref_1|[1]} or the ISO 7730 Standard {@link #ref_2|[2]}.
  *
@@ -226,7 +235,8 @@ export function pmv_ppd(
  * @param { number[] } tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param { number[] } tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param { number[] } vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
- * <br> Note: vr is the relative air speed caused by body movement and not the air
+ *
+ * Note: vr is the relative air speed caused by body movement and not the air
  * speed measured by the air speed sensor. The relative air speed is the sum of the
  * average air speed measured by the sensor plus the activity-generated air speed
  * (Vag). Where Vag is the activity-generated air speed caused by motion of
@@ -234,7 +244,8 @@ export function pmv_ppd(
  * @param { number[] } rh - relative humidity, [%]
  * @param { number[] } met - metabolic rate, [met]
  * @param { number[] } clo - clothing insulation, [clo]
- * <br> Note: The activity as well as the air speed modify the insulation characteristics
+ *
+ * Note: The activity as well as the air speed modify the insulation characteristics
  * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
  * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
  * for the effect of the body movement for met equal or higher than 1.2 met using
@@ -242,9 +253,12 @@ export function pmv_ppd(
  * can be calculated using the function `clo_dynamic_array` which is in .utilities.js.
  * @param { number[] } wme - external work, default is array of 0
  * @param { "ISO"|"ASHRAE" } [standard="ISO"] - comfort standard used for calculation
- * <br> · If "ISO", then the ISO Equation is used
- * <br> · If "ASHRAE", then the ASHRAE Equation is used
- * <br> Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of
+ *
+ * · If "ISO", then the ISO Equation is used
+ *
+ * · If "ASHRAE", then the ASHRAE Equation is used
+ *
+ * Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of
  * the PMV model is limited to air speeds below 0.10m/s (20 fpm). When air speeds exceed 0.10 m/s (20 fpm), the comfort
  * zone boundaries are adjusted based on the SET model. This change was introduced by the
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum_C to Standard 55-2020}

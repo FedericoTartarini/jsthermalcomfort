@@ -2,28 +2,28 @@
   "name": "jsthermalcomfort",
   "version": "0.0.2",
   "description": "A JavaScript package to calculate thermal comfort indices (e.g., Predicted Mean Vote, Standard Effective Temperature, Predicted Heat Strain).",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "lib"
+  ],
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./src/index.js"
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
       },
       "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./src/index.js"
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
       }
     }
   },
-  "types": "./dist/index.d.ts",
-  "type": "module",
-  "main": "./src/index.js",
-  "files": [
-    "lib/**/*"
-  ],
   "scripts": {
-    "clean": "rm -rf ./dist",
-    "build": "npm run clean && npm run build:types",
-    "build:types": "tsc -p ./tsconfig.json",
+    "clean": "rm -rf ./lib",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p ./configs/tsconfig.esm.json",
+    "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "semantic-release": "semantic-release",
     "docs": "npx documentation build ./src/index.js -f html --github --config documentation.yml -a public --theme docs_theme/index.js -o docs",

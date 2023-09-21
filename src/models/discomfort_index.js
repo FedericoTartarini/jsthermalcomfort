@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities";
+import { round } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} DiscomfortIndexReturnType - a result set containing the discomfort index and the classification of the

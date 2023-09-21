@@ -1,10 +1,10 @@
-import { t_o, t_o_array } from "../psychrometrics/t_o";
+import { t_o, t_o_array } from "../psychrometrics/t_o.js";
 import {
   units_converter,
   round,
   units_converter_array,
   valid_range,
-} from "../utilities/utilities";
+} from "../utilities/utilities.js";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}

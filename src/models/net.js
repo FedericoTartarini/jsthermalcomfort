@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities";
+import { round } from "../utilities/utilities.js";
 
 /**
  * Calculates the Normal Effective Temperature (NET). Missenard (1933)

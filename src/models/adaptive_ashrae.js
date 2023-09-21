@@ -4,9 +4,9 @@ import {
   units_converter,
   valid_range,
   units_converter_array,
-} from "../utilities/utilities";
-import { t_o, t_o_array } from "../psychrometrics/t_o";
-import { get_ce } from "./adaptive_en";
+} from "../utilities/utilities.js";
+import { t_o, t_o_array } from "../psychrometrics/t_o.js";
+import { get_ce } from "./adaptive_en.js";
 
 /**
  * @typedef {object} AdaptiveAshraeResult

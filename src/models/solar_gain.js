@@ -1,5 +1,5 @@
-import { round } from "../utilities/utilities";
-import { transpose_sharp_altitude } from "../utilities/utilities";
+import { round } from "../utilities/utilities.js";
+import { transpose_sharp_altitude } from "../utilities/utilities.js";
 
 // avoid reallocating these arrays accross function calls
 const _alt_range = [0, 15, 30, 45, 60, 75, 90];

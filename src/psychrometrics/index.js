@@ -1,11 +1,11 @@
-import { p_sat } from "./p_sat";
-import { p_sat_torr, p_sat_torr_array } from "./p_sat_torr";
-import { t_o, t_o_array } from "./t_o";
-import { enthalpy } from "./enthalpy";
-import { t_wb } from "./t_wb";
-import { t_dp } from "./t_dp";
-import { t_mrt, t_mrt_array } from "./t_mrt";
-import { psy_ta_rh } from "./psy_ta_rh";
+import { p_sat } from "./p_sat.js";
+import { p_sat_torr, p_sat_torr_array } from "./p_sat_torr.js";
+import { t_o, t_o_array } from "./t_o.js";
+import { enthalpy } from "./enthalpy.js";
+import { t_wb } from "./t_wb.js";
+import { t_dp } from "./t_dp.js";
+import { t_mrt, t_mrt_array } from "./t_mrt.js";
+import { psy_ta_rh } from "./psy_ta_rh.js";
 
 /**
  * @public

@@ -58,10 +58,29 @@ describe("adaptive_en", () => {
         tmp_cmf_cat_iii_low: 23.0,
       },
     },
+    {
+      tdb: 74.3,
+      tr: 74.3,
+      t_running_mean: 82.4,
+      v: 0.3281,
+      units: "IP",
+      expected: {
+        tmp_cmf: 82.5,
+        acceptability_cat_i: false,
+        acceptability_cat_ii: false,
+        acceptability_cat_iii: true,
+        tmp_cmf_cat_i_up: 86.1,
+        tmp_cmf_cat_ii_up: 87.9,
+        tmp_cmf_cat_iii_up: 89.7,
+        tmp_cmf_cat_i_low: 77.1,
+        tmp_cmf_cat_ii_low: 75.3,
+        tmp_cmf_cat_iii_low: 73.5,
+      },
+    },
   ])(
-    "returns $expected when tdb is $tdb, tr is $tr, t_running_mean is $t_running_mean and v is $v",
-    ({ tdb, tr, t_running_mean, v, expected }) => {
-      const result = adaptive_en(tdb, tr, t_running_mean, v);
+    "returns $expected when tdb is $tdb, tr is $tr, t_running_mean is $t_running_mean,  v is $v and units is $units",
+    ({ tdb, tr, t_running_mean, v, units, expected }) => {
+      const result = adaptive_en(tdb, tr, t_running_mean, v, units);
 
       if (isNaN(expected.tmp_cmf)) expect(result.tmp_cmf).toBeNaN();
       else expect(result.tmp_cmf).toBeCloseTo(expected.tmp_cmf);

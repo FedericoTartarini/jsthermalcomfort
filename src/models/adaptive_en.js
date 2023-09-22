@@ -100,12 +100,12 @@ export function adaptive_en(
     if (!trm_valid) t_cmf = NaN;
   }
 
-  const t_cmf_i_lower = t_cmf - 3.0;
-  const t_cmf_ii_lower = t_cmf - 4.0;
-  const t_cmf_iii_lower = t_cmf - 5.0;
-  const t_cmf_i_upper = t_cmf + 2.0 + ce;
-  const t_cmf_ii_upper = t_cmf + 3.0 + ce;
-  const t_cmf_iii_upper = t_cmf + 4.0 + ce;
+  let t_cmf_i_lower = t_cmf - 3.0;
+  let t_cmf_ii_lower = t_cmf - 4.0;
+  let t_cmf_iii_lower = t_cmf - 5.0;
+  let t_cmf_i_upper = t_cmf + 2.0 + ce;
+  let t_cmf_ii_upper = t_cmf + 3.0 + ce;
+  let t_cmf_iii_upper = t_cmf + 4.0 + ce;
 
   const acceptability_i = t_cmf_i_lower <= to && to <= t_cmf_i_upper;
   const acceptability_ii = t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
@@ -247,12 +247,12 @@ export function adaptive_en_array(
     });
   }
 
-  const t_cmf_i_lower = t_cmf.map((_t) => _t - 3.0);
-  const t_cmf_ii_lower = t_cmf.map((_t) => _t - 4.0);
-  const t_cmf_iii_lower = t_cmf.map((_t) => _t - 5.0);
-  const t_cmf_i_upper = t_cmf.map((_t, index) => _t + 2.0 + ce[index]);
-  const t_cmf_ii_upper = t_cmf.map((_t, index) => _t + 3.0 + ce[index]);
-  const t_cmf_iii_upper = t_cmf.map((_t, index) => _t + 4.0 + ce[index]);
+  let t_cmf_i_lower = t_cmf.map((_t) => _t - 3.0);
+  let t_cmf_ii_lower = t_cmf.map((_t) => _t - 4.0);
+  let t_cmf_iii_lower = t_cmf.map((_t) => _t - 5.0);
+  let t_cmf_i_upper = t_cmf.map((_t, index) => _t + 2.0 + ce[index]);
+  let t_cmf_ii_upper = t_cmf.map((_t, index) => _t + 3.0 + ce[index]);
+  let t_cmf_iii_upper = t_cmf.map((_t, index) => _t + 4.0 + ce[index]);
 
   const acceptability_i = to.map(
     (_to, index) => t_cmf_i_lower[index] <= _to && _to <= t_cmf_i_upper[index],

@@ -20,6 +20,7 @@ import { athb, athb_array } from "./athb.js";
 import { pmv, pmv_array } from "./pmv.js";
 import { a_pmv, a_pmv_array } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
+import { e_pmv, e_pmv_array } from "./e_pmv.js";
 
 /**
  * @public
@@ -55,4 +56,6 @@ export default {
   a_pmv,
   a_pmv_array,
   ankle_draft,
+  e_pmv,
+  e_pmv_array,
 };

@@ -37,8 +37,52 @@ export function round(number, precision) {
  */
 
 /**
- * @typedef {"ankle_draft" | "ashrae" | "iso" | "ISO7933"} Standard
+ * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "ISO" | "ISO7933"} Standard
  */
+
+/**
+ * Converts degrees to radians unit
+ *
+ * @param {number} degrees
+ *
+ * @returns {number} - radians
+ */
+function degrees_to_radians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+/**
+ * Converts radians to degree unit
+ *
+ * @param {number} radians
+ *
+ * @returns {number} - degrees
+ */
+function radians_to_degrees(radians) {
+  return radians * (180 / Math.PI);
+}
+
+/**
+ * Converts sharp and altittude from radians to degree unit
+ * @param {number} sharp
+ * @param {number} altitude
+ * @returns {[number, number]}
+ */
+export function transpose_sharp_altitude(sharp, altitude) {
+  const altitude_new = radians_to_degrees(
+    Math.asin(
+      Math.sin(degrees_to_radians(Math.abs(sharp - 90))) *
+        Math.cos(degrees_to_radians(altitude)),
+    ),
+  );
+  sharp = radians_to_degrees(
+    Math.atan(
+      Math.sin(degrees_to_radians(sharp)) *
+        Math.tan(degrees_to_radians(90 - altitude)),
+    ),
+  );
+  return [round(sharp, 3), round(altitude_new, 3)];
+}
 
 /**
  * Check that the values comply with the standard provided
@@ -50,11 +94,11 @@ export function round(number, precision) {
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case "ankle_draft":
+    case "ANKLE_DRAFT":
       return _ankle_draft_compliance(kwargs);
-    case "ashrae":
+    case "ASHRAE":
       return _ashrae_compliance(kwargs);
-    case "iso":
+    case "ISO":
       return _iso_compliance(kwargs);
     case "ISO7933":
       return _iso7933_compliance(kwargs);
@@ -78,7 +122,7 @@ export function check_standard_compliance(standard, kwargs) {
  * the values that do not comply are NaN
  * @see {@link check_standard_compliance} for scalar variant that returns warnings
  *
- * @param {Standard | "fan_heatwaves"} standard - standard to check compliance with
+ * @param {Standard | "FAN_HEATWAVES"} standard - standard to check compliance with
  * @param {ComplianceKwargsArray & {airspeed_control?: boolean}} kwargs - values to check compliance against
  *
  * @returns {CheckStandardComplianceResult} filtered arrays based on compliance limits
@@ -89,9 +133,9 @@ export function check_standard_compliance_array(standard, kwargs) {
 
   switch (standard) {
     case "ISO7933":
-    case "ankle_draft":
+    case "ANKLE_DRAFT":
       throw new Error(`Unsupported standard ${standard}`);
-    case "ashrae": {
+    case "ASHRAE": {
       // based on table 7.3.4 ashrae 55 2020
       const tdb = valid_range(kwargs.tdb, [10.0, 40.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);
@@ -131,7 +175,7 @@ export function check_standard_compliance_array(standard, kwargs) {
       }
       return { tdb, tr, v };
     }
-    case "fan_heatwaves": {
+    case "FAN_HEATWAVES": {
       const tdb = valid_range(kwargs.tdb, [20.0, 50.0]);
       const tr = valid_range(kwargs.tr, [20.0, 50.0]);
       const v = valid_range(kwargs.v, [0.1, 4.5]);
@@ -140,7 +184,7 @@ export function check_standard_compliance_array(standard, kwargs) {
       const clo = valid_range(kwargs.clo, [0.0, 1]);
       return { tdb, tr, v, rh, met, clo };
     }
-    case "iso": {
+    case "ISO": {
       // based on ISO 7730:2005 page 3
       const tdb = valid_range(kwargs.tdb, [10.0, 30.0]);
       const tr = valid_range(kwargs.tr, [10.0, 40.0]);
@@ -748,4 +792,181 @@ export const met_typical_tasks = {
   Pick_and_shovel_work: 4.4,
   Basketball: 6.3,
   Wrestling: 7.8,
+};
+
+/**
+ * Total Clothing insulation of typical ensembles
+ * @public
+ * @memberof reference_values
+ * @docname Typical ensembles insulation, [clo]
+ *
+ * @param {"Walking shorts, short-sleeve shirt" | "Typical summer indoor clothing" |
+ * "Knee-length skirt, short-sleeve shirt, sandals, underwear" | "Trousers, long-sleeve shirt" |
+ * "Knee-length skirt, long-sleeve shirt, full slip" | "Sweat pants, long-sleeve sweatshirt" |
+ * "Jacket, Trousers, long-sleeve shirt" | "Typical winter indoor clothing"} ensembles - Typical ensembles. One of:
+ *   - "Walking shorts, short-sleeve shirt"
+ *   - "Typical summer indoor clothing"
+ *   - "Knee-length skirt, short-sleeve shirt, sandals, underwear"
+ *   - "Trousers, short-sleeve shirt, socks, shoes, underwear"
+ *   - "Trousers, long-sleeve shirt"
+ *   - "Knee-length skirt, long-sleeve shirt, full slip"
+ *   - "Sweat pants, long-sleeve sweatshirt"
+ *   - "Jacket, Trousers, long-sleeve shirt"
+ *   - "Typical winter indoor clothing"
+ *
+ * @returns {number} - Clothing insulation of the given ensembles
+ * @example
+ * const result = clo_typical_ensembles("Trousers, long-sleeve shirt"); // returns 0.61
+ */
+
+export function clo_typical_ensembles(ensembles) {
+  switch (ensembles) {
+    case "Walking shorts, short-sleeve shirt":
+      return 0.36;
+    case "Typical summer indoor clothing":
+      return 0.5;
+    case "Knee-length skirt, short-sleeve shirt, sandals, underwear":
+      return 0.54;
+    case "Trousers, short-sleeve shirt, socks, shoes, underwear":
+      return 0.57;
+    case "Trousers, long-sleeve shirt":
+      return 0.61;
+    case "Knee-length skirt, long-sleeve shirt, full slip":
+      return 0.67;
+    case "Sweat pants, long-sleeve sweatshirt":
+      return 0.74;
+    case "Jacket, Trousers, long-sleeve shirt":
+      return 0.96;
+    case "Typical winter indoor clothing":
+      return 1.0;
+    default:
+      throw new Error("No such ensemble");
+  }
+}
+
+/**
+ * Clo values of individual clothing elements. To calculate the total clothing insulation you need to add these values together.
+ * @public
+ * @memberof reference_values
+ * @docname Insulation of individual garments, [clo]
+ * @constant
+ * @type {Object}
+ * @property {number} Metal_chair - 0.0
+ * @property {number} Bra - 0.01
+ * @property {number} Wooden_stool - 0.01
+ * @property {number} Ankle_socks - 0.02
+ * @property {number} Shoes_or_sandals - 0.02
+ * @property {number} Slippers - 0.03
+ * @property {number} Panty_hose - 0.02
+ * @property {number} Calf_length_socks - 0.03
+ * @property {number} Women_underwear - 0.03
+ * @property {number} Men_underwear - 0.04
+ * @property {number} Knee_socks_thick - 0.06
+ * @property {number} Short_shorts - 0.06
+ * @property {number} Walking_shorts: 0.08,
+ * @property {number} T_shirt - 0.08
+ * @property {number} Standard_office_chair - 0.1
+ * @property {number} Executive_chair - 0.15
+ * @property {number} Boots - 0.1
+ * @property {number} Sleeveless_scoop_neck_blouse - 0.12
+ * @property {number} Half_slip - 0.14
+ * @property {number} Long_underwear_bottoms - 0.15
+ * @property {number} Full_slip - 0.16
+ * @property {number} Short_sleeve_knit_shirt - 0.17
+ * @property {number} Sleeveless_vest_thin - 0.1
+ * @property {number} Sleeveless_vest_thick - 0.17
+ * @property {number} Sleeveless_short_gown_thin - 0.18
+ * @property {number} Short_sleeve_dress_shirt - 0.19
+ * @property {number} Sleeveless_long_gown_thin - 0.2
+ * @property {number} Long_underwear_top - 0.2
+ * @property {number} Thick_skirt - 0.23
+ * @property {number} Long_sleeve_dress_shirt - 0.25
+ * @property {number} Long_sleeve_flannel_shirt - 0.34
+ * @property {number} Long_sleeve_sweat_shirt - 0.34
+ * @property {number} Short_sleeve_hospital_gown - 0.31
+ * @property {number} Short_sleeve_short_robe_thin - 0.34
+ * @property {number} Short_sleeve_pajamas - 0.42
+ * @property {number} Long_sleeve_long_gown - 0.46
+ * @property {number} Long_sleeve_short_wrap_robe_thick - 0.48
+ * @property {number} Long_sleeve_pajamas_thick - 0.57
+ * @property {number} Long_sleeve_long_wrap_robe_thick - 0.69
+ * @property {number} Thin_trousers - 0.15
+ * @property {number} Thick_trousers - 0.24
+ * @property {number} Sweatpants - 0.28
+ * @property {number} Overalls - 0.3
+ * @property {number} Coveralls - 0.49
+ * @property {number} Thin_skirt - 0.14
+ * @property {number} Long_sleeve_shirt_dress_thin - 0.33
+ * @property {number} Long_sleeve_shirt_dress_thick - 0.47
+ * @property {number} Short_sleeve_shirt_dress - 0.29
+ * @property {number} Sleeveless_scoop_neck_shirt_thin - 0.23
+ * @property {number} Sleeveless_scoop_neck_shirt_thick - 0.27
+ * @property {number} Long_sleeve_shirt_thin - 0.25
+ * @property {number} Long_sleeve_shirt_thick - 0.36
+ * @property {number} Single_breasted_coat_thin - 0.36
+ * @property {number} Single_breasted_coat_thick - 0.44
+ * @property {number} Double_breasted_coat_thin - 0.42
+ * @property {number} Double_breasted_coat_thick - 0.48
+ * @example
+ * import { clo_individual_garments } from "jsthermalcomfort/utilities"; //The path to utilities
+ * console.log(clo_individual_garments['Metal_chair']);
+ * // output 0.0
+ */
+export const clo_individual_garments = {
+  Metal_chair: 0.0,
+  Bra: 0.01,
+  Wooden_stool: 0.01,
+  Ankle_socks: 0.02,
+  Shoes_or_sandals: 0.02,
+  Slippers: 0.03,
+  Panty_hose: 0.02,
+  Calf_length_socks: 0.03,
+  Women_underwear: 0.03,
+  Men_underwear: 0.04,
+  Knee_socks_thick: 0.06,
+  Short_shorts: 0.06,
+  Walking_shorts: 0.08,
+  T_shirt: 0.08,
+  Standard_office_chair: 0.1,
+  Executive_chair: 0.15,
+  Boots: 0.1,
+  Sleeveless_scoop_neck_blouse: 0.12,
+  Half_slip: 0.14,
+  Long_underwear_bottoms: 0.15,
+  Full_slip: 0.16,
+  Short_sleeve_knit_shirt: 0.17,
+  Sleeveless_vest_thin: 0.1,
+  Sleeveless_vest_thick: 0.17,
+  Sleeveless_short_gown_thin: 0.18,
+  Short_sleeve_dress_shirt: 0.19,
+  Sleeveless_long_gown_thin: 0.2,
+  Long_underwear_top: 0.2,
+  Thick_skirt: 0.23,
+  Long_sleeve_dress_shirt: 0.25,
+  Long_sleeve_flannel_shirt: 0.34,
+  Long_sleeve_sweat_shirt: 0.34,
+  Short_sleeve_hospital_gown: 0.31,
+  Short_sleeve_short_robe_thin: 0.34,
+  Short_sleeve_pajamas: 0.42,
+  Long_sleeve_long_gown: 0.46,
+  Long_sleeve_short_wrap_robe_thick: 0.48,
+  Long_sleeve_pajamas_thick: 0.57,
+  Long_sleeve_long_wrap_robe_thick: 0.69,
+  Thin_trousers: 0.15,
+  Thick_trousers: 0.24,
+  Sweatpants: 0.28,
+  Overalls: 0.3,
+  Coveralls: 0.49,
+  Thin_skirt: 0.14,
+  Long_sleeve_shirt_dress_thin: 0.33,
+  Long_sleeve_shirt_dress_thick: 0.47,
+  Short_sleeve_shirt_dress: 0.29,
+  Sleeveless_scoop_neck_shirt_thin: 0.23,
+  Sleeveless_scoop_neck_shirt_thick: 0.27,
+  Long_sleeve_shirt_thin: 0.25,
+  Long_sleeve_shirt_thick: 0.36,
+  Single_breasted_coat_thin: 0.36,
+  Single_breasted_coat_thick: 0.44,
+  Double_breasted_coat_thin: 0.42,
+  Double_breasted_coat_thick: 0.48,
 };

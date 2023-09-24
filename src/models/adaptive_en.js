@@ -1,10 +1,10 @@
-import { t_o, t_o_array } from "../psychrometrics/t_o";
+import { t_o, t_o_array } from "../psychrometrics/t_o.js";
 import {
   units_converter,
   round,
   units_converter_array,
   valid_range,
-} from "../utilities/utilities";
+} from "../utilities/utilities.js";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -91,7 +91,7 @@ export function adaptive_en(
 
   const to = t_o(tdb, tr, v, standard);
 
-  const ce = _get_ce(v, to);
+  const ce = get_ce(v, to);
 
   let t_cmf = 0.33 * t_running_mean + 18.8;
 
@@ -100,12 +100,12 @@ export function adaptive_en(
     if (!trm_valid) t_cmf = NaN;
   }
 
-  const t_cmf_i_lower = t_cmf - 3.0;
-  const t_cmf_ii_lower = t_cmf - 4.0;
-  const t_cmf_iii_lower = t_cmf - 5.0;
-  const t_cmf_i_upper = t_cmf + 2.0 + ce;
-  const t_cmf_ii_upper = t_cmf + 3.0 + ce;
-  const t_cmf_iii_upper = t_cmf + 4.0 + ce;
+  let t_cmf_i_lower = t_cmf - 3.0;
+  let t_cmf_ii_lower = t_cmf - 4.0;
+  let t_cmf_iii_lower = t_cmf - 5.0;
+  let t_cmf_i_upper = t_cmf + 2.0 + ce;
+  let t_cmf_ii_upper = t_cmf + 3.0 + ce;
+  let t_cmf_iii_upper = t_cmf + 4.0 + ce;
 
   const acceptability_i = t_cmf_i_lower <= to && to <= t_cmf_i_upper;
   const acceptability_ii = t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
@@ -234,7 +234,7 @@ export function adaptive_en_array(
   }
 
   const to = t_o_array(tdb, tr, v, standard);
-  const ce = v.map((_v, index) => _get_ce(_v, to[index]));
+  const ce = v.map((_v, index) => get_ce(_v, to[index]));
 
   let t_cmf = t_running_mean.map(
     (_t_running_mean) => 0.33 * _t_running_mean + 18.8,
@@ -247,12 +247,12 @@ export function adaptive_en_array(
     });
   }
 
-  const t_cmf_i_lower = t_cmf.map((_t) => _t - 3.0);
-  const t_cmf_ii_lower = t_cmf.map((_t) => _t - 4.0);
-  const t_cmf_iii_lower = t_cmf.map((_t) => _t - 5.0);
-  const t_cmf_i_upper = t_cmf.map((_t, index) => _t + 2.0 + ce[index]);
-  const t_cmf_ii_upper = t_cmf.map((_t, index) => _t + 3.0 + ce[index]);
-  const t_cmf_iii_upper = t_cmf.map((_t, index) => _t + 4.0 + ce[index]);
+  let t_cmf_i_lower = t_cmf.map((_t) => _t - 3.0);
+  let t_cmf_ii_lower = t_cmf.map((_t) => _t - 4.0);
+  let t_cmf_iii_lower = t_cmf.map((_t) => _t - 5.0);
+  let t_cmf_i_upper = t_cmf.map((_t, index) => _t + 2.0 + ce[index]);
+  let t_cmf_ii_upper = t_cmf.map((_t, index) => _t + 3.0 + ce[index]);
+  let t_cmf_iii_upper = t_cmf.map((_t, index) => _t + 4.0 + ce[index]);
 
   const acceptability_i = to.map(
     (_to, index) => t_cmf_i_lower[index] <= _to && _to <= t_cmf_i_upper[index],
@@ -339,7 +339,7 @@ export function adaptive_en_array(
  * @param {number} to
  * @returns {number}
  */
-function _get_ce(v, to) {
+export function get_ce(v, to) {
   let ce = 0;
   if (v >= 0.6 && to >= 25.0) {
     if (v < 0.9) {

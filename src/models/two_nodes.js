@@ -25,11 +25,11 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  */
 
 /**
- * @typedef {Object} TwoNodesKwargs
- * @property {boolean} [round=true]
- * @property {boolean} [calculate_ce=false]
- * @property {number} [max_sweating]
- * @property {number} [w_max]
+ * @typedef {Object} TwoNodesKwargs - a keywords argument set containing the additional arguments for Two nodes model calculation
+ * @property {boolean} [round=true] - round the result of two nodes model
+ * @property {boolean} [calculate_ce=false] - select if SET is used to calculate Cooling Effect
+ * @property {number} [max_sweating] - maximum rate at which regulatory sweat is generated, [kg/h/m2]
+ * @property {number} [w_max]  – maximum skin wettedness (w) adimensional. Ranges from 0 and 1
  * @public
  */
 
@@ -43,28 +43,28 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
 
 /**
  * 
- * Two-node model of human temperature regulation:
- * This model can be used to calculate a variety of indices, including:
- * Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
+ * Two-node model of human temperature regulation Gagge et al. (1986).
+ * 
+ * {@link #ref_10|[10]} This model can be used to calculate a variety of indices, including:
+ * 
+ *  - Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
  * the Fanger’s PMV equations but it replaces the heat loss and gain terms
- * with those calculated by the two node model PMV SET and the predicted
- * thermal sensation based on SET. This function is similar in all aspects
- * to the pythermalcomfort.models.pmv_gagge(). However, it uses the
- * pythermalcomfort.models.set() equation to calculate the dry heat loss by
- * convection {@link #ref_25|[25]}.
- * Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
- * to restore a state of comfort and thermal equilibrium by sweating. DISC is
- * described numerically as: comfortable and pleasant (0), slightly
- * uncomfortable but acceptable (1), uncomfortable and unpleasant (2),
- * very uncomfortable (3), limited tolerance (4), and intolerable (S).
- * The range of each category is ± 0.5 numerically. In the cold, the classical
- * negative category descriptions used for Fanger’s PMV apply.
- * Heat gains and losses via convection, radiation and conduction.
- * The Standard Effective Temperature (SET)
- * The New Effective Temperature (ET)
- * The Predicted Thermal Sensation (TSENS)
- * The Predicted Percent Dissatisfied Due to Draft (PD)
- * Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * with those calculated by the two node model developed by Gagge et al. (1986) {@link #ref_10|[10]}.
+ *  - PMV SET and the predicted thermal sensation based on SET {@link #ref_10|[10]}. This function is 
+ * similar in all aspects to the pythermalcomfort.models.pmv_gagge(). However, it uses the 
+ * pythermalcomfort.models.set() equation to calculate the dry heat loss by convection.
+ *  - Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
+ * to restore a state of comfort and thermal equilibrium by sweating {@link #ref_10|[10]}. DISC is
+ * described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1), 
+ * uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (S).
+ * The range of each category is ± 0.5 numerically. In the cold, the classical negative category 
+ * descriptions used for Fanger’s PMV apply {@link #ref_10|[10]}.
+ *  - Heat gains and losses via convection, radiation and conduction.
+ *  - The Standard Effective Temperature (SET)
+ *  - The New Effective Temperature (ET)
+ *  - The Predicted Thermal Sensation (TSENS)
+ *  - The Predicted Percent Dissatisfied Due to Draft (PD)
+ *  - Predicted Percent Satisfied With the Level of Air Movement” (PS)
  * 
  * @public
  * @memberof models
@@ -133,7 +133,28 @@ export function two_nodes(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
   const vapor_pressure = cal_vapor_pressure(tdb, rh);
+
+  if (joint_kwargs.calculate_ce) {
+    const ce_set_result = calculate_two_nodes(
+      tdb,
+      tr,
+      v,
+      met,
+      clo,
+      vapor_pressure,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      body_position,
+      max_skin_blood_flow,
+      { calculate_ce: true },
+    );
+    return {
+      set: ce_set_result.set,
+    };
+  }
 
   const result = calculate_two_nodes(
     tdb,
@@ -228,7 +249,29 @@ const skinBloodFlowNeutral = 6.3;
 
 /**
  * 
- * Compute two nodes model when the input parameters are arrays. 
+ * Two nodes model of human temperature regulation Gagge et al. when the input parameters are arrays. 
+ * 
+ * {@link #ref_10|[10]} This model can be used to calculate a variety of indices, including:
+ * 
+ *  - Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
+ * the Fanger’s PMV equations but it replaces the heat loss and gain terms
+ * with those calculated by the two node model developed by Gagge et al. (1986) {@link #ref_10|[10]}.
+ *  - PMV SET and the predicted thermal sensation based on SET {@link #ref_10|[10]}. This function is 
+ * similar in all aspects to the pythermalcomfort.models.pmv_gagge(). However, it uses the 
+ * pythermalcomfort.models.set() equation to calculate the dry heat loss by convection.
+ *  - Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
+ * to restore a state of comfort and thermal equilibrium by sweating {@link #ref_10|[10]}. DISC is
+ * described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1), 
+ * uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (S).
+ * The range of each category is ± 0.5 numerically. In the cold, the classical negative category 
+ * descriptions used for Fanger’s PMV apply {@link #ref_10|[10]}.
+ *  - Heat gains and losses via convection, radiation and conduction.
+ *  - The Standard Effective Temperature (SET)
+ *  - The New Effective Temperature (ET)
+ *  - The Predicted Thermal Sensation (TSENS)
+ *  - The Predicted Percent Dissatisfied Due to Draft (PD)
+ *  - Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * 
  * @public
  * @memberof models
  * @docname Gagge et al. two-node model (array version)
@@ -318,6 +361,31 @@ export function two_nodes_array(
 
   if (maxSkinBloodFlowArray === undefined) {
     maxSkinBloodFlowArray = tdbArray.map((_) => 80);
+  }
+
+  if (joint_kwargs.calculate_ce) {
+    const ceSetArray = new Array(tdbArray.length);
+    for (let index = 0; index < tdbArray.length; index++) {
+      const ceSetResult = calculate_two_nodes(
+        tdbArray[index],
+        trArray[index],
+        vArray[index],
+        metArray[index],
+        cloArray[index],
+        vaporPressureArray[index],
+        wmeArray[index],
+        bodySurfaceArray[index],
+        pAtmArray[index],
+        bodyPositionArray[index],
+        maxSkinBloodFlowArray[index],
+        { calculate_ce: true },
+      );
+      ceSetArray[index] = ceSetResult.set;
+    }
+
+    return {
+      set: ceSetArray,
+    };
   }
 
   const setArray = new Array(tdbArray.length);

@@ -1,7 +1,7 @@
-import { p_sat } from "./p_sat";
-import { t_dp } from "./t_dp";
-import { t_wb } from "./t_wb";
-import { enthalpy } from "./enthalpy";
+import { p_sat } from "./p_sat.js";
+import { t_dp } from "./t_dp.js";
+import { t_wb } from "./t_wb.js";
+import { enthalpy } from "./enthalpy.js";
 
 /**
  * @typedef {object} PsyTaRhReturnType

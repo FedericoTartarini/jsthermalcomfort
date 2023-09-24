@@ -9,7 +9,9 @@ import {
   running_mean_outdoor_temperature,
   f_svv,
   met_typical_tasks,
-} from "./utilities";
+  clo_typical_ensembles,
+  clo_individual_garments,
+} from "./utilities.js";
 
 /**
  * @public
@@ -27,6 +29,8 @@ export default {
   running_mean_outdoor_temperature,
   f_svv,
   met_typical_tasks,
+  clo_typical_ensembles,
+  clo_individual_garments,
 };
 
 /**

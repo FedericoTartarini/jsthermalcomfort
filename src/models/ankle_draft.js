@@ -72,11 +72,10 @@ export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
   }
 
   kwargs = { tdb: tdb, tr: tr, v_limited: vr, rh: rh, met: met, clo: clo };
+
   const warns = check_standard_compliance("ASHRAE", kwargs);
-  if (warns.length != 0) {
-    for (let i = 0; i < warns.length; i++) {
-      console.log("Warning:", warns[i]);
-    }
+  for (const warn of warns) {
+    console.warn("Warning:", warn);
   }
 
   const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE");

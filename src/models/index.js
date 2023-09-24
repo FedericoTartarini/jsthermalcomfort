@@ -21,8 +21,7 @@ import { pmv, pmv_array } from "./pmv.js";
 import { a_pmv, a_pmv_array } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv, e_pmv_array } from "./e_pmv.js";
-import { vertical_tmp_grad_ppd } from './vertical_tmp_grad_ppd';
-
+import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd";
 
 /**
  * @public

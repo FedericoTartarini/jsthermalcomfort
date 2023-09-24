@@ -154,4 +154,54 @@ export function use_fans_heatwaves(
     max_skin_blood_flow,
     { round: false, max_sweating: joint_kwargs.max_sweating },
   );
+
+  if (limit_inputs) {
+    const {
+      tdb: tdb_valid,
+      tr: tr_valid,
+      v: v_valid,
+      met: met_valid,
+      clo: clo_valid,
+    } = check_standard_compliance_array("ASHRAE", {
+      tdb: [tdb],
+      tr: [tr],
+      v: [v],
+      met: [met],
+      clo: [clo],
+    });
+
+    if (
+      isNaN(tdb_valid[0]) ||
+      isNaN(tr_valid[0]) ||
+      isNaN(v_valid[0]) ||
+      isNaN(met_valid[0]) ||
+      isNaN(clo_valid[0])
+    ) {
+      set_tmp = NaN;
+    }
+  }
+  
+  if (joint_kwargs.round) {
+    return {
+      e_skin: round(result.eSkin, 1),
+      e_rsw: round(result.eRsw, 1),
+      e_max: round(result.eMax, 1),
+      q_sensible: round(result.qSensible, 1),
+      q_skin: round(result.qSkin, 1),
+      q_res: round(result.qRes, 1),
+      t_core: round(result.tCore, 1),
+      t_skin: round(result.tSkin, 1),
+      m_bl: round(result.mBl, 1),
+      m_rsw: round(result.mRsw, 1),
+      w: round(result.w, 1),
+      w_max: round(result.wMax, 1),
+      set: round(result.set, 1),
+      et: round(result.et, 1),
+      pmv_gagge: round(result.pmvGagge, 1),
+      pmv_set: round(result.pmvSet, 1),
+      disc: round(result.disc, 1),
+      t_sens: round(result.tSens, 1),
+    };
+  }
+  return result;
 }

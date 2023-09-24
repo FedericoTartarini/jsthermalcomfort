@@ -49,7 +49,7 @@ import { round } from "../utilities/utilities.js";
  *   can be calculated using the function clo_dynamic in utilities.js.
  * @param {number} e_coefficient - expectancy factor
  * @param {number} [wme=0] - External work
- * @param {E_pmvKwargs} kwargs - additional arguments
+ * @param {E_pmvKwargs} [kwargs] - additional arguments
  *
  * @returns {number} pmv - Predicted Mean Vote
  *
@@ -129,7 +129,7 @@ export function e_pmv(
  *   can be calculated using the function clo_dynamic_array in utilities.js.
  * @param {number[]} e_coefficient - expectancy factor
  * @param {number[]} wme - External work, default is array of 0
- * @param {E_pmvKwargs} kwargs - additional arguments
+ * @param {E_pmvKwargs} [kwargs] - additional arguments
  *
  * @returns {number[]} pmv - Predicted Mean Vote
  *
@@ -167,12 +167,12 @@ export function e_pmv_array(
 
   let _pmv = pmv_array(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
 
-  met = _pmv.map((Value, i) => {
-    return Value > 0 ? met[i] * (1 + Value * -0.067) : met[i];
+  met = _pmv.map((value, i) => {
+    return value > 0 ? met[i] * (1 + value * -0.067) : met[i];
   });
   _pmv = pmv_array(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
 
-  return _pmv.map((Value, i) => {
-    return round(Value * e_coefficient[i], 2);
+  return _pmv.map((value, i) => {
+    return round(value * e_coefficient[i], 2);
   });
 }

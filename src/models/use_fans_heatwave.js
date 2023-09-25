@@ -219,6 +219,14 @@ export function use_fans_heatwaves(
   return joint_output;
 }
 
+/**
+ * Calculate vapor pressure based on air temperature and relative humidity.
+ *
+ * @param {object} two_nodes_result - the result of two nodes model
+ * @param {HeatwaveKwargs} joint_kwargs - heatwave kwargs
+ * @param {number} max_skin_blood_flow - maximum blood flow from the core to the skin, [kg/h/m2] default 80
+ * @returns {object} heat strain conditions
+ */
 function cal_heatwave(two_nodes_result, joint_kwargs, max_skin_blood_flow) {
   let heat_strain_blood_flow,
     heat_strain_w,

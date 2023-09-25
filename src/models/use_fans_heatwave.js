@@ -140,6 +140,7 @@ export function use_fans_heatwaves(
     body_surface_area = unit_convert.area;
     p_atm = unit_convert.pressure;
   }
+
   let output = two_nodes(
     tdb,
     tr,
@@ -155,14 +156,26 @@ export function use_fans_heatwaves(
     { round: false, max_sweating: joint_kwargs.max_sweating },
   );
 
-  if (limit_inputs) {
+  let heatwave_output = cal_heatwave(output, joint_kwargs, max_skin_blood_flow);
+
+  const key_to_remove = ["set", "et", "pmv_gagge", "pmv_set", "disc", "t_sens"];
+
+  const joint_output = {};
+  for (const key in output) {
+    if (!key_to_remove.includes(key)) {
+      joint_output[key] = output[key];
+    }
+  }
+  Object.assign(joint_output, heatwave_output);
+
+  if (joint_kwargs.limit_inputs) {
     const {
       tdb: tdb_valid,
       tr: tr_valid,
       v: v_valid,
       met: met_valid,
       clo: clo_valid,
-    } = check_standard_compliance_array("ASHRAE", {
+    } = check_standard_compliance_array("FAN_HEATWAVES", {
       tdb: [tdb],
       tr: [tr],
       v: [v],
@@ -177,31 +190,56 @@ export function use_fans_heatwaves(
       isNaN(met_valid[0]) ||
       isNaN(clo_valid[0])
     ) {
-      set_tmp = NaN;
+      for (let key in joint_output) {
+        joint_output[key] = NaN;
+      }
     }
   }
-  
+
   if (joint_kwargs.round) {
     return {
-      e_skin: round(result.eSkin, 1),
-      e_rsw: round(result.eRsw, 1),
-      e_max: round(result.eMax, 1),
-      q_sensible: round(result.qSensible, 1),
-      q_skin: round(result.qSkin, 1),
-      q_res: round(result.qRes, 1),
-      t_core: round(result.tCore, 1),
-      t_skin: round(result.tSkin, 1),
-      m_bl: round(result.mBl, 1),
-      m_rsw: round(result.mRsw, 1),
-      w: round(result.w, 1),
-      w_max: round(result.wMax, 1),
-      set: round(result.set, 1),
-      et: round(result.et, 1),
-      pmv_gagge: round(result.pmvGagge, 1),
-      pmv_set: round(result.pmvSet, 1),
-      disc: round(result.disc, 1),
-      t_sens: round(result.tSens, 1),
+      e_skin: round(joint_output.eSkin, 1),
+      e_rsw: round(joint_output.eRsw, 1),
+      e_max: round(joint_output.eMax, 1),
+      q_sensible: round(joint_output.qSensible, 1),
+      q_skin: round(joint_output.qSkin, 1),
+      q_res: round(joint_output.qRes, 1),
+      t_core: round(joint_output.tCore, 1),
+      t_skin: round(joint_output.tSkin, 1),
+      m_bl: round(joint_output.mBl, 1),
+      m_rsw: round(joint_output.mRsw, 1),
+      w: round(joint_output.w, 1),
+      w_max: round(joint_output.wMax, 1),
+      heat_strain_blood_flow: joint_output.heat_strain_blood_flow,
+      heat_strain_w: joint_output.heat_strain_w,
+      heat_strain_sweating: joint_output.heat_strain_sweating,
+      heat_strain: joint_output.heat_strain,
     };
   }
-  return result;
+  return joint_output;
+}
+
+function cal_heatwave(two_nodes_result, joint_kwargs, max_skin_blood_flow) {
+  let heat_strain_blood_flow,
+    heat_strain_w,
+    heat_strain_sweating,
+    heat_strain = 0;
+
+  heat_strain_blood_flow = two_nodes_result.mBl === max_skin_blood_flow ? 1 : 0;
+  heat_strain_w = two_nodes_result.w === two_nodes_result.wMax ? 1 : 0;
+  heat_strain_sweating =
+    two_nodes_result.mRsw === joint_kwargs.max_sweating ? 1 : 0;
+  if (
+    heat_strain_blood_flow == 1 ||
+    heat_strain_w == 1 ||
+    heat_strain_sweating == 1
+  ) {
+    heat_strain = 1;
+  }
+  return {
+    heat_strain_blood_flow: heat_strain_blood_flow,
+    heat_strain_w: heat_strain_w,
+    heat_strain_sweating: heat_strain_sweating,
+    heat_strain: heat_strain,
+  };
 }

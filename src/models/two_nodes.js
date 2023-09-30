@@ -872,6 +872,9 @@ function calculate_two_nodes(
     eMax =
       (Math.exp(18.6686 - 4030.183 / (tSkin + 235.0)) - vaporPressure) /
       (rEa + rEcl);
+    if (eMax == 0) {
+      eMax = 0.001;
+    }
     const pRsw = eRsw / eMax;
     w = 0.06 + 0.94 * pRsw;
     eDiff = w * eMax - eRsw;

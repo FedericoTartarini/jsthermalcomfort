@@ -18,10 +18,10 @@ import { two_nodes } from "../models/two_nodes.js";
  * @property {number} t_skin  – Skin temperature, [°C]
  * @property {number} m_bl  – Skin blood flow, [kg/h/m2]
  * @property {number} m_rsw  – Rate at which regulatory sweat is generated, [kg/h/m2]
- * @property {number} w  – Skin wettedness, adimensional. Ranges from 0 and 1.
- * @property {number} w_max  – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1.
- * @property {boolean} heat_strain  – True if the model predict that the person may be experiencing heat strain.
- * @property {boolean} heat_strain_blood_flow  – True if heat strain is caused by skin blood flow (m_bl) reaching its maximum value.
+ * @property {number} w  – Skin wettedness, adimensional. Ranges from 0 and 1
+ * @property {number} w_max  – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1
+ * @property {boolean} heat_strain  – True if the model predict that the person may be experiencing heat strain
+ * @property {boolean} heat_strain_blood_flow  – True if heat strain is caused by skin blood flow (m_bl) reaching its maximum value
  * @property {boolean} heat_strain_w  – True if heat strain is caused by skin wettedness (w) reaching its maximum value
  * @property {boolean} heat_strain_sweating  – True if heat strain is caused by regulatory sweating (m_rsw) reaching its maximum value
  * @public

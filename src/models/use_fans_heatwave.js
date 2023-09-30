@@ -71,7 +71,7 @@ import { two_nodes } from "../models/two_nodes.js";
  * @param {number} [max_skin_blood_flow=80] Maximum blood flow from the core to the skin, [kg/h/m2] default 80
  * @param {HeatwaveKwargs} [kwargs]
  *
- * @returns {HeatwaveReturnType} object with results of two_nodes
+ * @returns {HeatwaveReturnType} object with results of use fans during heatwave
  *
  * @example
  * const results = use_fans_heatwaves(25, 25, 0.1, 50, 1.2, 0.5);
@@ -220,7 +220,7 @@ export function use_fans_heatwaves(
 }
 
 /**
- * Calculate vapor pressure based on air temperature and relative humidity.
+ * Calculate heat strain conditions based on the result of two nodes model and max skin blood flow
  *
  * @param {object} two_nodes_result - the result of two nodes model
  * @param {HeatwaveKwargs} joint_kwargs - heatwave kwargs

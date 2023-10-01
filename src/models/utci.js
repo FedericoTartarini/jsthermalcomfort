@@ -26,6 +26,7 @@ const stress_categories = {
  * @see {@link utci_array} for a version that supports arrays
  * @public
  * @memberof models
+ * @docname Universal Thermal Climate Index (UTCI)
  * 
  * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
@@ -37,7 +38,11 @@ const stress_categories = {
         function returns nan. If False returns UTCI values even if input values are
         outside the applicability limits of the model. The valid input ranges are
         -50 < tdb [°C] < 50, tdb - 70 < tr [°C] < tdb + 30, and for 0.5 < v [m/s] < 17.0.
- *
+ * @example
+ * console.log(utci(25, 25, 1.0, 50)) // will print 24.6
+ * console.log(utci(77, 77, 3.28, 50, 'ip')) // will print 76.4
+ * console.log(utci(25, 25, 1.0, 50, 'si', true))
+ * // will print {utci: 24.6, stress_category: "no thermal stress"}
  */
 export function utci(
   tdb,
@@ -105,6 +110,7 @@ export function utci(
  * @see {@link utci} for scalar arguments. Accepts array arguments.
  * @public
  * @memberof models
+ * @docname Universal Thermal Climate Index (UTCI_Array)
  * 
  * @param {number[]} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param {number[]} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'

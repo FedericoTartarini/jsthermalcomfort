@@ -190,6 +190,12 @@ export function utci_array(
   return utci_approx;
 }
 
+/**
+ * 
+ * @param {number} val 
+ * @param {object} categories 
+ * @returns {string}
+ */
 function mapping(val, categories) {
   for (const [key, value] of Object.entries(categories)) {
     if (val > value[0] && val <= value[1]) {
@@ -198,6 +204,12 @@ function mapping(val, categories) {
   }
 }
 
+/**
+ * 
+ * @param {number[]} val 
+ * @param {object} categories 
+ * @returns {string[]}
+ */
 function mapping_arr(val, categories) {
   let ret = [];
   val.map((_v) => {
@@ -206,6 +218,11 @@ function mapping_arr(val, categories) {
   return ret;
 }
 
+/**
+ * 
+ * @param {number} t_db 
+ * @returns {number}
+ */
 function exponential(t_db) {
   const g = [
     -2836.5744,
@@ -225,6 +242,14 @@ function exponential(t_db) {
   return es;
 }
 
+/**
+ * 
+ * @param {number} tdb 
+ * @param {number} v 
+ * @param {number} delta_t_tr 
+ * @param {number} pa 
+ * @returns {number}
+ */
 function utci_optimized(tdb, v, delta_t_tr, pa) {
   return (
     tdb +

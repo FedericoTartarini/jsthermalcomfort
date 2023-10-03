@@ -28,7 +28,7 @@ import { pmv } from "../models/pmv.js";
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
  * @param {number} vertical_tmp_grad Vertical temperature gradient between the feet and the head, default in [°C/m]
- * @param {"SI" | "IP"} units - Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {"SI" | "IP"} [units="SI"] - Select the SI (International System of Units) or the IP (Imperial Units) system.
  *
  * @returns {VerTmpGradReturnType} Object with results of the PPD with vertical temprature gradident.
  *
@@ -43,15 +43,15 @@ export function vertical_tmp_grad_ppd(
   met,
   clo,
   vertical_tmp_grad,
-  units,
+  units = "SI",
 ) {
-  if (units === undefined) {
-    units = "SI";
-  }
   if (units === "IP") {
-    ({ tdb: tdb } = units_converter({ tdb: tdb }, "IP"));
-    ({ tr: tr } = units_converter({ tr: tr }, "IP"));
-    ({ vr: vr } = units_converter({ vr: vr }, "IP"));
+    ({
+      tdb: tdb,
+      tr: tr,
+      vr: vr,
+    } = units_converter({ tdb: tdb, tr: tr, vr: vr }, "IP"));
+
     vertical_tmp_grad = (vertical_tmp_grad / 1.8) * 3.28;
   }
   const warnings = check_standard_compliance("ASHRAE", {
@@ -96,9 +96,5 @@ function calculate_ppd_vg(tsv, vertical_tmp_grad) {
  * @returns {boolean} Acceptability
  */
 function check_acceptability(ppd_vg) {
-  let acceptability = false;
-  if (ppd_vg <= 5) {
-    acceptability = true;
-  }
-  return acceptability;
+  return ppd_vg <= 5;
 }

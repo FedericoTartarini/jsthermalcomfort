@@ -191,9 +191,9 @@ export function utci_array(
 }
 
 /**
- * 
- * @param {number} val 
- * @param {object} categories 
+ *
+ * @param {number} val
+ * @param {object} categories
  * @returns {string}
  */
 function mapping(val, categories) {
@@ -205,9 +205,9 @@ function mapping(val, categories) {
 }
 
 /**
- * 
- * @param {number[]} val 
- * @param {object} categories 
+ *
+ * @param {number[]} val
+ * @param {object} categories
  * @returns {string[]}
  */
 function mapping_arr(val, categories) {
@@ -219,8 +219,8 @@ function mapping_arr(val, categories) {
 }
 
 /**
- * 
- * @param {number} t_db 
+ *
+ * @param {number} t_db
  * @returns {number}
  */
 function exponential(t_db) {
@@ -243,11 +243,11 @@ function exponential(t_db) {
 }
 
 /**
- * 
- * @param {number} tdb 
- * @param {number} v 
- * @param {number} delta_t_tr 
- * @param {number} pa 
+ *
+ * @param {number} tdb
+ * @param {number} v
+ * @param {number} delta_t_tr
+ * @param {number} pa
  * @returns {number}
  */
 function utci_optimized(tdb, v, delta_t_tr, pa) {

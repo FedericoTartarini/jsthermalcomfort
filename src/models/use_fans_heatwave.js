@@ -20,10 +20,10 @@ import { two_nodes } from "../models/two_nodes.js";
  * @property {number} m_rsw  – Rate at which regulatory sweat is generated, [kg/h/m2]
  * @property {number} w  – Skin wettedness, adimensional. Ranges from 0 and 1
  * @property {number} w_max  – Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 and 1
- * @property {boolean} heat_strain  – True if the model predict that the person may be experiencing heat strain
- * @property {boolean} heat_strain_blood_flow  – True if heat strain is caused by skin blood flow (m_bl) reaching its maximum value
- * @property {boolean} heat_strain_w  – True if heat strain is caused by skin wettedness (w) reaching its maximum value
- * @property {boolean} heat_strain_sweating  – True if heat strain is caused by regulatory sweating (m_rsw) reaching its maximum value
+ * @property {boolean | undefined} heat_strain  – True if the model predict that the person may be experiencing heat strain, undefined if the result of two nodes model is not a number
+ * @property {boolean | undefined} heat_strain_blood_flow  – True if heat strain is caused by skin blood flow (m_bl) reaching its maximum value, undefined if the result of two nodes model is not a number
+ * @property {boolean | undefined} heat_strain_w  – True if heat strain is caused by skin wettedness (w) reaching its maximum value, undefined if the result of two nodes model is not a number
+ * @property {boolean | undefined} heat_strain_sweating  – True if heat strain is caused by regulatory sweating (m_rsw) reaching its maximum value, undefined if the result of two nodes model is not a number
  * @public
  */
 
@@ -191,7 +191,16 @@ export function use_fans_heatwaves(
       isNaN(clo_valid[0])
     ) {
       for (let key in joint_output) {
-        joint_output[key] = NaN;
+        if (
+          key === "heat_strain" ||
+          key === "heat_strain_blood_flow" ||
+          key === "heat_strain_sweating" ||
+          key === "heat_strain_w"
+        ) {
+          joint_output[key] = undefined;
+        } else {
+          joint_output[key] = NaN;
+        }
       }
     }
   }
@@ -231,19 +240,18 @@ function cal_heatwave(two_nodes_result, joint_kwargs, max_skin_blood_flow) {
   let heat_strain_blood_flow,
     heat_strain_w,
     heat_strain_sweating,
-    heat_strain = 0;
+    heat_strain = false;
 
-  heat_strain_blood_flow = two_nodes_result.mBl === max_skin_blood_flow ? 1 : 0;
-  heat_strain_w = two_nodes_result.w === two_nodes_result.wMax ? 1 : 0;
+  heat_strain_blood_flow =
+    two_nodes_result.mBl === max_skin_blood_flow ? true : false;
+  heat_strain_w = two_nodes_result.w === two_nodes_result.wMax ? true : false;
   heat_strain_sweating =
-    two_nodes_result.mRsw === joint_kwargs.max_sweating ? 1 : 0;
-  if (
-    heat_strain_blood_flow == 1 ||
-    heat_strain_w == 1 ||
-    heat_strain_sweating == 1
-  ) {
-    heat_strain = 1;
+    two_nodes_result.mRsw === joint_kwargs.max_sweating ? true : false;
+
+  if (heat_strain_blood_flow || heat_strain_w || heat_strain_sweating) {
+    heat_strain = true;
   }
+
   return {
     heat_strain_blood_flow: heat_strain_blood_flow,
     heat_strain_w: heat_strain_w,

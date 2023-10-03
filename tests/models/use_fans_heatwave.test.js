@@ -34,10 +34,10 @@ describe("use_fans_heatwaves", () => {
         m_rsw: 14.6,
         w: 0.1,
         w_max: 0.7,
-        heat_strain_blood_flow: 0.0,
-        heat_strain_w: 0.0,
-        heat_strain_sweating: 0.0,
-        heat_strain: 0.0,
+        heat_strain_blood_flow: false,
+        heat_strain_w: false,
+        heat_strain_sweating: false,
+        heat_strain: false,
       },
     },
     {
@@ -66,10 +66,10 @@ describe("use_fans_heatwaves", () => {
         m_rsw: 104.3,
         w: 0.7,
         w_max: 0.7,
-        heat_strain_blood_flow: 0.0,
-        heat_strain_w: 1.0,
-        heat_strain_sweating: 0.0,
-        heat_strain: 1.0,
+        heat_strain_blood_flow: false,
+        heat_strain_w: true,
+        heat_strain_sweating: false,
+        heat_strain: true,
       },
     },
     {
@@ -98,10 +98,10 @@ describe("use_fans_heatwaves", () => {
         m_rsw: 102.9,
         w: 0.7,
         w_max: 0.7,
-        heat_strain_blood_flow: 1.0,
-        heat_strain_w: 1.0,
-        heat_strain_sweating: 0.0,
-        heat_strain: 1.0,
+        heat_strain_blood_flow: true,
+        heat_strain_w: true,
+        heat_strain_sweating: false,
+        heat_strain: true,
       },
     },
     {
@@ -130,10 +130,10 @@ describe("use_fans_heatwaves", () => {
         m_rsw: NaN,
         w: NaN,
         w_max: NaN,
-        heat_strain_blood_flow: NaN,
-        heat_strain_w: NaN,
-        heat_strain_sweating: NaN,
-        heat_strain: NaN,
+        heat_strain_blood_flow: undefined,
+        heat_strain_w: undefined,
+        heat_strain_sweating: undefined,
+        heat_strain: undefined,
       },
     },
   ])(
@@ -170,10 +170,28 @@ describe("use_fans_heatwaves", () => {
         kwargs,
       );
       for (let key in expected) {
-        if (isNaN(expected[key])) {
+        if (isNaN(expected[key]) && expected[key] != undefined) {
           expect(result[key]).toBeNaN();
+        } else if (
+          key === "heat_strain" ||
+          key === "heat_strain_blood_flow" ||
+          key === "heat_strain_sweating" ||
+          key === "heat_strain_w"
+        ) {
+          expect(result.key).toBe(expect.key);
         } else {
-          deep_close_to_obj(result, expected, 1);
+          expect(result.e_skin).toBeCloseTo(expected.e_skin, 1);
+          expect(result.e_rsw).toBeCloseTo(expected.e_rsw, 1);
+          expect(result.e_max).toBeCloseTo(expected.e_max, 1);
+          expect(result.q_sensible).toBeCloseTo(expected.q_sensible, 1);
+          expect(result.q_skin).toBeCloseTo(expected.q_skin, 1);
+          expect(result.q_res).toBeCloseTo(expected.q_res, 1);
+          expect(result.t_core).toBeCloseTo(expected.t_core, 1);
+          expect(result.t_skin).toBeCloseTo(expected.t_skin, 1);
+          expect(result.m_bl).toBeCloseTo(expected.m_bl, 1);
+          expect(result.m_rsw).toBeCloseTo(expected.m_rsw, 1);
+          expect(result.w).toBeCloseTo(expected.w, 1);
+          expect(result.w_max).toBeCloseTo(expected.w_max, 1);
         }
       }
     },

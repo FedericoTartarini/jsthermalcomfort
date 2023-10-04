@@ -1,4 +1,9 @@
-import { units_converter, valid_range, round, units_converter_array } from "../utilities/utilities.js";
+import {
+  units_converter,
+  valid_range,
+  round,
+  units_converter_array,
+} from "../utilities/utilities.js";
 
 const g = [
   -2836.5744,
@@ -85,9 +90,9 @@ export function utci(
 
   // Checks that inputs are within the bounds accepted by the model if not return nan
   if (limit_inputs) {
-    const tdb_valid = tdb >= -50.0 && tdb <=50.0 ? tdb : NaN
-    const diff_valid = delta_t_tr >=-30 && delta_t_tr <= 70 ? delta_t_tr : NaN
-    const v_valid = v>=0.5 && v<=17 ? v : NaN
+    const tdb_valid = tdb >= -50.0 && tdb <= 50.0 ? tdb : NaN;
+    const diff_valid = delta_t_tr >= -30 && delta_t_tr <= 70 ? delta_t_tr : NaN;
+    const v_valid = v >= 0.5 && v <= 17 ? v : NaN;
     const all_valid = !(
       isNaN(tdb_valid) ||
       isNaN(diff_valid) ||
@@ -149,9 +154,9 @@ export function utci_array(
       v: v,
     };
     ret = units_converter_array(kwargs);
-      tdb = ret["tdb"];
-      tr = ret["tr"];
-      v = ret["v"];
+    tdb = ret["tdb"];
+    tr = ret["tr"];
+    v = ret["v"];
   }
   const eh_pa = tdb.map((_tdb, i) => exponential(_tdb) * (rh[i] / 100.0));
   const delta_t_tr = tdb.map((_tdb, i) => tr[i] - _tdb);
@@ -207,13 +212,13 @@ export function utci_array(
 function mapping(val, categories) {
   // Create an array of sorted temperature values from the categories object
   const sortedTemperatures = Object.values(categories);
-  const categoriesk = Object.keys(categories)
+  const categoriesk = Object.keys(categories);
 
   let left = 0;
   let right = sortedTemperatures.length - 1;
-  console.log(val, sortedTemperatures)
+  console.log(val, sortedTemperatures);
 
-  while (right - left>1) {
+  while (right - left > 1) {
     const mid = Math.floor((left + right) / 2);
     if (sortedTemperatures[mid] === val) {
       return categoriesk[mid];
@@ -222,16 +227,16 @@ function mapping(val, categories) {
     } else {
       right = mid;
     }
-    console.log(val, left, right, mid)
+    console.log(val, left, right, mid);
   }
-  if(right == 0) {
+  if (right == 0) {
     return categoriesk[0];
   }
 
-  if (sortedTemperatures[right]-val > val-sortedTemperatures[left]) {
-    return categoriesk[left]
+  if (sortedTemperatures[right] - val > val - sortedTemperatures[left]) {
+    return categoriesk[left];
   } else {
-    return categoriesk[right]
+    return categoriesk[right];
   }
 }
 
@@ -258,7 +263,7 @@ function mapping_arr(val, categories) {
 function exponential(t_db) {
   const tk = t_db + 273.15; // air temp in K
   let es = 2.7150305 * Math.log1p(tk);
-  for(let i = 0; i < g.length;i++) {
+  for (let i = 0; i < g.length; i++) {
     es = es + g[i] * Math.pow(tk, i - 2);
   }
   es = Math.exp(es) * 0.01; // convert Pa to hPa

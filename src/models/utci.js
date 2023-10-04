@@ -1,16 +1,26 @@
-import { units_converter, valid_range, round } from "../utilities/utilities.js";
+import { units_converter, valid_range, round, units_converter_array } from "../utilities/utilities.js";
+
+const g = [
+  -2836.5744,
+  -6028.076559,
+  19.54263612,
+  -0.02737830188,
+  0.000016261698,
+  7.0229056 * Math.pow(10.0, -10),
+  -1.8680009 * Math.pow(10.0, -13),
+];
 
 const stress_categories = {
-  "extreme cold stress": [Number.NEGATIVE_INFINITY, -40.0],
-  "very strong cold stress": [-40, -27.0],
-  "strong cold stress": [-27, -13.0],
-  "moderate cold stress": [-13, 0.0],
-  "slight cold stress": [0, 9.0],
-  "no thermal stress": [9, 26],
-  "moderate heat stress": [26, 32],
-  "strong heat stress": [32, 38],
-  "very strong heat stress": [38, 46],
-  "extreme heat stress": [46, 1000],
+  "extreme cold stress": -40.0,
+  "very strong cold stress": -27.0,
+  "strong cold stress": -13.0,
+  "moderate cold stress": 0.0,
+  "slight cold stress": 9.0,
+  "no thermal stress": 26,
+  "moderate heat stress": 32,
+  "strong heat stress": 38,
+  "very strong heat stress": 46,
+  "extreme heat stress": 1000,
 };
 /**
  * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
@@ -75,9 +85,9 @@ export function utci(
 
   // Checks that inputs are within the bounds accepted by the model if not return nan
   if (limit_inputs) {
-    const tdb_valid = valid_range(tdb, [-50.0, 50.0]);
-    const diff_valid = valid_range(tr - tdb, [-30.0, 70.0]);
-    const v_valid = valid_range(v, [0.5, 17.0]);
+    const tdb_valid = tdb >= -50.0 && tdb <=50.0 ? tdb : NaN
+    const diff_valid = delta_t_tr >=-30 && delta_t_tr <= 70 ? delta_t_tr : NaN
+    const v_valid = v>=0.5 && v<=17 ? v : NaN
     const all_valid = !(
       isNaN(tdb_valid) ||
       isNaN(diff_valid) ||
@@ -133,17 +143,15 @@ export function utci_array(
   let kwargs;
   let ret;
   if (units.toLowerCase() == "ip") {
-    for (let i = 0; i < tdb.length; i++) {
-      kwargs = {
-        tdb: tdb[i],
-        tr: tr[i],
-        v: v[i],
-      };
-      ret = units_converter(kwargs);
-      tdb[i] = ret["tdb"];
-      tr[i] = ret["tr"];
-      v[i] = ret["v"];
-    }
+    kwargs = {
+      tdb: tdb,
+      tr: tr,
+      v: v,
+    };
+    ret = units_converter_array(kwargs);
+      tdb = ret["tdb"];
+      tr = ret["tr"];
+      v = ret["v"];
   }
   const eh_pa = tdb.map((_tdb, i) => exponential(_tdb) * (rh[i] / 100.0));
   const delta_t_tr = tdb.map((_tdb, i) => tr[i] - _tdb);
@@ -197,10 +205,33 @@ export function utci_array(
  * @returns {string}
  */
 function mapping(val, categories) {
-  for (const [key, value] of Object.entries(categories)) {
-    if (val > value[0] && val <= value[1]) {
-      return key;
+  // Create an array of sorted temperature values from the categories object
+  const sortedTemperatures = Object.values(categories);
+  const categoriesk = Object.keys(categories)
+
+  let left = 0;
+  let right = sortedTemperatures.length - 1;
+  console.log(val, sortedTemperatures)
+
+  while (right - left>1) {
+    const mid = Math.floor((left + right) / 2);
+    if (sortedTemperatures[mid] === val) {
+      return categoriesk[mid];
+    } else if (sortedTemperatures[mid] < val) {
+      left = mid;
+    } else {
+      right = mid;
     }
+    console.log(val, left, right, mid)
+  }
+  if(right == 0) {
+    return categoriesk[0];
+  }
+
+  if (sortedTemperatures[right]-val > val-sortedTemperatures[left]) {
+    return categoriesk[left]
+  } else {
+    return categoriesk[right]
   }
 }
 
@@ -212,6 +243,7 @@ function mapping(val, categories) {
  */
 function mapping_arr(val, categories) {
   let ret = [];
+  //console.log(val)
   val.map((_v) => {
     ret.push(mapping(_v, categories));
   });
@@ -224,20 +256,11 @@ function mapping_arr(val, categories) {
  * @returns {number}
  */
 function exponential(t_db) {
-  const g = [
-    -2836.5744,
-    -6028.076559,
-    19.54263612,
-    -0.02737830188,
-    0.000016261698,
-    7.0229056 * Math.pow(10.0, -10),
-    -1.8680009 * Math.pow(10.0, -13),
-  ];
   const tk = t_db + 273.15; // air temp in K
   let es = 2.7150305 * Math.log1p(tk);
-  g.map((_g, i) => {
-    es = es + _g * Math.pow(tk, i - 2);
-  });
+  for(let i = 0; i < g.length;i++) {
+    es = es + g[i] * Math.pow(tk, i - 2);
+  }
   es = Math.exp(es) * 0.01; // convert Pa to hPa
   return es;
 }
@@ -608,12 +631,3 @@ function utci_optimized(tdb, v, delta_t_tr, pa) {
     0.00148348065 * pa * pa * pa * pa * pa * pa
   );
 }
-
-// tdb,
-//   tr,
-//   v,
-//   rh,
-//   units = "SI",
-//   return_stress_category = false,
-//   limit_inputs = true,
-// console.log(utci_array([25, 25], [27, 25], [1, 1], [50, 50], "si", true))

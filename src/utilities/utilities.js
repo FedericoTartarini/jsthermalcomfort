@@ -713,9 +713,6 @@ export function f_svv(w, h, d) {
  * @returns {number[]} the constrained range with NaNs for values that are outside the min, max range
  */
 export function valid_range(range, [min, max]) {
-  if (!Array.isArray(range)) {
-    return range >= min && range <= max ? range : NaN;
-  }
   if (range === undefined) return [];
   return range.map((n) => (n >= min && n <= max ? n : NaN));
 }

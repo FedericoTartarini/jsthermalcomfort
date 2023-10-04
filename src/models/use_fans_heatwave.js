@@ -242,11 +242,9 @@ function cal_heatwave(two_nodes_result, joint_kwargs, max_skin_blood_flow) {
     heat_strain_sweating,
     heat_strain = false;
 
-  heat_strain_blood_flow =
-    two_nodes_result.mBl === max_skin_blood_flow ? true : false;
-  heat_strain_w = two_nodes_result.w === two_nodes_result.wMax ? true : false;
-  heat_strain_sweating =
-    two_nodes_result.mRsw === joint_kwargs.max_sweating ? true : false;
+  heat_strain_blood_flow = two_nodes_result.mBl === max_skin_blood_flow;
+  heat_strain_w = two_nodes_result.w === two_nodes_result.wMax;
+  heat_strain_sweating = two_nodes_result.mRsw === joint_kwargs.max_sweating;
 
   if (heat_strain_blood_flow || heat_strain_w || heat_strain_sweating) {
     heat_strain = true;

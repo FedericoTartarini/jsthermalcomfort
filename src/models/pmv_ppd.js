@@ -158,7 +158,7 @@ export function pmv_ppd(
   let ce = 0;
   if (standard === "ASHRAE") {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-    ce = vr >= 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme) : 0;
+    ce = vr > 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme) : 0;
   }
 
   tdb = tdb - ce;
@@ -334,7 +334,7 @@ export function pmv_ppd_array(
   if (standard === "ASHRAE") {
     ce = vr.map((vrValue, i) => {
       //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-      return vrValue >= 0.1
+      return vrValue > 0.1
         ? cooling_effect(tdb[i], tr[i], vrValue, rh[i], met[i], clo[i], wme[i])
         : 0;
     });

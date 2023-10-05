@@ -22,6 +22,7 @@ import { a_pmv, a_pmv_array } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv, e_pmv_array } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd";
+import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 
 /**
  * @public
@@ -60,4 +61,5 @@ export default {
   ankle_draft,
   e_pmv,
   e_pmv_array,
+  use_fans_heatwaves,
 };

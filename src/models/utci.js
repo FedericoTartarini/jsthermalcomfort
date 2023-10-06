@@ -15,18 +15,22 @@ const g = [
   -1.8680009 * Math.pow(10.0, -13),
 ];
 
-const stress_categories = {
-  "extreme cold stress": -40.0,
-  "very strong cold stress": -27.0,
-  "strong cold stress": -13.0,
-  "moderate cold stress": 0.0,
-  "slight cold stress": 9.0,
-  "no thermal stress": 26,
-  "moderate heat stress": 32,
-  "strong heat stress": 38,
-  "very strong heat stress": 46,
-  "extreme heat stress": 1000,
-};
+const stress_categories = [
+  "extreme cold stress",
+  "very strong cold stress",
+  "strong cold stress",
+  "moderate cold stress",
+  "slight cold stress",
+  "no thermal stress",
+  "moderate heat stress",
+  "strong heat stress",
+  "very strong heat stress",
+  "extreme heat stress",
+];
+
+const stress_categories_vals = [
+  -40.0, -27.0, -13.0, 0.0, 9.0, 26, 32, 38, 46, 1000,
+];
 /**
  * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
     equivalent temperature for the environment derived from a reference
@@ -112,7 +116,7 @@ export function utci(
   if (return_stress_category) {
     return {
       utci: utci_approx,
-      stress_category: mapping(utci_approx, stress_categories),
+      stress_category: mapping(utci_approx),
     };
   }
   return utci_approx;
@@ -197,66 +201,59 @@ export function utci_array(
   if (return_stress_category) {
     return {
       utci: utci_approx,
-      stress_category: mapping_arr(utci_approx, stress_categories),
+      stress_category: mapping_arr(utci_approx),
     };
   }
   return utci_approx;
 }
 
 /**
- *
+ * Maps a temperature to the stress category.
  * @param {number} val
- * @param {object} categories
  * @returns {string}
  */
-function mapping(val, categories) {
-  // Create an array of sorted temperature values from the categories object
-  const sortedTemperatures = Object.values(categories);
-  const categoriesk = Object.keys(categories);
-
+function mapping(val) {
   let left = 0;
-  let right = sortedTemperatures.length - 1;
-  console.log(val, sortedTemperatures);
+  let right = stress_categories_vals.length - 1;
 
   while (right - left > 1) {
     const mid = Math.floor((left + right) / 2);
-    if (sortedTemperatures[mid] === val) {
-      return categoriesk[mid];
-    } else if (sortedTemperatures[mid] < val) {
+    if (stress_categories_vals[mid] === val) {
+      return stress_categories[mid];
+    } else if (stress_categories_vals[mid] < val) {
       left = mid;
     } else {
       right = mid;
     }
-    console.log(val, left, right, mid);
   }
   if (right == 0) {
-    return categoriesk[0];
+    return stress_categories[0];
   }
 
-  if (sortedTemperatures[right] - val > val - sortedTemperatures[left]) {
-    return categoriesk[left];
+  if (
+    stress_categories_vals[right] - val >
+    val - stress_categories_vals[left]
+  ) {
+    return stress_categories[left];
   } else {
-    return categoriesk[right];
+    return stress_categories[right];
   }
 }
 
 /**
- *
+ * Maps a temperature array to stress categories.
  * @param {number[]} val
- * @param {object} categories
  * @returns {string[]}
  */
-function mapping_arr(val, categories) {
+function mapping_arr(val) {
   let ret = [];
-  //console.log(val)
   val.map((_v) => {
-    ret.push(mapping(_v, categories));
+    ret.push(mapping(_v));
   });
   return ret;
 }
 
 /**
- *
  * @param {number} t_db
  * @returns {number}
  */
@@ -271,7 +268,6 @@ function exponential(t_db) {
 }
 
 /**
- *
  * @param {number} tdb
  * @param {number} v
  * @param {number} delta_t_tr

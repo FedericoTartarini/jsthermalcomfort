@@ -29,11 +29,10 @@ import { two_nodes } from "../models/two_nodes.js";
 
 /**
  * @typedef {Object} HeatwaveKwargs - a keywords argument set containing the additional arguments for use fans heatwave
- * @property {number} [max_sweating] - max sweating
- * @property {boolean} [round=true] - if True rounds output value, if False it does not round it
+ * @property {number} [max_sweating] - max sweating, [mL/h/m2] default 500
+ * @property {boolean} [round=true] - if True rounds output value, if False it does not round it, default True
  * @property {boolean} [limit_inputs=true]  – By default, if the inputs are outsude the following limits the function returns nan. If
- * False returns values regardless of the input values. The applicability limits are 20 < tdb [°C] < 50, 20 < tr [°C] < 50,
- * 0.1 < v [m/s] < 4.5, 0.7 < met [met] < 2, and 0 < clo [clo] < 1.
+ * False returns values regardless of the input values, default True
  *
  * The applicability limits are 20 < tdb [°C] < 50, 20 < tr [°C] < 50, 0.1 < v [m/s] < 4.5, 0.7 < met [met] < 2, and 0 < clo [clo] < 1.
  * @public

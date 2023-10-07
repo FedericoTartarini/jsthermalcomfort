@@ -38,6 +38,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("net");
   });
 
+  it("should have models.clo_tout", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("clo_tout");
+  });
+
+  it("should have models.clo_tout_array", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("clo_tout_array");
+  });
+
   it("should have models.wbgt", () => {
     expect(jsthermalcomfort.models).toHaveProperty("wbgt");
   });

@@ -41,7 +41,7 @@ export function round(number, precision) {
  */
 
 /**
- * Converts degrees to radians unit
+ * Converts degrees to radians
  *
  * @param {number} degrees
  *

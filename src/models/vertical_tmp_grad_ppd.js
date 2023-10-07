@@ -24,9 +24,19 @@ import { pmv } from "../models/pmv.js";
  * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if "units" = 'IP'.
  * @param {number} tr Mean radiant temperature, default in [°C]
  * @param {number} vr Relative air speed, default in [m/s] in [fps] if "units" = "IP"
+ * 
+ * Note: vr is the relative air speed caused by body movement and not the air speed measured by the air speed sensor.
+ * The relative air speed is the sum of the average air speed measured by the sensor plus the activity-generated air speed (Vag).
+ * Where Vag is the activity-generated air speed caused by motion of individual body parts. vr can be calculated using the function
+ * pythermalcomfort.utilities.v_relative().
  * @param {number} rh Relative humidity, [%].
  * @param {number} met Metabolic rate, [W/(m2)]
  * @param {number} clo Clothing insulation, [clo]
+ * 
+ * Note: The activity as well as the air speed modify the insulation characteristics of the clothing and the adjacent air layer.
+ * Consequently the ISO 7730 states that the clothing insulation shall be corrected 2. The ASHRAE 55 Standard corrects for the effect of
+ * the body movement for met equal or higher than 1.2 met using the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation,
+ * clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic().
  * @param {number} vertical_tmp_grad Vertical temperature gradient between the feet and the head, default in [°C/m]
  * @param {"SI" | "IP"} [units="SI"] - Select the SI (International System of Units) or the IP (Imperial Units) system.
  *

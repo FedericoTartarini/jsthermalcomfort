@@ -138,6 +138,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("e_pmv_array");
   });
 
+  it("should have models.vertical_tmp_grad_ppd", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("vertical_tmp_grad_ppd");
+  });
+
+  it("should have models.use_fans_heatwaves", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("use_fans_heatwaves");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

@@ -43,7 +43,7 @@ import { pmv } from "../models/pmv.js";
  * @returns {VerTmpGradReturnType} Object with results of the PPD with vertical temprature gradident.
  *
  * @example
- * const hi = vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7); // returns {'PPD_vg': 12.6, 'Acceptability': false}
+ * const result = vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7); // returns {'PPD_vg': 12.6, 'Acceptability': false}
  */
 export function vertical_tmp_grad_ppd(
   tdb,

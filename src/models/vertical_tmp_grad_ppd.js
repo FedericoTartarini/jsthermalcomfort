@@ -7,8 +7,8 @@ import { pmv } from "../models/pmv.js";
 
 /**
  * @typedef {Object} VerTmpGradReturnType - a result set containing the predicted precentage of dissatisfied and the acceptability
- * @property {number} PPD_vg – Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
- * @property {boolean} Acceptability – The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
+ * @property {number} PPD_vg Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
+ * @property {boolean} Acceptability The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
  * is acceptable if PPD_ad is lower or equal than 5 %
  * @public
  */
@@ -37,7 +37,7 @@ import { pmv } from "../models/pmv.js";
  * @param {number} clo clothing insulation, [clo]
  *
  * Note: The activity as well as the air speed modify the insulation characteristics of the clothing and the adjacent air layer.
- * Consequently the ISO 7730 states that the clothing insulation shall be corrected 2. The ASHRAE 55 Standard corrects for the effect of
+ * Consequently the ISO 7730 states that the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect of
  * the body movement for met equal or higher than 1.2 met using the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation,
  * clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic().
  * @param {number} vertical_tmp_grad vertical temperature gradient between the feet and the head, default in [°C/m] in [°F/ft] if units = ‘IP’

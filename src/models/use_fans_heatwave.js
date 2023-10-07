@@ -29,11 +29,13 @@ import { two_nodes } from "../models/two_nodes.js";
 
 /**
  * @typedef {Object} HeatwaveKwargs - a keywords argument set containing the additional arguments for use fans heatwave
- * @property {boolean} [round=true] - round the result of two nodes model
- * @property {number} [max_sweating] - maximum rate at which regulatory sweat is generated, [kg/h/m2]
- * @property {boolean} [limit_inputs=true]  – by default, if the inputs are outsude the following limits the function returns nan. If
+ * @property {number} [max_sweating] - max sweating
+ * @property {boolean} [round=true] - if True rounds output value, if False it does not round it
+ * @property {boolean} [limit_inputs=true]  – By default, if the inputs are outsude the following limits the function returns nan. If
  * False returns values regardless of the input values. The applicability limits are 20 < tdb [°C] < 50, 20 < tr [°C] < 50,
  * 0.1 < v [m/s] < 4.5, 0.7 < met [met] < 2, and 0 < clo [clo] < 1.
+ *
+ * The applicability limits are 20 < tdb [°C] < 50, 20 < tr [°C] < 50, 0.1 < v [m/s] < 4.5, 0.7 < met [met] < 2, and 0 < clo [clo] < 1.
  * @public
  */
 
@@ -57,18 +59,20 @@ import { two_nodes } from "../models/two_nodes.js";
  * @memberof models
  * @docname Use Fans During Heatwaves
  *
- * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
- * @param {number} tr Mean radiant temperature, default in [°C]
- * @param {number} v Air speed, default in [m/s]
- * @param {number} rh Relative humidity, [%].
- * @param {number} met Metabolic rate, [W/(m2)]
- * @param {number} clo Clothing insulation, [clo]
- * @param {number} [wme=0] External work, [W/(m2)] default 0
- * @param {number} [body_surface_area] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number} [p_atm] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
- * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {number} [max_skin_blood_flow=80] Maximum blood flow from the core to the skin, [kg/h/m2] default 80
+ * @param {number} tdb dry bulb air temperature, default in [°C] in [°F] if units = ‘IP’
+ * @param {number} tr mean radiant temperature, default in [°C] in [°F] if units = ‘IP’
+ * @param {number} v air speed, default in [m/s] in [fps] if units = ‘IP’
+ * @param {number} rh relative humidity, [%]
+ * @param {number} met metabolic rate, [met]
+ * @param {number} clo clothing insulation, [clo]
+ * @param {number} [wme=0] external work, [met] default 0
+ * @param {number} [body_surface_area] body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
+ * 
+ * The body surface area can be calculated using the function pythermalcomfort.utilities.body_surface_area().
+ * @param {number} [p_atm] atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
+ * @param {"standing" | "sitting"} [body_position="standing"] select either “sitting” or “standing”
+ * @param {"SI" | "IP"} [units="SI"] select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {number} [max_skin_blood_flow=80] maximum blood flow from the core to the skin
  * @param {HeatwaveKwargs} [kwargs]
  *
  * @returns {HeatwaveReturnType} object with results of use fans during heatwave

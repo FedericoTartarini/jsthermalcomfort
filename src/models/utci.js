@@ -226,7 +226,7 @@ function mapping(val) {
       right = mid;
     }
   }
-  if (right == 0) {
+  if (right === 0) {
     return stress_categories[0];
   }
 
@@ -246,11 +246,7 @@ function mapping(val) {
  * @returns {string[]}
  */
 function mapping_arr(val) {
-  let ret = [];
-  val.map((_v) => {
-    ret.push(mapping(_v));
-  });
-  return ret;
+  return val.map((_v) => mapping(_v));
 }
 
 /**

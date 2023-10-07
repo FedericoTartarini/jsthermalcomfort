@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities";
+import { round } from "../utilities/utilities.js";
 
 /**
  * @typedef {object} HumidexResult - a result set containing the humidex and

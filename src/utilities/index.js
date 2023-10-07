@@ -5,9 +5,13 @@ import {
   clo_dynamic,
   clo_dynamic_array,
   units_converter,
+  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
-} from "./utilities";
+  met_typical_tasks,
+  clo_typical_ensembles,
+  clo_individual_garments,
+} from "./utilities.js";
 
 /**
  * @public
@@ -21,6 +25,16 @@ export default {
   clo_dynamic,
   clo_dynamic_array,
   units_converter,
+  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
+  met_typical_tasks,
+  clo_typical_ensembles,
+  clo_individual_garments,
 };
+
+/**
+ * @public
+ * @name reference_values
+ * @docname Reference values clo and met
+ */

@@ -30,7 +30,7 @@ const o = 0.0000000567;
  *      to better determine the free and forced convection coefficient used in the
  *      calculation of the mean radiant temperature. They also showed that mean radiant
  *      temperature measured with ping-pong ball-sized globe thermometers is not reliable
- *      due to a stochastic convective bias [22]_. The Mixed Convection model has only
+ *      due to a stochastic convective bias {@link #ref_22|[22]}. The Mixed Convection model has only
  *      been validated for globe sensors with a diameter between 0.04 and 0.15 m.
  * @returns {number}
  */

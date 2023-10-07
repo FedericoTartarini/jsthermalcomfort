@@ -1,4 +1,6 @@
 import { expect } from "@jest/globals";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 /**
  * @template {Object.<string, number>} T
@@ -46,4 +48,16 @@ export function deep_close_to_array(array, expected, tolerance) {
     if (isNaN(value) !== isNaN(expected[index]))
       throw new Error("one value is NaN but the other is not");
   }
+}
+
+let _validationJson = undefined;
+
+export function get_validation_data() {
+  if (_validationJson === undefined) {
+    const buffer = readFileSync(
+      path.join("validation-data-comfort-models", "validation_data.json"),
+    );
+    _validationJson = JSON.parse(buffer);
+  }
+  return _validationJson;
 }

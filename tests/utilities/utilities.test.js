@@ -5,17 +5,41 @@ import {
   clo_dynamic,
   clo_dynamic_array,
   units_converter,
+  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
   check_standard_compliance_array,
   v_relative_array,
+  clo_typical_ensembles,
+  transpose_sharp_altitude,
 } from "../../src/utilities/utilities";
 import {
   deep_close_to_array,
   deep_close_to_obj,
   deep_close_to_obj_arrays,
 } from "../test_utilities";
+
+describe("transpose_sharp_altitude", () => {
+  it.each([
+    { sharp: 0, altitude: 0, expected: [0, 90] },
+    { sharp: 0, altitude: 20, expected: [0, 70] },
+    { sharp: 0, altitude: 45, expected: [0, 45] },
+    { sharp: 0, altitude: 60, expected: [0, 30] },
+    { sharp: 90, altitude: 0, expected: [90, 0] },
+    { sharp: 90, altitude: 45, expected: [45, 0] },
+    { sharp: 90, altitude: 30, expected: [60, 0] },
+    { sharp: 135, altitude: 60, expected: [22.208, 20.705] },
+    { sharp: 120, altitude: 75, expected: [13.064, 7.435] },
+    { sharp: 150, altitude: 30, expected: [40.893, 48.59] },
+  ])(
+    "returns $expected when sharp is $sharp and altitude is $altitude",
+    ({ sharp, altitude, expected }) => {
+      const result = transpose_sharp_altitude(sharp, altitude);
+      deep_close_to_array(result, expected, 0);
+    },
+  );
+});
 
 describe("body_surface_area", () => {
   it.each([
@@ -247,6 +271,85 @@ describe("units_converter", () => {
   );
 });
 
+describe("units_converter_array", () => {
+  it.each([
+    {
+      args: {
+        tdb: [77],
+        tr: [77],
+        v: [3.2],
+      },
+      from_units: "IP",
+      expected: {
+        tdb: [25.0],
+        tr: [25.0],
+        v: [0.975312],
+      },
+    },
+    {
+      args: {
+        pressure: [1],
+        area: [1 / 0.09],
+      },
+      from_units: "IP",
+      expected: {
+        pressure: [101325],
+        area: [1.03224],
+      },
+    },
+    {
+      args: {
+        tdb: [77],
+        v: [10],
+      },
+      from_units: "IP",
+      expected: {
+        tdb: [25.0],
+        v: [3.047],
+      },
+    },
+    {
+      args: {
+        tdb: [20],
+        v: [2],
+      },
+      from_units: "SI",
+      expected: {
+        tdb: [68],
+        v: [6.562],
+      },
+    },
+    {
+      args: {
+        area: [100],
+        pressure: [14.7],
+      },
+      from_units: "IP",
+      expected: {
+        area: [9.29],
+        pressure: [1489477.5],
+      },
+    },
+    {
+      args: {
+        area: [50],
+        pressure: [101325],
+      },
+      from_units: "SI",
+      expected: {
+        area: [538.199],
+        pressure: [1],
+      },
+    },
+  ])(
+    "returns $expected when args are $args and from_units is $from_units",
+    ({ args, from_units, expected }) => {
+      const result = units_converter_array(args, from_units);
+      deep_close_to_obj_arrays(result, expected, 2);
+    },
+  );
+});
+
 describe("running_mean_outdoor_temperature", () => {
   it.each([
     {
@@ -342,7 +445,7 @@ describe("valid_range", () => {
 describe("check_standard_compliance_array", () => {
   it.each([
     {
-      standard: "fan_heatwaves",
+      standard: "FAN_HEATWAVES",
       kwargs: {
         tdb: [15, 30, 60],
         tr: [15, 30, 60],
@@ -361,7 +464,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "iso",
+      standard: "ISO",
       kwargs: {
         tdb: [9, 20, 31],
         tr: [9, 25, 41],
@@ -378,7 +481,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -395,7 +498,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -413,7 +516,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -431,7 +534,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 39, 41],
@@ -449,7 +552,7 @@ describe("check_standard_compliance_array", () => {
       },
     },
     {
-      standard: "ashrae",
+      standard: "ASHRAE",
       kwargs: {
         tdb: [9, 20, 41],
         tr: [9, 25, 41],
@@ -473,4 +576,25 @@ describe("check_standard_compliance_array", () => {
       deep_close_to_obj_arrays(result, expected, 2);
     },
   );
+});
+
+describe("clo_typical_ensembles", () => {
+  it.each([
+    { ensembles: "Walking shorts, short-sleeve shirt", expected: 0.36 },
+    { ensembles: "Trousers, long-sleeve shirt", expected: 0.61 },
+    { ensembles: "Sweat pants, long-sleeve sweatshirt", expected: 0.74 },
+    { ensembles: "Typical winter indoor clothing", expected: 1.0 },
+  ])(
+    "returns $expected when ensemble is $ensembles",
+    ({ ensembles, expected }) => {
+      const result = clo_typical_ensembles(ensembles);
+      expect(result).toBeCloseTo(expected, 2);
+    },
+  );
+
+  it("throws an error if the ensemble is not valid", () => {
+    expect(() =>
+      clo_typical_ensembles("Sweet pants, short-sleeve shirt"),
+    ).toThrow();
+  });
 });

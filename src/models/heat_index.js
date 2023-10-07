@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities";
+import { round } from "../utilities/utilities.js";
 
 /**
  * Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.

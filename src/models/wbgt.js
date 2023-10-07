@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities";
+import { round } from "../utilities/utilities.js";
 
 const optionDefaults = {
   round: true,

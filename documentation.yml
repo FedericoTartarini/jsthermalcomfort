@@ -4,6 +4,7 @@ toc:
   - name: Installation
     file: docs_theme/installation.md
   - name: Examples and Tutorials
+    file: docs_theme/examples.md
   - name: Functions Documentation
     children:
       - models

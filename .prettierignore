@@ -2,7 +2,9 @@
 **/.svn
 **/.hg
 **/node_modules
-docs
+docs/**
+!docs/examples/
+!docs/examples/**
 docs_theme/**
 !docs_theme/index.js
 validation-data-comfort-models/

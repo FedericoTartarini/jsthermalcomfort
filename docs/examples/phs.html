@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PHS example</title>
+    <meta
+      name="description"
+      content="Example of PHS usage in jsthermalcomfort"
+    />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script
+      src="https://cdn.plot.ly/plotly-2.26.1.min.js"
+      charset="utf-8"
+    ></script>
+  </head>
+  <body style="text-align: center">
+    <h1>PHS example</h1>
+    <h2>V = 0.2</h2>
+    <div
+      id="heat_map_0"
+      style="width: 600px; height: 600px; margin: auto"
+    ></div>
+    <h2>V = 2.5</h2>
+    <div
+      id="heat_map_1"
+      style="width: 600px; height: 600px; margin: auto"
+    ></div>
+    <script type="module">
+      import { phs } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/phs.js";
+
+      function range(start, stop, step = 1) {
+        if (stop === undefined) {
+          stop = start;
+          start = 0;
+        }
+        return Array.from(
+          { length: Math.ceil((stop - start) / step) },
+          (_, index) => start + index * step,
+        );
+      }
+
+      for (const [index, v] of [0.2, 2.5].entries()) {
+        const z = [];
+        const tdb_range = range(30, 49);
+        const rh_range = range(0, 100).reverse();
+        for (const rh of rh_range) {
+          z.push(Array.from({ length: 49 - 30 }, () => null));
+          for (const tdb of tdb_range) {
+            const result = phs(tdb, tdb, v, rh, 55, 0.5, 2).t_re;
+            z[z.length - 1][tdb - 30] = result;
+          }
+        }
+
+        const heatmap_data = [
+          {
+            z,
+            x: tdb_range,
+            y: rh_range,
+            type: "heatmap",
+            hoverongaps: false,
+            zmin: 36.9,
+            zmax: 59.3,
+          },
+        ];
+        Plotly.newPlot(`heat_map_${index}`, heatmap_data, {
+          xaxis: {
+            title: "TDB",
+          },
+          yaxis: {
+            title: "RH",
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

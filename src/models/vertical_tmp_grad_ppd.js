@@ -14,7 +14,7 @@ import { pmv } from "../models/pmv.js";
  */
 
 /**
- * Calculates the percentage of thermally dissatisfied people with a vertical temperature gradient between feet and head [1].
+ * Calculates the percentage of thermally dissatisfied people with a vertical temperature gradient between feet and head {@link #ref_1|[1]} .
  * This equation is only applicable for vr < 0.2 m/s (40 fps).
  *
  * @public
@@ -22,6 +22,9 @@ import { pmv } from "../models/pmv.js";
  * @docname Vertical air temperature gradient
  *
  * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if "units" = 'IP'.
+ *
+ * Note: The air temperature is the average value over two heights: 0.6 m (24 in.) and 1.1 m (43 in.) for seated occupants and 1.1 m
+ * (43 in.) and 1.7 m (67 in.) for standing occupants.
  * @param {number} tr Mean radiant temperature, default in [°C]
  * @param {number} vr Relative air speed, default in [m/s] in [fps] if "units" = "IP"
  *
@@ -37,7 +40,7 @@ import { pmv } from "../models/pmv.js";
  * Consequently the ISO 7730 states that the clothing insulation shall be corrected 2. The ASHRAE 55 Standard corrects for the effect of
  * the body movement for met equal or higher than 1.2 met using the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation,
  * clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic().
- * @param {number} vertical_tmp_grad Vertical temperature gradient between the feet and the head, default in [°C/m]
+ * @param {number} vertical_tmp_grad Vertical temperature gradient between the feet and the head, default in [°C/m] in [°F/ft] if units = ‘IP’
  * @param {"SI" | "IP"} [units="SI"] - Select the SI (International System of Units) or the IP (Imperial Units) system.
  *
  * @returns {VerTmpGradReturnType} Object with results of the PPD with vertical temprature gradident.

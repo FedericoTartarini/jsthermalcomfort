@@ -31,6 +31,7 @@ const stress_categories = [
 const stress_categories_vals = [
   -40.0, -27.0, -13.0, 0.0, 9.0, 26, 32, 38, 46, 1000,
 ];
+
 /**
  * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
     equivalent temperature for the environment derived from a reference
@@ -42,7 +43,9 @@ const stress_categories_vals = [
     UTCI involve dry bulb temperature, mean radiation temperature, the pressure
     of water vapor or relative humidity, and wind speed (at the elevation of 10
     m above the ground). {@link #ref_7|[7]}
+ * - Note: You can use this function to calculate the Universal Thermal Climate Index (UTCI) The applicability wind speed value must be between 0.5 and 17 m/s.
  * @see {@link utci_array} for a version that supports arrays
+ * 
  * @public
  * @memberof models
  * @docname Universal Thermal Climate Index (UTCI)
@@ -127,9 +130,10 @@ export function utci(
     equivalent temperature for the environment derived from a reference
     environment. Supports array type.
  * @see {@link utci} for scalar arguments. Accepts array arguments.
+
  * @public
  * @memberof models
- * @docname Universal Thermal Climate Index (UTCI_Array)
+ * @docname Universal Thermal Climate Index (UTCI Array Version)
  * 
  * @param {number[]} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param {number[]} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'

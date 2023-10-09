@@ -1,6 +1,6 @@
 // In this example I am calculating the Standard Effective Temperature (SET) with the jsthermalcomfort package
 
-import { set_tmp } from "../../src/models/set_tmp.js";
+import { set_tmp } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/set_tmp.js";
 
 const set1 = set_tmp(25, 25, 0.3, 60, 1.2, 0.5); // returns 23.8
 console.log(

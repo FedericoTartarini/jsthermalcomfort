@@ -76,7 +76,9 @@ describe("v_relative", () => {
 });
 
 describe("v_relative_array", () => {
-  it.each([{ v: [1.0, 2.0, 3.0], met: [2.0, 2.0, 2.0], expected: [1.3, 2.3, 3.3] }])(
+  it.each([
+    { v: [1.0, 2.0, 3.0], met: [2.0, 2.0, 2.0], expected: [1.3, 2.3, 3.3] },
+  ])(
     "returns $expected when v is $v and met is $met",
     ({ v, met, expected }) => {
       const result = v_relative_array(v, met);

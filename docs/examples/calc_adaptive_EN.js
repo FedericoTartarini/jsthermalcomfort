@@ -24,10 +24,10 @@ const rmt_value = running_mean_outdoor_temperature(
   [29, 28, 30, 29, 28, 30, 27],
   0.9,
 );
-const result_adaptive_en_based_on_rmt_value = adaptive_en(
+const result_adaptive_en_rmt_value = adaptive_en(
   25,
   25,
   rmt_value,
   0.3,
 );
-console.log(result_adaptive_en_based_on_rmt_value);
+console.log(result_adaptive_en_rmt_value);

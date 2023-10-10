@@ -1,8 +1,8 @@
 import {
   adaptive_en,
   adaptive_en_array,
-} from "../../src/models/adaptive_en.js";
-import { running_mean_outdoor_temperature } from "../../src/utilities/utilities.js";
+} from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/adaptive_en.js";
+import { running_mean_outdoor_temperature } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/utilities/utilities.js";
 
 const result_adaptive_en = adaptive_en(25, 25, 24, 0.1);
 console.table(result_adaptive_en);

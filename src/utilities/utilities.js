@@ -408,12 +408,12 @@ export function v_relative(v, met) {
  * @see {@link v_relative} for a version that supports scalar arguments
  *
  * @param {number[]} v - air spped measured by the sensor, [m/s]
- * @param {number} met - metabolic rate, [met]
+ * @param {number[]} met - metabolic rate, [met]
  * @returns {number[]} relative air speed, [m/s]
  */
 export function v_relative_array(v, met) {
   if (met <= 1) return v;
-  return v.map((_v) => _v_relative_single(_v, met));
+  return v.map((_v, index) => _v_relative_single(_v, met[index]));
 }
 
 /**

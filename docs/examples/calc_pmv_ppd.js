@@ -85,7 +85,7 @@ const clo_d_test_ASHRAE = met_test.map((value) => clo_dynamic(1, value)); //clo 
 const clo_d_test_ISO = met_test.map((value) => clo_dynamic(1, value, "ISO")); //clo with the standard of ISO
 
 // ASHRAE PMV
-const startAshrae = performance.now()
+const startAshrae = performance.now();
 pmv_ppd_array(
   tdb_test,
   tr_test,
@@ -96,11 +96,11 @@ pmv_ppd_array(
   undefined,
   "ASHRAE",
 );
-const endAshrae = performance.now()
+const endAshrae = performance.now();
 console.log("ASHRAE PMV: " + (endAshrae - startAshrae) / 1000);
 
 // ISO PMV
-const startISO = performance.now()
+const startISO = performance.now();
 pmv_ppd_array(
   tdb_test,
   tr_test,
@@ -111,5 +111,5 @@ pmv_ppd_array(
   undefined,
   "ISO",
 );
-const endISO = performance.now()
+const endISO = performance.now();
 console.log("ISO PMV: " + (endISO - startISO) / 1000);

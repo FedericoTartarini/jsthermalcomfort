@@ -115,7 +115,7 @@ export function cooling_effect(
   let ce;
   try {
     // Find a root of a function in a bracketing interval
-    ce = findRoot(func, 0, 40);
+    ce = brent(func, 0, 40);
   } catch (error) {
     ce = 0;
   }
@@ -133,40 +133,93 @@ export function cooling_effect(
   return round(ce, 2);
 }
 
-/**
- * @param func - The target function that needs to find the root.
- * @param a - The left boundary of the search interval
- * @param b - The right boundary of the search interval
- * @returns {number} - return root if found
- */
-function findRoot(func, a, b) {
-  const maxIterations = 100; // Set the maximum number of iterations to prevent infinite loop
-  let fa = func(a);
-  let fb = func(b);
-  let c, fc;
+// https://gist.github.com/ryanspradlin/18c1010b7dd2d875284933d018c5c908
+// Derived from: https://en.wikipedia.org/wiki/Brent%27s_method#Algorithm
+// Brent's method is a hybrid root-finding algorithm that combines the
+// faster/less-reliable inverse quadradic interpolation and secant methods with
+// the slower/more-reliable bisection method.
+export function brent(
+  f,
+  lowerBound,
+  upperBound,
+  tolerance = 1e-6,
+  maxIterations = 100,
+) {
+  let a = lowerBound;
+  let b = upperBound;
+  let fa = f(a);
+  let fb = f(b);
 
-  if (Math.sign(fa) === Math.sign(fb)) {
-    throw new Error("Function has the same sign at both ends of the interval.");
+  if (fa * fb > 0) {
+    // Root is not bracketed.
+    throw new Error(`Root is not bracketed: [${fa}, ${fb}].`);
   }
 
+  if (Math.abs(fa) < Math.abs(fb)) {
+    [a, b] = [b, a];
+    [fa, fb] = [fb, fa];
+  }
+
+  let c = a;
+  let fc = fa;
+  let s = 0;
+  let d = 0;
+  let mflag = true;
   for (let i = 0; i < maxIterations; i++) {
-    // Calculate a new approximation 'c' using the bisection method
-    c = (a + b) / 2;
-    fc = func(c);
-
-    if (Math.abs(fc) < 1e-6) {
-      return c;
+    // Check if we have succeeded...
+    if (fb === 0 || Math.abs(b - a) <= tolerance) {
+      // Root found!
+      return b;
     }
 
-    if (Math.sign(fc) === Math.sign(fa)) {
-      // Update the interval boundaries
-      a = c;
-      fa = fc;
+    // Try to use fast/less-reliable methods first...
+    if (fa !== fc && fb !== fc) {
+      // Inverse quadratic interpolation.
+      s =
+        (a * fb * fc) / ((fa - fb) * (fa - fc)) +
+        (b * fa * fc) / ((fb - fa) * (fb - fc)) +
+        (c * fa * fb) / ((fc - fa) * (fc - fb));
     } else {
-      b = c;
-      fb = fc;
+      // Secant method.
+      s = b - fb * ((b - a) / (fb - fa));
+    }
+
+    // If necessary, fallback to slow/more-reliable method...
+    if (
+      (s - (3 * a + b) / 4) * (s - b) >= 0 ||
+      (mflag && Math.abs(s - b) >= Math.abs(b - c) / 2) ||
+      (!mflag && Math.abs(s - b) >= Math.abs(c - d) / 2) ||
+      (mflag && Math.abs(b - c) < Math.abs(tolerance)) ||
+      (!mflag && Math.abs(c - d) < Math.abs(tolerance))
+    ) {
+      // Bisection method.
+      s = (a + b) / 2;
+      mflag = true;
+    } else {
+      mflag = false;
+    }
+
+    d = c;
+    c = b;
+    fc = fb;
+
+    const fs = f(s);
+    if (fa * fs < 0) {
+      b = s;
+      fb = fs;
+    } else {
+      a = s;
+      fa = fs;
+    }
+
+    if (Math.abs(fa) < Math.abs(fb)) {
+      [a, b] = [b, a];
+      [fa, fb] = [fb, fa];
     }
   }
 
-  throw new Error("Maximum number of iterations reached.");
+  // Could not achieve required tolerance within iteration limit.
+  throw new Error(
+    "Could not achieve required tolerance within iteration limit.",
+  );
 }

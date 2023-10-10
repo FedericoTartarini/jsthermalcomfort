@@ -41,20 +41,19 @@ function vasomotricity(t_cr, t_sk) {
  * @returns {number} m_rsw - The sweating flow rate, [g/m2/h].
  */
 function sweat_rate(t_body) {
-    const tbody_set = 0.1 * tsk_set + 0.9 * tc_set; // Calculation of the body temperature through a weighted average
-    let sig_body = t_body - tbody_set;
-    
-    if (sig_body < 0) {
-        // In this case, Tbody < Tbody_set --> The sweat flow is 0 from Gagge's model
-        sig_body = 0.0;
-    }
-    
-    let m_rsw = 304.94 * Math.pow(10, -3) * sig_body;
-    
-    // 500 g/m^2/h is the upper sweat rate limit
-    if (m_rsw > 500) {
-        m_rsw = 500;
-    }
-    return m_rsw 
-}
+  const tbody_set = 0.1 * tsk_set + 0.9 * tc_set; // Calculation of the body temperature through a weighted average
+  let sig_body = t_body - tbody_set;
 
+  if (sig_body < 0) {
+    // In this case, Tbody < Tbody_set --> The sweat flow is 0 from Gagge's model
+    sig_body = 0.0;
+  }
+
+  let m_rsw = 304.94 * Math.pow(10, -3) * sig_body;
+
+  // 500 g/m^2/h is the upper sweat rate limit
+  if (m_rsw > 500) {
+    m_rsw = 500;
+  }
+  return m_rsw;
+}

@@ -47,9 +47,9 @@ console.log(result_utci_array_return_stress_category_True.stress_category);
 //------------------------------------------------------------------------------------------
 const iterations = 10000;
 const tdb = Array(iterations).fill(25);
-const tr = Array(iterations).fill(25);
-const v = Array(iterations).fill(25);
-const rh = Array(iterations).fill(25);
+const tr = Array(iterations).fill(30);
+const v = Array(iterations).fill(1);
+const rh = Array(iterations).fill(60);
 
 const startTime = performance.now();
 utci_array(tdb, tr, v, rh);

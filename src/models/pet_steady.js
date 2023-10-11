@@ -1,6 +1,13 @@
 import { body_surface_area } from "../utilities/utilities";
 import { p_sat } from "../psychrometrics/p_sat";
 
+/**
+ * @public
+ * @typedef {Object} VasomotricitytRet
+ * @property {number} m_blood - Blood flow rate, [kg/m2/h]
+ * @property {number} alpha - repartition of body mass between core and skin [].
+ */
+
 // skin and core temperatures set values
 const tc_set = 36.6;
 const tsk_set = 34;
@@ -9,8 +16,7 @@ const tsk_set = 34;
  * Defines the vasomotricity (blood flow) in function of the core and skin temperatures.
  * @param {number} t_cr - The body core temperature, [°C]
  * @param {number} t_sk - The body skin temperature, [°C]
- * @returns {Object} m_blood - Blood flow rate, [kg/m2/h]
- * alpha - repartition of body mass between core and skin [].
+ * @returns {VasomotricitytRet} 
  */
 function vasomotricity(t_cr, t_sk) {
   // Set value signals

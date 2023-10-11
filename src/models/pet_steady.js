@@ -16,7 +16,7 @@ const tsk_set = 34;
  * Defines the vasomotricity (blood flow) in function of the core and skin temperatures.
  * @param {number} t_cr - The body core temperature, [°C]
  * @param {number} t_sk - The body skin temperature, [°C]
- * @returns {VasomotricitytRet} 
+ * @returns {VasomotricitytRet}
  */
 function vasomotricity(t_cr, t_sk) {
   // Set value signals

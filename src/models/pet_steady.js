@@ -68,7 +68,7 @@ function sweat_rate(t_body) {
         of the 3 unknown temperatures (T_core, T_sk, T_clo) or it solves for the
         environment operative temperature that would yield the same energy balance as the
         actual environment.
- * @param {number[]} t_arr - [T_core, T_sk, T_clo], [°C]
+ * @param {[number, number, number]} t_arr - [T_core, T_sk, T_clo], [°C]
  * @param {number} _tdb - dry bulb air temperature, [°C]
  * @param {number} _tr - mean radiant temperature, [°C]
  * @param {number} _v - default 0.1 m/s for the reference environment air speed, [m/s]

@@ -155,7 +155,7 @@ function solve_pet(
   }
   // Convection coefficient depending on wind velocity and subject position
   let hc = 0;
-  switch(position) {
+  switch (position) {
     case 1:
       hc = 2.67 + 6.5 * Math.pow(_v, 0.67); // sitting
       break;

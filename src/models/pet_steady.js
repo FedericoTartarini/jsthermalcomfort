@@ -154,15 +154,21 @@ function solve_pet(
     vpa = ((_rh / 100.0) * p_sat(_tdb)) / 100;
   }
   // Convection coefficient depending on wind velocity and subject position
-  let hc = 2.67 + 6.5 * Math.pow(_v, 0.67); // sitting
-  if (position === 2) {
-    // standing
-    hc = 2.26 + 7.42 * Math.pow(_v, 0.67);
+  let hc = 0;
+  switch(position) {
+    case 1:
+      hc = 2.67 + 6.5 * Math.pow(_v, 0.67); // sitting
+      break;
+    case 2:
+      // standing
+      hc = 2.26 + 7.42 * Math.pow(_v, 0.67);
+      break;
+    case 3:
+      // standing, forced convection
+      hc = 8.6 * Math.pow(_v, 0.513);
+      break;
   }
-  if (position === 3) {
-    // standing, forced convection
-    hc = 8.6 * Math.pow(_v, 0.513);
-  }
+
   // h_cc corrected convective heat transfer coefficient
   const h_cc = 3.0 * Math.pow(p_atm / 1013.25, 0.53);
   hc = Math.max(h_cc, hc);

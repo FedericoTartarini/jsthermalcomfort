@@ -220,7 +220,7 @@ function solve_pet(
   const he_diff = hc * lr; // diffusion coefficient of air layer
   const fecl = 1 / (1 + 0.92 * hc * r_cl); // Burton efficiency factor
   let e_max = he_diff * fecl * (p_v_sk - vpa); // maximum diffusion at skin surface
-  if (e_max == 0) {
+  if (e_max < 0.001 && e_max >= 0) {
     // added this otherwise e_req / e_max cannot be calculated
     e_max = 0.001;
   }

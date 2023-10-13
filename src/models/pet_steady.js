@@ -151,7 +151,7 @@ function solve_pet(
   let vpa = 12; // [hPa] vapour pressure of the standard environment
   if (actual_environment) {
     // mode=True means we are solving for 3eqs/3unknowns
-    vpa = ((_rh / 100.0) * p_sat(_tdb)) / 100; 
+    vpa = ((_rh / 100.0) * p_sat(_tdb)) / 100;
   }
   // Convection coefficient depending on wind velocity and subject position
   let hc = 2.67 + 6.5 * Math.pow(_v, 0.67); // sitting

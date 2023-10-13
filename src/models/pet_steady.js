@@ -148,10 +148,10 @@ function solve_pet(
   const a_r_eff = a_dubois * f_eff; // Effective radiative area depending on the position of the subject
 
   // Partial pressure of water in the air
-  let vpa = ((_rh / 100.0) * p_sat(_tdb)) / 100; // [hPa]
-  if (!actual_environment) {
-    // mode=False means we are calculating the PET
-    vpa = 12; // [hPa] vapour pressure of the standard environment
+  let vpa = 12; // [hPa] vapour pressure of the standard environment
+  if (actual_environment) {
+    // mode=True means we are solving for 3eqs/3unknowns
+    vpa = ((_rh / 100.0) * p_sat(_tdb)) / 100; 
   }
   // Convection coefficient depending on wind velocity and subject position
   let hc = 2.67 + 6.5 * Math.pow(_v, 0.67); // sitting

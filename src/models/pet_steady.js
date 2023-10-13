@@ -83,7 +83,7 @@ function sweat_rate(t_body) {
  * @param {number} weight - default 75. body mass, [kg]
  * @param {number} height - default 1.8. height, [m]
  * @param {number} wme - external work, [W/(m2)] default 0
- * @returns {number | number[]} - PET (scalar) or energy balance (calculated core, skin, and clo temperatures).
+ * @returns {number | [number, number, number]} - PET (scalar) or energy balance (calculated core, skin, and clo temperatures).
  */
 function solve_pet(
   t_arr,

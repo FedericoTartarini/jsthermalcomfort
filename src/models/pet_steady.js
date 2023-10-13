@@ -2,7 +2,6 @@ import { body_surface_area } from "../utilities/utilities";
 import { p_sat } from "../psychrometrics/p_sat";
 
 /**
- * @public
  * @typedef {Object} VasomotricitytRet
  * @property {number} m_blood - Blood flow rate, [kg/m2/h]
  * @property {number} alpha - repartition of body mass between core and skin [].

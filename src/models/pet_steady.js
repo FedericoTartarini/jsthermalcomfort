@@ -444,6 +444,8 @@ function newtonRaphsonSingleEquation(
 }
 
 /**
+ * Derived from this method: {@link https://en.wikipedia.org/wiki/Newton's_method}
+ * We approximate the derivatives so not truly Newton's method.
  *
  * @param {NewtonRaphsonFunction} f
  * @param {[number, number, number]} initialGuess

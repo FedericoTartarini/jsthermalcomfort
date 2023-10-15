@@ -33,7 +33,7 @@ import { round } from "../utilities/utilities.js";
  * @param {number} rh - relative humidity, [%]
  * @param {number} met - metabolic rate, [met]
  * @param {number} clo - clothing insulation, [clo]
- * @param {number} p_atm - atmospheric pressure, default value 1013.25 [hPa]
+ * @param {number} [p_atm=1013.25] - atmospheric pressure, default value 1013.25 [hPa]
  * @param {1 | 2 | 3} [position=1] - position of the individual (1=sitting, 2=standing, 3=standing, forced convection)
  * @param {number} [age=23] - age in years
  * @param {1 | 2} [sex=1] - male (1) or female (2).

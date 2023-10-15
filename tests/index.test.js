@@ -138,6 +138,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("ankle_draft");
   });
 
+  it("should have models.pet_steady", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pet_steady");
+  });
+
   it("should have models.e_pmv", () => {
     expect(jsthermalcomfort.models).toHaveProperty("e_pmv");
   });

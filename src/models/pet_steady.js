@@ -229,9 +229,6 @@ function solve_pet(
   const sbc = 5.67 * Math.pow(10, -8); // Stefan-Boltzmann constant [W/(m2*K^(-4))]
   const cb = 3640; // Blood specific heat [J/kg/k]
 
-  // Reshape t_arr for fsolve
-  t_arr = [[t_arr[0]], [t_arr[1]], [t_arr[2]]]; // np.reshape(t_arr, (3, 1))
-
   // Initialize e_bal_vec and other variables
   const e_bal_vec = [[0], [0], [0]]; // required for the vectorial expression of the balance
   const a_dubois = body_surface_area(weight, height);
@@ -304,8 +301,8 @@ function solve_pet(
   const ere = c_res + q_res; // [W/m2]
 
   // Calculation of the equivalent thermal resistance of body tissues
-  let alpha = vasomotricity(t_arr[0][0], t_arr[1][0]).alpha;
-  let tbody = alpha * t_arr[1][0] + (1 - alpha) * t_arr[0][0];
+  let alpha = vasomotricity(t_arr[0], t_arr[1]).alpha;
+  let tbody = alpha * t_arr[1] + (1 - alpha) * t_arr[0];
 
   // Clothed fraction of the body approximation
   const r_cl = _clo / 6.45; // Conversion in [m2.K/W]
@@ -340,7 +337,7 @@ function solve_pet(
   // g/m2/s]
   let esw = ((h_vap / 1000) * qmsw) / 3600; // [W/m2]
   // Saturation vapor pressure at temperature Tsk
-  const p_v_sk = p_sat(t_arr[1][0]) / 100; // hPa
+  const p_v_sk = p_sat(t_arr[1]) / 100; // hPa
   // Calculation of vapour transfer
   const lr = 16.7 * Math.pow(10, -1); // [K/hPa] Lewis ratio
   const he_diff = hc * lr; // diffusion coefficient of air layer
@@ -371,7 +368,7 @@ function solve_pet(
       (1.0 - f_a_cl) *
       e_skin *
       sbc *
-      ((_tr + 273.15) ** 4.0 - (t_arr[1][0] + 273.15) ** 4.0)) /
+      ((_tr + 273.15) ** 4.0 - (t_arr[1] + 273.15) ** 4.0)) /
     a_dubois;
   // ... for clothed area
   const r_clo =
@@ -379,31 +376,31 @@ function solve_pet(
       a_clo *
       e_clo *
       sbc *
-      ((_tr + 273.15) ** 4.0 - (t_arr[2][0] + 273.15) ** 4.0)) /
+      ((_tr + 273.15) ** 4.0 - (t_arr[2] + 273.15) ** 4.0)) /
     a_dubois;
   const r_sum = r_clo + r_bare; // radiation total
 
   // Convection losses for bare skin
   const c_bare =
-    (hc * (_tdb - t_arr[1][0]) * a_dubois * (1.0 - f_a_cl)) / a_dubois; // [W/m^2]
+    (hc * (_tdb - t_arr[1]) * a_dubois * (1.0 - f_a_cl)) / a_dubois; // [W/m^2]
   // ... for clothed area
-  const c_clo = (hc * (_tdb - t_arr[2][0]) * a_clo) / a_dubois; // [W/m^2]
+  const c_clo = (hc * (_tdb - t_arr[2]) * a_clo) / a_dubois; // [W/m^2]
   const csum = c_clo + c_bare; // convection total
 
   // Balance equations of the 3-nodes model
   e_bal_vec[0][0] =
     h +
     ere -
-    ((vasomotricity(t_arr[0][0], t_arr[1][0]).m_blood / 3600) * cb + 5.28) *
-      (t_arr[0][0] - t_arr[1][0]); // Core balance [W/m^2]
+    ((vasomotricity(t_arr[0], t_arr[1]).m_blood / 3600) * cb + 5.28) *
+      (t_arr[0] - t_arr[1]); // Core balance [W/m^2]
   e_bal_vec[1][0] =
     r_bare +
     c_bare +
     evap +
-    ((vasomotricity(t_arr[0][0], t_arr[1][0]).m_blood / 3600) * cb + 5.28) *
-      (t_arr[0][0] - t_arr[1][0]) -
-    htcl * (t_arr[1][0] - t_arr[2][0]); // Skin balance [W/m^2]
-  e_bal_vec[2][0] = c_clo + r_clo + htcl * (t_arr[1][0] - t_arr[2][0]); // Clothes balance [W/m^2]
+    ((vasomotricity(t_arr[0], t_arr[1]).m_blood / 3600) * cb + 5.28) *
+      (t_arr[0] - t_arr[1]) -
+    htcl * (t_arr[1] - t_arr[2]); // Skin balance [W/m^2]
+  e_bal_vec[2][0] = c_clo + r_clo + htcl * (t_arr[1] - t_arr[2]); // Clothes balance [W/m^2]
   const e_bal_scal = h + ere + r_sum + csum + evap;
 
   // Return either the calculated core, skin, and clo temperatures or the PET

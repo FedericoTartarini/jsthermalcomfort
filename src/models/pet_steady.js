@@ -230,7 +230,7 @@ function solve_pet(
   const cb = 3640; // Blood specific heat [J/kg/k]
 
   // Initialize e_bal_vec and other variables
-  const e_bal_vec = [[0], [0], [0]]; // required for the vectorial expression of the balance
+  const e_bal_vec = [0, 0, 0]; // required for the vectorial expression of the balance
   const a_dubois = body_surface_area(weight, height);
   //Base metabolism for men and women in [W]
   const met_female =
@@ -388,24 +388,24 @@ function solve_pet(
   const csum = c_clo + c_bare; // convection total
 
   // Balance equations of the 3-nodes model
-  e_bal_vec[0][0] =
+  e_bal_vec[0] =
     h +
     ere -
     ((vasomotricity(t_arr[0], t_arr[1]).m_blood / 3600) * cb + 5.28) *
       (t_arr[0] - t_arr[1]); // Core balance [W/m^2]
-  e_bal_vec[1][0] =
+  e_bal_vec[1] =
     r_bare +
     c_bare +
     evap +
     ((vasomotricity(t_arr[0], t_arr[1]).m_blood / 3600) * cb + 5.28) *
       (t_arr[0] - t_arr[1]) -
     htcl * (t_arr[1] - t_arr[2]); // Skin balance [W/m^2]
-  e_bal_vec[2][0] = c_clo + r_clo + htcl * (t_arr[1] - t_arr[2]); // Clothes balance [W/m^2]
+  e_bal_vec[2] = c_clo + r_clo + htcl * (t_arr[1] - t_arr[2]); // Clothes balance [W/m^2]
   const e_bal_scal = h + ere + r_sum + csum + evap;
 
   // Return either the calculated core, skin, and clo temperatures or the PET
   if (actual_environment) {
-    return [e_bal_vec[0][0], e_bal_vec[1][0], e_bal_vec[2][0]];
+    return e_bal_vec;
   } else {
     return e_bal_scal;
   }

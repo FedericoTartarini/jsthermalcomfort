@@ -89,10 +89,10 @@ export function v_relative(v: number, met: number): number;
  * @see {@link v_relative} for a version that supports scalar arguments
  *
  * @param {number[]} v - air spped measured by the sensor, [m/s]
- * @param {number} met - metabolic rate, [met]
+ * @param {number[]} met - metabolic rate, [met]
  * @returns {number[]} relative air speed, [m/s]
  */
-export function v_relative_array(v: number[], met: number): number[];
+export function v_relative_array(v: number[], met: number[]): number[];
 /**
  * Estimates the dynamic clothing insulation of a moving occupant. The activity as
  * well as the air speed modify the insulation characteristics of the clothing and the

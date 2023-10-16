@@ -45,4 +45,5 @@
  * console.log(CE_IP); // Output: 3.74
  */
 export function cooling_effect(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, wme?: number, units?: 'SI' | 'IP'): number;
+export function brent(f: any, lowerBound: any, upperBound: any, tolerance?: number, maxIterations?: number): any;
 //# sourceMappingURL=cooling_effect.d.ts.map

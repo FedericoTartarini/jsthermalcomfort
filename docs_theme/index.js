@@ -5,6 +5,10 @@ import GithubSlugger from "github-slugger";
 import { util } from "documentation";
 import hljs from "highlight.js";
 import { fileURLToPath } from "url";
+import { remark } from "remark";
+import _rerouteLinks from "documentation/src/output/util/reroute_links.js";
+import highlighter from "documentation/src/output/highlighter.js";
+import html from "remark-html";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +24,18 @@ const javascriptTypes = new Set([
   "object",
   "t", // templates
 ]);
+
+function createCustomMarkdownFormatter(getHref) {
+  const rerouteLinks = _rerouteLinks.bind(undefined, getHref);
+  return (ast) => {
+    if (ast) {
+      return remark()
+        .use(html, { sanitize: false })
+        .stringify(highlighter(rerouteLinks(ast)));
+    }
+    return "";
+  }
+}
 
 const { LinkerStack, createFormatters } = util;
 
@@ -211,6 +227,7 @@ export default async function (comments, config) {
   }
 
   var formatters = createFormatters(linkerStack.link);
+  var customMarkdown = createCustomMarkdownFormatter(linkerStack.link);
 
   hljs.configure(config.hljs || {});
 
@@ -260,7 +277,7 @@ export default async function (comments, config) {
             children: ast.children[0].children.concat(ast.children.slice(1)),
           };
         }
-        return formatters.markdown(ast);
+        return customMarkdown(ast);
       },
       isTopLevel(section) {
         return topLevelTitles.has(section.name);

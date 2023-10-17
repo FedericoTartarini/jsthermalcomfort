@@ -5,7 +5,7 @@
 |**page deployment**|[![page deployment](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/pages/pages-build-deployment/badge.svg)][deploy_link]|
 |**snyk security**|[![synk](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/snyk.yml/badge.svg)][synk_link]|
 |**license**|[![license](https://custom-icon-badges.demolab.com/github/license/denvercoder1/custom-icon-badges?logo=law)](https://github.com/CenterForTheBuiltEnvironment/pythermalcomfort/blob/master/LICENSE)|
-|**npm version**|[![npm version](https://img.shields.io/npm/v/jsthermalcomfort)](https://github.com/CenterForTheBuiltEnvironment/pythermalcomfort/blob/master/LICENSE)|
+|**npm version**|[![npm](https://img.shields.io/npm/v/jsthermalcomfort?style=plastic&logo=npm&logoColor=rgb)](https://github.com/CenterForTheBuiltEnvironment/pythermalcomfort/blob/master/LICENSE)|
 
 
 Package to calculate several thermal comfort indices (e.g. PMV, PPD, SET, adaptive) and convert physical variables.  

@@ -1,5 +1,5 @@
 |docs|[![docs](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml/badge.svg)][docs_link]|
-|:---:|:---:|
+|:---:|:---|
 |**build**|[![build](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml/badge.svg)][build_link]|
 |**tests**|[![test](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test.yml/badge.svg)][test_link]|
 |**snyk security**|[![snyk security](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/snyk.yml/badge.svg)][snyk_link]|

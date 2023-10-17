@@ -34,7 +34,7 @@ function createCustomMarkdownFormatter(getHref) {
         .stringify(highlighter(rerouteLinks(ast)));
     }
     return "";
-  }
+  };
 }
 
 const { LinkerStack, createFormatters } = util;

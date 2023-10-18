@@ -4,7 +4,7 @@
 |**tests**|[![test](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test.yml/badge.svg)][test_link]|
 |**page deployment**|[![page deployment](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/pages/pages-build-deployment/badge.svg)][deploy_link]|
 |**snyk security**|[![synk](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/snyk.yml/badge.svg)][synk_link]|
-|**license**|[![license](https://custom-icon-badges.demolab.com/github/license/denvercoder1/custom-icon-badges?logo=law)](https://github.com/CenterForTheBuiltEnvironment/pythermalcomfort/blob/master/LICENSE)|
+|**license**|[![license](https://custom-icon-badges.demolab.com/github/license/denvercoder1/custom-icon-badges?logo=law)](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/LICENSE)|
 |**npm version**|[![npm](https://img.shields.io/npm/v/jsthermalcomfort?style=plastic&logo=npm&logoColor=rgb)][npm_link]|
 
 

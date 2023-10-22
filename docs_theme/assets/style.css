@@ -146,6 +146,37 @@ table {
   border: 1px solid #ddd;
 }
 
+div.keyline-top-not:nth-child(1) > section.py2.clearfix:nth-child(1) > table:nth-child(2)
+{
+  width: 50%;
+  margin: auto;
+  margin-bottom: 60px;
+}
+
+div.keyline-top-not:nth-child(1) > section.py2.clearfix:nth-child(1) > table:nth-child(2) th
+{
+  border: 1px solid black;
+  background-color: aliceblue;
+}
+
+div.keyline-top-not:nth-child(1) > section.py2.clearfix:nth-child(1) > table:nth-child(2) td
+{
+  border: 1px solid black;
+  background-color: rgb(247, 244, 241);
+}
+
+div.keyline-top-not:nth-child(1) > section.py2.clearfix:nth-child(1) > table:nth-child(2) th > a
+{
+  display: flex;
+  align-content: center;
+}
+
+div.keyline-top-not:nth-child(1) > section.py2.clearfix:nth-child(1) > table:nth-child(2) td > a
+{
+  display: flex;
+  align-content: center;
+}
+
 .prose-big {
   font-size: 18px;
   line-height: 30px;

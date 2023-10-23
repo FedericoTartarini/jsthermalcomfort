@@ -67,7 +67,8 @@
 
     // Print the BMR value using the getter
     document.getElementById("example1 bmr").innerHTML = model.bmr;
-    document.getElementById("example1 Body name list").innerHTML = model.body_names;
+    document.getElementById("example1 Body name list").innerHTML =
+      model.body_names;
 
     // -------------------------------------------
     // EXAMPLE 2 (detail simulation)
@@ -111,12 +112,12 @@
       0.1, // right leg
       0.1, // right foot
     ];
-    
+
     model.clo =
       local_clo_typical_ensembles[
         "briefs, socks, undershirt, work jacket, work pants, safety shoes"
       ]["local_body_part"];
-    
+
     model.par = 1.2; // Physical activity ratio [-]
     model.posture = "sitting"; // Posture
 

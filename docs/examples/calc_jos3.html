@@ -34,9 +34,9 @@
     </div>
   </body>
   <script type="module">
-    import { JOS3 } from "../../src/models/JOS3.js";
+    import { JOS3 } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/JOS3.js";
     //from pythermalcomfort.jos3_functions.utilities import local_clo_typical_ensembles
-    import { local_clo_typical_ensembles } from "../../src/jos3_functions/utilities.js";
+    import { local_clo_typical_ensembles } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/jos3_functions/utilities.js";
 
     let model = new JOS3(1.7, 60, undefined, 30);
     // Set the first phase
@@ -54,7 +54,7 @@
       x: model.cycle_time,
       y: model.t_skin_mean,
       mode: "lines",
-    }; // convert df.t_skin_mean.plot()  # Plot time series of mean skin temperature.
+    }; // Plot time series of mean skin temperature.
     let layout = {
       xaxis: {
         title: "Time [min]",
@@ -65,11 +65,9 @@
     };
     Plotly.newPlot("graph1", [t_skin_mean_trace], layout);
 
-    model.to_csv("jos3_output_example/jos3_example1 (default output).csv");
     // Print the BMR value using the getter
     document.getElementById("example1 bmr").innerHTML = model.bmr;
-    document.getElementById("example1 Body name list").innerHTML =
-      model.body_names;
+    document.getElementById("example1 Body name list").innerHTML = model.body_names;
 
     // -------------------------------------------
     // EXAMPLE 2 (detail simulation)
@@ -113,12 +111,12 @@
       0.1, // right leg
       0.1, // right foot
     ];
-    /////////////////////////
+    
     model.clo =
       local_clo_typical_ensembles[
         "briefs, socks, undershirt, work jacket, work pants, safety shoes"
       ]["local_body_part"];
-    ////////////////
+    
     model.par = 1.2; // Physical activity ratio [-]
     model.posture = "sitting"; // Posture
 
@@ -200,6 +198,5 @@
       ],
       layout,
     );
-    model.to_csv("jos3_output_example/jos3_example2 (all output).csv");
   </script>
 </html>

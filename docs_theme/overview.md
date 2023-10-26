@@ -13,7 +13,7 @@ Package to calculate several thermal comfort indices (e.g. PMV, PPD, SET, adapti
 Please cite us if you use this package: [Tartarini, F., Schiavon, S., 2020. pythermalcomfort: A Python package for thermal comfort research. SoftwareX 12, 100578. https://doi.org/10.1016/j.softx.2020.100578](https://www.sciencedirect.com/science/article/pii/S2352711020302910) 
 
 - Free software: MIT license
-- Authors: Omar Jesus Acuache Briceno, [Ruoshui Chen](https://github.com/ChristinChen233), [Jingyu Lu](https://github.com/Lu-Whale), [Yuchen Mu](https://github.com/YuchenMu), [Jordan Ocokoljic](https://github.com/JordanOcokoljic), [Santiago Zaldivar del Alba​](https://github.com/szaldivar) 
+- Authors: [Omar Jesus Acuache Briceno](https://www.linkedin.com/in/omar-acuache), [Ruoshui Chen](https://github.com/ChristinChen233), [Jingyu Lu](https://github.com/Lu-Whale), [Yuchen Mu](https://github.com/YuchenMu), [Jordan Ocokoljic](https://github.com/JordanOcokoljic), [Santiago Zaldivar del Alba​](https://github.com/szaldivar) 
 
 [docs_link]:https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml
 [build_link]:https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml

@@ -9,7 +9,7 @@ import { $map } from "../../supa";
  * @param {number[]} q_shiv - Local thermogenesis by shivering [W].
  * @param {number[]} q_nst - Local thermogenesis by non-shivering [W].
 
- * @return {number[]} q_thermogenesis_core, q_thermogenesis_muscle, q_thermogenesis_fat, q_thermogenesis_skin - Total thermogenesis in core, muscle, fat, skin layers [W].
+ * @return {number[][]} q_thermogenesis_core, q_thermogenesis_muscle, q_thermogenesis_fat, q_thermogenesis_skin - Total thermogenesis in core, muscle, fat, skin layers [W].
  */
 export function sum_m(mbase, q_work, q_shiv, q_nst) {
   let [

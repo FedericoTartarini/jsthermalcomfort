@@ -3,6 +3,8 @@ import { error_signals } from "./error_signals";
 import { bsa_rate } from "../bsa_rate";
 import { $map, $max, $min, $array } from "../../supa";
 
+export const antoine = (x) => Math.E ** (16.6536 - 4030.183 / (x + 235));
+
 /**
  * Calculate evaporative heat loss.
  *
@@ -34,8 +36,6 @@ export function evaporation(
   bsa_equation = JOS3Defaults.bsa_equation,
   age = JOS3Defaults.age,
 ) {
-  const antoine = (x) => Math.E ** (16.6536 - 4030.183 / (x + 235));
-
   let { wrms, clds } = error_signals(err_sk);
   let bsar = bsa_rate(height, weight, bsa_equation);
   let bsa = JOS3Defaults.local_bsa.map((local_bsa) => local_bsa * bsar);

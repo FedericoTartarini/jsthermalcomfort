@@ -9,7 +9,7 @@ import { basal_met } from "./basal_met";
  * @param {number} [age=20] - Age [years].
  * @param {string} [sex='male'] - Sex (male or female).
  * @param {string} [bmr_equation='harris-benedict'] - BMR equation to use (harris-benedict or ganpule).
- * @returns {Array} mbase - Local basal metabolic rate (Mbase) [W].
+ * @returns {number[][]} mbase - Local basal metabolic rate (Mbase) [W].
  */
 export function local_mbase(
   height = JOS3Defaults.height,

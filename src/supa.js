@@ -1,7 +1,7 @@
 export function $map(arrays, op) {
   const mapLength = arrays[0].length;
   if (!arrays.every((a) => a.length === mapLength)) {
-    throw new Error("cannot $map over arrays of different lengths");
+    throw new Error(`cannot $map over arrays of different lengths (${arrays[1].length} vs ${mapLength})`);
   }
 
   const result = [];
@@ -13,14 +13,29 @@ export function $map(arrays, op) {
   return result;
 }
 
+/**
+ * @template T
+ * @param {number} length
+ * @param {T} value
+ *
+ * @return {T[]}
+ */
 export function $array(length, value) {
   return Array(length).fill(value);
 }
 
+/**
+ * @template T
+ * @param arrays {T[][]}
+ * @param op {(reduced: T, items: T[]) => T}
+ * @param initial {T}
+ *
+ * @return {T}
+ */
 export function $reduce(arrays, op, initial) {
   const reduceLength = arrays[0].length;
   if (!arrays.every((a) => a.length === reduceLength)) {
-    throw new Error("cannot $reduce over arrays of different lengths");
+    throw new Error(`cannot $reduce over arrays of different lengths (${a.length} vs ${reduceLength})`);
   }
 
   let reduced = initial;
@@ -33,13 +48,12 @@ export function $reduce(arrays, op, initial) {
 }
 
 export function $average(array, weights) {
-  let weightSum = weights.reduce((t, c) => t + c, 0);
   return (
     $reduce(
       [array, weights],
       (reduced, [array, weights]) => reduced + array * weights,
       0,
-    ) / weightSum
+    ) / $sum(weights)
   );
 }
 
@@ -59,4 +73,8 @@ export function $max(array, sentinel) {
 
 export function $min(array, sentinel) {
   return array.map((array) => (array > sentinel ? sentinel : array));
+}
+
+export function $index(array, indicies) {
+  return array.filter((_, i) => indicies.includes(i));
 }

@@ -636,12 +636,19 @@ export class JOS3 {
       subset(zeros(NUM_NODES), index(INDEX["skin"]), to),
     );
 
+
     // Combines the current body temperature, the boundary matrix, and the heat generation matrix
     // to calculate the new body temperature distribution (arr).
     let arr = add(
       add(this._bodytemp, dotMultiply(arr_b, arr_to)),
       arr_q,
     );
+
+    console.log(arr_b);
+    console.log(arr_to);
+    console.log(arr_q);
+    console.log(arr_a_inv);
+    console.log(arr);
 
     // ------------------------------------------------------------------
     // New body temp. [°C]
@@ -966,9 +973,6 @@ export class JOS3 {
   }
 
   get t_skin_mean() {
-    console.log(this._bodytemp.size())
-    console.log(INDEX["skin"].length)
-
     return divide(
         sum(
           multiply(

@@ -1,7 +1,9 @@
 export function $map(arrays, op) {
   const mapLength = arrays[0].length;
   if (!arrays.every((a) => a.length === mapLength)) {
-    throw new Error(`cannot $map over arrays of different lengths (${arrays[1].length} vs ${mapLength})`);
+    throw new Error(
+      `cannot $map over arrays of different lengths (${arrays[1].length} vs ${mapLength})`,
+    );
   }
 
   const result = [];
@@ -35,7 +37,9 @@ export function $array(length, value) {
 export function $reduce(arrays, op, initial) {
   const reduceLength = arrays[0].length;
   if (!arrays.every((a) => a.length === reduceLength)) {
-    throw new Error(`cannot $reduce over arrays of different lengths (${a.length} vs ${reduceLength})`);
+    throw new Error(
+      `cannot $reduce over arrays of different lengths (${a.length} vs ${reduceLength})`,
+    );
   }
 
   let reduced = initial;

@@ -40,18 +40,24 @@ import { cr_ms_fat_blood_flow } from "../jos3_functions/thermoregulation/cr_ms_f
 import { resp_heat_loss } from "../jos3_functions/thermoregulation/resp_heat_loss.js";
 import { sum_bf } from "../jos3_functions/thermoregulation/sum_bf.js";
 import {
-  add, clone,
+  add,
+  clone,
   diag,
   divide,
   dotDivide,
-  dotMultiply, identity,
-  index, inv, map, matrix, mean,
+  dotMultiply,
+  identity,
+  index,
+  inv,
+  map,
+  matrix,
+  mean,
   multiply,
   reshape,
   subset,
   subtract,
   sum,
-  zeros
+  zeros,
 } from "mathjs";
 import { basal_met } from "../jos3_functions/thermoregulation/basal_met.js";
 
@@ -75,7 +81,7 @@ function _to17array(inp) {
 
 function wmean(values, weights) {
   if (values.length !== weights.length) {
-    throw new Error('Values and weights arrays must have the same length.');
+    throw new Error("Values and weights arrays must have the same length.");
   }
 
   // Calculate the sum of all products of values and their corresponding weights
@@ -580,11 +586,7 @@ export class JOS3 {
     // Thermogensis
     arr_q = add(
       arr_q,
-      subset(
-        zeros(NUM_NODES),
-        index(INDEX["core"]),
-        q_thermogenesis_core,
-      ),
+      subset(zeros(NUM_NODES), index(INDEX["core"]), q_thermogenesis_core),
     );
 
     arr_q = add(
@@ -605,15 +607,11 @@ export class JOS3 {
     );
     arr_q = add(
       arr_q,
-      subset(
-        zeros(NUM_NODES),
-        index(INDEX["skin"]),
-        q_thermogenesis_skin,
-      ),
+      subset(zeros(NUM_NODES), index(INDEX["skin"]), q_thermogenesis_skin),
     );
 
     // Respiratory [W]
-    arr_q[INDEX["core"][2]] -= res_sh + res_lh;  // chest core
+    arr_q[INDEX["core"][2]] -= res_sh + res_lh; // chest core
 
     // Sweating [W]
     arr_q = subtract(
@@ -628,21 +626,13 @@ export class JOS3 {
     arr_q = dotDivide(arr_q, this._cap); // Change unit [W]/[J/K] to [K/sec]
     arr_q = multiply(arr_q, dtime); // Change unit [K/sec] to [K]
 
-
     // Boundary matrix [°C]
     let arr_to = zeros(NUM_NODES);
-    arr_to = add(
-      arr_to,
-      subset(zeros(NUM_NODES), index(INDEX["skin"]), to),
-    );
-
+    arr_to = add(arr_to, subset(zeros(NUM_NODES), index(INDEX["skin"]), to));
 
     // Combines the current body temperature, the boundary matrix, and the heat generation matrix
     // to calculate the new body temperature distribution (arr).
-    let arr = add(
-      add(this._bodytemp, dotMultiply(arr_b, arr_to)),
-      arr_q,
-    );
+    let arr = add(add(this._bodytemp, dotMultiply(arr_b, arr_to)), arr_q);
 
     console.log(arr_b);
     console.log(arr_to);
@@ -974,14 +964,14 @@ export class JOS3 {
 
   get t_skin_mean() {
     return divide(
-        sum(
-          multiply(
-            subset(this._bodytemp, index(INDEX["skin"])),
-            JOS3Defaults.local_bsa,
-          ),
+      sum(
+        multiply(
+          subset(this._bodytemp, index(INDEX["skin"])),
+          JOS3Defaults.local_bsa,
         ),
-        sum(JOS3Defaults.local_bsa)
-    )
+      ),
+      sum(JOS3Defaults.local_bsa),
+    );
   }
 
   get t_skin() {

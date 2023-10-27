@@ -5,15 +5,15 @@ import { BODY_NAMES, IDICT } from "../matrix";
 /**
  * Calculate core, muscle and fat blood flow rate [L/h].
  *
- * @param {array} q_work - Heat production by work [W].
- * @param {array} q_shiv - Heat production by shivering [W].
- * @param {float} [height=1.72] - Body height [m].
- * @param {float} [weight=74.43] - Body weight [kg].
+ * @param {number[]} q_work - Heat production by work [W].
+ * @param {number[]} q_shiv - Heat production by shivering [W].
+ * @param {number} [height=1.72] - Body height [m].
+ * @param {number} [weight=74.43] - Body weight [kg].
  * @param {string} [bsa_equation="dubois"] - The equation name of bsa calculation. Choose from "dubois","takahira", "fujimoto", or "kurazumi".
- * @param {float} [age=20] - Age [years].
- * @param {float} [ci=2.59] - Cardiac index [L/min/㎡].
+ * @param {number} [age=20] - Age [years].
+ * @param {number} [ci=2.59] - Cardiac index [L/min/㎡].
  *
- * @returns {array} - Core, muscle and fat blood flow rate [L/h].
+ * @returns {[number[], number[], number[]]} - Core, muscle and fat blood flow rate [L/h].
  */
 export function cr_ms_fat_blood_flow(
   q_work,

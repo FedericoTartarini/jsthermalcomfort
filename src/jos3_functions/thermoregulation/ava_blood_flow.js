@@ -6,13 +6,14 @@ import { bfb_rate } from "../bfb_rate";
  * Calculate areteriovenous anastmoses (AVA) blood flow rate [L/h] based on
  * Takemori's model, 1995.
  *
- * @param {number[]} err_cr, err_sk - Difference between set-point and body temperatures [°C].
+ * @param {number[]} err_cr - Difference between set-point and body temperatures [°C].
+ * @param {number[]} err_sk - Difference between set-point and body temperatures [°C].
  * @param {number} [height=1.72] - Body height [m]
  * @param {number} [weight=74.43] - Body weight [kg]
  * @param {string} [bsa_equation="dubois"] - The equation name of bsa calculation. Choose a name from "dubois", "takahira", "fujimoto", or "kurazumi"
  * @param {number} [age=20] - age [years]
  * @param {number} [ci=2.59] - Cardiac index [L/min/m2]
- * @returns {number[]}  bf_ava_hand, bf_ava_foot : AVA blood flow rate at hand and foot [L/h]
+ * @returns {[number, number]}  bf_ava_hand, bf_ava_foot : AVA blood flow rate at hand and foot [L/h]
  *
  */
 export function ava_blood_flow(

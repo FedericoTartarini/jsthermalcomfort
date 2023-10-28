@@ -46,7 +46,7 @@ To set up jsthermalcomfort for local development:
     ```bash
     npm run format
     ```
-    - Commit your changes and push your branch to GitHub:
+    - Commit your changes:
     ```bash
     git add .
     git commit -m "Your detailed description of your changes."
@@ -54,6 +54,11 @@ To set up jsthermalcomfort for local development:
     - Update the docs:
     ```bash
     npm run docs
+    ```
+    - Commit your documentation changes:
+    ```bash
+    git add .
+    git commit -m "Your detailed description of your changes."
     ```
     - Push your branch to GitHub:
     ```bash

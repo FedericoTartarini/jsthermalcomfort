@@ -11,5 +11,7 @@ toc:
       - psychrometrics
       - utilities
       - reference_values
+  - name: Contributing
+    file: docs_theme/contributing.md
   - name: References
     file: docs_theme/references.md

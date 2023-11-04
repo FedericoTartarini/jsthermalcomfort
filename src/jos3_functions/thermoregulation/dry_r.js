@@ -1,5 +1,5 @@
-import { $map } from "../../supa";
-import { clo_area_factor } from "./clo_area_factor";
+import { $map } from "../../supa.js";
+import { clo_area_factor } from "./clo_area_factor.js";
 
 /**
  * Calculate total sensible thermal resistance (between the skin and ambient air).

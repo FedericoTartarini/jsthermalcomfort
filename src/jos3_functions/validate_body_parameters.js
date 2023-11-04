@@ -1,4 +1,4 @@
-import JOS3Defaults from "./JOS3Defaults";
+import JOS3Defaults from "./JOS3Defaults.js";
 
 /**
  * Validate the parameters: height, weight, age, and body fat percentage.

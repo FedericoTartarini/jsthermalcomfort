@@ -1,4 +1,4 @@
-import { $array, $map, $max, $min, $sum } from "../../supa";
+import { $array, $map, $max, $min, $sum } from "../../supa.js";
 
 /**
  * Calculate WRMS and CLDS signals of thermoregulation.

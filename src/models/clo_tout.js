@@ -1,4 +1,4 @@
-import { units_converter, round } from "../utilities/utilities";
+import { units_converter, round } from "../utilities/utilities.js";
 
 /**
  * Representative clothing insulation Icl as a function of outdoor air

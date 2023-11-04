@@ -1,4 +1,4 @@
-import JOS3Defaults from "../JOS3Defaults";
+import JOS3Defaults from "../JOS3Defaults.js";
 
 /**
  * Calculate radiative heat transfer coefficient (hr) [W/(m2*K)]

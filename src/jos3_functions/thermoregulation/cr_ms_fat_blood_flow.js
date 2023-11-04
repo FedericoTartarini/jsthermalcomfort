@@ -1,6 +1,6 @@
-import JOS3Defaults from "../JOS3Defaults";
-import { bfb_rate } from "../bfb_rate";
-import { BODY_NAMES, IDICT } from "../matrix";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { bfb_rate } from "../bfb_rate.js";
+import { BODY_NAMES, IDICT } from "../matrix.js";
 
 /**
  * Calculate core, muscle and fat blood flow rate [L/h].

@@ -1,6 +1,6 @@
-import JOS3Defaults from "./JOS3Defaults";
-import { validate_body_parameters } from "./validate_body_parameters";
-import { bsa_rate } from "./bsa_rate";
+import JOS3Defaults from "./JOS3Defaults.js";
+import { validate_body_parameters } from "./validate_body_parameters.js";
+import { bsa_rate } from "./bsa_rate.js";
 
 /**
  * Calculate local body surface area (bsa) [m2].

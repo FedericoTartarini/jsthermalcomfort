@@ -1,4 +1,4 @@
-import { $map } from "../../supa";
+import { $map } from "../../supa.js";
 
 /**
  * Calculate operative temperature [°C]

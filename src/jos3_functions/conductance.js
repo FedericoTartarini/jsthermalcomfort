@@ -1,8 +1,8 @@
-import JOS3Defaults from "./JOS3Defaults";
-import { validate_body_parameters } from "./validate_body_parameters";
-import { weight_rate } from "./weight_rate";
-import { bsa_rate } from "./bsa_rate";
-import { NUM_NODES, BODY_NAMES, IDICT } from "./matrix";
+import JOS3Defaults from "./JOS3Defaults.js";
+import { validate_body_parameters } from "./validate_body_parameters.js";
+import { weight_rate } from "./weight_rate.js";
+import { bsa_rate } from "./bsa_rate.js";
+import { NUM_NODES, BODY_NAMES, IDICT } from "./matrix.js";
 
 function maprange(array, from, to, op) {
   return array.map((x, i) => (i >= from && i < to ? op(x) : x));

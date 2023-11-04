@@ -1,5 +1,5 @@
-import JOS3Defaults from "./JOS3Defaults";
-import { validate_body_parameters } from "./validate_body_parameters";
+import JOS3Defaults from "./JOS3Defaults.js";
+import { validate_body_parameters } from "./validate_body_parameters.js";
 
 /**
  * Calculate the ratio of the body weight to the standard body (74.43 kg).

@@ -21,7 +21,7 @@ import { pmv, pmv_array } from "./pmv.js";
 import { a_pmv, a_pmv_array } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv, e_pmv_array } from "./e_pmv.js";
-import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd";
+import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout, clo_tout_array } from "./clo_tout.js";
 import { utci, utci_array } from "./utci.js";

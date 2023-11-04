@@ -1,6 +1,6 @@
 {
   "name": "jsthermalcomfort",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A JavaScript package to calculate thermal comfort indices (e.g., Predicted Mean Vote, Standard Effective Temperature, Predicted Heat Strain).",
   "type": "module",
   "files": [

@@ -42,7 +42,7 @@
   "bugs": {
     "url": "https://github.com/FedericoTartarini/jsthermalcomfort/issues"
   },
-  "homepage": "https://federicotartarini.github.io/jsthermalcomfort/",
+  "homepage": "https://github.com/FedericoTartarini/jsthermalcomfort#readme",
   "devDependencies": {
     "documentation": "^14.0.2",
     "github-slugger": "^2.0.0",

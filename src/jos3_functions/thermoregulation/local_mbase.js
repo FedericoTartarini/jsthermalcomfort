@@ -1,5 +1,5 @@
-import JOS3Defaults from "../JOS3Defaults";
-import { basal_met } from "./basal_met";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { basal_met } from "./basal_met.js";
 
 /**
  * Calculate local basal metabolic rate [W].

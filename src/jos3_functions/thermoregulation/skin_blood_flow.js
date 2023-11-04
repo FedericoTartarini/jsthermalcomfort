@@ -1,7 +1,7 @@
-import { $array, $map } from "../../supa";
-import JOS3Defaults from "../JOS3Defaults";
-import { error_signals } from "./error_signals";
-import { bfb_rate } from "../bfb_rate";
+import { $array, $map } from "../../supa.js";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { error_signals } from "./error_signals.js";
+import { bfb_rate } from "../bfb_rate.js";
 
 /**
  * Calculate skin blood flow rate (bf_skin) [L/h].

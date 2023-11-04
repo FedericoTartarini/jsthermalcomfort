@@ -1,5 +1,5 @@
-import JOS3Defaults from "../JOS3Defaults";
-import { $map, $array } from "../../supa";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { $map, $array } from "../../supa.js";
 
 /**
  * Calculate convective heat transfer coefficient (hc) [W/(m2*K)]

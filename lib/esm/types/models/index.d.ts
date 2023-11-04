@@ -53,6 +53,7 @@ import { wc } from "./wc.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { adaptive_en_array } from "./adaptive_en.js";
 import { at } from "./at.js";
+import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { set_tmp } from "./set_tmp.js";
 import { set_tmp_array } from "./set_tmp.js";
 import { adaptive_ashrae } from "./adaptive_ashrae.js";

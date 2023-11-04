@@ -1,7 +1,7 @@
-import JOS3Defaults from "../JOS3Defaults";
-import { error_signals } from "./error_signals";
-import { bsa_rate } from "../bsa_rate";
-import { $map, $max, $min, $array } from "../../supa";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { error_signals } from "./error_signals.js";
+import { bsa_rate } from "../bsa_rate.js";
+import { $map, $max, $min, $array } from "../../supa.js";
 
 export const antoine = (x) => Math.E ** (16.6536 - 4030.183 / (x + 235));
 

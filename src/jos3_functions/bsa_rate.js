@@ -1,6 +1,6 @@
-import JOS3Defaults from "../jos3_functions/JOS3Defaults";
-import { validate_body_parameters } from "./validate_body_parameters";
-import { body_surface_area } from "../utilities/utilities";
+import JOS3Defaults from "../jos3_functions/JOS3Defaults.js";
+import { validate_body_parameters } from "./validate_body_parameters.js";
+import { body_surface_area } from "../utilities/utilities.js";
 
 /**
  * Calculates the body surface area rate based on the given height, weight and

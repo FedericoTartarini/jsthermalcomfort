@@ -1,7 +1,7 @@
-import { $array, $average, $map } from "../../supa";
-import JOS3Defaults from "../JOS3Defaults";
-import { error_signals } from "./error_signals";
-import { bsa_rate } from "../bsa_rate";
+import { $array, $average, $map } from "../../supa.js";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { error_signals } from "./error_signals.js";
+import { bsa_rate } from "../bsa_rate.js";
 
 export let PRE_SHIV = 0;
 

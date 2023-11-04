@@ -1,4 +1,4 @@
-import JOS3Defaults from "../jos3_functions/JOS3Defaults";
+import JOS3Defaults from "../jos3_functions/JOS3Defaults.js";
 import {
   BODY_NAMES,
   INDEX,
@@ -7,22 +7,22 @@ import {
   vessel_blood_flow,
   VINDEX,
   whole_body,
-} from "../jos3_functions/matrix";
-import { bsa_rate } from "../jos3_functions/bsa_rate";
-import { local_bsa } from "../jos3_functions/local_bsa";
-import { bfb_rate } from "../jos3_functions/bfb_rate";
-import { conductance } from "../jos3_functions/conductance";
-import { capacity } from "../jos3_functions/capacity";
-import { pmv } from "./pmv";
+} from "../jos3_functions/matrix.js";
+import { bsa_rate } from "../jos3_functions/bsa_rate.js";
+import { local_bsa } from "../jos3_functions/local_bsa.js";
+import { bfb_rate } from "../jos3_functions/bfb_rate.js";
+import { conductance } from "../jos3_functions/conductance.js";
+import { capacity } from "../jos3_functions/capacity.js";
+import { pmv } from "./pmv.js";
 import {
   set_pre_shiv,
   shivering,
-} from "../jos3_functions/thermoregulation/shivering";
-import { fixed_hc } from "../jos3_functions/thermoregulation/fixed_hc";
-import { conv_coef } from "../jos3_functions/thermoregulation/conv_coef";
-import { fixed_hr } from "../jos3_functions/thermoregulation/fixed_hr";
-import { rad_coef } from "../jos3_functions/thermoregulation/rad_coef";
-import { operative_temp } from "../jos3_functions/thermoregulation/operative_temp";
+} from "../jos3_functions/thermoregulation/shivering.js";
+import { fixed_hc } from "../jos3_functions/thermoregulation/fixed_hc.js";
+import { conv_coef } from "../jos3_functions/thermoregulation/conv_coef.js";
+import { fixed_hr } from "../jos3_functions/thermoregulation/fixed_hr.js";
+import { rad_coef } from "../jos3_functions/thermoregulation/rad_coef.js";
+import { operative_temp } from "../jos3_functions/thermoregulation/operative_temp.js";
 import { dry_r } from "../jos3_functions/thermoregulation/dry_r.js";
 import { wet_r } from "../jos3_functions/thermoregulation/wet_r.js";
 import { $array, $average, $index, $map, $reduce, $sum } from "../supa.js";

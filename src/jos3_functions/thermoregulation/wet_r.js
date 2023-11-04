@@ -1,6 +1,6 @@
-import JOS3Defaults from "../JOS3Defaults";
-import { clo_area_factor } from "./clo_area_factor";
-import { $map } from "../../supa";
+import JOS3Defaults from "../JOS3Defaults.js";
+import { clo_area_factor } from "./clo_area_factor.js";
+import { $map } from "../../supa.js";
 
 /**
  * Calculate total evaporative thermal resistance (between the skin and ambient air).

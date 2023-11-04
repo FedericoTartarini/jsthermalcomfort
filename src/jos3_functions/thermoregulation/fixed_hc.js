@@ -1,5 +1,5 @@
-import { $average, $reduce } from "../../supa";
-import JOS3Defaults from "../JOS3Defaults";
+import { $average, $reduce } from "../../supa.js";
+import JOS3Defaults from "../JOS3Defaults.js";
 
 /**
  * Fixes hc values to fit two-node-model's values.

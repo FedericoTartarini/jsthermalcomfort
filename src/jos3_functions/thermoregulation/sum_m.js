@@ -1,5 +1,5 @@
-import { BODY_NAMES, IDICT } from "../matrix";
-import { $map } from "../../supa";
+import { BODY_NAMES, IDICT } from "../matrix.js";
+import { $map } from "../../supa.js";
 
 /**
  * Calculate total thermogenesis in each layer [W].

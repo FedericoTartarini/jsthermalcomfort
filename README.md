@@ -1,7 +1,7 @@
 # Overview
 
 |        docs         | [![docs](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml/badge.svg)][docs_link]                                                                 |
-| :-----------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|:-------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |      **build**      | [![build](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml/badge.svg)][build_link]                                                                   |
 |      **tests**      | [![test](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test.yml/badge.svg)][test_link]                                                                      |
 | **page deployment** | [![page deployment](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/pages/pages-build-deployment/badge.svg)][deploy_link]                                     |
@@ -9,12 +9,12 @@
 |     **license**     | [![license](https://custom-icon-badges.demolab.com/github/license/denvercoder1/custom-icon-badges?logo=law)](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/LICENSE) |
 |   **npm version**   | [![npm](https://img.shields.io/npm/v/jsthermalcomfort?style=plastic&logo=npm&logoColor=rgb)][npm_link]                                                                                |
 
-Package to calculate several thermal comfort indices (e.g. PMV, PPD, SET, adaptive) and convert physical variables.
+Package to calculate thermophysiological, thermal comfort, thermal stress indices, in JavaScript.
 
 Please cite us if you use this package: [Tartarini, F., Schiavon, S., 2020. pythermalcomfort: A Python package for thermal comfort research. SoftwareX 12, 100578. https://doi.org/10.1016/j.softx.2020.100578](https://www.sciencedirect.com/science/article/pii/S2352711020302910)
 
 - Free software: MIT license
-- Authors: [Omar Jesus Acuache Briceno](https://www.linkedin.com/in/omar-acuache), [Ruoshui Chen](https://github.com/ChristinChen233), [Jingyu Lu](https://github.com/Lu-Whale), [Yuchen Mu](https://github.com/YuchenMu), [Jordan Ocokoljic](https://github.com/JordanOcokoljic), [Santiago Zaldivar del Alba​](https://github.com/szaldivar)
+- Authors: [Omar Jesus Acuache Briceno](https://www.linkedin.com/in/omar-acuache), [Ruoshui Chen](https://github.com/ChristinChen233), [Jingyu Lu](https://github.com/Lu-Whale), [Yuchen Mu](https://github.com/YuchenMu), [Jordan Ocokoljic](https://github.com/JordanOcokoljic), [Santiago Zaldivar del Alba​](https://github.com/szaldivar), [Federico Tartarini](https://www.linkedin.com/in/federico-tartarini/), [Stefano Schiavon](https://www.linkedin.com/in/stefanoschiavon/), [Ollie Jay](https://www.linkedin.com/in/ollie-jay-793a1b11/)
 
 [docs_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml
 [build_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml
@@ -23,13 +23,17 @@ Please cite us if you use this package: [Tartarini, F., Schiavon, S., 2020. pyth
 [synk_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/snyk.yml
 [npm_link]: https://www.npmjs.com/package/jsthermalcomfort
 
+# Documentation
+
+[https://federicotartarini.github.io/jsthermalcomfort/](https://federicotartarini.github.io/jsthermalcomfort/)
+
 # Installation
 
 ```bash
 npm install jsthermalcomfort
 ```
 
-if you want to use jsthermalcomfort package without installing it on your local machine, you can import with:
+If you want to use jsthermalcomfort package without installing it on your local machine, you can import with:
 
 [`https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/`](https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/)
 
@@ -61,7 +65,7 @@ You can also import it in the website directly, and caution that you need to mar
 
 Here is a list of examples running in the browser:
 
-- [PHS](/jsthermalcomfort/examples/phs.html)
+- [PHS](/docs/examples/phs.html)
 
 # Contributing
 
@@ -76,6 +80,8 @@ When [reporting a bug](https://github.com/FedericoTartarini/jsthermalcomfort/iss
 - Detailed steps to reproduce the bug.
 
 ## Documentation improvements
+
+If you find any issue in our online [documentation](https://federicotartarini.github.io/jsthermalcomfort/) please open an [issue](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
 
 jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs, or even on the web in blog posts, articles, and such.
 
@@ -170,7 +176,7 @@ For merging, you should:
 
 We are using [JSDoc](https://jsdoc.app/) and [documentation.js](https://github.com/documentationjs/documentation) to automatically build the documentation.
 
-### To add a function
+### To add a function
 
 1. Add a file under `src/models/` with the name of the function/model and document it.
 2. Add any related functions that are used by your function either in `src/utilities/utilities.js` or `src/psychrometrics/`. See existing code as example.

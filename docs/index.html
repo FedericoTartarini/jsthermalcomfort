@@ -3,7 +3,7 @@
 <head>
   <meta charset='utf-8'>
   <title>jsthermalcomfort 0.1.4 | Documentation</title>
-  <meta name='description' content='A JavaScript package to calculate thermal comfort indices (e.g., Predicted Mean Vote, Standard Effective Temperature, Predicted Heat Strain).'>
+  <meta name='description' content='A JavaScript package to calculate thermophysiological, thermal comfort, thermal stress indices'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' rel='stylesheet'>
   <link href='assets/style.css' rel='stylesheet'>
@@ -625,12 +625,14 @@
 </tr>
 </tbody>
 </table>
-<p>Package to calculate several thermal comfort indices (e.g. PMV, PPD, SET, adaptive) and convert physical variables.</p>
+<p>Package to calculate thermophysiological, thermal comfort, thermal stress indices, in JavaScript.</p>
 <p>Please cite us if you use this package: <a href="https://www.sciencedirect.com/science/article/pii/S2352711020302910">Tartarini, F., Schiavon, S., 2020. pythermalcomfort: A Python package for thermal comfort research. SoftwareX 12, 100578. https://doi.org/10.1016/j.softx.2020.100578</a></p>
 <ul>
 <li>Free software: MIT license</li>
-<li>Authors: <a href="https://www.linkedin.com/in/omar-acuache">Omar Jesus Acuache Briceno</a>, <a href="https://github.com/ChristinChen233">Ruoshui Chen</a>, <a href="https://github.com/Lu-Whale">Jingyu Lu</a>, <a href="https://github.com/YuchenMu">Yuchen Mu</a>, <a href="https://github.com/JordanOcokoljic">Jordan Ocokoljic</a>, <a href="https://github.com/szaldivar">Santiago Zaldivar del Alba​</a></li>
+<li>Authors: <a href="https://www.linkedin.com/in/omar-acuache">Omar Jesus Acuache Briceno</a>, <a href="https://github.com/ChristinChen233">Ruoshui Chen</a>, <a href="https://github.com/Lu-Whale">Jingyu Lu</a>, <a href="https://github.com/YuchenMu">Yuchen Mu</a>, <a href="https://github.com/JordanOcokoljic">Jordan Ocokoljic</a>, <a href="https://github.com/szaldivar">Santiago Zaldivar del Alba​</a>, <a href="https://www.linkedin.com/in/federico-tartarini/">Federico Tartarini</a>, <a href="https://www.linkedin.com/in/stefanoschiavon/">Stefano Schiavon</a>, <a href="https://www.linkedin.com/in/ollie-jay-793a1b11/">Ollie Jay</a></li>
 </ul>
+<h1>Documentation</h1>
+<p><a href="https://federicotartarini.github.io/jsthermalcomfort/">https://federicotartarini.github.io/jsthermalcomfort/</a></p>
 
   
 </section></div>
@@ -645,7 +647,7 @@
   
   
     <pre class='hljs'>npm install jsthermalcomfort</pre>
-<p>if you want to use jsthermalcomfort package without installing it on your local machine, you can import with:</p>
+<p>If you want to use jsthermalcomfort package without installing it on your local machine, you can import with:</p>
 <p><a href="https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/"><code>https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/</code></a></p>
 <p>Example:</p>
 <pre class='hljs'><span class="hljs-keyword">import</span> { models, utilities, pschymetrics } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/index.js&quot;</span></pre>
@@ -669,7 +671,7 @@
     <h2><a href="https://github.com/FedericoTartarini/jsthermalcomfort/tree/main/docs/examples">Examples</a> files on how to use some of the functions</h2>
 <p>Here is a list of examples running in the browser:</p>
 <ul>
-<li><a href="/jsthermalcomfort/examples/phs.html">PHS</a></li>
+<li><a href="/docs/examples/phs.html">PHS</a></li>
 </ul>
 
   
@@ -735,7 +737,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/index.js#L35-L73'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/index.js#L35-L73'>
       <span>src/models/index.js</span>
       </a>
     
@@ -786,7 +788,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/heat_index.js#L25-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/heat_index.js#L25-L58'>
       <span>src/models/heat_index.js</span>
       </a>
     
@@ -938,7 +940,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/phs.js#L99-L171'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/phs.js#L99-L171'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -1089,7 +1091,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/phs.js#L23-L42'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/phs.js#L23-L42'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -1271,7 +1273,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/phs.js#L8-L21'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/phs.js#L8-L21'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -1441,7 +1443,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/humidex.js#L38-L62'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/humidex.js#L38-L62'>
       <span>src/models/humidex.js</span>
       </a>
     
@@ -1561,7 +1563,7 @@ relative humidity.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/humidex.js#L3-L11'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/humidex.js#L3-L11'>
       <span>src/models/humidex.js</span>
       </a>
     
@@ -1676,7 +1678,7 @@ would be felt by the average person.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/net.js#L38-L50'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/net.js#L38-L50'>
       <span>src/models/net.js</span>
       </a>
     
@@ -1837,7 +1839,7 @@ false, it does not.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/wbgt.js#L54-L74'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/wbgt.js#L54-L74'>
       <span>src/models/wbgt.js</span>
       </a>
     
@@ -2019,7 +2021,7 @@ setting
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/discomfort_index.js#L35-L43'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/discomfort_index.js#L35-L43'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2104,7 +2106,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/discomfort_index.js#L3-L9'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/discomfort_index.js#L3-L9'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2225,7 +2227,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/discomfort_index.js#L75-L86'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/discomfort_index.js#L75-L86'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2310,7 +2312,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/discomfort_index.js#L45-L51'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/discomfort_index.js#L45-L51'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2425,7 +2427,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/two_nodes.js#L114-L197'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/two_nodes.js#L114-L197'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -2619,7 +2621,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/two_nodes.js#L27-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/two_nodes.js#L27-L34'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -2717,7 +2719,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/two_nodes.js#L4-L25'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/two_nodes.js#L4-L25'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -2970,7 +2972,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/two_nodes.js#L320-L488'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/two_nodes.js#L320-L488'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -3159,7 +3161,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/two_nodes.js#L210-L231'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/two_nodes.js#L210-L231'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -3412,7 +3414,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/set_tmp.js#L53-L146'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/set_tmp.js#L53-L146'>
       <span>src/models/set_tmp.js</span>
       </a>
     
@@ -3599,7 +3601,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/set_tmp.js#L9-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/set_tmp.js#L9-L14'>
       <span>src/models/set_tmp.js</span>
       </a>
     
@@ -3720,7 +3722,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/set_tmp.js#L193-L303'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/set_tmp.js#L193-L303'>
       <span>src/models/set_tmp.js</span>
       </a>
     
@@ -3936,7 +3938,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/wc.js#L26-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/wc.js#L26-L34'>
       <span>src/models/wc.js</span>
       </a>
     
@@ -4073,7 +4075,7 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_en.js#L73-L155'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_en.js#L73-L155'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4206,7 +4208,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_en.js#L9-L22'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_en.js#L9-L22'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4397,7 +4399,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_en.js#L212-L334'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_en.js#L212-L334'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4530,7 +4532,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_en.js#L157-L170'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_en.js#L157-L170'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4712,7 +4714,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/at.js#L34-L50'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/at.js#L34-L50'>
       <span>src/models/at.js</span>
       </a>
     
@@ -4874,7 +4876,7 @@ Please specify q if you want to estimate AT with solar load.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv_ppd.js#L114-L199'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv_ppd.js#L114-L199'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5054,7 +5056,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv_ppd.js#L10-L29'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv_ppd.js#L10-L29'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5156,7 +5158,7 @@ the operative temperature, for more information please consult the Standard.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv_ppd.js#L31-L36'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv_ppd.js#L31-L36'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5289,7 +5291,7 @@ the operative temperature, for more information please consult the Standard.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv_ppd.js#L284-L403'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv_ppd.js#L284-L403'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5468,7 +5470,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv_ppd.js#L201-L206'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv_ppd.js#L201-L206'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5601,7 +5603,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_ashrae.js#L86-L173'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_ashrae.js#L86-L173'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -5741,7 +5743,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_ashrae.js#L11-L21'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_ashrae.js#L11-L21'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -5921,7 +5923,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_ashrae.js#L250-L344'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_ashrae.js#L250-L344'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -6061,7 +6063,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/adaptive_ashrae.js#L175-L185'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/adaptive_ashrae.js#L175-L185'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -6241,7 +6243,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/solar_gain.js#L97-L159'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/solar_gain.js#L97-L159'>
       <span>src/models/solar_gain.js</span>
       </a>
     
@@ -6411,7 +6413,7 @@ on skin and clothing color. More information is available in Blum (1945).</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/solar_gain.js#L41-L47'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/solar_gain.js#L41-L47'>
       <span>src/models/solar_gain.js</span>
       </a>
     
@@ -6526,7 +6528,7 @@ temperature of the space should be increased if no solar radiation is present.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/cooling_effect.js#L50-L134'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/cooling_effect.js#L50-L134'>
       <span>src/models/cooling_effect.js</span>
       </a>
     
@@ -6710,7 +6712,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/athb.js#L50-L75'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/athb.js#L50-L75'>
       <span>src/models/athb.js</span>
       </a>
     
@@ -6875,7 +6877,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/athb.js#L124-L170'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/athb.js#L124-L170'>
       <span>src/models/athb.js</span>
       </a>
     
@@ -7041,7 +7043,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv.js#L98-L133'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv.js#L98-L133'>
       <span>src/models/pmv.js</span>
       </a>
     
@@ -7217,7 +7219,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv.js#L3-L22'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv.js#L3-L22'>
       <span>src/models/pmv.js</span>
       </a>
     
@@ -7369,7 +7371,7 @@ the operative temperature, for more information please consult the Standard.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pmv.js#L209-L244'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pmv.js#L209-L244'>
       <span>src/models/pmv.js</span>
       </a>
     
@@ -7588,7 +7590,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/a_pmv.js#L68-L89'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/a_pmv.js#L68-L89'>
       <span>src/models/a_pmv.js</span>
       </a>
     
@@ -7751,7 +7753,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/a_pmv.js#L4-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/a_pmv.js#L4-L14'>
       <span>src/models/a_pmv.js</span>
       </a>
     
@@ -7886,7 +7888,7 @@ the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/a_pmv.js#L143-L166'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/a_pmv.js#L143-L166'>
       <span>src/models/a_pmv.js</span>
       </a>
     
@@ -8089,7 +8091,7 @@ can be calculated using the function clo_dynamic_array in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/ankle_draft.js#L57-L90'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/ankle_draft.js#L57-L90'>
       <span>src/models/ankle_draft.js</span>
       </a>
     
@@ -8244,7 +8246,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/ankle_draft.js#L8-L13'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/ankle_draft.js#L8-L13'>
       <span>src/models/ankle_draft.js</span>
       </a>
     
@@ -8357,7 +8359,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/e_pmv.js#L71-L94'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/e_pmv.js#L71-L94'>
       <span>src/models/e_pmv.js</span>
       </a>
     
@@ -8521,7 +8523,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/e_pmv.js#L4-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/e_pmv.js#L4-L14'>
       <span>src/models/e_pmv.js</span>
       </a>
     
@@ -8658,7 +8660,7 @@ are outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/e_pmv.js#L151-L178'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/e_pmv.js#L151-L178'>
       <span>src/models/e_pmv.js</span>
       </a>
     
@@ -8864,7 +8866,7 @@ can be calculated using the function clo_dynamic_array in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/vertical_tmp_grad_ppd.js#L51-L88'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/vertical_tmp_grad_ppd.js#L51-L88'>
       <span>src/models/vertical_tmp_grad_ppd.js</span>
       </a>
     
@@ -9006,7 +9008,7 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/vertical_tmp_grad_ppd.js#L8-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/vertical_tmp_grad_ppd.js#L8-L14'>
       <span>src/models/vertical_tmp_grad_ppd.js</span>
       </a>
     
@@ -9119,7 +9121,7 @@ is acceptable if PPD_ad is lower or equal than 5 %
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/use_fans_heatwave.js#L102-L232'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/use_fans_heatwave.js#L102-L232'>
       <span>src/models/use_fans_heatwave.js</span>
       </a>
     
@@ -9305,7 +9307,7 @@ This occurs when either the following variables reaches its maximum value:</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/use_fans_heatwave.js#L30-L39'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/use_fans_heatwave.js#L30-L39'>
       <span>src/models/use_fans_heatwave.js</span>
       </a>
     
@@ -9398,7 +9400,7 @@ False returns values regardless of the input values, default True
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/use_fans_heatwave.js#L8-L28'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/use_fans_heatwave.js#L8-L28'>
       <span>src/models/use_fans_heatwave.js</span>
       </a>
     
@@ -9634,7 +9636,7 @@ False returns values regardless of the input values, default True
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/clo_tout.js#L24-L32'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/clo_tout.js#L24-L32'>
       <span>src/models/clo_tout.js</span>
       </a>
     
@@ -9744,7 +9746,7 @@ or the IP (Imperial Units) system.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/clo_tout.js#L55-L57'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/clo_tout.js#L55-L57'>
       <span>src/models/clo_tout.js</span>
       </a>
     
@@ -9854,7 +9856,7 @@ or the IP (Imperial Units) system.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/utci.js#L69-L126'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/utci.js#L69-L126'>
       <span>src/models/utci.js</span>
       </a>
     
@@ -10025,7 +10027,7 @@ outside the applicability limits of the model. The valid input ranges are
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/utci.js#L165-L230'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/utci.js#L165-L230'>
       <span>src/models/utci.js</span>
       </a>
     
@@ -10198,7 +10200,7 @@ outside the applicability limits of the model. The valid input ranges are
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/models/pet_steady.js#L50-L93'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/models/pet_steady.js#L50-L93'>
       <span>src/models/pet_steady.js</span>
       </a>
     
@@ -10432,7 +10434,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/index.js#L15-L27'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/index.js#L15-L27'>
       <span>src/psychrometrics/index.js</span>
       </a>
     
@@ -10483,7 +10485,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/p_sat.js#L14-L51'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/p_sat.js#L14-L51'>
       <span>src/psychrometrics/p_sat.js</span>
       </a>
     
@@ -10566,7 +10568,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/p_sat_torr.js#L12-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/p_sat_torr.js#L12-L14'>
       <span>src/psychrometrics/p_sat_torr.js</span>
       </a>
     
@@ -10658,7 +10660,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/p_sat_torr.js#L28-L30'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/p_sat_torr.js#L28-L30'>
       <span>src/psychrometrics/p_sat_torr.js</span>
       </a>
     
@@ -10750,7 +10752,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/t_o.js#L15-L28'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/t_o.js#L15-L28'>
       <span>src/psychrometrics/t_o.js</span>
       </a>
     
@@ -10870,7 +10872,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/t_o.js#L44-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/t_o.js#L44-L58'>
       <span>src/psychrometrics/t_o.js</span>
       </a>
     
@@ -10990,7 +10992,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/enthalpy.js#L13-L23'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/enthalpy.js#L13-L23'>
       <span>src/psychrometrics/enthalpy.js</span>
       </a>
     
@@ -11082,7 +11084,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/t_wb.js#L11-L23'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/t_wb.js#L11-L23'>
       <span>src/psychrometrics/t_wb.js</span>
       </a>
     
@@ -11174,7 +11176,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/t_mrt.js#L37-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/t_mrt.js#L37-L58'>
       <span>src/psychrometrics/t_mrt.js</span>
       </a>
     
@@ -11322,7 +11324,7 @@ been validated for globe sensors with a diameter between 0.04 and 0.15 m.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/t_mrt.js#L78-L109'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/t_mrt.js#L78-L109'>
       <span>src/psychrometrics/t_mrt.js</span>
       </a>
     
@@ -11462,7 +11464,7 @@ developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard <a href="
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/psy_ta_rh.js#L34-L50'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/psy_ta_rh.js#L34-L50'>
       <span>src/psychrometrics/psy_ta_rh.js</span>
       </a>
     
@@ -11549,7 +11551,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/psychrometrics/psy_ta_rh.js#L6-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/psychrometrics/psy_ta_rh.js#L6-L14'>
       <span>src/psychrometrics/psy_ta_rh.js</span>
       </a>
     
@@ -11698,7 +11700,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/index.js#L21-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/index.js#L21-L34'>
       <span>src/utilities/index.js</span>
       </a>
     
@@ -11749,7 +11751,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L362-L375'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L362-L375'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -11851,7 +11853,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L393-L396'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L393-L396'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -11955,7 +11957,7 @@ Vag = 0.3 (M - 1) (m/s)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L414-L417'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L414-L417'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12059,7 +12061,7 @@ Vag = 0.3 (M - 1) (m/s)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L447-L455'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L447-L455'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12175,7 +12177,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L476-L488'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L476-L488'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12291,7 +12293,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L513-L538'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L513-L538'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12393,7 +12395,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L554-L579'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L554-L579'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12495,7 +12497,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L670-L687'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L670-L687'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12614,7 +12616,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L702-L706'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L702-L706'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12729,7 +12731,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/index.js#L21-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/index.js#L21-L34'>
       <span>src/utilities/index.js</span>
       </a>
     
@@ -12780,7 +12782,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L763-L795'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L763-L795'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -13076,7 +13078,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L822-L845'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L822-L845'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -13176,7 +13178,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/68b5dad52b6adb180d512dca5cae84ebba9b4f34/src/utilities/utilities.js#L915-L972'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/11a3ddbdb9ca821c754ac5629b109df6d3ec824e/src/utilities/utilities.js#L915-L972'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -13677,9 +13679,13 @@ temperature dynamics are relatively minor, sich as the humid tropics.
 <li>Detailed steps to reproduce the bug.</li>
 </ul>
 <h2>Documentation improvements</h2>
-<p>jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs, or even on the web in blog posts, articles, and such.</p>
+<p>If you find any issue in our online <a href="https://federicotartarini.github.io/jsthermalcomfort/">documentation</a> please open
+an <a href="https://github.com/FedericoTartarini/jsthermalcomfort/issues">issue</a>.</p>
+<p>jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs,
+or even on the web in blog posts, articles, and such.</p>
 <h2>Feature requests and feedback</h2>
-<p>The best way to send feedback is to file an issue at <a href="https://github.com/FedericoTartarini/jsthermalcomfort/issues">https://github.com/FedericoTartarini/jsthermalcomfort/issues</a></p>
+<p>The best way to send feedback is to file an issue
+at <a href="https://github.com/FedericoTartarini/jsthermalcomfort/issues">https://github.com/FedericoTartarini/jsthermalcomfort/issues</a></p>
 <p>If you are proposing a feature:</p>
 <ul>
 <li>Explain in detail how it would work.</li>
@@ -13709,6 +13715,10 @@ temperature dynamics are relatively minor, sich as the humid tropics.
 </li>
 <li>
 <p>When you’re done making changes run all tests using Jest:</p>
+<ul>
+<li>Install dependencies</li>
+</ul>
+<pre class='hljs'>npm install</pre>
 <pre class='hljs'>npm run <span class="hljs-built_in">test</span></pre>
 <ul>
 <li>Run prettier to format your code:</li>
@@ -13734,7 +13744,8 @@ git commit -m <span class="hljs-string">&quot;Your detailed description of your 
 <pre class='hljs'>git push origin name-of-your-bugfix-or-feature</pre>
 </li>
 <li>
-<p>Submit a pull request after you have done all your modifications and tested your work. The pull request should include a detailed description of your work:</p>
+<p>Submit a pull request after you have done all your modifications and tested your work. The pull request should
+include a detailed description of your work:</p>
 <ul>
 <li>What this pull request is about</li>
 <li>Have you tested your work</li>
@@ -13750,13 +13761,18 @@ git commit -m <span class="hljs-string">&quot;Your detailed description of your 
 <li>Update documentation when there’s new API, functionality etc.</li>
 </ul>
 <h3>Documentation</h3>
-<p>We are using <a href="https://jsdoc.app/">JSDoc</a> and <a href="https://github.com/documentationjs/documentation">documentation.js</a> to automatically build the documentation.</p>
-<h3>To add a function</h3>
+<p>We are using <a href="https://jsdoc.app/">JSDoc</a> and <a href="https://github.com/documentationjs/documentation">documentation.js</a> to
+automatically build the documentation.</p>
+<h3>To add a function</h3>
 <ol>
 <li>Add a file under <code>src/models/</code> with the name of the function/model and document it.</li>
-<li>Add any related functions that are used by your function either in <code>src/utilities/utilities.js</code> or <code>src/psychrometrics/</code>. See existing code as example.
+<li>Add any related functions that are used by your function either in <code>src/utilities/utilities.js</code>
+or <code>src/psychrometrics/</code>. See existing code as example.
 <ul>
-<li>In order to add a new function/API to the library you should mark that function as <code>@public</code>, add it to its corresponding category, for example for models you should do <code>@memberof models</code>, and lastly you should give it a proper name for the documentation with <code>@docname</code>, for example: <code>@docname Clothing prediction</code>. It is important to note that you should also add the <code>@public</code> tag to any types the function exposes/uses.</li>
+<li>In order to add a new function/API to the library you should mark that function as <code>@public</code>, add it to its
+corresponding category, for example for models you should do <code>@memberof models</code>, and lastly you should give it a
+proper name for the documentation with <code>@docname</code>, for example: <code>@docname Clothing prediction</code>. It is important to
+note that you should also add the <code>@public</code> tag to any types the function exposes/uses.</li>
 </ul>
 </li>
 <li>Test your function by writing a test in <code>tests/models/&#x3C;name_of_model>.test.js</code>.</li>
@@ -13764,12 +13780,15 @@ git commit -m <span class="hljs-string">&quot;Your detailed description of your 
 <h3>Tips</h3>
 <p>To run a subset of tests you can do the following:</p>
 <pre class='hljs'>npm run <span class="hljs-built_in">test</span> -- <span class="hljs-string">&#x27;&lt;path_to_test_file&gt;&#x27;</span> -t <span class="hljs-string">&#x27;&lt;test_pattern/name&gt;&#x27;</span></pre>
-<p>If you are using VSCode you can use the <a href="https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner">Jest Runner extension</a> to easily run subset of tests.</p>
+<p>If you are using VSCode you can use
+the <a href="https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner">Jest Runner extension</a> to easily
+run subset of tests.</p>
 <h3>Releases</h3>
 <p>To create a new release do the following:</p>
 <ol>
 <li>Update the <code>package.json</code> version to the new version (we use the semantic release system for versioning)</li>
-<li>Run <code>npm run build</code> to update the <code>lib</code> directory (output with types of the library that gets published to NPM) and commit the updates</li>
+<li>Run <code>npm run build</code> to update the <code>lib</code> directory (output with types of the library that gets published to NPM) and
+commit the updates</li>
 <li>In GitHub go to Releases -> click <code>Draft a new release</code></li>
 <li>Click <code>Choose a tag</code> and type the new version, for example <code>v0.1,1</code></li>
 <li>Write the title and description and click <code>Publish release</code></li>

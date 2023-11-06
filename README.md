@@ -81,13 +81,16 @@ When [reporting a bug](https://github.com/FedericoTartarini/jsthermalcomfort/iss
 
 ## Documentation improvements
 
-If you find any issue in our online [documentation](https://federicotartarini.github.io/jsthermalcomfort/) please open an [issue](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
+If you find any issue in our online [documentation](https://federicotartarini.github.io/jsthermalcomfort/) please open
+an [issue](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
 
-jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs, or even on the web in blog posts, articles, and such.
+jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs,
+or even on the web in blog posts, articles, and such.
 
 ## Feature requests and feedback
 
-The best way to send feedback is to file an issue at [https://github.com/FedericoTartarini/jsthermalcomfort/issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues)
+The best way to send feedback is to file an issue
+at [https://github.com/FedericoTartarini/jsthermalcomfort/issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues)
 
 If you are proposing a feature:
 
@@ -121,6 +124,12 @@ To set up jsthermalcomfort for local development:
    Now you can make your changes locally.
 
 4. When you’re done making changes run all tests using Jest:
+
+   - Install dependencies
+
+   ```bash
+   npm install
+   ```
 
    ```bash
    npm run test
@@ -158,7 +167,8 @@ To set up jsthermalcomfort for local development:
    git push origin name-of-your-bugfix-or-feature
    ```
 
-5. Submit a pull request after you have done all your modifications and tested your work. The pull request should include a detailed description of your work:
+5. Submit a pull request after you have done all your modifications and tested your work. The pull request should
+   include a detailed description of your work:
    - What this pull request is about
    - Have you tested your work
    - Will this work affect other component in the product
@@ -174,13 +184,18 @@ For merging, you should:
 
 ### Documentation
 
-We are using [JSDoc](https://jsdoc.app/) and [documentation.js](https://github.com/documentationjs/documentation) to automatically build the documentation.
+We are using [JSDoc](https://jsdoc.app/) and [documentation.js](https://github.com/documentationjs/documentation) to
+automatically build the documentation.
 
 ### To add a function
 
 1. Add a file under `src/models/` with the name of the function/model and document it.
-2. Add any related functions that are used by your function either in `src/utilities/utilities.js` or `src/psychrometrics/`. See existing code as example.
-   - In order to add a new function/API to the library you should mark that function as `@public`, add it to its corresponding category, for example for models you should do `@memberof models`, and lastly you should give it a proper name for the documentation with `@docname`, for example: `@docname Clothing prediction`. It is important to note that you should also add the `@public` tag to any types the function exposes/uses.
+2. Add any related functions that are used by your function either in `src/utilities/utilities.js`
+   or `src/psychrometrics/`. See existing code as example.
+   - In order to add a new function/API to the library you should mark that function as `@public`, add it to its
+     corresponding category, for example for models you should do `@memberof models`, and lastly you should give it a
+     proper name for the documentation with `@docname`, for example: `@docname Clothing prediction`. It is important to
+     note that you should also add the `@public` tag to any types the function exposes/uses.
 3. Test your function by writing a test in `tests/models/<name_of_model>.test.js`.
 
 ### Tips
@@ -191,14 +206,17 @@ To run a subset of tests you can do the following:
 npm run test -- '<path_to_test_file>' -t '<test_pattern/name>'
 ```
 
-If you are using VSCode you can use the [Jest Runner extension](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner) to easily run subset of tests.
+If you are using VSCode you can use
+the [Jest Runner extension](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner) to easily
+run subset of tests.
 
 ### Releases
 
 To create a new release do the following:
 
 1. Update the `package.json` version to the new version (we use the semantic release system for versioning)
-2. Run `npm run build` to update the `lib` directory (output with types of the library that gets published to NPM) and commit the updates
+2. Run `npm run build` to update the `lib` directory (output with types of the library that gets published to NPM) and
+   commit the updates
 3. In GitHub go to Releases -> click `Draft a new release`
 4. Click `Choose a tag` and type the new version, for example `v0.1,1`
 5. Write the title and description and click `Publish release`

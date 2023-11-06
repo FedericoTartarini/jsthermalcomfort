@@ -215,9 +215,9 @@ run subset of tests.
 To create a new release do the following:
 
 1. Update the `package.json` version to the new version (we use the semantic release system for versioning)
-2. Run `npm run build` to update the `lib` directory (output with types of the library that gets published to NPM) and
-   commit the updates
-3. In GitHub go to Releases -> click `Draft a new release`
-4. Click `Choose a tag` and type the new version, for example `v0.1,1`
-5. Write the title and description and click `Publish release`
-6. This will trigger a GitHub action that will publish the new version to NPM
+2. Run `npm run build` to update the `lib` directory (output with types of the library that gets published to NPM)
+3. Commit the updates
+4. In GitHub go to Releases -> click `Draft a new release`
+5. Click `Choose a tag` and type the new version, for example `v0.1.1`
+6. Write the title and description and click `Publish release`
+7. This will trigger a GitHub action that will publish the new version to NPM

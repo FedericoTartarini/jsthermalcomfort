@@ -8,6 +8,9 @@ When [reporting a bug](https://github.com/FedericoTartarini/jsthermalcomfort/iss
 - Detailed steps to reproduce the bug.
 
 ## Documentation improvements
+
+If you find any issue in our online [documentation](https://federicotartarini.github.io/jsthermalcomfort/) please open an [issue](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
+
 jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs, or even on the web in blog posts, articles, and such.
 
 ## Feature requests and feedback
@@ -80,7 +83,7 @@ For merging, you should:
 ### Documentation
 We are using [JSDoc](https://jsdoc.app/) and [documentation.js](https://github.com/documentationjs/documentation) to automatically build the documentation.
 
-### To add a function
+### To add a function
 1. Add a file under `src/models/` with the name of the function/model and document it.
 2. Add any related functions that are used by your function either in `src/utilities/utilities.js` or `src/psychrometrics/`. See existing code as example.
     - In order to add a new function/API to the library you should mark that function as `@public`, add it to its corresponding category, for example for models you should do `@memberof models`, and lastly you should give it a proper name for the documentation with `@docname`, for example: `@docname Clothing prediction`. It is important to note that you should also add the `@public` tag to any types the function exposes/uses.

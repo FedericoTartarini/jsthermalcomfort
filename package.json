@@ -1,7 +1,7 @@
 {
   "name": "jsthermalcomfort",
   "version": "0.1.4",
-  "description": "A JavaScript package to calculate thermal comfort indices (e.g., Predicted Mean Vote, Standard Effective Temperature, Predicted Heat Strain).",
+  "description": "A JavaScript package to calculate thermophysiological, thermal comfort, thermal stress indices",
   "type": "module",
   "files": [
     "lib"
@@ -42,7 +42,7 @@
   "bugs": {
     "url": "https://github.com/FedericoTartarini/jsthermalcomfort/issues"
   },
-  "homepage": "https://github.com/FedericoTartarini/jsthermalcomfort#readme",
+  "homepage": "https://federicotartarini.github.io/jsthermalcomfort/",
   "devDependencies": {
     "documentation": "^14.0.2",
     "github-slugger": "^2.0.0",

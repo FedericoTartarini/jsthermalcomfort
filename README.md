@@ -1,7 +1,7 @@
 # Overview
 
 |        docs         | [![docs](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml/badge.svg)][docs_link]                                                                 |
-|:-------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :-----------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 |      **build**      | [![build](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml/badge.svg)][build_link]                                                                   |
 |      **tests**      | [![test](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test.yml/badge.svg)][test_link]                                                                      |
 | **page deployment** | [![page deployment](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/pages/pages-build-deployment/badge.svg)][deploy_link]                                     |

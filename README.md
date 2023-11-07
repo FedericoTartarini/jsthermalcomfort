@@ -109,6 +109,12 @@ To set up jsthermalcomfort for local development:
    git clone git@github.com:FedericoTartarini/jsthermalcomfort.git
    ```
 
+   We use git submodules to pull validation data for the tests, to ensure tests are successful please run:
+
+   ```bash
+   git submodule update --init --recursive
+   ```
+
 3. Create a branch for local development. The naming rule for new branch are, as follows:
 
    - If this update is for a new feature Feature/feature_name_here

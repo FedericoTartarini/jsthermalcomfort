@@ -38,6 +38,7 @@ To set up jsthermalcomfort for local development:
     git clone git@github.com:FedericoTartarini/jsthermalcomfort.git
     ```
     We use git submodules to pull validation data for the tests, to ensure tests are successful please run:
+
     ```bash
     git submodule update --init --recursive
     ```

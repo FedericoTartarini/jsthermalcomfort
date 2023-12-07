@@ -414,9 +414,9 @@ function solve_pet(
 /**
  *
  * @param {NewtonRaphsonSingleFunction} func
- * @param {[number]} initialGuess
- * @param {number} [tolerance=1e-3]
- * @param {number} [maxIterations=1000]
+ * @param initialGuess {[number]} initialGuess
+ * @param tolerance {number} [tolerance=1e-3]
+ * @param maxIterations {number} [maxIterations=1000]
  *
  * @returns {[number]}
  */
@@ -448,9 +448,9 @@ function newtonRaphsonSingleEquation(
  * We approximate the derivatives so not truly Newton's method.
  *
  * @param {NewtonRaphsonFunction} f
- * @param {[number, number, number]} initialGuess
- * @param {number} [tolerance=1e-3]
- * @param {number} [maxIterations=1000]
+ * @param initialGuess {[number, number, number]} initialGuess
+ * @param tolerance {number} [tolerance=1e-3]
+ * @param maxIterations {number} [maxIterations=1000]
  *
  * @returns {[number, number, number]}
  */
@@ -512,10 +512,10 @@ function newtonRaphson(
 /**
  *
  * @param {NewtonRaphsonFunction} f
- * @param {[number, number, number]} values
- * @param {[number, number, number]} [evaluated] - result of f(values)
- * @param {number} [h=1e-2]
- * @param {number[][]} [matrix]
+ * @param values {[number, number, number]} values
+ * @param evaluated {[number, number, number]} [evaluated] - result of f(values)
+ * @param h {number} [h=1e-2]
+ * @param matrix {number[][]} [matrix]
  * @returns {number[][]}
  */
 function numericalDerivatives(f, values, evaluated, h = 1e-2, matrix) {
@@ -540,17 +540,17 @@ function numericalDerivatives(f, values, evaluated, h = 1e-2, matrix) {
 
 /**
  * @callback NewtonRaphsonFunction
- * @param {[number, number, number]}
+ * @param numbers {[number, number, number]}
  * @returns {[number, number, number]}
  */
 
 /**
  * @callback NewtonRaphsonSingleFunction
- * @param {[number]}
+ * @param numbers {[number]}
  * @returns {[number]}
  */
 
-function createMatrix(n) {
+function createMatrix(numbers) {
   const matrix = [];
 
   for (let i = 0; i < n; ++i) {

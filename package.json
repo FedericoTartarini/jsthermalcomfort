@@ -23,7 +23,6 @@
       "main"
     ]
   },
-  "type": "module",
   "publishConfig": {
     "access": "public"
   },

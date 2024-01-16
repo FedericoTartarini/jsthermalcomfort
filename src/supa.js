@@ -64,7 +64,7 @@ export function $average(array, weights) {
 export function $lerp(length, min, max) {
   return Array(length)
     .fill(min)
-    .map((x, i) => x + i * ((max - min) / length));
+    .map((x, i) => x + i * ((max - min) / (length - 1)));
 }
 
 export function $sum(array) {

@@ -1,6 +1,7 @@
 import JOS3Defaults from "./JOS3Defaults.js";
 import { bsa_rate } from "./bsa_rate.js";
 import { validate_body_parameters } from "./validate_body_parameters.js";
+import * as math from "mathjs";
 
 /**
  * Calculate the ratio of basal blood flow (BFB) of the standard body (290 L/h).
@@ -38,6 +39,7 @@ export function bfb_rate(
   const bfb_all =
     ci *
     bsa_rate(height, weight, bsa_equation) *
-    JOS3Defaults.local_bsa.reduce((t, c) => t + c, 0);
+    math.sum(JOS3Defaults.local_bsa);
+
   return bfb_all / JOS3Defaults.blood_flow_rate;
 }

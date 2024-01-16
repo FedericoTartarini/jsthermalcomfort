@@ -1,6 +1,7 @@
-import { evaporation } from "../../../src/jos3_functions/thermoregulation/evaporation";
 import { describe, it, expect } from "@jest/globals";
 import { $lerp } from "../../../src/supa";
+import * as math from "mathjs";
+import { evaporation } from "../../../src/jos3_functions/thermoregulation/evaporation.js";
 
 describe("evaporation", () => {
   it.each([

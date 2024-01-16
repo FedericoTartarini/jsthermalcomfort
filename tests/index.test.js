@@ -158,6 +158,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("use_fans_heatwaves");
   });
 
+  it("should have models.JOS3", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("JOS3");
+  });
+
   it("should have utilities.body_surface_area", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });

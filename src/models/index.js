@@ -26,6 +26,7 @@ import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout, clo_tout_array } from "./clo_tout.js";
 import { utci, utci_array } from "./utci.js";
 import { pet_steady } from "./pet_steady.js";
+import { JOS3 } from "./JOS3.js";
 
 /**
  * @public
@@ -70,4 +71,5 @@ export default {
   vertical_tmp_grad_ppd,
   wbgt,
   wc,
+  JOS3,
 };

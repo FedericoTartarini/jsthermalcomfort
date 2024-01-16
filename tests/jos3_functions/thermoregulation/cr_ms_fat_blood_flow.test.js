@@ -1,38 +1,58 @@
 import { cr_ms_fat_blood_flow } from "../../../src/jos3_functions/thermoregulation/cr_ms_fat_blood_flow";
 import { describe, it, expect } from "@jest/globals";
 import { $lerp } from "../../../src/supa";
+import * as math from "mathjs";
 
 describe("cr_ms_fat_blood_flow", () => {
-  it("should return the correct values", () => {
-    let expected = [
-      [
-        35.30423941882339, 47.12786946186046, 122.12401640361986,
-        121.48109829455413, 18.714221377553372, 37.31728061133258,
-        37.35839403394131, 37.544726449365264, 40.04855368806111,
-        40.08966711066985, 40.2759995260938, 42.37721962608814,
-        42.04376819826313, 42.870065692369344, 45.10849270281669,
-        44.77504127499168, 45.601338769097886,
-      ],
-      [
-        31.637458224302655, 0, 0, 0, 47.229176503190565, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0,
-      ],
-      [
-        0.26540022824850923, 0, 0, 0, 2.2223513452205355, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-      ],
-    ];
+  const result = cr_ms_fat_blood_flow(
+    math.matrix($lerp(17, 12, 18)),
+    math.matrix($lerp(17, 24, 36)),
+    1.72,
+    74.43,
+    "dubois",
+    20,
+    2.59,
+  );
 
-    const result = cr_ms_fat_blood_flow(
-      $lerp(17, 12, 18),
-      $lerp(17, 24, 36),
-      1.72,
-      74.43,
-      "dubois",
-      20,
-      2.59,
-    );
+  let expected = [
+    {
+      property: "bf_core",
+      expected: [
+        35.30423941882337, 47.1847709842923, 122.23781944848352,
+        121.65180286184963, 18.714221377553365, 37.601788223491795,
+        37.69980316853238, 37.943037106388175, 40.50376586751587,
+        40.60178081255645, 40.84501475041225, 43.003136372838426,
+        42.726586467445266, 43.60978548398332, 45.90511401686251,
+        45.62856411146934, 46.511763128007395,
+      ],
+    },
+    {
+      property: "bf_muscle",
+      expected: [
+        31.637458224302655, 0.0, 0.0, 0.0, 47.45678259291794, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      ],
+    },
+    {
+      property: "bf_fat",
+      expected: [
+        0.2654002282485091, 0.0, 0.0, 0.0, 2.2223513452205346, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      ],
+    },
+  ];
 
-    expect(result).toStrictEqual(expected);
-  });
+  it.each(expected)(
+    "should return the correct value for $property",
+    ({ property, expected }) => {
+      let actual = result[property];
+      let actualLength = actual.size()[0];
+
+      expect(actualLength).toBe(expected.length);
+
+      for (let i = 0; i < actualLength; i++) {
+        expect(actual.get([i])).toBeCloseTo(expected[i], 13);
+      }
+    },
+  );
 });

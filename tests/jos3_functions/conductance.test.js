@@ -2307,7 +2307,7 @@ describe("conductance", () => {
   ])(
     "returns the correct value when height is $height, weight is $weight, bsa_equation is $bsa_equation, and fat is $fat",
     ({ height, weight, bsa_equation, fat, expected }) => {
-      const result = conductance(height, weight, bsa_equation, fat);
+      const result = conductance(height, weight, bsa_equation, fat).toArray();
 
       expect(result).toHaveLength(expected.length);
 

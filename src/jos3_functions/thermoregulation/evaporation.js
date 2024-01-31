@@ -50,7 +50,7 @@ export function evaporation(
 ) {
   let { wrms, clds } = error_signals(err_sk);
   let bsar = bsa_rate(height, weight, bsa_equation);
-  let bsa = JOS3Defaults.local_bsa.map((local_bsa) => local_bsa * bsar);
+  let bsa = math.dotMultiply(JOS3Defaults.local_bsa, bsar);
 
   let p_a = math.dotDivide(math.dotMultiply(tdb.map(antoine), rh), 100);
   let p_sk_s = t_skin.map(antoine);
@@ -67,7 +67,7 @@ export function evaporation(
     0.0155, 0.073, 0.036, 0.0175, 0.073, 0.036, 0.0175,
   ];
 
-  let sig_sweat = 371.2 * err_cr[0] + 33.64 * (wrms - clds);
+  let sig_sweat = 371.2 * err_cr.get([0]) + 33.64 * (wrms - clds);
   sig_sweat = sig_sweat > 0 ? sig_sweat : 0;
   sig_sweat *= bsar;
 

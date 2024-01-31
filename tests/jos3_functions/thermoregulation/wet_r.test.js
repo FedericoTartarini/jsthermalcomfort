@@ -1,31 +1,43 @@
 import { wet_r } from "../../../src/jos3_functions/thermoregulation/wet_r";
 import { describe, it, expect } from "@jest/globals";
-import { $array, $lerp } from "../../../src/supa";
+import { $lerp } from "../../../src/supa";
+import * as math from "mathjs";
 
 describe("wet_r", () => {
   it("throws an error if hc is negative", () => {
-    expect(() => wet_r([-1], [])).toThrow(
+    expect(() => wet_r(math.matrix([-1]), math.matrix([]))).toThrow(
       "Input parameter hc must be non-negative.",
     );
   });
 
   it("should return the correct value", () => {
     const expected = [
-      0.0021645021645021645, 0.003349471689074972, 0.004535720923832167,
-      0.005723199160890929, 0.006911858199076293, 0.008101652195580091,
-      0.009292537527831646, 0.01048447266477957, 0.011677418046854316,
-      0.012876188354129531, 0.01408040692912621, 0.015285091429744541,
-      0.01649022961406062, 0.01769580964370202, 0.01890182006783671,
-      0.020108249807904748, 0.021315088143053263,
+      0.0021645021645021645,
+      0.003423575313939129,
+      0.004684089504371918,
+      0.005945984200305834,
+      0.007209202036788244,
+      0.008473688620747445,
+      0.009739392346802675,
+      0.011006264226345363,
+      0.012274257728803185,
+      0.013553503235181343,
+      0.014833280927405077,
+      0.016113575919067133,
+      0.01739437384598675,
+      0.01867566084416913,
+      0.019957423528852103,
+      0.021239648974578626,
+      0.02252232469623774
     ];
 
     const result = wet_r(
-      $lerp(17, 28, 32),
-      $lerp(17, 0, 1),
-      $array(17, 0.45),
+      math.matrix($lerp(17, 28, 32)),
+      math.matrix($lerp(17, 0, 1)),
+      math.dotMultiply(math.ones(17), 0.45),
       16.5,
     );
 
-    expect(result).toStrictEqual(expected);
+    expect(result.toArray()).toStrictEqual(expected);
   });
 });

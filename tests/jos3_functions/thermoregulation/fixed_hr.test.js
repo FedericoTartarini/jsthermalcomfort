@@ -14,6 +14,6 @@ describe("fixed_hr", () => {
     ];
 
     const result = fixed_hr(rad_coef(JOS3Defaults.posture));
-    expect(result).toStrictEqual(expected);
+    expect(result.toArray()).toStrictEqual(expected);
   });
 });

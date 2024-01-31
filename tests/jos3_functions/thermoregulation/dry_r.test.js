@@ -1,29 +1,46 @@
 import { dry_r } from "../../../src/jos3_functions/thermoregulation/dry_r";
 import { describe, it, expect } from "@jest/globals";
 import { $lerp } from "../../../src/supa";
+import * as math from "mathjs";
 
 describe("dry_r", () => {
   it("should throw an error if hc or hr are negative", () => {
-    expect(() => dry_r([-1], [], [])).toThrow(
+    expect(() => dry_r(math.matrix([-1]), math.matrix([]), math.matrix([]))).toThrow(
       "Input parameters hc and hr must be non-negative.",
     );
 
-    expect(() => dry_r([], [-1], [])).toThrow(
+    expect(() => dry_r(math.matrix([]), math.matrix([-1]), math.matrix([]))).toThrow(
       "Input parameters hc and hr must be non-negative.",
     );
   });
 
   it("should return the correct value", () => {
     const expected = [
-      0.5, 0.4512841097271222, 0.413692327505715, 0.3843193443385259,
-      0.3611896893588896, 0.34291333817477604, 0.3284838285446805,
-      0.3171545252041911, 0.30835987963122685, 0.30224929971988795,
-      0.29835978121982176, 0.2958153949625314, 0.2944191265905248,
-      0.2940106188811064, 0.2944580256344962, 0.2956519454227345,
-      0.29750084095334794,
+      0.5,
+      0.44864497599451303,
+      0.40961890243902443,
+      0.3795553806133625,
+      0.35621031746031745,
+      0.3380302601809955,
+      0.32390573089700997,
+      0.31302322796934867,
+      0.30477272727272725,
+      0.29988274759056166,
+      0.29662531210986265,
+      0.29474244707438985,
+      0.2940277777777778,
+      0.2943142429623783,
+      0.29546515984015986,
+      0.29736761998099315,
+      0.29992753623188406
     ];
 
-    const result = dry_r($lerp(17, 1, 3), $lerp(17, 1, 3), $lerp(17, 0, 1));
-    expect(result).toStrictEqual(expected);
+    const result = dry_r(
+      math.matrix($lerp(17, 1, 3)),
+      math.matrix($lerp(17, 1, 3)),
+      math.matrix($lerp(17, 0, 1)),
+    );
+
+    expect(result.toArray()).toStrictEqual(expected);
   });
 });

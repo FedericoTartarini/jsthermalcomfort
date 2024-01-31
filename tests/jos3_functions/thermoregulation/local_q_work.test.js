@@ -9,6 +9,6 @@ describe("local_q_work", () => {
     ];
 
     const result = local_q_work(5, 6);
-    expect(result).toStrictEqual(expected);
+    expect(result.toArray()).toStrictEqual(expected);
   });
 });

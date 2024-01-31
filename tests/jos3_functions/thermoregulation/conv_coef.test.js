@@ -85,7 +85,7 @@ describe("conv_coef", () => {
     "returns correct values when posture is $posture, v is $v, tdb is $tdb, t_skin is $t_skin",
     ({ posture, v, tdb, t_skin, expected }) => {
       const result = conv_coef(posture, v, tdb, t_skin);
-      expect(result).toStrictEqual(expected);
+      expect(result.toArray()).toStrictEqual(expected);
     },
   );
 });

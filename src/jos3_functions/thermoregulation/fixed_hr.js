@@ -11,5 +11,6 @@ export function fixed_hr(hr) {
   let mean_hr =
     math.sum(math.dotMultiply(hr, JOS3Defaults.local_bsa)) /
     math.sum(JOS3Defaults.local_bsa);
+
   return math.dotDivide(math.dotMultiply(hr, 4.7), mean_hr);
 }

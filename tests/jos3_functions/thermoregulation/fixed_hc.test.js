@@ -2,19 +2,19 @@ import JOS3Defaults from "../../../src/jos3_functions/JOS3Defaults";
 import { conv_coef } from "../../../src/jos3_functions/thermoregulation/conv_coef";
 import { fixed_hc } from "../../../src/jos3_functions/thermoregulation/fixed_hc";
 import { describe, it, expect } from "@jest/globals";
-import { $array } from "../../../src/supa";
+import * as math from "mathjs";
 
 describe("fixed_hc", () => {
   it("should return the correct value given appropriate details", () => {
     const result = fixed_hc(
       conv_coef(
         JOS3Defaults.posture,
-        $array(17, JOS3Defaults.air_speed),
-        $array(17, JOS3Defaults.dry_bulb_air_temperature),
-        $array(17, JOS3Defaults.other_body_temperature),
+        math.dotMultiply(math.ones(17), JOS3Defaults.air_speed),
+        math.dotMultiply(math.ones(17), JOS3Defaults.dry_bulb_air_temperature),
+        math.dotMultiply(math.ones(17), JOS3Defaults.other_body_temperature),
       ),
-      $array(17, JOS3Defaults.air_speed),
-    );
+      math.dotMultiply(math.ones(17), JOS3Defaults.air_speed),
+    ).toArray();
 
     const expected = [
       4.479928052547337, 4.479928052547337, 2.969952302693212,

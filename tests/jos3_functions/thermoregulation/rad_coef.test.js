@@ -55,7 +55,7 @@ describe("rad_coef", () => {
     "returns correct value when posture is $posture",
     ({ posture, expected }) => {
       const result = rad_coef(posture);
-      expect(result).toStrictEqual(expected);
+      expect(result.toArray()).toStrictEqual(expected);
     },
   );
 });

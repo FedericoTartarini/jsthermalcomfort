@@ -40,6 +40,7 @@ import { local_q_work } from "../jos3_functions/thermoregulation/local_q_work.js
 import { cr_ms_fat_blood_flow } from "../jos3_functions/thermoregulation/cr_ms_fat_blood_flow.js";
 import { resp_heat_loss } from "../jos3_functions/thermoregulation/resp_heat_loss.js";
 import { sum_bf } from "../jos3_functions/thermoregulation/sum_bf.js";
+import Object from "lodash/object.js";
 
 /**
  * Create an array of shape (17,) with the given input.
@@ -522,7 +523,12 @@ export class JOS3 {
       q_thermogenesis_muscle,
       q_thermogenesis_fat,
       q_thermogenesis_skin,
-    } = sum_m(q_bmr_local, q_work, q_shiv, q_nst);
+    } = sum_m(
+      q_bmr_local.map((c) => c.clone()),
+      q_work,
+      q_shiv,
+      q_nst,
+    );
 
     let q_thermogenesis_total =
       math.sum(q_thermogenesis_core) +
@@ -845,7 +851,60 @@ export class JOS3 {
    * @returns {object}
    */
   dict_results() {
-    throw new Error("Not implemented");
+    if (!this._history || this._history.length === 0) {
+      console.log("The model has no data.");
+      return null;
+    }
+
+    const checkWordContain = (word, ...args) => {
+      return args.some((arg) => word.includes(arg));
+    };
+
+    let key2keys = {}; // Column keys
+    for (let [key, value] of Object.entries(this._history[0])) {
+      let keys;
+      if (value.length !== undefined) {
+        if (typeof value === "string") {
+          keys = [key]; // string is iter. Convert to list without suffix
+        } else if (checkWordContain(key, "sve", "sfv", "superficialvein")) {
+          keys = VINDEX["sfvein"].map((i) => `${key}_${BODY_NAMES[i]}`);
+        } else if (checkWordContain(key, "ms", "muscle")) {
+          keys = VINDEX["muscle"].map((i) => `${key}_${BODY_NAMES[i]}`);
+        } else if (checkWordContain(key, "fat")) {
+          keys = VINDEX["fat"].map((i) => `${key}_${BODY_NAMES[i]}`);
+        } else if (value.length === 17) {
+          keys = BODY_NAMES.map((bn) => `${key}_${bn}`);
+        } else {
+          keys = Array.from(
+            { length: value.length },
+            (_, i) => `${key}_${BODY_NAMES[i]}`,
+          );
+        }
+      } else {
+        keys = [key];
+      }
+
+      key2keys[key] = keys;
+    }
+
+    let data = this._history.map((dictout) => {
+      let row = {};
+      for (let [key, value] of Object.entries(dictout)) {
+        let keys = key2keys[key];
+        let values = keys.length === 1 ? [value] : value;
+        keys.forEach((k, i) => {
+          row[k] = values[i];
+        });
+      }
+      return row;
+    });
+
+    let outDict = {};
+    Object.keys(data[0]).forEach((key) => {
+      outDict[key] = data.map((row) => row[key]);
+    });
+
+    return outDict;
   }
 
   /**

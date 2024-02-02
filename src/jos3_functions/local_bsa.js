@@ -27,5 +27,5 @@ export function local_bsa(
   validate_body_parameters(height, weight);
 
   const bsa = bsa_rate(height, weight, bsa_equation);
-  return math.dotMultiply(JOS3Defaults.local_bsa, bsa);
+  return math.matrix(math.dotMultiply(JOS3Defaults.local_bsa, bsa));
 }

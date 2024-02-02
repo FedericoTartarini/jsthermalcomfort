@@ -2,6 +2,9 @@ import { JOS3 } from "../../src/models/JOS3.js";
 import { describe, it, expect } from "@jest/globals";
 import single_iteration from "./1_run_dict.json";
 import twenty_iterations from "./20_runs_dict.json";
+import getters from "./1_run_getters.json";
+import * as math from "mathjs";
+import { BODY_NAMES } from "../../src/jos3_functions/matrix.js";
 
 describe("JOS3", () => {
   describe("state after single iteration", () => {
@@ -36,6 +39,38 @@ describe("JOS3", () => {
           }
         });
       }
+    });
+
+    describe("getters return correct values", () => {
+      const jos = new JOS3();
+
+      it("body_names", () => {
+        expect(jos.body_names).toBe(BODY_NAMES);
+      });
+
+      it("results", () => {
+        expect(jos.results).toStrictEqual(jos.dict_results());
+      });
+
+      it.each(getters)("$property", ({ property, expected }) => {
+        let prop = jos[property];
+
+        if (math.isMatrix(prop)) {
+          prop = prop.toArray();
+        }
+
+        if (Array.isArray(expected)) {
+          for (let i = 0; i < expected.length; i++) {
+            expect(prop[i]).toBeCloseTo(expected[i], 10);
+          }
+        } else if (typeof expected === "string") {
+          expect(prop).toBe(expected);
+        } else if (typeof expected === "number"){
+          expect(prop).toBeCloseTo(expected, 10);
+        } else {
+          throw new Error(`whoops, not implemented for "${typeof expected}"`)
+        }
+      });
     });
   });
 

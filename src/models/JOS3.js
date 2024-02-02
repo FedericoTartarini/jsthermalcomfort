@@ -771,7 +771,7 @@ export class JOS3 {
       detail_out["name"] = this.model_name;
       detail_out["height"] = this._height;
       detail_out["weight"] = this._weight;
-      detail_out["bsa"] = this._bsa;
+      detail_out["bsa"] = this._bsa.toArray();
       detail_out["fat"] = this._fat;
       detail_out["sex"] = this._sex;
       detail_out["age"] = this._age;

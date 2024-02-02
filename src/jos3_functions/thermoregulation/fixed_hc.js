@@ -14,5 +14,5 @@ export function fixed_hc(hc, v) {
     math.sum(math.dotMultiply(v, JOS3Defaults.local_bsa)) / local_bsa_sum;
 
   let mean_hc_whole = Math.max(3, 8.600001 * mean_va ** 0.53);
-  return math.dotDivide(math.dotMultiply(hc, mean_hc_whole), mean_hc)
+  return math.dotDivide(math.dotMultiply(hc, mean_hc_whole), mean_hc);
 }

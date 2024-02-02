@@ -65,10 +65,10 @@ describe("JOS3", () => {
           }
         } else if (typeof expected === "string") {
           expect(prop).toBe(expected);
-        } else if (typeof expected === "number"){
+        } else if (typeof expected === "number") {
           expect(prop).toBeCloseTo(expected, 10);
         } else {
-          throw new Error(`whoops, not implemented for "${typeof expected}"`)
+          throw new Error(`whoops, not implemented for "${typeof expected}"`);
         }
       });
     });
@@ -96,7 +96,6 @@ describe("JOS3", () => {
           const res = results[key];
           expect(res).not.toBeUndefined();
 
-
           for (let i = 0; i < value.length; i++) {
             const ex = value[i];
             const ac = res[i];
@@ -112,5 +111,5 @@ describe("JOS3", () => {
         });
       }
     });
-  })
+  });
 });

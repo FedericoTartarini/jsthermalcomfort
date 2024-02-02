@@ -3,6 +3,7 @@ import { describe, it, expect } from "@jest/globals";
 import single_iteration from "./1_run_dict.json";
 import twenty_iterations from "./20_runs_dict.json";
 import getters from "./1_run_getters.json";
+import setters from "./1_run_setters.json";
 import * as math from "mathjs";
 import { BODY_NAMES } from "../../src/jos3_functions/matrix.js";
 
@@ -41,6 +42,24 @@ describe("JOS3", () => {
       }
     });
 
+    const checkProperty = (prop, expected) => {
+      if (math.isMatrix(prop)) {
+        prop = prop.toArray();
+      }
+
+      if (Array.isArray(expected)) {
+        for (let i = 0; i < expected.length; i++) {
+          expect(prop[i]).toBeCloseTo(expected[i], 10);
+        }
+      } else if (typeof expected === "string") {
+        expect(prop).toBe(expected);
+      } else if (typeof expected === "number") {
+        expect(prop).toBeCloseTo(expected, 10);
+      } else {
+        throw new Error(`whoops, not implemented for "${typeof expected}"`);
+      }
+    }
+
     describe("getters return correct values", () => {
       const jos = new JOS3();
 
@@ -53,22 +72,22 @@ describe("JOS3", () => {
       });
 
       it.each(getters)("$property", ({ property, expected }) => {
-        let prop = jos[property];
+        checkProperty(jos[property], expected);
+      });
+    });
 
-        if (math.isMatrix(prop)) {
-          prop = prop.toArray();
-        }
+    describe("setters operate appropriately", () => {
+      it.each(setters)("$property", ({ property, operations }) => {
+        for (const { next, expected } of operations) {
+          const jos = new JOS3();
+          let set = next;
 
-        if (Array.isArray(expected)) {
-          for (let i = 0; i < expected.length; i++) {
-            expect(prop[i]).toBeCloseTo(expected[i], 10);
+          if (Array.isArray(set)) {
+            set = math.matrix(set);
           }
-        } else if (typeof expected === "string") {
-          expect(prop).toBe(expected);
-        } else if (typeof expected === "number") {
-          expect(prop).toBeCloseTo(expected, 10);
-        } else {
-          throw new Error(`whoops, not implemented for "${typeof expected}"`);
+
+          jos[property] = set;
+          checkProperty(jos[property], expected);
         }
       });
     });

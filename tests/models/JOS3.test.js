@@ -58,7 +58,7 @@ describe("JOS3", () => {
       } else {
         throw new Error(`whoops, not implemented for "${typeof expected}"`);
       }
-    }
+    };
 
     describe("getters return correct values", () => {
       const jos = new JOS3();

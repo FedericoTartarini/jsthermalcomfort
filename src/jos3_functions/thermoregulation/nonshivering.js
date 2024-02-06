@@ -1,11 +1,12 @@
 import JOS3Defaults from "../JOS3Defaults.js";
 import { error_signals } from "./error_signals.js";
 import { bsa_rate } from "../bsa_rate.js";
+import * as math from "mathjs";
 
 /**
  * Calculate local metabolic rate by non-shivering [W]
  *
- * @param {number[]} err_sk - Difference between set-point and body temperatures [°C].
+ * @param {math.MathCollection} err_sk - Difference between set-point and body temperatures [°C].
  * @param {number} [height=1.72] - Body height [m].
  * @param {number} [weight=74.43] - Body weight [kg].
  * @param {string} [bsa_equation="dubois"] - The equation name (str) of bsa calculation. Choose a name from "dubois", "takahira", "fujimoto", or "kurazumi".
@@ -13,7 +14,7 @@ import { bsa_rate } from "../bsa_rate.js";
  * @param {boolean} [cold_acclimation=false] - Whether the subject acclimates cold environment or not.
  * @param {boolean} [batpositive=true] - Whether BAT activity is positive or not.
  *
- * @returns {number[]} q_nst - Local metabolic rate by non-shivering [W].
+ * @returns {math.MathCollection} q_nst - Local metabolic rate by non-shivering [W].
  */
 export function nonshivering(
   err_sk,
@@ -66,11 +67,11 @@ export function nonshivering(
   let sig_nst = 2.8 * clds; // [W]
   sig_nst = Math.min(sig_nst, thres);
 
-  let nstf = [
+  let nstf = math.matrix([
     0.0, 0.19, 0.0, 0.19, 0.19, 0.215, 0.0, 0.0, 0.215, 0.0, 0.0, 0.0, 0.0, 0.0,
     0.0, 0.0, 0.0,
-  ];
+  ]);
 
   let bsar = bsa_rate(height, weight, bsa_equation);
-  return nstf.map((nst) => sig_nst * bsar * nst);
+  return math.dotMultiply(math.dotMultiply(bsar, nstf), sig_nst);
 }

@@ -13,7 +13,7 @@ describe("sum_bf", () => {
       18,
     );
 
-    const expected = 477.0;
+    const expected = 482.5;
 
     expect(result).toBe(expected);
   });

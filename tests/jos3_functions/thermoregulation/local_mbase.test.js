@@ -246,7 +246,7 @@ describe("local_mbase", () => {
     "returns correct value when sex is $sex and bmr_equation is $bmr_equation",
     ({ sex, bmr_equation, expected }) => {
       const result = local_mbase(1.72, 74.43, 20, sex, bmr_equation);
-      expect(result).toStrictEqual(expected);
+      expect(result.map((r) => r.toArray())).toStrictEqual(expected);
     },
   );
 });

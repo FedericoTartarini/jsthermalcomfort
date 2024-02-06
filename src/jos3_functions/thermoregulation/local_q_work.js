@@ -1,3 +1,5 @@
+import * as math from "mathjs";
+
 /**
  * Calculate local thermogenesis by work [W].
  *
@@ -5,7 +7,7 @@
  * @param {number} par - Physical activity ratio [-]
  * @throws {Error} If par is less than 1
  *
- * @return {Array} q_work - Local thermogenesis by work [W]
+ * @return {math.MathCollection} q_work - Local thermogenesis by work [W]
  */
 export function local_q_work(bmr, par) {
   if (par < 1) {
@@ -14,10 +16,10 @@ export function local_q_work(bmr, par) {
 
   let q_work_all = (par - 1) * bmr;
 
-  let workf = [
+  let workf = math.matrix([
     0, 0, 0.091, 0.08, 0.129, 0.0262, 0.0139, 0.005, 0.0262, 0.0139, 0.005,
     0.201, 0.099, 0.005, 0.201, 0.099, 0.005,
-  ];
+  ]);
 
-  return workf.map((workf) => workf * q_work_all);
+  return math.dotMultiply(workf, q_work_all);
 }

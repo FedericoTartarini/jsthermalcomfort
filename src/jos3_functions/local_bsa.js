@@ -1,6 +1,7 @@
 import JOS3Defaults from "./JOS3Defaults.js";
 import { validate_body_parameters } from "./validate_body_parameters.js";
 import { bsa_rate } from "./bsa_rate.js";
+import * as math from "mathjs";
 
 /**
  * Calculate local body surface area (bsa) [m2].
@@ -15,7 +16,8 @@ import { bsa_rate } from "./bsa_rate.js";
  * @param {string} [bsa_equation=JOS3Defaults.bsa_equation] - The equation name
  * of bsa calculation. Choose a name from "dubois", "takahira", "fujimoto",
  * or "kurazumi".
- * @returns {number[]}  local_bsa of length 17 - Local body surface area (bsa) [m2]
+ *
+ * @returns {math.Matrix}  local_bsa of length 17 - Local body surface area (bsa) [m2]
  */
 export function local_bsa(
   height = JOS3Defaults.height,
@@ -25,5 +27,5 @@ export function local_bsa(
   validate_body_parameters(height, weight);
 
   const bsa = bsa_rate(height, weight, bsa_equation);
-  return JOS3Defaults.local_bsa.map((local_bsa) => local_bsa * bsa);
+  return math.matrix(math.dotMultiply(JOS3Defaults.local_bsa, bsa));
 }

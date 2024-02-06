@@ -8,6 +8,7 @@ import JOS3Defaults from "../JOS3Defaults.js";
  * @param {number} [age=20] - Age [years].
  * @param {string} [sex="male"] - Choose male or female.
  * @param {string} [bmr_equation="harris-benedict"] - Choose harris-benedict or ganpule.
+ *
  * @returns {number} Basal metabolic rate [W].
  */
 export function basal_met(

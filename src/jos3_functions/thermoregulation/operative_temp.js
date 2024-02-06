@@ -1,18 +1,19 @@
 import { $map } from "../../supa.js";
+import * as math from "mathjs";
 
 /**
  * Calculate operative temperature [°C]
  *
- * @param {number[]} tdb - Air temperature [°C]
- * @param {number[]} tr - Mean radiant temperature [°C]
- * @param {number[]} hc - Convective heat transfer coefficient [W/(m2*K)]
- * @param {number[]} hr - Radiative heat transfer coefficient [W/(m2*K)]
+ * @param {math.MathCollection} tdb - Air temperature [°C]
+ * @param {math.MathCollection} tr - Mean radiant temperature [°C]
+ * @param {math.MathCollection} hc - Convective heat transfer coefficient [W/(m2*K)]
+ * @param {math.MathCollection} hr - Radiative heat transfer coefficient [W/(m2*K)]
 
- * @returns {number[]} Operative temperature [°C]
+ * @returns {math.MathCollection} Operative temperature [°C]
  */
 export function operative_temp(tdb, tr, hc, hr) {
-  return $map(
-    [tdb, tr, hc, hr],
-    ([tdb, tr, hc, hr]) => (hc * tdb + hr * tr) / (hc + hr),
+  return math.dotDivide(
+    math.add(math.dotMultiply(hc, tdb), math.dotMultiply(hr, tr)),
+    math.add(hc, hr),
   );
 }

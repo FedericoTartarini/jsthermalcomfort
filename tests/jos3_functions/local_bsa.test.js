@@ -70,7 +70,7 @@ describe("local_bsa", () => {
   ])(
     "should return $expected when height is $height, weight is $weight, and bsa_equation is $bsa_equation",
     ({ height, weight, bsa_equation, expected }) => {
-      const result = local_bsa(height, weight, bsa_equation);
+      const result = local_bsa(height, weight, bsa_equation).toArray();
 
       expect(result).toHaveLength(expected.length);
 

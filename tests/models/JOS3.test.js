@@ -1,91 +1,134 @@
 import { JOS3 } from "../../src/models/JOS3.js";
 import { describe, it, expect } from "@jest/globals";
+import single_iteration from "./1_run_dict.json";
+import twenty_iterations from "./20_runs_dict.json";
+import getters from "./1_run_getters.json";
+import setters from "./1_run_setters.json";
+import * as math from "mathjs";
+import { BODY_NAMES } from "../../src/jos3_functions/matrix.js";
 
 describe("JOS3", () => {
-  it("should return the correct value given certain defaults", () => {
-    // TODO: Fix dot product calculation for _bodytemp - then uncomment this test (everything else works when this is stubbed)
-    // const model = new JOS3();
-    //
-    // const expected = {
-    //   cardiac_output: [309.3525279636547],
-    //   cycle_time: [0],
-    //   dt: [60000],
-    //   q_res: [8.222503033578032],
-    //   q_skin2env_back: [8.14893481599888],
-    //   q_skin2env_chest: [9.319394672853791],
-    //   q_skin2env_head: [8.220790562331835],
-    //   q_skin2env_left_arm: [3.3060484333347873],
-    //   q_skin2env_left_foot: [2.847055691927899],
-    //   q_skin2env_left_hand: [2.820093545556136],
-    //   q_skin2env_left_leg: [5.065172487729327],
-    //   q_skin2env_left_shoulder: [5.495164499822654],
-    //   q_skin2env_left_thigh: [10.530261655946674],
-    //   q_skin2env_neck: [2.205000373975029],
-    //   q_skin2env_pelvis: [13.708771815913414],
-    //   q_skin2env_right_arm: [3.306048433334798],
-    //   q_skin2env_right_foot: [2.8470556919279275],
-    //   q_skin2env_right_hand: [2.820093545556159],
-    //   q_skin2env_right_leg: [5.065172487729508],
-    //   q_skin2env_right_shoulder: [5.495164499822711],
-    //   q_skin2env_right_thigh: [10.530261655946806],
-    //   q_thermogenesis_total: [109.95300054410399],
-    //   simulation_time: [0],
-    //   t_core_back: [37.10669294345571],
-    //   t_core_chest: [37.046763146185384],
-    //   t_core_head: [37.27948664648618],
-    //   t_core_left_arm: [35.71685683735247],
-    //   t_core_left_foot: [34.602386529646225],
-    //   t_core_left_hand: [34.90385741306187],
-    //   t_core_left_leg: [36.32476524669076],
-    //   t_core_left_shoulder: [36.25197837683718],
-    //   t_core_left_thigh: [36.67563450105145],
-    //   t_core_neck: [36.81782751853464],
-    //   t_core_pelvis: [37.25856827899341],
-    //   t_core_right_arm: [35.7168568373525],
-    //   t_core_right_foot: [34.602386529646274],
-    //   t_core_right_hand: [34.903857413061935],
-    //   t_core_right_leg: [36.32476524669116],
-    //   t_core_right_shoulder: [36.25197837683733],
-    //   t_core_right_thigh: [36.675634501051476],
-    //   t_skin_back: [34.52453966623942],
-    //   t_skin_chest: [34.61642143810777],
-    //   t_skin_head: [34.98583652881713],
-    //   t_skin_left_arm: [33.857087457104285],
-    //   t_skin_left_foot: [34.11693174783236],
-    //   t_skin_left_hand: [34.308156507844046],
-    //   t_skin_left_leg: [33.95264011542674],
-    //   t_skin_left_shoulder: [34.25228779730484],
-    //   t_skin_left_thigh: [34.15023407024665],
-    //   t_skin_mean: [34.46418466255792],
-    //   t_skin_neck: [35.10668504573099],
-    //   t_skin_pelvis: [35.844809578238284],
-    //   t_skin_right_arm: [33.8570874571043],
-    //   t_skin_right_foot: [34.11693174783242],
-    //   t_skin_right_hand: [34.308156507844096],
-    //   t_skin_right_leg: [33.95264011542693],
-    //   t_skin_right_shoulder: [34.2522877973049],
-    //   t_skin_right_thigh: [34.15023407024672],
-    //   w_back: [0.06],
-    //   w_chest: [0.06],
-    //   w_head: [0.06],
-    //   w_left_arm: [0.06],
-    //   w_left_foot: [0.06],
-    //   w_left_hand: [0.06],
-    //   w_left_leg: [0.06],
-    //   w_left_shoulder: [0.06],
-    //   w_left_thigh: [0.06],
-    //   w_mean: [0.05999999999999999],
-    //   w_neck: [0.06],
-    //   w_pelvis: [0.06],
-    //   w_right_arm: [0.06],
-    //   w_right_foot: [0.06],
-    //   w_right_hand: [0.06],
-    //   w_right_leg: [0.06],
-    //   w_right_shoulder: [0.06],
-    //   w_right_thigh: [0.06],
-    //   weight_loss_by_evap_and_res: [0.011094527785290931],
-    // };
-    //
-    // expect(model.dict_results()).toBe(expected);
+  describe("state after single iteration", () => {
+    describe("results should have correct values", () => {
+      const jos = new JOS3(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        "all",
+      );
+
+      const results = jos.dict_results();
+      for (const [key, value] of Object.entries(single_iteration)) {
+        it(key, () => {
+          const res = results[key];
+          expect(res).not.toBeUndefined();
+
+          const ex = value[0];
+          const ac = res[0];
+
+          switch (typeof ex) {
+            case "string":
+              expect(ac).toBe(ex);
+              break;
+            default:
+              expect(ac).toBeCloseTo(ex, 10);
+          }
+        });
+      }
+    });
+
+    const checkProperty = (prop, expected) => {
+      if (math.isMatrix(prop)) {
+        prop = prop.toArray();
+      }
+
+      if (Array.isArray(expected)) {
+        for (let i = 0; i < expected.length; i++) {
+          expect(prop[i]).toBeCloseTo(expected[i], 10);
+        }
+      } else if (typeof expected === "string") {
+        expect(prop).toBe(expected);
+      } else if (typeof expected === "number") {
+        expect(prop).toBeCloseTo(expected, 10);
+      } else {
+        throw new Error(`whoops, not implemented for "${typeof expected}"`);
+      }
+    };
+
+    describe("getters return correct values", () => {
+      const jos = new JOS3();
+
+      it("body_names", () => {
+        expect(jos.body_names).toBe(BODY_NAMES);
+      });
+
+      it("results", () => {
+        expect(jos.results).toStrictEqual(jos.dict_results());
+      });
+
+      it.each(getters)("$property", ({ property, expected }) => {
+        checkProperty(jos[property], expected);
+      });
+    });
+
+    describe("setters operate appropriately", () => {
+      it.each(setters)("$property", ({ property, operations }) => {
+        for (const { next, expected } of operations) {
+          const jos = new JOS3();
+          let set = next;
+
+          if (Array.isArray(set)) {
+            set = math.matrix(set);
+          }
+
+          jos[property] = set;
+          checkProperty(jos[property], expected);
+        }
+      });
+    });
+  });
+
+  describe("state after 20 iterations", () => {
+    describe("results should have correct values", () => {
+      const jos = new JOS3(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        "all",
+      );
+
+      jos.simulate(20);
+
+      const results = jos.dict_results();
+      for (const [key, value] of Object.entries(twenty_iterations)) {
+        it(key, () => {
+          const res = results[key];
+          expect(res).not.toBeUndefined();
+
+          for (let i = 0; i < value.length; i++) {
+            const ex = value[i];
+            const ac = res[i];
+
+            switch (typeof ex) {
+              case "string":
+                expect(ac).toBe(ex);
+                break;
+              default:
+                expect(ac).toBeCloseTo(ex, 10);
+            }
+          }
+        });
+      }
+    });
   });
 });

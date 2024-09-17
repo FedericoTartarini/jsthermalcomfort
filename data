@@ -1,0 +1,54 @@
+{
+  "information": {
+    "summary": "This file contains a series of validation tables for a_pmv() in pythermalcomfort, jsthermalcomfort, calcaPMV() in R",
+    "version": "1.0.0",
+    "license": "MIT"
+  },
+  "tolerance": {
+    "pmv": 0.01
+  },
+  "data": [
+    {
+      "inputs": {
+        "tdb": 24,
+        "tr": 30,
+        "vr": 0.22,
+        "rh": 50,
+        "met": 1.4,
+        "clo": 0.5,
+        "a_coefficient": 0.293
+      },
+      "outputs": {
+        "a_pmv": 0.48
+      }
+    },
+    {
+      "inputs": {
+        "tdb": 30,
+        "tr": 30,
+        "vr": 0.22,
+        "rh": 50,
+        "met": 1.4,
+        "clo": 0.5,
+        "a_coefficient": 0.293
+      },
+      "outputs": {
+        "a_pmv": 1.09
+      }
+    },
+    {
+      "inputs": {
+        "tdb": [24, 30],
+        "tr": 30,
+        "vr": 0.22,
+        "rh": 50,
+        "met": 1.4,
+        "clo": 0.5,
+        "a_coefficient": 0.293
+      },
+      "outputs": {
+        "a_pmv": [0.48, 1.09]
+      }
+    }
+  ]
+}

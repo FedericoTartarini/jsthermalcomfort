@@ -1,32 +1,27 @@
-import { expect, describe, it } from "@jest/globals";
-import { at } from "../../src/models/at";
+import { expect, describe, it, beforeAll } from "@jest/globals";
+import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
+import { at } from "../../src/models/at.js";
+import { testDataUrls } from './comftest';
+
+let testData;
+let tolerance;
+
+beforeAll(async () => {
+  const result = await loadTestData(testDataUrls.at, 'at');
+  testData = result.testData;
+  tolerance = result.tolerance;
+});
 
 describe("at", () => {
-  it.each([
-    {
-      tdb: 25,
-      rh: 30,
-      v: 0.1,
-      expected: 24.1,
-    },
-    {
-      tdb: 23,
-      rh: 70,
-      v: 1,
-      expected: 24.8,
-    },
-    {
-      tdb: 23,
-      rh: 70,
-      v: 1,
-      q: 50,
-      expected: 28.1,
-    },
-  ])(
-    "returns $expected when tdb is $tdb, rh is $rh, v is $v and q is $q",
-    ({ tdb, rh, v, q, expected }) => {
+  it("should run tests after data is loaded and skip data with arrays", () => {
+    testData.data.forEach(({ inputs, outputs }) => {
+      if (shouldSkipTest(inputs) || outputs === undefined) {
+        return; // Skip test
+      }
+
+      const { tdb, rh, v, q } = inputs;
       const result = at(tdb, rh, v, q);
-      expect(result).toBeCloseTo(expected);
-    },
-  );
+      expect(result).toBeCloseTo(outputs.at, tolerance);
+    });
+  });
 });

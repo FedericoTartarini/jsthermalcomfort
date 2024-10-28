@@ -1,39 +1,32 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it, beforeAll } from "@jest/globals";
+import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
 import { net } from "../../src/models/net";
+import { testDataUrls } from './comftest';
+
+let testData;
+let tolerance;
+
+beforeAll(async () => {
+  const result = await loadTestData(testDataUrls.net, 'net'); // Use the correct tolerance key
+  testData = result.testData;
+  tolerance = result.tolerance;
+});
 
 describe("net", () => {
-  it.each([
-    {
-      tdb: 21,
-      rh: 56,
-      v: 4,
-      expected: 13.7,
-    },
-    {
-      tdb: -273,
-      rh: 56,
-      v: 4,
-      expected: -327.4,
-    },
-    {
-      tdb: 100,
-      rh: 56,
-      v: 4,
-      expected: 105.4,
-    },
-    {
-      tdb: 21,
-      rh: 56,
-      v: 4,
-      round: false,
-      expected: 13.713298025191364,
-    },
-  ])(
-    "returns $expected when tdb is $tdb, rh is $rh, and v is $v",
-    ({ tdb, rh, v, round, expected }) => {
-      const options = round !== undefined ? { round } : undefined;
+  it("should run tests after data is loaded and skip data with arrays", () => {
+    testData.data.forEach(({ inputs, outputs }) => {
+      // Skip data that contains arrays
+      if (shouldSkipTest(inputs) || outputs === undefined) {
+        return;
+      }
+
+      const { tdb, rh, v, round } = inputs;
+      const options = round !== undefined ? { round } : undefined; // Pass round parameter if provided
+
       const result = net(tdb, rh, v, options);
-      expect(result).toBe(expected);
-    },
-  );
+
+      // Compare results
+      expect(result).toBeCloseTo(outputs.net, tolerance);
+    });
+  });
 });

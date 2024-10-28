@@ -1,71 +1,33 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it, beforeAll } from "@jest/globals";
+import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
 import { humidex } from "../../src/models/humidex";
+import { testDataUrls } from './comftest';
+
+let testData;
+let tolerance;
+
+beforeAll(async () => {
+  const result = await loadTestData(testDataUrls.humidex, 'humidex'); // Use the correct tolerance key
+  testData = result.testData;
+  tolerance = result.tolerance;
+});
 
 describe("humidex", () => {
-  it.each([
-    {
-      tdb: 22,
-      rh: 56,
-      expected: {
-        humidex: 24.7,
-        discomfort: "Little or no discomfort",
-      },
-    },
-    {
-      tdb: 28,
-      rh: 56,
-      expected: {
-        humidex: 34.2,
-        discomfort: "Noticeable discomfort",
-      },
-    },
-    {
-      tdb: 30,
-      rh: 56,
-      expected: {
-        humidex: 37.6,
-        discomfort: "Evident discomfort",
-      },
-    },
-    {
-      tdb: 32,
-      rh: 56,
-      expected: {
-        humidex: 41.2,
-        discomfort: "Intense discomfort; avoid exertion",
-      },
-    },
-    {
-      tdb: 38,
-      rh: 56,
-      expected: {
-        humidex: 53.0,
-        discomfort: "Dangerous discomfort",
-      },
-    },
-    {
-      tdb: 40,
-      rh: 56,
-      expected: {
-        humidex: 57.3,
-        discomfort: "Heat stroke probable",
-      },
-    },
-    {
-      tdb: 40,
-      rh: 56,
-      round: false,
-      expected: {
-        humidex: 57.32156454581363,
-        discomfort: "Heat stroke probable",
-      },
-    },
-  ])(
-    "returns $expected when tdb is $tdb and rh is $rh",
-    ({ tdb, rh, round, expected }) => {
-      const options = round !== undefined ? { round } : undefined;
+  it("should run tests after data is loaded and skip data with arrays", () => {
+    testData.data.forEach(({ inputs, outputs }) => {
+      // Skip data that contains arrays
+      if (shouldSkipTest(inputs) || outputs === undefined) {
+        return;
+      }
+
+      const { tdb, rh, round } = inputs;
+      const options = round !== undefined ? { round } : undefined; // Add to options if round is provided
+
       const result = humidex(tdb, rh, options);
-      expect(result).toStrictEqual(expected);
-    },
-  );
+
+      // Compare results
+      expect(result.humidex).toBeCloseTo(outputs.humidex, tolerance);
+      expect(result.discomfort).toBe(outputs.discomfort);
+    });
+  });
 });

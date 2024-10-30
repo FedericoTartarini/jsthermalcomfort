@@ -44,6 +44,7 @@
   },
   "homepage": "https://federicotartarini.github.io/jsthermalcomfort/",
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "documentation": "^14.0.2",
     "github-slugger": "^2.0.0",
     "highlight.js": "^11.8.0",
@@ -51,10 +52,10 @@
     "jsdoc": "^4.0.2",
     "lodash": "^4.17.21",
     "prettier": "3.0.2",
-    "typescript": "^5.1.6",
-    "@jest/globals": "^29.7.0"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
-    "mathjs": "^11.11.2"
+    "mathjs": "^11.11.2",
+    "node-fetch": "^3.3.2"
   }
 }

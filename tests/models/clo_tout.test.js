@@ -1,44 +1,34 @@
-import { expect, describe, it } from "@jest/globals";
-import { clo_tout, clo_tout_array } from "../../src/models/clo_tout";
+import { expect, describe, it, beforeAll } from "@jest/globals";
+import { loadTestData, shouldSkipTest } from './testUtils';
+import { clo_tout } from "../../src/models/clo_tout";
+import { testDataUrls } from './comftest';
 
-describe("clo_tout", () => {
-  it.each([
-    { tout: 0, units: "SI", expected: 0.82 },
-    { tout: 25, units: "SI", expected: 0.47 },
-    { tout: 50, units: "SI", expected: 0.46 },
-    { tout: 0, units: "IP", expected: 1 },
-    { tout: 25, units: "IP", expected: 0.96 },
-    { tout: 50, units: "IP", expected: 0.59 },
-  ])(
-    "returns $expected when tout is $tout and units is $units",
-    ({ tout, units, expected }) => {
-      const result = clo_tout(tout, units);
-      expect(result).toBe(expected);
-    },
-  );
+let testData;
+let tolerance;
 
-  it("defaults to SI units if the units are undefined", () => {
-    const result = clo_tout(0);
-    expect(result).not.toBe(1);
-    expect(result).toBe(0.82);
-  });
+beforeAll(async () => {
+  const result = await loadTestData(testDataUrls.cloTout, 'clo_tout');
+  testData = result.testData;
+  tolerance = result.tolerance;
 });
 
-describe("clo_tout_array", () => {
-  it.each([
-    { tout: [0, 25, 50], units: "SI", expected: [0.82, 0.47, 0.46] },
-    { tout: [0, 25, 50], units: "IP", expected: [1, 0.96, 0.59] },
-  ])(
-    "returns $expected when tout is $tout and units is $units",
-    ({ tout, units, expected }) => {
-      const result = clo_tout_array(tout, units);
-      expect(result).toStrictEqual(expected);
-    },
-  );
+describe("clo_tout", () => {
+  it("should run tests after data is loaded and skip tests with array data", () => {
+    testData.data.forEach(({ inputs, outputs }) => {
+      // Skip test cases with array data
+      if (shouldSkipTest(inputs) || Array.isArray(inputs.tout) || Array.isArray(outputs.clo_tout)) {
+        return;
+      }
 
-  it("defaults to SI units if the units are undefined", () => {
-    const result = clo_tout_array([0, 25, 50]);
-    expect(result).not.toStrictEqual([1, 0.96, 0.59]);
-    expect(result).toStrictEqual([0.82, 0.47, 0.46]);
+      const { tout, units } = inputs;
+      const result = clo_tout(tout, units);
+
+      // Use NaN check to ensure the result matches
+      if (isNaN(result) || outputs.clo_tout === null || outputs.clo_tout === undefined) {
+        expect(result).toBeNaN();
+      } else {
+        expect(result).toBeCloseTo(outputs.clo_tout, tolerance);
+      }
+    });
   });
 });

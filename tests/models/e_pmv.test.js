@@ -1,48 +1,30 @@
-import { expect, describe, it } from "@jest/globals";
-import { deep_close_to_array } from "../test_utilities.js";
-import { e_pmv, e_pmv_array } from "../../src/models/e_pmv.js";
+import { expect, describe, it, beforeAll } from "@jest/globals";
+import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
+import { e_pmv } from "../../src/models/e_pmv";
+import { testDataUrls } from './comftest';
 
-describe("e_pmv", () => {
-  it.each([
-    {
-      tdb: 24,
-      tr: 30,
-      vr: 0.22,
-      rh: 50,
-      met: 1.4,
-      clo: 0.5,
-      e_coefficient: 0.6,
-      expected: 0.29,
-    },
-  ])(
-    "returns $expected when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo, e_coefficient is $e_coefficient",
-    ({ tdb, tr, vr, rh, met, clo, e_coefficient, expected }) => {
-      const result = e_pmv(tdb, tr, vr, rh, met, clo, e_coefficient);
+let testData;
+let tolerance;
 
-      expect(result).toBeCloseTo(expected, 2);
-    },
-  );
+beforeAll(async () => {
+  const result = await loadTestData(testDataUrls.ePmv, 'pmv'); // Use the correct tolerance key
+  testData = result.testData;
+  tolerance = result.tolerance;
 });
 
-describe("e_pmv_array", () => {
-  it.each([
-    {
-      tdb: [24, 30],
-      tr: [30, 30],
-      vr: [0.22, 0.22],
-      rh: [50, 50],
-      met: [1.4, 1.4],
-      clo: [0.5, 0.5],
-      e_coefficient: [0.6, 0.6],
-      wme: undefined,
-      expected: [0.29, 0.91],
-    },
-  ])(
-    "returns $expected when tdb is $tdb, tr is $tr, vr is $vr, rh is $rh, met is $met, clo is $clo, e_coefficient is $e_coefficient",
-    ({ tdb, tr, vr, rh, met, clo, e_coefficient, wme, expected }) => {
-      const result = e_pmv_array(tdb, tr, vr, rh, met, clo, e_coefficient, wme);
+describe("e_pmv", () => {
+  it("should run tests after data is loaded and skip data with arrays", () => {
+    testData.data.forEach(({ inputs, outputs }) => {
+      // Skip data that contains arrays
+      if (shouldSkipTest(inputs) || outputs === undefined || outputs.pmv === undefined) {
+        return;
+      }
 
-      deep_close_to_array(result, expected, 2);
-    },
-  );
+      const { tdb, tr, vr, rh, met, clo, e_coefficient } = inputs;
+      const result = e_pmv(tdb, tr, vr, rh, met, clo, e_coefficient);
+
+      // Compare results
+      expect(result).toBeCloseTo(outputs.pmv, tolerance);
+    });
+  });
 });

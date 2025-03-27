@@ -19,12 +19,11 @@ describe(output_variable, () => {
     const expectedOutput = outputs.a_pmv;
     const { tdb, tr, vr, rh, met, clo, a_coefficient, wme } = inputs;
 
-    // Determine if any input is an array
+    // choose the appropriate function based on whether any inputs contain arrays
     const hasArrayInput = Object.values(inputs).some((value) =>
       Array.isArray(value),
     );
 
-    // Choose the appropriate function based on whether any inputs are arrays
     const modelResult = hasArrayInput
       ? a_pmv_array(tdb, tr, vr, rh, met, clo, a_coefficient, wme)
       : a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);

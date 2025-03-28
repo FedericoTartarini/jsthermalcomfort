@@ -73,7 +73,7 @@ export function validateResult(
         });
       } else if (typeof expectedValue === "number") {
         // Handle numeric values
-        if (isNaN(expectedValue) || isNaN(actualValue)) {
+        if (isNaN(expectedValue)) {
           expect(actualValue).toBeNaN();
         } else {
           expect(actualValue).toBeCloseTo(expectedValue, tol);

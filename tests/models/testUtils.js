@@ -1,16 +1,16 @@
 import fetch from "node-fetch"; // Import node-fetch to support data fetching
 
 // Load test data and extract tolerance
-export async function loadTestData(url, toleranceKey, returnArray = false) {
+export async function loadTestData(url, returnArray = false) {
   let testData;
-  let tolerance;
+  let tolerances;
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     testData = await response.json();
-    tolerance = testData.tolerance[toleranceKey];
+    tolerances = testData.tolerance;
   } catch (error) {
     console.error("Unable to fetch or parse test data:", error);
     throw error;
@@ -24,7 +24,7 @@ export async function loadTestData(url, toleranceKey, returnArray = false) {
       );
     });
   }
-  return { testData, tolerance };
+  return { testData, tolerances };
 }
 
 // Check if the test should be skipped (if it contains array data)
@@ -34,41 +34,60 @@ export function shouldSkipTest(inputs) {
 }
 
 /**
- * Validates the result against the expected value within a given tolerance.
- * Logs the input details if an assertion fails.
+ * Validates the model's output against the expected outputs using specified tolerances.
  *
- * @param {*} modelResult - The result from the model function.
- * @param {*} expectedOutput - The expected result.
- * @param {number} tolerance - The tolerance for floating-point comparisons.
- * @param {Object} details - Additional context to log if the test fails.
+ * @param {*} modelResult - The output from the model function, which can be either a primitive value or an object.
+ * @param {Object} expectedOutputs - An object containing the expected outputs, with keys matching those in modelResult.
+ * @param {Object} tolerances - An object specifying tolerance values for numeric comparisons for each key.
+ * @param {Object} inputs - The input parameters used to generate modelResult, logged in case of test failure.
  */
 
-export function validateResult(modelResult, expectedOutput, tolerance, inputs) {
+export function validateResult(
+  modelResult,
+  expectedOutputs,
+  tolerances,
+  inputs,
+) {
   try {
-    // testing for arrays
-    if (Array.isArray(expectedOutput)) {
-      // array output
-      expect(Array.isArray(modelResult)).toBe(true);
-      modelResult.forEach((element, index) => {
-        if (isNaN(element) || expectedOutput[index] === null) {
-          expect(element).toBeNaN();
+    Object.keys(expectedOutputs).forEach((key) => {
+      const expectedValue = expectedOutputs[key];
+      const actualValue = modelResult[key];
+
+      // expected output might contain variables whose tolerance is not defined
+      const tol = (tolerances && tolerances[key]) || 0;
+
+      // Handle arrays
+      if (Array.isArray(expectedValue)) {
+        expect(Array.isArray(actualValue)).toBe(true);
+        expectedValue.forEach((exp, index) => {
+          const act = actualValue[index];
+          if (typeof exp === "number") {
+            if (isNaN(exp) || isNaN(act)) {
+              expect(act).toBeNaN();
+            } else {
+              expect(act).toBeCloseTo(exp, tol);
+            }
+          } else {
+            expect(act).toEqual(exp);
+          }
+        });
+      } else if (typeof expectedValue === "number") {
+        // Handle numeric values
+        if (isNaN(expectedValue) || isNaN(actualValue)) {
+          expect(actualValue).toBeNaN();
         } else {
-          expect(element).toBeCloseTo(expectedOutput[index], tolerance);
+          expect(actualValue).toBeCloseTo(expectedValue, tol);
         }
-      });
-    } else {
-      // single value output
-      expect(Array.isArray(modelResult)).toBe(false);
-      if (isNaN(modelResult) || expectedOutput === null) {
-        expect(modelResult).toBeNaN();
       } else {
-        expect(modelResult).toBeCloseTo(expectedOutput, tolerance);
+        // For booleans or other types
+        expect(actualValue).toEqual(expectedValue);
       }
-    }
+    });
   } catch (error) {
     console.log("Test failed with the following context:");
     console.log("Inputs:", inputs);
-    console.log("Outputs:", expectedOutput);
+    console.log("Expected outputs:", expectedOutputs);
+    console.log("Model outputs:", modelResult);
     throw error;
   }
 }

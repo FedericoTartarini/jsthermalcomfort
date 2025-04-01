@@ -4,8 +4,8 @@ import { pmv_calculation } from "./pmv_ppd.js";
 /**
  * @typedef {Object} AthbResult
  * @property {number} athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+ * @public
  */
-
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
  * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework

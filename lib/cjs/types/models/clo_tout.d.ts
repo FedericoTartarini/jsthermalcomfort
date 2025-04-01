@@ -2,6 +2,7 @@ import { CloToutResult } from "../../../../src/models/clo_tout";
 /**
  * @typedef {object} CloToutResult
  * @property {number} clo - Representative clothing insulation Icl, [clo]
+ * @public
  */
 /**
  * Representative clothing insulation Icl as a function of outdoor air

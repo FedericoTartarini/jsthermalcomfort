@@ -3,6 +3,7 @@ import { round, units_converter } from "../utilities/utilities.js";
 /**
  * @typedef {object} CloToutResult
  * @property {number} clo - Representative clothing insulation Icl, [clo]
+ * @public
  */
 
 /**

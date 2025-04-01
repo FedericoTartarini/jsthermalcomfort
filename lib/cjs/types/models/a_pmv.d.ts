@@ -1,4 +1,10 @@
 /**
+ * @typedef {object} APmvResult
+ * @property {number} a_pmv - Predicted Mean Vote
+ * @public
+ */
+
+/**
  * @typedef {Object} A_pmvKwargs
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
@@ -62,11 +68,6 @@
  * console.log(result) //output {a_pmv: 0.48}
  */
 export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, a_coefficient: number, wme?: number, kwargs?: A_pmvKwargs): APmvResult;
-/**
- * @typedef {object} APmvResult
- * @property {number} a_pmv - Predicted Mean Vote
- * @public
- */
 /**
  * Returns Adaptive Predicted Mean Vote (aPMV) {@link #ref_25|[25]}.
  * This index was developed by Yao, R. et al. (2009). The model takes into account factors

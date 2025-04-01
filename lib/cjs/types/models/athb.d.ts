@@ -1,5 +1,8 @@
 import { AthbResult } from "../../../../src/models/athb";
-
+/**
+ * @typedef {Object} AthbResult
+ * @property {number} athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+ */
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
  * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework
@@ -47,10 +50,6 @@ import { AthbResult } from "../../../../src/models/athb";
  * console.log(athb_result); // Output: {athb_pmv: 0.2}
  */
 export function athb(tdb: number, tr: number, vr: number, rh: number, met: number, t_running_mean: number): AthbResult;
-/**
- * @typedef {Object} AthbResult
- * @property {number} athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
- */
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
  * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework

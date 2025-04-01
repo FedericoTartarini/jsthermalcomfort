@@ -1,13 +1,13 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
+import { loadTestData, shouldSkipTest } from "./testUtils"; // Import shared utilities
 import { at } from "../../src/models/at.js";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
 
 let testData;
 let tolerance;
 
 beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.at, 'at');
+  const result = await loadTestData(testDataUrls.at, "at");
   testData = result.testData;
   tolerance = result.tolerance;
 });

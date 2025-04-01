@@ -1,7 +1,7 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 import { find_span, solar_gain } from "../../src/models/solar_gain";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
 
 // Use the URL from comftest.js to fetch data for solar_gain tests
 const testDataUrl = testDataUrls.solarGain;
@@ -13,7 +13,7 @@ let tolerance;
 beforeAll(async () => {
   const response = await fetch(testDataUrl);
   if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-  
+
   const fetchedData = await response.json();
   testData = fetchedData.data || []; // Directly get the data field
   tolerance = fetchedData.tolerance || {}; // Extract tolerance values
@@ -65,11 +65,14 @@ describe("solar_gain", () => {
         f_svv,
         f_bes,
         asw,
-        posture
+        posture,
       );
 
       expect(result.erf).toBeCloseTo(outputs.erf, tolerance.erf);
-      expect(result.delta_mrt).toBeCloseTo(outputs.delta_mrt, tolerance.delta_mrt);
+      expect(result.delta_mrt).toBeCloseTo(
+        outputs.delta_mrt,
+        tolerance.delta_mrt,
+      );
     });
   });
 });

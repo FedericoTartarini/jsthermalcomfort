@@ -10,7 +10,7 @@ let tolerance;
 
 // Fetch data before running tests
 beforeAll(async () => {
-  ({ testData, tolerance } = await loadTestData(testDataUrls.utci, 'utci'));
+  ({ testData, tolerance } = await loadTestData(testDataUrls.utci, "utci"));
 });
 
 describe("utci", () => {
@@ -30,7 +30,11 @@ describe("utci", () => {
       const expected = outputs.utci;
 
       // Skip comparison if expected is null, an object, or return_stress_category is set
-      if (expected === null || typeof expected === "object" || return_stress_category) {
+      if (
+        expected === null ||
+        typeof expected === "object" ||
+        return_stress_category
+      ) {
         return;
       }
 
@@ -62,7 +66,12 @@ describe("utci_array", () => {
       const expected = outputs.utci_array;
 
       // Skip if valid array inputs are not provided
-      if (!Array.isArray(tdb) || !Array.isArray(tr) || !Array.isArray(v) || !Array.isArray(rh)) {
+      if (
+        !Array.isArray(tdb) ||
+        !Array.isArray(tr) ||
+        !Array.isArray(v) ||
+        !Array.isArray(rh)
+      ) {
         return;
       }
 
@@ -73,7 +82,9 @@ describe("utci_array", () => {
       deep_close_to_array(result.utci, expected.utci, tolerance);
 
       // Ensure stress_category lengths are the same
-      expect(result.stress_category.length).toBe(expected.stress_category.length);
+      expect(result.stress_category.length).toBe(
+        expected.stress_category.length,
+      );
       for (let i = 0; i < result.stress_category.length; i++) {
         expect(result.stress_category[i]).toBe(expected.stress_category[i]);
       }

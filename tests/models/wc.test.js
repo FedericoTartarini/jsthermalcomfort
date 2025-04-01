@@ -1,7 +1,7 @@
 import { describe, it, beforeAll } from "@jest/globals";
 import { wc } from "../../src/models/wc.js";
 import { deep_close_to_obj } from "../test_utilities.js";
-import { testDataUrls } from './comftest'; // Import all test URLs from comftest.js
+import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, shouldSkipTest } from "./testUtils"; // Import utility functions
 
 // Variables to store data fetched from remote source
@@ -10,7 +10,7 @@ let tolerance;
 
 // Fetch data before running tests
 beforeAll(async () => {
-  ({ testData, tolerance } = await loadTestData(testDataUrls.wc, 'wc'));
+  ({ testData, tolerance } = await loadTestData(testDataUrls.wc, "wc"));
 });
 
 describe("test_wc", () => {

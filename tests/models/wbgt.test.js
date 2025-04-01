@@ -1,6 +1,6 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
 import { wbgt } from "../../src/models/wbgt";
-import { testDataUrls } from './comftest'; // Import all test URLs from comftest.js
+import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData } from "./testUtils"; // Import utility functions
 
 // Variables to store data fetched from remote source
@@ -9,7 +9,7 @@ let tolerance;
 
 // Fetch data before running tests
 beforeAll(async () => {
-  ({ testData, tolerance } = await loadTestData(testDataUrls.wbgt, 'wbgt'));
+  ({ testData, tolerance } = await loadTestData(testDataUrls.wbgt, "wbgt"));
 });
 
 describe("wbgt", () => {
@@ -29,11 +29,12 @@ describe("wbgt", () => {
         if (outputs.wbgt !== undefined) {
           expect(result).toBeCloseTo(outputs.wbgt, tolerance);
         }
-
       } catch (error) {
         // Capture and handle specific error messages
         if (with_solar_load && tdb === undefined) {
-          expect(error.message).toBe("Please enter the dry bulb air temperature");
+          expect(error.message).toBe(
+            "Please enter the dry bulb air temperature",
+          );
         } else {
           throw error; // Re-throw if it’s another error
         }

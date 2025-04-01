@@ -62,7 +62,7 @@ export function validateResult(
         expectedValue.forEach((exp, index) => {
           const act = actualValue[index];
           if (typeof exp === "number") {
-            if (isNaN(exp) || isNaN(act)) {
+            if (isNaN(exp)) {
               expect(act).toBeNaN();
             } else {
               expect(act).toBeCloseTo(exp, tol);

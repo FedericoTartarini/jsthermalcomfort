@@ -1,4 +1,9 @@
-import { units_converter, round } from "../utilities/utilities.js";
+import { round, units_converter } from "../utilities/utilities.js";
+
+/**
+ * @typedef {object} CloToutResult
+ * @property {number} clo - Representative clothing insulation Icl, [clo]
+ */
 
 /**
  * Representative clothing insulation Icl as a function of outdoor air
@@ -19,7 +24,7 @@ import { units_converter, round } from "../utilities/utilities.js";
  * @param {("IP" | "SI")} units - select the SI (International System of Units)
  * or the IP (Imperial Units) system.
  *
- * @returns {number} Representative clothing insulation Icl, [clo]
+ * @returns {CloToutResult} set containing results for the model
  */
 export function clo_tout(tout, units = "SI") {
   const t = units === "IP" ? units_converter({ tmp: tout }).tmp : tout;
@@ -27,8 +32,9 @@ export function clo_tout(tout, units = "SI") {
   let clo = t < 26 ? 10 ** (-0.1635 - 0.0066 * t) : 0.46;
   clo = t < 5 ? 0.818 - 0.0364 * t : clo;
   clo = t < -5 ? 1 : clo;
+  clo = round(clo, 2);
 
-  return round(clo, 2);
+  return { clo_tout: clo };
 }
 
 /**

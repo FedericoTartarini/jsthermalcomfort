@@ -46,7 +46,7 @@
  * @param {number} [wme=0] - External work
  * @param {A_pmvKwargs} kwargs - additional arguments
  *
- * @returns {number} pmv - Predicted Mean Vote
+ * @returns {APmvResult} set containing results for the model
  *
  * @example
  * const tdb = 24,
@@ -59,9 +59,14 @@
  * const wme = undefined,
  *
  * const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
- * console.log(result) //output 0.48
+ * console.log(result) //output {a_pmv: 0.48}
  */
-export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, a_coefficient: number, wme?: number, kwargs?: A_pmvKwargs): number;
+export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, a_coefficient: number, wme?: number, kwargs?: A_pmvKwargs): APmvResult;
+/**
+ * @typedef {object} APmvResult
+ * @property {number} a_pmv - Predicted Mean Vote
+ * @public
+ */
 /**
  * Returns Adaptive Predicted Mean Vote (aPMV) {@link #ref_25|[25]}.
  * This index was developed by Yao, R. et al. (2009). The model takes into account factors

@@ -2,6 +2,12 @@ import { round } from "../utilities/utilities.js";
 import { pmv, pmv_array } from "./pmv.js";
 
 /**
+ * @typedef {object} APmvResult
+ * @property {number} a_pmv - Predicted Mean Vote
+ * @public
+ */
+
+/**
  * @typedef {Object} A_pmvKwargs
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
@@ -50,7 +56,7 @@ import { pmv, pmv_array } from "./pmv.js";
  * @param {number} [wme=0] - External work
  * @param {A_pmvKwargs} kwargs - additional arguments
  *
- * @returns {number} pmv - Predicted Mean Vote
+ * @returns {APmvResult} set containing results for the model
  *
  * @example
  * const tdb = 24,

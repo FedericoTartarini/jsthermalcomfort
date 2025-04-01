@@ -13,8 +13,8 @@ let { testData, tolerance } = await loadTestData(
 describe("adaptive_ashrae", () => {
   test.each(testData.data)("Test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, tr, t_running_mean, v } = inputs;
-    const modelResult = adaptive_ashrae(tdb, tr, t_running_mean, v);
+    const { tdb, tr, t_running_mean, v, units } = inputs;
+    const modelResult = adaptive_ashrae(tdb, tr, t_running_mean, v, units);
 
     validateResult(modelResult, expectedOutput, tolerance, inputs);
   });

@@ -1,13 +1,16 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
+import { loadTestData, shouldSkipTest } from "./testUtils"; // Import shared utilities
 import { discomfort_index } from "../../src/models/discomfort_index";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
 
 let testData;
 let tolerance;
 
 beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.discomfortIndex, 'discomfort_index'); // Use the correct tolerance key
+  const result = await loadTestData(
+    testDataUrls.discomfortIndex,
+    "discomfort_index",
+  ); // Use the correct tolerance key
   testData = result.testData;
   tolerance = result.tolerance;
 });

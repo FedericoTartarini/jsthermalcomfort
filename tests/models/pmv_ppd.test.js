@@ -1,8 +1,8 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 import { pmv_ppd, pmv_calculation } from "../../src/models/pmv_ppd.js";
-import { testDataUrls } from './comftest';
-import jest from 'jest-mock';
+import { testDataUrls } from "./comftest";
+import jest from "jest-mock";
 
 const testDataUrl = testDataUrls.pmvPpd;
 
@@ -21,16 +21,17 @@ beforeAll(async () => {
   }
 
   // Disable console warnings
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 describe("pmv_pdd", () => {
   it("should run tests and skip data that contains arrays or undefined fields", () => {
-    if (!testData || !testData.data) throw new Error("Data not loaded or undefined");
+    if (!testData || !testData.data)
+      throw new Error("Data not loaded or undefined");
 
     testData.data.forEach(({ inputs, outputs }) => {
       const values = Object.values(inputs);
-      const hasArray = values.some(value => Array.isArray(value));
+      const hasArray = values.some((value) => Array.isArray(value));
 
       if (hasArray || outputs === undefined) return; // Skip data with arrays or undefined
 
@@ -56,11 +57,12 @@ describe("pmv_pdd", () => {
 
 describe("pmv_calculation", () => {
   it("should run tests and skip data that contains arrays or undefined fields", () => {
-    if (!testData || !testData.data) throw new Error("Data not loaded or undefined");
+    if (!testData || !testData.data)
+      throw new Error("Data not loaded or undefined");
 
     testData.data.forEach(({ inputs, outputs }) => {
       const values = Object.values(inputs);
-      const hasArray = values.some(value => Array.isArray(value));
+      const hasArray = values.some((value) => Array.isArray(value));
 
       if (hasArray || outputs === undefined) return; // Skip data with arrays or undefined
 

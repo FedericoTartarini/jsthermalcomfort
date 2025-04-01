@@ -1,13 +1,13 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
+import { loadTestData, shouldSkipTest } from "./testUtils"; // Import shared utilities
 import { athb } from "../../src/models/athb.js";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
 
 let testData;
 let tolerance;
 
 beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.athb, 'athb_pmv'); // Use the correct tolerance key
+  const result = await loadTestData(testDataUrls.athb, "athb_pmv"); // Use the correct tolerance key
   testData = result.testData;
   tolerance = result.tolerance;
 });
@@ -24,7 +24,11 @@ describe("athb", () => {
       const result = athb(tdb, tr, rh, met, clo, wme);
 
       // Check if the result is close to the expected value
-      if (isNaN(result) || outputs.athb_pmv === null || outputs.athb_pmv === undefined) {
+      if (
+        isNaN(result) ||
+        outputs.athb_pmv === null ||
+        outputs.athb_pmv === undefined
+      ) {
         expect(result).toBeNaN();
       } else {
         expect(result).toBeCloseTo(outputs.athb_pmv, tolerance);

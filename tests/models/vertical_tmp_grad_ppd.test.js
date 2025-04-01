@@ -1,6 +1,6 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
 import { vertical_tmp_grad_ppd } from "../../src/models/vertical_tmp_grad_ppd";
-import { testDataUrls } from './comftest'; // Import all test URLs from comftest.js
+import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, shouldSkipTest } from "./testUtils"; // Import utility functions
 
 // Variables to store data fetched from remote source
@@ -9,7 +9,10 @@ let tolerance;
 
 // Fetch data before running tests
 beforeAll(async () => {
-  ({ testData, tolerance } = await loadTestData(testDataUrls.verticalTmpGradPpd, 'PPD_vg'));
+  ({ testData, tolerance } = await loadTestData(
+    testDataUrls.verticalTmpGradPpd,
+    "PPD_vg",
+  ));
 });
 
 describe("vertical_tmp_grad_ppd", () => {
@@ -28,12 +31,16 @@ describe("vertical_tmp_grad_ppd", () => {
       const { tdb, tr, vr, rh, met, clo, vertical_tmp_grad, units } = inputs;
 
       // Check input range to ensure it’s within ASHRAE recommended range
-      if ((tdb < 10 || tdb > 40) || (tr < 10 || tr > 40)) {
+      if (tdb < 10 || tdb > 40 || tr < 10 || tr > 40) {
         return;
       }
 
       // Skip this data set if any input value is invalid
-      if ([tdb, tr, vr, rh, met, clo, vertical_tmp_grad].some(value => isNaN(value))) {
+      if (
+        [tdb, tr, vr, rh, met, clo, vertical_tmp_grad].some((value) =>
+          isNaN(value),
+        )
+      ) {
         return;
       }
 
@@ -64,7 +71,9 @@ describe("vertical_tmp_grad_ppd", () => {
       } catch (error) {
         // Capture and check specific error messages
         if (vr > 0.2) {
-          expect(error.message).toBe("This equation is only applicable for air speed lower than 0.2 m/s");
+          expect(error.message).toBe(
+            "This equation is only applicable for air speed lower than 0.2 m/s",
+          );
         } else {
           throw error; // Re-throw error if unrelated to air speed
         }

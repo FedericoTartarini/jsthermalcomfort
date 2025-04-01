@@ -1,13 +1,13 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from './testUtils'; // use the utils
+import { beforeAll, describe, expect, it } from "@jest/globals";
 import { adaptive_en } from "../../src/models/adaptive_en";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
+import { loadTestData, shouldSkipTest } from "./testUtils"; // use the utils
 
 let testData;
 let tolerance;
 
 beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.adaptiveEn, 'tmp_cmf');
+  const result = await loadTestData(testDataUrls.adaptiveEn, "tmp_cmf");
   testData = result.testData;
   tolerance = result.tolerance;
 });

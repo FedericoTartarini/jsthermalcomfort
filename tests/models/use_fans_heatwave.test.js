@@ -11,7 +11,7 @@ let tolerance;
 
 // Load data before tests
 beforeAll(async () => {
-  const result = await loadTestData(testDataUrl, 'use_fans_heatwaves');
+  const result = await loadTestData(testDataUrl, "use_fans_heatwaves");
   testData = result.testData.data || []; // Ensure testData points to the data array
   tolerance = result.tolerance || 1; // Use default tolerance
 });
@@ -45,18 +45,44 @@ describe("use_fans_heatwaves", () => {
     }
 
     testData.forEach(({ inputs, expected }) => {
-      if (shouldSkipTest(inputs) || expected === null || typeof expected === "object") {
+      if (
+        shouldSkipTest(inputs) ||
+        expected === null ||
+        typeof expected === "object"
+      ) {
         return; // Skip tests with array data or complex/empty expected values
       }
 
       const {
-        tdb, tr, v, rh, met, clo, wme, body_surface_area, p_atm,
-        body_position, units, max_skin_blood_flow, kwargs
+        tdb,
+        tr,
+        v,
+        rh,
+        met,
+        clo,
+        wme,
+        body_surface_area,
+        p_atm,
+        body_position,
+        units,
+        max_skin_blood_flow,
+        kwargs,
       } = inputs;
 
       const result = use_fans_heatwaves(
-        tdb, tr, v, rh, met, clo, wme, body_surface_area, p_atm,
-        body_position, units, max_skin_blood_flow, kwargs
+        tdb,
+        tr,
+        v,
+        rh,
+        met,
+        clo,
+        wme,
+        body_surface_area,
+        p_atm,
+        body_position,
+        units,
+        max_skin_blood_flow,
+        kwargs,
       );
 
       // Compare results using compareResults

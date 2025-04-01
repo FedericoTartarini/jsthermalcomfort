@@ -1,11 +1,11 @@
-import {
-  round,
-  check_standard_compliance_array,
-  units_converter,
-  valid_range,
-  units_converter_array,
-} from "../utilities/utilities.js";
 import { t_o, t_o_array } from "../psychrometrics/t_o.js";
+import {
+  check_standard_compliance_array,
+  round,
+  units_converter,
+  units_converter_array,
+  valid_range,
+} from "../utilities/utilities.js";
 import { get_ce } from "./adaptive_en.js";
 
 /**
@@ -92,7 +92,7 @@ export function adaptive_ashrae(
   limit_inputs = true,
 ) {
   const standard = "ASHRAE";
-  if (units === "IP") {
+  if (units.toUpperCase() === "IP") {
     ({
       tdb,
       tr,
@@ -142,7 +142,7 @@ export function adaptive_ashrae(
   const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
   const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
 
-  if (units === "IP") {
+  if (units.toUpperCase() === "IP") {
     ({
       tmp_cmf: t_cmf,
       tmp_cmf_80_low,

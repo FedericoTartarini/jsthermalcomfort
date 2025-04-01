@@ -1,32 +1,24 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from './testUtils'; // Use the utils
+import { describe, test } from "@jest/globals";
 import { a_pmv } from "../../src/models/a_pmv.js";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
+import { loadTestData, validateResult } from "./testUtils"; // Use the utils
 
-let testData;
-let tolerance;
+let returnArray = false;
 
-beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.aPmv, 'pmv');
-  testData = result.testData;
-  tolerance = result.tolerance;
-});
+// use top-level await to load test data before tests are defined.
+let { testData, tolerances } = await loadTestData(
+  testDataUrls.aPmv,
+  returnArray,
+);
 
 describe("a_pmv", () => {
-  it("Runs the test after data is loaded and skips data containing arrays", () => {
-    testData.data.forEach(({ inputs, expected }) => {
-      if (shouldSkipTest(inputs) || expected === undefined) {
-        return; // skip the test
-      }
+  // automatically number each test case
+  test.each(testData.data)("Test case #%#", (testCase) => {
+    const { inputs, outputs: expectedOutput } = testCase;
+    const { tdb, tr, vr, rh, met, clo, a_coefficient, wme } = inputs;
 
-      const { tdb, tr, vr, rh, met, clo, a_coefficient, wme } = inputs;
-      const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
+    const modelResult = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
 
-      if (isNaN(result) || expected === null) {
-        expect(result).toBeNaN();
-      } else {
-        expect(result).toBeCloseTo(expected, tolerance);
-      }
-    });
+    validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });

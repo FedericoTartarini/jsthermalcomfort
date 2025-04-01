@@ -1,5 +1,5 @@
-import { pmv, pmv_array } from "./pmv.js";
 import { round } from "../utilities/utilities.js";
+import { pmv, pmv_array } from "./pmv.js";
 
 /**
  * @typedef {Object} A_pmvKwargs
@@ -63,7 +63,7 @@ import { round } from "../utilities/utilities.js";
  * const wme = undefined,
  *
  * const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
- * console.log(result) //output 0.48
+ * console.log(result) //output { a_pmv: 0.48 }
  */
 export function a_pmv(
   tdb,
@@ -83,9 +83,10 @@ export function a_pmv(
 
   kwargs = Object.assign(default_kwargs, kwargs);
 
-  const _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  _pmv = round(_pmv / (1 + a_coefficient * _pmv), 2);
 
-  return round(_pmv / (1 + a_coefficient * _pmv), 2);
+  return { a_pmv: _pmv };
 }
 
 /**

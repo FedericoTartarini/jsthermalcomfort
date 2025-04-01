@@ -1,13 +1,13 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from './testUtils'; // Import shared utilities
+import { loadTestData, shouldSkipTest } from "./testUtils"; // Import shared utilities
 import { humidex } from "../../src/models/humidex";
-import { testDataUrls } from './comftest';
+import { testDataUrls } from "./comftest";
 
 let testData;
 let tolerance;
 
 beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.humidex, 'humidex'); // Use the correct tolerance key
+  const result = await loadTestData(testDataUrls.humidex, "humidex"); // Use the correct tolerance key
   testData = result.testData;
   tolerance = result.tolerance;
 });

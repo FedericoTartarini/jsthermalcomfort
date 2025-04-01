@@ -50,7 +50,7 @@ import { pmv_calculation } from "./pmv_ppd.js";
  * const t_running_mean = 20;
  *
  * const athb_result = athb(tdb, tr, vr, rh, met, t_running_mean);
- * console.log(athb_result); // Output: 0.2
+ * console.log(athb_result); // Output: {athb_pmv: 0.2}
  */
 export function athb(tdb, tr, vr, rh, met, t_running_mean) {
   const met_adapted = met - (0.234 * t_running_mean) / 58.2;

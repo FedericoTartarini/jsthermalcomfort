@@ -22,7 +22,7 @@
  * @param {object} [kwargs] - other parameters
  * @param {boolean} [kwargs.round=true] - if True rounds output value, if False it does not round it
  *
- * @returns {number} apparent temperature, [°C]
+ * @returns {AtResult} set containing results for the model
  *
  * @example
  * const result = at(25, 30, 0.1);
@@ -30,5 +30,10 @@
  */
 export function at(tdb: number, rh: number, v: number, q?: number | undefined, kwargs?: {
     round?: boolean;
-}): number;
+}): AtResult;
 //# sourceMappingURL=at.d.ts.map
+/**
+ * @typedef {object} AtResult
+ * @property {number} at - Apparent Temperature, [°C]
+ * @public
+ */

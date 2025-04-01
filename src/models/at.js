@@ -1,5 +1,11 @@
-import { round } from "../utilities/utilities.js";
 import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.js";
+import { round } from "../utilities/utilities.js";
+
+/**
+ * @typedef {object} AtResult
+ * @property {number} at - Apparent Temperature, [°C]
+ * @public
+ */
 
 /**
  * Calculates the Apparent Temperature (AT). The AT is defined as the temperature at the reference
@@ -25,11 +31,11 @@ import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.js";
  * @param {object} [kwargs] - other parameters
  * @param {boolean} [kwargs.round=true] - if True rounds output value, if False it does not round it
  *
- * @returns {number} apparent temperature, [°C]
+ * @returns {AtResult} set containing results for the model
  *
  * @example
  * const result = at(25, 30, 0.1);
- * console.log(result); // 24.1
+ * console.log(result); // {at: 24.1}
  */
 export function at(tdb, rh, v, q, kwargs = { round: true }) {
   // dividing it by 100 since the at eq. requires p_vap to be in hPa
@@ -46,5 +52,5 @@ export function at(tdb, rh, v, q, kwargs = { round: true }) {
     t_at = round(t_at, 1);
   }
 
-  return t_at;
+  return { at: t_at };
 }

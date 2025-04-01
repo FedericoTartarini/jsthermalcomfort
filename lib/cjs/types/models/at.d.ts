@@ -26,7 +26,7 @@
  *
  * @example
  * const result = at(25, 30, 0.1);
- * console.log(result); // 24.1
+ * console.log(result); // {at: 24.1}
  */
 export function at(tdb: number, rh: number, v: number, q?: number | undefined, kwargs?: {
     round?: boolean;

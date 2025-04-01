@@ -1,3 +1,5 @@
+import { AthbResult } from "../../../../src/models/athb";
+
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
  * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework
@@ -31,7 +33,7 @@
  * The running mean temperature can be calculated using the function
  * jsthermalcomfort.utilities.running_mean_outdoor_temperature.
  *
- * @returns { number } athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+ *  @returns { AthbResult } set containing results for the model
  *
  * @example
  * const tdb = 25;
@@ -42,9 +44,13 @@
  * const t_running_mean = 20;
  *
  * const athb_result = athb(tdb, tr, vr, rh, met, t_running_mean);
- * console.log(athb_result); // Output: 0.2
+ * console.log(athb_result); // Output: {athb_pmv: 0.2}
  */
-export function athb(tdb: number, tr: number, vr: number, rh: number, met: number, t_running_mean: number): number;
+export function athb(tdb: number, tr: number, vr: number, rh: number, met: number, t_running_mean: number): AthbResult;
+/**
+ * @typedef {Object} AthbResult
+ * @property {number} athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+ */
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
  * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework

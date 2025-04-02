@@ -1,6 +1,11 @@
-import { body_surface_area } from "../utilities/utilities.js";
 import { p_sat } from "../psychrometrics/p_sat.js";
-import { round } from "../utilities/utilities.js";
+import { body_surface_area, round } from "../utilities/utilities.js";
+
+/**
+ * @typedef {object} PetSteadyResult
+ * @property {number} pet - Steady-state PET under the given ambient conditions
+ * @public
+ */
 
 /**
  * The steady physiological equivalent temperature (PET) is calculated using the Munich
@@ -41,11 +46,11 @@ import { round } from "../utilities/utilities.js";
  * @param {number} [height=1.8] - height, [m]
  * @param {number} [wme=0] - external work, [W/(m2)]
  *
- * @returns {number} Steady-state PET under the given ambient conditions
+ * @returns {PetSteadyResult} set containing results for the model
  *
  * @example
  * const result = pet_steady(20, 20, 50, 0.15, 1.37, 0.5);
- * console.log(result); // 18.85
+ * console.log(result); // {pet: 18.85}
  */
 export function pet_steady(
   tdb,
@@ -89,7 +94,7 @@ export function pet_steady(
       ),
     t_guess,
   );
-  return pet_fc(t_stable);
+  return { pet: pet_fc(t_stable) };
 }
 
 /**

@@ -1,4 +1,9 @@
 /**
+ * @typedef {object} AtResult
+ * @property {number} at - Apparent Temperature, [°C]
+ * @public
+ */
+/**
  * Calculates the Apparent Temperature (AT). The AT is defined as the temperature at the reference
  * humidity level producing the same amount of discomfort as that experienced under the current ambient
  * temperature, humidity, and solar radiation {@link #ref_17|[17]}. In other words, the AT is an adjustment to the dry
@@ -22,13 +27,13 @@
  * @param {object} [kwargs] - other parameters
  * @param {boolean} [kwargs.round=true] - if True rounds output value, if False it does not round it
  *
- * @returns {number} apparent temperature, [°C]
+ * @returns {AtResult} set containing results for the model
  *
  * @example
  * const result = at(25, 30, 0.1);
- * console.log(result); // 24.1
+ * console.log(result); // {at: 24.1}
  */
 export function at(tdb: number, rh: number, v: number, q?: number | undefined, kwargs?: {
     round?: boolean;
-}): number;
+}): AtResult;
 //# sourceMappingURL=at.d.ts.map

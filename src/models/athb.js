@@ -1,6 +1,11 @@
-import { pmv_calculation } from "./pmv_ppd.js";
 import { round } from "../utilities/utilities.js";
+import { pmv_calculation } from "./pmv_ppd.js";
 
+/**
+ * @typedef {Object} AthbResult
+ * @property {number} athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+ * @public
+ */
 /**
  * Return the PMV value calculated with the Adaptive Thermal Heat Balance
  * Framework {@link #ref_27|[27]}. The adaptive thermal heat balance (ATHB) framework
@@ -34,7 +39,7 @@ import { round } from "../utilities/utilities.js";
  * The running mean temperature can be calculated using the function
  * jsthermalcomfort.utilities.running_mean_outdoor_temperature.
  *
- * @returns { number } athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+ * @returns { AthbResult } set containing results for the model
  *
  * @example
  * const tdb = 25;
@@ -45,7 +50,7 @@ import { round } from "../utilities/utilities.js";
  * const t_running_mean = 20;
  *
  * const athb_result = athb(tdb, tr, vr, rh, met, t_running_mean);
- * console.log(athb_result); // Output: 0.2
+ * console.log(athb_result); // Output: {athb_pmv: 0.2}
  */
 export function athb(tdb, tr, vr, rh, met, t_running_mean) {
   const met_adapted = met - (0.234 * t_running_mean) / 58.2;
@@ -62,16 +67,18 @@ export function athb(tdb, tr, vr, rh, met, t_running_mean) {
   const ts = 0.303 * Math.exp(-0.036 * met_adapted * 58.15) + 0.028;
   const l_adapted = pmv_res / ts;
 
-  return round(
-    1.484 +
-      0.0276 * l_adapted -
-      0.9602 * met_adapted -
-      0.0342 * t_running_mean +
-      0.0002264 * l_adapted * t_running_mean +
-      0.018696 * met_adapted * t_running_mean -
-      0.0002909 * l_adapted * met_adapted * t_running_mean,
-    3,
-  );
+  return {
+    athb_pmv: round(
+      1.484 +
+        0.0276 * l_adapted -
+        0.9602 * met_adapted -
+        0.0342 * t_running_mean +
+        0.0002264 * l_adapted * t_running_mean +
+        0.018696 * met_adapted * t_running_mean -
+        0.0002909 * l_adapted * met_adapted * t_running_mean,
+      3,
+    ),
+  };
 }
 
 /**

@@ -1,3 +1,9 @@
+import { CloToutResult } from "../../../../src/models/clo_tout";
+/**
+ * @typedef {object} CloToutResult
+ * @property {number} clo - Representative clothing insulation Icl, [clo]
+ * @public
+ */
 /**
  * Representative clothing insulation Icl as a function of outdoor air
  * temperature at 06:00 a.m {@link #ref_4|[4]}.
@@ -17,9 +23,10 @@
  * @param {("IP" | "SI")} units - select the SI (International System of Units)
  * or the IP (Imperial Units) system.
  *
- * @returns {number} Representative clothing insulation Icl, [clo]
+ * @returns {CloToutResult} set containing results for the model
  */
-export function clo_tout(tout: number, units?: ("IP" | "SI")): number;
+export function clo_tout(tout: number, units?: ("IP" | "SI")): CloToutResult;
+
 /**
  * Representative clothing insulation Icl as a function of outdoor air
  * temperature at 06:00 a.m {@link #ref_4|[4]}.

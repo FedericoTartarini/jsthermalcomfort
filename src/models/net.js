@@ -1,4 +1,9 @@
 import { round } from "../utilities/utilities.js";
+/**
+ * @typedef {object} NetResult
+ * @property {number} net - Normal Effective Temperature, [°C]
+ * @public
+ */
 
 /**
  * Calculates the Normal Effective Temperature (NET). Missenard (1933)
@@ -29,22 +34,22 @@ import { round } from "../utilities/utilities.js";
  * @param {boolean} [options.round = true] - If true, rounds output value. If
  * false, it does not.
  *
- * @returns {number} Normal Effective Temperature, [°C]
+ * @returns {NetResult} set containing results for the
  *
  * @example
  * const result = net(37, 100, 0.1);
- * console.log(result); // -> 37
+ * console.log(result); // -> {net: 37}
  */
 export function net(tdb, rh, v, options = { round: true }) {
   const frac = 1.0 / (1.76 + 1.4 * v ** 0.75);
-  const et =
+  let et =
     37 -
     (37 - tdb) / (0.68 - 0.0014 * rh + frac) -
     0.29 * tdb * (1 - 0.01 * rh);
 
   if (options.round) {
-    return round(et, 1);
+    et = round(et, 1);
   }
 
-  return et;
+  return { net: et };
 }

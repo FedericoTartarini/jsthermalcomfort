@@ -1,4 +1,12 @@
 /**
+ * @typedef {object} HeatIndexResult
+ * @property {number} hi - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
+ * @public
+ */
+
+import { HeatIndexResult } from "../../../../src/models/heat_index";
+
+/**
  * Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.
  * The HI equation {@link #ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
  * of Steadman’s (1979) apparent temperature (AT) {@link #ref_13|[13]}.
@@ -13,7 +21,7 @@
  * @param {boolean} [options.round=true] - If True rounds output value, if False it does not round it.
  * @param {"SI" | "IP"} [options.units="SI"] - Select the SI (International System of Units) or the IP (Imperial Units) system.
  *
- * @returns {number} Heat Index, default in [°C] in [°F] if `units` = 'IP'.
+ * @returns {HeatIndexResult} set containing results for the model
  *
  * @example
  * const hi = heat_index(25, 50); // returns 25.9
@@ -23,5 +31,5 @@
 export function heat_index(tdb: number, rh: number, options?: {
     round?: boolean;
     units?: "SI" | "IP";
-}): number;
+}): HeatIndexResult;
 //# sourceMappingURL=heat_index.d.ts.map

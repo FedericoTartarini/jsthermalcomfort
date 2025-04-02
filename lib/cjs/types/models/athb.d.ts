@@ -37,7 +37,7 @@ import { AthbResult } from "../../../../src/models/athb";
  * The running mean temperature can be calculated using the function
  * jsthermalcomfort.utilities.running_mean_outdoor_temperature.
  *
- *  @returns { AthbResult } set containing results for the model
+ * @returns { AthbResult } set containing results for the model
  *
  * @example
  * const tdb = 25;

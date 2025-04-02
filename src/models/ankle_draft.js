@@ -86,5 +86,5 @@ export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
     1,
   );
   const acceptability = ppd_val <= 20;
-  return { ppd_ad: ppd_val, Acceptability: acceptability };
+  return { ppd_ad: ppd_val, acceptability: acceptability };
 }

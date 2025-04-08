@@ -129,7 +129,7 @@ export function pmv_ppd(
   };
   kwargs = Object.assign(default_kwargs, kwargs);
 
-  if (kwargs.units && kwargs.units === "IP") {
+  if (kwargs.units && kwargs.units.toUpperCase() === "IP") {
     // Conversion from IP to SI units
     ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
   }
@@ -154,11 +154,10 @@ export function pmv_ppd(
     clo: [clo],
     airspeed_control: kwargs.airspeed_control,
   });
-
   let ce = 0;
   if (standard === "ASHRAE") {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-    ce = vr > 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme) : 0;
+    ce = vr > 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme).ce : 0;
   }
 
   tdb = tdb - ce;
@@ -336,6 +335,7 @@ export function pmv_ppd_array(
       //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
       return vrValue > 0.1
         ? cooling_effect(tdb[i], tr[i], vrValue, rh[i], met[i], clo[i], wme[i])
+            .ce
         : 0;
     });
   }

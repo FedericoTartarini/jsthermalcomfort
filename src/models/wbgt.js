@@ -7,6 +7,12 @@ const optionDefaults = {
 };
 
 /**
+ * @typedef {object} WbgtResult
+ * @property {number} wbgt - Wet Bulb Globe Temperature Index, [°C]
+ * @public
+ */
+
+/**
  * Calculates the Wet Bulb Globe Temperature (WBGT) index calculated in
  * compliance with the ISO 7243 {@link #ref_11|[11]}. The WBGT is a heat stress index that
  * measures the thermal environment to which a person is exposed. In most
@@ -41,15 +47,15 @@ const optionDefaults = {
  * exposed to direct solar radiation. If this is set to true without also
  * setting `options.tdb` then an error will be thrown.
  *
- * @returns {number} Wet Bulb Globe Temperature Index, [°C]
+ * @returns {WbgtResult} set containing results for the model
  *
  * @example
  * const result = wbgt(25, 32);
- * console.log(result); // -> 27.1
+ * console.log(result); // -> {"wbgt": 27.1}
  *
  * @example
  * const result = wbgt(25, 32, { tdb: 20, with_solar_radiation: true });
- * console.log(result); // -> 25.9
+ * console.log(result); // -> {"wbgt": 25.9}
  */
 export function wbgt(twb, tg, options) {
   const opt = Object.assign({}, optionDefaults, options);
@@ -70,5 +76,5 @@ export function wbgt(twb, tg, options) {
     return round(t_wbg, 1);
   }
 
-  return t_wbg;
+  return { wbgt: t_wbg };
 }

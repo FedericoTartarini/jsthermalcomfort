@@ -1,10 +1,16 @@
+import { roundArray, two_nodes, two_nodes_array } from "../models/two_nodes.js";
 import {
-  units_converter,
-  units_converter_array,
   check_standard_compliance_array,
   round,
+  units_converter,
+  units_converter_array,
 } from "../utilities/utilities.js";
-import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
+
+/**
+ * @typedef {Object} SetTmpResult
+ * @property {number} set - Standard effective temperature in array, [°C]
+ * @public
+ */
 
 /**
  * @typedef {Object} SetTmpKwargs - a keywords argument set containing the additional arguments for Standard Effective Temperature calculation
@@ -45,10 +51,10 @@ import { two_nodes, two_nodes_array, roundArray } from "../models/two_nodes.js";
  * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
- * @returns {number} SET – Standard effective temperature in array, [°C]
+ * @returns {SetTmpResult} set containing results for the model
  *
  * @example
- * const set = set_tmp(25, 25, 0.1, 50, 1.2, 0.5); // returns 24.3
+ * const set = set_tmp(25, 25, 0.1, 50, 1.2, 0.5); // returns {set: 24.3}
  */
 export function set_tmp(
   tdb,
@@ -140,9 +146,9 @@ export function set_tmp(
   }
 
   if (joint_kwargs.round) {
-    return round(set_tmp, 1);
+    set_tmp = round(set_tmp, 1);
   }
-  return set_tmp;
+  return { set: set_tmp };
 }
 
 /**

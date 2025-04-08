@@ -1,6 +1,11 @@
-import { units_converter, round } from "../utilities/utilities.js";
+import { round, units_converter } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
 
+/**
+ * @typedef {object} CoolingEffectResult
+ * @property {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
+ * @public
+ */
 /**
  * Returns the value of the Cooling Effect ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} )
  * calculated in compliance with the ASHRAE 55 2020 Standard {@link #ref_1|[1]}.
@@ -37,15 +42,15 @@ import { set_tmp } from "./set_tmp.js";
  *
  * @param {number} [wme=0] - external work
  * @param {'SI'|'IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @returns {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
+ * @returns {CoolingEffectResult} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
  *
  * @example
  * const CE = cooling_effect(25, 25, 0.3, 50, 1.2, 0.5);
- * console.log(CE); // Output: 1.64
+ * console.log(CE); // Output: {ce: 1.64}
  *
  * // For users who want to use the IP system
  * const CE_IP = cooling_effect(77, 77, 1.64, 50, 1, 0.6, "IP");
- * console.log(CE_IP); // Output: 3.74
+ * console.log(CE_IP); // Output: {ce: 3.74}
  */
 export function cooling_effect(
   tdb,
@@ -65,7 +70,7 @@ export function cooling_effect(
   }
 
   if (vr <= 0.1) {
-    return 0;
+    return { ce: 0 };
   }
 
   const still_air_threshold = 0.1;
@@ -87,7 +92,7 @@ export function cooling_effect(
       round: false,
       calculate_ce: true,
     },
-  );
+  ).set;
 
   function func(x) {
     return (
@@ -108,7 +113,7 @@ export function cooling_effect(
           round: false,
           calculate_ce: true,
         },
-      ) - initial_set_tmp
+      ).set - initial_set_tmp
     );
   }
 
@@ -130,7 +135,9 @@ export function cooling_effect(
     ce = (ce / 1.8) * 3.28;
   }
 
-  return round(ce, 2);
+  ce = round(ce, 2);
+
+  return { ce: ce };
 }
 
 // https://gist.github.com/ryanspradlin/18c1010b7dd2d875284933d018c5c908

@@ -1,32 +1,22 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from "./testUtils"; // Import shared utilities
+import { describe, test } from "@jest/globals";
 import { net } from "../../src/models/net";
 import { testDataUrls } from "./comftest";
+import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities
 
-let testData;
-let tolerance;
+let returnArray = false;
 
-beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.net, "net"); // Use the correct tolerance key
-  testData = result.testData;
-  tolerance = result.tolerance;
-});
+// use top-level await to load test data before tests are defined.
+let { testData, tolerances } = await loadTestData(
+  testDataUrls.net,
+  returnArray,
+);
 
 describe("net", () => {
-  it("should run tests after data is loaded and skip data with arrays", () => {
-    testData.data.forEach(({ inputs, outputs }) => {
-      // Skip data that contains arrays
-      if (shouldSkipTest(inputs) || outputs === undefined) {
-        return;
-      }
+  test.each(testData.data)("Test case #%#", (testCase) => {
+    const { inputs, outputs: expectedOutput } = testCase;
+    const { tdb, rh, v, options } = inputs;
+    const modelResult = net(tdb, rh, v, options);
 
-      const { tdb, rh, v, round } = inputs;
-      const options = round !== undefined ? { round } : undefined; // Pass round parameter if provided
-
-      const result = net(tdb, rh, v, options);
-
-      // Compare results
-      expect(result).toBeCloseTo(outputs.net, tolerance);
-    });
+    validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });

@@ -1,37 +1,57 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from "./testUtils"; // Use modular utilities to load data and check if test should be skipped
+import { describe, test } from "@jest/globals";
 import { set_tmp } from "../../src/models/set_tmp";
 import { testDataUrls } from "./comftest";
+import { loadTestData, validateResult } from "./testUtils"; // Use modular utilities to load data and check if test should be skipped
 
-let testData;
-let tolerance;
+let returnArray = false;
 
-// Load test data before all tests
-beforeAll(async () => {
-  const result = await loadTestData(testDataUrls.setTmp, "set_tmp"); // Load remote data and extract tolerance
-  testData = result.testData;
-  tolerance = result.tolerance;
-});
+// use top-level await to load test data before tests are defined.
+let { testData, tolerances } = await loadTestData(
+  testDataUrls.setTmp,
+  returnArray,
+);
 
 describe("set_tmp", () => {
-  it("should run tests after data is loaded and skip data containing arrays", () => {
-    if (!testData || !testData.data)
-      throw new Error("Data not loaded or undefined");
+  test.each(testData.data)("Test case #%#", (testCase) => {
+    const { inputs, outputs } = testCase;
+    const {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atm,
+      body_position,
+      units,
+      limit_inputs = false,
+      round,
+      calculate_ce,
+    } = inputs;
 
-    testData.data.forEach(({ inputs, outputs }) => {
-      // Use shouldSkipTest to check and skip data containing arrays
-      if (
-        shouldSkipTest(inputs) ||
-        outputs === undefined ||
-        outputs.setTmp === undefined
-      )
-        return;
+    const kwargs = {
+      round,
+      calculate_ce,
+    };
 
-      const { tdb, tr, v, rh, met, clo, wme, kwargs } = inputs;
-      const result = set_tmp(tdb, tr, v, rh, met, clo, wme, kwargs);
+    const modelResult = set_tmp(
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atm,
+      body_position,
+      units,
+      limit_inputs,
+      kwargs,
+    );
 
-      // Use tolerance for accurate comparison
-      expect(result).toBeCloseTo(outputs.setTmp, tolerance);
-    });
+    validateResult(modelResult, outputs, tolerances, inputs);
   });
 });

@@ -1,12 +1,11 @@
-import { round } from "../utilities/utilities.js";
-import { transpose_sharp_altitude } from "../utilities/utilities.js";
+import { round, transpose_sharp_altitude } from "../utilities/utilities.js";
 
 // avoid reallocating these arrays accross function calls
 const _alt_range = [0, 15, 30, 45, 60, 75, 90];
 const _az_range = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180];
 
 // avoid reallocating these table across function calls
-const _fp_table_seated = [
+const _fp_table_sitting = [
   [0.29, 0.324, 0.305, 0.303, 0.262, 0.224, 0.177],
   [0.292, 0.328, 0.294, 0.288, 0.268, 0.227, 0.177],
   [0.288, 0.332, 0.298, 0.29, 0.264, 0.222, 0.177],
@@ -84,14 +83,14 @@ const _fp_table = [
  * clothing or skin color of the occupants is available.
  * Note: Short-wave absorptivity typically ranges from 0.57 to 0.84, depending
  * on skin and clothing color. More information is available in Blum (1945).
- * @param {"standing" | "supine" | "seated"} [posture="seated"] - Default 'seated' list of available options 'standing', 'supine' or 'seated'
+ * @param {"standing" | "supine" | "sitting"} [posture="sitting"] - Default 'sitting' list of available options 'standing', 'supine' or 'sitting'
  * @param {number} [floor_reflectance=0.7] - Floor refectance. It is assumed to be constant and equal to 0.6.
  *
  * @returns {SolarGainReturnType}
  *
  * @example
  * import {solar_gain} from "jsthermalcomfort/models";
- * const results = solar_gain(0, 120, 800, 0.5, 0.7, "seated");
+ * const results = solar_gain(0, 120, 800, 0.5, 0.7, "sitting");
  * console.log(results); // {erf: 42.9, delta_mrt: 10.3}
  */
 export function solar_gain(
@@ -102,19 +101,19 @@ export function solar_gain(
   f_svv,
   f_bes,
   asw = 0.7,
-  posture = "seated",
+  posture = "sitting",
   floor_reflectance = 0.6,
 ) {
   posture = posture.toLowerCase();
-  if (posture !== "standing" && posture !== "supine" && posture !== "seated")
-    throw new Error("Posture has to be either standing, supine or seated");
+  if (posture !== "standing" && posture !== "supine" && posture !== "sitting")
+    throw new Error("Posture has to be either standing, supine or sitting");
 
   const deg_to_rad = 0.0174532925;
   const hr = 6;
   const i_diff = 0.2 * sol_radiation_dir;
 
   // fp is the projected area factor
-  const fp_table = posture === "seated" ? _fp_table_seated : _fp_table;
+  const fp_table = posture === "sitting" ? _fp_table_sitting : _fp_table;
 
   if (posture === "supine") {
     [sharp, sol_altitude] = transpose_sharp_altitude(sharp, sol_altitude);
@@ -136,7 +135,7 @@ export function solar_gain(
   fp += fp22 * (sharp - az1) * (sol_altitude - alt1);
   fp /= (az2 - az1) * (alt2 - alt1);
 
-  const f_eff = posture === "seated" ? 0.696 : 0.725; // fraction of the body surface exposed to environmental radiation
+  const f_eff = posture === "sitting" ? 0.696 : 0.725; // fraction of the body surface exposed to environmental radiation
 
   const sw_abs = asw;
   const lw_abs = 0.95;

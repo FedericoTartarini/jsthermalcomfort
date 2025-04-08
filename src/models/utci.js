@@ -1,8 +1,8 @@
 import {
-  units_converter,
-  valid_range,
   round,
+  units_converter,
   units_converter_array,
+  valid_range,
 } from "../utilities/utilities.js";
 
 const g = [
@@ -122,7 +122,7 @@ export function utci(
       stress_category: mapping(utci_approx),
     };
   }
-  return utci_approx;
+  return { utci: utci_approx };
 }
 
 /**

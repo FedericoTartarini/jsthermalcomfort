@@ -1,5 +1,11 @@
-import { pmv, pmv_array } from "./pmv.js";
 import { round } from "../utilities/utilities.js";
+import { pmv, pmv_array } from "./pmv.js";
+
+/**
+ * @typedef {Object} EPmvResult
+ * @property {number} e_pmv - Predicted Mean Vote
+ * @public
+ */
 
 /**
  * @typedef {Object} E_pmvKwargs
@@ -51,7 +57,7 @@ import { round } from "../utilities/utilities.js";
  * @param {number} [wme=0] - External work
  * @param {E_pmvKwargs} [kwargs] - additional arguments
  *
- * @returns {number} pmv - Predicted Mean Vote
+ * @returns {EPmvResult} set containing results for the model
  *
  * @example
  * const tdb = 28;
@@ -66,7 +72,7 @@ import { round } from "../utilities/utilities.js";
  * const e_coefficient = 0.6;
  *
  * const result = e_pmv(tdb, tr, v_r, rh, met, clo_d, e_coefficient);
- * console.log(result) // output 0.51
+ * console.log(result) // output {e_pmv: 0.51}
  */
 export function e_pmv(
   tdb,
@@ -89,8 +95,9 @@ export function e_pmv(
 
   met = _pmv > 0 ? met * (1 + _pmv * -0.067) : met;
   _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  _pmv = round(_pmv * e_coefficient, 2);
 
-  return round(_pmv * e_coefficient, 2);
+  return { e_pmv: _pmv };
 }
 
 /**

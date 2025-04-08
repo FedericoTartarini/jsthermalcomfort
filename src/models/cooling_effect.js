@@ -92,7 +92,7 @@ export function cooling_effect(
       round: false,
       calculate_ce: true,
     },
-  );
+  ).set;
 
   function func(x) {
     return (
@@ -113,7 +113,7 @@ export function cooling_effect(
           round: false,
           calculate_ce: true,
         },
-      ) - initial_set_tmp
+      ).set - initial_set_tmp
     );
   }
 

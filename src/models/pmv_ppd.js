@@ -335,6 +335,7 @@ export function pmv_ppd_array(
       //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
       return vrValue > 0.1
         ? cooling_effect(tdb[i], tr[i], vrValue, rh[i], met[i], clo[i], wme[i])
+            .ce
         : 0;
     });
   }

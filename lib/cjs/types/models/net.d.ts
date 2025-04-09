@@ -3,7 +3,6 @@
  * @property {number} net - Normal Effective Temperature, [°C]
  * @public
  */
-
 /**
  * Calculates the Normal Effective Temperature (NET). Missenard (1933)
  * devised a formula for calculating effective temperature. The index
@@ -42,4 +41,10 @@
 export function net(tdb: number, rh: number, v: number, options?: {
     round?: boolean;
 }): NetResult;
+export type NetResult = {
+    /**
+     * - Normal Effective Temperature, [°C]
+     */
+    net: number;
+};
 //# sourceMappingURL=net.d.ts.map

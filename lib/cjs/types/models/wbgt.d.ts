@@ -3,7 +3,6 @@
  * @property {number} wbgt - Wet Bulb Globe Temperature Index, [°C]
  * @public
  */
-
 /**
  * Calculates the Wet Bulb Globe Temperature (WBGT) index calculated in
  * compliance with the ISO 7243 {@link #ref_11|[11]}. The WBGT is a heat stress index that
@@ -54,4 +53,10 @@ export function wbgt(twb: number, tg: number, options?: {
     tdb?: number;
     with_solar_load?: boolean;
 }): WbgtResult;
+export type WbgtResult = {
+    /**
+     * - Wet Bulb Globe Temperature Index, [°C]
+     */
+    wbgt: number;
+};
 //# sourceMappingURL=wbgt.d.ts.map

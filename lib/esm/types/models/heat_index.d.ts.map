@@ -1,1 +1,1 @@
-{"version":3,"file":"heat_index.d.ts","sourceRoot":"","sources":["../../../../src/models/heat_index.js"],"names":[],"mappings":"AAEA;;;;;;;;;;;;;;;;;;;;;GAqBG;AACH,gCAbW,MAAM,MACN,MAAM;IAEY,KAAK,GAAvB,OAAO;IACe,KAAK,GAA3B,IAAI,GAAG,IAAI;IAET,MAAM,CAwClB"}
+{"version":3,"file":"heat_index.d.ts","sourceRoot":"","sources":["../../../../src/models/heat_index.js"],"names":[],"mappings":"AAEA;;;;GAIG;AACH;;;;;;;;;;;;;;;;;;;;;GAqBG;AACH,gCAbW,MAAM,MACN,MAAM;IAEY,KAAK,GAAvB,OAAO;IACe,KAAK,GAA3B,IAAI,GAAG,IAAI;IAET,eAAe,CAuC3B;;;;;QAzDa,MAAM"}

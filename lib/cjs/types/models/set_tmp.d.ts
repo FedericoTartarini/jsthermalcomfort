@@ -1,4 +1,9 @@
 /**
+ * @typedef {Object} SetTmpResult
+ * @property {number} set - Standard effective temperature in array, [°C]
+ * @public
+ */
+/**
  * @typedef {Object} SetTmpKwargs - a keywords argument set containing the additional arguments for Standard Effective Temperature calculation
  * @property {boolean} [round=true] - round the result of the SET
  * @property {boolean} [calculate_ce=false] - select if SET is used to calculate Cooling Effect
@@ -36,12 +41,12 @@
  * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
- * @returns {number} SET – Standard effective temperature in array, [°C]
+ * @returns {SetTmpResult} set containing results for the model
  *
  * @example
- * const set = set_tmp(25, 25, 0.1, 50, 1.2, 0.5); // returns 24.3
+ * const set = set_tmp(25, 25, 0.1, 50, 1.2, 0.5); // returns {set: 24.3}
  */
-export function set_tmp(tdb: number, tr: number, v: number, rh: number, met: number, clo: number, wme?: number, body_surface_area?: number, p_atm?: number, body_position?: "standing" | "sitting", units?: "SI" | "IP", limit_inputs?: boolean, kwargs?: SetTmpKwargs): number;
+export function set_tmp(tdb: number, tr: number, v: number, rh: number, met: number, clo: number, wme?: number, body_surface_area?: number, p_atm?: number, body_position?: "standing" | "sitting", units?: "SI" | "IP", limit_inputs?: boolean, kwargs?: SetTmpKwargs): SetTmpResult;
 /**
  * @typedef {Object} SetTmpArrayKwargs - a keywords argument set containing the additional arguments for SET array calculation
  * @property {boolean} [round=true] - round the result of the SET
@@ -87,6 +92,12 @@ export function set_tmp(tdb: number, tr: number, v: number, rh: number, met: num
  * const set = set_tmp_array([25, 25], [25, 25], [0.1, 0.1], [50, 50], [1.2, 1.2], [0.5, 0.5]); // returns [24.3, 24.3]
  */
 export function set_tmp_array(tdbArray: number[], trArray: number[], vArray: number[], rhArray: number[], metArray: number[], cloArray: number[], wmeArray?: number[], bodySurfaceArray?: number[], pAtmArray?: number[], bodyPositionArray: "standing" | "sitting", units?: "SI" | "IP", limit_inputs?: boolean, kwargs?: SetTmpKwargs): number[];
+export type SetTmpResult = {
+    /**
+     * - Standard effective temperature in array, [°C]
+     */
+    set: number;
+};
 /**
  * - a keywords argument set containing the additional arguments for Standard Effective Temperature calculation
  */

@@ -3,7 +3,6 @@
  * @property {number} e_pmv - Predicted Mean Vote
  * @public
  */
-
 /**
  * @typedef {Object} E_pmvKwargs
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
@@ -15,9 +14,6 @@
  *    0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, and -2 < PMV < 2.
  * @public
  */
-
-import { EPmvResult } from "../../../../src/models/e_pmv";
-
 /**
  * Returns Adjusted Predicted Mean Votes with Expectancy Factor (ePMV). This index was developed by
  * Fanger, P. O. et al. (2002). In non-air-conditioned buildings in warm climates, occupants may sense
@@ -130,6 +126,12 @@ export function e_pmv(tdb: number, tr: number, vr: number, rh: number, met: numb
  * console.log(result) // output [0.29, 0.91]
  */
 export function e_pmv_array(tdb: number[], tr: number[], vr: number[], rh: number[], met: number[], clo: number[], e_coefficient: number[], wme: number[], kwargs?: E_pmvKwargs): number[];
+export type EPmvResult = {
+    /**
+     * - Predicted Mean Vote
+     */
+    e_pmv: number;
+};
 export type E_pmvKwargs = {
     /**
      * - select the SI (International System of Units) or the IP (Imperial Units) system.

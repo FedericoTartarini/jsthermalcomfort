@@ -3,7 +3,6 @@
  * @property {number} a_pmv - Predicted Mean Vote
  * @public
  */
-
 /**
  * @typedef {Object} A_pmvKwargs
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
@@ -65,7 +64,7 @@
  * const wme = undefined,
  *
  * const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
- * console.log(result) //output {a_pmv: 0.48}
+ * console.log(result) //output { a_pmv: 0.48 }
  */
 export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, a_coefficient: number, wme?: number, kwargs?: A_pmvKwargs): APmvResult;
 /**
@@ -121,6 +120,12 @@ export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: numb
  * console.log(result) //output [0.48, 1.09]
  */
 export function a_pmv_array(tdb: number[], tr: number[], vr: number[], rh: number[], met: number[], clo: number[], a_coefficient: number[], wme: number[], kwargs?: A_pmvKwargs): number[];
+export type APmvResult = {
+    /**
+     * - Predicted Mean Vote
+     */
+    a_pmv: number;
+};
 export type A_pmvKwargs = {
     /**
      * - select the SI (International System of Units) or the IP (Imperial Units) system.

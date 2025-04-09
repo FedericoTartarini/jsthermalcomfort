@@ -1,4 +1,9 @@
 /**
+ * @typedef {object} NetResult
+ * @property {number} net - Normal Effective Temperature, [°C]
+ * @public
+ */
+/**
  * Calculates the Normal Effective Temperature (NET). Missenard (1933)
  * devised a formula for calculating effective temperature. The index
  * establishes a link between the same condition of the organism's
@@ -27,13 +32,19 @@
  * @param {boolean} [options.round = true] - If true, rounds output value. If
  * false, it does not.
  *
- * @returns {number} Normal Effective Temperature, [°C]
+ * @returns {NetResult} set containing results for the
  *
  * @example
  * const result = net(37, 100, 0.1);
- * console.log(result); // -> 37
+ * console.log(result); // -> {net: 37}
  */
 export function net(tdb: number, rh: number, v: number, options?: {
     round?: boolean;
-}): number;
+}): NetResult;
+export type NetResult = {
+    /**
+     * - Normal Effective Temperature, [°C]
+     */
+    net: number;
+};
 //# sourceMappingURL=net.d.ts.map

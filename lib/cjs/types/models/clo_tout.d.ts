@@ -1,4 +1,3 @@
-import { CloToutResult } from "../../../../src/models/clo_tout";
 /**
  * @typedef {object} CloToutResult
  * @property {number} clo - Representative clothing insulation Icl, [clo]
@@ -26,7 +25,6 @@ import { CloToutResult } from "../../../../src/models/clo_tout";
  * @returns {CloToutResult} set containing results for the model
  */
 export function clo_tout(tout: number, units?: ("IP" | "SI")): CloToutResult;
-
 /**
  * Representative clothing insulation Icl as a function of outdoor air
  * temperature at 06:00 a.m {@link #ref_4|[4]}.
@@ -49,4 +47,10 @@ export function clo_tout(tout: number, units?: ("IP" | "SI")): CloToutResult;
  * @returns {number[]} Representative clothing insulation Icl, [clo]
  */
 export function clo_tout_array(tout: number[], units?: ("IP" | "SI")): number[];
+export type CloToutResult = {
+    /**
+     * - Representative clothing insulation Icl, [clo]
+     */
+    clo: number;
+};
 //# sourceMappingURL=clo_tout.d.ts.map

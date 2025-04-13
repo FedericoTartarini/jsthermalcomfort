@@ -3,9 +3,6 @@
  * @property {number} hi - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
  * @public
  */
-
-import { HeatIndexResult } from "../../../../src/models/heat_index";
-
 /**
  * Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.
  * The HI equation {@link #ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
@@ -24,7 +21,7 @@ import { HeatIndexResult } from "../../../../src/models/heat_index";
  * @returns {HeatIndexResult} set containing results for the model
  *
  * @example
- * const hi = heat_index(25, 50); // returns 25.9
+ * const hi = heat_index(25, 50); // returns {hi: 25.9}
  *
  * @category Thermophysiological models
  */
@@ -32,4 +29,10 @@ export function heat_index(tdb: number, rh: number, options?: {
     round?: boolean;
     units?: "SI" | "IP";
 }): HeatIndexResult;
+export type HeatIndexResult = {
+    /**
+     * - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
+     */
+    hi: number;
+};
 //# sourceMappingURL=heat_index.d.ts.map

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset='utf-8'>
-  <title>jsthermalcomfort 0.1.5 | Documentation</title>
+  <title>jsthermalcomfort 0.2.1 | Documentation</title>
   <meta name='description' content='A JavaScript package to calculate thermophysiological, thermal comfort, thermal stress indices'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' rel='stylesheet'>
@@ -15,7 +15,7 @@
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>jsthermalcomfort</h3>
-          <div class='mb1'><code>0.1.5</code></div>
+          <div class='mb1'><code>0.2.1</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -580,6 +580,28 @@
               
                 
               
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
+                
+              
             </ul>
           </div>
           <div class='mt1 h6 quiet'>
@@ -743,7 +765,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/index.js#L36-L75'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/index.js#L36-L75'>
       <span>src/models/index.js</span>
       </a>
     
@@ -794,7 +816,7 @@
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/heat_index.js#L25-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/heat_index.js#L30-L62'>
       <span>src/models/heat_index.js</span>
       </a>
     
@@ -805,7 +827,7 @@
 The HI equation <a href="#ref_12">[12]</a> is derived by multiple regression analysis in temperature and relative humidity from the first version
 of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
 
-  <div class='pre p1 fill-light mt0'>heat_index(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>heat_index(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?): <a href="#heatindexresult">HeatIndexResult</a></div>
   
   
 
@@ -896,15 +918,98 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        Heat Index, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'.
+      <code><a href="#heatindexresult">HeatIndexResult</a></code>:
+        set containing results for the model
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="heatindexresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          HeatIndexResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/heat_index.js#L3-L7'>
+      <span>src/models/heat_index.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>hi</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Heat Index, default in [°C] in [°F] if 
+<code>units</code>
+ = 'IP'.
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -915,7 +1020,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> hi = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns 25.9</span></pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> hi = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns {hi: 25.9}</span></pre>
     
   
 
@@ -946,7 +1051,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/phs.js#L99-L171'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/phs.js#L103-L175'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -964,6 +1069,8 @@ by respiratory evaporation, steady state mean skin temperature, instantaneous va
 of skin temperature, heat accumulation associated with the metabolic rate, maximum
 evaporative heat flow at the skin surface, predicted sweat rate, predicted evaporative
 heat flow, and rectal temperature.</p>
+<p><strong>Warning:</strong> Some tests are currently failing for this function. Please refer to the test
+suite or the project's issue tracker for more details.</p>
 
   <div class='pre p1 fill-light mt0'>phs(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, posture: (<code>1</code> | <code>2</code> | <code>3</code>), wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#phskwargs">PhsKwargs</a>?): <a href="#phsreturntype">PhsReturnType</a></div>
   
@@ -1097,7 +1204,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/phs.js#L23-L42'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/phs.js#L23-L42'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -1279,7 +1386,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/phs.js#L8-L21'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/phs.js#L8-L21'>
       <span>src/models/phs.js</span>
       </a>
     
@@ -1449,7 +1556,7 @@ heat flow, and rectal temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/humidex.js#L38-L62'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/humidex.js#L38-L62'>
       <span>src/models/humidex.js</span>
       </a>
     
@@ -1569,7 +1676,7 @@ relative humidity.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/humidex.js#L3-L11'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/humidex.js#L3-L11'>
       <span>src/models/humidex.js</span>
       </a>
     
@@ -1684,7 +1791,7 @@ would be felt by the average person.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/net.js#L38-L50'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/net.js#L43-L55'>
       <span>src/models/net.js</span>
       </a>
     
@@ -1708,7 +1815,7 @@ Hong Kong Observatory <a href="#ref_16">[16]</a>. In central Europe the followin
 in use: &#x3C;1°C = very cold; 1–9 = cold; 9–17 = cool; 17–21 = fresh;
 21–23 = comfortable; 23–27 = warm; >27°C = hot [1].</p>
 
-  <div class='pre p1 fill-light mt0'>net(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>net(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#netresult">NetResult</a></div>
   
   
 
@@ -1796,13 +1903,96 @@ false, it does not.
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        Normal Effective Temperature, [°C]
+      <code><a href="#netresult">NetResult</a></code>:
+        set containing results for the
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="netresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          NetResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/net.js#L2-L6'>
+      <span>src/models/net.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>net</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Normal Effective Temperature, [°C]
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -1814,7 +2004,7 @@ false, it does not.
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">net</span>(<span class="hljs-number">37</span>, <span class="hljs-number">100</span>, <span class="hljs-number">0.1</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// -&gt; 37</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// -&gt; {net: 37}</span></pre>
     
   
 
@@ -1845,7 +2035,7 @@ false, it does not.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/wbgt.js#L54-L74'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/wbgt.js#L60-L80'>
       <span>src/models/wbgt.js</span>
       </a>
     
@@ -1868,7 +2058,7 @@ of surroundings <a href="#ref_11">[11]</a>.</p>
 exposed to direct radiant heat from the sun. When a person is exposed to
 direct radiant heat, tdb must also be specified.</p>
 
-  <div class='pre p1 fill-light mt0'>wbgt(twb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tg: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>wbgt(twb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tg: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#wbgtresult">WbgtResult</a></div>
   
   
 
@@ -1974,13 +2164,96 @@ setting
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        Wet Bulb Globe Temperature Index, [°C]
+      <code><a href="#wbgtresult">WbgtResult</a></code>:
+        set containing results for the model
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="wbgtresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          WbgtResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/wbgt.js#L9-L13'>
+      <span>src/models/wbgt.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>wbgt</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Wet Bulb Globe Temperature Index, [°C]
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -1992,11 +2265,11 @@ setting
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">wbgt</span>(<span class="hljs-number">25</span>, <span class="hljs-number">32</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// -&gt; 27.1</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// -&gt; {&quot;wbgt&quot;: 27.1}</span></pre>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">wbgt</span>(<span class="hljs-number">25</span>, <span class="hljs-number">32</span>, { <span class="hljs-attr">tdb</span>: <span class="hljs-number">20</span>, <span class="hljs-attr">with_solar_radiation</span>: <span class="hljs-literal">true</span> });
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// -&gt; 25.9</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// -&gt; {&quot;wbgt&quot;: 25.9}</span></pre>
     
   
 
@@ -2027,7 +2300,7 @@ setting
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/discomfort_index.js#L35-L43'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/discomfort_index.js#L35-L43'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2112,7 +2385,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/discomfort_index.js#L3-L9'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/discomfort_index.js#L3-L9'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2233,7 +2506,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/discomfort_index.js#L75-L86'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/discomfort_index.js#L75-L86'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2318,7 +2591,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/discomfort_index.js#L45-L51'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/discomfort_index.js#L45-L51'>
       <span>src/models/discomfort_index.js</span>
       </a>
     
@@ -2433,7 +2706,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/two_nodes.js#L114-L197'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/two_nodes.js#L117-L200'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -2462,6 +2735,8 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
 <li>The Predicted Percent Dissatisfied Due to Draft (PD)</li>
 <li>Predicted Percent Satisfied With the Level of Air Movement” (PS)</li>
 </ul>
+<p><strong>Warning:</strong> Some tests are currently failing for this function. Please refer to the test
+suite or the project's issue tracker for more details.</p>
 
   <div class='pre p1 fill-light mt0'>two_nodes(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atmospheric: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_position: (<code>"standing"</code> | <code>"sitting"</code>), max_skin_blood_flow: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#twonodeskwargs">TwoNodesKwargs</a>?): <a href="#twonodesreturntype">TwoNodesReturnType</a></div>
   
@@ -2627,7 +2902,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/two_nodes.js#L27-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/two_nodes.js#L27-L34'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -2725,7 +3000,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/two_nodes.js#L4-L25'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/two_nodes.js#L4-L25'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -2978,7 +3253,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/two_nodes.js#L320-L488'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/two_nodes.js#L323-L491'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -3167,7 +3442,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/two_nodes.js#L210-L231'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/two_nodes.js#L213-L234'>
       <span>src/models/two_nodes.js</span>
       </a>
     
@@ -3420,7 +3695,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/set_tmp.js#L53-L146'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/set_tmp.js#L59-L152'>
       <span>src/models/set_tmp.js</span>
       </a>
     
@@ -3435,7 +3710,7 @@ clothing, standardized for the activity concerned is the same as
 that from a person in the actual environment with actual clothing
 and activity level <a href="#ref_10">[10]</a>.</p>
 
-  <div class='pre p1 fill-light mt0'>set_tmp(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, body_position: (<code>"standing"</code> | <code>"sitting"</code>), units: (<code>"SI"</code> | <code>"IP"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, kwargs: <a href="#settmpkwargs">SetTmpKwargs</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>set_tmp(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, body_position: (<code>"standing"</code> | <code>"sitting"</code>), units: (<code>"SI"</code> | <code>"IP"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, kwargs: <a href="#settmpkwargs">SetTmpKwargs</a>?): <a href="#settmpresult">SetTmpResult</a></div>
   
   
 
@@ -3581,8 +3856,8 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        SET – Standard effective temperature in array, [°C]
+      <code><a href="#settmpresult">SetTmpResult</a></code>:
+        set containing results for the model
 
       
     
@@ -3607,7 +3882,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/set_tmp.js#L9-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/set_tmp.js#L15-L20'>
       <span>src/models/set_tmp.js</span>
       </a>
     
@@ -3676,6 +3951,83 @@ and activity level <a href="#ref_10">[10]</a>.</p>
     </div>
   </div>
   
+  <div class="border-bottom" id="settmpresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          SetTmpResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/set_tmp.js#L9-L13'>
+      <span>src/models/set_tmp.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>set</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Standard effective temperature in array, [°C]
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
 </div>
 
   
@@ -3697,7 +4049,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> set = <span class="hljs-title function_">set_tmp</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>); <span class="hljs-comment">// returns 24.3</span></pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> set = <span class="hljs-title function_">set_tmp</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>); <span class="hljs-comment">// returns {set: 24.3}</span></pre>
     
   
 
@@ -3728,7 +4080,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/set_tmp.js#L193-L303'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/set_tmp.js#L199-L309'>
       <span>src/models/set_tmp.js</span>
       </a>
     
@@ -3944,7 +4296,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/wc.js#L26-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/wc.js#L26-L34'>
       <span>src/models/wc.js</span>
       </a>
     
@@ -4081,7 +4433,7 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_en.js#L73-L155'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_en.js#L73-L155'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4214,7 +4566,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_en.js#L9-L22'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_en.js#L9-L22'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4405,7 +4757,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_en.js#L212-L334'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_en.js#L212-L334'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4538,7 +4890,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_en.js#L157-L170'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_en.js#L157-L170'>
       <span>src/models/adaptive_en.js</span>
       </a>
     
@@ -4720,7 +5072,7 @@ outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/at.js#L34-L50'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/at.js#L40-L56'>
       <span>src/models/at.js</span>
       </a>
     
@@ -4737,7 +5089,7 @@ is chosen as a reference.</p>
 radiation and the other one does not ({@link <a href="http://www.bom.gov.au/info/thermal_stress/%7D">http://www.bom.gov.au/info/thermal_stress/}</a>, 29 Sep 2021).
 Please specify q if you want to estimate AT with solar load.</p>
 
-  <div class='pre p1 fill-light mt0'>at(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, q: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined">undefined</a>)?, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>at(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, q: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined">undefined</a>)?, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#atresult">AtResult</a></div>
   
   
 
@@ -4833,13 +5185,96 @@ Please specify q if you want to estimate AT with solar load.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        apparent temperature, [°C]
+      <code><a href="#atresult">AtResult</a></code>:
+        set containing results for the model
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="atresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          AtResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/at.js#L4-L8'>
+      <span>src/models/at.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>at</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Apparent Temperature, [°C]
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -4851,7 +5286,7 @@ Please specify q if you want to estimate AT with solar load.</p>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">at</span>(<span class="hljs-number">25</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0.1</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// 24.1</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// {at: 24.1}</span></pre>
     
   
 
@@ -4882,7 +5317,7 @@ Please specify q if you want to estimate AT with solar load.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv_ppd.js#L114-L199'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv_ppd.js#L114-L198'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5062,7 +5497,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv_ppd.js#L10-L29'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv_ppd.js#L10-L29'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5164,7 +5599,7 @@ the operative temperature, for more information please consult the Standard.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv_ppd.js#L31-L36'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv_ppd.js#L31-L36'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5297,7 +5732,7 @@ the operative temperature, for more information please consult the Standard.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv_ppd.js#L284-L403'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv_ppd.js#L283-L403'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5476,7 +5911,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv_ppd.js#L201-L206'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv_ppd.js#L200-L205'>
       <span>src/models/pmv_ppd.js</span>
       </a>
     
@@ -5609,7 +6044,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_ashrae.js#L86-L173'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_ashrae.js#L86-L173'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -5749,7 +6184,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_ashrae.js#L11-L21'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_ashrae.js#L11-L21'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -5929,7 +6364,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_ashrae.js#L250-L344'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_ashrae.js#L250-L344'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -6069,7 +6504,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/adaptive_ashrae.js#L175-L185'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/adaptive_ashrae.js#L175-L185'>
       <span>src/models/adaptive_ashrae.js</span>
       </a>
     
@@ -6249,7 +6684,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/solar_gain.js#L97-L159'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/solar_gain.js#L96-L158'>
       <span>src/models/solar_gain.js</span>
       </a>
     
@@ -6264,7 +6699,7 @@ amount by which the mean radiant temperature of the space should be
 increased if no solar radiation is present.</p>
 <p>More information on the calculation procedure can be found in Appendix C of <a href="#ref_1">[1]</a>.</p>
 
-  <div class='pre p1 fill-light mt0'>solar_gain(sol_altitude: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sharp: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sol_radiation_dir: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sol_transmittance: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, f_svv: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, f_bes: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, asw: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, posture: (<code>"standing"</code> | <code>"supine"</code> | <code>"seated"</code>), floor_reflectance: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#solargainreturntype">SolarGainReturnType</a></div>
+  <div class='pre p1 fill-light mt0'>solar_gain(sol_altitude: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sharp: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sol_radiation_dir: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sol_transmittance: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, f_svv: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, f_bes: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, asw: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, posture: (<code>"standing"</code> | <code>"supine"</code> | <code>"sitting"</code>), floor_reflectance: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#solargainreturntype">SolarGainReturnType</a></div>
   
   
 
@@ -6368,9 +6803,9 @@ on skin and clothing color. More information is available in Blum (1945).</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>posture</span> <code class='quiet'>((<code>"standing"</code> | <code>"supine"</code> | <code>"seated"</code>)
-            = <code>&quot;seated&quot;</code>)</code>
-	    Default 'seated' list of available options 'standing', 'supine' or 'seated'
+            <span class='code bold'>posture</span> <code class='quiet'>((<code>"standing"</code> | <code>"supine"</code> | <code>"sitting"</code>)
+            = <code>&quot;sitting&quot;</code>)</code>
+	    Default 'sitting' list of available options 'standing', 'supine' or 'sitting'
 
           </div>
           
@@ -6419,7 +6854,7 @@ on skin and clothing color. More information is available in Blum (1945).</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/solar_gain.js#L41-L47'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/solar_gain.js#L40-L46'>
       <span>src/models/solar_gain.js</span>
       </a>
     
@@ -6502,7 +6937,7 @@ temperature of the space should be increased if no solar radiation is present.
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> {solar_gain} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort/models&quot;</span>;
-<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">solar_gain</span>(<span class="hljs-number">0</span>, <span class="hljs-number">120</span>, <span class="hljs-number">800</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;seated&quot;</span>);
+<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">solar_gain</span>(<span class="hljs-number">0</span>, <span class="hljs-number">120</span>, <span class="hljs-number">800</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.7</span>, <span class="hljs-string">&quot;sitting&quot;</span>);
 <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results); <span class="hljs-comment">// {erf: 42.9, delta_mrt: 10.3}</span></pre>
     
   
@@ -6534,7 +6969,7 @@ temperature of the space should be increased if no solar radiation is present.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/cooling_effect.js#L50-L134'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/cooling_effect.js#L55-L141'>
       <span>src/models/cooling_effect.js</span>
       </a>
     
@@ -6549,7 +6984,7 @@ the same <a href="https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effecti
 as in the first <a href="https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature">SET</a> calculation
 under elevated air speed. The cooling effect is calculated only for air speed higher than 0.1 m/s.</p>
 
-  <div class='pre p1 fill-light mt0'>cooling_effect(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"SI"</code> | <code>"IP"</code>)): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>cooling_effect(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"SI"</code> | <code>"IP"</code>)): <a href="#coolingeffectresult">CoolingEffectResult</a></div>
   
   
 
@@ -6663,7 +7098,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
+      <code><a href="#coolingeffectresult">CoolingEffectResult</a></code>:
         ce - Cooling Effect, default in [°C] in [°F] if 
 <code>units</code>
  = 'IP'
@@ -6672,6 +7107,91 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="coolingeffectresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          CoolingEffectResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/cooling_effect.js#L4-L8'>
+      <span>src/models/cooling_effect.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>ce</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Cooling Effect, default in [°C] in [°F] if 
+<code>units</code>
+ = 'IP'
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -6683,11 +7203,11 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">CE</span> = <span class="hljs-title function_">cooling_effect</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable constant_">CE</span>); <span class="hljs-comment">// Output: 1.64</span>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable constant_">CE</span>); <span class="hljs-comment">// Output: {ce: 1.64}</span>
 
 <span class="hljs-comment">// For users who want to use the IP system</span>
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">CE_IP</span> = <span class="hljs-title function_">cooling_effect</span>(<span class="hljs-number">77</span>, <span class="hljs-number">77</span>, <span class="hljs-number">1.64</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0.6</span>, <span class="hljs-string">&quot;IP&quot;</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable constant_">CE_IP</span>); <span class="hljs-comment">// Output: 3.74</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable constant_">CE_IP</span>); <span class="hljs-comment">// Output: {ce: 3.74}</span></pre>
     
   
 
@@ -6718,7 +7238,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/athb.js#L50-L75'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/athb.js#L55-L82'>
       <span>src/models/athb.js</span>
       </a>
     
@@ -6734,7 +7254,7 @@ thermal sensation applicable during the design stage or in international
 standards without knowing characteristics of future occupants.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='pre p1 fill-light mt0'>athb(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>athb(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#athbresult">AthbResult</a></div>
   
   
 
@@ -6818,13 +7338,96 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+      <code><a href="#athbresult">AthbResult</a></code>:
+        set containing results for the model
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="athbresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          AthbResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/athb.js#L4-L8'>
+      <span>src/models/athb.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>athb_pmv</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -6852,7 +7455,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
 <span class="hljs-keyword">const</span> t_running_mean = <span class="hljs-number">20</span>;
 
 <span class="hljs-keyword">const</span> athb_result = <span class="hljs-title function_">athb</span>(tdb, tr, vr, rh, met, t_running_mean);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(athb_result); <span class="hljs-comment">// Output: 0.2</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(athb_result); <span class="hljs-comment">// Output: {athb_pmv: 0.2}</span></pre>
     
   
 
@@ -6883,7 +7486,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/athb.js#L124-L170'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/athb.js#L131-L177'>
       <span>src/models/athb.js</span>
       </a>
     
@@ -7049,7 +7652,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv.js#L98-L133'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv.js#L98-L133'>
       <span>src/models/pmv.js</span>
       </a>
     
@@ -7225,7 +7828,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv.js#L3-L22'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv.js#L3-L22'>
       <span>src/models/pmv.js</span>
       </a>
     
@@ -7377,7 +7980,7 @@ the operative temperature, for more information please consult the Standard.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pmv.js#L209-L244'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pmv.js#L209-L244'>
       <span>src/models/pmv.js</span>
       </a>
     
@@ -7596,7 +8199,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/a_pmv.js#L68-L89'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/a_pmv.js#L74-L96'>
       <span>src/models/a_pmv.js</span>
       </a>
     
@@ -7610,7 +8213,7 @@ an impact on the senses used to detect thermal comfort. This model uses an adapt
 coefficient (λ) representing the adaptive factors that affect the sense of thermal comfort.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='pre p1 fill-light mt0'>a_pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, a_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#a_pmvkwargs">A_pmvKwargs</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>a_pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, a_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#a_pmvkwargs">A_pmvKwargs</a>): <a href="#apmvresult">APmvResult</a></div>
   
   
 
@@ -7733,8 +8336,8 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        pmv - Predicted Mean Vote
+      <code><a href="#apmvresult">APmvResult</a></code>:
+        set containing results for the model
 
       
     
@@ -7759,7 +8362,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/a_pmv.js#L4-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/a_pmv.js#L10-L20'>
       <span>src/models/a_pmv.js</span>
       </a>
     
@@ -7832,6 +8435,83 @@ the applicability limits of the model.
     </div>
   </div>
   
+  <div class="border-bottom" id="apmvresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          APmvResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/a_pmv.js#L4-L8'>
+      <span>src/models/a_pmv.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>a_pmv</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Predicted Mean Vote
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
 </div>
 
   
@@ -7863,7 +8543,7 @@ the applicability limits of the model.
 <span class="hljs-keyword">const</span> wme = <span class="hljs-literal">undefined</span>,
 
 <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">a_pmv</span>(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result) <span class="hljs-comment">//output 0.48</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result) <span class="hljs-comment">//output { a_pmv: 0.48 }</span></pre>
     
   
 
@@ -7894,7 +8574,7 @@ the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/a_pmv.js#L143-L166'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/a_pmv.js#L150-L173'>
       <span>src/models/a_pmv.js</span>
       </a>
     
@@ -8097,7 +8777,7 @@ can be calculated using the function clo_dynamic_array in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/ankle_draft.js#L57-L90'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/ankle_draft.js#L57-L90'>
       <span>src/models/ankle_draft.js</span>
       </a>
     
@@ -8252,7 +8932,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/ankle_draft.js#L8-L13'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/ankle_draft.js#L8-L13'>
       <span>src/models/ankle_draft.js</span>
       </a>
     
@@ -8365,7 +9045,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/e_pmv.js#L71-L94'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/e_pmv.js#L77-L101'>
       <span>src/models/e_pmv.js</span>
       </a>
     
@@ -8380,7 +9060,7 @@ of the PMV model that includes an expectancy factor is introduced for use in non
 in warm climates <a href="#ref_26">[26]</a>.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='pre p1 fill-light mt0'>e_pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, e_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#e_pmvkwargs">E_pmvKwargs</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>e_pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, e_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#e_pmvkwargs">E_pmvKwargs</a>?): <a href="#epmvresult">EPmvResult</a></div>
   
   
 
@@ -8503,8 +9183,8 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        pmv - Predicted Mean Vote
+      <code><a href="#epmvresult">EPmvResult</a></code>:
+        set containing results for the model
 
       
     
@@ -8529,7 +9209,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/e_pmv.js#L4-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/e_pmv.js#L10-L20'>
       <span>src/models/e_pmv.js</span>
       </a>
     
@@ -8602,6 +9282,83 @@ are outside the applicability limits of the model.
     </div>
   </div>
   
+  <div class="border-bottom" id="epmvresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          EPmvResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/e_pmv.js#L4-L8'>
+      <span>src/models/e_pmv.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>e_pmv</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Predicted Mean Vote
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
 </div>
 
   
@@ -8635,7 +9392,7 @@ are outside the applicability limits of the model.
 <span class="hljs-keyword">const</span> e_coefficient = <span class="hljs-number">0.6</span>;
 
 <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">e_pmv</span>(tdb, tr, v_r, rh, met, clo_d, e_coefficient);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result) <span class="hljs-comment">// output 0.51</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result) <span class="hljs-comment">// output {e_pmv: 0.51}</span></pre>
     
   
 
@@ -8666,7 +9423,7 @@ are outside the applicability limits of the model.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/e_pmv.js#L151-L178'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/e_pmv.js#L158-L185'>
       <span>src/models/e_pmv.js</span>
       </a>
     
@@ -8872,7 +9629,7 @@ can be calculated using the function clo_dynamic_array in utilities.js.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/vertical_tmp_grad_ppd.js#L51-L88'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/vertical_tmp_grad_ppd.js#L51-L88'>
       <span>src/models/vertical_tmp_grad_ppd.js</span>
       </a>
     
@@ -9014,7 +9771,7 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/vertical_tmp_grad_ppd.js#L8-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/vertical_tmp_grad_ppd.js#L8-L14'>
       <span>src/models/vertical_tmp_grad_ppd.js</span>
       </a>
     
@@ -9045,14 +9802,14 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
     <div>
       
         <div class='space-bottom0'>
-          <span class='code bold'>PPD_vg</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          <span class='code bold'>ppd_vg</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
           : Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
 
           
         </div>
       
         <div class='space-bottom0'>
-          <span class='code bold'>Acceptability</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</code>
+          <span class='code bold'>acceptability</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</code>
           : The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
 is acceptable if PPD_ad is lower or equal than 5 %
 
@@ -9096,7 +9853,7 @@ is acceptable if PPD_ad is lower or equal than 5 %
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">vertical_tmp_grad_ppd</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">7</span>); <span class="hljs-comment">// returns {&#x27;PPD_vg&#x27;: 12.6, &#x27;Acceptability&#x27;: false}</span></pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">vertical_tmp_grad_ppd</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">7</span>); <span class="hljs-comment">// returns {&#x27;ppd_vg&#x27;: 12.6, &#x27;acceptability&#x27;: false}</span></pre>
     
   
 
@@ -9127,7 +9884,7 @@ is acceptable if PPD_ad is lower or equal than 5 %
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/use_fans_heatwave.js#L102-L232'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/use_fans_heatwave.js#L102-L232'>
       <span>src/models/use_fans_heatwave.js</span>
       </a>
     
@@ -9313,7 +10070,7 @@ This occurs when either the following variables reaches its maximum value:</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/use_fans_heatwave.js#L30-L39'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/use_fans_heatwave.js#L30-L39'>
       <span>src/models/use_fans_heatwave.js</span>
       </a>
     
@@ -9406,7 +10163,7 @@ False returns values regardless of the input values, default True
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/use_fans_heatwave.js#L8-L28'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/use_fans_heatwave.js#L8-L28'>
       <span>src/models/use_fans_heatwave.js</span>
       </a>
     
@@ -9642,7 +10399,7 @@ False returns values regardless of the input values, default True
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/clo_tout.js#L24-L32'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/clo_tout.js#L30-L39'>
       <span>src/models/clo_tout.js</span>
       </a>
     
@@ -9655,7 +10412,7 @@ temperature at 06:00 a.m <a href="#ref_4">[4]</a>.</p>
 clothing insulation Icl using this equation in mechanically conditioned
 buildings <a href="#ref_1">[1]</a>.</p>
 
-  <div class='pre p1 fill-light mt0'>clo_tout(tout: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"IP"</code> | <code>"SI"</code>)): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>clo_tout(tout: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"IP"</code> | <code>"SI"</code>)): <a href="#clotoutresult">CloToutResult</a></div>
   
   
 
@@ -9701,13 +10458,96 @@ or the IP (Imperial Units) system.
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        Representative clothing insulation Icl, [clo]
+      <code><a href="#clotoutresult">CloToutResult</a></code>:
+        set containing results for the model
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="clotoutresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          CloToutResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/clo_tout.js#L3-L7'>
+      <span>src/models/clo_tout.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>clo</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Representative clothing insulation Icl, [clo]
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -9752,7 +10592,7 @@ or the IP (Imperial Units) system.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/clo_tout.js#L55-L57'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/clo_tout.js#L62-L64'>
       <span>src/models/clo_tout.js</span>
       </a>
     
@@ -9862,7 +10702,7 @@ or the IP (Imperial Units) system.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/utci.js#L69-L126'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/utci.js#L69-L126'>
       <span>src/models/utci.js</span>
       </a>
     
@@ -10033,7 +10873,7 @@ outside the applicability limits of the model. The valid input ranges are
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/utci.js#L165-L230'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/utci.js#L165-L230'>
       <span>src/models/utci.js</span>
       </a>
     
@@ -10206,7 +11046,7 @@ outside the applicability limits of the model. The valid input ranges are
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/pet_steady.js#L50-L93'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pet_steady.js#L58-L101'>
       <span>src/models/pet_steady.js</span>
       </a>
     
@@ -10229,8 +11069,10 @@ solves the heat balances without accounting for heat storage in the human body.<
 proposed a correction of the original model, purging the errors in the
 PET calculation routine, and implementing a state-of-the-art vapour diffusion model.
 Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
+<p><strong>Warning:</strong> Some tests are currently failing for this function. Please refer to the test
+suite or the project's issue tracker for more details.</p>
 
-  <div class='pre p1 fill-light mt0'>pet_steady(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, position: (<code>1</code> | <code>2</code> | <code>3</code>), age: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sex: (<code>1</code> | <code>2</code>), weight: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, height: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  <div class='pre p1 fill-light mt0'>pet_steady(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, position: (<code>1</code> | <code>2</code> | <code>3</code>), age: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sex: (<code>1</code> | <code>2</code>), weight: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, height: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#petsteadyresult">PetSteadyResult</a></div>
   
   
 
@@ -10377,13 +11219,96 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        Steady-state PET under the given ambient conditions
+      <code><a href="#petsteadyresult">PetSteadyResult</a></code>:
+        set containing results for the model
 
       
     
   
   
+  
+    <div class='py1 quiet mt1 prose-big'>Related types</div>
+    <div class="clearfix">
+  
+  <div class="border-bottom" id="petsteadyresult">
+    <div class="clearfix small pointer">
+      <div class="py1 contain">
+        <span class="code strong strong levelIndex4">
+          PetSteadyResult
+        </span>
+      </div>
+    </div>
+    <div class="clearfix">
+      <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/pet_steady.js#L4-L8'>
+      <span>src/models/pet_steady.js</span>
+      </a>
+    
+  </div>
+  
+
+  
+  
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>pet</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : Steady-state PET under the given ambient conditions
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+    </div>
+  </div>
+  
+</div>
+
   
 
   
@@ -10395,7 +11320,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">pet_steady</span>(<span class="hljs-number">20</span>, <span class="hljs-number">20</span>, <span class="hljs-number">50</span>, <span class="hljs-number">0.15</span>, <span class="hljs-number">1.37</span>, <span class="hljs-number">0.5</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// 18.85</span></pre>
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result); <span class="hljs-comment">// {pet: 18.85}</span></pre>
     
   
 
@@ -10426,7 +11351,7 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/models/JOS3.js#L112-L1239'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/models/JOS3.js#L113-L1298'>
       <span>src/models/JOS3.js</span>
       </a>
     
@@ -10626,7 +11551,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/index.js#L15-L27'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/index.js#L15-L27'>
       <span>src/psychrometrics/index.js</span>
       </a>
     
@@ -10677,7 +11602,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/p_sat.js#L14-L51'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/p_sat.js#L14-L51'>
       <span>src/psychrometrics/p_sat.js</span>
       </a>
     
@@ -10760,7 +11685,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/p_sat_torr.js#L12-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/p_sat_torr.js#L12-L14'>
       <span>src/psychrometrics/p_sat_torr.js</span>
       </a>
     
@@ -10852,7 +11777,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/p_sat_torr.js#L28-L30'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/p_sat_torr.js#L28-L30'>
       <span>src/psychrometrics/p_sat_torr.js</span>
       </a>
     
@@ -10944,7 +11869,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/t_o.js#L15-L28'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/t_o.js#L15-L28'>
       <span>src/psychrometrics/t_o.js</span>
       </a>
     
@@ -11064,7 +11989,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/t_o.js#L44-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/t_o.js#L44-L58'>
       <span>src/psychrometrics/t_o.js</span>
       </a>
     
@@ -11184,7 +12109,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/enthalpy.js#L13-L23'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/enthalpy.js#L13-L23'>
       <span>src/psychrometrics/enthalpy.js</span>
       </a>
     
@@ -11276,7 +12201,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/t_wb.js#L11-L23'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/t_wb.js#L11-L23'>
       <span>src/psychrometrics/t_wb.js</span>
       </a>
     
@@ -11368,7 +12293,7 @@ the computational load.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/t_mrt.js#L37-L58'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/t_mrt.js#L37-L58'>
       <span>src/psychrometrics/t_mrt.js</span>
       </a>
     
@@ -11516,7 +12441,7 @@ been validated for globe sensors with a diameter between 0.04 and 0.15 m.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/t_mrt.js#L78-L109'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/t_mrt.js#L78-L109'>
       <span>src/psychrometrics/t_mrt.js</span>
       </a>
     
@@ -11656,7 +12581,7 @@ developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard <a href="
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/psy_ta_rh.js#L34-L50'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/psy_ta_rh.js#L34-L50'>
       <span>src/psychrometrics/psy_ta_rh.js</span>
       </a>
     
@@ -11743,7 +12668,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/psychrometrics/psy_ta_rh.js#L6-L14'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/psychrometrics/psy_ta_rh.js#L6-L14'>
       <span>src/psychrometrics/psy_ta_rh.js</span>
       </a>
     
@@ -11892,7 +12817,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/index.js#L21-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/index.js#L21-L34'>
       <span>src/utilities/index.js</span>
       </a>
     
@@ -11943,7 +12868,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L362-L375'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L362-L375'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12045,7 +12970,7 @@ relative humidity.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L393-L396'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L393-L396'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12149,7 +13074,7 @@ Vag = 0.3 (M - 1) (m/s)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L414-L417'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L414-L417'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12253,7 +13178,7 @@ Vag = 0.3 (M - 1) (m/s)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L447-L455'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L447-L455'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12369,7 +13294,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L476-L488'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L476-L488'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12485,7 +13410,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L513-L538'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L513-L538'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12587,7 +13512,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L554-L579'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L554-L579'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12689,7 +13614,7 @@ clo = Icl × (0.6 + 0.4/met)</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L670-L687'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L670-L687'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12808,7 +13733,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L702-L706'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L702-L706'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -12923,7 +13848,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/index.js#L21-L34'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/index.js#L21-L34'>
       <span>src/utilities/index.js</span>
       </a>
     
@@ -12974,7 +13899,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L763-L795'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L763-L795'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -13270,7 +14195,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L822-L845'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L822-L845'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -13370,7 +14295,7 @@ temperature dynamics are relatively minor, sich as the humid tropics.
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/8825a4f9e95b48d92fcd62161536db7031c99ecb/src/utilities/utilities.js#L915-L972'>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/rcqz/jsthermalcomfort/blob/719ae393f3024221367f76efe7105d408d548b2a/src/utilities/utilities.js#L915-L972'>
       <span>src/utilities/utilities.js</span>
       </a>
     
@@ -14118,6 +15043,28 @@ run subset of tests.</p>
     
   
 </section></div>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
           
         
           

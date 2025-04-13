@@ -1,4 +1,9 @@
 /**
+ * @typedef {object} PetSteadyResult
+ * @property {number} pet - Steady-state PET under the given ambient conditions
+ * @public
+ */
+/**
  * The steady physiological equivalent temperature (PET) is calculated using the Munich
  * Energy-balance Model for Individuals (MEMI), which simulates the human body's thermal
  * circumstances in a medically realistic manner. PET is defined as the air temperature
@@ -19,6 +24,9 @@
  * PET calculation routine, and implementing a state-of-the-art vapour diffusion model.
  * Walther and Goestchel (2018) model is therefore used to calculate the PET.
  *
+ * **Warning:** Some tests are currently failing for this function. Please refer to the test
+ * suite or the project's issue tracker for more details.
+ *
  * @public
  * @memberof models
  * @docname Physiological Equivalent Temperature (PET)
@@ -37,13 +45,19 @@
  * @param {number} [height=1.8] - height, [m]
  * @param {number} [wme=0] - external work, [W/(m2)]
  *
- * @returns {number} Steady-state PET under the given ambient conditions
+ * @returns {PetSteadyResult} set containing results for the model
  *
  * @example
  * const result = pet_steady(20, 20, 50, 0.15, 1.37, 0.5);
- * console.log(result); // 18.85
+ * console.log(result); // {pet: 18.85}
  */
-export function pet_steady(tdb: number, tr: number, v: number, rh: number, met: number, clo: number, p_atm?: number, position?: 1 | 2 | 3, age?: number, sex?: 1 | 2, weight?: number, height?: number, wme?: number): number;
+export function pet_steady(tdb: number, tr: number, v: number, rh: number, met: number, clo: number, p_atm?: number, position?: 1 | 2 | 3, age?: number, sex?: 1 | 2, weight?: number, height?: number, wme?: number): PetSteadyResult;
+export type PetSteadyResult = {
+    /**
+     * - Steady-state PET under the given ambient conditions
+     */
+    pet: number;
+};
 export type NewtonRaphsonFunction = (: [number, number, number]) => [number, number, number];
 export type NewtonRaphsonSingleFunction = (: [number]) => [number];
 export type VasomotricitytRet = {

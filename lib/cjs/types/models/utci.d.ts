@@ -32,9 +32,12 @@
  * console.log(utci(25, 25, 1.0, 50, 'si', true))
  * // will print {utci: 24.6, stress_category: "no thermal stress"}
  */
-export function utci(tdb: number, tr: number, v: number, rh: number, units?: "SI" | "IP", return_stress_category?: boolean, limit_inputs?: boolean): number | {
+export function utci(tdb: number, tr: number, v: number, rh: number, units?: "SI" | "IP", return_stress_category?: boolean, limit_inputs?: boolean): {
     utci: number;
     stress_category: string;
+} | {
+    utci: number;
+    stress_category?: undefined;
 };
 /**
  * Determines the Universal Thermal Climate Index (UTCI) (Supports array type). The UTCI is the

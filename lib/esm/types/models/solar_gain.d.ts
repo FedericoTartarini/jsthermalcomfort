@@ -43,17 +43,17 @@
  * clothing or skin color of the occupants is available.
  * Note: Short-wave absorptivity typically ranges from 0.57 to 0.84, depending
  * on skin and clothing color. More information is available in Blum (1945).
- * @param {"standing" | "supine" | "seated"} [posture="seated"] - Default 'seated' list of available options 'standing', 'supine' or 'seated'
+ * @param {"standing" | "supine" | "sitting"} [posture="sitting"] - Default 'sitting' list of available options 'standing', 'supine' or 'sitting'
  * @param {number} [floor_reflectance=0.7] - Floor refectance. It is assumed to be constant and equal to 0.6.
  *
  * @returns {SolarGainReturnType}
  *
  * @example
  * import {solar_gain} from "jsthermalcomfort/models";
- * const results = solar_gain(0, 120, 800, 0.5, 0.7, "seated");
+ * const results = solar_gain(0, 120, 800, 0.5, 0.7, "sitting");
  * console.log(results); // {erf: 42.9, delta_mrt: 10.3}
  */
-export function solar_gain(sol_altitude: number, sharp: number, sol_radiation_dir: number, sol_transmittance: number, f_svv: number, f_bes: number, asw?: number, posture?: "standing" | "supine" | "seated", floor_reflectance?: number): SolarGainReturnType;
+export function solar_gain(sol_altitude: number, sharp: number, sol_radiation_dir: number, sol_transmittance: number, f_svv: number, f_bes: number, asw?: number, posture?: "standing" | "supine" | "sitting", floor_reflectance?: number): SolarGainReturnType;
 /**
  *
  * @param {number[]} arr

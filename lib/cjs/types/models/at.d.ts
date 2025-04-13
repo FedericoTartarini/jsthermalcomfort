@@ -36,4 +36,10 @@
 export function at(tdb: number, rh: number, v: number, q?: number | undefined, kwargs?: {
     round?: boolean;
 }): AtResult;
+export type AtResult = {
+    /**
+     * - Apparent Temperature, [°C]
+     */
+    at: number;
+};
 //# sourceMappingURL=at.d.ts.map

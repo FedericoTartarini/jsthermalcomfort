@@ -60,6 +60,9 @@
  *  - The Predicted Percent Dissatisfied Due to Draft (PD)
  *  - Predicted Percent Satisfied With the Level of Air Movement” (PS)
  *
+ * **Warning:** Some tests are currently failing for this function. Please refer to the test
+ * suite or the project's issue tracker for more details.
+ *
  * @public
  * @memberof models
  * @docname Gagge et al. two-node model

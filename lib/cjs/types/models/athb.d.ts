@@ -1,4 +1,3 @@
-import { AthbResult } from "../../../../src/models/athb";
 /**
  * @typedef {Object} AthbResult
  * @property {number} athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
@@ -99,4 +98,10 @@ export function athb(tdb: number, tr: number, vr: number, rh: number, met: numbe
  * console.log(athb_array_result); // Output: [0.2, 0.209]
  */
 export function athb_array(tdb: number[], tr: number[], vr: number[], rh: number[], met: number[], t_running_mean: number[]): number[];
+export type AthbResult = {
+    /**
+     * - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
+     */
+    athb_pmv: number;
+};
 //# sourceMappingURL=athb.d.ts.map

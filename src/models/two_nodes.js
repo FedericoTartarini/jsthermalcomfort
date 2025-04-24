@@ -1,5 +1,5 @@
-import { round } from "../utilities/utilities.js";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
+import { round } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} TwoNodesReturnType
@@ -65,6 +65,9 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
  *  - The Predicted Thermal Sensation (TSENS)
  *  - The Predicted Percent Dissatisfied Due to Draft (PD)
  *  - Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ * 
+ * **Warning:** Some tests are currently failing for this function. Please refer to the test
+ * suite or the project's issue tracker for more details.
  * 
  * @public
  * @memberof models

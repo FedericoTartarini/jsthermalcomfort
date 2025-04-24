@@ -3,9 +3,6 @@
  * @property {number} pet - Steady-state PET under the given ambient conditions
  * @public
  */
-
-import { PetSteadyResult } from "../../../../src/models/pet_steady";
-
 /**
  * The steady physiological equivalent temperature (PET) is calculated using the Munich
  * Energy-balance Model for Individuals (MEMI), which simulates the human body's thermal
@@ -26,6 +23,9 @@ import { PetSteadyResult } from "../../../../src/models/pet_steady";
  * proposed a correction of the original model, purging the errors in the
  * PET calculation routine, and implementing a state-of-the-art vapour diffusion model.
  * Walther and Goestchel (2018) model is therefore used to calculate the PET.
+ *
+ * **Warning:** Some tests are currently failing for this function. Please refer to the test
+ * suite or the project's issue tracker for more details.
  *
  * @public
  * @memberof models
@@ -52,8 +52,14 @@ import { PetSteadyResult } from "../../../../src/models/pet_steady";
  * console.log(result); // {pet: 18.85}
  */
 export function pet_steady(tdb: number, tr: number, v: number, rh: number, met: number, clo: number, p_atm?: number, position?: 1 | 2 | 3, age?: number, sex?: 1 | 2, weight?: number, height?: number, wme?: number): PetSteadyResult;
-export type NewtonRaphsonFunction = (t: [number, number, number]) => [number, number, number];
-export type NewtonRaphsonSingleFunction = (t: [number]) => [number];
+export type PetSteadyResult = {
+    /**
+     * - Steady-state PET under the given ambient conditions
+     */
+    pet: number;
+};
+export type NewtonRaphsonFunction = (: [number, number, number]) => [number, number, number];
+export type NewtonRaphsonSingleFunction = (: [number]) => [number];
 export type VasomotricitytRet = {
     /**
      * - Blood flow rate, [kg/m2/h]

@@ -1,7 +1,7 @@
 /**
  * @typedef {Object} VerTmpGradReturnType - a result set containing the predicted precentage of dissatisfied and the acceptability
- * @property {number} PPD_vg Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
- * @property {boolean} Acceptability The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
+ * @property {number} ppd_vg Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
+ * @property {boolean} acceptability The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
  * is acceptable if PPD_ad is lower or equal than 5 %
  * @public
  */
@@ -38,7 +38,7 @@
  * @returns {VerTmpGradReturnType} Object with results of the PPD with vertical temprature gradient.
  *
  * @example
- * const result = vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7); // returns {'PPD_vg': 12.6, 'Acceptability': false}
+ * const result = vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7); // returns {'ppd_vg': 12.6, 'acceptability': false}
  */
 export function vertical_tmp_grad_ppd(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, vertical_tmp_grad: number, units?: "SI" | "IP"): VerTmpGradReturnType;
 /**
@@ -48,11 +48,11 @@ export type VerTmpGradReturnType = {
     /**
      * Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
      */
-    PPD_vg: number;
+    ppd_vg: number;
     /**
      * The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
      * is acceptable if PPD_ad is lower or equal than 5 %
      */
-    Acceptability: boolean;
+    acceptability: boolean;
 };
 //# sourceMappingURL=vertical_tmp_grad_ppd.d.ts.map

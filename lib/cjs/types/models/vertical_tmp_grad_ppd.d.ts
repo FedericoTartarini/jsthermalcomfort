@@ -48,11 +48,11 @@ export type VerTmpGradReturnType = {
     /**
      * Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
      */
-    PPD_vg: number;
+    ppd_vg: number;
     /**
      * The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
      * is acceptable if PPD_ad is lower or equal than 5 %
      */
-    Acceptability: boolean;
+    acceptability: boolean;
 };
 //# sourceMappingURL=vertical_tmp_grad_ppd.d.ts.map

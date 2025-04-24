@@ -1,9 +1,9 @@
+import { p_sat } from "../psychrometrics/p_sat.js";
 import {
   body_surface_area,
   check_standard_compliance,
   round,
 } from "../utilities/utilities.js";
-import { p_sat } from "../psychrometrics/p_sat.js";
 
 /**
  * @typedef {Object} PhsReturnType
@@ -74,6 +74,10 @@ import { p_sat } from "../psychrometrics/p_sat.js";
  * of skin temperature, heat accumulation associated with the metabolic rate, maximum
  * evaporative heat flow at the skin surface, predicted sweat rate, predicted evaporative
  * heat flow, and rectal temperature.
+ *
+ *
+ *  **Warning:** Some tests are currently failing for this function. Please refer to the test
+ *  suite or the project's issue tracker for more details.
  *
  * @public
  * @memberof models

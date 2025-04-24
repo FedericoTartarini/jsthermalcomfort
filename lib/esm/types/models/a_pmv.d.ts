@@ -1,4 +1,9 @@
 /**
+ * @typedef {object} APmvResult
+ * @property {number} a_pmv - Predicted Mean Vote
+ * @public
+ */
+/**
  * @typedef {Object} A_pmvKwargs
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
@@ -46,7 +51,7 @@
  * @param {number} [wme=0] - External work
  * @param {A_pmvKwargs} kwargs - additional arguments
  *
- * @returns {number} pmv - Predicted Mean Vote
+ * @returns {APmvResult} set containing results for the model
  *
  * @example
  * const tdb = 24,
@@ -61,11 +66,7 @@
  * const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
  * console.log(result) //output { a_pmv: 0.48 }
  */
-export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, a_coefficient: number, wme?: number, kwargs?: A_pmvKwargs): aPmvResult;
-/**
- * @typedef {object} aPmvResult
- * @property {number} a_pmv - Adaptive Predicted Mean Vote
- */
+export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, a_coefficient: number, wme?: number, kwargs?: A_pmvKwargs): APmvResult;
 /**
  * Returns Adaptive Predicted Mean Vote (aPMV) {@link #ref_25|[25]}.
  * This index was developed by Yao, R. et al. (2009). The model takes into account factors
@@ -119,6 +120,12 @@ export function a_pmv(tdb: number, tr: number, vr: number, rh: number, met: numb
  * console.log(result) //output [0.48, 1.09]
  */
 export function a_pmv_array(tdb: number[], tr: number[], vr: number[], rh: number[], met: number[], clo: number[], a_coefficient: number[], wme: number[], kwargs?: A_pmvKwargs): number[];
+export type APmvResult = {
+    /**
+     * - Predicted Mean Vote
+     */
+    a_pmv: number;
+};
 export type A_pmvKwargs = {
     /**
      * - select the SI (International System of Units) or the IP (Imperial Units) system.

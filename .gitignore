@@ -90,3 +90,7 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Lib/doc files, generated at build time
+/lib
+/docs

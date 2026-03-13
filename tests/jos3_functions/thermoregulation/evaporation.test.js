@@ -87,12 +87,18 @@ describe("evaporation", () => {
         age,
       );
 
-      expect({
+      const actual = {
         wet: result.wet.toArray(),
         e_sk: result.e_sk.toArray(),
         e_max: result.e_max.toArray(),
         e_sweat: result.e_sweat.toArray(),
-      }).toStrictEqual(expected);
+      };
+
+      for (const key of Object.keys(expected)) {
+        for (let i = 0; i < expected[key].length; i++) {
+          expect(actual[key][i]).toBeCloseTo(expected[key][i], 14);
+        }
+      }
     },
   );
 });

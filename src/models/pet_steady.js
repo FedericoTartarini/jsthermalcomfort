@@ -182,7 +182,7 @@ function sweat_rate(t_body) {
     sig_body = 0.0;
   }
 
-  let m_rsw = 304.94 * Math.pow(10, -3) * sig_body;
+  let m_rsw = 304.94 * sig_body;
 
   // 500 g/m^2/h is the upper sweat rate limit
   if (m_rsw > 500) {
@@ -264,7 +264,7 @@ function solve_pet(
 
   // Calculation of the Burton surface increase coefficient, k = 0.31 for Hoeppe:
   const fcl = 1 + 0.31 * _clo; // Increase heat exchange surface depending on clothing level
-  const f_a_cl =
+  let f_a_cl =
     (173.51 * _clo - 2.36 - 100.76 * _clo * _clo + 19.28 * _clo ** 3.0) / 100;
   const a_clo = a_dubois * f_a_cl + a_dubois * (fcl - 1.0); // clothed body surface area
 
@@ -315,19 +315,14 @@ function solve_pet(
   // Clothed fraction of the body approximation
   const r_cl = _clo / 6.45; // Conversion in [m2.K/W]
   let y = 0;
-  if (f_a_cl > 1.0) {
-    f_a_cl = 1.0;
-  }
+  f_a_cl = Math.min(f_a_cl, 1.0);
   if (_clo >= 2.0) {
     y = 1.0;
-  }
-  if (0.6 < _clo < 2.0) {
+  } else if (_clo > 0.6) {
     y = (height - 0.2) / height;
-  }
-  if (0.6 >= _clo > 0.3) {
+  } else if (_clo > 0.3) {
     y = 0.5;
-  }
-  if (0.3 >= _clo > 0.0) {
+  } else if (_clo > 0.0) {
     y = 0.1;
   }
   // calculation of the clothing radius depending on the clothing level (6.28 = 2*
@@ -351,7 +346,7 @@ function solve_pet(
   const he_diff = hc * lr; // diffusion coefficient of air layer
   const fecl = 1 / (1 + 0.92 * hc * r_cl); // Burton efficiency factor
   let e_max = he_diff * fecl * (p_v_sk - vpa); // maximum diffusion at skin surface
-  if (e_max < 0.001 && e_max >= 0) {
+  if (e_max === 0) {
     // added this otherwise e_req / e_max cannot be calculated
     e_max = 0.001;
   }

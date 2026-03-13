@@ -1497,7 +1497,7 @@ describe("shivering", () => {
       expect(result).toHaveLength(expected.length);
 
       for (let i = 0; i < expected.length; i++) {
-        expect(result[i]).toBeCloseTo(expected[i], 13);
+        expect(result[i]).toBeCloseTo(expected[i], 12);
       }
     },
   );

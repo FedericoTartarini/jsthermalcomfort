@@ -72,8 +72,9 @@ export function utci(
   v,
   rh,
   units = "SI",
-  return_stress_category = false,
+  return_stress_category = true,
   limit_inputs = true,
+  round_output = true,
 ) {
   let kwargs;
   let ret;
@@ -115,14 +116,14 @@ export function utci(
     utci_approx = units_converter(kwargs, "SI")["tmp"];
   }
 
-  utci_approx = round(utci_approx, 1);
-  if (return_stress_category) {
-    return {
-      utci: utci_approx,
-      stress_category: mapping(utci_approx),
-    };
+  if (round_output) {
+    utci_approx = round(utci_approx, 1);
   }
-  return { utci: utci_approx };
+
+  return {
+    utci: utci_approx,
+    stress_category: mapping(utci_approx),
+  };
 }
 
 /**
@@ -168,8 +169,9 @@ export function utci_array(
   v,
   rh,
   units = "SI",
-  return_stress_category = false,
+  return_stress_category = true,
   limit_inputs = true,
+  round_output = true,
 ) {
   let kwargs;
   let ret;
@@ -219,14 +221,14 @@ export function utci_array(
     }
   }
 
-  utci_approx = utci_approx.map((_utci) => round(_utci, 1));
-  if (return_stress_category) {
-    return {
-      utci: utci_approx,
-      stress_category: mapping_arr(utci_approx),
-    };
+  if (round_output) {
+    utci_approx = utci_approx.map((_utci) => round(_utci, 1));
   }
-  return utci_approx;
+
+  return {
+    utci: utci_approx,
+    stress_category: mapping_arr(utci_approx),
+  };
 }
 
 /**

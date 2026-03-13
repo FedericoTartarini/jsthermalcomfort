@@ -1,27 +1,19 @@
 /**
  * @typedef {Object} Pmv_ppdKwargs
- * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
+ * @property {'SI'|'IP'} [units] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @property {boolean} [limit_inputs] - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
- *
- *    The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
- *    0 < vr [m/s] < 2, 1 < met [met] < 4, and 0 < clo [clo] < 1.5.
- *    The ISO 7730 2005 limits are 10 < tdb [°C] < 30, 10 < tr [°C] < 40,
- *    0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, and -2 < PMV < 2.
- * @property { boolean } airspeed_control - This only applies if standard = "ASHRAE".
- *
- *    Default is True. By default, it is assumed that the occupant has control over the airspeed.
- *    In this case, the ASHRAE 55 Standard does not impose any airspeed limits.
- *    On the other hand, if the occupant has no control over the airspeed,
- *    the ASHRAE 55 imposes an upper limit for v which varies as a function of
- *    the operative temperature, for more information please consult the Standard.
+ * @property {boolean} [airspeed_control] - This only applies if standard = "ASHRAE".
+ * @property {boolean} [round_output] - If true (default), rounds output values.
  * @public
  */
 /**
  * @typedef {Object} Pmv_ppdReturns
- * @property { number } pmv - Predicted Mean Vote
- * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {number} pmv - Predicted Mean Vote
+ * @property {number} ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {string} tsv - Thermal Sensation Vote category
+ * @property {boolean|number} [compliance] - ASHRAE only: true if -0.5 < PMV < 0.5
  * @public
  */
 /**
@@ -103,8 +95,10 @@
 export function pmv_ppd(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, wme?: number, standard?: "ISO" | "ASHRAE", kwargs?: Pmv_ppdKwargs): Pmv_ppdReturns;
 /**
  * @typedef {Object} Pmv_ppd_arrayReturns
- * @property { number[] } pmv - Predicted Mean Vote
- * @property { number[] } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {number[]} pmv - Predicted Mean Vote
+ * @property {number[]} ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {string[]} tsv - Thermal Sensation Vote categories
+ * @property {(boolean|number)[]} [compliance] - ASHRAE only
  * @public
  */
 /**
@@ -200,28 +194,21 @@ export type Pmv_ppdKwargs = {
     /**
      * - select the SI (International System of Units) or the IP (Imperial Units) system.
      */
-    units: "SI" | "IP";
+    units?: "SI" | "IP";
     /**
      * - Default is True. By default, if the inputs are outside the standard applicability
      * limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
      * the applicability limits of the model.
-     *
-     * The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
-     * 0 < vr [m/s] < 2, 1 < met [met] < 4, and 0 < clo [clo] < 1.5.
-     * The ISO 7730 2005 limits are 10 < tdb [°C] < 30, 10 < tr [°C] < 40,
-     * 0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, and -2 < PMV < 2.
      */
-    limit_inputs: boolean;
+    limit_inputs?: boolean;
     /**
      * - This only applies if standard = "ASHRAE".
-     *
-     * Default is True. By default, it is assumed that the occupant has control over the airspeed.
-     * In this case, the ASHRAE 55 Standard does not impose any airspeed limits.
-     * On the other hand, if the occupant has no control over the airspeed,
-     * the ASHRAE 55 imposes an upper limit for v which varies as a function of
-     * the operative temperature, for more information please consult the Standard.
      */
-    airspeed_control: boolean;
+    airspeed_control?: boolean;
+    /**
+     * - If true (default), rounds output values.
+     */
+    round_output?: boolean;
 };
 export type Pmv_ppdReturns = {
     /**
@@ -232,6 +219,14 @@ export type Pmv_ppdReturns = {
      * - Predicted Percentage of Dissatisfied occupants, [%]
      */
     ppd: number;
+    /**
+     * - Thermal Sensation Vote category
+     */
+    tsv: string;
+    /**
+     * - ASHRAE only: true if -0.5 < PMV < 0.5
+     */
+    compliance?: boolean | number;
 };
 export type Pmv_ppd_arrayReturns = {
     /**
@@ -242,5 +237,13 @@ export type Pmv_ppd_arrayReturns = {
      * - Predicted Percentage of Dissatisfied occupants, [%]
      */
     ppd: number[];
+    /**
+     * - Thermal Sensation Vote categories
+     */
+    tsv: string[];
+    /**
+     * - ASHRAE only
+     */
+    compliance?: (boolean | number)[];
 };
 //# sourceMappingURL=pmv_ppd.d.ts.map

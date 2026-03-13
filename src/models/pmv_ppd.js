@@ -7,31 +7,49 @@ import {
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
 
+const _thermal_sensation_thresholds = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5];
+const _thermal_sensation_labels = [
+  "Cold",
+  "Cool",
+  "Slightly Cool",
+  "Neutral",
+  "Slightly Warm",
+  "Warm",
+  "Hot",
+];
+
+/**
+ * Maps a PMV value to a thermal sensation string.
+ * @param {number} pmv
+ * @returns {string}
+ */
+function _thermal_sensation(pmv) {
+  if (isNaN(pmv)) return "NaN";
+  for (let i = 0; i < _thermal_sensation_thresholds.length; i++) {
+    if (pmv < _thermal_sensation_thresholds[i]) {
+      return _thermal_sensation_labels[i];
+    }
+  }
+  return _thermal_sensation_labels[_thermal_sensation_labels.length - 1];
+}
+
 /**
  * @typedef {Object} Pmv_ppdKwargs
- * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
+ * @property {'SI'|'IP'} [units] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @property {boolean} [limit_inputs] - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
  *    the applicability limits of the model.
- *
- *    The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
- *    0 < vr [m/s] < 2, 1 < met [met] < 4, and 0 < clo [clo] < 1.5.
- *    The ISO 7730 2005 limits are 10 < tdb [°C] < 30, 10 < tr [°C] < 40,
- *    0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, and -2 < PMV < 2.
- * @property { boolean } airspeed_control - This only applies if standard = "ASHRAE".
- *
- *    Default is True. By default, it is assumed that the occupant has control over the airspeed.
- *    In this case, the ASHRAE 55 Standard does not impose any airspeed limits.
- *    On the other hand, if the occupant has no control over the airspeed,
- *    the ASHRAE 55 imposes an upper limit for v which varies as a function of
- *    the operative temperature, for more information please consult the Standard.
+ * @property {boolean} [airspeed_control] - This only applies if standard = "ASHRAE".
+ * @property {boolean} [round_output] - If true (default), rounds output values.
  * @public
  */
 
 /**
  * @typedef {Object} Pmv_ppdReturns
- * @property { number } pmv - Predicted Mean Vote
- * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {number} pmv - Predicted Mean Vote
+ * @property {number} ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {string} tsv - Thermal Sensation Vote category
+ * @property {boolean|number} [compliance] - ASHRAE only: true if -0.5 < PMV < 0.5
  * @public
  */
 
@@ -126,6 +144,7 @@ export function pmv_ppd(
     units: "SI",
     limit_inputs: true,
     airspeed_control: true,
+    round_output: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
 
@@ -191,16 +210,26 @@ export function pmv_ppd(
     }
   }
 
-  return {
-    pmv: round(pmv, 2),
-    ppd: round(ppd, 1),
-  };
+  const tsv = _thermal_sensation(pmv);
+  const compliance =
+    standard === "ASHRAE" ? (isNaN(pmv) ? NaN : pmv > -0.5 && pmv < 0.5) : undefined;
+
+  if (kwargs.round_output) {
+    pmv = round(pmv, 2);
+    ppd = round(ppd, 1);
+  }
+
+  const result = { pmv, ppd, tsv };
+  if (compliance !== undefined) result.compliance = compliance;
+  return result;
 }
 
 /**
  * @typedef {Object} Pmv_ppd_arrayReturns
- * @property { number[] } pmv - Predicted Mean Vote
- * @property { number[] } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {number[]} pmv - Predicted Mean Vote
+ * @property {number[]} ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property {string[]} tsv - Thermal Sensation Vote categories
+ * @property {(boolean|number)[]} [compliance] - ASHRAE only
  * @public
  */
 
@@ -295,6 +324,7 @@ export function pmv_ppd_array(
     units: "SI",
     limit_inputs: true,
     airspeed_control: true,
+    round_output: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
 
@@ -391,15 +421,26 @@ export function pmv_ppd_array(
     }
   }
 
-  for (let i = 0; i < pmv_array.length; ++i) {
-    pmv_array[i] = round(pmv_array[i], 2);
-    ppd_array[i] = round(ppd_array[i], 1);
+  const tsv_array = pmv_array.map((v) => _thermal_sensation(v));
+  const compliance_array =
+    standard === "ASHRAE"
+      ? pmv_array.map((v) => (isNaN(v) ? NaN : v > -0.5 && v < 0.5))
+      : undefined;
+
+  if (kwargs.round_output) {
+    for (let i = 0; i < pmv_array.length; ++i) {
+      pmv_array[i] = round(pmv_array[i], 2);
+      ppd_array[i] = round(ppd_array[i], 1);
+    }
   }
 
-  return {
+  const result = {
     pmv: pmv_array,
     ppd: ppd_array,
+    tsv: tsv_array,
   };
+  if (compliance_array !== undefined) result.compliance = compliance_array;
+  return result;
 }
 
 /**

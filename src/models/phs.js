@@ -15,8 +15,9 @@ import {
  * @property {number} d_lim_loss_50 - maximum allowable exposure time for water loss, mean subject, [minutes]
  * @property {number} d_lim_loss_95 - maximum allowable exposure time for water loss, 95% of the working population, [minutes]
  * @property {number} d_lim_t_re - maximum allowable exposure time for heat storage, [minutes]
- * @property {number} water_loss_watt - maximum water loss in watts, [W]
- * @property {number} water_loss - maximum water loss, [g]
+ * @property {number} sweat_rate_watt - instantaneous regulatory sweat rate at skin, [W·m⁻²]
+ * @property {number} sweat_loss_g - maximum water loss, [g]
+ * @property {number} evap_load_wm2_min - accumulated evaporative load per area
  * @public
  */
 
@@ -57,7 +58,9 @@ import {
  * @property {number} t_cr
  * @property {number} t_re
  * @property {number} t_cr_eq
- * @property {number} sweat_rate
+ * @property {number} t_sk_t_cr_wg
+ * @property {number} sweat_rate_watt
+ * @property {number} evap_load_wm2_min
  * @property {boolean} round
  */
 
@@ -87,10 +90,10 @@ import {
  * @param {number} tr - mean radiant temperature, default in [°C]
  * @param {number} v - air speed, default in [m/s]
  * @param {number} rh - relative humidity, [%]
- * @param {number} met - metabolic rate, [W/(m2)]
+ * @param {number} met - metabolic rate, [met]
  * @param {number} clo - clothing insulation, [clo]
- * @param {1 | 2 | 3} posture - a numeric value presenting posture of person [sitting=1, standing=2, crouching=3]
- * @param {number} [wme=0] - external work, [W/(m2)] default 0
+ * @param {number | "sitting" | "standing" | "crouching"} posture - a numeric or string value presenting posture of person [sitting=1, standing=2, crouching=3]
+ * @param {number} [wme=0] - external work, [met] default 0
  * @param {PhsKwargs} [kwargs] - additional arguments
  *
  * @returns {PhsReturnType} object with results of phs
@@ -116,12 +119,24 @@ export function phs(tdb, tr, v, rh, met, clo, posture, wme = 0, kwargs = {}) {
     t_cr: 36.8,
     t_re: undefined,
     t_cr_eq: undefined,
-    sweat_rate: 0,
+    t_sk_t_cr_wg: 0.3,
+    sweat_rate_watt: 0,
+    evap_load_wm2_min: 0,
     round: true,
   };
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
   joint_kwargs.t_re = joint_kwargs.t_re || joint_kwargs.t_cr;
   joint_kwargs.t_cr_eq = joint_kwargs.t_cr_eq || joint_kwargs.t_cr;
+
+  if (typeof posture === "string") {
+    const p = posture.toLowerCase();
+    if (p === "sitting") posture = 1;
+    else if (p === "standing") posture = 2;
+    else if (p === "crouching") posture = 3;
+  }
+
+  met = met * 58.15;
+  wme = wme * 58.15;
 
   const warnings = check_standard_compliance("ISO7933", {
     tdb,
@@ -167,8 +182,9 @@ export function phs(tdb, tr, v, rh, met, clo, posture, wme = 0, kwargs = {}) {
       d_lim_loss_50: round(result.d_lim_loss_50, 1),
       d_lim_loss_95: round(result.d_lim_loss_95, 1),
       d_lim_t_re: round(result.d_lim_t_re, 1),
-      water_loss_watt: round(result.water_loss_watt, 1),
-      water_loss: round(result.water_loss, 1),
+      sweat_rate_watt: round(result.sweat_rate_watt, 1),
+      sweat_loss_g: round(result.sweat_loss_g, 1),
+      evap_load_wm2_min: round(result.evap_load_wm2_min, 1),
     };
   }
   return result;
@@ -260,7 +276,7 @@ function _calculate_variables_for_loop(v, met, posture, clo, tdb, p_a, kwargs) {
 
   const a_dubois =
     0.202 * Math.pow(kwargs.weight, 0.425) * Math.pow(kwargs.height, 0.725);
-  const sp_heat = (57.83 * kwargs.weight) / a_dubois;
+  const sp_heat = (58.15 * kwargs.weight) / a_dubois;
   const d_lim_t_re = 0;
   const d_lim_loss_50 = 0;
   const d_lim_loss_95 = 0;
@@ -379,11 +395,8 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     const_sw,
   } = variables;
 
-  let { duration, t_sk, t_re, t_cr, t_cr_eq, sweat_rate, drink } = kwargs;
+  let { duration, t_sk, t_re, t_cr, t_cr_eq, sweat_rate_watt, t_sk_t_cr_wg, evap_load_wm2_min, drink } = kwargs;
 
-  let sw_tot = sweat_rate;
-
-  let t_sk_t_cr_wg = 0.3;
   let sw_tot_g = 0.0;
 
   for (let time = 1; time <= duration; time++) {
@@ -438,6 +451,9 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     let radiation = fcl * h_r * (t_cl - tr);
     // maximum evaporative heat flow at the skin surface [W/m2]
     let e_max = (p_sk - p_a) / r_t_dyn;
+    if (e_max === 0) {
+      e_max = 0.001;
+    }
     // required evaporative heat flow [W/m2]
     let e_req =
       met - d_stored_eq - wme - c_res - e_res - convection - radiation;
@@ -458,19 +474,20 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
       if (w_req > 1) {
         e_v_eff = (2 - w_req) ** 2 / 2;
       }
+      e_v_eff = Math.max(0.05, e_v_eff);
       sw_req = e_req / e_v_eff;
       if (sw_req > sw_max) {
         sw_req = sw_max;
       }
     }
-    sweat_rate = sweat_rate * const_sw + sw_req * (1 - const_sw);
+    sweat_rate_watt = sweat_rate_watt * const_sw + sw_req * (1 - const_sw);
 
     let e_p;
-    if (sweat_rate <= 0) {
+    if (sweat_rate_watt <= 0) {
       e_p = 0; // predicted evaporative heat flow [W/m2]
-      sweat_rate = 0;
+      sweat_rate_watt = 0;
     } else {
-      let k = e_max / sweat_rate;
+      let k = e_max / Math.max(sweat_rate_watt, 1e-6);
       let wp = 1;
       if (k >= 0.5) {
         wp = -k + Math.sqrt(k * k + 2);
@@ -507,18 +524,19 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     if (d_lim_t_re == 0 && t_re >= 38) {
       d_lim_t_re = time;
     }
-    sw_tot = sw_tot + sweat_rate + e_res;
-    sw_tot_g = (sw_tot * 2.67 * a_dubois) / 1.8 / 60;
+    evap_load_wm2_min = evap_load_wm2_min + sweat_rate_watt + e_res;
+    sw_tot_g = (evap_load_wm2_min * 2.67 * a_dubois) / 1.8 / 60;
     if (d_lim_loss_50 == 0 && sw_tot_g >= d_max_50) {
       d_lim_loss_50 = time;
     }
     if (d_lim_loss_95 == 0 && sw_tot_g >= d_max_95) {
       d_lim_loss_95 = time;
     }
-    if (drink == 0) {
-      d_lim_loss_95 = d_lim_loss_95 * 0.6;
-      d_lim_loss_50 = d_lim_loss_95;
-    }
+  }
+
+  if (drink == 0) {
+    d_lim_loss_95 = d_lim_loss_95 * 0.6;
+    d_lim_loss_50 = d_lim_loss_95;
   }
 
   if (d_lim_loss_50 === 0) {
@@ -542,7 +560,8 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     d_lim_loss_50,
     d_lim_loss_95,
     d_lim_t_re,
-    water_loss_watt: sweat_rate,
-    water_loss: sw_tot_g,
+    sweat_rate_watt,
+    sweat_loss_g: sw_tot_g,
+    evap_load_wm2_min,
   };
 }

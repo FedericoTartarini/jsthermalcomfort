@@ -132,7 +132,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set to(arg: math.Matrix);
+    set to(inp: number | number[] | object | math.Matrix);
     /**
      * Operative temperature [°C].
      *
@@ -142,7 +142,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set rh(arg: math.Matrix);
+    set rh(inp: number | number[] | object | math.Matrix);
     /**
      * Relative humidity [%].
      *
@@ -152,7 +152,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set v(arg: math.Matrix);
+    set v(inp: number | number[] | object | math.Matrix);
     /**
      * Air velocity [m/s].
      *
@@ -162,7 +162,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set clo(arg: math.Matrix);
+    set clo(inp: number | number[] | object | math.Matrix);
     /**
      * Clothing insulation [clo].
      *
@@ -172,7 +172,7 @@ export class JOS3 {
     /**
      * @param inp {number}
      */
-    set par(arg: number);
+    set par(inp: number);
     /**
      * Physical activity ratio [-].This equals the ratio of metabolic rate to basal metabolic rate. par of sitting quietly is 1.2.
      *
@@ -238,7 +238,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set tdb(arg: math.Matrix);
+    set tdb(inp: number | number[] | object | math.Matrix);
     /**
      * Dry-bulb air temperature.
      *
@@ -248,7 +248,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set tr(arg: math.Matrix);
+    set tr(inp: number | number[] | object | math.Matrix);
     /**
      * Mean radiant temperature [°C].
      *
@@ -258,7 +258,7 @@ export class JOS3 {
     /**
      * @param inp {number | string}
      */
-    set posture(arg: string);
+    set posture(inp: number | string);
     /**
      * Current JOS3 posture.
      *
@@ -268,7 +268,7 @@ export class JOS3 {
     /**
      * @param inp {math.Matrix}
      */
-    set body_temp(arg: math.Matrix);
+    set body_temp(inp: math.Matrix);
     /**
      * All segment temperatures of JOS-3.
      *
@@ -314,7 +314,7 @@ export class JOS3 {
     /**
      * @param inp {number | number[] | object | math.Matrix}
      */
-    set t_skin(arg: math.Matrix);
+    set t_skin(inp: number | number[] | object | math.Matrix);
     /**
      * Skin temperatures by the local body segments [°C].
      *
@@ -374,7 +374,7 @@ export class JOS3 {
      *
      * @return {object}
      */
-    get results(): any;
+    get results(): object;
     /**
      * Basal metabolic rate.
      * @returns {number}

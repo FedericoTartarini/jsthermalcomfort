@@ -49,7 +49,7 @@
  * const CE_IP = cooling_effect(77, 77, 1.64, 50, 1, 0.6, "IP");
  * console.log(CE_IP); // Output: {ce: 3.74}
  */
-export function cooling_effect(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, wme?: number, units?: 'SI' | 'IP'): CoolingEffectResult;
+export function cooling_effect(tdb: number, tr: number, vr: number, rh: number, met: number, clo: number, wme?: number, units?: "SI" | "IP"): CoolingEffectResult;
 export function brent(f: any, lowerBound: any, upperBound: any, tolerance?: number, maxIterations?: number): any;
 export type CoolingEffectResult = {
     /**

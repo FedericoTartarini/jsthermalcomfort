@@ -17,10 +17,9 @@ the downstream Svelte 5 calculation layer.
 
 Validation gate (all three required):
 
-1. Jest tests pass (≥ 4 cases)
-2. Cross-validated against `pythermalcomfort` — batch (submodule data)
-   and spot-check (≥ 4 hand-selected inputs with Python-generated
-   reference values)
+1. Jest tests pass (≥ 4 cases), with reference values sourced from the
+   shared `validation-data-comfort-models` repository
+2. Cross-validated against the shared validation data
 3. Listed in Section 4 of this file
 
 ---
@@ -53,44 +52,39 @@ Full suite run: `node --experimental-vm-modules ./node_modules/.bin/jest`
 
 ### Tier 1 — Independently cross-validated by our team
 
-These functions have been validated against `pythermalcomfort v3.9.1`
-using both batch validation (submodule data) and spot-check validation
-(hand-selected inputs with Python-generated reference values).
+These functions have been validated against the shared
+`validation-data-comfort-models` repository using the same online
+data-loading mechanism as the existing test suite.
 
 #### `pmv_ppd_ashrae`
 
 - **Wrapper:** Delegates to `pmv_ppd()` with standard fixed to `'ASHRAE'`
-- **Reference:** pythermalcomfort v3.9.1 (`pmv_ppd_ashrae`)
-- **Jest tests:** 5/5 passed (`tests/models/pmv_ppd_ashrae.test.js`)
-  — 4 spot-check cases + return-shape validation
-- **Spot-check:** 4/4 passed (reference_values.json, tolerance PMV ±0.05, PPD ±0.5%)
-- **Batch:** 31/35 rows passed (tolerances aligned with submodule's own
-  declared values: PMV ±0.5, PPD ±0.05). The 4 remaining failures are
-  array-input rows — the scalar `pmv_ppd()` does not handle arrays;
-  these require `pmv_ppd_array()`. Not a JS bug.
+- **Reference:** shared `validation-data-comfort-models` repository
+- **Jest tests:** 9/9 passed (`tests/models/pmv_ppd_ashrae.test.js`)
+  — 9 ASHRAE SI scalar rows from the shared repository (including 1
+  row with `limit_inputs=false`), loaded via `testDataUrls.pmvPpd`
+  using the same mechanism as `pmv_ppd.test.js`
+- **Tolerances:** from the shared data's own declarations (PMV ±0.1,
+  PPD ±1), applied via `validateResult()` from `testUtils.js`
 
 #### `pmv_ppd_iso`
 
 - **Wrapper:** Delegates to `pmv_ppd()` with standard fixed to `'ISO'`
-- **Reference:** pythermalcomfort v3.9.1 (`pmv_ppd_iso`)
-- **Jest tests:** 5/5 passed (`tests/models/pmv_ppd_iso.test.js`)
-  — 3 spot-check cases + NaN out-of-range test + return-shape validation
-- **Spot-check:** 3/4 passed. The 4th case (tdb=35) is a known
-  behavioural difference: JS returns PMV 3.58 when `limit_inputs=false`,
-  while Python v3.9.1 returns null because ISO clamps PMV to ±2
-  regardless. With the default `limit_inputs=true`, JS correctly returns
-  NaN and the wrapper test passes.
-- **Batch:** Same underlying `pmv_ppd()` as ASHRAE; batch results shared
-  (31/35 passed, 4 array-input rows excluded).
+- **Reference:** shared `validation-data-comfort-models` repository
+- **Jest tests:** 14/14 passed (`tests/models/pmv_ppd_iso.test.js`)
+  — 13 ISO SI scalar rows from the shared repository (including 1 row
+  with `limit_inputs=false`), loaded via `testDataUrls.pmvPpd` using
+  the same mechanism as `pmv_ppd.test.js`, plus 1 NaN boundary test
+  (tdb=35°C exceeds ISO 7730 valid range)
+- **Tolerances:** from the shared data's own declarations (PMV ±0.1,
+  PPD ±1), applied via `validateResult()` from `testUtils.js`
 
 #### `utci` (numerical values only)
 
 - **Function:** `utci(tdb, tr, v, rh)` — returns UTCI in °C
-- **Reference:** pythermalcomfort v3.9.1 (`utci`)
-- **Jest tests:** existing `tests/models/utci.test.js` passes
-- **Spot-check:** 6/6 passed (reference_values.json, tolerance ±0.1 °C)
-- **Batch:** 10/13 rows passed. The 3 failures are IP-unit and
-  array-input rows that require `utci_array()`, not the scalar `utci()`.
+- **Reference:** shared `validation-data-comfort-models` repository
+- **Jest tests:** existing `tests/models/utci.test.js` passes — loads
+  data from `testDataUrls.utci` using the same mechanism as other tests
 - **Caveat:** The `mapping()` function that assigns stress-category
   strings is **buggy** (see Section 5). Numerical UTCI values are
   correct; category strings are not. The frontend must implement its
@@ -99,8 +93,7 @@ using both batch validation (submodule data) and spot-check validation
 ### Tier 2 — Original tests pass, not yet independently cross-validated
 
 These functions have passing Jest tests from the original codebase but
-have not been independently cross-validated by our team against a known
-pythermalcomfort version with hand-selected reference values.
+have not been independently reviewed by our team.
 
 | Function | Test file | Status |
 |----------|-----------|--------|
@@ -175,8 +168,9 @@ Section 5.
 | `tests/models/comftest.js` | Fetches from GitHub raw URLs | Fragile — requires network |
 | `tests/test_utilities.js` | Reads from local submodule | Reliable — local files |
 
-New tests should use hardcoded reference values (spot-check) or local
-submodule files (batch), never network fetches.
+New wrapper tests use the same online data-loading mechanism as the
+existing test suite (`loadTestData` from `testUtils.js` via
+`testDataUrls` from `comftest.js`), ensuring consistency.
 
 ### PMV batch tolerance
 
@@ -194,7 +188,5 @@ to be passed through kwargs (as the existing Jest tests do via
 
 When `limit_inputs` is set to `false`, the JS `pmv_ppd()` function
 computes and returns raw PMV/PPD values even for inputs outside the
-ISO 7730 range (e.g. tdb=35 returns PMV 3.58). Python v3.9.1 returns
-null for the same inputs because ISO clamps PMV to ±2 regardless of the
-`limit_inputs` flag. With the default `limit_inputs=true`, both
-implementations return NaN/null consistently.
+ISO 7730 range (e.g. tdb=35 returns PMV 3.58). With the default
+`limit_inputs=true`, out-of-range inputs correctly return NaN.

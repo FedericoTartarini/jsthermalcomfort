@@ -31,6 +31,9 @@
     "type": "git",
     "url": "https://github.com/FedericoTartarini/jsthermalcomfort.git"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "keywords": [
     "thermal comfort",
     "heat stress",

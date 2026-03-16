@@ -103,16 +103,10 @@ If you are proposing a feature:
 To set up jsthermalcomfort for local development:
 
 1. Fork jsthermalcomfort (look for the “Fork” button).
-2. Clone your fork locally. Fetch and pull all the updates from the master branch before you do anything:
+2. Clone your fork locally. Fetch and pull all the updates from the main branch before you do anything:
 
    ```bash
    git clone git@github.com:FedericoTartarini/jsthermalcomfort.git
-   ```
-
-   We use git submodules to pull validation data for the tests, to ensure tests are successful please run:
-
-   ```bash
-   git submodule update --init --recursive
    ```
 
 3. Create a branch for local development. The naming rule for new branch are, as follows:

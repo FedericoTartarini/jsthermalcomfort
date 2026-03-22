@@ -13,7 +13,6 @@ import { wc } from "./wc.js";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en.js";
 import { at } from "./at.js";
 import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
-// ASHRAE 55 and ISO 7730 named wrappers — consistent with pythermalcomfort API
 import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
 import { adaptive_ashrae, adaptive_ashrae_array } from "./adaptive_ashrae.js";

@@ -13,6 +13,8 @@ import { wc } from "./wc.js";
 import { adaptive_en, adaptive_en_array } from "./adaptive_en.js";
 import { at } from "./at.js";
 import { pmv_ppd, pmv_ppd_array } from "./pmv_ppd.js";
+import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
+import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
 import { adaptive_ashrae, adaptive_ashrae_array } from "./adaptive_ashrae.js";
 import { solar_gain } from "./solar_gain.js";
 import { cooling_effect } from "./cooling_effect.js";
@@ -58,6 +60,8 @@ export default {
   pet_steady,
   pmv_ppd,
   pmv_ppd_array,
+  pmv_ppd_ashrae,
+  pmv_ppd_iso,
   pmv,
   pmv_array,
   solar_gain,

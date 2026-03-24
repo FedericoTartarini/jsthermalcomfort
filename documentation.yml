@@ -3,15 +3,22 @@ toc:
     file: docs_theme/overview.md
   - name: Installation
     file: docs_theme/installation.md
+  - name: Contributing
+    file: docs_theme/contributing.md
+  - name: Authors
+    file: docs_theme/authors.md
+  - name: Surveys
+    file: docs_theme/surveys.md
+  - name: References
+    file: docs_theme/references.md
   - name: Examples and Tutorials
     file: docs_theme/examples.md
+  - name: Changelog
+    file: docs_theme/changelog.md
   - name: Functions Documentation
     children:
       - models
       - psychrometrics
       - utilities
-      - reference_values
-  - name: Contributing
-    file: docs_theme/contributing.md
-  - name: References
-    file: docs_theme/references.md
+      - clo
+      - met

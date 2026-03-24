@@ -10,7 +10,7 @@ When [reporting a bug](https://github.com/FedericoTartarini/jsthermalcomfort/iss
 
 ## Documentation improvements
 
-If you find any issue in our online [documentation](https://federicotartarini.github.io/jsthermalcomfort/) please open
+If you find any issue in our online documentation please open
 an [issue](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
 
 jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs,

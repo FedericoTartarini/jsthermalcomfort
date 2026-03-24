@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
-import template from "lodash/template.js";
+import lodash from "lodash";
+const { template } = lodash;
 import GithubSlugger from "github-slugger";
 import { util } from "documentation";
 import hljs from "highlight.js";
@@ -76,6 +77,78 @@ function getSlug(str) {
     slugs[str] = slugger.slug(str);
   }
   return slugs[str];
+}
+
+const displayNameMap = {
+  // Models
+  "heat_index": "Heat Index (HI)",
+  "phs": "Predicted Heat Strain (PHS)",
+  "humidex": "Humidex",
+  "net": "Normal Effective Temperature (NET)",
+  "wbgt": "Wet Bulb Globe Temperature (WBGT)",
+  "discomfort_index": "Discomfort Index (DI)",
+  "discomfort_index_array": "Discomfort Index — Array (DI)",
+  "two_nodes": "Two-Node Model (Gagge)",
+  "two_nodes_array": "Two-Node Model — Array",
+  "set_tmp": "Standard Effective Temperature (SET)",
+  "set_tmp_array": "Standard Effective Temperature — Array",
+  "wc": "Wind Chill Index (WCI)",
+  "adaptive_en": "Adaptive EN-16798",
+  "adaptive_en_array": "Adaptive EN-16798 — Array",
+  "at": "Apparent Temperature (AT)",
+  "pmv_ppd": "PMV-PPD Model",
+  "pmv_ppd_array": "PMV-PPD — Array",
+  "adaptive_ashrae": "Adaptive ASHRAE-55",
+  "adaptive_ashrae_array": "Adaptive ASHRAE-55 — Array",
+  "solar_gain": "Solar Gain (MRT Delta)",
+  "cooling_effect": "Cooling Effect (CE)",
+  "athb": "Adaptive Thermal Heat Balance (ATHB)",
+  "athb_array": "Adaptive Thermal Heat Balance — Array",
+  "pmv": "Predicted Mean Vote (PMV)",
+  "pmv_array": "Predicted Mean Vote — Array",
+  "a_pmv": "Adjusted PMV (aPMV)",
+  "a_pmv_array": "Adjusted PMV — Array",
+  "ankle_draft": "Ankle Draft",
+  "e_pmv": "Extended PMV (ePMV)",
+  "e_pmv_array": "Extended PMV — Array",
+  "vertical_tmp_grad_ppd": "Vertical Temperature Gradient PPD",
+  "use_fans_heatwaves": "Use of Fans During Heatwaves",
+  "clo_tout": "Clothing Insulation (Tout)",
+  "clo_tout_array": "Clothing Insulation (Tout) — Array",
+  "utci": "Universal Thermal Climate Index (UTCI)",
+  "utci_array": "Universal Thermal Climate Index — Array",
+  "pet_steady": "Physiological Equivalent Temperature (PET)",
+  "JOS3": "JOS-3 Thermoregulation Model",
+  // Psychrometrics
+  "p_sat": "Saturation Vapor Pressure (p_sat)",
+  "p_sat_torr": "Saturation Vapor Pressure in Torr",
+  "p_sat_torr_array": "Saturation Vapor Pressure in Torr — Array",
+  "t_o": "Operative Temperature (t_o)",
+  "t_o_array": "Operative Temperature — Array",
+  "enthalpy": "Enthalpy",
+  "t_wb": "Wet Bulb Temperature (t_wb)",
+  "t_mrt": "Mean Radiant Temperature (t_mrt)",
+  "t_mrt_array": "Mean Radiant Temperature — Array",
+  "psy_ta_rh": "Psychrometric Properties (psy_ta_rh)",
+  // Utilities
+  "body_surface_area": "Body Surface Area (BSA)",
+  "v_relative": "Relative Air Speed (v_relative)",
+  "v_relative_array": "Relative Air Speed — Array",
+  "clo_dynamic": "Dynamic Clothing Insulation",
+  "clo_dynamic_array": "Dynamic Clothing Insulation — Array",
+  "units_converter": "Units Converter",
+  "units_converter_array": "Units Converter — Array",
+  "running_mean_outdoor_temperature": "Running Mean Outdoor Temperature",
+  "f_svv": "Sky Vault View Factor (f_svv)",
+  // Clo
+  "clo_typical_ensembles": "Typical Ensembles (Clo)",
+  "clo_individual_garments": "Individual Garments (Clo)",
+  // Met
+  "met_typical_tasks": "Typical Tasks (Met)",
+};
+
+function getDisplayName(name) {
+  return displayNameMap[name] || name;
 }
 
 function getDocname(prefix, section, formatters) {
@@ -219,6 +292,40 @@ export default async function (comments, config) {
     }
   }
 
+  // Pre-process notes (Changelog, Surveys) to split them by headers for TOC
+  const splitNoteByHeaders = (noteName, level = 2) => {
+    const note = comments.find(c => c.kind === 'note' && (c.name === noteName || (c.path && c.path[0].name === noteName)));
+    if (!note || !note.description || !note.description.children) return [];
+    
+    const sections = [];
+    let currentSection = {
+      kind: 'note',
+      name: noteName,
+      description: { type: 'root', children: [] },
+      path: [{ name: noteName, kind: 'note' }]
+    };
+    
+    note.description.children.forEach(child => {
+      if (child.type === 'heading' && child.depth === level) {
+        if (currentSection.description.children.length > 0) sections.push(currentSection);
+        const name = child.children[0].value;
+        currentSection = {
+          kind: 'note',
+          name: name,
+          description: { type: 'root', children: [] },
+          path: [{ name: name, kind: 'note' }]
+        };
+      } else {
+        currentSection.description.children.push(child);
+      }
+    });
+    if (currentSection.description.children.length > 0) sections.push(currentSection);
+    return sections;
+  };
+
+  const changelogSections = splitNoteByHeaders('Changelog', 2);
+  const surveySections = splitNoteByHeaders('Surveys', 2);
+
   for (let comment of comments) {
     walkComments(comment);
     if (isReferenceSection(comment)) {
@@ -228,6 +335,7 @@ export default async function (comments, config) {
 
   var formatters = createFormatters(linkerStack.link);
   var customMarkdown = createCustomMarkdownFormatter(linkerStack.link);
+
 
   hljs.configure(config.hljs || {});
 
@@ -290,6 +398,7 @@ export default async function (comments, config) {
         }
         return hljs.highlight(example, { language: "js" }).value;
       },
+      getDisplayName,
     },
   };
 
@@ -315,12 +424,109 @@ export default async function (comments, config) {
     sharedImports,
   );
 
-  const string = pageTemplate({ docs: comments, config });
+  // Flatten comments recursively to find all functions/typedefs
+  const allFlattened = [];
+  function flatten(items) {
+    if (!items) return;
+    items.forEach(item => {
+      allFlattened.push(item);
+      if (item.members) {
+        flatten(item.members.static);
+        flatten(item.members.instance);
+        flatten(item.members.global);
+        flatten(item.members.inner);
+      }
+    });
+  }
+  flatten(comments);
 
-  if (!config.output) {
-    return string;
+  // Partition comments
+  const partitioned = {
+    models: allFlattened.filter(c => c.memberof === 'models'),
+    psychrometrics: allFlattened.filter(c => c.memberof === 'psychrometrics'),
+    utilities: allFlattened.filter(c => c.memberof === 'utilities'),
+    clo: allFlattened.filter(c => c.memberof === 'reference_values' && (c.name.includes('clo') || (c.docname && c.docname.includes('clo')))),
+    met: allFlattened.filter(c => c.memberof === 'reference_values' && (c.name.includes('met') || (c.docname && c.docname.includes('met')))),
+    notes: allFlattened.filter(c => c.kind === 'note')
+  };
+
+  console.log('Partitioned counts:', {
+    models: partitioned.models.length,
+    psychrometrics: partitioned.psychrometrics.length,
+    utilities: partitioned.utilities.length,
+    clo: partitioned.clo.length,
+    met: partitioned.met.length
+  });
+
+  // Search data collection
+  const searchData = [];
+
+  function extractText(ast) {
+    if (!ast) return "";
+    if (Array.isArray(ast)) return ast.map(extractText).join(" ");
+    if (ast.type === 'text') return ast.value || "";
+    if (ast.children) return ast.children.map(extractText).join(" ");
+    return "";
   }
 
+  const pages = [
+    { name: "index.html", docs: splitNoteByHeaders('Overview', 2), title: 'Overview', type: 'root', pathToRoot: '' },
+    { name: "installation.html", docs: splitNoteByHeaders('Installation', 2), title: 'Installation', type: 'root', pathToRoot: '' },
+    { name: "contributing.html", docs: splitNoteByHeaders('Contributing', 2), title: 'Contributing', type: 'root', pathToRoot: '' },
+    { name: "authors.html", docs: splitNoteByHeaders('Authors', 2), title: 'Authors', type: 'root', pathToRoot: '' },
+    { name: "documentation/models.html", docs: partitioned.models, title: 'Models', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/psychrometrics.html", docs: partitioned.psychrometrics, title: 'Psychrometrics', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/utilities_functions.html", docs: partitioned.utilities, title: 'Utilities functions', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/clo.html", docs: partitioned.clo, title: 'Clo reference values', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/met.html", docs: partitioned.met, title: 'Met reference values', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/surveys.html", docs: surveySections.length ? surveySections : splitNoteByHeaders('Surveys', 2), title: 'Surveys', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/references.html", docs: splitNoteByHeaders('References', 2), title: 'References', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/examples.html", docs: splitNoteByHeaders('Examples and Tutorials', 2), title: 'Examples', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/changelog.html", docs: changelogSections.length ? changelogSections : splitNoteByHeaders('Changelog', 2), title: 'Changelog', type: 'doc', pathToRoot: '../' },
+    { name: "documentation/search.html", docs: [], title: 'Search', type: 'search', pathToRoot: '../' },
+    { name: "documentation/index.html", docs: [], title: 'Documentation', type: 'doc_index', pathToRoot: '../' }
+  ];
+
   await copyDir(__dirname + "/assets/", config.output + "/assets/");
-  await fs.writeFile(config.output + "/index.html", string, "utf8");
+  await fs.mkdir(path.join(config.output, "documentation"), { recursive: true });
+
+  for (const page of pages) {
+    console.log(`Rendering page: ${page.name}, title: ${page.title}, type: ${page.type}`);
+    const string = pageTemplate({ 
+      docs: page.docs, 
+      config, 
+      pageTitle: page.title, 
+      pageType: page.type,
+      pathToRoot: page.pathToRoot,
+      allDocs: comments,
+      partitioned,
+      navigation: page.docs // Fallback for documentation.yml structures
+    });
+    await fs.writeFile(path.join(config.output, page.name), string, "utf8");
+
+    // Add to search index (excluding search page itself)
+    if (page.type !== 'search') {
+      let content = "";
+      if (Array.isArray(page.docs)) {
+        page.docs.forEach(doc => {
+          content += (doc.name || "") + " " + extractText(doc.description) + " ";
+          if (doc.members) {
+            const allMembers = [...(doc.members.static || []), ...(doc.members.instance || []), ...(doc.members.global || [])];
+            allMembers.forEach(m => {
+              content += (m.name || "") + " " + extractText(m.description) + " ";
+            });
+          }
+        });
+      }
+      
+      searchData.push({
+        title: page.title || page.name,
+        url: page.name,
+        content: content.trim()
+      });
+    }
+  }
+
+  // Write search data
+  await fs.writeFile(path.join(config.output, "search-data.json"), JSON.stringify(searchData), "utf8");
 }

@@ -107,31 +107,35 @@ function preOpen() {
 
 var split_left = document.querySelector('#split-left');
 var split_right = document.querySelector('#split-right');
-var split_parent = split_left.parentNode;
-var cw_with_sb = split_left.clientWidth;
-split_left.style.overflow = 'hidden';
-var cw_without_sb = split_left.clientWidth;
-split_left.style.overflow = '';
 
-Split(['#split-left', '#split-right'], {
-  elementStyle: function (dimension, size, gutterSize) {
-    return {
-      'flex-basis': 'calc(' + size + '% - ' + gutterSize + 'px)'
-    };
-  },
-  gutterStyle: function (dimension, gutterSize) {
-    return {
-      'flex-basis': gutterSize + 'px'
-    };
-  },
-  gutterSize: 20,
-  sizes: [33, 67]
-});
+if (split_left && split_right) {
+  var split_parent = split_left.parentNode;
+  var cw_with_sb = split_left.clientWidth;
+  split_left.style.overflow = 'hidden';
+  var cw_without_sb = split_left.clientWidth;
+  split_left.style.overflow = '';
+
+  Split(['#split-left', '#split-right'], {
+    elementStyle: function (dimension, size, gutterSize) {
+      return {
+        'flex-basis': 'calc(' + size + '% - ' + gutterSize + 'px)'
+      };
+    },
+    gutterStyle: function (dimension, gutterSize) {
+      return {
+        'flex-basis': gutterSize + 'px'
+      };
+    },
+    gutterSize: 20,
+    sizes: [33, 67]
+  });
+}
 
 // Chrome doesn't remember scroll position properly so do it ourselves.
 // Also works on Firefox and Edge.
 
 function updateState() {
+  if (!split_left || !split_right) return;
   history.replaceState(
     {
       left_top: split_left.scrollTop,
@@ -146,13 +150,14 @@ function loadState(ev) {
     // Edge doesn't replace change history.state on popstate.
     history.replaceState(ev.state, document.title);
   }
-  if (history.state) {
+  if (history.state && split_left && split_right) {
     split_left.scrollTop = history.state.left_top;
     split_right.scrollTop = history.state.right_top;
   }
 }
 
 window.addEventListener('load', function () {
+  if (!split_left || !split_right) return;
   // Restore after Firefox scrolls to hash.
   setTimeout(function () {
     loadState();
@@ -166,3 +171,38 @@ window.addEventListener('load', function () {
 });
 
 window.addEventListener('popstate', loadState);
+
+// Mobile Sidebar Toggle Fix
+document.addEventListener('DOMContentLoaded', function() {
+  function toggleSidebar(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    document.body.classList.toggle('sidebar-open');
+  }
+
+  // Attach to all potential toggle buttons
+  var toggles = document.querySelectorAll('.primary-toggle, .navbar-toggler, .sidebar-toggle');
+  toggles.forEach(function(btn) {
+    btn.addEventListener('click', toggleSidebar);
+  });
+
+  // Close sidebar when clicking outside (on the backdrop)
+  document.addEventListener('click', function(e) {
+    if (document.body.classList.contains('sidebar-open')) {
+      var sidebar = document.querySelector('#pst-mobile-sidebar');
+      var isToggle = e.target.closest('.primary-toggle, .navbar-toggler, .sidebar-toggle');
+      if (sidebar && !sidebar.contains(e.target) && !isToggle) {
+        document.body.classList.remove('sidebar-open');
+      }
+    }
+  });
+
+  // Close sidebar on escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.body.classList.contains('sidebar-open')) {
+      document.body.classList.remove('sidebar-open');
+    }
+  });
+});

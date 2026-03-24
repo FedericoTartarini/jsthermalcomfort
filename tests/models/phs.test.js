@@ -56,6 +56,7 @@ describe("phs", () => {
           inputs.clo,
           inputs.posture,
           inputs.wme,
+          "7933-2004",
           inputs,
         );
 

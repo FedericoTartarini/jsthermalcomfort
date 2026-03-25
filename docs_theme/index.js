@@ -1,3 +1,11 @@
+/**
+ * JSDoc Theme for jsthermalcomfort
+ *
+ * This file handles the generation of the documentation site using documentation.js.
+ * It partitions JSDoc comments into logical sections (Models, Psychrometrics, Utilities),
+ * maps internal function names to display titles, and renders EJS templates into HTML pages.
+ */
+
 import fs from "fs/promises";
 import path from "path";
 import lodash from "lodash";
@@ -14,6 +22,9 @@ import html from "remark-html";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Standard JavaScript types that shouldn't be linked to custom documentation pages.
+ */
 const javascriptTypes = new Set([
   "string",
   "number",
@@ -26,6 +37,9 @@ const javascriptTypes = new Set([
   "t", // templates
 ]);
 
+/**
+ * Creates a custom markdown formatter for documentation.js.
+ */
 function createCustomMarkdownFormatter(getHref) {
   const rerouteLinks = _rerouteLinks.bind(undefined, getHref);
   return (ast) => {
@@ -40,6 +54,9 @@ function createCustomMarkdownFormatter(getHref) {
 
 const { LinkerStack, createFormatters } = util;
 
+/**
+ * Recursively copies a directory.
+ */
 async function copyDir(sorce, dest) {
   await fs.mkdir(dest, { recursive: true });
   let entries = await fs.readdir(sorce, { withFileTypes: true });
@@ -54,11 +71,17 @@ async function copyDir(sorce, dest) {
   }
 }
 
+/**
+ * Checks if a section represents a Type definition.
+ */
 function isType(section) {
   if (section.type === undefined) return false;
   return section.type.type === "NameExpression";
 }
 
+/**
+ * Checks if a section represents a Function.
+ */
 function isFunction(section) {
   return (
     section.kind === "function" ||
@@ -72,6 +95,9 @@ function isFunction(section) {
 const slugger = new GithubSlugger();
 const slugs = {};
 
+/**
+ * Generates a unique slug for a string.
+ */
 function getSlug(str) {
   if (slugs[str] === undefined) {
     slugs[str] = slugger.slug(str);
@@ -79,6 +105,13 @@ function getSlug(str) {
   return slugs[str];
 }
 
+/**
+ * Display Name Mapping
+ *
+ * IMPORTANT: If you add a new model or function to the project, you MUST add its
+ * internal name and desired display title to this dictionary to ensure it appears
+ * correctly in the Documentation and Table of Contents.
+ */
 const displayNameMap = {
   // Models
   heat_index: "Heat Index (HI)",

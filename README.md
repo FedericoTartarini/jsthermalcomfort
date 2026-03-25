@@ -35,7 +35,7 @@ npm install jsthermalcomfort
 
 If you want to use jsthermalcomfort package without installing it on your local machine, you can import with:
 
-[`https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/`](https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/)
+[`https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/`](https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/)
 
 Example:
 
@@ -44,7 +44,7 @@ import {
   models,
   utilities,
   pschymetrics,
-} from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/index.js";
+} from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js";
 ```
 
 You can also import it in the website directly, and caution that you need to mark the script as module:
@@ -55,7 +55,7 @@ You can also import it in the website directly, and caution that you need to mar
     models,
     utilities,
     pschymetrics,
-  } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/index.js";
+  } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js";
 </script>
 ```
 
@@ -110,7 +110,6 @@ To set up jsthermalcomfort for local development:
    ```
 
 3. Create a branch for local development. The naming rule for new branch are, as follows:
-
    - If this update is for a new feature Feature/feature_name_here
    - If this update is for bug fix Fix/bug_name_here
    - If this update is for documentation Documentation/doc_name_here
@@ -124,7 +123,6 @@ To set up jsthermalcomfort for local development:
    Now you can make your changes locally.
 
 4. When you’re done making changes run all tests using Jest:
-
    - Install dependencies
 
    ```bash
@@ -141,6 +139,15 @@ To set up jsthermalcomfort for local development:
    npm run format
    ```
 
+   - A pre-commit hook now runs automatically on every commit and executes:
+
+   ```bash
+   npm run check:format
+   npm run build
+   npm test
+   ```
+
+   If one of these checks fails, the commit is blocked until the issue is fixed.
    - Commit your changes:
 
    ```bash

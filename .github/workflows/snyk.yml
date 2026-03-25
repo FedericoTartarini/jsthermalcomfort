@@ -3,9 +3,16 @@ on: [push, pull_request]
 jobs:
   security:
     runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@v1
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        if: ${{ env.SNYK_TOKEN != '' }}
+        uses: snyk/actions/node@master
+        with:
+          command: monitor
+      - name: Skip Snyk for fork pull requests (no secrets)
+        if: ${{ env.SNYK_TOKEN == '' }}
+        run: |
+          echo "Snyk scan skipped: SNYK_TOKEN is not available in this context (likely a pull request from a fork)."

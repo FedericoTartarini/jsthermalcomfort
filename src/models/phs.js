@@ -115,7 +115,6 @@ export function phs(
   model = "7933-2023",
   kwargs = {},
 ) {
-
   const defaults_kwargs = {
     i_mst: 0.38,
     a_p: 0.54,
@@ -500,7 +499,6 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     // Saturated water vapour pressure at the surface of the skin
     let p_sk = 0.6105 * Math.exp((17.27 * t_sk) / (t_sk + 237.3));
     let t_cl = tr + 0.1; // clothing surface temperature
-
 
     let h_r;
     while (true) {

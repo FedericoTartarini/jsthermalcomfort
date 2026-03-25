@@ -494,12 +494,37 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
-      .pst-search-placeholder {
+      .pst-search-no-results {
         padding: 2rem;
         text-align: center;
         color: var(--pst-color-text-muted);
       }
-      
+
+      /* Logo Styling */
+      .logo__title {
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+        color: var(--pst-color-text-base) !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        display: block !important;
+      }
+      .navbar-brand.logo {
+        display: flex !important;
+        align-items: center !important;
+        text-decoration: none !important;
+        min-width: 200px !important;
+      }
+      @media (max-width: 991.98px) {
+        .logo__title {
+            font-size: 1rem !important;
+        }
+        .navbar-brand.logo {
+            min-width: auto !important;
+            margin-left: 0.5rem !important;
+        }
+      }
+
       .search-result-page-item {
         margin-bottom: 2rem;
       }
@@ -583,7 +608,7 @@
         <div class="col-lg-3 navbar-header-items__start">
           <div class="navbar-item">
             <a class="navbar-brand logo" href="<%= pathToRoot %>index.html">
-              <p class="title logo__title"><%- config['project-name'] %> <%- config['project-version'] %></p>
+              <p class="title logo__title"><%- config['project-name'] || 'jsthermalcomfort' %> <%- config['project-version'] || '' %></p>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>

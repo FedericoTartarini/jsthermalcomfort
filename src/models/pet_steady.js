@@ -325,6 +325,11 @@ function solve_pet(
   } else if (_clo > 0.0) {
     y = 0.1;
   }
+  // Ensure y is non-zero before using it in radius calculations, in particular
+  // for _clo <= 0 (nude case), to avoid division by zero.
+  if (y === 0) {
+    y = 0.1;
+  }
   // calculation of the clothing radius depending on the clothing level (6.28 = 2*
   // pi !)
   const r2 = (a_dubois * (fcl - 1.0 + f_a_cl)) / (6.28 * height * y); // External radius

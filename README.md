@@ -110,6 +110,7 @@ To set up jsthermalcomfort for local development:
    ```
 
 3. Create a branch for local development. The naming rule for new branch are, as follows:
+
    - If this update is for a new feature Feature/feature_name_here
    - If this update is for bug fix Fix/bug_name_here
    - If this update is for documentation Documentation/doc_name_here
@@ -123,6 +124,7 @@ To set up jsthermalcomfort for local development:
    Now you can make your changes locally.
 
 4. When you’re done making changes run all tests using Jest:
+
    - Install dependencies
 
    ```bash
@@ -148,6 +150,7 @@ To set up jsthermalcomfort for local development:
    ```
 
    If one of these checks fails, the commit is blocked until the issue is fixed.
+
    - Commit your changes:
 
    ```bash

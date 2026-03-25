@@ -112,14 +112,9 @@ export function phs(
   clo,
   posture,
   wme = 0,
-  modelOrKwargs = "7933-2023",
+  model = "7933-2023",
   kwargs = {},
 ) {
-  let model = modelOrKwargs;
-  if (typeof modelOrKwargs === "object" && modelOrKwargs !== null) {
-    kwargs = modelOrKwargs;
-    model = kwargs.model || "7933-2023";
-  }
 
   const defaults_kwargs = {
     i_mst: 0.38,
@@ -506,8 +501,6 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     let p_sk = 0.6105 * Math.exp((17.27 * t_sk) / (t_sk + 237.3));
     let t_cl = tr + 0.1; // clothing surface temperature
 
-    // Update hc_dyn for 2023 version inside the loop if it depends on t_cl
-    const z = variables.hc_dyn; // Actually z was stored in hc_dyn if higher
 
     let h_r;
     while (true) {
@@ -600,20 +593,20 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     }
 
     t_re = t_re0 + (2 * t_cr - 1.962 * t_re0 - 1.31) / 9;
-    if (d_lim_t_re == 0 && t_re >= 38) {
+    if (d_lim_t_re === 0 && t_re >= 38) {
       d_lim_t_re = time;
     }
     evap_load_wm2_min = evap_load_wm2_min + sweat_rate_watt + e_res;
     sw_tot_g = (evap_load_wm2_min * 2.67 * a_dubois) / 1.8 / 60;
-    if (d_lim_loss_50 == 0 && sw_tot_g >= d_max_50) {
+    if (d_lim_loss_50 === 0 && sw_tot_g >= d_max_50) {
       d_lim_loss_50 = time;
     }
-    if (d_lim_loss_95 == 0 && sw_tot_g >= d_max_95) {
+    if (d_lim_loss_95 === 0 && sw_tot_g >= d_max_95) {
       d_lim_loss_95 = time;
     }
   }
 
-  if (drink == 0) {
+  if (drink === 0) {
     d_lim_loss_95 = d_lim_loss_95 * 0.6;
     d_lim_loss_50 = d_lim_loss_95;
   }

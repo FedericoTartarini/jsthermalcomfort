@@ -139,6 +139,15 @@ To set up jsthermalcomfort for local development:
    npm run format
    ```
 
+   - A pre-commit hook now runs automatically on every commit and executes:
+
+   ```bash
+   npm run check:format
+   npm run build
+   npm test
+   ```
+
+   If one of these checks fails, the commit is blocked until the issue is fixed.
    - Commit your changes:
 
    ```bash

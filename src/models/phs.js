@@ -170,7 +170,7 @@ export function phs(
   if (model === "7933-2023") {
     p_a = 0.6105 * Math.exp((17.27 * tdb) / (tdb + 237.3)) * (rh / 100);
   } else {
-    p_a = (p_sat(tdb) / 1000 * rh) / 100;
+    p_a = ((p_sat(tdb) / 1000) * rh) / 100;
   }
 
   const variables_for_loop = _calculate_variables_for_loop(
@@ -384,7 +384,12 @@ function _calculate_variables_for_loop(v, met, posture, clo, tdb, p_a, kwargs) {
     f_cl_r = (1 - kwargs.a_p) * 0.97 + kwargs.a_p * kwargs.f_r;
   }
 
-  const sw_max = _max_sweat_rate(met, a_dubois, kwargs.acclimatized, kwargs.model);
+  const sw_max = _max_sweat_rate(
+    met,
+    a_dubois,
+    kwargs.acclimatized,
+    kwargs.model,
+  );
 
   return {
     sw_max,
@@ -451,7 +456,18 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
 
   let hc_dyn = hc_dyn_init;
 
-  let { duration, t_sk, t_re, t_cr, t_cr_eq, sweat_rate_watt, t_sk_t_cr_wg, evap_load_wm2_min, drink, model } = kwargs;
+  let {
+    duration,
+    t_sk,
+    t_re,
+    t_cr,
+    t_cr_eq,
+    sweat_rate_watt,
+    t_sk_t_cr_wg,
+    evap_load_wm2_min,
+    drink,
+    model,
+  } = kwargs;
 
   let sw_tot_g = 0.0;
 

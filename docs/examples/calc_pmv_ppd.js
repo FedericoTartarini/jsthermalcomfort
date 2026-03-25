@@ -1,10 +1,10 @@
-import { pmv_ppd } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/pmv_ppd.js";
+import { pmv_ppd } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/models/pmv_ppd.js";
 import {
   v_relative,
   clo_dynamic,
   met_typical_tasks,
   clo_individual_garments,
-} from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/utilities/utilities.js";
+} from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/utilities/utilities.js";
 
 const tdb = 27; // dry bulb air temperature, °C
 const tr = 25; // mean radiant temperature, °C
@@ -43,11 +43,11 @@ console.log(results_ip);
 
 //------------------------------------------------------------------------------------------
 //If you want you can also pass an array of inputs
-import { pmv_ppd_array } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/pmv_ppd.js";
+import { pmv_ppd_array } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/models/pmv_ppd.js";
 import {
   v_relative_array,
   clo_dynamic_array,
-} from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/utilities/utilities.js";
+} from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/utilities/utilities.js";
 
 const tdb_array = [25, 26, 27, 28, 29, 20, 21];
 const tr_array = [25, 25, 25, 25, 25, 25, 25];

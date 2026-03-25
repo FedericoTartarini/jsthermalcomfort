@@ -1,4 +1,4 @@
-import { utci } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/utci.js";
+import { utci } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/models/utci.js";
 
 const result_utci_1 = utci(29, 30, 1, 60);
 console.table(result_utci_1);
@@ -22,7 +22,7 @@ console.table(result_utci_units_IP);
 
 //------------------------------------------------------------------------------------------
 // examples of array version
-import { utci_array } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/utci.js";
+import { utci_array } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/models/utci.js";
 
 const result_utci_array = utci_array(
   [29, 29, 25],

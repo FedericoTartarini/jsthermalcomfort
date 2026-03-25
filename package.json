@@ -18,6 +18,7 @@
     "docs": "npx documentation build ./src/index.js -f html --github --config documentation.yml -a public --theme docs_theme/index.js -o docs && ./create_readme.sh",
     "format": "npx prettier . --write",
     "check:format": "npx prettier . --check",
+    "prepack": "npm run build",
     "prepare": "husky"
   },
   "release": {

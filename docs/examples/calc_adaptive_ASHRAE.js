@@ -1,5 +1,5 @@
-import { adaptive_ashrae } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/models/adaptive_ashrae.js";
-import { running_mean_outdoor_temperature } from "https://cdn.jsdelivr.net/gh/FedericoTartarini/jsthermalcomfort/lib/esm/utilities/utilities.js";
+import { adaptive_ashrae } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/models/adaptive_ashrae.js";
+import { running_mean_outdoor_temperature } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/utilities/utilities.js";
 
 const adaptive_ashrae1 = adaptive_ashrae(25, 25, 23, 0.3);
 console.table(adaptive_ashrae1);

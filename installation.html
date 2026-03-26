@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jsthermalcomfort 1.0.3</title>
+
+    <meta name='description' content='A JavaScript package to calculate thermophysiological, thermal comfort, thermal stress indices'>
+
+    
+    <script data-cfasync="false">
+      document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+      document.documentElement.dataset.theme = localStorage.getItem("theme") || "dark";
+    </script>
+    <noscript>
+      <style>
+        .pst-js-only { display: none !important; }
+      </style>
+    </noscript>
+
+    <link href="assets/favicon.png" rel="icon" type="image/png">
+  <link href="assets/basic.css" rel="stylesheet">
+  <link href="assets/github.css" rel="stylesheet">
+  <link href="assets/style.css" rel="stylesheet">
+  <link href="assets/pydata-sphinx-theme.css" rel="stylesheet">
+  
+  <!-- Required Scripts -->
+  <script src="assets/fontawesome.js"></script>
+  <link rel="preload" as="script" href="assets/bootstrap.js" />
+  <link rel="preload" as="script" href="assets/pydata-sphinx-theme.js" />
+
+
+    <!-- Custom Tweaks for Documentation.js and Dark Mode -->
+    <style>
+      :root[data-theme="dark"] {
+        --pst-color-background: #14181e;
+        --pst-color-surface: #1f242c;
+        --pst-color-text-base: #ced6dd;
+        --pst-color-text-muted: #8d959e;
+        --pst-color-primary: #3fb1c5;
+        --pst-color-link: #3fb1c5;
+        --pst-color-link-hover: #5ac5d9;
+        --pst-color-border: #2e353f;
+        --pst-color-header-background: #14181e;
+        --pst-color-sidebar-background: #14181e;
+      }
+
+      :root[data-theme="light"] {
+        --pst-color-background: #ffffff;
+        --pst-color-surface: #f3f4f5;
+        --pst-color-text-base: #212529;
+        --pst-color-text-muted: #6a737d;
+        --pst-color-primary: #3fb1c5;
+        --pst-color-link: #3fb1c5;
+        --pst-color-link-hover: #2188ff;
+        --pst-color-border: #d1d5da;
+      }
+
+      body {
+        background-color: var(--pst-color-background) !important;
+      }
+
+      /* Force background for main areas */
+      body, 
+      .bd-container,
+      .bd-main,
+      article.bd-article,
+      .bd-footer-content {
+        background-color: var(--pst-color-background) !important;
+        color: var(--pst-color-text-base) !important;
+      }
+
+      [data-theme="dark"] h1,
+      [data-theme="dark"] h2,
+      [data-theme="dark"] h3,
+      [data-theme="dark"] h4,
+      [data-theme="dark"] h5,
+      [data-theme="dark"] h6 {
+        color: #ced6dd !important;
+      }
+
+      /* Breadcrumbs styling */
+      .bd-breadcrumbs {
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #8d959e;
+        list-style: none !important;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .bd-breadcrumbs .breadcrumb-item + .breadcrumb-item:before {
+        content: ">" !important;
+        padding-right: 0.5rem;
+        color: #8d959e;
+      }
+      .bd-breadcrumbs a {
+        color: #3fb1c5;
+        text-decoration: none;
+      }
+      .bd-breadcrumbs li.active {
+        color: #ced6dd;
+      }
+      /* Hide breadcrumbs on Main Index */
+      body.index-page .bd-breadcrumbs {
+        display: none !important;
+      }
+
+      /* Sidebar Navigation Styles */
+      .bd-sidenav li > a.active {
+        color: #3fb1c5 !important;
+        border-left: 2px solid #3fb1c5;
+        background-color: transparent !important;
+        font-weight: bold;
+      }
+      .bd-sidenav li > a {
+        padding: 0.25rem 1rem !important;
+        color: #ced6dd;
+        font-size: 0.9rem !important;
+      }
+      .bd-sidenav li > a:hover {
+        color: #3fb1c5;
+      }
+      .bd-links__title {
+        color: #ced6dd !important;
+        font-weight: bold;
+        text-transform: none !important;
+        font-size: 0.9rem !important;
+        letter-spacing: 0.05rem;
+        margin-bottom: 1rem;
+      }
+      [data-theme="light"] .bd-links__title {
+        color: #727272 !important;
+      }
+      
+      
+      /* Primary Sidebar Correction */
+      .bd-container__inner {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        margin: 0 auto !important;
+        max-width: 88rem !important; /* Matches pydata-sphinx-theme */
+        padding: 0 !important;
+        width: 100% !important;
+      }
+      
+      /* Force it to behaving like a flex container even when primary sidebar exists */
+      .has-primary-sidebar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+      }
+
+      #pst-primary-sidebar-modal {
+        display: none !important;
+      }
+
+      .bd-sidebar-primary {
+        display: block !important;
+        width: 350px !important; 
+        min-width: 350px !important;
+        background-color: var(--pst-color-background) !important;
+        border-right: 1px solid var(--pst-color-border) !important;
+        position: sticky !important;
+        top: 5rem !important;
+        height: min-content !important;
+        max-height: calc(100vh - 6rem) !important;
+        overflow-y: auto;
+        padding: 2rem 1rem 1rem !important; 
+        z-index: 10 !important;
+        margin: 0 !important;
+        visibility: visible !important;
+        box-sizing: border-box !important;
+      }
+      
+      #main-content.bd-main {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        background-color: transparent !important;
+      }
+      
+      .bd-content {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+        gap: 2rem !important;
+      }
+      
+      .bd-article-container {
+        width: 100% !important;
+        max-width: 60em !important; 
+        padding: 1rem 2rem !important; 
+        box-sizing: border-box !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        overflow-x: hidden !important;
+      }
+      
+      article.bd-article {
+        padding: 0 !important;
+      }
+
+      .bd-sidebar-secondary {
+        width: 250px !important;
+        flex: 0 0 250px !important;
+        padding: 2rem 1rem 1rem !important;
+        box-sizing: border-box !important;
+      }
+      
+      /* Fix for backticks text color in dark mode */
+      [data-theme="dark"] code {
+        color: #3fb1c5 !important;
+      }
+      [data-theme="dark"] .hljs {
+        color: #ced6dd !important;
+      }
+
+      .bd-main {
+        padding: 1rem !important;
+        padding-top: 1rem !important;
+      }
+      .documentation header { margin-bottom: 2rem; }
+      .toggle-target { padding-left: 1rem; }
+      .display-none { display: none; }
+      .nav-item .icon { font-size: 0.8em; margin-left: 5px; opacity: 0.6; }
+      .keyline-top-not { margin-bottom: 3rem; }
+      .pre-open { cursor: pointer; }
+
+      .levelIndex1 {
+        font-size: 2.5rem !important;
+      }
+
+      /* TOC Styling */
+      .onthispage {
+        color: #ced6dd !important;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+      [data-theme="light"] .onthispage {
+        color: #727272 !important;
+      }
+      .bd-toc-nav .nav-link.active {
+        color: #3fb1c5 !important;
+        border-left: 2px solid #3fb1c5;
+        padding-left: 0.85rem !important;
+      }
+      .bd-toc-nav .nav-link {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal !important;
+        display: block !important;
+        word-break: break-word !important;
+      }
+      .bd-sidebar-secondary {
+        position: sticky !important;
+        top: 5rem !important;
+        height: calc(100vh - 5rem);
+        overflow-y: auto;
+      }
+
+      /* HLJS as Blockquote / Code Blocks / JSDoc Sig */
+      .hljs, .hljs.fill-light, .pre, pre, .sig {
+        display: block;
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+        background: #1f242c !important;
+        border: 1px solid #2e353f !important;
+        border-left: 4px solid #3fb1c5 !important;
+        color: #ced6dd !important;
+        overflow-x: auto;
+        border-radius: 4px;
+        font-family: var(--pst-font-family-monospace) !important;
+      }
+      [data-theme="light"] .hljs, [data-theme="light"] .hljs.fill-light, [data-theme="light"] .pre, [data-theme="light"] pre, [data-theme="light"] .sig {
+        background: #f3f4f5 !important;
+        border: 1px solid #d1d5da !important;
+        border-left: 4px solid #3fb1c5 !important;
+        color: #24292e !important;
+      }
+
+      /* Syntax Highlighting Colors - Aligning with pythermalcomfort */
+      .hljs-keyword, .hljs-selector-tag { color: #d73a49 !important; } /* Reddish */
+      .hljs-string, .hljs-doctag { color: #032f62 !important; } /* Dark blue */
+      .hljs-title, .hljs-section { color: #6f42c1 !important; } /* Purple */
+      .hljs-variable, .hljs-template-variable { color: #e36209 !important; } /* Orange */
+      .hljs-type, .hljs-built_in { color: #005cc5 !important; } /* Blue */
+      .hljs-number, .hljs-literal { color: #005cc5 !important; } /* Blue */
+      .hljs-comment { color: #6a737d !important; } /* Grey */
+
+      [data-theme="dark"] .hljs-keyword, [data-theme="dark"] .hljs-selector-tag { color: #ff7b72 !important; }
+      [data-theme="dark"] .hljs-string, [data-theme="dark"] .hljs-doctag { color: #a5d6ff !important; }
+      [data-theme="dark"] .hljs-title, [data-theme="dark"] .hljs-section { color: #d2a8ff !important; }
+      [data-theme="dark"] .hljs-variable, [data-theme="dark"] .hljs-template-variable { color: #ffa657 !important; }
+      [data-theme="dark"] .hljs-type, [data-theme="dark"] .hljs-built_in { color: #79c0ff !important; }
+      [data-theme="dark"] .hljs-number, [data-theme="dark"] .hljs-literal { color: #79c0ff !important; }
+      [data-theme="dark"] .hljs-comment { color: #8b949e !important; }
+      [data-theme="dark"] .hljs-tag { color: #FFD900 !important; }
+      [data-theme="dark"] .hljs-attr { color: #79c0ff !important; }
+      /* Table Styling - Matching pythermalcomfort */
+      .bd-article table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin: 1.5rem 0 !important;
+        font-size: 0.95rem !important;
+        border: 1px solid #f3f4f5 !important;
+      }
+      .bd-article table thead tr {
+        border-bottom: 2px solid #0a7d91 !important;
+      }
+      .bd-article table th {
+        background-color: #f3f4f5 !important;
+        padding: 0.75rem !important;
+        text-align: left !important;
+        color: #14181e !important;
+        border-top: 1px solid #e5e7ea !important;
+        border-right: 1px solid #e5e7ea !important;
+        border-left: 1px solid #e5e7ea !important;
+      }
+      .bd-article table td {
+        padding: 0.75rem !important;
+        border-bottom: 1px solid #e5e7ea !important;
+        border-right: 1px solid #e5e7ea !important;
+        border-left: 1px solid #e5e7ea !important;
+        color: #14181e !important;
+      }
+      /* Zebra striping - Matching pythermalcomfort */
+      .bd-article table tr:nth-child(even) {
+        background-color: #ffffff !important;
+      }
+      .bd-article table tr:nth-child(odd) {
+        background-color: #f3f4f5 !important;
+      }
+
+      [data-theme="dark"] .bd-article table {
+        border-color: #364150 !important;
+      }
+      [data-theme="dark"] .bd-article table thead tr {
+        border-bottom: 2px solid #3fb1c5 !important;
+      }
+      [data-theme="dark"] .bd-article table th {
+        background-color: #29313d !important;
+        color: #ffffff !important;
+        border-color: #364150 !important;
+      }
+      [data-theme="dark"] .bd-article table td {
+        border-color: #364150 !important;
+        color: #ced6dd !important;
+      }
+      [data-theme="dark"] .bd-article table tr:nth-child(even) {
+        background-color: #222832 !important;
+      }
+      [data-theme="dark"] .bd-article table tr:nth-child(odd) {
+        background-color: #29313d !important;
+      }
+
+      /* Clean up fill-light class and other potential theme overrides */
+      section.fill-light, div.fill-light, .fill-light {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      [data-theme="dark"] .card {
+        background-color: #1f242c !important;
+        border-color: #2e353f !important;
+      }
+      [data-theme="dark"] .card-title a {
+        color: #3fb1c5 !important;
+        text-decoration: none !important;
+      }
+      [data-theme="dark"] .card-text {
+        color: #8d959e !important;
+      }
+
+      /* Search Styling */
+      .search-button {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        background: var(--pst-color-surface) !important;
+        border: 1px solid var(--pst-color-border) !important;
+        border-radius: 0.5rem !important;
+        padding: 0.4rem 0.8rem !important;
+        color: var(--pst-color-text-base) !important;
+        font-size: 0.85rem !important;
+        cursor: pointer !important;
+        transition: border-color 0.2s !important;
+      }
+      .search-button:hover {
+        border-color: #3fb1c5 !important;
+      }
+      .pst-button__shortcut-text {
+        background: var(--pst-color-border) !important;
+        padding: 0.1rem 0.4rem !important;
+        border-radius: 0.25rem !important;
+        font-size: 0.75rem !important;
+        opacity: 0.8 !important;
+      }
+      
+      .pst-search-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        display: none;
+        backdrop-filter: blur(2px);
+      }
+      .pst-search-modal {
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 600px;
+        background: var(--pst-color-background);
+        border: 1px solid var(--pst-color-border);
+        border-radius: 0.75rem;
+        z-index: 2001;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        overflow: hidden;
+      }
+      .pst-search-header {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--pst-color-border);
+        gap: 0.75rem;
+      }
+      .pst-search-header i {
+        color: #3fb1c5;
+        font-size: 1.25rem;
+      }
+      .pst-search-header input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: var(--pst-color-text-base);
+        font-size: 1.1rem;
+        outline: none;
+      }
+      .pst-search-shortcut {
+        font-size: 0.75rem;
+        color: var(--pst-color-text-muted);
+        border: 1px solid var(--pst-color-border);
+        padding: 0.1rem 0.4rem;
+        border-radius: 0.25rem;
+      }
+      .pst-search-results {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.5rem 0;
+      }
+      .pst-search-result-item {
+        padding: 0.75rem 1rem;
+        display: block;
+        text-decoration: none !important;
+        color: var(--pst-color-text-base);
+        border-bottom: 1px solid var(--pst-color-border);
+        transition: background 0.2s;
+      }
+      .pst-search-result-item:hover {
+        background: var(--pst-color-surface);
+      }
+      .pst-search-result-title {
+        font-weight: bold;
+        color: #1184ce;
+        display: block;
+        margin-bottom: 0.25rem;
+      }
+      [data-theme="dark"] .pst-search-result-title {
+        color: #3fb1c5;
+      }
+      .pst-search-result-snippet {
+        font-size: 0.85rem;
+        color: var(--pst-color-text-muted);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .pst-search-no-results {
+        padding: 2rem;
+        text-align: center;
+        color: var(--pst-color-text-muted);
+      }
+
+      /* Logo Styling */
+      .logo__title {
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+        color: var(--pst-color-text-base) !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        display: block !important;
+      }
+      .navbar-brand.logo {
+        display: flex !important;
+        align-items: center !important;
+        text-decoration: none !important;
+        min-width: 200px !important;
+      }
+      @media (max-width: 991.98px) {
+        .logo__title {
+            font-size: 1rem !important;
+        }
+        .navbar-brand.logo {
+            min-width: auto !important;
+            margin-left: 0.5rem !important;
+        }
+      }
+
+      .search-result-page-item {
+        margin-bottom: 2rem;
+      }
+      .search-result-page-item h3 {
+        margin-bottom: 0.5rem;
+      }
+      .search-result-page-snippet {
+        color: var(--pst-color-text-muted);
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light" class="documentation ">
+
+    <!-- Mobile Navigation Modal -->
+    <div id="pst-mobile-sidebar" class="bd-sidebar-primary bd-sidebar">
+      <button class="btn btn-sm pst-navbar-icon sidebar-toggle primary-toggle mobile-close-btn" onclick="document.body.classList.remove('sidebar-open')" style="position: absolute; right: 10px; top: 10px;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="sidebar-header-items sidebar-primary__section">
+        <div class="sidebar-header-item">
+          <nav>
+            <ul class="bd-navbar-elements navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link nav-internal active" href="installation.html">
+                  Installation
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link nav-internal " href="documentation/index.html">
+                  Documentation
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link nav-internal " href="contributing.html">
+                  Contributing
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link nav-internal " href="authors.html">
+                  Authors
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+      <div class="bd-header__inner bd-page-width">
+        <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" onclick="document.body.classList.toggle('sidebar-open')">
+          <span class="fa-solid fa-bars"></span>
+        </button>
+        
+        <div class="col-lg-3 navbar-header-items__start">
+          <div class="navbar-item">
+            <a class="navbar-brand logo" href="index.html">
+              <p class="title logo__title">jsthermalcomfort 1.0.3</p>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="col-lg-9 navbar-header-items">
+          <div class="me-auto navbar-header-items__center">
+            <div class="navbar-item">
+              <nav>
+                <ul class="bd-navbar-elements navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link nav-internal active" href="installation.html">
+                      Installation
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link nav-internal " href="documentation/index.html">
+                      Documentation
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link nav-internal " href="contributing.html">
+                      Contributing
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link nav-internal " href="authors.html">
+                      Authors
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <div class="navbar-header-items__end">
+            <div class="navbar-item">
+              <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode" data-bs-placement="bottom" data-bs-toggle="tooltip">
+                <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+                <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+                <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+              </button>
+            </div>
+
+            <div class="navbar-item">
+              <button class="btn btn-sm search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+                <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+                <span class="pst-button__search-text">Search</span>
+                <span class="pst-button__shortcut-text">Ctrl + K</span>
+              </button>
+            </div>
+            
+            <div class="navbar-item">
+              <ul class="navbar-icon-links" aria-label="Icon Links">
+                <li class="nav-item">
+                  <a href="https://github.com/FedericoTartarini/jsthermalcomfort" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                    <i class="fa-brands fa-github fa-lg"></i>
+                    <span class="sr-only">GitHub</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="https://www.linkedin.com/in/federico-tartarini-39bab3149/" title="LinkedIn" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                    <i class="fa-brands fa-linkedin fa-lg"></i>
+                    <span class="sr-only">LinkedIn</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="https://scholar.google.com/citations?user=29_An_8AAAAJ" title="Google Scholar" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                    <i class="fa-solid fa-graduation-cap fa-lg"></i>
+                    <span class="sr-only">Google Scholar</span>
+                  </a>
+                </li>
+             </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="bd-container">
+      <div class="bd-container__inner bd-page-width ">
+        
+        <!-- Sidebar Navigation -->
+        <dialog id="pst-primary-sidebar-modal"></dialog>
+
+        
+
+
+        <!-- Main Content -->
+        <main id="main-content" class="bd-main" role="main">
+          <div class="bd-content">
+            <div class="bd-article-container">
+              <div class="bd-header-article d-print-none">
+                <nav aria-label="Breadcrumb" class="d-print-none">
+                  
+                  <ol class="bd-breadcrumbs">
+                    <li class="breadcrumb-item">
+                      <a href="index.html" title="Home"><i class="fa-solid fa-house"></i></a>
+                    </li>
+                    
+                    
+                    <li class="breadcrumb-item active" aria-current="page">Installation</li>
+                    
+                  </ol>
+                  
+                </nav>
+              </div>
+              
+                <article class="bd-article">
+                
+                  
+                  
+
+                
+                  
+                  <section class='keyline-top-not py2' id='installation'>
+                    <h2 class='mt0 levelIndex1'>Installation</h2>
+                    
+                    
+                      <section class='py2 clearfix'>
+
+  
+    <pre class='hljs'>npm install jsthermalcomfort</pre>
+<p>If you want to use jsthermalcomfort package without installing it on your local machine, you can import with:</p>
+<p><a href="https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/"><code>https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/</code></a></p>
+<p>Example:</p>
+<pre class='hljs'><span class="hljs-keyword">import</span> { models, utilities, pschymetrics } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js&quot;</span></pre>
+<p>You can also import it in the website directly, and caution that you need to mark the script as module:</p>
+<pre class='hljs'><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="language-javascript">
+  <span class="hljs-keyword">import</span> { models, utilities, pschymetrics } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js&quot;</span>
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></pre>
+
+  
+</section>
+                    
+                  </section>
+                
+              
+                </article>
+              </div>
+
+              <!-- Secondary Sidebar: Section Navigation (On this page) -->
+              
+              <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc">
+                <div class="sidebar-secondary-items sidebar-secondary__inner">
+                  <div class="sidebar-secondary-item">
+                    <div id="pst-page-navigation-heading-2" class="page-toc tocsection onthispage">
+                      <i class="fa-solid fa-list"></i> On this page
+                    </div>
+                    <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+                      <ul class="visible nav section-nav flex-column">
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#installation">Installation</a>
+                            
+                          </li>
+                        
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+              
+
+              
+            </div>
+          </div>
+          
+          <footer class="bd-footer-content">
+            <div class="footer-content-items footer-content__inner">
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+    
+    <!-- Search Modal -->
+    <div class="pst-search-overlay" id="pst-search-overlay"></div>
+    <div class="pst-search-modal" id="pst-search-modal">
+      <div class="pst-search-header">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="pst-search-input" placeholder="Search the docs ..." autocomplete="off">
+        <span class="pst-search-shortcut">ESC</span>
+      </div>
+      <div id="pst-search-results" class="pst-search-results">
+        <div class="pst-search-placeholder">Start typing to search ...</div>
+      </div>
+    </div>
+
+    <script src='assets/anchor.js'></script>
+    <script src='assets/split.js'></script>
+    <script src='assets/site.js'></script>
+    <script src="https://unpkg.com/lunr/lunr.js"></script>
+    <script src='assets/search.js'></script>
+    
+    <!-- PyData scripts -->
+    <script defer src="assets/bootstrap.js"></script>
+    <script defer src="assets/pydata-sphinx-theme.js"></script>
+  </body>
+</html>

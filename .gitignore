@@ -6,6 +6,7 @@
 /lib
 /tmp
 /out-tsc
+/docs
 
 # Runtime data
 pids

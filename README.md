@@ -133,6 +133,15 @@ To set up jsthermalcomfort for local development:
    npm run test
    ```
 
+   Validation datasets for model tests are fetched from
+   `FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).
+   By default tests use the `main` branch. To pin tests to a specific ref (tag/branch/commit), set
+   `VALIDATION_DATA_REF` when running tests:
+
+   ```bash
+   VALIDATION_DATA_REF=main npm run test
+   ```
+
    - Run prettier to format your code:
 
    ```bash

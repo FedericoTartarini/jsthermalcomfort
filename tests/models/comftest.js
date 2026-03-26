@@ -1,5 +1,5 @@
-const prefixURL =
-  "https://raw.githubusercontent.com/FedericoTartarini/validation-data-comfort-models/refs/heads/main/";
+const validationDataRef = process.env.VALIDATION_DATA_REF || "main";
+const prefixURL = `https://raw.githubusercontent.com/FedericoTartarini/validation-data-comfort-models/${validationDataRef}/`;
 
 export const testDataUrls = {
   adaptiveEn: prefixURL + "ts_adaptive_en.json",

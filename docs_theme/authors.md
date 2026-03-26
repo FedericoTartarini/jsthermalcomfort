@@ -1,24 +1,17 @@
-## Main Authors
+## Main Author
 
 - [Federico Tartarini](https://www.linkedin.com/in/federico-tartarini-3991995b/)
-- [Stefano Schiavon](https://www.linkedin.com/in/stefanoschiavon/)
 
-## Contributors
+## Code Contributors
 
-- [Akihisa Nomoto](https://www.linkedin.com/in/akihisa-nomoto-3b872611b/)
-- [Tyler Hoyt](https://www.linkedin.com/in/tyler-hoyt1/)
-- Chris Mackey
-- [Jonas Kittner](https://github.com/jkittner/)
-- [Connor Forbes](https://www.linkedin.com/in/connor-forbes-1a490117b/)
-- [Yehui Huang](https://www.linkedin.com/in/yehuih/)
+- [GitHub Contributors](https://github.com/FedericoTartarini/jsthermalcomfort/graphs/contributors)
 
 ## Acknowledgements
 
 `jsthermalcomfort` is a derivative work of the following software projects:
 
 - [CBE Comfort Tool](https://comfort.cbe.berkeley.edu) for indoor thermal comfort calculations. Available under GPL.
-- [ladybug-comfort](https://pypi.org/project/ladybug-comfort/). Available under GPL.
-- [UTCI](https://www.utci.org/) Fortran Code for outdoor thermal comfort calculations. Available under MIT.
+- [pythermalcomfort](https://pythermalcomfort.readthedocs.io/). Pythermalcomfort is a Python package for thermal comfort research. Available under MIT license.
 
 ## Contact us
 

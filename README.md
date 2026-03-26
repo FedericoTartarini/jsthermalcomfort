@@ -2,9 +2,9 @@
 
 |        docs         | [![docs](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml/badge.svg)][docs_link]                                                                 |
 | :-----------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|      **build**      | [![build](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml/badge.svg)][build_link]                                                                   |
-|      **tests**      | [![test](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test.yml/badge.svg)][test_link]                                                                      |
-| **page deployment** | [![page deployment](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/pages/pages-build-deployment/badge.svg)][deploy_link]                                     |
+|      **build**      | [![build](https://img.shields.io/github/actions/workflow/status/FedericoTartarini/jsthermalcomfort/ci.yml?branch=main&label=build)][build_link]                                       |
+|      **tests**      | [![test](https://img.shields.io/github/actions/workflow/status/FedericoTartarini/jsthermalcomfort/ci.yml?branch=main&label=tests)][test_link]                                         |
+| **page deployment** | [![page deployment](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/deploy-docs.yml/badge.svg)][deploy_link]                                                  |
 |  **snyk security**  | [![snyk](https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/snyk.yml/badge.svg)][snyk_link]                                                                      |
 |     **license**     | [![license](https://custom-icon-badges.demolab.com/github/license/denvercoder1/custom-icon-badges?logo=law)](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/LICENSE) |
 |   **npm version**   | [![npm](https://img.shields.io/npm/v/jsthermalcomfort?style=plastic&logo=npm&logoColor=rgb)][npm_link]                                                                                |
@@ -17,9 +17,9 @@ Please cite us if you use this package: [Tartarini, F., Schiavon, S., 2020. pyth
 - Authors: [Federico Tartarini](https://www.linkedin.com/in/federico-tartarini/), [Omar Jesus Acuache Briceno](https://www.linkedin.com/in/omar-acuache), [Ruoshui Chen](https://github.com/ChristinChen233), [Jingyu Lu](https://github.com/Lu-Whale), [Yuchen Mu](https://github.com/YuchenMu), [Jordan Ocokoljic](https://github.com/JordanOcokoljic), [Santiago Zaldivar del Alba​](https://github.com/szaldivar), [Stefano Schiavon](https://www.linkedin.com/in/stefanoschiavon/), [Ollie Jay](https://www.linkedin.com/in/ollie-jay-793a1b11/)
 
 [docs_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test_docs.yml
-[build_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/build.yml
-[test_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/test.yml
-[deploy_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/pages/pages-build-deployment
+[build_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/ci.yml
+[test_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/ci.yml
+[deploy_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/deploy-docs.yml
 [snyk_link]: https://github.com/FedericoTartarini/jsthermalcomfort/actions/workflows/snyk.yml
 [npm_link]: https://www.npmjs.com/package/jsthermalcomfort
 
@@ -43,7 +43,7 @@ Example:
 import {
   models,
   utilities,
-  pschymetrics,
+  psychrometrics,
 } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js";
 ```
 
@@ -54,7 +54,7 @@ You can also import it in the website directly, and caution that you need to mar
   import {
     models,
     utilities,
-    pschymetrics,
+    psychrometrics,
   } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js";
 </script>
 ```
@@ -69,177 +69,26 @@ Here is a list of examples running in the browser:
 
 # Contributing
 
-Contributions are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
+Contributions are welcome.
 
-## Bug reports
+- Contributor guide: [`docs_theme/contributing.md`](docs_theme/contributing.md)
+- Online docs version: [Contributing](https://federicotartarini.github.io/jsthermalcomfort/contributing.html)
+- Bug reports and feature requests: [GitHub Issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues)
 
-When [reporting a bug](https://github.com/FedericoTartarini/jsthermalcomfort/issues) please include:
-
-- Your operating system name and version.
-- Any details about your local setup that might be helpful in troubleshooting.
-- Detailed steps to reproduce the bug.
-
-## Documentation improvements
-
-If you find any issue in our online [documentation](https://federicotartarini.github.io/jsthermalcomfort/) please open
-an [issue](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
-
-jsthermalcomfort could always use more documentation, whether as part of the official jsthermalcomfort docs, in JSDocs,
-or even on the web in blog posts, articles, and such.
-
-## Feature requests and feedback
-
-The best way to send feedback is to file an issue
-at [https://github.com/FedericoTartarini/jsthermalcomfort/issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues)
-
-If you are proposing a feature:
-
-- Explain in detail how it would work.
-- Keep the scope as narrow as possible, to make it easier to implement.
-- Remember that this is a volunteer-driven project, and that code contributions are welcome :)
-
-## Local development
-
-To set up jsthermalcomfort for local development:
-
-1. Fork jsthermalcomfort (look for the “Fork” button).
-2. Clone your fork locally. Fetch and pull all the updates from the main branch before you do anything:
-
-   ```bash
-   git clone git@github.com:FedericoTartarini/jsthermalcomfort.git
-   ```
-
-3. Create a branch for local development. The naming rule for new branch are, as follows:
-   - If this update is for a new feature Feature/feature_name_here
-   - If this update is for bug fix Fix/bug_name_here
-   - If this update is for documentation Documentation/doc_name_here
-
-   You can create a branch locally using the following command. Make sure you only push updates to this new branch only:
-
-   ```bash
-   git checkout -b name-of-your-bugfix-or-feature
-   ```
-
-   Now you can make your changes locally.
-
-4. When you’re done making changes run all tests using Jest:
-   - Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-   ```bash
-   npm run test
-   ```
-
-   Validation datasets for model tests are fetched from
-   `FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).
-   By default tests use the `main` branch. To pin tests to a specific ref (tag/branch/commit), set
-   `VALIDATION_DATA_REF` when running tests:
-
-   ```bash
-   VALIDATION_DATA_REF=main npm run test
-   ```
-
-   - Run prettier to format your code:
-
-   ```bash
-   npm run format
-   ```
-
-   - A pre-commit hook now runs automatically on every commit and executes:
-
-   ```bash
-   npm run check:format
-   npm run build
-   npm test
-   ```
-
-   If one of these checks fails, the commit is blocked until the issue is fixed.
-   - Commit your changes:
-
-   ```bash
-   git add .
-   git commit -m "Your detailed description of your changes."
-   ```
-
-   - Update the docs:
-
-   ```bash
-   npm run docs
-   ```
-
-   - Commit your documentation changes:
-
-   ```bash
-   git add .
-   git commit -m "Your detailed description of your changes."
-   ```
-
-   - Push your branch to GitHub:
-
-   ```bash
-   git push origin name-of-your-bugfix-or-feature
-   ```
-
-5. Submit a pull request after you have done all your modifications and tested your work. The pull request should
-   include a detailed description of your work:
-   - What this pull request is about
-   - Have you tested your work
-   - Will this work affect other component in the product
-
-### Pull Request Guidelines
-
-If you need some code review or feedback while you’re developing the code just make the pull request.
-
-For merging, you should:
-
-- Include passing tests (run `npm run test`).
-- Update documentation when there’s new API, functionality etc.
-
-## Documentation
-
-We are using [JSDoc](https://jsdoc.app/) and [documentation.js](https://github.com/documentationjs/documentation) to
-automatically build the documentation.
-
-All the files needed to generate the documentation can be found in the `docs_theme` repository.
-After updating the Markdown files, please run the command:
+## Local development (quick start)
 
 ```bash
-npm run docs
+npm ci
+npm test
+npm run check:format
+npm run build
 ```
 
-Please ignore the `docs` folder, this folder contains all the files generated by the above command.
+Validation datasets for model tests are fetched from
+`FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).
+By default tests use the `main` branch. To pin tests to a specific ref (tag/branch/commit), set
+`VALIDATION_DATA_REF` when running tests:
 
-## How to add a new model to jsthermalcomfort
-
-1. Add a file under `src/models/` with the name of the function/model and document it.
-2. Add any related functions that are used by your function either in `src/utilities/utilities.js`
-   or `src/psychrometrics/`. See existing code as example.
-   - In order to add a new function/API to the library you should mark that function as `@public`, add it to its
-     corresponding category, for example for models you should do `@memberof models`, and lastly you should give it a
-     proper name for the documentation with `@docname`, for example: `@docname Clothing prediction`. It is important to
-     note that you should also add the `@public` tag to any types the function exposes/uses.
-3. Test your function by writing a test in `tests/models/<name_of_model>.test.js`.
-4. To run a subset of tests you can do the following:
-
-   ```bash
-   npm run test -- '<path_to_test_file>' -t '<test_pattern/name>'
-   ```
-
-If you are using VSCode you can use
-the [Jest Runner extension](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner) to easily
-run subset of tests.
-
-## How to publish a new version of jsthermalcomfort
-
-To create a new release do the following:
-
-1. Update the `package.json` version to the new version (we use the semantic release system for versioning)
-2. Run `npm run build` to update the `lib` directory (output with types of the library that gets published to NPM)
-3. Commit the updates
-4. In GitHub go to Releases -> click `Draft a new release`
-5. Click `Choose a tag` and type the new version, for example `v0.1.1`
-6. Write the title and description and click `Publish release`
-7. This will trigger a GitHub action that will publish the new version to NPM
+```bash
+VALIDATION_DATA_REF=main npm test
+```

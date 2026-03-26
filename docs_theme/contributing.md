@@ -204,12 +204,18 @@ Please ensure all tests pass and your code is correctly formatted before submitt
 
 ## How to publish a new version of jsthermalcomfort
 
-To create a new release do the following:
+Releases are published from Git tags by GitHub Actions. Local builds are not required for publishing.
 
-1. Update the `package.json` version to the new version (we use the semantic release system for versioning)
-2. Run `npm run build` to update the `lib` directory (output with types of the library that gets published to NPM)
-3. Commit the updates
-4. In GitHub go to Releases -> click `Draft a new release`
-5. Click `Choose a tag` and type the new version, for example `v0.1.1`
-6. Write the title and description and click `Publish release`
-7. This will trigger a GitHub action that will publish the new version to NPM
+1. Ensure your branch is merged to `main` and CI is green.
+2. Bump the package version with npm:
+   - Patch release: `npm version patch`
+   - Minor release: `npm version minor`
+   - Major release: `npm version major`
+   - Exact version: `npm version 1.2.3`
+3. Push the commit and tags:
+   ```bash
+   git push && git push --tags
+   ```
+4. Pushing a `v*` tag (for example `v1.0.3`) triggers the publish workflow.
+
+The publish workflow runs checks (`npm run check:format`, `npm test`, `npm run build`) and then runs `npm publish` in CI.

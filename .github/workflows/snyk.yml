@@ -1,17 +1,34 @@
 name: Snyk Security Check
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
   security:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
     steps:
-      - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
-        if: ${{ env.SNYK_TOKEN != '' }}
+      - uses: actions/checkout@v6
+
+      - name: Run Snyk test on pull requests
+        if: ${{ env.SNYK_TOKEN != '' && github.event_name == 'pull_request' }}
+        uses: snyk/actions/node@master
+        with:
+          command: test
+
+      - name: Run Snyk monitor on main
+        if: ${{ env.SNYK_TOKEN != '' && github.event_name == 'push' }}
         uses: snyk/actions/node@master
         with:
           command: monitor
+
       - name: Skip Snyk for fork pull requests (no secrets)
         if: ${{ env.SNYK_TOKEN == '' }}
         run: |

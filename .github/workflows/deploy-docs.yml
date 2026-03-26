@@ -1,13 +1,22 @@
 name: Deploy Documentation
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Docs can build"]
+    types:
+      - completed
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

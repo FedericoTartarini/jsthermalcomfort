@@ -28,7 +28,7 @@ jobs:
       - name: Ensure git tag matches package version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          PACKAGE_VERSION="v$(node -p \"require('./package.json').version\")"
+          PACKAGE_VERSION="v$(npm pkg get version | tr -d '\"')"
           if [ "${GITHUB_REF_NAME}" != "${PACKAGE_VERSION}" ]; then
             echo "Tag ${GITHUB_REF_NAME} does not match package version ${PACKAGE_VERSION}"
             exit 1

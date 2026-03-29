@@ -1,0 +1,86 @@
+{
+  "model": "ankle_draft",
+  "cases": [
+    {
+      "name": "SC-1 Typical office conditions \u2192 low ankle draft PPD",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "vr": 0.2,
+        "rh": 50,
+        "met": 1.2,
+        "clo": 0.5,
+        "v_ankle": 0.1
+      },
+      "expected": {
+        "ppd_ad": 11.0,
+        "acceptability": true
+      }
+    },
+    {
+      "name": "SC-2 Higher ankle velocity \u2192 increased PPD",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "vr": 0.2,
+        "rh": 50,
+        "met": 1.2,
+        "clo": 0.5,
+        "v_ankle": 0.4
+      },
+      "expected": {
+        "ppd_ad": 23.5,
+        "acceptability": false
+      }
+    },
+    {
+      "name": "SC-3 Warm conditions with moderate ankle draft",
+      "inputs": {
+        "tdb": 27,
+        "tr": 27,
+        "vr": 0.2,
+        "rh": 60,
+        "met": 1.2,
+        "clo": 0.5,
+        "v_ankle": 0.2
+      },
+      "expected": {
+        "ppd_ad": 7.6,
+        "acceptability": true
+      }
+    },
+    {
+      "name": "SC-4 High ankle velocity \u2192 PPD exceeds 20% not acceptable",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "vr": 0.2,
+        "rh": 50,
+        "met": 1.2,
+        "clo": 0.5,
+        "v_ankle": 0.6
+      },
+      "expected": {
+        "ppd_ad": 36.1,
+        "acceptability": false
+      }
+    },
+    {
+      "name": "SC-5 IP units conversion",
+      "inputs": {
+        "tdb": 77,
+        "tr": 77,
+        "vr": 0.656,
+        "rh": 50,
+        "met": 1.2,
+        "clo": 0.5,
+        "v_ankle": 0.66,
+        "units": "IP"
+      },
+      "expected": {
+        "ppd_ad": 14.4,
+        "acceptability": true
+      }
+    }
+  ]
+}

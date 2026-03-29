@@ -1,0 +1,111 @@
+{
+  "model": "adaptive_en",
+  "cases": [
+    {
+      "name": "SC-1 Neutral comfort, t_running_mean within range \u2192 category II acceptable",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "t_running_mean": 20,
+        "v": 0.1
+      },
+      "expected": {
+        "tmp_cmf": 25.4,
+        "acceptability_cat_i": true,
+        "acceptability_cat_ii": true,
+        "acceptability_cat_iii": true,
+        "tmp_cmf_cat_i_up": 27.4,
+        "tmp_cmf_cat_ii_up": 28.4,
+        "tmp_cmf_cat_iii_up": 29.4,
+        "tmp_cmf_cat_i_low": 22.4,
+        "tmp_cmf_cat_ii_low": 21.4,
+        "tmp_cmf_cat_iii_low": 20.4
+      }
+    },
+    {
+      "name": "SC-2 Warm indoor with high t_running_mean \u2192 category III only",
+      "inputs": {
+        "tdb": 27,
+        "tr": 27,
+        "t_running_mean": 26,
+        "v": 0.1
+      },
+      "expected": {
+        "tmp_cmf": 27.4,
+        "acceptability_cat_i": true,
+        "acceptability_cat_ii": true,
+        "acceptability_cat_iii": true,
+        "tmp_cmf_cat_i_up": 29.4,
+        "tmp_cmf_cat_ii_up": 30.4,
+        "tmp_cmf_cat_iii_up": 31.4,
+        "tmp_cmf_cat_i_low": 24.4,
+        "tmp_cmf_cat_ii_low": 23.4,
+        "tmp_cmf_cat_iii_low": 22.4
+      }
+    },
+    {
+      "name": "SC-3 Cool indoor \u2192 not acceptable in any category",
+      "inputs": {
+        "tdb": 20,
+        "tr": 20,
+        "t_running_mean": 12,
+        "v": 0.1
+      },
+      "expected": {
+        "tmp_cmf": 22.8,
+        "acceptability_cat_i": true,
+        "acceptability_cat_ii": true,
+        "acceptability_cat_iii": true,
+        "tmp_cmf_cat_i_up": 24.8,
+        "tmp_cmf_cat_ii_up": 25.8,
+        "tmp_cmf_cat_iii_up": 26.8,
+        "tmp_cmf_cat_i_low": 19.8,
+        "tmp_cmf_cat_ii_low": 18.8,
+        "tmp_cmf_cat_iii_low": 17.8
+      }
+    },
+    {
+      "name": "SC-4 Out-of-range t_running_mean \u2192 tmp_cmf is NaN",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "t_running_mean": 8,
+        "v": 0.1,
+        "limit_inputs": true
+      },
+      "expected": {
+        "tmp_cmf": null,
+        "acceptability_cat_i": false,
+        "acceptability_cat_ii": false,
+        "acceptability_cat_iii": false,
+        "tmp_cmf_cat_i_up": null,
+        "tmp_cmf_cat_ii_up": null,
+        "tmp_cmf_cat_iii_up": null,
+        "tmp_cmf_cat_i_low": null,
+        "tmp_cmf_cat_ii_low": null,
+        "tmp_cmf_cat_iii_low": null
+      }
+    },
+    {
+      "name": "SC-5 Higher air speed \u2192 wider comfort range",
+      "inputs": {
+        "tdb": 27,
+        "tr": 27,
+        "t_running_mean": 22,
+        "v": 0.6
+      },
+      "expected": {
+        "tmp_cmf": 26.1,
+        "acceptability_cat_i": true,
+        "acceptability_cat_ii": true,
+        "acceptability_cat_iii": true,
+        "tmp_cmf_cat_i_up": 29.3,
+        "tmp_cmf_cat_ii_up": 30.3,
+        "tmp_cmf_cat_iii_up": 31.3,
+        "tmp_cmf_cat_i_low": 23.1,
+        "tmp_cmf_cat_ii_low": 22.1,
+        "tmp_cmf_cat_iii_low": 21.1
+      }
+    }
+  ]
+}

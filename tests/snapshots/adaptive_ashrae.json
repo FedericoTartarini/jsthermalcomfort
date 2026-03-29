@@ -1,0 +1,97 @@
+{
+  "model": "adaptive_ashrae",
+  "cases": [
+    {
+      "name": "SC-1 Neutral comfort, t_running_mean within range \u2192 comfort predicted",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "t_running_mean": 20,
+        "v": 0.1
+      },
+      "expected": {
+        "tmp_cmf": 24.0,
+        "tmp_cmf_80_low": 20.5,
+        "tmp_cmf_80_up": 27.5,
+        "tmp_cmf_90_low": 21.5,
+        "tmp_cmf_90_up": 26.5,
+        "acceptability_80": true,
+        "acceptability_90": true
+      }
+    },
+    {
+      "name": "SC-2 Warm indoor with high t_running_mean \u2192 not acceptable at 90%",
+      "inputs": {
+        "tdb": 28,
+        "tr": 28,
+        "t_running_mean": 26,
+        "v": 0.1
+      },
+      "expected": {
+        "tmp_cmf": 25.9,
+        "tmp_cmf_80_low": 22.4,
+        "tmp_cmf_80_up": 29.4,
+        "tmp_cmf_90_low": 23.4,
+        "tmp_cmf_90_up": 28.4,
+        "acceptability_80": true,
+        "acceptability_90": true
+      }
+    },
+    {
+      "name": "SC-3 Cool indoor with low t_running_mean \u2192 not acceptable",
+      "inputs": {
+        "tdb": 19,
+        "tr": 19,
+        "t_running_mean": 12,
+        "v": 0.1
+      },
+      "expected": {
+        "tmp_cmf": 21.5,
+        "tmp_cmf_80_low": 18.0,
+        "tmp_cmf_80_up": 25.0,
+        "tmp_cmf_90_low": 19.0,
+        "tmp_cmf_90_up": 24.0,
+        "acceptability_80": true,
+        "acceptability_90": true
+      }
+    },
+    {
+      "name": "SC-4 Out-of-range t_running_mean \u2192 tmp_cmf is NaN",
+      "inputs": {
+        "tdb": 25,
+        "tr": 25,
+        "t_running_mean": 5,
+        "v": 0.1,
+        "limit_inputs": true
+      },
+      "expected": {
+        "tmp_cmf": null,
+        "tmp_cmf_80_low": null,
+        "tmp_cmf_80_up": null,
+        "tmp_cmf_90_low": null,
+        "tmp_cmf_90_up": null,
+        "acceptability_80": false,
+        "acceptability_90": false
+      }
+    },
+    {
+      "name": "SC-5 IP units conversion",
+      "inputs": {
+        "tdb": 77,
+        "tr": 77,
+        "t_running_mean": 68,
+        "v": 0.3,
+        "units": "IP"
+      },
+      "expected": {
+        "tmp_cmf": 75.2,
+        "tmp_cmf_80_low": 68.9,
+        "tmp_cmf_80_up": 81.5,
+        "tmp_cmf_90_low": 70.7,
+        "tmp_cmf_90_up": 79.7,
+        "acceptability_80": true,
+        "acceptability_90": true
+      }
+    }
+  ]
+}

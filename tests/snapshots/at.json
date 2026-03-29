@@ -1,0 +1,61 @@
+{
+  "model": "at",
+  "cases": [
+    {
+      "name": "SC-1 Warm and humid conditions without solar radiation",
+      "inputs": {
+        "tdb": 30,
+        "rh": 70,
+        "v": 0.5
+      },
+      "expected": {
+        "at": 35.5
+      }
+    },
+    {
+      "name": "SC-2 Cool and windy conditions without solar radiation \u2192 wind chill effect reduces AT below tdb",
+      "inputs": {
+        "tdb": 15,
+        "rh": 50,
+        "v": 3.0
+      },
+      "expected": {
+        "at": 11.7
+      }
+    },
+    {
+      "name": "SC-3 Hot conditions with high relative humidity \u2192 humidity raises AT above tdb",
+      "inputs": {
+        "tdb": 35,
+        "rh": 80,
+        "v": 0.2
+      },
+      "expected": {
+        "at": 45.7
+      }
+    },
+    {
+      "name": "SC-4 Solar radiation included (q=200 W/m2) \u2192 AT higher than without solar load",
+      "inputs": {
+        "tdb": 28,
+        "rh": 60,
+        "v": 0.5,
+        "q": 200
+      },
+      "expected": {
+        "at": 44.6
+      }
+    },
+    {
+      "name": "SC-5 Low humidity conditions without solar radiation",
+      "inputs": {
+        "tdb": 28,
+        "rh": 20,
+        "v": 0.5
+      },
+      "expected": {
+        "at": 26.1
+      }
+    }
+  ]
+}

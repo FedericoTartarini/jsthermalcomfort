@@ -92,3 +92,39 @@ By default tests use the `main` branch. To pin tests to a specific ref (tag/bran
 ```bash
 VALIDATION_DATA_REF=main npm test
 ```
+
+## Migration: Removing *_array APIs
+
+### What changed
+
+All `*_array` functions have been removed from the public API. These functions accepted arrays of inputs and returned arrays of results. They are no longer exported from `models`, `utilities`, or `psychrometrics`.
+
+### Removed functions
+
+**Models:** `adaptive_ashrae_array`, `adaptive_en_array`, `a_pmv_array`, `athb_array`, `clo_tout_array`, `discomfort_index_array`, `e_pmv_array`, `pmv_array`, `pmv_ppd_array`, `set_tmp_array`, `two_nodes_array`, `utci_array`
+
+**Utilities:** `v_relative_array`, `clo_dynamic_array`, `units_converter_array`
+
+**Psychrometrics:** `p_sat_torr_array`, `t_o_array`, `t_mrt_array`
+
+### How to migrate
+
+Replace array function calls with scalar equivalents using `Array.map()`:
+
+```js
+// Before
+import jsthermalcomfort from "jsthermalcomfort";
+const results = jsthermalcomfort.models.utci_array(
+  [25, 30], [27, 35], [1, 0.5], [50, 60]
+);
+
+// After
+import jsthermalcomfort from "jsthermalcomfort";
+const inputs = [
+  { tdb: 25, tr: 27, v: 1, rh: 50 },
+  { tdb: 30, tr: 35, v: 0.5, rh: 60 },
+];
+const results = inputs.map(({ tdb, tr, v, rh }) =>
+  jsthermalcomfort.models.utci(tdb, tr, v, rh)
+);
+```

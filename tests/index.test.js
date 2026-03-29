@@ -42,10 +42,6 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("clo_tout");
   });
 
-  it("should have models.clo_tout_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("clo_tout_array");
-  });
-
   it("should have models.wbgt", () => {
     expect(jsthermalcomfort.models).toHaveProperty("wbgt");
   });
@@ -54,32 +50,16 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });
 
-  it("should have models.discomfort_index_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("discomfort_index_array");
-  });
-
   it("should have models.two_nodes", () => {
     expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
-  });
-
-  it("should have models.two_nodes_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("two_nodes_array");
   });
 
   it("should have models.set_tmp", () => {
     expect(jsthermalcomfort.models).toHaveProperty("set_tmp");
   });
 
-  it("should have models.set_tmp_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("set_tmp_array");
-  });
-
   it("should have models.adaptive_en", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_en");
-  });
-
-  it("should have models.adaptive_en_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("adaptive_en_array");
   });
 
   it("should have models.at", () => {
@@ -90,16 +70,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd");
   });
 
-  it("should have models.pmv_ppd_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd_array");
-  });
-
   it("should have models.adaptive_ashrae", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae");
-  });
-
-  it("should have models.adaptive_ashrae_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae_array");
   });
 
   it("should have models.cooling_effect", () => {
@@ -114,24 +86,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("athb");
   });
 
-  it("should have models.athb_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("athb_array");
-  });
-
   it("should have models.pmv", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pmv");
   });
 
-  it("should have models.pmv_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("pmv_array");
-  });
-
   it("should have models.a_pmv", () => {
     expect(jsthermalcomfort.models).toHaveProperty("a_pmv");
-  });
-
-  it("should have models.a_pmv_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("a_pmv_array");
   });
 
   it("should have models.ankle_draft", () => {
@@ -144,10 +104,6 @@ describe("NPM Package", () => {
 
   it("should have models.e_pmv", () => {
     expect(jsthermalcomfort.models).toHaveProperty("e_pmv");
-  });
-
-  it("should have models.e_pmv_array", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("e_pmv_array");
   });
 
   it("should have models.vertical_tmp_grad_ppd", () => {
@@ -170,24 +126,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("v_relative");
   });
 
-  it("should have utilities.v_relative_array", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("v_relative_array");
-  });
-
   it("should have utilities.clo_dynamic", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic");
   });
 
-  it("should have utilities.clo_dynamic_array", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_array");
-  });
-
   it("should have utilities.units_converter", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("units_converter");
-  });
-
-  it("should have utilities.units_converter_array", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("units_converter_array");
   });
 
   it("should have utilities.running_mean_outdoor_temperature", () => {
@@ -222,15 +166,7 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr");
   });
 
-  it("should have psychrometrics.p_sat_torr_array", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr_array");
-  });
-
   it("should have psychrometrics.t_o", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
-  });
-
-  it("should have psychrometrics.t_o_array", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
   });
 

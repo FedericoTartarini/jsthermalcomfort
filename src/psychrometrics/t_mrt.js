@@ -1,4 +1,4 @@
-import { valid_range, round } from "../utilities/utilities.js";
+import { round } from "../utilities/utilities.js";
 
 const g = 9.81;
 const c_to_k = 273.15;
@@ -17,8 +17,6 @@ const o = 0.0000000567;
  *
  * @public
  * @memberof psychrometrics
- *
- * @see {@link t_mrt_array} for a version that supports arrays
  *
  * @param {number} tg - globe temperature, [°C]
  * @param {number} tdb - air temperature, [°C]
@@ -51,57 +49,6 @@ export function t_mrt(
 
   if (standard === "iso") {
     return get_tr_iso(tg, tdb, v, d, emissivity);
-  }
-  throw new Error(
-    "No standard found, please choose standard from ISO and Mixed Convectioin",
-  );
-}
-
-/**
- * Converts globe temperature reading into mean radiant temperature in accordance with either the Mixed Convection
- * developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard {@link #ref_5|[5]}.
- *
- * @public
- * @memberof psychrometrics
- *
- * @see {@link t_mrt} for scalar arguments. Accepts array arguments.
- *
- * @param {number[]} tg - globe temperature, [°C]
- * @param {number[]} tdb - air temperature, [°C]
- * @param {number[]} v - air speed, [m/s]
- * @param {number[]} d - diameter of the globe, [m] default 0.15 m
- * @param {number[]} emissivity - emissivity of the globe temperature sensor, default 0.95
- * @param {"Mixed Convection" | "ISO"} standard - either choose between the Mixed Convection and ISO formulations. Refer to the {@link #t_mrt|t_mrt} function for more information
- * @returns {number[]}
- */
-
-export function t_mrt_array(
-  tg,
-  tdb,
-  v,
-  d,
-  emissivity,
-  standard = "Mixed Convection",
-) {
-  // the array version of t_mrt, we assume all paramaters have the same length
-  standard = standard.toLowerCase();
-  let tr_array = 0;
-  if (standard === "mixed convection") {
-    tr_array = tg.map((_tg, i) => {
-      return get_tr_mixed_convection(_tg, tdb[i], v[i], d[i], emissivity[i]);
-    });
-    const d_valid = valid_range(d, [0.04, 0.15]);
-    const trResult = d_valid.map((_d_valid, i) =>
-      !isNaN(_d_valid) ? round(tr_array[i], 1) : NaN,
-    );
-    return trResult;
-  }
-
-  if (standard === "iso") {
-    tr_array = tg.map((_tg, i) => {
-      return get_tr_iso(_tg, tdb[i], v[i], d[i], emissivity[i]);
-    });
-    return tr_array;
   }
   throw new Error(
     "No standard found, please choose standard from ISO and Mixed Convectioin",

@@ -3,14 +3,11 @@ import {
   body_surface_area,
   v_relative,
   clo_dynamic,
-  clo_dynamic_array,
   units_converter,
-  units_converter_array,
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
   check_standard_compliance_array,
-  v_relative_array,
   clo_typical_ensembles,
   transpose_sharp_altitude,
 } from "../../src/utilities/utilities";
@@ -71,18 +68,6 @@ describe("v_relative", () => {
     ({ v, met, expected }) => {
       const result = v_relative(v, met);
       expect(result).toBeCloseTo(expected, 4);
-    },
-  );
-});
-
-describe("v_relative_array", () => {
-  it.each([
-    { v: [1.0, 2.0, 3.0], met: [2.0, 2.0, 2.0], expected: [1.3, 2.3, 3.3] },
-  ])(
-    "returns $expected when v is $v and met is $met",
-    ({ v, met, expected }) => {
-      const result = v_relative_array(v, met);
-      deep_close_to_array(result, expected, 4);
     },
   );
 });
@@ -155,42 +140,6 @@ describe("clo_dynamic", () => {
 
   it("throws an error when standard is invalid", () => {
     expect(() => clo_dynamic(1.0, 1.0, "invalid")).toThrow();
-  });
-});
-
-describe("clo_dynamic_array", () => {
-  it.each([
-    {
-      clo: [1, 1, 2],
-      met: [1, 0.5, 0.5],
-      standard: "ASHRAE",
-      expected: [1, 1, 2],
-      tolerance: 4,
-    },
-    {
-      clo: [1, 1, 1],
-      met: [1, 1.2, 2.0],
-      standard: undefined,
-      expected: [1, 1, 0.8],
-      tolerance: 4,
-    },
-    {
-      clo: [1.0, 1.0],
-      met: [1.0, 2.0],
-      standard: "ISO",
-      expected: [1, 0.8],
-      tolerance: 4,
-    },
-  ])(
-    "returns $expected when clo is $clo, met is $met, and the standard is $standard",
-    ({ clo, met, standard, expected, tolerance }) => {
-      const result = clo_dynamic_array(clo, met, standard);
-      deep_close_to_array(result, expected, tolerance);
-    },
-  );
-
-  it("throws an error when standard is invalid", () => {
-    expect(() => clo_dynamic_array([1.0], [1.0], "invalid")).toThrow();
   });
 });
 
@@ -269,85 +218,6 @@ describe("units_converter", () => {
     ({ args, from_units, expected }) => {
       const result = units_converter(args, from_units);
       deep_close_to_obj(result, expected, 2);
-    },
-  );
-});
-
-describe("units_converter_array", () => {
-  it.each([
-    {
-      args: {
-        tdb: [77],
-        tr: [77],
-        v: [3.2],
-      },
-      from_units: "IP",
-      expected: {
-        tdb: [25.0],
-        tr: [25.0],
-        v: [0.975312],
-      },
-    },
-    {
-      args: {
-        pressure: [1],
-        area: [1 / 0.09],
-      },
-      from_units: "IP",
-      expected: {
-        pressure: [101325],
-        area: [1.03224],
-      },
-    },
-    {
-      args: {
-        tdb: [77],
-        v: [10],
-      },
-      from_units: "IP",
-      expected: {
-        tdb: [25.0],
-        v: [3.047],
-      },
-    },
-    {
-      args: {
-        tdb: [20],
-        v: [2],
-      },
-      from_units: "SI",
-      expected: {
-        tdb: [68],
-        v: [6.562],
-      },
-    },
-    {
-      args: {
-        area: [100],
-        pressure: [14.7],
-      },
-      from_units: "IP",
-      expected: {
-        area: [9.29],
-        pressure: [1489477.5],
-      },
-    },
-    {
-      args: {
-        area: [50],
-        pressure: [101325],
-      },
-      from_units: "SI",
-      expected: {
-        area: [538.199],
-        pressure: [1],
-      },
-    },
-  ])(
-    "returns $expected when args are $args and from_units is $from_units",
-    ({ args, from_units, expected }) => {
-      const result = units_converter_array(args, from_units);
-      deep_close_to_obj_arrays(result, expected, 2);
     },
   );
 });

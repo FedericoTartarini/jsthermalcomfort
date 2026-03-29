@@ -1,8 +1,4 @@
-import {
-  round,
-  units_converter,
-  valid_range,
-} from "../utilities/utilities.js";
+import { round, units_converter, valid_range } from "../utilities/utilities.js";
 
 const g = [
   -2836.5744,

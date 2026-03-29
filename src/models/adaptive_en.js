@@ -1,8 +1,5 @@
 import { t_o } from "../psychrometrics/t_o.js";
-import {
-  units_converter,
-  round,
-} from "../utilities/utilities.js";
+import { units_converter, round } from "../utilities/utilities.js";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}

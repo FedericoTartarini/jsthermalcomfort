@@ -93,7 +93,7 @@ By default tests use the `main` branch. To pin tests to a specific ref (tag/bran
 VALIDATION_DATA_REF=main npm test
 ```
 
-## Migration: Removing *_array APIs
+## Migration: Removing \*\_array APIs
 
 ### What changed
 
@@ -115,7 +115,10 @@ Replace array function calls with scalar equivalents using `Array.map()`:
 // Before
 import jsthermalcomfort from "jsthermalcomfort";
 const results = jsthermalcomfort.models.utci_array(
-  [25, 30], [27, 35], [1, 0.5], [50, 60]
+  [25, 30],
+  [27, 35],
+  [1, 0.5],
+  [50, 60],
 );
 
 // After
@@ -125,6 +128,6 @@ const inputs = [
   { tdb: 30, tr: 35, v: 0.5, rh: 60 },
 ];
 const results = inputs.map(({ tdb, tr, v, rh }) =>
-  jsthermalcomfort.models.utci(tdb, tr, v, rh)
+  jsthermalcomfort.models.utci(tdb, tr, v, rh),
 );
 ```

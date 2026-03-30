@@ -770,6 +770,25 @@
                   </section>
                 
                   
+                  <section class='keyline-top-not py2' id='unreleased'>
+                    <h2 class='mt0 '>Unreleased</h2>
+                    
+                    
+                      <section class='py2 clearfix'>
+
+  
+    <ul>
+<li>Removed all <code>*_array</code> function exports from models, utilities and psychrometrics. This is a breaking change compared with previous versions.</li>
+<li>Removed functions: <code>adaptive_ashrae_array</code>, <code>adaptive_en_array</code>, <code>a_pmv_array</code>, <code>athb_array</code>, <code>clo_tout_array</code>, <code>discomfort_index_array</code>, <code>e_pmv_array</code>, <code>pmv_array</code>, <code>pmv_ppd_array</code>, <code>set_tmp_array</code>, <code>two_nodes_array</code>, <code>utci_array</code>, <code>v_relative_array</code>, <code>clo_dynamic_array</code>, <code>units_converter_array</code>, <code>p_sat_torr_array</code>, <code>t_mrt_array</code>, <code>t_o_array</code>.</li>
+<li>Migration: use <code>Array.map()</code> with the scalar equivalent. See PR #141 for before/after examples.</li>
+</ul>
+
+  
+</section>
+                    
+                  </section>
+                
+                  
                   <section class='keyline-top-not py2' id='102-2026-03-19'>
                     <h2 class='mt0 '>1.0.2 (2026-03-19)</h2>
                     
@@ -880,6 +899,12 @@
                       <ul class="visible nav section-nav flex-column">
                         
                           
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#unreleased">Unreleased</a>
+                            
+                          </li>
+                        
                           
                           <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#102-2026-03-19">1.0.2 (2026-03-19)</a>

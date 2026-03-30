@@ -763,7 +763,7 @@
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/heat_index.js#L30-L62' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/heat_index.js#L30-L62' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -893,7 +893,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/phs.js#L106-L208' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/phs.js#L106-L208' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1044,7 +1044,7 @@ heat flow, and rectal temperature.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/humidex.js#L38-L62' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/humidex.js#L38-L62' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1167,7 +1167,7 @@ relative humidity.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/net.js#L43-L55' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/net.js#L43-L55' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1306,7 +1306,7 @@ false, it does not.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/wbgt.js#L60-L80' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/wbgt.js#L60-L80' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1468,7 +1468,7 @@ setting
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/discomfort_index.js#L35-L43' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/discomfort_index.js#L34-L42' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1549,89 +1549,6 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='discomfort_index_array'>
-                    <h2 class='mt0 '>Discomfort Index — Array (DI)</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/discomfort_index.js#L75-L86' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Calculates the Discomfort Index (DI). The index is essentially an effective temperature based on air temperature and humidity.
-The discomfort index is usuallly divided in 6 dicomfort categories and it only applies to warm environments. <a href="#ref_24">[24]</a></p>
-<ul>
-<li>class 1 - DI &#x3C; 21 °C - No discomfort</li>
-<li>class 2 - 21 &#x3C;= DI &#x3C; 24 °C - Less than 50% feels discomfort</li>
-<li>class 3 - 24 &#x3C;= DI &#x3C; 27 °C - More than 50% feels discomfort</li>
-<li>class 4 - 27 &#x3C;= DI &#x3C; 29 °C - Most of the population feels discomfort</li>
-<li>class 5 - 29 &#x3C;= DI &#x3C; 32 °C - Everyone feels severe stress</li>
-<li>class 6 - DI >= 32 °C - State of medical emergency</li>
-</ul>
-
-  <div class='hljs pre p1 mt0 sig'>discomfort_index_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>): <a href="#discomfortindexarrayreturntype">DiscomfortIndexArrayReturnType</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='discomfort_index_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            air temperature [C]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative humidity [%]
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='discomfort_index_array-returns'>Returns</div>
-      <code><a href="#discomfortindexarrayreturntype">DiscomfortIndexArrayReturnType</a></code>
-      
-        :
-        object with results of DI
-
-      
-    
-  
-
-  
-
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='two_nodes'>
                     <h2 class='mt0 '>Two-Node Model (Gagge)</h2>
                     
@@ -1640,7 +1557,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/two_nodes.js#L117-L200' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/two_nodes.js#L116-L199' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1832,199 +1749,6 @@ suite or the project's issue tracker for more details.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='two_nodes_array'>
-                    <h2 class='mt0 '>Two-Node Model — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/two_nodes.js#L323-L491' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Two nodes model of human temperature regulation Gagge et al. when the input parameters are arrays.</p>
-<p><a href="#ref_10">[10]</a> This model can be used to calculate a variety of indices, including:</p>
-<ul>
-<li>Gagge’s version of Fanger’s Predicted Mean Vote (PMV). This function uses
-the Fanger’s PMV equations but it replaces the heat loss and gain terms
-with those calculated by the two node model developed by Gagge et al. (1986) <a href="#ref_10">[10]</a>.</li>
-<li>PMV SET and the predicted thermal sensation based on SET <a href="#ref_10">[10]</a>. This function is
-similar in all aspects to the pythermalcomfort.models.pmv_gagge(). However, it uses the
-pythermalcomfort.models.set() equation to calculate the dry heat loss by convection.</li>
-<li>Thermal discomfort (DISC) as the relative thermoregulatory strain necessary
-to restore a state of comfort and thermal equilibrium by sweating <a href="#ref_10">[10]</a>. DISC is
-described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1),
-uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (S).
-The range of each category is ± 0.5 numerically. In the cold, the classical negative category
-descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
-<li>Heat gains and losses via convection, radiation and conduction.</li>
-<li>The Standard Effective Temperature (SET)</li>
-<li>The New Effective Temperature (ET)</li>
-<li>The Predicted Thermal Sensation (TSENS)</li>
-<li>The Predicted Percent Dissatisfied Due to Draft (PD)</li>
-<li>Predicted Percent Satisfied With the Level of Air Movement” (PS)</li>
-</ul>
-
-  <div class='hljs pre p1 mt0 sig'>two_nodes_array(tdbArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, trArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rhArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, metArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, cloArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, wmeArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, bodySurfaceArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, pAtmArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, bodyPositionArray: (<code>"standing"</code> | <code>"sitting"</code>), maxSkinBloodFlowArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, kwargs: <a href="#twonodeskwargs">TwoNodesKwargs</a>?): <a href="#twonodesarrayreturntype">TwoNodesArrayReturnType</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='two_nodes_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdbArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>trArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Mean radiant temperature, default in [°C]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Air speed, default in [m/s]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rhArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Relative humidity, [%].
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>metArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Metabolic rate, [W/(m2)]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>cloArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Clothing insulation, [clo]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>wmeArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            External work, [W/(m2)] default 0
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>bodySurfaceArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>pAtmArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>bodyPositionArray</span> <code class='quiet'>((<code>"standing"</code> | <code>"sitting"</code>))</code>
-            Select either “sitting” or “standing”
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>maxSkinBloodFlowArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Maximum blood flow from the core to the skin, [kg/h/m2] default 90
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#twonodeskwargs">TwoNodesKwargs</a>?
-            = <code>{}</code>)</code>
-            
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='two_nodes_array-returns'>Returns</div>
-      <code><a href="#twonodesarrayreturntype">TwoNodesArrayReturnType</a></code>
-      
-        :
-        object with results of two_nodes_array
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='two_nodes_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">two_nodes_array</span>([<span class="hljs-number">25</span>,<span class="hljs-number">30</span>], [<span class="hljs-number">25</span>,<span class="hljs-number">35</span>], [<span class="hljs-number">0.3</span>,<span class="hljs-number">0.5</span>], [<span class="hljs-number">50</span>,<span class="hljs-number">60</span>], [<span class="hljs-number">1.2</span>,<span class="hljs-number">1.5</span>], [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.3</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">1.8258</span>,<span class="hljs-number">1.8258</span>], [<span class="hljs-number">101325</span>,<span class="hljs-number">101325</span>], [<span class="hljs-string">&quot;standing&quot;</span>,<span class="hljs-string">&quot;standing&quot;</span>], [<span class="hljs-number">90</span>,<span class="hljs-number">90</span>])
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results); <span class="hljs-comment">// {</span>
-<span class="hljs-attr">e_skin</span>: [ <span class="hljs-number">16.2</span>, <span class="hljs-number">60.4</span> ],
-<span class="hljs-attr">e_rsw</span>: [ <span class="hljs-number">7</span>, <span class="hljs-number">51.9</span> ],
-<span class="hljs-attr">e_max</span>: [ <span class="hljs-number">159.9</span>, <span class="hljs-number">193.8</span> ],
-<span class="hljs-attr">q_sensible</span>: [ <span class="hljs-number">47.6</span>, <span class="hljs-number">21.1</span> ],
-<span class="hljs-attr">q_skin</span>: [ <span class="hljs-number">63.8</span>, <span class="hljs-number">81.5</span> ],
-<span class="hljs-attr">q_res</span>: [ <span class="hljs-number">5.2</span>, <span class="hljs-number">5</span> ],
-<span class="hljs-attr">t_core</span>: [ <span class="hljs-number">36.9</span>, <span class="hljs-number">37</span> ],
-<span class="hljs-attr">t_skin</span>: [ <span class="hljs-number">33.7</span>, <span class="hljs-number">35.1</span> ],
-<span class="hljs-attr">m_bl</span>: [ <span class="hljs-number">12.9</span>, <span class="hljs-number">31.6</span> ],
-<span class="hljs-attr">m_rsw</span>: [ <span class="hljs-number">10.3</span>, <span class="hljs-number">76.3</span> ],
-<span class="hljs-attr">w</span>: [ <span class="hljs-number">0.1</span>, <span class="hljs-number">0.3</span> ],
-<span class="hljs-attr">w_max</span>: [ <span class="hljs-number">0.6</span>, <span class="hljs-number">0.6</span> ],
-<span class="hljs-attr">set</span>: [ <span class="hljs-number">23.6</span>, <span class="hljs-number">29.3</span> ],
-<span class="hljs-attr">et</span>: [ <span class="hljs-number">25</span>, <span class="hljs-number">32.5</span> ],
-<span class="hljs-attr">pmv_gagge</span>: [ <span class="hljs-number">0.1</span>, <span class="hljs-number">1.6</span> ],
-<span class="hljs-attr">pmv_set</span>: [ -<span class="hljs-number">0</span>, <span class="hljs-number">1.1</span> ],
-<span class="hljs-attr">disc</span>: [ <span class="hljs-number">0.1</span>, <span class="hljs-number">1.9</span> ],
-<span class="hljs-attr">t_sens</span>: [ <span class="hljs-number">0.1</span>, <span class="hljs-number">1.4</span> ]
-}</pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='set_tmp'>
                     <h2 class='mt0 '>Standard Effective Temperature (SET)</h2>
                     
@@ -2033,7 +1757,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/set_tmp.js#L59-L152' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/set_tmp.js#L57-L150' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2194,173 +1918,6 @@ and activity level <a href="#ref_10">[10]</a>.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='set_tmp_array'>
-                    <h2 class='mt0 '>Standard Effective Temperature — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/set_tmp.js#L199-L309' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Calculates the SET when the input parameters are arrays. The SET is the
-temperature of a hypothetical isothermal environment at 50% (rh),
-&#x3C;0.1 m/s (20 fpm) average air speed (v), and tr = tdb, in which the
-total heat loss from the skin of an imaginary occupant wearing
-clothing, standardized for the activity concerned is the same as
-that from a person in the actual environment with actual clothing
-and activity level <a href="#ref_10">[10]</a>.</p>
-
-  <div class='hljs pre p1 mt0 sig'>set_tmp_array(tdbArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, trArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rhArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, metArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, cloArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, wmeArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>?, bodySurfaceArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>?, pAtmArray: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>?, bodyPositionArray: (<code>"standing"</code> | <code>"sitting"</code>), units: (<code>"SI"</code> | <code>"IP"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, kwargs: <a href="#settmpkwargs">SetTmpKwargs</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='set_tmp_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdbArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>trArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Mean radiant temperature, default in [°C]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Air speed, default in [m/s]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rhArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Relative humidity, [%].
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>metArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Metabolic rate, [W/(m2)]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>cloArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Clothing insulation, [clo]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>wmeArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>?)</code>
-            External work, [W/(m2)] default 0
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>bodySurfaceArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>?)</code>
-            Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>pAtmArray</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>?)</code>
-            Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>bodyPositionArray</span> <code class='quiet'>((<code>"standing"</code> | <code>"sitting"</code>))</code>
-            Select either “sitting” or “standing”
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
-            Select the SI (International System of Units) or the IP (Imperial Units) system.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>true</code>)</code>
-            By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#settmpkwargs">SetTmpKwargs</a>?
-            = <code>{}</code>)</code>
-            
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='set_tmp_array-returns'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></code>
-      
-        :
-        SET Array – Standard effective temperature in array, [°C]
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='set_tmp_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> set = <span class="hljs-title function_">set_tmp_array</span>([<span class="hljs-number">25</span>, <span class="hljs-number">25</span>], [<span class="hljs-number">25</span>, <span class="hljs-number">25</span>], [<span class="hljs-number">0.1</span>, <span class="hljs-number">0.1</span>], [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>], [<span class="hljs-number">1.2</span>, <span class="hljs-number">1.2</span>], [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>]); <span class="hljs-comment">// returns [24.3, 24.3]</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='wc'>
                     <h2 class='mt0 '>Wind Chill Index (WCI)</h2>
                     
@@ -2369,7 +1926,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/wc.js#L26-L34' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/wc.js#L26-L34' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2486,7 +2043,7 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/adaptive_en.js#L73-L155' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/adaptive_en.js#L67-L149' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2621,140 +2178,6 @@ outside the applicability limits of the model.
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='adaptive_en_array'>
-                    <h2 class='mt0 '>Adaptive EN-16798 — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/adaptive_en.js#L212-L334' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Determines the adaptive thermal comfort based on EN 16798-1 2019 <a href="#ref_3">[3]</a></p>
-<p>Note: You can use this function to calculate if your conditions are within the EN
-adaptive thermal comfort region. Calculations with comply with the EN 16798-1 2019 <a href="#ref_3">[3]</a>.</p>
-
-  <div class='hljs pre p1 mt0 sig'>adaptive_en_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, units: (<code>"IP"</code> | <code>"SI"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>): <a href="#adaptiveenarrayresult">AdaptiveEnArrayResult</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='adaptive_en_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>t_running_mean</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            running mean temperature, default in [°C] in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-The running mean temperature can be calculated using the function 
-<a href="#running_mean_outdoor_temperature">running_mean_outdoor_temperature</a>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>v</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            air speed, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-<p>Note: Indoor operative temperature correction is applicable for buildings equipped
-with fans or personal systems providing building occupants with personal
-control over air speed at occupant level.
-For operative temperatures above 25°C the comfort zone upper limit can be
-increased by 1.2 °C (0.6 &#x3C; v &#x3C; 0.9 m/s), 1.8 °C (0.9 &#x3C; v &#x3C; 1.2 m/s), 2.2 °C (v> 1.2 m/s)</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"IP"</code> | <code>"SI"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
-            select the SI (International System of Units) or the IP (Imperial Units) system.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>true</code>)</code>
-            By default, if the inputs are outsude the standard applicability limits the
-function returns nan. If False returns pmv and ppd values even if input values are
-outside the applicability limits of the model.
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='adaptive_en_array-returns'>Returns</div>
-      <code><a href="#adaptiveenarrayresult">AdaptiveEnArrayResult</a></code>
-      
-        :
-        result set
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='adaptive_en_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">adaptive_en</span>([<span class="hljs-number">25</span>,<span class="hljs-number">25</span>], [<span class="hljs-number">25</span>,<span class="hljs-number">25</span>], [<span class="hljs-number">20</span>,<span class="hljs-number">9</span>], [<span class="hljs-number">0.1</span>,<span class="hljs-number">0.1</span>]);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results); <span class="hljs-comment">// {tmp_cmf: [25.4, NaN], acceptability_cat_i: [true, true], acceptability_cat_ii: [true, true], ... }</span>
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results.<span class="hljs-property">acceptability_cat_i</span>); <span class="hljs-comment">// [true, true]</span>
-<span class="hljs-comment">// The conditions you entered are considered to comply with Category I</span>
-<span class="hljs-comment">// The adaptive thermal comfort model can only be used</span>
-<span class="hljs-comment">// if the running mean temperature is between 10 °C and 30 °C</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='at'>
                     <h2 class='mt0 '>Apparent Temperature (AT)</h2>
                     
@@ -2763,7 +2186,7 @@ outside the applicability limits of the model.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/at.js#L40-L56' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/at.js#L40-L56' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2901,7 +2324,7 @@ Please specify q if you want to estimate AT with solar load.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pmv_ppd.js#L114-L198' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/pmv_ppd.js#L112-L196' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3075,187 +2498,6 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pmv_ppd_array'>
-                    <h2 class='mt0 '>PMV-PPD — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pmv_ppd.js#L283-L403' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Returns Predicted Mean Vote ( <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PMV</a> ) and
-Predicted Percentage of Dissatisfied ( <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PPD</a> )
-calculated in accordance with main thermal comfort Standards. The PMV is an index that predicts the mean
-value of the thermal sensation votes (self-reported perceptions) of a large group of people on a
-sensation scale expressed from –3 to +3 corresponding to the categories:
-cold, cool, slightly cool, neutral, slightly warm, warm, and hot. <a href="#ref_1">[1]</a></p>
-<p>While the PMV equation is the same for both the ISO and ASHRAE standards, in the
-ASHRAE 55 PMV equation, the SET is used to calculate the cooling effect first,
-this is then subtracted from both the air and mean radiant temperatures, and the
-differences are used as input to the PMV model, while the airspeed is set to 0.1m/s.
-Please read more in the Note below.</p>
-<p>Notes:</p>
-<p>You can use this function to calculate the <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PMV</a>
-and <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PPD</a> in accordance with
-either the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</a> or the ISO 7730 Standard <a href="#ref_2">[2]</a>.</p>
-<p>This is a version that supports arrays.</p>
-
-  <div class='hljs pre p1 mt0 sig'>pmv_ppd_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, standard: (<code>"ISO"</code> | <code>"ASHRAE"</code>), kwargs: <a href="#pmv_ppdkwargs">Pmv_ppdKwargs</a>): <a href="#pmv_ppd_arrayreturns">Pmv_ppd_arrayReturns</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative air speed, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-<p>Note: vr is the relative air speed caused by body movement and not the air
-speed measured by the air speed sensor. The relative air speed is the sum of the
-average air speed measured by the sensor plus the activity-generated air speed
-(Vag). Where Vag is the activity-generated air speed caused by motion of
-individual body parts. vr can be calculated using the function <code>v_relative_array</code> which is in .utilities.js.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative humidity, [%]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>met</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            metabolic rate, [met]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>clo</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            clothing insulation, [clo]
-<p>Note: The activity as well as the air speed modify the insulation characteristics
-of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
-the clothing insulation shall be corrected <a href="#ref_2">[2]</a>. The ASHRAE 55 Standard corrects
-for the effect of the body movement for met equal or higher than 1.2 met using
-the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
-can be calculated using the function <code>clo_dynamic_array</code> which is in .utilities.js.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>wme</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            external work, default is array of 0
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>standard</span> <code class='quiet'>((<code>"ISO"</code> | <code>"ASHRAE"</code>)
-            = <code>&quot;ISO&quot;</code>)</code>
-            comfort standard used for calculation
-<p>· If "ISO", then the ISO Equation is used</p>
-<p>· If "ASHRAE", then the ASHRAE Equation is used</p>
-<p>Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of
-the PMV model is limited to air speeds below 0.10m/s (20 fpm). When air speeds exceed 0.10 m/s (20 fpm), the comfort
-zone boundaries are adjusted based on the SET model. This change was introduced by the
-<a href="https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf">Addendum_C to Standard 55-2020</a></p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#pmv_ppdkwargs">Pmv_ppdKwargs</a>
-            = <code>{}</code>)</code>
-            additional arguments
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='pmv_ppd_array-returns'>Returns</div>
-      <code><a href="#pmv_ppd_arrayreturns">Pmv_ppd_arrayReturns</a></code>
-      
-        :
-        Result of pmv and ppd
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = [<span class="hljs-number">22</span>, <span class="hljs-number">25</span>];
-<span class="hljs-keyword">const</span> tr = [<span class="hljs-number">25</span>, <span class="hljs-number">25</span>];
-<span class="hljs-keyword">const</span> rh = [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>];
-<span class="hljs-keyword">const</span> v = [<span class="hljs-number">0.1</span>, <span class="hljs-number">0.1</span>];
-<span class="hljs-keyword">const</span> met = [<span class="hljs-number">1.4</span>, <span class="hljs-number">1.4</span>];
-<span class="hljs-keyword">const</span> clo = [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>];
-<span class="hljs-comment">// Calculate relative air speed</span>
-<span class="hljs-keyword">const</span> v_r = <span class="hljs-title function_">v_relative_array</span>(v, met);
-<span class="hljs-comment">// Calculate dynamic clothing</span>
-<span class="hljs-keyword">const</span> clo_d = <span class="hljs-title function_">clo_dynamic_array</span>(clo, met);
-<span class="hljs-keyword">const</span> arrayResults = <span class="hljs-title function_">pmv_ppd_array</span>(tdb, tr, v_r, rh, met, clo_d);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(arrayResults); <span class="hljs-comment">// Output: { pmv: [-0.47, 0.06], ppd: [9.6, 5.1] }</span>
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results.<span class="hljs-property">pmv</span>); <span class="hljs-comment">// Output: [-0.47, 0.06]</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='pmv_ppd_ashrae'>
                     <h2 class='mt0 '>pmv_ppd_ashrae</h2>
                     
@@ -3264,7 +2506,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pmv_ppd_ashrae.js#L47-L58' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/pmv_ppd_ashrae.js#L47-L58' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3451,7 +2693,7 @@ elevated air speed is present.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pmv_ppd_iso.js#L48-L50' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/pmv_ppd_iso.js#L48-L50' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3629,7 +2871,7 @@ ranges cause the function to return NaN:</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/adaptive_ashrae.js#L86-L173' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/adaptive_ashrae.js#L83-L170' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3781,166 +3023,6 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='adaptive_ashrae_array'>
-                    <h2 class='mt0 '>Adaptive ASHRAE-55 — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/adaptive_ashrae.js#L250-L344' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Determines the adaptive thermal comfort based on ASHRAE 55. The adaptive
-model relates indoor design temperatures or acceptable temperature ranges
-to outdoor meteorological or climatological parameters. The adaptive model
-can only be used in occupant-controlled naturally conditioned spaces that
-meet all the following criteria:</p>
-<ul>
-<li>There is no mechianical cooling or heating system in operation</li>
-<li>Occupants have a metabolic rate between 1.0 and 1.5 met</li>
-<li>Occupants are free to adapt their clothing within a range as wide as 0.5 and 1.0 clo</li>
-<li>The prevailing mean (runnin mean) outdoor temperature is between 10 and 33.5 °C</li>
-</ul>
-
-  <div class='hljs pre p1 mt0 sig'>adaptive_ashrae_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, units: (<code>"SI"</code> | <code>"IP"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>): <a href="#adaptiveashraearrayresult">AdaptiveAshraeArrayResult</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>t_running_mean</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            running mean temperature, default in [°C] in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-The running mean temperature can be calculated using the function 
-<a href="#running_mean_outdoor_temperature">running_mean_outdoor_temperature</a>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>v</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            air speed, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
-            select the SI (International System of Units) or the IP (Imperial Units) system.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>true</code>)</code>
-            By default, if the inputs are outsude the standard applicability limits the
-function returns nan. If False returns pmv and ppd values even if input values are
-outside the applicability limits of the model.
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae_array-returns'>Returns</div>
-      <code><a href="#adaptiveashraearrayresult">AdaptiveAshraeArrayResult</a></code>
-      
-        :
-        set containing results for the model
-<p>The ASHRAE 55 2020 limits are 10 &#x3C; tdb [°C] &#x3C; 40, 10 &#x3C; tr [°C] &#x3C; 40,
-0 &#x3C; vr [m/s] &#x3C; 2, 10 &#x3C; t running mean [°C] &#x3C; 33.5</p>
-<p>You can use this function to calculate if your conditions are within the <code>adaptive thermal comfort region</code>.
-Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</a>.</p>
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">import</span> { adaptive_ashrae_array } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort/models&quot;</span>;
-<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">adaptive_ashrae_array</span>([<span class="hljs-number">25</span>], [<span class="hljs-number">25</span>], [<span class="hljs-number">20</span>], [<span class="hljs-number">0.1</span>]);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results);
-<span class="hljs-comment">// {tmp_cmf: [24.0], tmp_cmf_80_low: [20.5], tmp_cmf_80_up: [27.5],</span>
-<span class="hljs-comment">//   tmp_cmf_90_low: [21.5], tmp_cmf_90_up: [26.5], acceptability_80: [true],</span>
-<span class="hljs-comment">//   acceptability_90: [true]}</span>
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results.<span class="hljs-property">acceptability_80</span>);
-<span class="hljs-comment">// [true]</span></pre>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">import</span> { adaptive_ashrae_array } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort/models&quot;</span>;
-<span class="hljs-comment">// For users who want to use the IP system</span>
-<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">adaptive_ashrae_array</span>([<span class="hljs-number">77</span>], [<span class="hljs-number">77</span>], [<span class="hljs-number">68</span>], [<span class="hljs-number">0.3</span>], <span class="hljs-string">&#x27;IP&#x27;</span>);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results);
-<span class="hljs-comment">// {tmp_cmf: [75.2], tmp_cmf_80_low: [68.9], tmp_cmf_80_up: [81.5],</span>
-<span class="hljs-comment">//  tmp_cmf_90_low: [70.7], tmp_cmf_90_up: [79.7], acceptability_80: [true],</span>
-<span class="hljs-comment">//  acceptability_90: [true]}</span></pre>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">import</span> { adaptive_ashrae_array } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort/models&quot;</span>;
-<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">adaptive_ashrae_array</span>([<span class="hljs-number">25</span>], [<span class="hljs-number">25</span>], [<span class="hljs-number">9</span>], [<span class="hljs-number">0.1</span>]);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results);
-<span class="hljs-comment">// {tmp_cmf: [NaN], tmp_cmf_80_low: [NaN], ...}</span>
-<span class="hljs-comment">// The adaptive thermal comfort model can only be used</span>
-<span class="hljs-comment">// if the running mean temperature is higher than 10°C</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='solar_gain'>
                     <h2 class='mt0 '>Solar Gain (MRT Delta)</h2>
                     
@@ -3949,7 +3031,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/solar_gain.js#L96-L158' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/solar_gain.js#L96-L158' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4111,7 +3193,7 @@ on skin and clothing color. More information is available in Blum (1945).</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/cooling_effect.js#L55-L141' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/cooling_effect.js#L55-L141' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4265,7 +3347,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/athb.js#L55-L82' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/athb.js#L54-L81' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4387,137 +3469,6 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='athb_array'>
-                    <h2 class='mt0 '>Adaptive Thermal Heat Balance — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/athb.js#L131-L177' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Return the PMV value calculated with the Adaptive Thermal Heat Balance
-Framework <a href="#ref_27">[27]</a>. The adaptive thermal heat balance (ATHB) framework
-introduced a method to account for the three adaptive principals, namely
-physiological, behavioral, and psychological adaptation, individually
-within existing heat balance models. The objective is a predictive model of
-thermal sensation applicable during the design stage or in international
-standards without knowing characteristics of future occupants.</p>
-<p>This is a version that supports arrays.</p>
-
-  <div class='hljs pre p1 mt0 sig'>athb_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='athb_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            dry bulb air temperature, in [°C]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            mean radiant temperature, in [°C]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative air speed, in [m/s]
-<p>Note: vr is the relative air speed caused by body movement and not the air
-speed measured by the air speed sensor. The relative air speed is the sum of the
-average air speed measured by the sensor plus the activity-generated air speed
-(Vag). Where Vag is the activity-generated air speed caused by motion of
-individual body parts. vr can be calculated using the function
-jsthermalcomfort.utilities.v_relative.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative humidity, [%]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>met</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            metabolic rate, [met]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>t_running_mean</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            running mean temperature, in [°C]
-<p>The running mean temperature can be calculated using the function
-jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='athb_array-returns'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></code>
-      
-        :
-        athb_pmv - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='athb_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = [<span class="hljs-number">25</span>, <span class="hljs-number">27</span>];
-<span class="hljs-keyword">const</span> tr = [<span class="hljs-number">25</span>, <span class="hljs-number">25</span>];
-<span class="hljs-keyword">const</span> vr = [<span class="hljs-number">0.1</span>, <span class="hljs-number">0.1</span>];
-<span class="hljs-keyword">const</span> rh = [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>];
-<span class="hljs-keyword">const</span> met = [<span class="hljs-number">1.1</span>, <span class="hljs-number">1.1</span>];
-<span class="hljs-keyword">const</span> t_running_mean = [<span class="hljs-number">20</span>, <span class="hljs-number">20</span>];
-
-<span class="hljs-keyword">const</span> athb_array_result = <span class="hljs-title function_">athb_array</span>(tdb, tr, vr, rh, met, t_running_mean);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(athb_array_result); <span class="hljs-comment">// Output: [0.2, 0.209]</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='pmv'>
                     <h2 class='mt0 '>Predicted Mean Vote (PMV)</h2>
                     
@@ -4526,7 +3477,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pmv.js#L98-L133' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/pmv.js#L97-L132' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4697,184 +3648,6 @@ boundaries are adjusted based on the SET model. This change was introduced by th
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pmv_array'>
-                    <h2 class='mt0 '>Predicted Mean Vote — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pmv.js#L209-L244' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Returns Predicted Mean Vote ( <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PMV</a> ) calculated
-in accordance with main thermal comfort Standards.</p>
-<p>The <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PMV</a> is an index that predicts the
-mean value of the thermal sensation votes (self-reported perceptions) of a large group of people on a sensation
-scale expressed from –3 to +3 corresponding to the categories: cold, cool, slightly cool, neutral, slightly warm,
-warm, and hot. <a href="#ref_1">[1]</a></p>
-<p>While the PMV equation is the same for both the ISO and ASHRAE standards, in the ASHRAE 55 PMV equation, the SET is
-used to calculate the cooling effect first, this is then subtracted from both the air and mean radiant temperatures,
-and the differences are used as input to the PMV model, while the airspeed is set to 0.1m/s. Please read more in the
-Note below.</p>
-<p>Notes:</p>
-<p>You can use this function to calculate the <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PMV</a>
-<a href="#ref_1">[1]</a> <a href="#ref_2">[2]</a></p>
-<p>This is a version that supports arrays.</p>
-
-  <div class='hljs pre p1 mt0 sig'>pmv_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, standard: (<code>"ISO"</code> | <code>"ASHRAE"</code>), kwargs: <a href="#pmvkwargs">PmvKwargs</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='pmv_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative air speed, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-<p>Note: vr is the relative air speed caused by body movement and not the air speed measured by the air speed sensor.
-The relative air speed is the sum of the average air speed measured by the sensor plus the activity-generated air
-speed (Vag). Where Vag is the activity-generated air speed caused by motion of individual body parts. vr can be
-calculated using the function 'v_relative_array' in utilities.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative humidity, [%]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>met</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            metabolic rate, [met]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>clo</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            clothing insulation, [clo]
-<p>Note: The activity as well as the air speed modify the insulation characteristics of the clothing and the adjacent
-air layer. Consequently, the ISO 7730 states that the clothing insulation shall be corrected [2]. The ASHRAE 55
-Standard corrects for the effect of the body movement for met equal or higher than 1.2 met using the equation
-clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo, can be calculated using the function 'clo_dynamic_array'
-in utilities.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>wme</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            external work, default is array of 0
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>standard</span> <code class='quiet'>((<code>"ISO"</code> | <code>"ASHRAE"</code>)
-            = <code>&quot;ISO&quot;</code>)</code>
-            comfort standard used for calculation
-<p>· If "ISO", then the ISO Equation is used</p>
-<p>· If "ASHRAE", then the ASHRAE Equation is used</p>
-<p>Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of the
-PMV model is limited to air speeds below 0.10m/s (20 fpm). When air speeds exceed 0.10 m/s (20 fpm), the comfort zone
-boundaries are adjusted based on the SET model. This change was introduced by the
-<a href="https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf">Addendum_C to Standard 55-2020</a></p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#pmvkwargs">PmvKwargs</a>
-            = <code>{}</code>)</code>
-            additional arguments
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='pmv_array-returns'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></code>
-      
-        :
-        pmv - Predicted Mean Vote
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='pmv_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = [<span class="hljs-number">22</span>, <span class="hljs-number">25</span>];
-<span class="hljs-keyword">const</span> tr = [<span class="hljs-number">25</span>, <span class="hljs-number">25</span>];
-<span class="hljs-keyword">const</span> rh = [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>];
-<span class="hljs-keyword">const</span> v = [<span class="hljs-number">0.1</span>, <span class="hljs-number">0.1</span>];
-<span class="hljs-keyword">const</span> met = [<span class="hljs-number">1.4</span>, <span class="hljs-number">1.4</span>];
-<span class="hljs-keyword">const</span> clo = [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>];
-
-<span class="hljs-comment">// calculate relative air speed</span>
-<span class="hljs-keyword">const</span> v_r = <span class="hljs-title function_">v_relative_array</span>(v, met);
-<span class="hljs-comment">// calculate dynamic clothing</span>
-<span class="hljs-keyword">const</span> clo_d = <span class="hljs-title function_">clo_dynamic_array</span>(clo, met);
-
-<span class="hljs-keyword">const</span> results = <span class="hljs-title function_">pmv_array</span>(tdb, tr, v_r, rh, met, clo_d);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results); <span class="hljs-comment">// [-0.47, 0.06]</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='a_pmv'>
                     <h2 class='mt0 '>Adjusted PMV (aPMV)</h2>
                     
@@ -4883,7 +3656,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/a_pmv.js#L74-L96' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/a_pmv.js#L73-L95' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5038,168 +3811,6 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='a_pmv_array'>
-                    <h2 class='mt0 '>Adjusted PMV — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/a_pmv.js#L150-L173' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Returns Adaptive Predicted Mean Vote (aPMV) <a href="#ref_25">[25]</a>.
-This index was developed by Yao, R. et al. (2009). The model takes into account factors
-such as culture, climate, social, psychological and behavioral adaptations, which have
-an impact on the senses used to detect thermal comfort. This model uses an adaptive
-coefficient (λ) representing the adaptive factors that affect the sense of thermal comfort.</p>
-<p>This is a version that supports arrays.</p>
-
-  <div class='hljs pre p1 mt0 sig'>a_pmv_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, a_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, kwargs: <a href="#a_pmvkwargs">A_pmvKwargs</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='a_pmv_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Relative air speed, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-<p>Note: vr is the relative air speed caused by body movement and not the air
-speed measured by the air speed sensor. The relative air speed is the sum of the
-average air speed measured by the sensor plus the activity-generated air speed
-(Vag). Where Vag is the activity-generated air speed caused by motion of
-individual body parts. vr can be calculated using the function v_relative_array in utilities.js.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Relative humidity, [%]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>met</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Metabolic rate, [met]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>clo</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Clothing insulation, [clo]
-<p>Note: The activity as well as the air speed modify the insulation characteristics
-of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
-the clothing insulation shall be corrected <a href="#ref_2">[2]</a>. The ASHRAE 55 Standard corrects
-for the effect of the body movement for met equal or higher than 1.2 met using
-the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
-can be calculated using the function clo_dynamic_array in utilities.js.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>a_coefficient</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Adaptive coefficient
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>wme</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            External work, default is array of 0
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#a_pmvkwargs">A_pmvKwargs</a>
-            = <code>{}</code>)</code>
-            additional arguments
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='a_pmv_array-returns'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></code>
-      
-        :
-        pmv - Predicted Mean Vote
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='a_pmv_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = [<span class="hljs-number">24</span>, <span class="hljs-number">30</span>],
-<span class="hljs-keyword">const</span> tr = [<span class="hljs-number">30</span>, <span class="hljs-number">30</span>],
-<span class="hljs-keyword">const</span> vr = [<span class="hljs-number">0.22</span>, <span class="hljs-number">0.22</span>],
-<span class="hljs-keyword">const</span> rh = [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>],
-<span class="hljs-keyword">const</span> met = [<span class="hljs-number">1.4</span>, <span class="hljs-number">1.4</span>],
-<span class="hljs-keyword">const</span> clo = [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>],
-<span class="hljs-keyword">const</span> a_coefficient = [<span class="hljs-number">0.293</span>, <span class="hljs-number">0.293</span>],
-<span class="hljs-keyword">const</span> wme = <span class="hljs-literal">undefined</span>,
-
-<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">a_pmv_array</span>(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result) <span class="hljs-comment">//output [0.48, 1.09]</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='ankle_draft'>
                     <h2 class='mt0 '>Ankle Draft</h2>
                     
@@ -5208,7 +3819,7 @@ can be calculated using the function clo_dynamic_array in utilities.js.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/ankle_draft.js#L57-L90' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/ankle_draft.js#L57-L90' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5356,7 +3967,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/e_pmv.js#L77-L101' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/e_pmv.js#L76-L100' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5514,171 +4125,6 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='e_pmv_array'>
-                    <h2 class='mt0 '>Extended PMV — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/e_pmv.js#L158-L185' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Returns Adjusted Predicted Mean Votes with Expectancy Factor (ePMV). This index was developed by
-Fanger, P. O. et al. (2002). In non-air-conditioned buildings in warm climates, occupants may sense
-the warmth as being less severe than the PMV predicts. The main reason is low expectations, but a
-metabolic rate that is estimated too high can also contribute to explaining the difference. An extension
-of the PMV model that includes an expectancy factor is introduced for use in non-air-conditioned buildings
-in warm climates <a href="#ref_26">[26]</a>.</p>
-<p>This is a version that supports arrays.</p>
-
-  <div class='hljs pre p1 mt0 sig'>e_pmv_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, e_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, kwargs: <a href="#e_pmvkwargs">E_pmvKwargs</a>?): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='e_pmv_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>vr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Relative air speed, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-<p>Note: vr is the relative air speed caused by body movement and not the air
-speed measured by the air speed sensor. The relative air speed is the sum of the
-average air speed measured by the sensor plus the activity-generated air speed
-(Vag). Where Vag is the activity-generated air speed caused by motion of
-individual body parts. vr can be calculated using the function v_relative_array in utilities.js.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Relative humidity, [%]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>met</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Metabolic rate, [met]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>clo</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            Clothing insulation, [clo]
-<p>Note: The activity as well as the air speed modify the insulation characteristics
-of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
-the clothing insulation shall be corrected <a href="#ref_2">[2]</a>. The ASHRAE 55 Standard corrects
-for the effect of the body movement for met equal or higher than 1.2 met using
-the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
-can be calculated using the function clo_dynamic_array in utilities.js.</p>
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>e_coefficient</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            expectancy factor
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>wme</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            External work, default is array of 0
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#e_pmvkwargs">E_pmvKwargs</a>?
-            = <code>{}</code>)</code>
-            additional arguments
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='e_pmv_array-returns'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></code>
-      
-        :
-        pmv - Predicted Mean Vote
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='e_pmv_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = [<span class="hljs-number">24</span>, <span class="hljs-number">30</span>];
-<span class="hljs-keyword">const</span> tr = [<span class="hljs-number">30</span>, <span class="hljs-number">30</span>];
-<span class="hljs-keyword">const</span> v = [<span class="hljs-number">0.22</span>, <span class="hljs-number">0.22</span>];
-<span class="hljs-keyword">const</span> met = [<span class="hljs-number">1.4</span>, <span class="hljs-number">1.4</span>];
-<span class="hljs-keyword">const</span> clo = [<span class="hljs-number">0.5</span>, <span class="hljs-number">0.5</span>];
-<span class="hljs-comment">// Calculate relative air speed</span>
-<span class="hljs-keyword">const</span> v_r = <span class="hljs-title function_">v_relative_array</span>(v, met);
-<span class="hljs-comment">// Calculate dynamic clothing</span>
-<span class="hljs-keyword">const</span> clo_d = <span class="hljs-title function_">clo_dynamic_array</span>(clo, met);
-<span class="hljs-keyword">const</span> e_coefficient = [<span class="hljs-number">0.6</span>, <span class="hljs-number">0.6</span>];
-
-<span class="hljs-keyword">const</span> result = <span class="hljs-title function_">e_pmv_array</span>(tdb, tr, v_r, rh, met, clo_d, e_coefficient);
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(result) <span class="hljs-comment">// output [0.29, 0.91]</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='vertical_tmp_grad_ppd'>
                     <h2 class='mt0 '>Vertical Temperature Gradient PPD</h2>
                     
@@ -5687,7 +4133,7 @@ can be calculated using the function clo_dynamic_array in utilities.js.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/vertical_tmp_grad_ppd.js#L51-L88' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/vertical_tmp_grad_ppd.js#L51-L88' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5821,7 +4267,7 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/use_fans_heatwave.js#L102-L232' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/use_fans_heatwave.js#L102-L232' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -6008,7 +4454,7 @@ This occurs when either the following variables reaches its maximum value:</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/clo_tout.js#L30-L39' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/clo_tout.js#L29-L38' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -6083,89 +4529,6 @@ or the IP (Imperial Units) system.
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='clo_tout_array'>
-                    <h2 class='mt0 '>Clothing Insulation (Tout) — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/clo_tout.js#L62-L64' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Representative clothing insulation Icl as a function of outdoor air
-temperature at 06:00 a.m <a href="#ref_4">[4]</a>.</p>
-<p>Note: The ASHRAE 55 2020 states that it is acceptable to determine the
-clothing insulation Icl using this equation in mechanically conditioned
-buildings <a href="#ref_1">[1]</a>.</p>
-
-  <div class='hljs pre p1 mt0 sig'>clo_tout_array(tout: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, units: (<code>"IP"</code> | <code>"SI"</code>)): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='clo_tout_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tout</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            outdoor air temperatures at 06:00 a.m., default in
-[°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"IP"</code> | <code>"SI"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
-            select the SI (International System of Units)
-or the IP (Imperial Units) system.
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big' id='clo_tout_array-returns'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>></code>
-      
-        :
-        Representative clothing insulation Icl, [clo]
-
-      
-    
-  
-
-  
-
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='utci'>
                     <h2 class='mt0 '>Universal Thermal Climate Index (UTCI)</h2>
                     
@@ -6174,7 +4537,7 @@ or the IP (Imperial Units) system.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/utci.js#L69-L126' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/utci.js#L63-L120' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -6298,140 +4661,6 @@ outside the applicability limits of the model. The valid input ranges are
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='utci_array'>
-                    <h2 class='mt0 '>Universal Thermal Climate Index — Array</h2>
-                    
-                    
-                      <section class='p2 mb2 clearfix model-section'>
-
-  
-  <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/utci.js#L165-L230' title="Source code">
-        <i class="fa-solid fa-link"></i> Source code
-      </a>
-  </div>
-  
-
-  <p>Determines the Universal Thermal Climate Index (UTCI) (Supports array type). The UTCI is the
-equivalent temperature for the environment derived from a reference
-environment. It is defined as the air temperature of the reference
-environment which produces the same strain index value in comparison with
-the reference individual's response to the real environment. It is regarded
-as one of the most comprehensive indices for calculating heat stress in
-outdoor spaces. The parameters that are taken into account for calculating
-UTCI involve dry bulb temperature, mean radiation temperature, the pressure
-of water vapor or relative humidity, and wind speed (at the elevation of 10
-m above the ground). <a href="#ref_7">[7]</a></p>
-<ul>
-<li>Note: You can use this function to calculate the Universal Thermal Climate Index (UTCI) The applicability wind speed value must be between 0.5 and 17 m/s.</li>
-</ul>
-
-  <div class='hljs pre p1 mt0 sig'>utci_array(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>, units: (<code>"SI"</code> | <code>"IP"</code>), return_stress_category: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='utci_array-parameters'>Parameters</div>
-    <div class='prose'>
-      <ul class="param-list">
-        
-          <li>
-            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            dry bulb air temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>tr</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            mean radiant temperature, default in [°C] in [°F] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>v</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            wind speed 10m above ground level, default in [m/s] in [fps] if 
-<code>units</code>
- = 'IP'
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
-            relative humidity, [%]
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
-            select the SI (International System of Units) or the IP (Imperial Units) system.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>return_stress_category</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>false</code>)</code>
-            default False, if True returns the UTCI categorized in terms of thermal stress.
-
-            
-          </li>
-        
-          <li>
-            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>true</code>)</code>
-            default True. By default, if the inputs are outsude the standard applicability limits the
-function returns nan. If False returns UTCI values even if input values are
-outside the applicability limits of the model. The valid input ranges are
--50 &#x3C; tdb [°C] &#x3C; 50, tdb - 70 &#x3C; tr [°C] &#x3C; tdb + 30, and for 0.5 &#x3C; v [m/s] &#x3C; 17.0.
-
-            
-          </li>
-        
-      </ul>
-    </div>
-  
-
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big' id='utci_array-example'>Example</div>
-    
-      
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">utci_array</span>([<span class="hljs-number">25</span>, <span class="hljs-number">25</span>], [<span class="hljs-number">27</span>, <span class="hljs-number">25</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>])) <span class="hljs-comment">// will print [25.2, 24.6]</span>
-<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">utci_array</span>([<span class="hljs-number">25</span>, <span class="hljs-number">25</span>], [<span class="hljs-number">27</span>, <span class="hljs-number">25</span>], [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>], [<span class="hljs-number">50</span>, <span class="hljs-number">50</span>], <span class="hljs-string">&quot;si&quot;</span>, <span class="hljs-literal">true</span>))
-<span class="hljs-comment">// will print {</span>
-<span class="hljs-comment">//     utci: [25.2, 24.6],</span>
-<span class="hljs-comment">//    stress_category: [&quot;no thermal stress&quot;, &quot;no thermal stress&quot;],</span>
-<span class="hljs-comment">//  }</span></pre>
-    
-  
-
-  
-
-</section>
-
-                    
-                  </section>
-                
-                  
                   <section class='keyline-top-not py2' id='pet_steady'>
                     <h2 class='mt0 '>Physiological Equivalent Temperature (PET)</h2>
                     
@@ -6440,7 +4669,7 @@ outside the applicability limits of the model. The valid input ranges are
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/pet_steady.js#L58-L101' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/pet_steady.js#L58-L101' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -6622,7 +4851,7 @@ suite or the project's issue tracker for more details.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/a621178a0eba1b2e304d47d19848ad3cb5059731/src/models/JOS3.js#L113-L1298' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/ea4470a3913f075661f13c66e2b08fb0de4a355e/src/models/JOS3.js#L113-L1298' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -6926,28 +5155,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#discomfort_index_array">Discomfort Index — Array (DI)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index_array-returns">Returns</a></li>
-                                
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#two_nodes">Two-Node Model (Gagge)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -6972,30 +5179,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#two_nodes_array">Two-Node Model — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes_array-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#set_tmp">Standard Effective Temperature (SET)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -7007,30 +5190,6 @@ the computational load.
                                 
                                 
                                   <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#set_tmp_array">Standard Effective Temperature — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp_array-example">Example</a></li>
                                 
                                 
                                   
@@ -7090,30 +5249,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#adaptive_en_array">Adaptive EN-16798 — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en_array-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#at">Apparent Temperature (AT)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -7149,30 +5284,6 @@ the computational load.
                                 
                                 
                                   <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pmv_ppd_array">PMV-PPD — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_array-example">Example</a></li>
                                 
                                 
                                   
@@ -7258,30 +5369,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#adaptive_ashrae_array">Adaptive ASHRAE-55 — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae_array-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#solar_gain">Solar Gain (MRT Delta)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -7354,30 +5441,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#athb_array">Adaptive Thermal Heat Balance — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb_array-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#pmv">Predicted Mean Vote (PMV)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -7402,30 +5465,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pmv_array">Predicted Mean Vote — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_array-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#a_pmv">Adjusted PMV (aPMV)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -7437,30 +5476,6 @@ the computational load.
                                 
                                 
                                   <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#a_pmv_array">Adjusted PMV — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv_array-example">Example</a></li>
                                 
                                 
                                   
@@ -7509,30 +5524,6 @@ the computational load.
                                 
                                 
                                   <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#e_pmv_array">Extended PMV — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv_array-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv_array-example">Example</a></li>
                                 
                                 
                                   
@@ -7616,28 +5607,6 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#clo_tout_array">Clothing Insulation (Tout) — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clo_tout_array-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clo_tout_array-returns">Returns</a></li>
-                                
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#utci">Universal Thermal Climate Index (UTCI)</a>
                             
                               <ul class="nav section-nav flex-column">
@@ -7647,28 +5616,6 @@ the computational load.
                                 
                                 
                                   <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#utci_array">Universal Thermal Climate Index — Array</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci_array-parameters">Parameters</a></li>
-                                
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci_array-example">Example</a></li>
                                 
                                 
                                   

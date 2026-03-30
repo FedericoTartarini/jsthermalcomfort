@@ -1,5 +1,11 @@
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Removed all `*_array` function exports from models, utilities and psychrometrics. This is a breaking change compared with previous versions.
+- Removed functions: `adaptive_ashrae_array`, `adaptive_en_array`, `a_pmv_array`, `athb_array`, `clo_tout_array`, `discomfort_index_array`, `e_pmv_array`, `pmv_array`, `pmv_ppd_array`, `set_tmp_array`, `two_nodes_array`, `utci_array`, `v_relative_array`, `clo_dynamic_array`, `units_converter_array`, `p_sat_torr_array`, `t_mrt_array`, `t_o_array`.
+- Migration: use `Array.map()` with the scalar equivalent. See PR #141 for before/after examples.
+
 ## 1.0.2 (2026-03-19)
 
 - Integrated `Lunr.js` to provide high-performance, client-side indexing and searching across all documentation pages.

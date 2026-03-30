@@ -1,6 +1,6 @@
 import { expect, describe, it, beforeAll } from "@jest/globals";
-import { loadTestData, shouldSkipTest } from "./testUtils";
-import { two_nodes, two_nodes_array } from "../../src/models/two_nodes";
+import { loadTestData } from "./testUtils";
+import { two_nodes } from "../../src/models/two_nodes";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 
 // Use the URL from comftest.js to fetch data for two_nodes tests
@@ -52,7 +52,7 @@ function runTest(testFunction, inputs, expected) {
 }
 
 describe("two_nodes related tests", () => {
-  it("should run two_nodes and two_nodes_array tests after data is loaded", () => {
+  it("should run two_nodes tests after data is loaded", () => {
     if (!testData || !testData.data)
       throw new Error("Test data is undefined or data not loaded");
 
@@ -60,13 +60,11 @@ describe("two_nodes related tests", () => {
       // Skip empty or invalid data
       if (expected === undefined || expected === null) return;
 
-      if (shouldSkipTest(inputs)) {
-        // Test array data with two_nodes_array
-        runTest(two_nodes_array, inputs, expected);
-      } else {
-        // Test non-array data with two_nodes
-        runTest(two_nodes, inputs, expected);
-      }
+      // Skip array inputs — only test scalar cases
+      const values = Object.values(inputs);
+      if (values.some((value) => Array.isArray(value))) return;
+
+      runTest(two_nodes, inputs, expected);
     });
   });
 });

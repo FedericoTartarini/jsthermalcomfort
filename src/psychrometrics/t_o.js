@@ -4,7 +4,6 @@
  * @public
  * @memberof psychrometrics
  *
- * @see {@link t_o_array} for a version that supports arrays
  *
  * @param {number} tdb - air temperature [C]
  * @param {number} tr - mean radiant temperature [C]

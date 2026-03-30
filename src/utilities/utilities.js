@@ -384,8 +384,6 @@ export function body_surface_area(weight, height, formula = "dubois") {
  * @memberof utilities
  * @docname Relative air speed
  *
- * @see {@link v_relative_array} for a version that supports array arguments
- *
  * @param {number} v - air spped measured by the sensor, [m/s]
  * @param {number} met - metabolic rate, [met]
  * @returns {number} relative air speed, [m/s]
@@ -393,27 +391,6 @@ export function body_surface_area(weight, height, formula = "dubois") {
 export function v_relative(v, met) {
   if (met <= 1) return v;
   return _v_relative_single(v, met);
-}
-
-/**
- * Estimates the relative air speed which combines the average air speed of the
- * space plus the relative air speed caused by the body movement. Vag is assumed
- * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to
- * Vag = 0.3 (M - 1) (m/s)
- *
- * @public
- * @memberof utilities
- * @docname Relative air speed (array version)
- *
- * @see {@link v_relative} for a version that supports scalar arguments
- *
- * @param {number[]} v - air spped measured by the sensor, [m/s]
- * @param {number[]} met - metabolic rate, [met]
- * @returns {number[]} relative air speed, [m/s]
- */
-export function v_relative_array(v, met) {
-  if (met <= 1) return v;
-  return v.map((_v, index) => _v_relative_single(_v, met[index]));
 }
 
 /**
@@ -437,8 +414,6 @@ function _v_relative_single(v, met) {
  * @memberof utilities
  * @docname Dynamic clothing
  *
- * @see {@link clo_dynamic_array} for a version that supports array arguments
- *
  * @param {number} clo - clothing insulation, [clo]
  * @param {number} met - metabolic rate, [met]
  * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
@@ -452,39 +427,6 @@ export function clo_dynamic(clo, met, standard = "ASHRAE") {
   if ((standard === "ASHRAE" && met <= 1.2) || (standard === "ISO" && met <= 1))
     return clo;
   return _clo_dynamic_single(clo, met);
-}
-
-/**
- * Estimates the dynamic clothing insulation of a moving occupant. The activity as
- * well as the air speed modify the insulation characteristics of the clothing and the
- * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
- * of the body movement for met equal or higher than 1.2 met using the equation
- * clo = Icl × (0.6 + 0.4/met)
- *
- * @public
- * @memberof utilities
- * @docname Dynamic clothing (array version)
- *
- * @see {@link clo_dynamic} for a version that supports scalar arguments
- *
- * @param {number[]} clo - clothing insulation, [clo]
- * @param {number[]} met - metabolic rate, [met]
- * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
- * @returns {number[]} dunamic clothing insulation, [clo]
- */
-export function clo_dynamic_array(clo, met, standard = "ASHRAE") {
-  if (standard === "ASHRAE")
-    return met.map((_met, index) =>
-      _met > 1.2 ? _clo_dynamic_single(clo[index], _met) : clo[index],
-    );
-  if (standard === "ISO")
-    return met.map((_met, index) =>
-      _met > 1 ? _clo_dynamic_single(clo[index], _met) : clo[index],
-    );
-  throw new Error(
-    "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
-  );
 }
 
 /**
@@ -508,7 +450,6 @@ function _clo_dynamic_single(clo, met) {
  * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
  * @returns {T} converted values in SI units
  *
- * @see {@link units_converter_array} for a version that supports array parameters
  */
 export function units_converter(kwargs, from_units = "IP") {
   let result = { ...kwargs };
@@ -529,47 +470,6 @@ export function units_converter(kwargs, from_units = "IP") {
         result[key] = _vel_si_to_ip(value);
       else if (key === "area") result[key] = _area_si_to_ip(value);
       else if (key === "pressure") result[key] = _pressure_si_to_ip(value);
-    }
-  } else {
-    throw new Error(`Unknown system ${from_units}`);
-  }
-
-  return result;
-}
-
-/**
- * Converts IP values to SI units
- *
- * @memberof utilities
- * @docname Units converter (array version)
- * @public
- *
- * @template {Object.<string, number[]>} T
- * @param {T} kwargs - [t, v] units to convert
- * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
- * @returns {T} converted values in SI units
- *
- * @see {@link units_converter} for a version that supports scalar parameters
- */
-export function units_converter_array(kwargs, from_units = "IP") {
-  let result = {};
-  if (from_units === "IP") {
-    for (const [key, value] of Object.entries(kwargs)) {
-      if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = value.map(_temp_ip_to_si);
-      else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = value.map(_vel_ip_to_si);
-      else if (key === "area") result[key] = value.map(_area_ip_to_si);
-      else if (key === "pressure") result[key] = value.map(_pressure_ip_to_si);
-    }
-  } else if (from_units === "SI") {
-    for (const [key, value] of Object.entries(kwargs)) {
-      if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = value.map(_temp_si_to_ip);
-      else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = value.map(_vel_si_to_ip);
-      else if (key === "area") result[key] = value.map(_area_si_to_ip);
-      else if (key === "pressure") result[key] = value.map(_pressure_si_to_ip);
     }
   } else {
     throw new Error(`Unknown system ${from_units}`);

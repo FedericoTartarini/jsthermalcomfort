@@ -9,7 +9,7 @@ describe("t_wb", () => {
     "returns $expected when bulbTemperature is $bulbTemperature and relativeHumidity is $relativeHumidity",
     ({ tdb, rh, expected }) => {
       const result = t_wb(tdb, rh);
-      expect(result).toBeCloseTo(expected);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
 });

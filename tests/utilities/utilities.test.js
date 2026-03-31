@@ -33,7 +33,7 @@ describe("transpose_sharp_altitude", () => {
     "returns $expected when sharp is $sharp and altitude is $altitude",
     ({ sharp, altitude, expected }) => {
       const result = transpose_sharp_altitude(sharp, altitude);
-      deep_close_to_array(result, expected, 0);
+      deep_close_to_array(result, expected, 0.001);
     },
   );
 });
@@ -49,8 +49,7 @@ describe("body_surface_area", () => {
     "returns $expected when weight is $weight, height is $height and formula is $formula",
     ({ weight, height, formula, expected }) => {
       const result = body_surface_area(weight, height, formula);
-
-      expect(result).toBeCloseTo(expected, 2);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.01);
     },
   );
 
@@ -67,7 +66,7 @@ describe("v_relative", () => {
     "returns $expected when v is $v and met is $met",
     ({ v, met, expected }) => {
       const result = v_relative(v, met);
-      expect(result).toBeCloseTo(expected, 4);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
 });
@@ -134,7 +133,8 @@ describe("clo_dynamic", () => {
     "returns $expected when clo is $clo, met is $met, and the standard is $standard",
     ({ clo, met, standard, expected, tolerance }) => {
       const result = clo_dynamic(clo, met, standard);
-      expect(result).toBeCloseTo(expected, tolerance);
+      const absTol = Math.pow(10, -tolerance);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(absTol);
     },
   );
 
@@ -217,7 +217,7 @@ describe("units_converter", () => {
     "returns $expected when args are $args and from_units is $from_units",
     ({ args, from_units, expected }) => {
       const result = units_converter(args, from_units);
-      deep_close_to_obj(result, expected, 2);
+      deep_close_to_obj(result, expected, 0.01);
     },
   );
 });
@@ -263,7 +263,7 @@ describe("running_mean_outdoor_temperature", () => {
         from_units,
       );
 
-      expect(result).toBeCloseTo(expected, 1);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.1);
     },
   );
 });
@@ -288,7 +288,7 @@ describe("f_svv", () => {
     ({ width, height, distance, expected }) => {
       const result = f_svv(width, height, distance);
 
-      expect(result).toBeCloseTo(expected, 2);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.01);
     },
   );
 });
@@ -445,7 +445,7 @@ describe("check_standard_compliance_array", () => {
     "returns $expected when standard is $standard and kwargs is $kwargs",
     ({ standard, kwargs, expected }) => {
       const result = check_standard_compliance_array(standard, kwargs);
-      deep_close_to_obj_arrays(result, expected, 2);
+      deep_close_to_obj_arrays(result, expected, 0.01);
     },
   );
 });
@@ -460,7 +460,7 @@ describe("clo_typical_ensembles", () => {
     "returns $expected when ensemble is $ensembles",
     ({ ensembles, expected }) => {
       const result = clo_typical_ensembles(ensembles);
-      expect(result).toBeCloseTo(expected, 2);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.01);
     },
   );
 

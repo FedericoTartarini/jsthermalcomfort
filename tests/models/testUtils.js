@@ -54,11 +54,9 @@ export function validateResult(
         expectedOutputs[key] === null ? NaN : expectedOutputs[key];
       const actualValue = modelResult[key];
 
-      // skip variables whose tolerance is not given
-      if (!tolerances || tolerances[key] === undefined) {
-        return;
-      }
-      const tol = tolerances[key];
+      // Use the specified tolerance if available, otherwise default to a strict 0.0001
+      const tol =
+        tolerances && tolerances[key] !== undefined ? tolerances[key] : 0.0001;
 
       // Handle arrays
       if (Array.isArray(expectedValue)) {

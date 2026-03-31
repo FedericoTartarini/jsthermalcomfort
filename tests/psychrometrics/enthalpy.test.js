@@ -11,7 +11,7 @@ describe("enthalpy", () => {
     "returns $expected when airTemperature is $airTemperature and the humidityRatio is $humidityRatio",
     ({ tdb, hr, expected }) => {
       const result = enthalpy(tdb, hr);
-      expect(result).toBeCloseTo(expected);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
 });

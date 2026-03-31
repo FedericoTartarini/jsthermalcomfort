@@ -48,7 +48,9 @@ function runTest(testFunction, inputs, expected) {
     kwargs,
   );
 
-  expect(result).toBeCloseTo(expected, tolerance);
+  // Use specified tolerance or default to 0.0001
+  const tol = tolerance !== undefined ? tolerance : 0.0001;
+  expect(Math.abs(result - expected)).toBeLessThanOrEqual(tol);
 }
 
 describe("two_nodes related tests", () => {

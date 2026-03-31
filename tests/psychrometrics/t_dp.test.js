@@ -10,7 +10,7 @@ describe("t_dp", () => {
     "returns $expected when airTemperature is $airTemperature and relativeHumidity is $relativeHumidity",
     ({ tdb, rh, expected }) => {
       const result = t_dp(tdb, rh);
-      expect(result).toBeCloseTo(expected);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
 });

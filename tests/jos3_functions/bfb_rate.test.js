@@ -53,7 +53,7 @@ describe("bfb_rate", () => {
     "returns $expected when height is $height, weight is $weight, bsa_equation is $bsa_equation, age is $age, and ci is $ci",
     ({ height, weight, bsa_equation, age, ci, expected }) => {
       const result = bfb_rate(height, weight, bsa_equation, age, ci);
-      expect(result).toBeCloseTo(expected);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
 });

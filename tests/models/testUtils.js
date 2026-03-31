@@ -69,7 +69,9 @@ export function validateResult(
             if (isNaN(exp)) {
               expect(act).toBeNaN();
             } else {
-              expect(act).toBeCloseTo(exp, tol);
+              expect(Math.abs(act - exp)).toBeLessThanOrEqual(
+                tol + Number.EPSILON * 100,
+              );
             }
           } else {
             expect(act).toEqual(exp);
@@ -80,7 +82,9 @@ export function validateResult(
         if (isNaN(expectedValue)) {
           expect(actualValue).toBeNaN();
         } else {
-          expect(actualValue).toBeCloseTo(expectedValue, tol);
+          expect(Math.abs(actualValue - expectedValue)).toBeLessThanOrEqual(
+            tol + Number.EPSILON * 100,
+          );
         }
       } else {
         // For booleans or other types

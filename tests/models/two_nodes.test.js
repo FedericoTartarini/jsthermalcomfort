@@ -70,3 +70,35 @@ describe("two_nodes related tests", () => {
     });
   });
 });
+
+describe("two_nodes validation logic (Testing the Test)", () => {
+  it("should fail if the result is outside the tolerance margin", () => {
+    const mockExpected = 25.0;
+    const mockActual = 25.2; // Difference is 0.2
+    const mockTolerance = 0.1;
+
+    expect(() => {
+      const diff = Math.abs(mockActual - mockExpected);
+      if (diff > mockTolerance) {
+        throw new Error(
+          `Value outside tolerance: actual ${mockActual}, expected ${mockExpected}, tol ${mockTolerance}`,
+        );
+      }
+    }).toThrow();
+  });
+
+  it("should pass if the result is inside the tolerance margin", () => {
+    const mockExpected = 25.0;
+    const mockActual = 25.05; // Difference is 0.05
+    const mockTolerance = 0.1;
+
+    expect(() => {
+      const diff = Math.abs(mockActual - mockExpected);
+      if (diff > mockTolerance) {
+        throw new Error(
+          `Value outside tolerance: actual ${mockActual}, expected ${mockExpected}, tol ${mockTolerance}`,
+        );
+      }
+    }).not.toThrow();
+  });
+});

@@ -17,6 +17,8 @@ import {
   deep_close_to_obj_arrays,
 } from "../test_utilities";
 
+const DEFAULT_TOLERANCE = 0.01;
+
 describe("transpose_sharp_altitude", () => {
   it.each([
     { sharp: 0, altitude: 0, expected: [0, 90] },
@@ -49,7 +51,7 @@ describe("body_surface_area", () => {
     "returns $expected when weight is $weight, height is $height and formula is $formula",
     ({ weight, height, formula, expected }) => {
       const result = body_surface_area(weight, height, formula);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.01);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(DEFAULT_TOLERANCE);
     },
   );
 
@@ -66,6 +68,7 @@ describe("v_relative", () => {
     "returns $expected when v is $v and met is $met",
     ({ v, met, expected }) => {
       const result = v_relative(v, met);
+      // Tolerance is manually defined because v_relative is not in the shared reference data
       expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
@@ -217,7 +220,7 @@ describe("units_converter", () => {
     "returns $expected when args are $args and from_units is $from_units",
     ({ args, from_units, expected }) => {
       const result = units_converter(args, from_units);
-      deep_close_to_obj(result, expected, 0.01);
+      deep_close_to_obj(result, expected, DEFAULT_TOLERANCE);
     },
   );
 });
@@ -263,7 +266,9 @@ describe("running_mean_outdoor_temperature", () => {
         from_units,
       );
 
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.1);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
+        DEFAULT_TOLERANCE,
+      );
     },
   );
 });
@@ -288,7 +293,7 @@ describe("f_svv", () => {
     ({ width, height, distance, expected }) => {
       const result = f_svv(width, height, distance);
 
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.01);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(DEFAULT_TOLERANCE);
     },
   );
 });
@@ -445,7 +450,7 @@ describe("check_standard_compliance_array", () => {
     "returns $expected when standard is $standard and kwargs is $kwargs",
     ({ standard, kwargs, expected }) => {
       const result = check_standard_compliance_array(standard, kwargs);
-      deep_close_to_obj_arrays(result, expected, 0.01);
+      deep_close_to_obj_arrays(result, expected, DEFAULT_TOLERANCE);
     },
   );
 });
@@ -460,7 +465,7 @@ describe("clo_typical_ensembles", () => {
     "returns $expected when ensemble is $ensembles",
     ({ ensembles, expected }) => {
       const result = clo_typical_ensembles(ensembles);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.01);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(DEFAULT_TOLERANCE);
     },
   );
 

@@ -51,7 +51,9 @@ describe("body_surface_area", () => {
     "returns $expected when weight is $weight, height is $height and formula is $formula",
     ({ weight, height, formula, expected }) => {
       const result = body_surface_area(weight, height, formula);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(DEFAULT_TOLERANCE);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
+        DEFAULT_TOLERANCE,
+      );
     },
   );
 
@@ -293,7 +295,9 @@ describe("f_svv", () => {
     ({ width, height, distance, expected }) => {
       const result = f_svv(width, height, distance);
 
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(DEFAULT_TOLERANCE);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
+        DEFAULT_TOLERANCE,
+      );
     },
   );
 });
@@ -465,7 +469,9 @@ describe("clo_typical_ensembles", () => {
     "returns $expected when ensemble is $ensembles",
     ({ ensembles, expected }) => {
       const result = clo_typical_ensembles(ensembles);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(DEFAULT_TOLERANCE);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
+        DEFAULT_TOLERANCE,
+      );
     },
   );
 

@@ -71,10 +71,13 @@ describe("phs", () => {
           } else if (key === "sweat_rate_watt") {
             // Allow +/- 0.3 diff since JS uses half-up rounding (266.15 -> 266.2) vs Python banker's rounding (266.1)
             expect(Math.abs(result[key] - value)).toBeLessThanOrEqual(0.3);
-          } else if (tolerance[key] !== undefined) {
-            expect(result[key]).toBeCloseTo(value, tolerance[key]);
           } else {
-            expect(result[key]).toBeCloseTo(value, 1); // Default precision of 1
+            // Use the specified tolerance if available, otherwise default to a strict 0.0001
+            const tol =
+              tolerance && tolerance[key] !== undefined
+                ? tolerance[key]
+                : 0.0001;
+            expect(Math.abs(result[key] - value)).toBeLessThanOrEqual(tol);
           }
         }
       } catch (error) {

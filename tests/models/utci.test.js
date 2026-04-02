@@ -14,7 +14,9 @@ let { testData, tolerances } = await loadTestData(
 describe("utci", () => {
   test.each(testData.data)("Test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, tr, rh, v, units, return_stress_category } = inputs;
+    const { tdb, tr, rh, v, units } = inputs;
+    const return_stress_category =
+      inputs.return_stress_category || !!expectedOutput.stress_category;
     const modelResult = utci(tdb, tr, v, rh, units, return_stress_category);
 
     validateResult(modelResult, expectedOutput, tolerances, inputs);

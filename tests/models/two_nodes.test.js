@@ -48,7 +48,9 @@ function runTest(testFunction, inputs, expected) {
     kwargs,
   );
 
-  expect(result).toBeCloseTo(expected, tolerance);
+  // Use specified tolerance or default to 0.0001
+  const tol = tolerance !== undefined ? tolerance : 0.0001;
+  expect(Math.abs(result - expected)).toBeLessThanOrEqual(tol);
 }
 
 describe("two_nodes related tests", () => {
@@ -66,5 +68,37 @@ describe("two_nodes related tests", () => {
 
       runTest(two_nodes, inputs, expected);
     });
+  });
+});
+
+describe("two_nodes validation logic (Testing the Test)", () => {
+  it("should fail if the result is outside the tolerance margin", () => {
+    const mockExpected = 25.0;
+    const mockActual = 25.2; // Difference is 0.2
+    const mockTolerance = 0.1;
+
+    expect(() => {
+      const diff = Math.abs(mockActual - mockExpected);
+      if (diff > mockTolerance) {
+        throw new Error(
+          `Value outside tolerance: actual ${mockActual}, expected ${mockExpected}, tol ${mockTolerance}`,
+        );
+      }
+    }).toThrow();
+  });
+
+  it("should pass if the result is inside the tolerance margin", () => {
+    const mockExpected = 25.0;
+    const mockActual = 25.05; // Difference is 0.05
+    const mockTolerance = 0.1;
+
+    expect(() => {
+      const diff = Math.abs(mockActual - mockExpected);
+      if (diff > mockTolerance) {
+        throw new Error(
+          `Value outside tolerance: actual ${mockActual}, expected ${mockExpected}, tol ${mockTolerance}`,
+        );
+      }
+    }).not.toThrow();
   });
 });

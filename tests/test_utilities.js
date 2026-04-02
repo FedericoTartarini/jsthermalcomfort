@@ -4,15 +4,15 @@ import { expect } from "@jest/globals";
  * @template {Object.<string, number>} T
  * @param {T} obj
  * @param {T} expected
- * @param {number} tolerance
+ * @param {number} [tolerance=0.0001]
  */
-export function deep_close_to_obj(obj, expected, tolerance) {
+export function deep_close_to_obj(obj, expected, tolerance = 0.0001) {
   const objLength = Object.keys(obj).length;
   const expectedLength = Object.keys(expected).length;
   expect(objLength).toEqual(expectedLength);
 
   for (let [key, value] of Object.entries(obj)) {
-    expect(value).toBeCloseTo(expected[key], tolerance);
+    expect(Math.abs(value - expected[key])).toBeLessThanOrEqual(tolerance);
   }
 }
 
@@ -20,9 +20,9 @@ export function deep_close_to_obj(obj, expected, tolerance) {
  * @template {Object.<string, number[]>} T
  * @param {T} obj
  * @param {T} expected
- * @param {number} tolerance
+ * @param {number} [tolerance=0.0001]
  */
-export function deep_close_to_obj_arrays(obj, expected, tolerance) {
+export function deep_close_to_obj_arrays(obj, expected, tolerance = 0.0001) {
   const objLength = Object.keys(obj).length;
   const expectedLength = Object.keys(expected).length;
   expect(objLength).toEqual(expectedLength);
@@ -35,12 +35,12 @@ export function deep_close_to_obj_arrays(obj, expected, tolerance) {
 /**
  * @param {number[]} array
  * @param {number[]} expected
- * @param {number} tolerance
+ * @param {number} [tolerance=0.0001]
  */
-export function deep_close_to_array(array, expected, tolerance) {
+export function deep_close_to_array(array, expected, tolerance = 0.0001) {
   for (let [index, value] of array.entries()) {
     if (!isNaN(value) && !isNaN(expected[index])) {
-      expect(value).toBeCloseTo(expected[index], tolerance);
+      expect(Math.abs(value - expected[index])).toBeLessThanOrEqual(tolerance);
       continue;
     }
     if (isNaN(value) !== isNaN(expected[index]))

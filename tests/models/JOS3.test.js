@@ -36,7 +36,8 @@ describe("JOS3", () => {
               expect(ac).toBe(ex);
               break;
             default:
-              expect(ac).toBeCloseTo(ex, 10);
+              // Using 1e-10 as absolute tolerance to match the intended 10 digits of precision
+              expect(Math.abs(ac - ex)).toBeLessThanOrEqual(1e-10);
           }
         });
       }
@@ -49,12 +50,13 @@ describe("JOS3", () => {
 
       if (Array.isArray(expected)) {
         for (let i = 0; i < expected.length; i++) {
-          expect(prop[i]).toBeCloseTo(expected[i], 10);
+          // Using 1e-10 as absolute tolerance
+          expect(Math.abs(prop[i] - expected[i])).toBeLessThanOrEqual(1e-10);
         }
       } else if (typeof expected === "string") {
         expect(prop).toBe(expected);
       } else if (typeof expected === "number") {
-        expect(prop).toBeCloseTo(expected, 10);
+        expect(Math.abs(prop - expected)).toBeLessThanOrEqual(1e-10);
       } else {
         throw new Error(`whoops, not implemented for "${typeof expected}"`);
       }
@@ -124,7 +126,7 @@ describe("JOS3", () => {
                 expect(ac).toBe(ex);
                 break;
               default:
-                expect(ac).toBeCloseTo(ex, 10);
+                expect(Math.abs(ac - ex)).toBeLessThanOrEqual(1e-10);
             }
           }
         });

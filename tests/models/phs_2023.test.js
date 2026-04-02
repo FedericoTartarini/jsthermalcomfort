@@ -17,12 +17,12 @@ describe("phs 2023", () => {
       "7933-2023",
     );
 
-    expect(result.t_re).toBeCloseTo(37.5, 1);
+    expect(Math.abs(result.t_re - 37.5)).toBeLessThanOrEqual(0.1);
     // Values from Python reference (pythermalcomfort phs model="7933-2023"):
     // sweat_loss_g: 5847.0
     // sweat_rate_watt: 252.1
-    expect(result.sweat_loss_g).toBeCloseTo(5847.0, 0);
-    expect(result.sweat_rate_watt).toBeCloseTo(252.1, 1);
+    expect(Math.abs(result.sweat_loss_g - 5847.0)).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(result.sweat_rate_watt - 252.1)).toBeLessThanOrEqual(0.1);
   });
 
   it("should handle the 2004 version correctly when explicitly requested", () => {

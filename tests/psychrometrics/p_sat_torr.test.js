@@ -15,7 +15,7 @@ describe("p_sat_torr", () => {
     "returns $expected when dryBulbAirTemp is $dryBulbAirTemp",
     ({ tdb, expected }) => {
       const result = p_sat_torr(tdb);
-      expect(result).toBeCloseTo(expected);
+      expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
 });

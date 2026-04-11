@@ -1,4 +1,8 @@
 import { round } from "../utilities/utilities.js";
+import {
+  allValidNumbers,
+  isValidNumber,
+} from "../utilities/validate_inputs.js";
 
 const optionDefaults = {
   round: true,
@@ -59,6 +63,16 @@ const optionDefaults = {
  */
 export function wbgt(twb, tg, options) {
   const opt = Object.assign({}, optionDefaults, options);
+
+  if (
+    !allValidNumbers(twb, tg) ||
+    (opt.tdb !== undefined && !isValidNumber(opt.tdb))
+  ) {
+    if (opt.round) {
+      return NaN;
+    }
+    return { wbgt: NaN };
+  }
 
   let t_wbg;
 

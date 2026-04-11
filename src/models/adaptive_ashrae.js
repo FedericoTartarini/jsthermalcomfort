@@ -4,6 +4,7 @@ import {
   round,
   units_converter,
 } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { get_ce } from "./adaptive_en.js";
 
 /**
@@ -88,6 +89,18 @@ export function adaptive_ashrae(
   units = "SI",
   limit_inputs = true,
 ) {
+  if (!allValidNumbers(tdb, tr, t_running_mean, v)) {
+    return {
+      tmp_cmf: NaN,
+      tmp_cmf_80_low: NaN,
+      tmp_cmf_80_up: NaN,
+      tmp_cmf_90_low: NaN,
+      tmp_cmf_90_up: NaN,
+      acceptability_80: false,
+      acceptability_90: false,
+    };
+  }
+
   const standard = "ASHRAE";
   if (units.toUpperCase() === "IP") {
     ({

@@ -1,5 +1,6 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
 import { body_surface_area, round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {object} PetSteadyResult
@@ -70,6 +71,26 @@ export function pet_steady(
   height = 1.8,
   wme = 0,
 ) {
+  if (
+    !allValidNumbers(
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      p_atm,
+      position,
+      age,
+      sex,
+      weight,
+      height,
+      wme,
+    )
+  ) {
+    return { pet: NaN };
+  }
+
   const met_factor = 58.2; // met conversion factor
   met = met * met_factor; // metabolic rate
 

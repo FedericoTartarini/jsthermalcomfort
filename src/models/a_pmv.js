@@ -1,4 +1,5 @@
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { pmv } from "./pmv.js";
 
 /**
@@ -81,6 +82,10 @@ export function a_pmv(
   wme = 0,
   kwargs = {},
 ) {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, clo, a_coefficient, wme)) {
+    return { a_pmv: NaN };
+  }
+
   const default_kwargs = {
     units: "SI",
     limit_inputs: true,

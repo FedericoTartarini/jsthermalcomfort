@@ -4,6 +4,7 @@ import {
   round,
   units_converter,
 } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {Object} VerTmpGradReturnType - a result set containing the predicted precentage of dissatisfied and the acceptability
@@ -58,6 +59,10 @@ export function vertical_tmp_grad_ppd(
   vertical_tmp_grad,
   units = "SI",
 ) {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, clo, vertical_tmp_grad)) {
+    return { ppd_vg: NaN, acceptability: false };
+  }
+
   if (units === "IP") {
     ({
       tdb: tdb,

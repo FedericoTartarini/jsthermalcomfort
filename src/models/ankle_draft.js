@@ -3,6 +3,7 @@ import {
   round,
   units_converter,
 } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { pmv } from "./pmv.js";
 
 /**
@@ -55,6 +56,10 @@ import { pmv } from "./pmv.js";
  * 
  */
 export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, clo, v_ankle)) {
+    return { ppd_ad: NaN, acceptability: false };
+  }
+
   let kwargs = {};
   let ret = 0;
   if (units.toLowerCase() == "ip") {

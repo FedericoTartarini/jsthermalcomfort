@@ -1,4 +1,5 @@
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 /**
  * @typedef {object} NetResult
  * @property {number} net - Normal Effective Temperature, [°C]
@@ -41,6 +42,10 @@ import { round } from "../utilities/utilities.js";
  * console.log(result); // -> {net: 37}
  */
 export function net(tdb, rh, v, options = { round: true }) {
+  if (!allValidNumbers(tdb, rh, v)) {
+    return { net: NaN };
+  }
+
   const frac = 1.0 / (1.76 + 1.4 * v ** 0.75);
   let et =
     37 -

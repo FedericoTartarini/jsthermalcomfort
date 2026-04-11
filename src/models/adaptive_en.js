@@ -1,5 +1,6 @@
 import { t_o } from "../psychrometrics/t_o.js";
 import { units_converter, round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -60,7 +61,7 @@ import { units_converter, round } from "../utilities/utilities.js";
  *
  * @example
  * const results = adaptive_en(25, 25, 9, 0.1);
- * console.log(results); // {tmp_cmf: NaN, acceptability_cat_i: true, acceptability_cat_ii: true, ... }
+ * console.log(results); // {tmp_cmf: NaN, acceptability_cat_i: false, acceptability_cat_ii: false, ... }
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is between 10 °C and 30 °C
  */
@@ -73,6 +74,21 @@ export function adaptive_en(
   limit_inputs = true,
 ) {
   const standard = "ISO";
+
+  if (!allValidNumbers(tdb, tr, t_running_mean, v)) {
+    return {
+      tmp_cmf: NaN,
+      acceptability_cat_i: false,
+      acceptability_cat_ii: false,
+      acceptability_cat_iii: false,
+      tmp_cmf_cat_i_up: NaN,
+      tmp_cmf_cat_ii_up: NaN,
+      tmp_cmf_cat_iii_up: NaN,
+      tmp_cmf_cat_i_low: NaN,
+      tmp_cmf_cat_ii_low: NaN,
+      tmp_cmf_cat_iii_low: NaN,
+    };
+  }
 
   if (units.toLowerCase() == "ip") {
     ({

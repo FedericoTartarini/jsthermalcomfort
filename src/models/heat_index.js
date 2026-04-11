@@ -1,4 +1,5 @@
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {object} HeatIndexResult
@@ -28,6 +29,10 @@ import { round } from "../utilities/utilities.js";
  * @category Thermophysiological models
  */
 export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
+  if (!allValidNumbers(tdb, rh)) {
+    return { hi: NaN };
+  }
+
   let hi;
   let tdb_squared = Math.pow(tdb, 2);
   let rh_squared = Math.pow(rh, 2);

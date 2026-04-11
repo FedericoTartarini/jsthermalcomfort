@@ -1,4 +1,5 @@
 import { round, units_converter } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { set_tmp } from "./set_tmp.js";
 
 /**
@@ -62,6 +63,10 @@ export function cooling_effect(
   wme = 0,
   units = "SI",
 ) {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, clo, wme)) {
+    return { ce: NaN };
+  }
+
   if (units.toLowerCase() === "ip") {
     const result = units_converter({ tdb, tr, vr }, "IP");
     tdb = result.tdb;

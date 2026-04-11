@@ -4,6 +4,7 @@ import {
   units_converter,
   valid_range,
 } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { cooling_effect } from "./cooling_effect.js";
 
 /**
@@ -120,6 +121,10 @@ export function pmv_ppd(
   standard = "ISO",
   kwargs = {},
 ) {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, clo, wme)) {
+    return { pmv: NaN, ppd: NaN };
+  }
+
   const default_kwargs = {
     units: "SI",
     limit_inputs: true,

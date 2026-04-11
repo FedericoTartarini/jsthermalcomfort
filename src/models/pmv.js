@@ -1,3 +1,4 @@
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { pmv_ppd } from "./pmv_ppd.js";
 
 /**
@@ -105,6 +106,10 @@ export function pmv(
   standard = "ISO",
   kwargs = {},
 ) {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, clo, wme)) {
+    return NaN;
+  }
+
   const default_kwargs = {
     units: "SI",
     limit_inputs: true,

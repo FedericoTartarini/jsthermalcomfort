@@ -3,6 +3,10 @@ import {
   check_standard_compliance_array,
   round,
 } from "../utilities/utilities.js";
+import {
+  allValidNumbers,
+  isValidNumber,
+} from "../utilities/validate_inputs.js";
 import { two_nodes } from "../models/two_nodes.js";
 
 /**
@@ -114,6 +118,55 @@ export function use_fans_heatwaves(
   max_skin_blood_flow = 80,
   kwargs = {},
 ) {
+  if (
+    !allValidNumbers(tdb, tr, v, rh, met, clo, wme, max_skin_blood_flow) ||
+    (body_surface_area !== undefined && !isValidNumber(body_surface_area)) ||
+    (p_atm !== undefined && !isValidNumber(p_atm))
+  ) {
+    const earlyKwargs = Object.assign({ round: true }, kwargs);
+    if (earlyKwargs.round) {
+      return {
+        e_skin: NaN,
+        e_rsw: NaN,
+        e_max: NaN,
+        q_sensible: NaN,
+        q_skin: NaN,
+        q_res: NaN,
+        t_core: NaN,
+        t_skin: NaN,
+        m_bl: NaN,
+        m_rsw: NaN,
+        w: NaN,
+        w_max: NaN,
+        heat_strain_blood_flow: undefined,
+        heat_strain_w: undefined,
+        heat_strain_sweating: undefined,
+        heat_strain: undefined,
+      };
+    }
+    return {
+      eSkin: NaN,
+      eRsw: NaN,
+      eMax: NaN,
+      qSensible: NaN,
+      qSkin: NaN,
+      qRes: NaN,
+      tCore: NaN,
+      tSkin: NaN,
+      mBl: NaN,
+      mRsw: NaN,
+      w: NaN,
+      wMax: NaN,
+      pmvGagge: NaN,
+      pmvSet: NaN,
+      tSens: NaN,
+      heat_strain_blood_flow: undefined,
+      heat_strain_w: undefined,
+      heat_strain_sweating: undefined,
+      heat_strain: undefined,
+    };
+  }
+
   const defaults_kwargs = {
     round: true,
     max_sweating: 500,

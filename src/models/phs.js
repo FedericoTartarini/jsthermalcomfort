@@ -4,6 +4,10 @@ import {
   check_standard_compliance,
   round,
 } from "../utilities/utilities.js";
+import {
+  allValidNumbers,
+  isValidNumber,
+} from "../utilities/validate_inputs.js";
 
 const MET_WATT_PER_MET = 58.15;
 
@@ -115,6 +119,28 @@ export function phs(
   model = "7933-2023",
   kwargs = {},
 ) {
+  const postureValid =
+    typeof posture === "number"
+      ? isValidNumber(posture)
+      : typeof posture === "string" &&
+        ["sitting", "standing", "crouching"].includes(posture.toLowerCase());
+
+  if (!allValidNumbers(tdb, tr, v, rh, met, clo, wme) || !postureValid) {
+    return {
+      t_re: NaN,
+      t_sk: NaN,
+      t_cr: NaN,
+      t_cr_eq: NaN,
+      t_sk_t_cr_wg: NaN,
+      d_lim_loss_50: NaN,
+      d_lim_loss_95: NaN,
+      d_lim_t_re: NaN,
+      sweat_rate_watt: NaN,
+      sweat_loss_g: NaN,
+      evap_load_wm2_min: NaN,
+    };
+  }
+
   const defaults_kwargs = {
     i_mst: 0.38,
     a_p: 0.54,

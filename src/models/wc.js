@@ -1,4 +1,5 @@
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 {@link #ref_18|[18]}.
@@ -24,6 +25,10 @@ import { round } from "../utilities/utilities.js";
  * @returns {{wci: number}} wind chill index, [W/m2]
  */
 export function wc(tdb, v, kwargs = { round: true }) {
+  if (!allValidNumbers(tdb, v)) {
+    return { wci: NaN };
+  }
+
   let wci = (10.45 + 10 * Math.pow(v, 0.5) - v) * (33 - tdb);
   // the factor 1.163 is used to convert to W/m2
   wci = wci * 1.163;

@@ -1,4 +1,5 @@
 import { round, transpose_sharp_altitude } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 // avoid reallocating these arrays accross function calls
 const _alt_range = [0, 15, 30, 45, 60, 75, 90];
@@ -104,6 +105,21 @@ export function solar_gain(
   posture = "sitting",
   floor_reflectance = 0.6,
 ) {
+  if (
+    !allValidNumbers(
+      sol_altitude,
+      sharp,
+      sol_radiation_dir,
+      sol_transmittance,
+      f_svv,
+      f_bes,
+      asw,
+      floor_reflectance,
+    )
+  ) {
+    return { erf: NaN, delta_mrt: NaN };
+  }
+
   posture = posture.toLowerCase();
   if (posture !== "standing" && posture !== "supine" && posture !== "sitting")
     throw new Error("Posture has to be either standing, supine or sitting");

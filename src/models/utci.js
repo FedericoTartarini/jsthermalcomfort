@@ -1,4 +1,5 @@
 import { round, units_converter, valid_range } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 const g = [
   -2836.5744,
@@ -69,6 +70,13 @@ export function utci(
   return_stress_category = false,
   limit_inputs = true,
 ) {
+  if (!allValidNumbers(tdb, tr, v, rh)) {
+    if (return_stress_category) {
+      return { utci: NaN, stress_category: NaN };
+    }
+    return { utci: NaN };
+  }
+
   let kwargs;
   let ret;
   if (units.toLowerCase() == "ip") {
@@ -125,6 +133,7 @@ export function utci(
  * @returns {string}
  */
 function mapping(val) {
+  if (!isFinite(val)) return NaN;
   let left = 0;
   let right = stress_categories_vals.length - 1;
 

@@ -1,4 +1,5 @@
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 import { pmv_calculation } from "./pmv_ppd.js";
 
 /**
@@ -52,6 +53,10 @@ import { pmv_calculation } from "./pmv_ppd.js";
  * console.log(athb_result); // Output: {athb_pmv: 0.2}
  */
 export function athb(tdb, tr, vr, rh, met, t_running_mean) {
+  if (!allValidNumbers(tdb, tr, vr, rh, met, t_running_mean)) {
+    return { athb_pmv: NaN };
+  }
+
   const met_adapted = met - (0.234 * t_running_mean) / 58.2;
 
   const clo_adapted = Math.pow(

@@ -4,6 +4,10 @@ import {
   round,
   units_converter,
 } from "../utilities/utilities.js";
+import {
+  allValidNumbers,
+  isValidNumber,
+} from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {Object} SetTmpResult
@@ -69,6 +73,14 @@ export function set_tmp(
   limit_inputs = true,
   kwargs = {},
 ) {
+  if (
+    !allValidNumbers(tdb, tr, v, rh, met, clo, wme) ||
+    (body_surface_area !== undefined && !isValidNumber(body_surface_area)) ||
+    (p_atm !== undefined && !isValidNumber(p_atm))
+  ) {
+    return { set: NaN };
+  }
+
   const defaults_kwargs = {
     calculate_ce: false,
     round: true,

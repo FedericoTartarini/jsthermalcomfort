@@ -1,5 +1,6 @@
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {Object} TwoNodesReturnType
@@ -127,6 +128,71 @@ export function two_nodes(
   max_skin_blood_flow = 90,
   kwargs = {},
 ) {
+  if (
+    !allValidNumbers(
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      max_skin_blood_flow,
+    )
+  ) {
+    const earlyKwargs = Object.assign(
+      { round: true, calculate_ce: false },
+      kwargs,
+    );
+    if (earlyKwargs.calculate_ce) {
+      return { set: NaN };
+    }
+    if (earlyKwargs.round) {
+      return {
+        e_skin: NaN,
+        e_rsw: NaN,
+        e_max: NaN,
+        q_sensible: NaN,
+        q_skin: NaN,
+        q_res: NaN,
+        t_core: NaN,
+        t_skin: NaN,
+        m_bl: NaN,
+        m_rsw: NaN,
+        w: NaN,
+        w_max: NaN,
+        set: NaN,
+        et: NaN,
+        pmv_gagge: NaN,
+        pmv_set: NaN,
+        disc: NaN,
+        t_sens: NaN,
+      };
+    }
+    return {
+      set: NaN,
+      eSkin: NaN,
+      eRsw: NaN,
+      eMax: NaN,
+      qSensible: NaN,
+      qSkin: NaN,
+      qRes: NaN,
+      tCore: NaN,
+      tSkin: NaN,
+      mBl: NaN,
+      mRsw: NaN,
+      w: NaN,
+      wMax: NaN,
+      et: NaN,
+      pmvGagge: NaN,
+      pmvSet: NaN,
+      disc: NaN,
+      tSens: NaN,
+    };
+  }
+
   const defaults_kwargs = {
     calculate_ce: false,
     round: true,

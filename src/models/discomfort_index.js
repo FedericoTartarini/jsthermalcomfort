@@ -1,4 +1,5 @@
 import { round } from "../utilities/utilities.js";
+import { allValidNumbers } from "../utilities/validate_inputs.js";
 
 /**
  * @typedef {Object} DiscomfortIndexReturnType - a result set containing the discomfort index and the classification of the
@@ -32,6 +33,10 @@ import { round } from "../utilities/utilities.js";
  * const DI = discomfort_index(25, 50); // returns { di: 22.1, discomfort_condition: 'Less than 50% feels discomfort' }
  */
 export function discomfort_index(tdb, rh) {
+  if (!allValidNumbers(tdb, rh)) {
+    return { di: NaN, discomfort_condition: NaN };
+  }
+
   const di = calculate_di(tdb, rh);
   const condition = check_categories(di);
 

@@ -67,3 +67,27 @@ describe("adaptive_ashrae scalar tests (hardcoded)", () => {
     expect(result.acceptability_90).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("adaptive_ashrae input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 20, 0.1],
+    ["tr", 25, "25", 20, 0.1],
+    ["t_running_mean", 25, 25, "20", 0.1],
+    ["v", 25, 25, 20, "0.1"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => adaptive_ashrae(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if units is invalid", () => {
+    expect(() => adaptive_ashrae(25, 25, 20, 0.1, "INVALID")).toThrow(Error);
+  });
+
+  test("throws TypeError if limit_inputs is not a boolean", () => {
+    expect(() => adaptive_ashrae(25, 25, 20, 0.1, "SI", "true")).toThrow(
+      TypeError,
+    );
+  });
+});

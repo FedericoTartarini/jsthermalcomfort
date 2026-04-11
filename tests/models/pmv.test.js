@@ -29,3 +29,23 @@ describe("pmv", () => {
     validateResult(modelResult, outputs, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("pmv input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 0.1, 50, 1.2, 0.5],
+    ["tr", 25, "25", 0.1, 50, 1.2, 0.5],
+    ["vr", 25, 25, "0.1", 50, 1.2, 0.5],
+    ["rh", 25, 25, 0.1, "50", 1.2, 0.5],
+    ["met", 25, 25, 0.1, 50, "1.2", 0.5],
+    ["clo", 25, 25, 0.1, 50, 1.2, "0.5"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => pmv(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if standard is not a valid enum", () => {
+    expect(() => pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "INVALID")).toThrow(Error);
+  });
+});

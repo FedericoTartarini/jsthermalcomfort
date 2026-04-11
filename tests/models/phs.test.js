@@ -1,4 +1,4 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
+import { expect, describe, it, test, beforeAll } from "@jest/globals";
 import fetch from "node-fetch";
 import { phs } from "../../src/models/phs";
 import { testDataUrls } from "./comftest"; // Import test URLs from comftest.js
@@ -89,5 +89,36 @@ describe("phs", () => {
         throw error; // Re-throw to display specific error details
       }
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("phs input validation", () => {
+  test.each([
+    ["tdb", "40", 40, 0.3, 33.85, 2.5, 0.5, "standing"],
+    ["tr", 40, "40", 0.3, 33.85, 2.5, 0.5, "standing"],
+    ["v", 40, 40, "0.3", 33.85, 2.5, 0.5, "standing"],
+    ["rh", 40, 40, 0.3, "33.85", 2.5, 0.5, "standing"],
+    ["met", 40, 40, 0.3, 33.85, "2.5", 0.5, "standing"],
+    ["clo", 40, 40, 0.3, 33.85, 2.5, "0.5", "standing"],
+    ["wme", 40, 40, 0.3, 33.85, 2.5, 0.5, "standing", "0"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => phs(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if model is not a valid enum", () => {
+    expect(() =>
+      phs(40, 40, 0.3, 33.85, 2.5, 0.5, "standing", 0, "INVALID"),
+    ).toThrow(Error);
+  });
+
+  test("throws TypeError if kwargs.round is not a boolean", () => {
+    expect(() =>
+      phs(40, 40, 0.3, 33.85, 2.5, 0.5, "standing", 0, "7933-2023", {
+        round: "true",
+      }),
+    ).toThrow(TypeError);
   });
 });

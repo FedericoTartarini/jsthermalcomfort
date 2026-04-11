@@ -1,5 +1,9 @@
 import { t_o } from "../psychrometrics/t_o.js";
-import { units_converter, round } from "../utilities/utilities.js";
+import {
+  units_converter,
+  round,
+  validateInputs,
+} from "../utilities/utilities.js";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -64,6 +68,15 @@ import { units_converter, round } from "../utilities/utilities.js";
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is between 10 °C and 30 °C
  */
+const ADAPTIVE_EN_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  t_running_mean: { type: "number" },
+  v: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+  limit_inputs: { type: "boolean" },
+};
+
 export function adaptive_en(
   tdb,
   tr,
@@ -72,6 +85,11 @@ export function adaptive_en(
   units = "SI",
   limit_inputs = true,
 ) {
+  validateInputs(
+    { tdb, tr, t_running_mean, v, units: units.toUpperCase(), limit_inputs },
+    ADAPTIVE_EN_SCHEMA,
+  );
+
   const standard = "ISO";
 
   if (units.toLowerCase() == "ip") {

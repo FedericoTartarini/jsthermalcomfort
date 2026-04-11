@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 /**
  * @typedef {object} NetResult
  * @property {number} net - Normal Effective Temperature, [°C]
@@ -40,7 +40,15 @@ import { round } from "../utilities/utilities.js";
  * const result = net(37, 100, 0.1);
  * console.log(result); // -> {net: 37}
  */
+const NET_SCHEMA = {
+  tdb: { type: "number" },
+  rh: { type: "number" },
+  v: { type: "number" },
+  round: { type: "boolean", required: false },
+};
+
 export function net(tdb, rh, v, options = { round: true }) {
+  validateInputs({ tdb, rh, v, round: options.round }, NET_SCHEMA);
   const frac = 1.0 / (1.76 + 1.4 * v ** 0.75);
   let et =
     37 -

@@ -3,6 +3,7 @@ import {
   check_standard_compliance_array,
   round,
   units_converter,
+  validateInputs,
 } from "../utilities/utilities.js";
 import { get_ce } from "./adaptive_en.js";
 
@@ -80,6 +81,15 @@ import { get_ce } from "./adaptive_en.js";
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is higher than 10°C
  */
+const ADAPTIVE_ASHRAE_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  t_running_mean: { type: "number" },
+  v: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+  limit_inputs: { type: "boolean" },
+};
+
 export function adaptive_ashrae(
   tdb,
   tr,
@@ -88,6 +98,11 @@ export function adaptive_ashrae(
   units = "SI",
   limit_inputs = true,
 ) {
+  validateInputs(
+    { tdb, tr, t_running_mean, v, units: units.toUpperCase(), limit_inputs },
+    ADAPTIVE_ASHRAE_SCHEMA,
+  );
+
   const standard = "ASHRAE";
   if (units.toUpperCase() === "IP") {
     ({

@@ -3,6 +3,7 @@ import {
   round,
   units_converter,
   valid_range,
+  validateInputs,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
 
@@ -109,6 +110,20 @@ import { cooling_effect } from "./cooling_effect.js";
  * console.log(results); // Output: { pmv: 0.06, ppd: 5.1 }
  * console.log(results.pmv); // Output: -0.06
  */
+const PMV_PPD_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  standard: { enum: ["ISO", "ASHRAE"] },
+  units: { enum: ["SI", "IP"], required: false },
+  limit_inputs: { type: "boolean", required: false },
+  airspeed_control: { type: "boolean", required: false },
+};
+
 export function pmv_ppd(
   tdb,
   tr,
@@ -126,16 +141,26 @@ export function pmv_ppd(
     airspeed_control: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
+  validateInputs(
+    {
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      standard,
+      units: kwargs.units?.toUpperCase(),
+      limit_inputs: kwargs.limit_inputs,
+      airspeed_control: kwargs.airspeed_control,
+    },
+    PMV_PPD_SCHEMA,
+  );
 
   if (kwargs.units && kwargs.units.toUpperCase() === "IP") {
     // Conversion from IP to SI units
     ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
-  }
-
-  if (standard !== "ISO" && standard !== "ASHRAE") {
-    throw new Error(
-      "PMV calculations can only be performed in compliance with ISO or ASHRAE Standards",
-    );
   }
 
   const {

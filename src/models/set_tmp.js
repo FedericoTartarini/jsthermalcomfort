@@ -3,6 +3,7 @@ import {
   check_standard_compliance_array,
   round,
   units_converter,
+  validateInputs,
 } from "../utilities/utilities.js";
 
 /**
@@ -54,6 +55,23 @@ import {
  * @example
  * const set = set_tmp(25, 25, 0.1, 50, 1.2, 0.5); // returns {set: 24.3}
  */
+const SET_TMP_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  body_surface_area: { type: "number", required: false },
+  p_atm: { type: "number", required: false },
+  body_position: { enum: ["sitting", "standing"] },
+  units: { enum: ["SI", "IP"] },
+  limit_inputs: { type: "boolean" },
+  calculate_ce: { type: "boolean", required: false },
+  round: { type: "boolean", required: false },
+};
+
 export function set_tmp(
   tdb,
   tr,
@@ -75,6 +93,26 @@ export function set_tmp(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atm,
+      body_position,
+      units,
+      limit_inputs,
+      calculate_ce: joint_kwargs.calculate_ce,
+      round: joint_kwargs.round,
+    },
+    SET_TMP_SCHEMA,
+  );
 
   if (body_surface_area === undefined)
     body_surface_area = units === "SI" ? 1.8258 : 19.65;

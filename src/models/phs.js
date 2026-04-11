@@ -3,6 +3,7 @@ import {
   body_surface_area,
   check_standard_compliance,
   round,
+  validateInputs,
 } from "../utilities/utilities.js";
 
 const MET_WATT_PER_MET = 58.15;
@@ -103,6 +104,18 @@ const MET_WATT_PER_MET = 58.15;
  * const results = phs(40, 40, 0.3, 33.85, 2.5, 0.5, "standing");
  * console.log(results); // {t_re: 37.5, d_lim_loss_50: 480, d_lim_loss_95: 480, d_lim_t_re: 480, sweat_loss_g: 5847.0, sweat_rate_watt: 252.1, ...}
  */
+const PHS_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  model: { enum: ["7933-2004", "7933-2023"] },
+  round: { type: "boolean", required: false },
+};
+
 export function phs(
   tdb,
   tr,
@@ -146,6 +159,21 @@ export function phs(
     else if (p === "standing") posture = 2;
     else if (p === "crouching") posture = 3;
   }
+
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      model,
+      round: joint_kwargs.round,
+    },
+    PHS_SCHEMA,
+  );
 
   const met_watt = met * MET_WATT_PER_MET;
   const wme_watt = wme * MET_WATT_PER_MET;

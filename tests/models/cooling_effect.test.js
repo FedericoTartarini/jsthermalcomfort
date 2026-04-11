@@ -20,3 +20,31 @@ describe("cooling_effect", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("cooling_effect input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 0.3, 50, 1.2, 0.5],
+    ["tr", 25, "25", 0.3, 50, 1.2, 0.5],
+    ["vr", 25, 25, "0.3", 50, 1.2, 0.5],
+    ["rh", 25, 25, 0.3, "50", 1.2, 0.5],
+    ["met", 25, 25, 0.3, 50, "1.2", 0.5],
+    ["clo", 25, 25, 0.3, 50, 1.2, "0.5"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => cooling_effect(...args)).toThrow(TypeError);
+  });
+
+  test("throws TypeError if wme is not a number", () => {
+    expect(() => cooling_effect(25, 25, 0.3, 50, 1.2, 0.5, "0")).toThrow(
+      TypeError,
+    );
+  });
+
+  test("throws Error if units is not a valid enum", () => {
+    expect(() =>
+      cooling_effect(25, 25, 0.3, 50, 1.2, 0.5, 0, "INVALID"),
+    ).toThrow(Error);
+  });
+});

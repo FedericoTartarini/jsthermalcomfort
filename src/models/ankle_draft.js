@@ -2,6 +2,7 @@ import {
   check_standard_compliance,
   round,
   units_converter,
+  validateInputs,
 } from "../utilities/utilities.js";
 import { pmv } from "./pmv.js";
 
@@ -54,7 +55,23 @@ import { pmv } from "./pmv.js";
  * console.log(results) // expected result is {PPD_ad: 18.5, Acceptability: true}
  * 
  */
+const ANKLE_DRAFT_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  v_ankle: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+};
+
 export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
+  validateInputs(
+    { tdb, tr, vr, rh, met, clo, v_ankle, units: units.toUpperCase() },
+    ANKLE_DRAFT_SCHEMA,
+  );
+
   let kwargs = {};
   let ret = 0;
   if (units.toLowerCase() == "ip") {

@@ -3,6 +3,7 @@ import {
   check_standard_compliance,
   round,
   units_converter,
+  validateInputs,
 } from "../utilities/utilities.js";
 
 /**
@@ -48,6 +49,17 @@ import {
  * @example
  * const result = vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7); // returns {'ppd_vg': 12.6, 'acceptability': false}
  */
+const VERTICAL_TMP_GRAD_PPD_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  vertical_tmp_grad: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+};
+
 export function vertical_tmp_grad_ppd(
   tdb,
   tr,
@@ -58,6 +70,11 @@ export function vertical_tmp_grad_ppd(
   vertical_tmp_grad,
   units = "SI",
 ) {
+  validateInputs(
+    { tdb, tr, vr, rh, met, clo, vertical_tmp_grad, units },
+    VERTICAL_TMP_GRAD_PPD_SCHEMA,
+  );
+
   if (units === "IP") {
     ({
       tdb: tdb,

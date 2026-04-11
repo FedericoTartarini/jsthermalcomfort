@@ -870,3 +870,61 @@ export const clo_individual_garments = {
   Double_breasted_coat_thin: 0.42,
   Double_breasted_coat_thick: 0.48,
 };
+
+/**
+ * Asserts that a value is a valid number (not NaN).
+ * Throws a TypeError if the value is not a number or is NaN.
+ *
+ * @param {*} value - the value to check
+ * @param {string} name - the parameter name, used in the error message
+ * @throws {TypeError} if value is not a number or is NaN
+ */
+export const assertNumber = (value, name) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new TypeError(`Parameter "${name}" must be a valid finite number`);
+  }
+};
+
+/**
+ * Validates model input parameters against a schema.
+ *
+ * @param {object} params - The input parameters as key-value pairs
+ * @param {object} schema - Validation rules per parameter:
+ *   - `type: "number"`  — calls assertNumber (throws TypeError if invalid)
+ *   - `type: "boolean"` — throws TypeError if value is not a boolean
+ *   - `enum: [...]`     — throws Error if value not in the list
+ *   - `required: false` — skips validation when value is undefined
+ * @throws {TypeError} if a numeric or boolean parameter has an invalid type
+ * @throws {Error} if an enum parameter has an invalid value
+ *
+ * @example
+ * validateInputs(
+ *   { tdb, tr, units },
+ *   {
+ *     tdb:   { type: "number" },
+ *     tr:    { type: "number" },
+ *     units: { enum: ["SI", "IP"] },
+ *   }
+ * );
+ */
+export const validateInputs = (params, schema) => {
+  for (const [key, rules] of Object.entries(schema)) {
+    const value = params[key];
+    if (rules.required === false && value === undefined) continue;
+    if (rules.type === "number") {
+      assertNumber(value, key);
+    }
+    if (rules.type === "boolean") {
+      if (typeof value !== "boolean") {
+        throw new TypeError(`Parameter "${key}" must be a boolean`);
+      }
+    }
+    if (rules.enum !== undefined) {
+      if (!rules.enum.includes(value)) {
+        throw new Error(
+          `"${key}" must be one of: ${rules.enum.map((v) => `'${v}'`).join(", ")}`,
+        );
+      }
+    }
+  }
+};

@@ -1,4 +1,8 @@
-import { round, units_converter } from "../utilities/utilities.js";
+import {
+  round,
+  units_converter,
+  validateInputs,
+} from "../utilities/utilities.js";
 
 /**
  * @typedef {object} CloToutResult
@@ -26,7 +30,13 @@ import { round, units_converter } from "../utilities/utilities.js";
  *
  * @returns {CloToutResult} set containing results for the model
  */
+const CLO_TOUT_SCHEMA = {
+  tout: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+};
+
 export function clo_tout(tout, units = "SI") {
+  validateInputs({ tout, units }, CLO_TOUT_SCHEMA);
   const t = units === "IP" ? units_converter({ tmp: tout }).tmp : tout;
 
   let clo = t < 26 ? 10 ** (-0.1635 - 0.0066 * t) : 0.46;

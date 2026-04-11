@@ -1,4 +1,8 @@
-import { round, units_converter } from "../utilities/utilities.js";
+import {
+  round,
+  units_converter,
+  validateInputs,
+} from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
 
 /**
@@ -52,6 +56,17 @@ import { set_tmp } from "./set_tmp.js";
  * const CE_IP = cooling_effect(77, 77, 1.64, 50, 1, 0.6, "IP");
  * console.log(CE_IP); // Output: {ce: 3.74}
  */
+const COOLING_EFFECT_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+};
+
 export function cooling_effect(
   tdb,
   tr,
@@ -62,6 +77,11 @@ export function cooling_effect(
   wme = 0,
   units = "SI",
 ) {
+  validateInputs(
+    { tdb, tr, vr, rh, met, clo, wme, units: units.toUpperCase() },
+    COOLING_EFFECT_SCHEMA,
+  );
+
   if (units.toLowerCase() === "ip") {
     const result = units_converter({ tdb, tr, vr }, "IP");
     tdb = result.tdb;

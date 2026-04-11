@@ -1,5 +1,5 @@
 import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.js";
-import { round } from "../utilities/utilities.js";
+import { validateInputs, round } from "../utilities/utilities.js";
 
 /**
  * @typedef {object} AtResult
@@ -37,7 +37,17 @@ import { round } from "../utilities/utilities.js";
  * const result = at(25, 30, 0.1);
  * console.log(result); // {at: 24.1}
  */
+const AT_SCHEMA = {
+  tdb: { type: "number" },
+  rh: { type: "number" },
+  v: { type: "number" },
+  q: { type: "number", required: false },
+  round: { type: "boolean", required: false },
+};
+
 export function at(tdb, rh, v, q, kwargs = { round: true }) {
+  validateInputs({ tdb, rh, v, q, round: kwargs.round }, AT_SCHEMA);
+
   // dividing it by 100 since the at eq. requires p_vap to be in hPa
   const p_vap = psy_ta_rh(tdb, rh).p_vap / 100;
   let t_at;

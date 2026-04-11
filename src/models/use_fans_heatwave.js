@@ -2,6 +2,7 @@ import {
   units_converter,
   check_standard_compliance_array,
   round,
+  validateInputs,
 } from "../utilities/utilities.js";
 import { two_nodes } from "../models/two_nodes.js";
 
@@ -99,6 +100,24 @@ import { two_nodes } from "../models/two_nodes.js";
     }
  *
  */
+const USE_FANS_HEATWAVES_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  body_surface_area: { type: "number", required: false },
+  p_atm: { type: "number", required: false },
+  body_position: { enum: ["sitting", "standing"] },
+  units: { enum: ["SI", "IP"] },
+  max_skin_blood_flow: { type: "number" },
+  round: { type: "boolean", required: false },
+  max_sweating: { type: "number", required: false },
+  limit_inputs: { type: "boolean", required: false },
+};
+
 export function use_fans_heatwaves(
   tdb,
   tr,
@@ -121,6 +140,27 @@ export function use_fans_heatwaves(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atm,
+      body_position,
+      units,
+      max_skin_blood_flow,
+      round: joint_kwargs.round,
+      max_sweating: joint_kwargs.max_sweating,
+      limit_inputs: joint_kwargs.limit_inputs,
+    },
+    USE_FANS_HEATWAVES_SCHEMA,
+  );
 
   if (body_surface_area === undefined)
     body_surface_area = units === "SI" ? 1.8258 : 19.65;

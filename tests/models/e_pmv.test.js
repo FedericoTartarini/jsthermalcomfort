@@ -20,3 +20,20 @@ describe("e_pmv", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("e_pmv input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 0.1, 50, 1.4, 0.5, 0.6],
+    ["tr", 25, "25", 0.1, 50, 1.4, 0.5, 0.6],
+    ["vr", 25, 25, "0.1", 50, 1.4, 0.5, 0.6],
+    ["rh", 25, 25, 0.1, "50", 1.4, 0.5, 0.6],
+    ["met", 25, 25, 0.1, 50, "1.4", 0.5, 0.6],
+    ["clo", 25, 25, 0.1, 50, 1.4, "0.5", 0.6],
+    ["e_coefficient", 25, 25, 0.1, 50, 1.4, 0.5, "0.6"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => e_pmv(...args)).toThrow(TypeError);
+  });
+});

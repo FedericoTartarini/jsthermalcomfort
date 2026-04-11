@@ -1,4 +1,8 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
+
+const E_PMV_SCHEMA = {
+  e_coefficient: { type: "number" },
+};
 import { pmv } from "./pmv.js";
 
 /**
@@ -89,6 +93,7 @@ export function e_pmv(
     limit_inputs: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
+  validateInputs({ e_coefficient }, E_PMV_SCHEMA);
 
   let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
 

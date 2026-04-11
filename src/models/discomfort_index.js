@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} DiscomfortIndexReturnType - a result set containing the discomfort index and the classification of the
@@ -31,7 +31,14 @@ import { round } from "../utilities/utilities.js";
  * @example
  * const DI = discomfort_index(25, 50); // returns { di: 22.1, discomfort_condition: 'Less than 50% feels discomfort' }
  */
+const DISCOMFORT_INDEX_SCHEMA = {
+  tdb: { type: "number" },
+  rh: { type: "number" },
+};
+
 export function discomfort_index(tdb, rh) {
+  validateInputs({ tdb, rh }, DISCOMFORT_INDEX_SCHEMA);
+
   const di = calculate_di(tdb, rh);
   const condition = check_categories(di);
 

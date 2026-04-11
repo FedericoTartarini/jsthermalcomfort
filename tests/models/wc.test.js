@@ -18,3 +18,19 @@ describe("test_wc", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("wc input validation", () => {
+  test.each([
+    ["tdb", "0", 5],
+    ["v", 0, "5"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => wc(...args)).toThrow(TypeError);
+  });
+
+  test("throws TypeError if round is not a boolean", () => {
+    expect(() => wc(0, 5, { round: "true" })).toThrow(TypeError);
+  });
+});

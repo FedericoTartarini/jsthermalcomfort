@@ -1,5 +1,5 @@
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} TwoNodesReturnType
@@ -113,6 +113,23 @@ import { round } from "../utilities/utilities.js";
 }
  *
  */
+const TWO_NODES_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  body_surface_area: { type: "number" },
+  p_atmospheric: { type: "number" },
+  body_position: { enum: ["sitting", "standing"] },
+  max_skin_blood_flow: { type: "number" },
+  calculate_ce: { type: "boolean", required: false },
+  round: { type: "boolean", required: false },
+  max_sweating: { type: "number", required: false },
+};
+
 export function two_nodes(
   tdb,
   tr,
@@ -135,6 +152,26 @@ export function two_nodes(
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      body_position,
+      max_skin_blood_flow,
+      calculate_ce: joint_kwargs.calculate_ce,
+      round: joint_kwargs.round,
+      max_sweating: joint_kwargs.max_sweating,
+    },
+    TWO_NODES_SCHEMA,
+  );
 
   const vapor_pressure = cal_vapor_pressure(tdb, rh);
 

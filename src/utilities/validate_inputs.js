@@ -7,6 +7,7 @@
  * calculation.
  *
  * @public
+ * @ignore
  * @param {unknown} value - value to check
  * @returns {boolean} true if value is a finite number
  */
@@ -18,6 +19,7 @@ export function isValidNumber(value) {
  * Checks whether every provided value is a valid finite number.
  *
  * @public
+ * @ignore
  * @param {...unknown} values - values to check
  * @returns {boolean} true if every value satisfies {@link isValidNumber}
  */

@@ -29,3 +29,33 @@ describe("wbgt", () => {
     }
   });
 });
+
+describe("wbgt invalid input", () => {
+  const valid = { twb: 25, tg: 32 };
+
+  describe("with round=true (default)", () => {
+    test.each([
+      ["twb", { ...valid, twb: undefined }],
+      ["tg", { ...valid, tg: "string" }],
+      ["twb", { ...valid, twb: null }],
+      ["tg", { ...valid, tg: NaN }],
+      ["twb", { ...valid, twb: Infinity }],
+    ])("returns NaN when %s is invalid", (_label, args) => {
+      const result = wbgt(args.twb, args.tg);
+      expect(result).toBeNaN();
+    });
+  });
+
+  describe("with round=false", () => {
+    test.each([
+      ["twb", { ...valid, twb: undefined }],
+      ["tg", { ...valid, tg: "string" }],
+      ["twb", { ...valid, twb: null }],
+      ["tg", { ...valid, tg: NaN }],
+      ["twb", { ...valid, twb: Infinity }],
+    ])("returns NaN object when %s is invalid", (_label, args) => {
+      const result = wbgt(args.twb, args.tg, { round: false });
+      expect(result.wbgt).toBeNaN();
+    });
+  });
+});

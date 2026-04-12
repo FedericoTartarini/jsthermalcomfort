@@ -1,4 +1,4 @@
-import { describe } from "@jest/globals";
+import { describe, expect } from "@jest/globals";
 import { cooling_effect } from "../../src/models/cooling_effect";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, validateResult } from "./testUtils"; // Import utility functions
@@ -18,5 +18,28 @@ describe("cooling_effect", () => {
     const modelResult = cooling_effect(tdb, tr, vr, rh, met, clo, wme, units);
 
     validateResult(modelResult, expectedOutput, tolerances, inputs);
+  });
+});
+
+describe("cooling_effect invalid input", () => {
+  const valid = { tdb: 25, tr: 25, vr: 0.5, rh: 50, met: 1.2, clo: 0.5 };
+
+  test.each([
+    ["tdb", { ...valid, tdb: undefined }],
+    ["tr", { ...valid, tr: "string" }],
+    ["vr", { ...valid, vr: null }],
+    ["rh", { ...valid, rh: NaN }],
+    ["met", { ...valid, met: Infinity }],
+    ["clo", { ...valid, clo: undefined }],
+  ])("returns NaN result when %s is invalid", (_label, args) => {
+    const result = cooling_effect(
+      args.tdb,
+      args.tr,
+      args.vr,
+      args.rh,
+      args.met,
+      args.clo,
+    );
+    expect(result.ce).toBeNaN();
   });
 });

@@ -1,4 +1,4 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
+import { beforeAll, describe, expect, it, test } from "@jest/globals";
 import { loadTestData } from "./testUtils";
 import { two_nodes } from "../../src/models/two_nodes";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
@@ -100,5 +100,28 @@ describe("two_nodes validation logic (Testing the Test)", () => {
         );
       }
     }).not.toThrow();
+  });
+});
+
+describe("two_nodes invalid input", () => {
+  const valid = { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+
+  test.each([
+    ["tdb", { ...valid, tdb: undefined }],
+    ["tr", { ...valid, tr: "string" }],
+    ["v", { ...valid, v: null }],
+    ["rh", { ...valid, rh: NaN }],
+    ["met", { ...valid, met: Infinity }],
+    ["clo", { ...valid, clo: undefined }],
+  ])("returns NaN result when %s is invalid", (_label, args) => {
+    const result = two_nodes(
+      args.tdb,
+      args.tr,
+      args.v,
+      args.rh,
+      args.met,
+      args.clo,
+    );
+    expect(result.set).toBeNaN();
   });
 });

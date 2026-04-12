@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals";
+import { describe, expect, test } from "@jest/globals";
 import { adaptive_en } from "../../src/models/adaptive_en";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // use the utils
@@ -70,5 +70,20 @@ describe("adaptive_en scalar tests (hardcoded)", () => {
     expect(result.acceptability_cat_i).toBe(true);
     expect(result.acceptability_cat_ii).toBe(true);
     expect(result.acceptability_cat_iii).toBe(true);
+  });
+});
+
+describe("adaptive_en invalid input", () => {
+  const valid = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
+
+  test.each([
+    ["tdb (undefined)", { ...valid, tdb: undefined }],
+    ["tr (string)", { ...valid, tr: "string" }],
+    ["t_running_mean (null)", { ...valid, t_running_mean: null }],
+    ["v (NaN)", { ...valid, v: NaN }],
+    ["tdb (Infinity)", { ...valid, tdb: Infinity }],
+  ])("returns NaN result when %s is invalid", (_label, args) => {
+    const result = adaptive_en(args.tdb, args.tr, args.t_running_mean, args.v);
+    expect(result.tmp_cmf).toBeNaN();
   });
 });

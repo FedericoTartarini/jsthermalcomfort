@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals";
+import { describe, expect, test } from "@jest/globals";
 import { adaptive_ashrae } from "../../src/models/adaptive_ashrae";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils";
@@ -65,5 +65,25 @@ describe("adaptive_ashrae scalar tests (hardcoded)", () => {
     validateResult(result, { tmp_cmf: 75.2 }, tolerances, {});
     expect(result.acceptability_80).toBe(true);
     expect(result.acceptability_90).toBe(true);
+  });
+});
+
+describe("adaptive_ashrae invalid input", () => {
+  const valid = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
+
+  test.each([
+    ["tdb (undefined)", { ...valid, tdb: undefined }],
+    ["tr (string)", { ...valid, tr: "string" }],
+    ["t_running_mean (null)", { ...valid, t_running_mean: null }],
+    ["v (NaN)", { ...valid, v: NaN }],
+    ["tdb (Infinity)", { ...valid, tdb: Infinity }],
+  ])("returns NaN result when %s is invalid", (_label, args) => {
+    const result = adaptive_ashrae(
+      args.tdb,
+      args.tr,
+      args.t_running_mean,
+      args.v,
+    );
+    expect(result.tmp_cmf).toBeNaN();
   });
 });

@@ -1,4 +1,4 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
+import { beforeAll, describe, expect, it, test } from "@jest/globals";
 import fetch from "node-fetch";
 import { phs } from "../../src/models/phs";
 import { testDataUrls } from "./comftest"; // Import test URLs from comftest.js
@@ -89,5 +89,37 @@ describe("phs", () => {
         throw error; // Re-throw to display specific error details
       }
     });
+  });
+});
+
+describe("phs invalid input", () => {
+  const valid = {
+    tdb: 40,
+    tr: 40,
+    v: 0.3,
+    rh: 35,
+    met: 150,
+    clo: 0.5,
+    posture: 2,
+  };
+
+  test.each([
+    ["tdb=undefined", { ...valid, tdb: undefined }],
+    ["tr='string'", { ...valid, tr: "string" }],
+    ["v=null", { ...valid, v: null }],
+    ["rh=NaN", { ...valid, rh: NaN }],
+    ["met=Infinity", { ...valid, met: Infinity }],
+    ["clo=undefined", { ...valid, clo: undefined }],
+  ])("returns NaN result when %s is invalid", (_label, args) => {
+    const result = phs(
+      args.tdb,
+      args.tr,
+      args.v,
+      args.rh,
+      args.met,
+      args.clo,
+      args.posture,
+    );
+    expect(result.t_re).toBeNaN();
   });
 });

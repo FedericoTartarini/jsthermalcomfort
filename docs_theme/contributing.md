@@ -218,4 +218,6 @@ Releases are published from Git tags by GitHub Actions. Local builds are not req
    ```
 4. Pushing a `v*` tag (for example `v1.0.3`) triggers the publish workflow.
 
-The publish workflow runs checks (`npm run check:format`, `npm test`, `npm run build`) and then runs `npm publish` in CI.
+The publish workflow runs checks (`npm run check:format`, `npm test`, `npm run build`) and then automatically:
+- Runs `npm publish` to publish the package to the NPM registry.
+- Creates a new GitHub Release with automatically generated release notes based on merged PRs.

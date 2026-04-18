@@ -87,7 +87,7 @@ function get_tr_iso(_tg, _tdb, _v, _d, _emissivity) {
   _tdb += c_to_k;
 
   // calculate heat transfer coefficient
-  const h_n = Math.pow(1.4 * (Math.abs(_tg - _tdb) / _d), 0.25); // natural convection
+  const h_n = 1.4 * Math.pow(Math.abs(_tg - _tdb) / _d, 0.25); // natural convection
   const h_f = (6.3 * Math.pow(_v, 0.6)) / Math.pow(_d, 0.4); // forced convection
 
   // get the biggest between the two coefficients

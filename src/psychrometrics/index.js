@@ -12,6 +12,8 @@ import { psy_ta_rh } from "./psy_ta_rh.js";
  * @name psychrometrics
  * @docname Psychrometrics
  */
+export { p_sat, p_sat_torr, psy_ta_rh, t_o, enthalpy, t_wb, t_dp, t_mrt };
+
 export default {
   p_sat,
   p_sat_torr,

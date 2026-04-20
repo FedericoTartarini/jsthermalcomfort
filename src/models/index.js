@@ -32,6 +32,37 @@ import { JOS3 } from "./JOS3.js";
  * @name models
  * @docname Comfort Models
  */
+export {
+  adaptive_ashrae,
+  adaptive_en,
+  a_pmv,
+  athb,
+  e_pmv,
+  at,
+  ankle_draft,
+  clo_tout,
+  cooling_effect,
+  discomfort_index,
+  heat_index,
+  humidex,
+  net,
+  phs,
+  pet_steady,
+  pmv_ppd,
+  pmv_ppd_ashrae,
+  pmv_ppd_iso,
+  pmv,
+  solar_gain,
+  set_tmp,
+  two_nodes,
+  utci,
+  use_fans_heatwaves,
+  vertical_tmp_grad_ppd,
+  wbgt,
+  wc,
+  JOS3,
+};
+
 export default {
   adaptive_ashrae,
   adaptive_en,

@@ -1003,7 +1003,11 @@ After updating the Markdown files, please run the command:</p>
 </li>
 <li>Pushing a <code>v*</code> tag (for example <code>v1.0.3</code>) triggers the publish workflow.</li>
 </ol>
-<p>The publish workflow runs checks (<code>npm run check:format</code>, <code>npm test</code>, <code>npm run build</code>) and then runs <code>npm publish</code> in CI.</p>
+<p>The publish workflow runs checks (<code>npm run check:format</code>, <code>npm test</code>, <code>npm run build</code>) and then automatically:</p>
+<ul>
+<li>Runs <code>npm publish</code> to publish the package to the NPM registry.</li>
+<li>Creates a new GitHub Release with automatically generated release notes based on merged PRs.</li>
+</ul>
 
   
 </section>

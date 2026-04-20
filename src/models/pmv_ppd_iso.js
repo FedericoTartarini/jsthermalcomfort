@@ -1,4 +1,5 @@
 import { pmv_ppd } from "./pmv_ppd.js";
+import { validateInputs } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} PmvPpdIso
@@ -45,6 +46,32 @@ import { pmv_ppd } from "./pmv_ppd.js";
  * @memberof models
  * @docname PMV/PPD (ISO 7730)
  */
+const PMV_PPD_ISO_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  units: { enum: ["SI", "IP"], required: false },
+  limit_inputs: { type: "boolean", required: false },
+};
+
 export function pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme = 0, kwargs = {}) {
+  validateInputs(
+    {
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      units: kwargs.units?.toUpperCase(),
+      limit_inputs: kwargs.limit_inputs,
+    },
+    PMV_PPD_ISO_SCHEMA,
+  );
   return pmv_ppd(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
 }

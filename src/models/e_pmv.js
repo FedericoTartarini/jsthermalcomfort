@@ -1,8 +1,4 @@
 import { round, validateInputs } from "../utilities/utilities.js";
-
-const E_PMV_SCHEMA = {
-  e_coefficient: { type: "number" },
-};
 import { pmv } from "./pmv.js";
 
 /**
@@ -77,6 +73,19 @@ import { pmv } from "./pmv.js";
  * const result = e_pmv(tdb, tr, v_r, rh, met, clo_d, e_coefficient);
  * console.log(result) // output {e_pmv: 0.51}
  */
+const E_PMV_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  e_coefficient: { type: "number" },
+  wme: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+  limit_inputs: { type: "boolean", required: false },
+};
+
 export function e_pmv(
   tdb,
   tr,
@@ -93,7 +102,21 @@ export function e_pmv(
     limit_inputs: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
-  validateInputs({ e_coefficient }, E_PMV_SCHEMA);
+  validateInputs(
+    {
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      e_coefficient,
+      wme,
+      units: (kwargs.units ?? "SI").toUpperCase(),
+      limit_inputs: kwargs.limit_inputs,
+    },
+    E_PMV_SCHEMA,
+  );
 
   let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
 

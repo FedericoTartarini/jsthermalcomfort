@@ -50,7 +50,20 @@ describe("pmv_ppd_iso input validation", () => {
     ["rh", 25, 25, 0.1, "50", 1.2, 0.5],
     ["met", 25, 25, 0.1, 50, "1.2", 0.5],
     ["clo", 25, 25, 0.1, 50, 1.2, "0.5"],
+    ["wme", 25, 25, 0.1, 50, 1.2, 0.5, "0"],
   ])("throws TypeError if %s is not a number", (_, ...args) => {
     expect(() => pmv_ppd_iso(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if kwargs.units is not a valid enum", () => {
+    expect(() =>
+      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { units: "INVALID" }),
+    ).toThrow(Error);
+  });
+
+  test("throws TypeError if kwargs.limit_inputs is not a boolean", () => {
+    expect(() =>
+      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { limit_inputs: "true" }),
+    ).toThrow(TypeError);
   });
 });

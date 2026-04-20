@@ -1,4 +1,5 @@
 import { pmv_ppd } from "./pmv_ppd.js";
+import { validateInputs } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} PmvKwargs
@@ -94,6 +95,20 @@ import { pmv_ppd } from "./pmv_ppd.js";
  * const results = pmv(tdb, tr, v_r, rh, met, clo_d);
  * console.log(results); // 0.06
  */
+const PMV_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  standard: { enum: ["ISO", "ASHRAE"] },
+  units: { enum: ["SI", "IP"] },
+  limit_inputs: { type: "boolean", required: false },
+  airspeed_control: { type: "boolean", required: false },
+};
+
 export function pmv(
   tdb,
   tr,
@@ -111,6 +126,23 @@ export function pmv(
     airspeed_control: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
+
+  validateInputs(
+    {
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      standard,
+      units: (kwargs.units ?? "SI").toUpperCase(),
+      limit_inputs: kwargs.limit_inputs,
+      airspeed_control: kwargs.airspeed_control,
+    },
+    PMV_SCHEMA,
+  );
 
   const pmv_ppdValue = pmv_ppd(
     tdb,

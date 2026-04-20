@@ -128,6 +128,7 @@ const TWO_NODES_SCHEMA = {
   calculate_ce: { type: "boolean", required: false },
   round: { type: "boolean", required: false },
   max_sweating: { type: "number", required: false },
+  w_max: { type: "number", required: false },
 };
 
 export function two_nodes(
@@ -148,10 +149,11 @@ export function two_nodes(
     calculate_ce: false,
     round: true,
     max_sweating: 500,
-    w_max: false,
   };
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
+
+  if (joint_kwargs.w_max === false) joint_kwargs.w_max = undefined;
 
   validateInputs(
     {
@@ -169,6 +171,7 @@ export function two_nodes(
       calculate_ce: joint_kwargs.calculate_ce,
       round: joint_kwargs.round,
       max_sweating: joint_kwargs.max_sweating,
+      w_max: joint_kwargs.w_max,
     },
     TWO_NODES_SCHEMA,
   );
@@ -291,14 +294,9 @@ function calculate_metabolic_rate(met, wme) {
  * @returns {number} wettedness practical upper limit
  */
 function calculate_w_max(airSpeed, clo, kwargs) {
-  let wMax = 0;
-  if (!kwargs.w_max) {
-    wMax = 0.38 * Math.pow(airSpeed, -0.29);
-    if (clo > 0) {
-      wMax = 0.59 * Math.pow(airSpeed, -0.08);
-    }
-  }
-  return wMax;
+  if (kwargs.w_max) return kwargs.w_max;
+  if (clo > 0) return 0.59 * Math.pow(airSpeed, -0.08);
+  return 0.38 * Math.pow(airSpeed, -0.29);
 }
 
 /**

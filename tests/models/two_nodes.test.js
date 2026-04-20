@@ -108,6 +108,18 @@ describe("two_nodes input validation", () => {
       }),
     ).toThrow(TypeError);
   });
+
+  test("throws TypeError if kwargs.w_max is not a number", () => {
+    expect(() =>
+      two_nodes(25, 25, 0.3, 50, 1.2, 0.5, 0, 1.8258, 101325, "standing", 90, {
+        w_max: "0.5",
+      }),
+    ).toThrow(TypeError);
+  });
+
+  test("does not throw when kwargs.w_max is not provided", () => {
+    expect(() => two_nodes(25, 25, 0.3, 50, 1.2, 0.5)).not.toThrow();
+  });
 });
 
 // Range check

@@ -23,10 +23,6 @@ const stress_categories = [
   "extreme heat stress",
 ];
 
-const stress_categories_vals = [
-  -40.0, -27.0, -13.0, 0.0, 9.0, 26, 32, 38, 46, 1000,
-];
-
 /**
  * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
     equivalent temperature for the environment derived from a reference
@@ -122,34 +118,21 @@ export function utci(
 /**
  * Maps a temperature to the stress category.
  * @param {number} val
- * @returns {string}
+ * @returns {string|number} Stress category label, or NaN for non-finite input.
  */
-function mapping(val) {
-  let left = 0;
-  let right = stress_categories_vals.length - 1;
-
-  while (right - left > 1) {
-    const mid = Math.floor((left + right) / 2);
-    if (stress_categories_vals[mid] === val) {
-      return stress_categories[mid];
-    } else if (stress_categories_vals[mid] < val) {
-      left = mid;
-    } else {
-      right = mid;
-    }
-  }
-  if (right === 0) {
-    return stress_categories[0];
-  }
-
-  if (
-    stress_categories_vals[right] - val >
-    val - stress_categories_vals[left]
-  ) {
-    return stress_categories[left];
-  } else {
-    return stress_categories[right];
-  }
+export function mapping(val) {
+  // Right-inclusive thresholds; matches pythermalcomfort np.digitize(right=True).
+  if (!Number.isFinite(val)) return NaN;
+  if (val <= -40) return stress_categories[0];
+  if (val <= -27) return stress_categories[1];
+  if (val <= -13) return stress_categories[2];
+  if (val <= 0) return stress_categories[3];
+  if (val <= 9) return stress_categories[4];
+  if (val <= 26) return stress_categories[5];
+  if (val <= 32) return stress_categories[6];
+  if (val <= 38) return stress_categories[7];
+  if (val <= 46) return stress_categories[8];
+  return stress_categories[9];
 }
 
 /**

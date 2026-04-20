@@ -35,6 +35,7 @@ const HEAT_INDEX_SCHEMA = {
 };
 
 export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
+  if (options.units) options.units = options.units.toUpperCase();
   validateInputs(
     { tdb, rh, round: options.round, units: options.units },
     HEAT_INDEX_SCHEMA,

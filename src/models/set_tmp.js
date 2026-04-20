@@ -94,6 +94,7 @@ export function set_tmp(
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
 
+  units = units.toUpperCase();
   validateInputs(
     {
       tdb,

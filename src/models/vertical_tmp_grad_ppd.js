@@ -70,6 +70,7 @@ export function vertical_tmp_grad_ppd(
   vertical_tmp_grad,
   units = "SI",
 ) {
+  units = units.toUpperCase();
   validateInputs(
     { tdb, tr, vr, rh, met, clo, vertical_tmp_grad, units },
     VERTICAL_TMP_GRAD_PPD_SCHEMA,

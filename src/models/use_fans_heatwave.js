@@ -141,6 +141,7 @@ export function use_fans_heatwaves(
 
   let joint_kwargs = Object.assign(defaults_kwargs, kwargs);
 
+  units = units.toUpperCase();
   validateInputs(
     {
       tdb,

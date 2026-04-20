@@ -36,6 +36,7 @@ const CLO_TOUT_SCHEMA = {
 };
 
 export function clo_tout(tout, units = "SI") {
+  units = units.toUpperCase();
   validateInputs({ tout, units }, CLO_TOUT_SCHEMA);
   const t = units === "IP" ? units_converter({ tmp: tout }).tmp : tout;
 

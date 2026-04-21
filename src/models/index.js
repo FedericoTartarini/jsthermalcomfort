@@ -60,7 +60,6 @@ export {
   vertical_tmp_grad_ppd,
   wbgt,
   wc,
-  JOS3,
 };
 
 export default {

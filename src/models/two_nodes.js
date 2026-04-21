@@ -491,7 +491,7 @@ function calculate_two_nodes(
 
   const pressureInAtmospheres = pAtmospheric / 101325;
   const lengthTimeSimulation = 60;
-  let nSimulation = 0;
+  let nSimulation = 1;
 
   const rClo = 0.155 * clo; // thermal resistance of clothing, C M^2 /W
   const fACl = 1.0 + 0.15 * clo; // increase in body surface area due to clothing

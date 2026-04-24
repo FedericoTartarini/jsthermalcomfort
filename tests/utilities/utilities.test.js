@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, test } from "@jest/globals";
 import {
   body_surface_area,
   v_relative,
@@ -10,6 +10,8 @@ import {
   check_standard_compliance_array,
   clo_typical_ensembles,
   transpose_sharp_altitude,
+  assertNumber,
+  validateInputs,
 } from "../../src/utilities/utilities";
 import {
   deep_close_to_array,
@@ -479,5 +481,120 @@ describe("clo_typical_ensembles", () => {
     expect(() =>
       clo_typical_ensembles("Sweet pants, short-sleeve shirt"),
     ).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// assertNumber
+// ---------------------------------------------------------------------------
+describe("assertNumber", () => {
+  test.each(["25", true, null, undefined, NaN, Infinity, -Infinity])(
+    "throws TypeError for %s",
+    (value) => {
+      expect(() => assertNumber(value, "x")).toThrow(TypeError);
+    },
+  );
+
+  test("does not throw for a valid finite number", () => {
+    expect(() => assertNumber(25, "x")).not.toThrow();
+    expect(() => assertNumber(-10.5, "x")).not.toThrow();
+    expect(() => assertNumber(0, "x")).not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateInputs
+// ---------------------------------------------------------------------------
+describe("validateInputs", () => {
+  describe("type: number", () => {
+    test("throws TypeError when a required number param receives a string", () => {
+      expect(() =>
+        validateInputs({ tdb: "25" }, { tdb: { type: "number" } }),
+      ).toThrow(TypeError);
+    });
+
+    test("does not throw for a valid number", () => {
+      expect(() =>
+        validateInputs({ tdb: 25 }, { tdb: { type: "number" } }),
+      ).not.toThrow();
+    });
+  });
+
+  describe("type: boolean", () => {
+    test("throws TypeError when a boolean param receives a string", () => {
+      expect(() =>
+        validateInputs(
+          { limit_inputs: "true" },
+          { limit_inputs: { type: "boolean" } },
+        ),
+      ).toThrow(TypeError);
+    });
+
+    test("does not throw for a valid boolean", () => {
+      expect(() =>
+        validateInputs(
+          { limit_inputs: true },
+          { limit_inputs: { type: "boolean" } },
+        ),
+      ).not.toThrow();
+    });
+  });
+
+  describe("enum", () => {
+    test("throws Error when value is not in the enum list", () => {
+      expect(() =>
+        validateInputs({ units: "INVALID" }, { units: { enum: ["SI", "IP"] } }),
+      ).toThrow(Error);
+    });
+
+    test("does not throw for a valid enum value", () => {
+      expect(() =>
+        validateInputs({ units: "SI" }, { units: { enum: ["SI", "IP"] } }),
+      ).not.toThrow();
+    });
+  });
+
+  describe("required: false", () => {
+    test("skips validation when value is undefined", () => {
+      expect(() =>
+        validateInputs(
+          { w_max: undefined },
+          { w_max: { type: "number", required: false } },
+        ),
+      ).not.toThrow();
+    });
+
+    test("still validates type when value is defined", () => {
+      expect(() =>
+        validateInputs(
+          { w_max: "0.5" },
+          { w_max: { type: "number", required: false } },
+        ),
+      ).toThrow(TypeError);
+    });
+  });
+
+  describe("multiple params", () => {
+    test("throws on the first invalid param encountered", () => {
+      expect(() =>
+        validateInputs(
+          { tdb: "25", tr: 25 },
+          { tdb: { type: "number" }, tr: { type: "number" } },
+        ),
+      ).toThrow(TypeError);
+    });
+
+    test("does not throw when all params are valid", () => {
+      expect(() =>
+        validateInputs(
+          { tdb: 25, tr: 30, units: "SI" },
+          {
+            tdb: { type: "number" },
+            tr: { type: "number" },
+            units: { enum: ["SI", "IP"] },
+          },
+        ),
+      ).not.toThrow();
+    });
   });
 });

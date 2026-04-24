@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { validateInputs, round } from "../utilities/utilities.js";
 import { pmv } from "./pmv.js";
 
 /**
@@ -70,6 +70,19 @@ import { pmv } from "./pmv.js";
  * const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
  * console.log(result) //output { a_pmv: 0.48 }
  */
+const A_PMV_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  a_coefficient: { type: "number" },
+  wme: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+  limit_inputs: { type: "boolean", required: false },
+};
+
 export function a_pmv(
   tdb,
   tr,
@@ -81,6 +94,22 @@ export function a_pmv(
   wme = 0,
   kwargs = {},
 ) {
+  validateInputs(
+    {
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      a_coefficient,
+      wme,
+      units: (kwargs.units ?? "SI").toUpperCase(),
+      limit_inputs: kwargs.limit_inputs,
+    },
+    A_PMV_SCHEMA,
+  );
+
   const default_kwargs = {
     units: "SI",
     limit_inputs: true,

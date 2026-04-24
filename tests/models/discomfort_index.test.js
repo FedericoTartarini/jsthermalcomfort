@@ -20,3 +20,15 @@ describe("discomfort_index", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("discomfort_index input validation", () => {
+  test.each([
+    ["tdb", "25", 50],
+    ["rh", 25, "50"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => discomfort_index(...args)).toThrow(TypeError);
+  });
+});

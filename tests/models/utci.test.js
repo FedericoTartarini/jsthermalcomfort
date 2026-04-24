@@ -90,3 +90,29 @@ describe("utci() stress_category with invalid inputs (Issue #147)", () => {
     expect(result.stress_category).toBeNaN();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("utci input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 1.0, 50],
+    ["tr", 25, "25", 1.0, 50],
+    ["v", 25, 25, "1.0", 50],
+    ["rh", 25, 25, 1.0, "50"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => utci(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if units is not a valid enum", () => {
+    expect(() => utci(25, 25, 1.0, 50, "INVALID")).toThrow(Error);
+  });
+
+  test("throws TypeError if return_stress_category is not a boolean", () => {
+    expect(() => utci(25, 25, 1.0, 50, "SI", "true")).toThrow(TypeError);
+  });
+
+  test("throws TypeError if limit_inputs is not a boolean", () => {
+    expect(() => utci(25, 25, 1.0, 50, "SI", false, "true")).toThrow(TypeError);
+  });
+});

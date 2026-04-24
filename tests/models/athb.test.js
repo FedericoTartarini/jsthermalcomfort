@@ -20,3 +20,19 @@ describe("athb", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("athb input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 0.1, 50, 1.1, 20],
+    ["tr", 25, "25", 0.1, 50, 1.1, 20],
+    ["vr", 25, 25, "0.1", 50, 1.1, 20],
+    ["rh", 25, 25, 0.1, "50", 1.1, 20],
+    ["met", 25, 25, 0.1, 50, "1.1", 20],
+    ["t_running_mean", 25, 25, 0.1, 50, 1.1, "20"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => athb(...args)).toThrow(TypeError);
+  });
+});

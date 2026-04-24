@@ -1,4 +1,8 @@
-import { round, transpose_sharp_altitude } from "../utilities/utilities.js";
+import {
+  round,
+  transpose_sharp_altitude,
+  validateInputs,
+} from "../utilities/utilities.js";
 
 // avoid reallocating these arrays accross function calls
 const _alt_range = [0, 15, 30, 45, 60, 75, 90];
@@ -93,6 +97,18 @@ const _fp_table = [
  * const results = solar_gain(0, 120, 800, 0.5, 0.7, "sitting");
  * console.log(results); // {erf: 42.9, delta_mrt: 10.3}
  */
+const SOLAR_GAIN_SCHEMA = {
+  sol_altitude: { type: "number" },
+  sharp: { type: "number" },
+  sol_radiation_dir: { type: "number" },
+  sol_transmittance: { type: "number" },
+  f_svv: { type: "number" },
+  f_bes: { type: "number" },
+  asw: { type: "number" },
+  posture: { enum: ["sitting", "standing", "supine"] },
+  floor_reflectance: { type: "number" },
+};
+
 export function solar_gain(
   sol_altitude,
   sharp,
@@ -105,8 +121,20 @@ export function solar_gain(
   floor_reflectance = 0.6,
 ) {
   posture = posture.toLowerCase();
-  if (posture !== "standing" && posture !== "supine" && posture !== "sitting")
-    throw new Error("Posture has to be either standing, supine or sitting");
+  validateInputs(
+    {
+      sol_altitude,
+      sharp,
+      sol_radiation_dir,
+      sol_transmittance,
+      f_svv,
+      f_bes,
+      asw,
+      posture,
+      floor_reflectance,
+    },
+    SOLAR_GAIN_SCHEMA,
+  );
 
   const deg_to_rad = 0.0174532925;
   const hr = 6;

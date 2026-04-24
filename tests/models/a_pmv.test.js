@@ -22,3 +22,33 @@ describe("a_pmv", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("a_pmv input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 0.1, 50, 1.2, 0.5, 0.293],
+    ["tr", 25, "25", 0.1, 50, 1.2, 0.5, 0.293],
+    ["vr", 25, 25, "0.1", 50, 1.2, 0.5, 0.293],
+    ["rh", 25, 25, 0.1, "50", 1.2, 0.5, 0.293],
+    ["met", 25, 25, 0.1, 50, "1.2", 0.5, 0.293],
+    ["clo", 25, 25, 0.1, 50, 1.2, "0.5", 0.293],
+    ["a_coefficient", 25, 25, 0.1, 50, 1.2, 0.5, "0.293"],
+    ["wme", 25, 25, 0.1, 50, 1.2, 0.5, 0.293, "0"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => a_pmv(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if units is invalid", () => {
+    expect(() =>
+      a_pmv(25, 25, 0.1, 50, 1.2, 0.5, 0.293, 0, { units: "wrong" }),
+    ).toThrow(Error);
+  });
+
+  test("throws TypeError if limit_inputs is not a boolean", () => {
+    expect(() =>
+      a_pmv(25, 25, 0.1, 50, 1.2, 0.5, 0.293, 0, { limit_inputs: "true" }),
+    ).toThrow(TypeError);
+  });
+});

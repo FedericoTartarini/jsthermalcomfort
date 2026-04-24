@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 import { pmv_calculation } from "./pmv_ppd.js";
 
 /**
@@ -51,7 +51,18 @@ import { pmv_calculation } from "./pmv_ppd.js";
  * const athb_result = athb(tdb, tr, vr, rh, met, t_running_mean);
  * console.log(athb_result); // Output: {athb_pmv: 0.2}
  */
+const ATHB_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  t_running_mean: { type: "number" },
+};
+
 export function athb(tdb, tr, vr, rh, met, t_running_mean) {
+  validateInputs({ tdb, tr, vr, rh, met, t_running_mean }, ATHB_SCHEMA);
+
   const met_adapted = met - (0.234 * t_running_mean) / 58.2;
 
   const clo_adapted = Math.pow(

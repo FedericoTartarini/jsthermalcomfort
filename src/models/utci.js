@@ -1,4 +1,9 @@
-import { round, units_converter, valid_range } from "../utilities/utilities.js";
+import {
+  round,
+  units_converter,
+  valid_range,
+  validateInputs,
+} from "../utilities/utilities.js";
 
 const g = [
   -2836.5744,
@@ -56,6 +61,16 @@ const stress_categories = [
  * console.log(utci(25, 25, 1.0, 50, 'si', true))
  * // will print {utci: 24.6, stress_category: "no thermal stress"}
  */
+const UTCI_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  units: { enum: ["SI", "IP"] },
+  return_stress_category: { type: "boolean" },
+  limit_inputs: { type: "boolean" },
+};
+
 export function utci(
   tdb,
   tr,
@@ -65,6 +80,19 @@ export function utci(
   return_stress_category = false,
   limit_inputs = true,
 ) {
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      units: units.toUpperCase(),
+      return_stress_category,
+      limit_inputs,
+    },
+    UTCI_SCHEMA,
+  );
+
   let kwargs;
   let ret;
   if (units.toLowerCase() == "ip") {

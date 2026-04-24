@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 
 /**
  * @typedef {object} HeatIndexResult
@@ -27,7 +27,19 @@ import { round } from "../utilities/utilities.js";
  *
  * @category Thermophysiological models
  */
+const HEAT_INDEX_SCHEMA = {
+  tdb: { type: "number" },
+  rh: { type: "number" },
+  round: { type: "boolean", required: false },
+  units: { enum: ["SI", "IP"], required: false },
+};
+
 export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
+  if (options.units) options.units = options.units.toUpperCase();
+  validateInputs(
+    { tdb, rh, round: options.round, units: options.units },
+    HEAT_INDEX_SCHEMA,
+  );
   let hi;
   let tdb_squared = Math.pow(tdb, 2);
   let rh_squared = Math.pow(rh, 2);

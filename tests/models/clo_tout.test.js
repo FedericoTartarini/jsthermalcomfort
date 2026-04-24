@@ -20,3 +20,16 @@ describe("clo_tout", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("clo_tout input validation", () => {
+  test("throws TypeError if tout is not a number", () => {
+    expect(() => clo_tout("20")).toThrow(TypeError);
+  });
+
+  test("throws Error if units is not a valid enum", () => {
+    expect(() => clo_tout(20, "INVALID")).toThrow(Error);
+  });
+});

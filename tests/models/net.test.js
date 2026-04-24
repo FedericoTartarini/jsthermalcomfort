@@ -20,3 +20,20 @@ describe("net", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("net input validation", () => {
+  test.each([
+    ["tdb", "37", 100, 0.1],
+    ["rh", 37, "100", 0.1],
+    ["v", 37, 100, "0.1"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => net(...args)).toThrow(TypeError);
+  });
+
+  test("throws TypeError if round is not a boolean", () => {
+    expect(() => net(37, 100, 0.1, { round: "true" })).toThrow(TypeError);
+  });
+});

@@ -1,4 +1,4 @@
-import { expect, describe, it, beforeAll } from "@jest/globals";
+import { expect, describe, it, test, beforeAll } from "@jest/globals";
 import { loadTestData } from "./testUtils";
 import { two_nodes } from "../../src/models/two_nodes";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
@@ -71,6 +71,58 @@ describe("two_nodes related tests", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("two_nodes input validation", () => {
+  test.each([
+    ["tdb", "25", 25, 0.3, 50, 1.2, 0.5],
+    ["tr", 25, "25", 0.3, 50, 1.2, 0.5],
+    ["v", 25, 25, "0.3", 50, 1.2, 0.5],
+    ["rh", 25, 25, 0.3, "50", 1.2, 0.5],
+    ["met", 25, 25, 0.3, 50, "1.2", 0.5],
+    ["clo", 25, 25, 0.3, 50, 1.2, "0.5"],
+    ["wme", 25, 25, 0.3, 50, 1.2, 0.5, "0"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => two_nodes(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if body_position is not a valid enum", () => {
+    expect(() =>
+      two_nodes(25, 25, 0.3, 50, 1.2, 0.5, 0, 1.8258, 101325, "INVALID"),
+    ).toThrow(Error);
+  });
+
+  test("throws TypeError if kwargs.calculate_ce is not a boolean", () => {
+    expect(() =>
+      two_nodes(25, 25, 0.3, 50, 1.2, 0.5, 0, 1.8258, 101325, "standing", 90, {
+        calculate_ce: "true",
+      }),
+    ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if kwargs.round is not a boolean", () => {
+    expect(() =>
+      two_nodes(25, 25, 0.3, 50, 1.2, 0.5, 0, 1.8258, 101325, "standing", 90, {
+        round: "true",
+      }),
+    ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if kwargs.w_max is not a number", () => {
+    expect(() =>
+      two_nodes(25, 25, 0.3, 50, 1.2, 0.5, 0, 1.8258, 101325, "standing", 90, {
+        w_max: "0.5",
+      }),
+    ).toThrow(TypeError);
+  });
+
+  test("does not throw when kwargs.w_max is not provided", () => {
+    expect(() => two_nodes(25, 25, 0.3, 50, 1.2, 0.5)).not.toThrow();
+  });
+});
+
+// Range check
 describe("two_nodes validation logic (Testing the Test)", () => {
   it("should fail if the result is outside the tolerance margin", () => {
     const mockExpected = 25.0;

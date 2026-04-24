@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 
 const optionDefaults = {
   round: true,
@@ -57,8 +57,26 @@ const optionDefaults = {
  * const result = wbgt(25, 32, { tdb: 20, with_solar_radiation: true });
  * console.log(result); // -> {"wbgt": 25.9}
  */
+const WBGT_SCHEMA = {
+  twb: { type: "number" },
+  tg: { type: "number" },
+  round: { type: "boolean", required: false },
+  tdb: { type: "number", required: false },
+  with_solar_load: { type: "boolean", required: false },
+};
+
 export function wbgt(twb, tg, options) {
   const opt = Object.assign({}, optionDefaults, options);
+  validateInputs(
+    {
+      twb,
+      tg,
+      round: opt.round,
+      tdb: opt.tdb,
+      with_solar_load: opt.with_solar_load,
+    },
+    WBGT_SCHEMA,
+  );
 
   let t_wbg;
 

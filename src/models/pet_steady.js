@@ -1,5 +1,9 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
-import { body_surface_area, round } from "../utilities/utilities.js";
+import {
+  body_surface_area,
+  round,
+  validateInputs,
+} from "../utilities/utilities.js";
 
 /**
  * @typedef {object} PetSteadyResult
@@ -55,6 +59,22 @@ import { body_surface_area, round } from "../utilities/utilities.js";
  * const result = pet_steady(20, 20, 50, 0.15, 1.37, 0.5);
  * console.log(result); // {pet: 18.85}
  */
+const PET_STEADY_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  p_atm: { type: "number" },
+  position: { type: "number" },
+  age: { type: "number" },
+  sex: { type: "number" },
+  weight: { type: "number" },
+  height: { type: "number" },
+  wme: { type: "number" },
+};
+
 export function pet_steady(
   tdb,
   tr,
@@ -70,6 +90,25 @@ export function pet_steady(
   height = 1.8,
   wme = 0,
 ) {
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      p_atm,
+      position,
+      age,
+      sex,
+      weight,
+      height,
+      wme,
+    },
+    PET_STEADY_SCHEMA,
+  );
+
   const met_factor = 58.2; // met conversion factor
   met = met * met_factor; // metabolic rate
 

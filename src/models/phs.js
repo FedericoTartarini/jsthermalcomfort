@@ -3,6 +3,7 @@ import {
   body_surface_area,
   check_standard_compliance,
   round,
+  validateInputs,
 } from "../utilities/utilities.js";
 
 const MET_WATT_PER_MET = 58.15;
@@ -103,6 +104,36 @@ const MET_WATT_PER_MET = 58.15;
  * const results = phs(40, 40, 0.3, 33.85, 2.5, 0.5, "standing");
  * console.log(results); // {t_re: 37.5, d_lim_loss_50: 480, d_lim_loss_95: 480, d_lim_t_re: 480, sweat_loss_g: 5847.0, sweat_rate_watt: 252.1, ...}
  */
+const PHS_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  v: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  posture: { enum: [1, 2, 3] },
+  model: { enum: ["7933-2004", "7933-2023"] },
+  i_mst: { type: "number" },
+  a_p: { type: "number" },
+  drink: { enum: [0, 1] },
+  weight: { type: "number" },
+  height: { type: "number" },
+  walk_sp: { type: "number" },
+  theta: { type: "number" },
+  acclimatized: { type: "number" },
+  duration: { type: "number" },
+  f_r: { type: "number" },
+  t_sk: { type: "number" },
+  t_cr: { type: "number" },
+  t_re: { type: "number" },
+  t_cr_eq: { type: "number" },
+  t_sk_t_cr_wg: { type: "number" },
+  sweat_rate_watt: { type: "number" },
+  evap_load_wm2_min: { type: "number" },
+  round: { type: "boolean", required: false },
+};
+
 export function phs(
   tdb,
   tr,
@@ -146,6 +177,39 @@ export function phs(
     else if (p === "standing") posture = 2;
     else if (p === "crouching") posture = 3;
   }
+
+  validateInputs(
+    {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      posture,
+      model,
+      i_mst: joint_kwargs.i_mst,
+      a_p: joint_kwargs.a_p,
+      drink: joint_kwargs.drink,
+      weight: joint_kwargs.weight,
+      height: joint_kwargs.height,
+      walk_sp: joint_kwargs.walk_sp,
+      theta: joint_kwargs.theta,
+      acclimatized: joint_kwargs.acclimatized,
+      duration: joint_kwargs.duration,
+      f_r: joint_kwargs.f_r,
+      t_sk: joint_kwargs.t_sk,
+      t_cr: joint_kwargs.t_cr,
+      t_re: joint_kwargs.t_re,
+      t_cr_eq: joint_kwargs.t_cr_eq,
+      t_sk_t_cr_wg: joint_kwargs.t_sk_t_cr_wg,
+      sweat_rate_watt: joint_kwargs.sweat_rate_watt,
+      evap_load_wm2_min: joint_kwargs.evap_load_wm2_min,
+      round: joint_kwargs.round,
+    },
+    PHS_SCHEMA,
+  );
 
   const met_watt = met * MET_WATT_PER_MET;
   const wme_watt = wme * MET_WATT_PER_MET;

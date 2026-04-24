@@ -20,3 +20,19 @@ describe("humidex", () => {
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("humidex input validation", () => {
+  test.each([
+    ["tdb", "25", 50],
+    ["rh", 25, "50"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => humidex(...args)).toThrow(TypeError);
+  });
+
+  test("throws TypeError if round is not a boolean", () => {
+    expect(() => humidex(25, 50, { round: "true" })).toThrow(TypeError);
+  });
+});

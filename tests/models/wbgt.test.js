@@ -29,3 +29,27 @@ describe("wbgt", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
+describe("wbgt input validation", () => {
+  test.each([
+    ["twb", "25", 32],
+    ["tg", 25, "32"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => wbgt(...args)).toThrow(TypeError);
+  });
+
+  test("throws TypeError if tdb is not a number", () => {
+    expect(() => wbgt(25, 32, { tdb: "20" })).toThrow(TypeError);
+  });
+
+  test("throws TypeError if round is not a boolean", () => {
+    expect(() => wbgt(25, 32, { round: "true" })).toThrow(TypeError);
+  });
+
+  test("throws TypeError if with_solar_load is not a boolean", () => {
+    expect(() => wbgt(25, 32, { with_solar_load: "true" })).toThrow(TypeError);
+  });
+});

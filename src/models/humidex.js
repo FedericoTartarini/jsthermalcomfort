@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 
 /**
  * @typedef {object} HumidexResult - a result set containing the humidex and
@@ -35,7 +35,15 @@ import { round } from "../utilities/utilities.js";
  * const result = humidex(25, 50);
  * console.log(result); // -> { humidex: 28.2, discomfort: "Little or no discomfort" }
  */
+const HUMIDEX_SCHEMA = {
+  tdb: { type: "number" },
+  rh: { type: "number" },
+  round: { type: "boolean", required: false },
+};
+
 export function humidex(tdb, rh, options = { round: true }) {
+  validateInputs({ tdb, rh, round: options.round }, HUMIDEX_SCHEMA);
+
   let hi =
     tdb +
     (5 / 9) * ((6.112 * 10 ** ((7.5 * tdb) / (237.7 + tdb)) * rh) / 100 - 10);

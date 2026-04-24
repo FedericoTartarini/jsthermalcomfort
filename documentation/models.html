@@ -755,15 +755,15 @@
 
                 
                   
-                  <section class='keyline-top-not py2' id='heat_index'>
-                    <h2 class='mt0 '>Heat Index (HI)</h2>
+                  <section class='keyline-top-not py2' id='heat_index_schema'>
+                    <h2 class='mt0 '>HEAT_INDEX_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/heat_index.js#L30-L62' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/heat_index.js#L30-L35' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -773,19 +773,19 @@
 The HI equation <a href="#ref_12">[12]</a> is derived by multiple regression analysis in temperature and relative humidity from the first version
 of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>heat_index(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?): <a href="#heatindexresult">HeatIndexResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='heat_index-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='heat_index_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -806,8 +806,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
           </li>
         
           <li>
-            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?
-            = <code>{round:true,units:&quot;SI&quot;}</code>)</code>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?)</code>
             (Optional) Other parameters.
 
             
@@ -857,7 +856,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='heat_index-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='heat_index_schema-returns'>Returns</div>
       <code><a href="#heatindexresult">HeatIndexResult</a></code>
       
         :
@@ -870,7 +869,7 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='heat_index-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='heat_index_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> hi = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns {hi: 25.9}</span></pre>
@@ -885,15 +884,15 @@ of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='phs'>
-                    <h2 class='mt0 '>Predicted Heat Strain (PHS)</h2>
+                  <section class='keyline-top-not py2' id='phs_schema'>
+                    <h2 class='mt0 '>PHS_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/phs.js#L106-L208' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/phs.js#L107-L135' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -911,19 +910,19 @@ of skin temperature, heat accumulation associated with the metabolic rate, maxim
 evaporative heat flow at the skin surface, predicted sweat rate, predicted evaporative
 heat flow, and rectal temperature.</p>
 
-  <div class='hljs pre p1 mt0 sig'>phs(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, posture: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <code>"sitting"</code> | <code>"standing"</code> | <code>"crouching"</code>), wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, model: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, kwargs: <a href="#phskwargs">PhsKwargs</a>?): <a href="#phsreturntype">PhsReturnType</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='phs-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='phs_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -993,8 +992,7 @@ heat flow, and rectal temperature.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#phskwargs">PhsKwargs</a>?
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#phskwargs">PhsKwargs</a>?)</code>
             additional arguments
 
             
@@ -1006,7 +1004,7 @@ heat flow, and rectal temperature.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='phs-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='phs_schema-returns'>Returns</div>
       <code><a href="#phsreturntype">PhsReturnType</a></code>
       
         :
@@ -1019,7 +1017,7 @@ heat flow, and rectal temperature.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='phs-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='phs_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">import</span> { phs } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort&quot;</span>;
@@ -1036,15 +1034,15 @@ heat flow, and rectal temperature.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='humidex'>
-                    <h2 class='mt0 '>Humidex</h2>
+                  <section class='keyline-top-not py2' id='humidex_schema'>
+                    <h2 class='mt0 '>HUMIDEX_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/humidex.js#L38-L62' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/humidex.js#L38-L42' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1057,19 +1055,19 @@ to describe how hot, humid weather is felt by the average person. The
 Humidex differs from the heat index in being related to the dew point
 rather than relative humidity <a href="#ref_15">[15]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>humidex(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#humidexresult">HumidexResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='humidex-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='humidex_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1088,8 +1086,7 @@ rather than relative humidity <a href="#ref_15">[15]</a>.</p>
           </li>
         
           <li>
-            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?
-            = <code>{round:true}</code>)</code>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?)</code>
             configuration options for the function.
 
             
@@ -1129,7 +1126,7 @@ false, it does not.
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='humidex-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='humidex_schema-returns'>Returns</div>
       <code><a href="#humidexresult">HumidexResult</a></code>
       
         :
@@ -1143,7 +1140,7 @@ relative humidity.
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='humidex-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='humidex_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">humidex</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>);
@@ -1159,15 +1156,15 @@ relative humidity.
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='net'>
-                    <h2 class='mt0 '>Normal Effective Temperature (NET)</h2>
+                  <section class='keyline-top-not py2' id='net_schema'>
+                    <h2 class='mt0 '>NET_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/net.js#L43-L55' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/net.js#L43-L48' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1190,19 +1187,19 @@ Hong Kong Observatory <a href="#ref_16">[16]</a>. In central Europe the followin
 in use: &#x3C;1°C = very cold; 1–9 = cold; 9–17 = cool; 17–21 = fresh;
 21–23 = comfortable; 23–27 = warm; >27°C = hot [1].</p>
 
-  <div class='hljs pre p1 mt0 sig'>net(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#netresult">NetResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='net-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='net_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1228,8 +1225,7 @@ in use: &#x3C;1°C = very cold; 1–9 = cold; 9–17 = cool; 17–21 = fresh;
           </li>
         
           <li>
-            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?
-            = <code>{round:true}</code>)</code>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?)</code>
             configuration options for the function.
 
             
@@ -1269,7 +1265,7 @@ false, it does not.
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='net-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='net_schema-returns'>Returns</div>
       <code><a href="#netresult">NetResult</a></code>
       
         :
@@ -1282,7 +1278,7 @@ false, it does not.
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='net-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='net_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">net</span>(<span class="hljs-number">37</span>, <span class="hljs-number">100</span>, <span class="hljs-number">0.1</span>);
@@ -1298,15 +1294,15 @@ false, it does not.
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='wbgt'>
-                    <h2 class='mt0 '>Wet Bulb Globe Temperature (WBGT)</h2>
+                  <section class='keyline-top-not py2' id='wbgt_schema'>
+                    <h2 class='mt0 '>WBGT_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/wbgt.js#L60-L80' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/wbgt.js#L60-L66' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1328,19 +1324,19 @@ of surroundings <a href="#ref_11">[11]</a>.</p>
 exposed to direct radiant heat from the sun. When a person is exposed to
 direct radiant heat, tdb must also be specified.</p>
 
-  <div class='hljs pre p1 mt0 sig'>wbgt(twb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tg: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, options: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#wbgtresult">WbgtResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='wbgt-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='wbgt_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1427,7 +1423,7 @@ setting
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='wbgt-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='wbgt_schema-returns'>Returns</div>
       <code><a href="#wbgtresult">WbgtResult</a></code>
       
         :
@@ -1440,7 +1436,7 @@ setting
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='wbgt-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='wbgt_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">wbgt</span>(<span class="hljs-number">25</span>, <span class="hljs-number">32</span>);
@@ -1460,15 +1456,15 @@ setting
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='discomfort_index'>
-                    <h2 class='mt0 '>Discomfort Index (DI)</h2>
+                  <section class='keyline-top-not py2' id='discomfort_index_schema'>
+                    <h2 class='mt0 '>DISCOMFORT_INDEX_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/discomfort_index.js#L34-L42' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/discomfort_index.js#L34-L37' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1485,19 +1481,19 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
 <li>class 6 - DI >= 32 °C - State of medical emergency</li>
 </ul>
 
-  <div class='hljs pre p1 mt0 sig'>discomfort_index(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#discomfortindexreturntype">DiscomfortIndexReturnType</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='discomfort_index-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='discomfort_index_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1521,7 +1517,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='discomfort_index-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='discomfort_index_schema-returns'>Returns</div>
       <code><a href="#discomfortindexreturntype">DiscomfortIndexReturnType</a></code>
       
         :
@@ -1534,7 +1530,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='discomfort_index-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='discomfort_index_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">DI</span> = <span class="hljs-title function_">discomfort_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns { di: 22.1, discomfort_condition: &#x27;Less than 50% feels discomfort&#x27; }</span></pre>
@@ -1549,15 +1545,15 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='two_nodes'>
-                    <h2 class='mt0 '>Two-Node Model (Gagge)</h2>
+                  <section class='keyline-top-not py2' id='two_nodes_schema'>
+                    <h2 class='mt0 '>TWO_NODES_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/two_nodes.js#L116-L199' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/two_nodes.js#L116-L132' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1588,19 +1584,19 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
 <p><strong>Warning:</strong> Some tests are currently failing for this function. Please refer to the test
 suite or the project's issue tracker for more details.</p>
 
-  <div class='hljs pre p1 mt0 sig'>two_nodes(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atmospheric: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_position: (<code>"standing"</code> | <code>"sitting"</code>), max_skin_blood_flow: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#twonodeskwargs">TwoNodesKwargs</a>?): <a href="#twonodesreturntype">TwoNodesReturnType</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='two_nodes-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='two_nodes_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1689,8 +1685,7 @@ suite or the project's issue tracker for more details.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#twonodeskwargs">TwoNodesKwargs</a>?
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#twonodeskwargs">TwoNodesKwargs</a>?)</code>
             
             
           </li>
@@ -1701,7 +1696,7 @@ suite or the project's issue tracker for more details.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='two_nodes-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='two_nodes_schema-returns'>Returns</div>
       <code><a href="#twonodesreturntype">TwoNodesReturnType</a></code>
       
         :
@@ -1714,7 +1709,7 @@ suite or the project's issue tracker for more details.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='two_nodes-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='two_nodes_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">two_nodes</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
@@ -1749,15 +1744,15 @@ suite or the project's issue tracker for more details.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='set_tmp'>
-                    <h2 class='mt0 '>Standard Effective Temperature (SET)</h2>
+                  <section class='keyline-top-not py2' id='set_tmp_schema'>
+                    <h2 class='mt0 '>SET_TMP_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/set_tmp.js#L57-L150' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/set_tmp.js#L58-L73' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1771,19 +1766,19 @@ clothing, standardized for the activity concerned is the same as
 that from a person in the actual environment with actual clothing
 and activity level <a href="#ref_10">[10]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>set_tmp(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, body_position: (<code>"standing"</code> | <code>"sitting"</code>), units: (<code>"SI"</code> | <code>"IP"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, kwargs: <a href="#settmpkwargs">SetTmpKwargs</a>?): <a href="#settmpresult">SetTmpResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='set_tmp-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='set_tmp_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1878,8 +1873,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#settmpkwargs">SetTmpKwargs</a>?
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#settmpkwargs">SetTmpKwargs</a>?)</code>
             
             
           </li>
@@ -1890,7 +1884,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='set_tmp-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='set_tmp_schema-returns'>Returns</div>
       <code><a href="#settmpresult">SetTmpResult</a></code>
       
         :
@@ -1903,7 +1897,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='set_tmp-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='set_tmp_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> set = <span class="hljs-title function_">set_tmp</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>); <span class="hljs-comment">// returns {set: 24.3}</span></pre>
@@ -1918,15 +1912,15 @@ and activity level <a href="#ref_10">[10]</a>.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='wc'>
-                    <h2 class='mt0 '>Wind Chill Index (WCI)</h2>
+                  <section class='keyline-top-not py2' id='wc_schema'>
+                    <h2 class='mt0 '>WC_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/wc.js#L26-L34' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/wc.js#L26-L30' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1942,19 +1936,19 @@ always below 33°C in a cold environment. Furthermore, the equation’s values p
 increases. Nonetheless, this score reliably represents the combined effects of temperature and wind on subjective discomfort
 for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>wc(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): {wci: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>}</div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='wc-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='wc_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -1973,8 +1967,7 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?
-            = <code>{round:true}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?)</code>
             (Optional) Other parameters.
 
             
@@ -2013,7 +2006,7 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='wc-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='wc_schema-returns'>Returns</div>
       <code>{wci: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>}</code>
       
         :
@@ -2035,15 +2028,15 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='adaptive_en'>
-                    <h2 class='mt0 '>Adaptive EN-16798</h2>
+                  <section class='keyline-top-not py2' id='adaptive_en_schema'>
+                    <h2 class='mt0 '>ADAPTIVE_EN_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/adaptive_en.js#L67-L149' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/adaptive_en.js#L71-L78' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2053,19 +2046,19 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
 <p>Note: You can use this function to calculate if your conditions are within the EN
 adaptive thermal comfort region. Calculations with comply with the EN 16798-1 2019 <a href="#ref_3">[3]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>adaptive_en(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"IP"</code> | <code>"SI"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>): <a href="#adaptiveenresult">AdaptiveEnResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='adaptive_en-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='adaptive_en_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -2136,7 +2129,7 @@ outside the applicability limits of the model.
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='adaptive_en-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='adaptive_en_schema-returns'>Returns</div>
       <code><a href="#adaptiveenresult">AdaptiveEnResult</a></code>
       
         :
@@ -2149,7 +2142,7 @@ outside the applicability limits of the model.
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='adaptive_en-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='adaptive_en_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">adaptive_en</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">20</span>, <span class="hljs-number">0.1</span>);
@@ -2178,15 +2171,15 @@ outside the applicability limits of the model.
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='at'>
-                    <h2 class='mt0 '>Apparent Temperature (AT)</h2>
+                  <section class='keyline-top-not py2' id='at_schema'>
+                    <h2 class='mt0 '>AT_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/at.js#L40-L56' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/at.js#L40-L46' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2202,19 +2195,19 @@ is chosen as a reference.</p>
 radiation and the other one does not ({@link <a href="http://www.bom.gov.au/info/thermal_stress/%7D">http://www.bom.gov.au/info/thermal_stress/}</a>, 29 Sep 2021).
 Please specify q if you want to estimate AT with solar load.</p>
 
-  <div class='hljs pre p1 mt0 sig'>at(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, q: (<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined">undefined</a>)?, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?): <a href="#atresult">AtResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='at-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='at_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -2247,8 +2240,7 @@ Please specify q if you want to estimate AT with solar load.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?
-            = <code>{round:true}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>?)</code>
             other parameters
 
             
@@ -2287,7 +2279,7 @@ Please specify q if you want to estimate AT with solar load.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='at-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='at_schema-returns'>Returns</div>
       <code><a href="#atresult">AtResult</a></code>
       
         :
@@ -2300,7 +2292,7 @@ Please specify q if you want to estimate AT with solar load.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='at-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='at_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">at</span>(<span class="hljs-number">25</span>, <span class="hljs-number">30</span>, <span class="hljs-number">0.1</span>);
@@ -2316,15 +2308,15 @@ Please specify q if you want to estimate AT with solar load.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pmv_ppd'>
-                    <h2 class='mt0 '>PMV-PPD Model</h2>
+                  <section class='keyline-top-not py2' id='pmv_ppd_schema'>
+                    <h2 class='mt0 '>PMV_PPD_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/pmv_ppd.js#L112-L196' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/pmv_ppd.js#L113-L125' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2347,19 +2339,19 @@ and <a href="https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method">PPD</
 either the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</a> or the ISO 7730 Standard <a href="#ref_2">[2]</a>.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='hljs pre p1 mt0 sig'>pmv_ppd(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, standard: (<code>"ISO"</code> | <code>"ASHRAE"</code>), kwargs: <a href="#pmv_ppdkwargs">Pmv_ppdKwargs</a>): <a href="#pmv_ppdreturns">Pmv_ppdReturns</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -2445,8 +2437,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#pmv_ppdkwargs">Pmv_ppdKwargs</a>
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#pmv_ppdkwargs">Pmv_ppdKwargs</a>)</code>
             additional arguments
 
             
@@ -2458,7 +2449,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='pmv_ppd-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='pmv_ppd_schema-returns'>Returns</div>
       <code><a href="#pmv_ppdreturns">Pmv_ppdReturns</a></code>
       
         :
@@ -2471,7 +2462,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = <span class="hljs-number">25</span>;
@@ -2498,15 +2489,15 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pmv_ppd_ashrae'>
-                    <h2 class='mt0 '>pmv_ppd_ashrae</h2>
+                  <section class='keyline-top-not py2' id='pmv_ppd_ashrae_schema'>
+                    <h2 class='mt0 '>PMV_PPD_ASHRAE_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/pmv_ppd_ashrae.js#L47-L58' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/pmv_ppd_ashrae.js#L48-L59' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2526,19 +2517,19 @@ elevated air speed is present.</p>
 <li>0 &#x3C; clo [clo] &#x3C; 1.5</li>
 </ul>
 
-  <div class='hljs pre p1 mt0 sig'>pmv_ppd_ashrae(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="#pmvppdashrae">PmvPpdAshrae</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_ashrae-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_ashrae_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -2655,7 +2646,7 @@ elevated air speed is present.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='pmv_ppd_ashrae-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='pmv_ppd_ashrae_schema-returns'>Returns</div>
       <code><a href="#pmvppdashrae">PmvPpdAshrae</a></code>
       
         :
@@ -2668,7 +2659,7 @@ elevated air speed is present.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_ashrae-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_ashrae_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> r = <span class="hljs-title function_">pmv_ppd_ashrae</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
@@ -2685,15 +2676,15 @@ elevated air speed is present.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pmv_ppd_iso'>
-                    <h2 class='mt0 '>pmv_ppd_iso</h2>
+                  <section class='keyline-top-not py2' id='pmv_ppd_iso_schema'>
+                    <h2 class='mt0 '>PMV_PPD_ISO_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/pmv_ppd_iso.js#L48-L50' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/pmv_ppd_iso.js#L49-L59' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2715,19 +2706,19 @@ ranges cause the function to return NaN:</p>
 <li>-2 &#x3C; PMV &#x3C; 2 (result is clamped to NaN outside this range)</li>
 </ul>
 
-  <div class='hljs pre p1 mt0 sig'>pmv_ppd_iso(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="#pmvppdiso">PmvPpdIso</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_iso-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_iso_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -2833,7 +2824,7 @@ ranges cause the function to return NaN:</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='pmv_ppd_iso-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='pmv_ppd_iso_schema-returns'>Returns</div>
       <code><a href="#pmvppdiso">PmvPpdIso</a></code>
       
         :
@@ -2846,7 +2837,7 @@ ranges cause the function to return NaN:</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_iso-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='pmv_ppd_iso_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> r = <span class="hljs-title function_">pmv_ppd_iso</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
@@ -2863,15 +2854,15 @@ ranges cause the function to return NaN:</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='adaptive_ashrae'>
-                    <h2 class='mt0 '>Adaptive ASHRAE-55</h2>
+                  <section class='keyline-top-not py2' id='adaptive_ashrae_schema'>
+                    <h2 class='mt0 '>ADAPTIVE_ASHRAE_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/adaptive_ashrae.js#L83-L170' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/adaptive_ashrae.js#L84-L91' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2889,19 +2880,19 @@ meet all the following criteria:</p>
 <li>The prevailing mean (runnin mean) outdoor temperature is between 10 and 33.5 °C</li>
 </ul>
 
-  <div class='hljs pre p1 mt0 sig'>adaptive_ashrae(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"SI"</code> | <code>"IP"</code>), limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>): <a href="#adaptiveashraeresult">AdaptiveAshraeResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -2944,16 +2935,14 @@ The running mean temperature can be calculated using the function
           </li>
         
           <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
+            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>))</code>
             select the SI (International System of Units) or the IP (Imperial Units) system.
 
             
           </li>
         
           <li>
-            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>true</code>)</code>
+            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</code>
             By default, if the inputs are outsude the standard applicability limits the
 function returns nan. If False returns pmv and ppd values even if input values are
 outside the applicability limits of the model.
@@ -2967,7 +2956,7 @@ outside the applicability limits of the model.
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae_schema-returns'>Returns</div>
       <code><a href="#adaptiveashraeresult">AdaptiveAshraeResult</a></code>
       
         :
@@ -2984,7 +2973,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='adaptive_ashrae_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">import</span> { adaptive_ashrae } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort/models&quot;</span>;
@@ -3023,15 +3012,15 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='solar_gain'>
-                    <h2 class='mt0 '>Solar Gain (MRT Delta)</h2>
+                  <section class='keyline-top-not py2' id='solar_gain_schema'>
+                    <h2 class='mt0 '>SOLAR_GAIN_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/solar_gain.js#L96-L158' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/solar_gain.js#L100-L110' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3045,19 +3034,19 @@ amount by which the mean radiant temperature of the space should be
 increased if no solar radiation is present.</p>
 <p>More information on the calculation procedure can be found in Appendix C of <a href="#ref_1">[1]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>solar_gain(sol_altitude: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sharp: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sol_radiation_dir: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sol_transmittance: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, f_svv: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, f_bes: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, asw: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, posture: (<code>"standing"</code> | <code>"supine"</code> | <code>"sitting"</code>), floor_reflectance: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#solargainreturntype">SolarGainReturnType</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='solar_gain-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='solar_gain_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -3156,7 +3145,7 @@ on skin and clothing color. More information is available in Blum (1945).</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='solar_gain-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='solar_gain_schema-returns'>Returns</div>
       <code><a href="#solargainreturntype">SolarGainReturnType</a></code>
       
         :
@@ -3168,7 +3157,7 @@ on skin and clothing color. More information is available in Blum (1945).</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='solar_gain-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='solar_gain_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">import</span> {solar_gain} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsthermalcomfort/models&quot;</span>;
@@ -3185,15 +3174,15 @@ on skin and clothing color. More information is available in Blum (1945).</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='cooling_effect'>
-                    <h2 class='mt0 '>Cooling Effect (CE)</h2>
+                  <section class='keyline-top-not py2' id='cooling_effect_schema'>
+                    <h2 class='mt0 '>COOLING_EFFECT_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/cooling_effect.js#L55-L141' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/cooling_effect.js#L59-L68' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3207,19 +3196,19 @@ the same <a href="https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effecti
 as in the first <a href="https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature">SET</a> calculation
 under elevated air speed. The cooling effect is calculated only for air speed higher than 0.1 m/s.</p>
 
-  <div class='hljs pre p1 mt0 sig'>cooling_effect(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"SI"</code> | <code>"IP"</code>)): <a href="#coolingeffectresult">CoolingEffectResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='cooling_effect-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='cooling_effect_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -3304,7 +3293,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='cooling_effect-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='cooling_effect_schema-returns'>Returns</div>
       <code><a href="#coolingeffectresult">CoolingEffectResult</a></code>
       
         :
@@ -3319,7 +3308,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='cooling_effect-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='cooling_effect_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">CE</span> = <span class="hljs-title function_">cooling_effect</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
@@ -3339,15 +3328,15 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='athb'>
-                    <h2 class='mt0 '>Adaptive Thermal Heat Balance (ATHB)</h2>
+                  <section class='keyline-top-not py2' id='athb_schema'>
+                    <h2 class='mt0 '>ATHB_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/athb.js#L54-L81' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/athb.js#L54-L61' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3362,19 +3351,19 @@ thermal sensation applicable during the design stage or in international
 standards without knowing characteristics of future occupants.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='hljs pre p1 mt0 sig'>athb(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, t_running_mean: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#athbresult">AthbResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='athb-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='athb_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -3433,7 +3422,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='athb-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='athb_schema-returns'>Returns</div>
       <code><a href="#athbresult">AthbResult</a></code>
       
         :
@@ -3446,7 +3435,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='athb-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='athb_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = <span class="hljs-number">25</span>;
@@ -3469,15 +3458,15 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pmv'>
-                    <h2 class='mt0 '>Predicted Mean Vote (PMV)</h2>
+                  <section class='keyline-top-not py2' id='pmv_schema'>
+                    <h2 class='mt0 '>PMV_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/pmv.js#L97-L132' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/pmv.js#L98-L110' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3498,19 +3487,19 @@ Note below.</p>
 <a href="#ref_1">[1]</a> <a href="#ref_2">[2]</a></p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='hljs pre p1 mt0 sig'>pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, standard: (<code>"ISO"</code> | <code>"ASHRAE"</code>), kwargs: <a href="#pmvkwargs">PmvKwargs</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='pmv_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -3594,8 +3583,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#pmvkwargs">PmvKwargs</a>
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#pmvkwargs">PmvKwargs</a>)</code>
             additional arguments
 
             
@@ -3607,7 +3595,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='pmv-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='pmv_schema-returns'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
       
         :
@@ -3620,7 +3608,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pmv-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='pmv_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = <span class="hljs-number">25</span>;
@@ -3648,15 +3636,15 @@ boundaries are adjusted based on the SET model. This change was introduced by th
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='a_pmv'>
-                    <h2 class='mt0 '>Adjusted PMV (aPMV)</h2>
+                  <section class='keyline-top-not py2' id='a_pmv_schema'>
+                    <h2 class='mt0 '>A_PMV_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/a_pmv.js#L73-L95' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/a_pmv.js#L73-L84' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3669,19 +3657,19 @@ an impact on the senses used to detect thermal comfort. This model uses an adapt
 coefficient (λ) representing the adaptive factors that affect the sense of thermal comfort.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='hljs pre p1 mt0 sig'>a_pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, a_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#a_pmvkwargs">A_pmvKwargs</a>): <a href="#apmvresult">APmvResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='a_pmv-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='a_pmv_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -3760,8 +3748,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#a_pmvkwargs">A_pmvKwargs</a>
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#a_pmvkwargs">A_pmvKwargs</a>)</code>
             additional arguments
 
             
@@ -3773,7 +3760,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='a_pmv-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='a_pmv_schema-returns'>Returns</div>
       <code><a href="#apmvresult">APmvResult</a></code>
       
         :
@@ -3786,7 +3773,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='a_pmv-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='a_pmv_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = <span class="hljs-number">24</span>,
@@ -3811,15 +3798,15 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='ankle_draft'>
-                    <h2 class='mt0 '>Ankle Draft</h2>
+                  <section class='keyline-top-not py2' id='ankle_draft_schema'>
+                    <h2 class='mt0 '>ANKLE_DRAFT_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/ankle_draft.js#L57-L90' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/ankle_draft.js#L58-L67' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3828,19 +3815,19 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <p>Calculates the percentage of thermally dissatisfied people with the ankle draft (0.1 m) above floor level <a href="#ref_23">[23]</a>.
 This equation is only applicable for vr &#x3C; 0.2 m/s (40 fps).</p>
 
-  <div class='hljs pre p1 mt0 sig'>ankle_draft(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v_ankle: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"IP"</code> | <code>"SI"</code>)): <a href="#ankledraftret">AnkleDraftRet</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='ankle_draft-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='ankle_draft_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -3930,7 +3917,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='ankle_draft-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='ankle_draft_schema-returns'>Returns</div>
       <code><a href="#ankledraftret">AnkleDraftRet</a></code>
       
         :
@@ -3943,7 +3930,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='ankle_draft-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='ankle_draft_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'>results = <span class="hljs-title function_">ankle_draft</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.2</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.3</span>, <span class="hljs-string">&quot;SI&quot;</span>)
@@ -3959,15 +3946,15 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='e_pmv'>
-                    <h2 class='mt0 '>Extended PMV (ePMV)</h2>
+                  <section class='keyline-top-not py2' id='e_pmv_schema'>
+                    <h2 class='mt0 '>E_PMV_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/e_pmv.js#L76-L100' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/e_pmv.js#L76-L87' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3981,19 +3968,19 @@ of the PMV model that includes an expectancy factor is introduced for use in non
 in warm climates <a href="#ref_26">[26]</a>.</p>
 <p>This is a version that supports scalar arguments.</p>
 
-  <div class='hljs pre p1 mt0 sig'>e_pmv(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, e_coefficient: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#e_pmvkwargs">E_pmvKwargs</a>?): <a href="#epmvresult">EPmvResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='e_pmv-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='e_pmv_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -4072,8 +4059,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#e_pmvkwargs">E_pmvKwargs</a>?
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#e_pmvkwargs">E_pmvKwargs</a>?)</code>
             additional arguments
 
             
@@ -4085,7 +4071,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='e_pmv-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='e_pmv_schema-returns'>Returns</div>
       <code><a href="#epmvresult">EPmvResult</a></code>
       
         :
@@ -4098,7 +4084,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='e_pmv-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='e_pmv_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> tdb = <span class="hljs-number">28</span>;
@@ -4125,15 +4111,15 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='vertical_tmp_grad_ppd'>
-                    <h2 class='mt0 '>Vertical Temperature Gradient PPD</h2>
+                  <section class='keyline-top-not py2' id='vertical_tmp_grad_ppd_schema'>
+                    <h2 class='mt0 '>VERTICAL_TMP_GRAD_PPD_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/vertical_tmp_grad_ppd.js#L51-L88' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/vertical_tmp_grad_ppd.js#L52-L61' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4142,19 +4128,19 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
   <p>Calculates the percentage of thermally dissatisfied people with a vertical temperature gradient between feet and head <a href="#ref_1">[1]</a> .
 This equation is only applicable for vr &#x3C; 0.2 m/s (40 fps).</p>
 
-  <div class='hljs pre p1 mt0 sig'>vertical_tmp_grad_ppd(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, vertical_tmp_grad: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"SI"</code> | <code>"IP"</code>)): <a href="#vertmpgradreturntype">VerTmpGradReturnType</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='vertical_tmp_grad_ppd-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='vertical_tmp_grad_ppd_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -4231,7 +4217,7 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='vertical_tmp_grad_ppd-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='vertical_tmp_grad_ppd_schema-returns'>Returns</div>
       <code><a href="#vertmpgradreturntype">VerTmpGradReturnType</a></code>
       
         :
@@ -4244,7 +4230,7 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='vertical_tmp_grad_ppd-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='vertical_tmp_grad_ppd_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">vertical_tmp_grad_ppd</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">7</span>); <span class="hljs-comment">// returns {&#x27;ppd_vg&#x27;: 12.6, &#x27;acceptability&#x27;: false}</span></pre>
@@ -4259,15 +4245,15 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='use_fans_heatwaves'>
-                    <h2 class='mt0 '>Use of Fans During Heatwaves</h2>
+                  <section class='keyline-top-not py2' id='use_fans_heatwaves_schema'>
+                    <h2 class='mt0 '>USE_FANS_HEATWAVES_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/use_fans_heatwave.js#L102-L232' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/use_fans_heatwave.js#L103-L119' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4281,19 +4267,19 @@ This occurs when either the following variables reaches its maximum value:</p>
 <li>m_bl : Skin blood flow [kg/h/m2].</li>
 </ul>
 
-  <div class='hljs pre p1 mt0 sig'>use_fans_heatwaves(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?, body_position: (<code>"standing"</code> | <code>"sitting"</code>), units: (<code>"SI"</code> | <code>"IP"</code>), max_skin_blood_flow: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#heatwavekwargs">HeatwaveKwargs</a>?): <a href="#heatwavereturntype">HeatwaveReturnType</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='use_fans_heatwaves-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='use_fans_heatwaves_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -4387,8 +4373,7 @@ This occurs when either the following variables reaches its maximum value:</p>
           </li>
         
           <li>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#heatwavekwargs">HeatwaveKwargs</a>?
-            = <code>{}</code>)</code>
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#heatwavekwargs">HeatwaveKwargs</a>?)</code>
             
             
           </li>
@@ -4399,7 +4384,7 @@ This occurs when either the following variables reaches its maximum value:</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='use_fans_heatwaves-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='use_fans_heatwaves_schema-returns'>Returns</div>
       <code><a href="#heatwavereturntype">HeatwaveReturnType</a></code>
       
         :
@@ -4412,7 +4397,7 @@ This occurs when either the following variables reaches its maximum value:</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='use_fans_heatwaves-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='use_fans_heatwaves_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">use_fans_heatwaves</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
@@ -4446,15 +4431,15 @@ This occurs when either the following variables reaches its maximum value:</p>
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='clo_tout'>
-                    <h2 class='mt0 '>Clothing Insulation (Tout)</h2>
+                  <section class='keyline-top-not py2' id='clo_tout_schema'>
+                    <h2 class='mt0 '>CLO_TOUT_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/clo_tout.js#L29-L38' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/clo_tout.js#L33-L36' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4466,19 +4451,19 @@ temperature at 06:00 a.m <a href="#ref_4">[4]</a>.</p>
 clothing insulation Icl using this equation in mechanically conditioned
 buildings <a href="#ref_1">[1]</a>.</p>
 
-  <div class='hljs pre p1 mt0 sig'>clo_tout(tout: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"IP"</code> | <code>"SI"</code>)): <a href="#clotoutresult">CloToutResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='clo_tout-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='clo_tout_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -4493,8 +4478,7 @@ buildings <a href="#ref_1">[1]</a>.</p>
           </li>
         
           <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"IP"</code> | <code>"SI"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
+            <span class='code bold'>units</span> <code class='quiet'>((<code>"IP"</code> | <code>"SI"</code>))</code>
             select the SI (International System of Units)
 or the IP (Imperial Units) system.
 
@@ -4507,7 +4491,7 @@ or the IP (Imperial Units) system.
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='clo_tout-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='clo_tout_schema-returns'>Returns</div>
       <code><a href="#clotoutresult">CloToutResult</a></code>
       
         :
@@ -4529,15 +4513,15 @@ or the IP (Imperial Units) system.
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='utci'>
-                    <h2 class='mt0 '>Universal Thermal Climate Index (UTCI)</h2>
+                  <section class='keyline-top-not py2' id='utci_schema'>
+                    <h2 class='mt0 '>UTCI_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/utci.js#L59-L116' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/utci.js#L64-L72' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4557,19 +4541,19 @@ m above the ground). <a href="#ref_7">[7]</a></p>
 <li>Note: You can use this function to calculate the Universal Thermal Climate Index (UTCI) The applicability wind speed value must be between 0.5 and 17 m/s.</li>
 </ul>
 
-  <div class='hljs pre p1 mt0 sig'>utci(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, units: (<code>"SI"</code> | <code>"IP"</code>), return_stress_category: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>, limit_inputs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='utci-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='utci_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -4608,24 +4592,21 @@ m above the ground). <a href="#ref_7">[7]</a></p>
           </li>
         
           <li>
-            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>)
-            = <code>&quot;SI&quot;</code>)</code>
+            <span class='code bold'>units</span> <code class='quiet'>((<code>"SI"</code> | <code>"IP"</code>))</code>
             select the SI (International System of Units) or the IP (Imperial Units) system.
 
             
           </li>
         
           <li>
-            <span class='code bold'>return_stress_category</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>false</code>)</code>
+            <span class='code bold'>return_stress_category</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</code>
             default False if True returns the UTCI categorized in terms of thermal stress.
 
             
           </li>
         
           <li>
-            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>
-            = <code>true</code>)</code>
+            <span class='code bold'>limit_inputs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>)</code>
             default True. By default, if the inputs are outsude the standard applicability limits the
 function returns nan. If False returns UTCI values even if input values are
 outside the applicability limits of the model. The valid input ranges are
@@ -4643,7 +4624,7 @@ outside the applicability limits of the model. The valid input ranges are
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='utci-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='utci_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">utci</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">50</span>)) <span class="hljs-comment">// will print 24.6</span>
@@ -4661,15 +4642,15 @@ outside the applicability limits of the model. The valid input ranges are
                   </section>
                 
                   
-                  <section class='keyline-top-not py2' id='pet_steady'>
-                    <h2 class='mt0 '>Physiological Equivalent Temperature (PET)</h2>
+                  <section class='keyline-top-not py2' id='pet_steady_schema'>
+                    <h2 class='mt0 '>PET_STEADY_SCHEMA</h2>
                     
                     
                       <section class='p2 mb2 clearfix model-section'>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/pet_steady.js#L58-L101' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/pet_steady.js#L62-L76' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4694,19 +4675,19 @@ Walther and Goestchel (2018) model is therefore used to calculate the PET.</p>
 <p><strong>Warning:</strong> Some tests are currently failing for this function. Please refer to the test
 suite or the project's issue tracker for more details.</p>
 
-  <div class='hljs pre p1 mt0 sig'>pet_steady(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, position: (<code>1</code> | <code>2</code> | <code>3</code>), age: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, sex: (<code>1</code> | <code>2</code>), weight: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, height: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="#petsteadyresult">PetSteadyResult</a></div>
-  
-  
-
-  
-  
-  
   
   
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pet_steady-parameters'>Parameters</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='pet_steady_schema-parameters'>Parameters</div>
     <div class='prose'>
       <ul class="param-list">
         
@@ -4814,7 +4795,7 @@ suite or the project's issue tracker for more details.</p>
 
   
     
-      <div class='py1 quiet mt1 prose-big' id='pet_steady-returns'>Returns</div>
+      <div class='py1 quiet mt1 prose-big' id='pet_steady_schema-returns'>Returns</div>
       <code><a href="#petsteadyresult">PetSteadyResult</a></code>
       
         :
@@ -4827,7 +4808,7 @@ suite or the project's issue tracker for more details.</p>
   
 
   
-    <div class='py1 quiet mt1 prose-big' id='pet_steady-example'>Example</div>
+    <div class='py1 quiet mt1 prose-big' id='pet_steady_schema-example'>Example</div>
     
       
       <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> result = <span class="hljs-title function_">pet_steady</span>(<span class="hljs-number">20</span>, <span class="hljs-number">20</span>, <span class="hljs-number">50</span>, <span class="hljs-number">0.15</span>, <span class="hljs-number">1.37</span>, <span class="hljs-number">0.5</span>);
@@ -4851,7 +4832,7 @@ suite or the project's issue tracker for more details.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/518762806c8dbe034d555a4d573ce9d68b0e6652/src/models/JOS3.js#L113-L1298' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/3fa75e812f5b2cbb47012a82c84b96708e4a5cf0/src/models/JOS3.js#L113-L1298' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5011,17 +4992,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#heat_index">Heat Index (HI)</a>
+                            <a class="reference internal nav-link" href="#heat_index_schema">HEAT_INDEX_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5035,17 +5016,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#phs">Predicted Heat Strain (PHS)</a>
+                            <a class="reference internal nav-link" href="#phs_schema">PHS_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phs-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phs_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phs-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phs_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phs-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#phs_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5059,17 +5040,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#humidex">Humidex</a>
+                            <a class="reference internal nav-link" href="#humidex_schema">HUMIDEX_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#humidex-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#humidex_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#humidex-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#humidex_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#humidex-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#humidex_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5083,17 +5064,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#net">Normal Effective Temperature (NET)</a>
+                            <a class="reference internal nav-link" href="#net_schema">NET_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5107,17 +5088,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#wbgt">Wet Bulb Globe Temperature (WBGT)</a>
+                            <a class="reference internal nav-link" href="#wbgt_schema">WBGT_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wbgt-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wbgt_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wbgt-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wbgt_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wbgt-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wbgt_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5131,17 +5112,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#discomfort_index">Discomfort Index (DI)</a>
+                            <a class="reference internal nav-link" href="#discomfort_index_schema">DISCOMFORT_INDEX_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#discomfort_index_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5155,17 +5136,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#two_nodes">Two-Node Model (Gagge)</a>
+                            <a class="reference internal nav-link" href="#two_nodes_schema">TWO_NODES_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#two_nodes_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5179,17 +5160,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#set_tmp">Standard Effective Temperature (SET)</a>
+                            <a class="reference internal nav-link" href="#set_tmp_schema">SET_TMP_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set_tmp_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5203,396 +5184,14 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#wc">Wind Chill Index (WCI)</a>
+                            <a class="reference internal nav-link" href="#wc_schema">WC_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wc-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wc_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wc-returns">Returns</a></li>
-                                
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#adaptive_en">Adaptive EN-16798</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#at">Apparent Temperature (AT)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#at-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#at-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#at-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pmv_ppd">PMV-PPD Model</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pmv_ppd_ashrae">pmv_ppd_ashrae</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_ashrae-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_ashrae-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_ashrae-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pmv_ppd_iso">pmv_ppd_iso</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_iso-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_iso-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_iso-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#adaptive_ashrae">Adaptive ASHRAE-55</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#solar_gain">Solar Gain (MRT Delta)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#solar_gain-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#solar_gain-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#solar_gain-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#cooling_effect">Cooling Effect (CE)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cooling_effect-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cooling_effect-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cooling_effect-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#athb">Adaptive Thermal Heat Balance (ATHB)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pmv">Predicted Mean Vote (PMV)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#a_pmv">Adjusted PMV (aPMV)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#ankle_draft">Ankle Draft</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ankle_draft-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ankle_draft-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ankle_draft-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#e_pmv">Extended PMV (ePMV)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#vertical_tmp_grad_ppd">Vertical Temperature Gradient PPD</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vertical_tmp_grad_ppd-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vertical_tmp_grad_ppd-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vertical_tmp_grad_ppd-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#use_fans_heatwaves">Use of Fans During Heatwaves</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use_fans_heatwaves-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use_fans_heatwaves-returns">Returns</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use_fans_heatwaves-example">Example</a></li>
-                                
-                                
-                                  
-                                
-                                
-                                  
-                                
-                              </ul>
-                            
-                          </li>
-                        
-                          
-                          <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#clo_tout">Clothing Insulation (Tout)</a>
-                            
-                              <ul class="nav section-nav flex-column">
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clo_tout-parameters">Parameters</a></li>
-                                
-                                
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clo_tout-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wc_schema-returns">Returns</a></li>
                                 
                                 
                                 
@@ -5607,15 +5206,17 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#utci">Universal Thermal Climate Index (UTCI)</a>
+                            <a class="reference internal nav-link" href="#adaptive_en_schema">ADAPTIVE_EN_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en_schema-parameters">Parameters</a></li>
                                 
                                 
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en_schema-returns">Returns</a></li>
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci-example">Example</a></li>
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_en_schema-example">Example</a></li>
                                 
                                 
                                   
@@ -5629,17 +5230,397 @@ the computational load.
                         
                           
                           <li class="toc-h2 nav-item toc-entry">
-                            <a class="reference internal nav-link" href="#pet_steady">Physiological Equivalent Temperature (PET)</a>
+                            <a class="reference internal nav-link" href="#at_schema">AT_SCHEMA</a>
                             
                               <ul class="nav section-nav flex-column">
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pet_steady-parameters">Parameters</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#at_schema-parameters">Parameters</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pet_steady-returns">Returns</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#at_schema-returns">Returns</a></li>
                                 
                                 
-                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pet_steady-example">Example</a></li>
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#at_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#pmv_ppd_schema">PMV_PPD_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#pmv_ppd_ashrae_schema">PMV_PPD_ASHRAE_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_ashrae_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_ashrae_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_ashrae_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#pmv_ppd_iso_schema">PMV_PPD_ISO_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_iso_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_iso_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_ppd_iso_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#adaptive_ashrae_schema">ADAPTIVE_ASHRAE_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive_ashrae_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#solar_gain_schema">SOLAR_GAIN_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#solar_gain_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#solar_gain_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#solar_gain_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#cooling_effect_schema">COOLING_EFFECT_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cooling_effect_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cooling_effect_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cooling_effect_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#athb_schema">ATHB_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#athb_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#pmv_schema">PMV_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pmv_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#a_pmv_schema">A_PMV_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a_pmv_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#ankle_draft_schema">ANKLE_DRAFT_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ankle_draft_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ankle_draft_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ankle_draft_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#e_pmv_schema">E_PMV_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#e_pmv_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#vertical_tmp_grad_ppd_schema">VERTICAL_TMP_GRAD_PPD_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vertical_tmp_grad_ppd_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vertical_tmp_grad_ppd_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vertical_tmp_grad_ppd_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#use_fans_heatwaves_schema">USE_FANS_HEATWAVES_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use_fans_heatwaves_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use_fans_heatwaves_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use_fans_heatwaves_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#clo_tout_schema">CLO_TOUT_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clo_tout_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#clo_tout_schema-returns">Returns</a></li>
+                                
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#utci_schema">UTCI_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci_schema-parameters">Parameters</a></li>
+                                
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#utci_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#pet_steady_schema">PET_STEADY_SCHEMA</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pet_steady_schema-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pet_steady_schema-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pet_steady_schema-example">Example</a></li>
                                 
                                 
                                   

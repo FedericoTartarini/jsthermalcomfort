@@ -95,7 +95,7 @@ export function vertical_tmp_grad_ppd(
   });
   warnings.forEach((warning) => console.warn(warning));
 
-  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE");
+  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE").pmv;
   const ppd_vg = calculate_ppd_vg(tsv, vertical_tmp_grad);
   const acceptability = check_acceptability(ppd_vg);
 

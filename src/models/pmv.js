@@ -19,6 +19,7 @@ import { validateInputs } from "../utilities/utilities.js";
  *    On the other hand, if the occupant has no control over the airspeed,
  *    the ASHRAE 55 imposes an upper limit for v which varies as a function of
  *    the operative temperature, for more information please consult the Standard.
+ * @property {boolean} round_output - If true, rounds pmv to 2 decimal places. Defaults to true.
  * @public
  */
 
@@ -77,7 +78,7 @@ import { validateInputs } from "../utilities/utilities.js";
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum_C to Standard 55-2020}
  * @param {PmvKwargs} kwargs - additional arguments
  *
- * @returns {number} pmv - Predicted Mean Vote
+ * @returns {{ pmv: number }} result - Object containing the Predicted Mean Vote
  *
  * @example
  * const tdb = 25;
@@ -107,6 +108,7 @@ const PMV_SCHEMA = {
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
 };
 
 export function pmv(
@@ -124,6 +126,7 @@ export function pmv(
     units: "SI",
     limit_inputs: true,
     airspeed_control: true,
+    round_output: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
 
@@ -140,6 +143,7 @@ export function pmv(
       units: (kwargs.units ?? "SI").toUpperCase(),
       limit_inputs: kwargs.limit_inputs,
       airspeed_control: kwargs.airspeed_control,
+      round_output: kwargs.round_output,
     },
     PMV_SCHEMA,
   );
@@ -160,5 +164,5 @@ export function pmv(
     throw new Error("pmv property not found in pmv_ppdValue");
   }
 
-  return pmv_ppdValue.pmv;
+  return { pmv: pmv_ppdValue.pmv };
 }

@@ -24,7 +24,7 @@ describe("pmv", () => {
     };
 
     const { tdb, tr, vr, rh, met, clo, wme, standard } = inputs;
-    const modelResult = { pmv: pmv(tdb, tr, vr, rh, met, clo, wme, standard) };
+    const modelResult = pmv(tdb, tr, vr, rh, met, clo, wme, standard);
 
     validateResult(modelResult, outputs, tolerances, inputs);
   });
@@ -65,6 +65,12 @@ describe("pmv input validation", () => {
   test("throws TypeError if kwargs.airspeed_control is not a boolean", () => {
     expect(() =>
       pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { airspeed_control: "true" }),
+    ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if kwargs.round_output is not a boolean", () => {
+    expect(() =>
+      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { round_output: "true" }),
     ).toThrow(TypeError);
   });
 });

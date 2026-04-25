@@ -118,10 +118,10 @@ export function e_pmv(
     E_PMV_SCHEMA,
   );
 
-  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs).pmv;
 
   met = _pmv > 0 ? met * (1 + _pmv * -0.067) : met;
-  _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs).pmv;
   _pmv = round(_pmv * e_coefficient, 2);
 
   return { e_pmv: _pmv };

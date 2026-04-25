@@ -254,7 +254,7 @@ export class JOS3 {
     // Iterate until the PMV (Predicted Mean Vote) value is less than 0.001
     let vpmv;
     for (let i = 0; i < 100; i++) {
-      vpmv = pmv(to, to, va, rh, met, clo);
+      vpmv = pmv(to, to, va, rh, met, clo).pmv;
 
       // Break the loop if the absolute value of PMV is less than 0.001
       if (math.abs(vpmv) < 0.001) {

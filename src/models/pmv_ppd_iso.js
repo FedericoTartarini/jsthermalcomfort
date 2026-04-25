@@ -35,6 +35,7 @@ import { validateInputs } from "../utilities/utilities.js";
  * @param {Object} [kwargs={}] - Optional overrides
  * @param {'SI'|'IP'} [kwargs.units='SI'] - Unit system
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
+ * @param {boolean}   [kwargs.round_output=true] - Round pmv to 2 decimal places and ppd to 1
  * @returns {PmvPpdIso} PMV and PPD values
  *
  * @example
@@ -56,6 +57,7 @@ const PMV_PPD_ISO_SCHEMA = {
   wme: { type: "number" },
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
 };
 
 export function pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme = 0, kwargs = {}) {
@@ -70,6 +72,7 @@ export function pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme = 0, kwargs = {}) {
       wme,
       units: kwargs.units?.toUpperCase(),
       limit_inputs: kwargs.limit_inputs,
+      round_output: kwargs.round_output,
     },
     PMV_PPD_ISO_SCHEMA,
   );

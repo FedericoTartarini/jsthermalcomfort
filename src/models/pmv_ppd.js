@@ -25,6 +25,7 @@ import { cooling_effect } from "./cooling_effect.js";
  *    On the other hand, if the occupant has no control over the airspeed,
  *    the ASHRAE 55 imposes an upper limit for v which varies as a function of
  *    the operative temperature, for more information please consult the Standard.
+ * @property { boolean } round_output - If true, rounds pmv to 2 decimal places and ppd to 1. Defaults to true.
  * @public
  */
 
@@ -122,6 +123,7 @@ const PMV_PPD_SCHEMA = {
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
 };
 
 export function pmv_ppd(
@@ -139,6 +141,7 @@ export function pmv_ppd(
     units: "SI",
     limit_inputs: true,
     airspeed_control: true,
+    round_output: true,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
   validateInputs(
@@ -154,6 +157,7 @@ export function pmv_ppd(
       units: kwargs.units?.toUpperCase(),
       limit_inputs: kwargs.limit_inputs,
       airspeed_control: kwargs.airspeed_control,
+      round_output: kwargs.round_output,
     },
     PMV_PPD_SCHEMA,
   );
@@ -214,10 +218,13 @@ export function pmv_ppd(
     }
   }
 
-  return {
-    pmv: round(pmv, 2),
-    ppd: round(ppd, 1),
-  };
+  if (kwargs.round_output) {
+    return {
+      pmv: round(pmv, 2),
+      ppd: round(ppd, 1),
+    };
+  }
+  return { pmv, ppd };
 }
 
 /**

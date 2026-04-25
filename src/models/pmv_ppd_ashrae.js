@@ -34,6 +34,7 @@ import { validateInputs } from "../utilities/utilities.js";
  * @param {'SI'|'IP'} [kwargs.units='SI'] - Unit system
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
  * @param {boolean}   [kwargs.airspeed_control=true] - Occupant controls airspeed
+ * @param {boolean}   [kwargs.round_output=true] - Round pmv to 2 decimal places and ppd to 1
  * @returns {PmvPpdAshrae} PMV and PPD values
  *
  * @example
@@ -56,6 +57,7 @@ const PMV_PPD_ASHRAE_SCHEMA = {
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
 };
 
 export function pmv_ppd_ashrae(
@@ -80,6 +82,7 @@ export function pmv_ppd_ashrae(
       units: kwargs.units?.toUpperCase(),
       limit_inputs: kwargs.limit_inputs,
       airspeed_control: kwargs.airspeed_control,
+      round_output: kwargs.round_output,
     },
     PMV_PPD_ASHRAE_SCHEMA,
   );

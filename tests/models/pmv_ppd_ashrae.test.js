@@ -1,6 +1,6 @@
 // Validation data loaded from the shared validation-data-comfort-models
 // repository via the same URL-based mechanism as the original pmv_ppd.test.js.
-import { describe, test } from "@jest/globals";
+import { describe, expect, test } from "@jest/globals";
 import { pmv_ppd_ashrae } from "../../src/models/pmv_ppd_ashrae.js";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils.js";
@@ -65,6 +65,12 @@ describe("pmv_ppd_ashrae input validation", () => {
       pmv_ppd_ashrae(25, 25, 0.1, 50, 1.2, 0.5, 0, {
         airspeed_control: "true",
       }),
+    ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if kwargs.round_output is not a boolean", () => {
+    expect(() =>
+      pmv_ppd_ashrae(25, 25, 0.1, 50, 1.2, 0.5, 0, { round_output: "true" }),
     ).toThrow(TypeError);
   });
 });

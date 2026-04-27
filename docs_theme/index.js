@@ -157,7 +157,6 @@ const displayNameMap = {
   p_sat_torr: "Saturation Vapor Pressure in Torr",
   p_sat_torr_array: "Saturation Vapor Pressure in Torr — Array",
   t_o: "Operative Temperature (t_o)",
-  t_o_array: "Operative Temperature — Array",
   enthalpy: "Enthalpy",
   t_wb: "Wet Bulb Temperature (t_wb)",
   t_mrt: "Mean Radiant Temperature (t_mrt)",

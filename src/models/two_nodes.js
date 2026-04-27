@@ -410,9 +410,17 @@ function calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl) {
  * @returns {number} Thermal discomfort
  */
 function calculate_discomfort(eRsw, eComfort, eMax, wMax, eDiff, tSens) {
-  let disc = (4.7 * (eRsw - eComfort)) / (eMax * wMax - eComfort - eDiff);
+  let disc;
+  if (tSens > 0 && eMax * wMax - eComfort - eDiff < 0) {
+    disc = 6.0;
+  } else {
+    disc = (4.7 * (eRsw - eComfort)) / (eMax * wMax - eComfort - eDiff);
+  }
   if (disc <= 0) {
     disc = tSens;
+  }
+  if (disc > 6) {
+    disc = 6.0;
   }
   return disc;
 }

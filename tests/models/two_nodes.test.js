@@ -1,73 +1,89 @@
-import { expect, describe, it, test, beforeAll } from "@jest/globals";
-import { loadTestData } from "./testUtils";
+import { expect, describe, test, it } from "@jest/globals";
+import { loadTestData, validateResult } from "./testUtils";
 import { two_nodes } from "../../src/models/two_nodes";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 
 // Use the URL from comftest.js to fetch data for two_nodes tests
 const testDataUrl = testDataUrls.twoNodes; // Ensure the correct URL is added in comftest.js
 
-let testData;
-let tolerance;
+// Load data at module scope so test.each can register one test per row.
+const { testData, tolerances } = await loadTestData(testDataUrl, false);
 
-// Load data before tests
-beforeAll(async () => {
-  const result = await loadTestData(testDataUrl, "twoNodes"); // Load data from URL using loadTestData
-  testData = result.testData;
-  tolerance = result.tolerance || 0.1; // Set a default tolerance
-});
-
-// General test function to verify results for different test functions
-function runTest(testFunction, inputs, expected) {
-  const {
-    tdb,
-    tr,
-    v,
-    rh,
-    met,
-    clo,
-    wme,
-    body_surface_area,
-    p_atmospheric,
-    body_position,
-    max_skin_blood_flow,
-    kwargs,
-  } = inputs;
-
-  const result = testFunction(
-    tdb,
-    tr,
-    v,
-    rh,
-    met,
-    clo,
-    wme,
-    body_surface_area,
-    p_atmospheric,
-    body_position,
-    max_skin_blood_flow,
-    kwargs,
-  );
-
-  // Use specified tolerance or default to 0.0001
-  const tol = tolerance !== undefined ? tolerance : 0.0001;
-  expect(Math.abs(result - expected)).toBeLessThanOrEqual(tol);
-}
+// Skip rows with missing outputs or array-valued inputs; keep original
+// dataset index so failures are reported as "row N" matching the JSON file.
+const scalarRows = testData.data
+  .map((row, index) => ({ ...row, index }))
+  .filter(({ inputs, outputs }) => {
+    if (outputs === undefined || outputs === null) return false;
+    return !Object.values(inputs).some((value) => Array.isArray(value));
+  });
 
 describe("two_nodes related tests", () => {
-  it("should run two_nodes tests after data is loaded", () => {
-    if (!testData || !testData.data)
-      throw new Error("Test data is undefined or data not loaded");
+  test.each(scalarRows)("row $index", ({ inputs, outputs }) => {
+    const {
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      body_position,
+      max_skin_blood_flow,
+      kwargs,
+      w_max,
+      max_sweating,
+    } = inputs;
 
-    testData.data.forEach(({ inputs, expected }) => {
-      // Skip empty or invalid data
-      if (expected === undefined || expected === null) return;
+    const mergedKwargs = {
+      w_max,
+      max_sweating,
+      ...(kwargs ?? {}),
+      round: false,
+    };
+    for (const k of Object.keys(mergedKwargs)) {
+      if (mergedKwargs[k] === undefined) delete mergedKwargs[k];
+    }
 
-      // Skip array inputs — only test scalar cases
-      const values = Object.values(inputs);
-      if (values.some((value) => Array.isArray(value))) return;
+    const result = two_nodes(
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atmospheric,
+      body_position,
+      max_skin_blood_flow,
+      mergedKwargs,
+    );
 
-      runTest(two_nodes, inputs, expected);
-    });
+    const resultSnakeCase = {
+      disc: result.disc,
+      t_core: result.tCore,
+      e_skin: result.eSkin,
+      e_rsw: result.eRsw,
+      e_max: result.eMax,
+      q_sensible: result.qSensible,
+      q_skin: result.qSkin,
+      q_res: result.qRes,
+      t_skin: result.tSkin,
+      m_bl: result.mBl,
+      m_rsw: result.mRsw,
+      w: result.w,
+      w_max: result.wMax,
+      set: result.set,
+      et: result.et,
+      pmv_gagge: result.pmvGagge,
+      pmv_set: result.pmvSet,
+      t_sens: result.tSens,
+    };
+
+    validateResult(resultSnakeCase, outputs, tolerances, inputs);
   });
 });
 

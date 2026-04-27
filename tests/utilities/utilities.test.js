@@ -7,17 +7,13 @@ import {
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
-  check_standard_compliance_array,
   clo_typical_ensembles,
   transpose_sharp_altitude,
   assertNumber,
   validateInputs,
+  check_standard_compliance,
 } from "../../src/utilities/utilities";
-import {
-  deep_close_to_array,
-  deep_close_to_obj,
-  deep_close_to_obj_arrays,
-} from "../test_utilities";
+import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
 
 const DEFAULT_TOLERANCE = 0.01;
 
@@ -325,142 +321,6 @@ describe("valid_range", () => {
   );
 });
 
-describe("check_standard_compliance_array", () => {
-  it.each([
-    {
-      standard: "FAN_HEATWAVES",
-      kwargs: {
-        tdb: [15, 30, 60],
-        tr: [15, 30, 60],
-        v: [0, 2, 5],
-        rh: [-1, 50, 150],
-        met: [0, 1, 3],
-        clo: [-1, 0.5, 2],
-      },
-      expected: {
-        tdb: [NaN, 30, NaN],
-        tr: [NaN, 30, NaN],
-        v: [NaN, 2, NaN],
-        rh: [NaN, 50, NaN],
-        met: [NaN, 1, NaN],
-        clo: [NaN, 0.5, NaN],
-      },
-    },
-    {
-      standard: "ISO",
-      kwargs: {
-        tdb: [9, 20, 31],
-        tr: [9, 25, 41],
-        v: [-1, 0.5, 1.1],
-        met: [0.7, 0.9, 4.1],
-        clo: [-1, 0.5, 2.1],
-      },
-      expected: {
-        tdb: [NaN, 20, NaN],
-        tr: [NaN, 25, NaN],
-        v: [NaN, 0.5, NaN],
-        met: [NaN, 0.9, NaN],
-        clo: [NaN, 0.5, NaN],
-      },
-    },
-    {
-      standard: "ASHRAE",
-      kwargs: {
-        tdb: [9, 20, 41],
-        tr: [9, 25, 41],
-        v: [-1, 0.5, 2.1],
-        met: [0.9, 3, 4.1],
-        clo: [-1, 0.5, 1.6],
-      },
-      expected: {
-        tdb: [NaN, 20, NaN],
-        tr: [NaN, 25, NaN],
-        v: [NaN, 0.5, NaN],
-        met: [NaN, 3, NaN],
-        clo: [NaN, 0.5, NaN],
-      },
-    },
-    {
-      standard: "ASHRAE",
-      kwargs: {
-        tdb: [9, 20, 41],
-        tr: [9, 25, 41],
-        v: [-1, 0.9, 2.1],
-        met: [0.9, 1.2, 4.1],
-        clo: [-1, 0.5, 1.6],
-        airspeed_control: false,
-      },
-      expected: {
-        tdb: [NaN, 20, NaN],
-        tr: [NaN, 25, NaN],
-        v: [NaN, NaN, NaN],
-        met: [NaN, 1.2, NaN],
-        clo: [NaN, 0.5, NaN],
-      },
-    },
-    {
-      standard: "ASHRAE",
-      kwargs: {
-        tdb: [9, 20, 41],
-        tr: [9, 25, 41],
-        v: [-1, 0.3, 2.1],
-        met: [0.9, 1.2, 4.1],
-        clo: [-1, 0.5, 1.6],
-        airspeed_control: false,
-      },
-      expected: {
-        tdb: [NaN, 20, NaN],
-        tr: [NaN, 25, NaN],
-        v: [NaN, NaN, NaN],
-        met: [NaN, 1.2, NaN],
-        clo: [NaN, 0.5, NaN],
-      },
-    },
-    {
-      standard: "ASHRAE",
-      kwargs: {
-        tdb: [9, 20, 41],
-        tr: [9, 39, 41],
-        v: [-1, 0.9, 2.1],
-        met: [0.9, 1.2, 4.1],
-        clo: [-1, 0.5, 1.6],
-        airspeed_control: false,
-      },
-      expected: {
-        tdb: [NaN, 20, NaN],
-        tr: [NaN, 39, NaN],
-        v: [NaN, NaN, NaN],
-        met: [NaN, 1.2, NaN],
-        clo: [NaN, 0.5, NaN],
-      },
-    },
-    {
-      standard: "ASHRAE",
-      kwargs: {
-        tdb: [9, 20, 41],
-        tr: [9, 25, 41],
-        v: [-1, 0.9, 2.1],
-        met: [0.9, 1.2, 4.1],
-        clo: [-1, 0.8, 1.6],
-        airspeed_control: false,
-      },
-      expected: {
-        tdb: [NaN, 20, NaN],
-        tr: [NaN, 25, NaN],
-        v: [NaN, 0.9, NaN],
-        met: [NaN, 1.2, NaN],
-        clo: [NaN, 0.8, NaN],
-      },
-    },
-  ])(
-    "returns $expected when standard is $standard and kwargs is $kwargs",
-    ({ standard, kwargs, expected }) => {
-      const result = check_standard_compliance_array(standard, kwargs);
-      deep_close_to_obj_arrays(result, expected, DEFAULT_TOLERANCE);
-    },
-  );
-});
-
 describe("clo_typical_ensembles", () => {
   it.each([
     { ensembles: "Walking shorts, short-sleeve shirt", expected: 0.36 },
@@ -595,6 +455,104 @@ describe("validateInputs", () => {
           },
         ),
       ).not.toThrow();
+    });
+  });
+});
+
+describe("check_standard_compliance", () => {
+  describe("ASHRAE airspeed_control branch", () => {
+    it("flags v > 0.8 with low clo and met when occupant has no airspeed control", () => {
+      const warnings = check_standard_compliance("ASHRAE", {
+        tdb: 26,
+        tr: 26,
+        v: 1.0,
+        met: 1.2,
+        clo: 0.5,
+        airspeed_control: false,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+    });
+
+    it("flags v above the operative-temperature limit when 23 < to < 25.5", () => {
+      const warnings = check_standard_compliance("ASHRAE", {
+        tdb: 24,
+        tr: 24,
+        v: 0.4,
+        met: 1.2,
+        clo: 0.5,
+        airspeed_control: false,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+    });
+
+    it("flags v > 0.2 when to <= 23 with low clo and met", () => {
+      const warnings = check_standard_compliance("ASHRAE", {
+        tdb: 20,
+        tr: 20,
+        v: 0.5,
+        met: 1.2,
+        clo: 0.5,
+        airspeed_control: false,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+    });
+
+    it("does not flag the same inputs when airspeed_control is true", () => {
+      const warnings = check_standard_compliance("ASHRAE", {
+        tdb: 26,
+        tr: 26,
+        v: 1.0,
+        met: 1.2,
+        clo: 0.5,
+        airspeed_control: true,
+      });
+      expect(warnings).toHaveLength(0);
+    });
+  });
+
+  describe("FAN_HEATWAVES branch", () => {
+    const valid = { tdb: 30, tr: 30, v: 1, rh: 50, met: 1, clo: 0.5 };
+
+    it.each([
+      { field: "tdb", value: 51 },
+      { field: "tr", value: 19 },
+      { field: "v", value: 5 },
+      { field: "rh", value: 101 },
+      { field: "met", value: 0.5 },
+      { field: "clo", value: 1.5 },
+    ])("flags an out-of-range $field of $value", ({ field, value }) => {
+      const kwargs = { ...valid, [field]: value };
+      const warnings = check_standard_compliance("FAN_HEATWAVES", kwargs);
+      expect(warnings.length).toBeGreaterThan(0);
+    });
+
+    it("returns no warnings when all fields are within range", () => {
+      const warnings = check_standard_compliance("FAN_HEATWAVES", valid);
+      expect(warnings).toHaveLength(0);
+    });
+  });
+
+  describe("ISO branch v range check", () => {
+    it("returns no warnings when v is within [0, 1]", () => {
+      const warnings = check_standard_compliance("ISO", {
+        tdb: 25,
+        tr: 25,
+        v: 0.1,
+        met: 1.2,
+        clo: 0.5,
+      });
+      expect(warnings).toHaveLength(0);
+    });
+
+    it("flags v above 1 m/s", () => {
+      const warnings = check_standard_compliance("ISO", {
+        tdb: 25,
+        tr: 25,
+        v: 1.5,
+        met: 1.2,
+        clo: 0.5,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
     });
   });
 });

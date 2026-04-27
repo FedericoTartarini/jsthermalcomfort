@@ -9,6 +9,7 @@ import {
   clo_typical_ensembles,
   clo_individual_garments,
   check_standard_compliance_array,
+  maskOutOfRange,
 } from "./utilities.js";
 
 /**
@@ -27,6 +28,7 @@ export {
   clo_typical_ensembles,
   clo_individual_garments,
   check_standard_compliance_array,
+  maskOutOfRange,
 };
 
 export default {

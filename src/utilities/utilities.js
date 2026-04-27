@@ -928,3 +928,73 @@ export const validateInputs = (params, schema) => {
     }
   }
 };
+
+/**
+ * Replaces values that fall outside their declared `[min, max]` range with
+ * `NaN`, mirroring the range-check stage of pythermalcomfort's `valid_range`.
+ *
+ * Intended as the post-validation range mask in the model entry path. Callers
+ * should pass each input through `validateInputs` first (the PR #145 type
+ * gate, which throws `TypeError` for non-numeric or non-finite values) and
+ * then call this helper to collapse out-of-range numeric values to `NaN`.
+ *
+ * Scalars are replaced wholesale; arrays are checked per element. Scope is
+ * per-parameter only — cross-parameter rules, for example ASHRAE's
+ * `airspeed_control` cross-field check, are not handled here and remain the
+ * caller's responsibility (see `check_standard_compliance`).
+ *
+ * Direct utility callers (tests, debug, ad-hoc tooling) that bypass
+ * `validateInputs` get a secondary defensive layer: each value passes through
+ * `Number.isFinite` before the range comparison, so non-numbers (`"25"`,
+ * `true`, `null`) and `Infinity`/`NaN` collapse to `NaN` without coercion.
+ * On the model entry path this branch is unreachable because `validateInputs`
+ * has already thrown; the guard exists for direct utility use only.
+ *
+ * Schema scope: only list a key in `schema` if you want it range-masked. An
+ * omitted optional caller param that arrives as `undefined` will collapse to
+ * `NaN` if the same key is also in `schema`, which is rarely the desired
+ * outcome — keep optional params out of the schema unless that collapse is
+ * intentional.
+ *
+ * Keys present in `params` but absent from `schema` pass through unchanged.
+ * Keys named in `schema` but missing from `params` are skipped silently (the
+ * key is not added to the result). The input `params` object is never mutated;
+ * a shallow copy is returned so callers can replace their working set in place.
+ *
+ * @param {Object.<string, number | number[]>} params - input values keyed by name
+ * @param {Object.<string, { min: number, max: number }>} schema - per-parameter
+ *   inclusive `[min, max]` range to enforce
+ * @returns {Object.<string, number | number[]>} a new object with the same keys
+ *   as `params`, where any value or array element outside its schema range, or
+ *   not a finite number, has been replaced by `NaN`
+ *
+ * @example
+ * maskOutOfRange(
+ *   { tdb: 45, met: 1.2, clo: [0.3, 2.5, NaN] },
+ *   {
+ *     tdb: { min: 10, max: 40 },
+ *     met: { min: 1.0, max: 4.0 },
+ *     clo: { min: 0.0, max: 1.5 },
+ *   },
+ * );
+ * // → { tdb: NaN, met: 1.2, clo: [0.3, NaN, NaN] }
+ */
+export const maskOutOfRange = (params, schema) => {
+  // Shallow copy so callers, and the input itself, are never mutated.
+  const result = { ...params };
+  for (const [key, { min, max }] of Object.entries(schema)) {
+    if (!(key in result)) continue;
+    const value = result[key];
+    if (Array.isArray(value)) {
+      // Number.isFinite avoids coercion for direct utility callers; on the
+      // model entry path validateInputs has already thrown for non-numbers.
+      result[key] = value.map((n) =>
+        Number.isFinite(n) && n >= min && n <= max ? n : NaN,
+      );
+    } else {
+      result[key] =
+        Number.isFinite(value) && value >= min && value <= max ? value : NaN;
+    }
+  }
+  return result;
+};

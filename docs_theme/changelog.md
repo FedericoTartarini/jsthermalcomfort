@@ -1,5 +1,10 @@
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- Removed `check_standard_compliance_array` from public exports. This is a breaking change for consumers that imported the array helper directly. Internal callers (`adaptive_ashrae`, `pmv_ppd`, `set_tmp`, `use_fans_heatwaves`) have been migrated to the scalar `check_standard_compliance` helper, which now also covers the ASHRAE `airspeed_control` cross-field check (pass `airspeed_control: false` to enable) and the `FAN_HEATWAVES` standard.
+- Migration: replace `check_standard_compliance_array(standard, kwargs)` with `check_standard_compliance(standard, kwargs)` and check `warnings.length === 0` for compliance. See PR #165 for before/after examples.
+
 ## 1.1.0 (2026-06-31)
 
 - Removed all `*_array` function exports from models, utilities and psychrometrics. This is a breaking change compared with previous versions.

@@ -1,7 +1,7 @@
 import { round, validateInputs } from "../utilities/utilities.js";
 
 const optionDefaults = {
-  round: true,
+  round_output: true,
   tdb: undefined,
   with_solar_load: false,
 };
@@ -38,7 +38,7 @@ const optionDefaults = {
  * @param {number} twb - natural (no forced air flow) wet bulb temperature, [°C]
  * @param {number} tg - globe temperature, [°C]
  * @param {object} [options] - configuration options for the function.
- * @param {boolean} [options.round = true] - If true rounds output value. If
+ * @param {boolean} [options.round_output = true] - If true rounds output value. If
  * false it does not round it.
  * @param {number} [options.tdb = undefined] - Dry bulb air temperature, [°C].
  * This value is needed as input if the person is exposed to direct solar
@@ -60,7 +60,7 @@ const optionDefaults = {
 const WBGT_SCHEMA = {
   twb: { type: "number" },
   tg: { type: "number" },
-  round: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
   tdb: { type: "number", required: false },
   with_solar_load: { type: "boolean", required: false },
 };
@@ -71,7 +71,7 @@ export function wbgt(twb, tg, options) {
     {
       twb,
       tg,
-      round: opt.round,
+      round_output: opt.round_output,
       tdb: opt.tdb,
       with_solar_load: opt.with_solar_load,
     },
@@ -90,8 +90,8 @@ export function wbgt(twb, tg, options) {
     t_wbg = 0.7 * twb + 0.3 * tg;
   }
 
-  if (opt.round) {
-    return round(t_wbg, 1);
+  if (opt.round_output) {
+    t_wbg = round(t_wbg, 1);
   }
 
   return { wbgt: t_wbg };

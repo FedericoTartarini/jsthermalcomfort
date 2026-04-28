@@ -95,7 +95,7 @@ export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
     console.warn("Warning:", warn);
   }
 
-  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE");
+  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE").pmv;
   const ppd_val = round(
     (Math.exp(-2.58 + 3.05 * v_ankle - 1.06 * tsv) /
       (1 + Math.exp(-2.58 + 3.05 * v_ankle - 1.06 * tsv))) *

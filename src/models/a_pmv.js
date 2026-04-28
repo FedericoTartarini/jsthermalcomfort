@@ -117,7 +117,7 @@ export function a_pmv(
 
   kwargs = Object.assign(default_kwargs, kwargs);
 
-  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs).pmv;
   _pmv = round(_pmv / (1 + a_coefficient * _pmv), 2);
 
   return { a_pmv: _pmv };

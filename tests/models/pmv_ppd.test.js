@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals";
+import { describe, expect, test } from "@jest/globals";
 import { pmv_ppd } from "../../src/models/pmv_ppd.js";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils.js";
@@ -48,6 +48,34 @@ describe("pmv_pdd", () => {
 
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
+
+  test("round_output: false returns raw unrounded finite values", () => {
+    const result = pmv_ppd(25, 25, 0.3, 50, 1.2, 0.5, 0, "ISO", {
+      round_output: false,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+    expect(Number.isFinite(result.ppd)).toBe(true);
+  });
+
+  test("round_output: true rounds pmv to 2 and ppd to 1 decimal places", () => {
+    const raw = pmv_ppd(25, 25, 0.3, 50, 1.2, 0.5, 0, "ISO", {
+      round_output: false,
+    });
+    const rounded = pmv_ppd(25, 25, 0.3, 50, 1.2, 0.5, 0, "ISO", {
+      round_output: true,
+    });
+    expect(rounded.pmv).toBe(parseFloat(raw.pmv.toFixed(2)));
+    expect(rounded.ppd).toBe(parseFloat(raw.ppd.toFixed(1)));
+  });
+
+  test("default behaviour rounds output", () => {
+    const defaultResult = pmv_ppd(25, 25, 0.3, 50, 1.2, 0.5);
+    const roundedResult = pmv_ppd(25, 25, 0.3, 50, 1.2, 0.5, 0, "ISO", {
+      round_output: true,
+    });
+    expect(defaultResult.pmv).toBe(roundedResult.pmv);
+    expect(defaultResult.ppd).toBe(roundedResult.ppd);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -92,6 +120,12 @@ describe("pmv_ppd input validation", () => {
       pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", {
         airspeed_control: "true",
       }),
+    ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if round_output is not a boolean", () => {
+    expect(() =>
+      pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { round_output: "true" }),
     ).toThrow(TypeError);
   });
 });

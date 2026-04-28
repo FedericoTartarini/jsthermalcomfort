@@ -66,4 +66,10 @@ describe("pmv_ppd_iso input validation", () => {
       pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { limit_inputs: "true" }),
     ).toThrow(TypeError);
   });
+
+  test("throws TypeError if kwargs.round_output is not a boolean", () => {
+    expect(() =>
+      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { round_output: "true" }),
+    ).toThrow(TypeError);
+  });
 });

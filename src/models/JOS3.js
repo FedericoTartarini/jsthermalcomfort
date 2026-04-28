@@ -40,7 +40,6 @@ import { local_q_work } from "../jos3_functions/thermoregulation/local_q_work.js
 import { cr_ms_fat_blood_flow } from "../jos3_functions/thermoregulation/cr_ms_fat_blood_flow.js";
 import { resp_heat_loss } from "../jos3_functions/thermoregulation/resp_heat_loss.js";
 import { sum_bf } from "../jos3_functions/thermoregulation/sum_bf.js";
-import Object from "lodash/object.js";
 
 /**
  * Create an array of shape (17,) with the given input.

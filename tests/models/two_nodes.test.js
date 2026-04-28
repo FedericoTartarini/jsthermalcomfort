@@ -62,7 +62,7 @@ describe("two_nodes related tests", () => {
       mergedKwargs,
     );
 
-    const resultSnakeCase = {
+    const actualOutputs = {
       disc: result.disc,
       t_core: result.tCore,
       e_skin: result.eSkin,
@@ -83,7 +83,7 @@ describe("two_nodes related tests", () => {
       t_sens: result.tSens,
     };
 
-    validateResult(resultSnakeCase, outputs, tolerances, inputs);
+    validateResult(actualOutputs, outputs, tolerances, inputs);
   });
 });
 

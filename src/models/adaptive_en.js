@@ -75,6 +75,7 @@ const ADAPTIVE_EN_SCHEMA = {
   v: { type: "number" },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
+  round_output: { type: "boolean", required: false },
 };
 
 export function adaptive_en(
@@ -84,9 +85,23 @@ export function adaptive_en(
   v,
   units = "SI",
   limit_inputs = true,
+  kwargs = {},
 ) {
+  const default_kwargs = {
+    round_output: true,
+  };
+  kwargs = Object.assign(default_kwargs, kwargs);
+
   validateInputs(
-    { tdb, tr, t_running_mean, v, units: units.toUpperCase(), limit_inputs },
+    {
+      tdb,
+      tr,
+      t_running_mean,
+      v,
+      units: units.toUpperCase(),
+      limit_inputs,
+      round_output: kwargs.round_output,
+    },
     ADAPTIVE_EN_SCHEMA,
   );
 
@@ -103,8 +118,6 @@ export function adaptive_en(
 
   const to = t_o(tdb, tr, v, standard);
 
-  const ce = get_ce(v, to);
-
   let t_cmf = 0.33 * t_running_mean + 18.8;
 
   if (limit_inputs) {
@@ -115,9 +128,21 @@ export function adaptive_en(
   let t_cmf_i_lower = t_cmf - 3.0;
   let t_cmf_ii_lower = t_cmf - 4.0;
   let t_cmf_iii_lower = t_cmf - 5.0;
-  let t_cmf_i_upper = t_cmf + 2.0 + ce;
-  let t_cmf_ii_upper = t_cmf + 3.0 + ce;
-  let t_cmf_iii_upper = t_cmf + 4.0 + ce;
+
+  let t_cmf_i_upper = t_cmf + 2.0;
+  let t_cmf_ii_upper = t_cmf + 3.0;
+  let t_cmf_iii_upper = t_cmf + 4.0;
+
+  if (kwargs.round_output) {
+    const ce = get_ce(v, to);
+    t_cmf_i_upper += ce;
+    t_cmf_ii_upper += ce;
+    t_cmf_iii_upper += ce;
+  } else {
+    t_cmf_i_upper += get_ce(v, t_cmf_i_upper);
+    t_cmf_ii_upper += get_ce(v, t_cmf_ii_upper);
+    t_cmf_iii_upper += get_ce(v, t_cmf_iii_upper);
+  }
 
   const acceptability_i = t_cmf_i_lower <= to && to <= t_cmf_i_upper;
   const acceptability_ii = t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
@@ -152,17 +177,32 @@ export function adaptive_en(
     ));
   }
 
+  if (kwargs.round_output) {
+    return {
+      tmp_cmf: round(t_cmf, 1),
+      acceptability_cat_i: acceptability_i,
+      acceptability_cat_ii: acceptability_ii,
+      acceptability_cat_iii: acceptability_iii,
+      tmp_cmf_cat_i_up: round(t_cmf_i_upper, 1),
+      tmp_cmf_cat_ii_up: round(t_cmf_ii_upper, 1),
+      tmp_cmf_cat_iii_up: round(t_cmf_iii_upper, 1),
+      tmp_cmf_cat_i_low: round(t_cmf_i_lower, 1),
+      tmp_cmf_cat_ii_low: round(t_cmf_ii_lower, 1),
+      tmp_cmf_cat_iii_low: round(t_cmf_iii_lower, 1),
+    };
+  }
+
   return {
-    tmp_cmf: round(t_cmf, 1),
+    tmp_cmf: t_cmf,
     acceptability_cat_i: acceptability_i,
     acceptability_cat_ii: acceptability_ii,
     acceptability_cat_iii: acceptability_iii,
-    tmp_cmf_cat_i_up: round(t_cmf_i_upper, 1),
-    tmp_cmf_cat_ii_up: round(t_cmf_ii_upper, 1),
-    tmp_cmf_cat_iii_up: round(t_cmf_iii_upper, 1),
-    tmp_cmf_cat_i_low: round(t_cmf_i_lower, 1),
-    tmp_cmf_cat_ii_low: round(t_cmf_ii_lower, 1),
-    tmp_cmf_cat_iii_low: round(t_cmf_iii_lower, 1),
+    tmp_cmf_cat_i_up: t_cmf_i_upper,
+    tmp_cmf_cat_ii_up: t_cmf_ii_upper,
+    tmp_cmf_cat_iii_up: t_cmf_iii_upper,
+    tmp_cmf_cat_i_low: t_cmf_i_lower,
+    tmp_cmf_cat_ii_low: t_cmf_ii_lower,
+    tmp_cmf_cat_iii_low: t_cmf_iii_lower,
   };
 }
 /**

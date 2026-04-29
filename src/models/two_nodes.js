@@ -66,9 +66,6 @@ import { round, validateInputs } from "../utilities/utilities.js";
  *  - The Predicted Percent Dissatisfied Due to Draft (PD)
  *  - Predicted Percent Satisfied With the Level of Air Movement” (PS)
  * 
- * **Warning:** Some tests are currently failing for this function. Please refer to the test
- * suite or the project's issue tracker for more details.
- * 
  * @public
  * @memberof models
  * @docname Gagge et al. two-node model
@@ -410,9 +407,17 @@ function calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl) {
  * @returns {number} Thermal discomfort
  */
 function calculate_discomfort(eRsw, eComfort, eMax, wMax, eDiff, tSens) {
-  let disc = (4.7 * (eRsw - eComfort)) / (eMax * wMax - eComfort - eDiff);
+  let disc;
+  if (tSens > 0 && eMax * wMax - eComfort - eDiff < 0) {
+    disc = 6.0;
+  } else {
+    disc = (4.7 * (eRsw - eComfort)) / (eMax * wMax - eComfort - eDiff);
+  }
   if (disc <= 0) {
     disc = tSens;
+  }
+  if (disc > 6) {
+    disc = 6.0;
   }
   return disc;
 }

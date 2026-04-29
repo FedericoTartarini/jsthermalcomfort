@@ -76,11 +76,19 @@ export function cooling_effect(
   clo,
   wme = 0,
   units = "SI",
+  threshold = undefined,
+  temp_checked = undefined,
 ) {
   validateInputs(
     { tdb, tr, vr, rh, met, clo, wme, units: units.toUpperCase() },
     COOLING_EFFECT_SCHEMA,
   );
+
+  if (threshold !== undefined && temp_checked !== undefined) {
+    if (temp_checked <= threshold) {
+      return { ce: 0 };
+    }
+  }
 
   if (units.toLowerCase() === "ip") {
     const result = units_converter({ tdb, tr, vr }, "IP");

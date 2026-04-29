@@ -88,6 +88,7 @@ const ADAPTIVE_ASHRAE_SCHEMA = {
   v: { type: "number" },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
+  round_output: { type: "boolean", required: false },
 };
 
 export function adaptive_ashrae(
@@ -97,9 +98,23 @@ export function adaptive_ashrae(
   v,
   units = "SI",
   limit_inputs = true,
+  kwargs = {},
 ) {
+  const default_kwargs = {
+    round_output: true,
+  };
+  kwargs = Object.assign(default_kwargs, kwargs);
+
   validateInputs(
-    { tdb, tr, t_running_mean, v, units: units.toUpperCase(), limit_inputs },
+    {
+      tdb,
+      tr,
+      t_running_mean,
+      v,
+      units: units.toUpperCase(),
+      limit_inputs,
+      round_output: kwargs.round_output,
+    },
     ADAPTIVE_ASHRAE_SCHEMA,
   );
 
@@ -118,9 +133,7 @@ export function adaptive_ashrae(
     }));
   }
   const to = t_o(tdb, tr, v, standard);
-  // calculate cooling effect (ce) of elevated air speed when top > 25 degC.
-  const ce = get_ce(v, to);
-  // Relation between comfort and outdoor temperature
+
   let t_cmf = 0.31 * t_running_mean + 17.8;
 
   if (limit_inputs) {
@@ -144,12 +157,23 @@ export function adaptive_ashrae(
       t_cmf = NaN;
   }
 
-  t_cmf = round(t_cmf, 1);
+  if (kwargs.round_output) {
+    t_cmf = round(t_cmf, 1);
+  }
 
   let tmp_cmf_80_low = t_cmf - 3.5;
   let tmp_cmf_90_low = t_cmf - 2.5;
-  let tmp_cmf_80_up = t_cmf + 3.5 + ce;
-  let tmp_cmf_90_up = t_cmf + 2.5 + ce;
+  let tmp_cmf_80_up = t_cmf + 3.5;
+  let tmp_cmf_90_up = t_cmf + 2.5;
+
+  if (kwargs.round_output) {
+    const ce = get_ce(v, to);
+    tmp_cmf_80_up += ce;
+    tmp_cmf_90_up += ce;
+  } else {
+    tmp_cmf_80_up += get_ce(v, tmp_cmf_80_up);
+    tmp_cmf_90_up += get_ce(v, tmp_cmf_90_up);
+  }
 
   const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
   const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
@@ -171,6 +195,18 @@ export function adaptive_ashrae(
       },
       "SI",
     ));
+  }
+
+  if (kwargs.round_output) {
+    return {
+      tmp_cmf: round(t_cmf, 1),
+      tmp_cmf_80_low: round(tmp_cmf_80_low, 1),
+      tmp_cmf_80_up: round(tmp_cmf_80_up, 1),
+      tmp_cmf_90_low: round(tmp_cmf_90_low, 1),
+      tmp_cmf_90_up: round(tmp_cmf_90_up, 1),
+      acceptability_80,
+      acceptability_90,
+    };
   }
 
   return {

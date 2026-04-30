@@ -12,6 +12,7 @@ import {
   transpose_sharp_altitude,
   assertNumber,
   validateInputs,
+  maskOutOfRange,
 } from "../../src/utilities/utilities";
 import {
   deep_close_to_array,
@@ -596,5 +597,123 @@ describe("validateInputs", () => {
         ),
       ).not.toThrow();
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// maskOutOfRange
+// ---------------------------------------------------------------------------
+describe("maskOutOfRange", () => {
+  it("leaves a scalar value within range untouched", () => {
+    const result = maskOutOfRange({ tdb: 25 }, { tdb: { min: 10, max: 40 } });
+    expect(result.tdb).toBe(25);
+  });
+
+  it("replaces an out-of-range scalar with NaN", () => {
+    const result = maskOutOfRange({ tdb: 45 }, { tdb: { min: 10, max: 40 } });
+    expect(result.tdb).toBeNaN();
+  });
+
+  it("replaces only out-of-range elements in an array", () => {
+    const result = maskOutOfRange(
+      { clo: [0.3, 2.5, 1.0, -0.1] },
+      { clo: { min: 0.0, max: 1.5 } },
+    );
+    expect(result.clo[0]).toBe(0.3);
+    expect(result.clo[1]).toBeNaN();
+    expect(result.clo[2]).toBe(1.0);
+    expect(result.clo[3]).toBeNaN();
+  });
+
+  it("passes a NaN scalar through as NaN", () => {
+    const result = maskOutOfRange({ tdb: NaN }, { tdb: { min: 10, max: 40 } });
+    expect(result.tdb).toBeNaN();
+  });
+
+  it("passes a NaN array element through as NaN at the same index", () => {
+    const result = maskOutOfRange(
+      { tdb: [25, NaN, 30] },
+      { tdb: { min: 10, max: 40 } },
+    );
+    expect(result.tdb[0]).toBe(25);
+    expect(result.tdb[1]).toBeNaN();
+    expect(result.tdb[2]).toBe(30);
+  });
+
+  it("leaves a params key untouched when it has no schema rule", () => {
+    const result = maskOutOfRange(
+      { tdb: 25, units: "SI" },
+      { tdb: { min: 10, max: 40 } },
+    );
+    expect(result.units).toBe("SI");
+  });
+
+  it("does not error and produces no key when the schema names a missing param", () => {
+    const result = maskOutOfRange(
+      { tdb: 25 },
+      { tdb: { min: 10, max: 40 }, met: { min: 1.0, max: 4.0 } },
+    );
+    expect(result.tdb).toBe(25);
+    expect("met" in result).toBe(false);
+  });
+
+  it("returns a fresh object without mutating the input", () => {
+    const params = { tdb: 45, clo: [0.3, 2.5] };
+    const result = maskOutOfRange(params, {
+      tdb: { min: 10, max: 40 },
+      clo: { min: 0.0, max: 1.5 },
+    });
+    expect(result).not.toBe(params);
+    expect(params.tdb).toBe(45);
+    expect(params.clo).toEqual([0.3, 2.5]);
+  });
+
+  it("retains a scalar value at the inclusive lower boundary", () => {
+    const result = maskOutOfRange({ tdb: 10 }, { tdb: { min: 10, max: 40 } });
+    expect(result.tdb).toBe(10);
+  });
+
+  it("retains a scalar value at the inclusive upper boundary", () => {
+    const result = maskOutOfRange({ tdb: 40 }, { tdb: { min: 10, max: 40 } });
+    expect(result.tdb).toBe(40);
+  });
+
+  it("treats array boundaries inclusively and rejects values just outside", () => {
+    const result = maskOutOfRange(
+      { tdb: [10, 40, 9.99, 40.01] },
+      { tdb: { min: 10, max: 40 } },
+    );
+    expect(result.tdb[0]).toBe(10);
+    expect(result.tdb[1]).toBe(40);
+    expect(result.tdb[2]).toBeNaN();
+    expect(result.tdb[3]).toBeNaN();
+  });
+
+  it("masks non-number scalar inputs to NaN for direct utility use", () => {
+    const schema = { tdb: { min: 10, max: 40 } };
+    expect(maskOutOfRange({ tdb: "25" }, schema).tdb).toBeNaN();
+    expect(maskOutOfRange({ tdb: true }, schema).tdb).toBeNaN();
+    expect(maskOutOfRange({ tdb: null }, schema).tdb).toBeNaN();
+    expect(maskOutOfRange({ tdb: undefined }, schema).tdb).toBeNaN();
+    expect(maskOutOfRange({ tdb: Infinity }, schema).tdb).toBeNaN();
+  });
+
+  it("masks non-finite array elements to NaN for direct utility use", () => {
+    const result = maskOutOfRange(
+      { clo: [true, "0.5", null, 2] },
+      { clo: { min: 0, max: 1.5 } },
+    );
+    expect(result.clo[0]).toBeNaN();
+    expect(result.clo[1]).toBeNaN();
+    expect(result.clo[2]).toBeNaN();
+    expect(result.clo[3]).toBeNaN();
+  });
+
+  it("retains an in-range finite-number scalar", () => {
+    const result = maskOutOfRange(
+      { met: 1.2 },
+      { met: { min: 1.0, max: 4.0 } },
+    );
+    expect(result.met).toBe(1.2);
   });
 });

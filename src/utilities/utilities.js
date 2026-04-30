@@ -14,23 +14,6 @@ export function round(number, precision) {
 }
 
 /**
- * @typedef {Object} ComplianceKwargs
- * @property {number} [met]
- * @property {number} [clo]
- * @property {number} [tdb]
- * @property {number} [tr]
- * @property {number} [v]
- * @property {number} [vr]
- * @property {number} [v_limited]
- * @property {number} [rh]
- * @property {boolean} [airspeed_control]
- */
-
-/**
- * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "ISO" | "ISO7933"} Standard
- */
-
-/**
  * Converts degrees to radians
  *
  * @param {number} degrees
@@ -75,9 +58,26 @@ export function transpose_sharp_altitude(sharp, altitude) {
 }
 
 /**
+ * @typedef {Object} ComplianceKwargs
+ * @property {number} [met]
+ * @property {number} [clo]
+ * @property {number} [tdb]
+ * @property {number} [tr]
+ * @property {number} [v]
+ * @property {number} [vr]
+ * @property {number} [v_limited]
+ * @property {number} [rh]
+ * @property {boolean} [airspeed_control]
+ */
+
+/**
+ * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "FAN_HEATWAVES" | "ISO" | "ISO7933"} Standard
+ */
+
+/**
  * Check that the values comply with the standard provided
  *
- * @param {Standard | "FAN_HEATWAVES"} standard
+ * @param {Standard} standard
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted
@@ -214,7 +214,6 @@ function _fan_heatwaves_compliance(kwargs) {
           );
         break;
       case "v":
-      case "vr":
         if (value > 4.5 || value < 0.1)
           warnings.push(
             "Fan use during heatwaves air speed applicability limits between 0.1 and 4.5 m/s",

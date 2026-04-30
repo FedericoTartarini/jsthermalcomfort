@@ -1,6 +1,6 @@
 import {
   units_converter,
-  check_standard_compliance_array,
+  check_standard_compliance,
   round,
   validateInputs,
 } from "../utilities/utilities.js";
@@ -213,27 +213,15 @@ export function use_fans_heatwaves(
   Object.assign(joint_output, heatwave_output);
 
   if (joint_kwargs.limit_inputs) {
-    const {
-      tdb: tdb_valid,
-      tr: tr_valid,
-      v: v_valid,
-      met: met_valid,
-      clo: clo_valid,
-    } = check_standard_compliance_array("FAN_HEATWAVES", {
-      tdb: [tdb],
-      tr: [tr],
-      v: [v],
-      met: [met],
-      clo: [clo],
+    const warnings = check_standard_compliance("FAN_HEATWAVES", {
+      tdb,
+      tr,
+      v,
+      met,
+      clo,
     });
 
-    if (
-      isNaN(tdb_valid[0]) ||
-      isNaN(tr_valid[0]) ||
-      isNaN(v_valid[0]) ||
-      isNaN(met_valid[0]) ||
-      isNaN(clo_valid[0])
-    ) {
+    if (warnings.length > 0) {
       for (let key in joint_output) {
         if (
           key === "heat_strain" ||

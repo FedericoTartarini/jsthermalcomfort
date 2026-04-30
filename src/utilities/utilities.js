@@ -1,5 +1,5 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
-import { t_o_array } from "../psychrometrics/t_o.js";
+import { t_o } from "../psychrometrics/t_o.js";
 
 /**
  * Rounds a number to the given precision.
@@ -12,33 +12,6 @@ export function round(number, precision) {
   const smudge = 10 ** precision;
   return Math.round(number * smudge) / smudge;
 }
-
-/**
- * @typedef {Object} ComplianceKwargs
- * @property {number} [met]
- * @property {number} [clo]
- * @property {number} [tdb]
- * @property {number} [tr]
- * @property {number} [v]
- * @property {number} [vr]
- * @property {number} [v_limited]
- * @property {number} [rh]
- */
-
-/**
- * @typedef {Object} ComplianceKwargsArray
- * @property {number[]} [met]
- * @property {number[]} [clo]
- * @property {number[]} [tdb]
- * @property {number[]} [tr]
- * @property {number[]} [v]
- * @property {number[]} [v_limited]
- * @property {number[]} [rh]
- */
-
-/**
- * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "ISO" | "ISO7933"} Standard
- */
 
 /**
  * Converts degrees to radians
@@ -85,6 +58,23 @@ export function transpose_sharp_altitude(sharp, altitude) {
 }
 
 /**
+ * @typedef {Object} ComplianceKwargs
+ * @property {number} [met]
+ * @property {number} [clo]
+ * @property {number} [tdb]
+ * @property {number} [tr]
+ * @property {number} [v]
+ * @property {number} [vr]
+ * @property {number} [v_limited]
+ * @property {number} [rh]
+ * @property {boolean} [airspeed_control]
+ */
+
+/**
+ * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "FAN_HEATWAVES" | "ISO" | "ISO7933"} Standard
+ */
+
+/**
  * Check that the values comply with the standard provided
  *
  * @param {Standard} standard
@@ -98,101 +88,14 @@ export function check_standard_compliance(standard, kwargs) {
       return _ankle_draft_compliance(kwargs);
     case "ASHRAE":
       return _ashrae_compliance(kwargs);
+    case "FAN_HEATWAVES":
+      return _fan_heatwaves_compliance(kwargs);
     case "ISO":
       return _iso_compliance(kwargs);
     case "ISO7933":
       return _iso7933_compliance(kwargs);
     default:
       throw new Error("Unknown standard");
-  }
-}
-
-/**
- * @typedef {Object.<string, number[]>} CheckStandardComplianceResult
- * @property {number[]} tdb
- * @property {number[]} tr
- * @property {number[]} v
- * @property {number[]} [met]
- * @property {number[]} [clo]
- * @property {number[]} [rh]
- */
-
-/**
- * Check that the values as an array comply with the standard provided and returns arrays where
- * the values that do not comply are NaN
- * @see {@link check_standard_compliance} for scalar variant that returns warnings
- *
- * @param {Standard | "FAN_HEATWAVES"} standard - standard to check compliance with
- * @param {ComplianceKwargsArray & {airspeed_control?: boolean}} kwargs - values to check compliance against
- *
- * @returns {CheckStandardComplianceResult} filtered arrays based on compliance limits
- */
-export function check_standard_compliance_array(standard, kwargs) {
-  const default_kwargs = { airspeed_control: true };
-  kwargs = Object.assign(default_kwargs, kwargs);
-
-  switch (standard) {
-    case "ISO7933":
-    case "ANKLE_DRAFT":
-      throw new Error(`Unsupported standard ${standard}`);
-    case "ASHRAE": {
-      // based on table 7.3.4 ashrae 55 2020
-      const tdb = valid_range(kwargs.tdb, [10.0, 40.0]);
-      const tr = valid_range(kwargs.tr, [10.0, 40.0]);
-      let original_v = kwargs.v || [];
-      let v = valid_range(kwargs.v, [0.0, 2.0]);
-      if (!kwargs.airspeed_control) {
-        const met_aux = kwargs.met || [];
-        const clo_aux = kwargs.clo || [];
-        v = v.map((_v, index) =>
-          original_v[index] > 0.8 &&
-          clo_aux[index] < 0.7 &&
-          met_aux[index] < 1.3
-            ? NaN
-            : _v,
-        );
-        const to = t_o_array(tdb, tr, original_v);
-        v = v.map((_v, index) => {
-          const limit =
-            50.49 - 4.4047 * to[index] + 0.096425 * to[index] * to[index];
-          return (23 < to[index] &&
-            to[index] < 25.5 &&
-            original_v[index] > limit &&
-            clo_aux[index] < 0.7 &&
-            met_aux[index] < 1.3) ||
-            (to[index] <= 23 &&
-              original_v[index] > 0.2 &&
-              clo_aux[index] < 0.7 &&
-              met_aux[index] < 1.3)
-            ? NaN
-            : _v;
-        });
-      }
-      if (kwargs.met !== undefined) {
-        const met = valid_range(kwargs.met, [1.0, 4.0]);
-        const clo = valid_range(kwargs.clo, [0.0, 1.5]);
-        return { tdb, tr, v, met, clo };
-      }
-      return { tdb, tr, v };
-    }
-    case "FAN_HEATWAVES": {
-      const tdb = valid_range(kwargs.tdb, [20.0, 50.0]);
-      const tr = valid_range(kwargs.tr, [20.0, 50.0]);
-      const v = valid_range(kwargs.v, [0.1, 4.5]);
-      const rh = valid_range(kwargs.rh, [0, 100]);
-      const met = valid_range(kwargs.met, [0.7, 2]);
-      const clo = valid_range(kwargs.clo, [0.0, 1]);
-      return { tdb, tr, v, rh, met, clo };
-    }
-    case "ISO": {
-      // based on ISO 7730:2005 page 3
-      const tdb = valid_range(kwargs.tdb, [10.0, 30.0]);
-      const tr = valid_range(kwargs.tr, [10.0, 40.0]);
-      const v = valid_range(kwargs.v, [0.0, 1.0]);
-      const met = valid_range(kwargs.met, [0.8, 4.0]);
-      const clo = valid_range(kwargs.clo, [0.0, 2]);
-      return { tdb, tr, v, met, clo };
-    }
   }
 }
 
@@ -261,6 +164,81 @@ function _ashrae_compliance(kwargs) {
         break;
     }
   }
+
+  // Cross-field check (ASHRAE 55 table 7.3.4): when the occupant cannot
+  // control the airspeed, v has additional upper limits that depend on the
+  // operative temperature, clo and met.
+  if (
+    kwargs.airspeed_control === false &&
+    kwargs.v !== undefined &&
+    kwargs.met !== undefined &&
+    kwargs.clo !== undefined &&
+    kwargs.tdb !== undefined &&
+    kwargs.tr !== undefined
+  ) {
+    const v = kwargs.v;
+    const met = kwargs.met;
+    const clo = kwargs.clo;
+    const to = t_o(kwargs.tdb, kwargs.tr, v);
+    const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
+    const violates =
+      (v > 0.8 && clo < 0.7 && met < 1.3) ||
+      (to > 23 && to < 25.5 && v > v_limit && clo < 0.7 && met < 1.3) ||
+      (to <= 23 && v > 0.2 && clo < 0.7 && met < 1.3);
+    if (violates)
+      warnings.push(
+        "ASHRAE air speed applicability limits when the occupant does not control the airspeed",
+      );
+  }
+
+  return warnings;
+}
+
+/**
+ * @param {ComplianceKwargs} kwargs
+ *
+ * @returns {string[]} strings with warnings emitted
+ */
+function _fan_heatwaves_compliance(kwargs) {
+  /** @type {string[]} */
+  let warnings = [];
+  for (const [key, value] of Object.entries(kwargs)) {
+    if (value === undefined) continue;
+    switch (key) {
+      case "tdb":
+      case "tr":
+        let parameter = key === "tdb" ? "dry-bulb" : "mean radiant";
+        if (value > 50 || value < 20)
+          warnings.push(
+            `Fan use during heatwaves ${parameter} temperature applicability limits between 20 and 50 ºC`,
+          );
+        break;
+      case "v":
+        if (value > 4.5 || value < 0.1)
+          warnings.push(
+            "Fan use during heatwaves air speed applicability limits between 0.1 and 4.5 m/s",
+          );
+        break;
+      case "rh":
+        if (value > 100 || value < 0)
+          warnings.push(
+            "Fan use during heatwaves rh applicability limits between 0 and 100 %",
+          );
+        break;
+      case "met":
+        if (value > 2 || value < 0.7)
+          warnings.push(
+            "Fan use during heatwaves met applicability limits between 0.7 and 2 met",
+          );
+        break;
+      case "clo":
+        if (value > 1 || value < 0)
+          warnings.push(
+            "Fan use during heatwaves clo applicability limits between 0 and 1 clo",
+          );
+        break;
+    }
+  }
   return warnings;
 }
 
@@ -282,7 +260,7 @@ function _iso_compliance(kwargs) {
       warnings.push(
         "ISO mean radiant temperature applicability limits between 10 and 40 ºC",
       );
-    if (key === "v" || (key === "vr" && (value > 1 || value < 0)))
+    if ((key === "v" || key === "vr") && (value > 1 || value < 0))
       warnings.push("ISO air speed applicability limits between 0 and 1 m/s");
     if (key === "met" && (value > 4 || value < 0))
       warnings.push("ISO met applicability limits between 0.8 and 4.0 met");

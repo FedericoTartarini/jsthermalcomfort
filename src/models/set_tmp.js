@@ -1,6 +1,6 @@
 import { two_nodes } from "../models/two_nodes.js";
 import {
-  check_standard_compliance_array,
+  check_standard_compliance,
   round,
   units_converter,
   validateInputs,
@@ -157,27 +157,15 @@ export function set_tmp(
   }
 
   if (limit_inputs) {
-    const {
-      tdb: tdb_valid,
-      tr: tr_valid,
-      v: v_valid,
-      met: met_valid,
-      clo: clo_valid,
-    } = check_standard_compliance_array("ASHRAE", {
-      tdb: [tdb],
-      tr: [tr],
-      v: [v],
-      met: [met],
-      clo: [clo],
+    const warnings = check_standard_compliance("ASHRAE", {
+      tdb,
+      tr,
+      v,
+      met,
+      clo,
     });
 
-    if (
-      isNaN(tdb_valid[0]) ||
-      isNaN(tr_valid[0]) ||
-      isNaN(v_valid[0]) ||
-      isNaN(met_valid[0]) ||
-      isNaN(clo_valid[0])
-    ) {
+    if (warnings.length > 0) {
       set_tmp = NaN;
     }
   }

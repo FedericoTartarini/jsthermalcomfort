@@ -1,5 +1,5 @@
 import {
-  check_standard_compliance_array,
+  check_standard_compliance,
   round,
   units_converter,
   valid_range,
@@ -167,18 +167,12 @@ export function pmv_ppd(
     ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
   }
 
-  const {
-    tdb: tdb_valid,
-    tr: tr_valid,
-    v: v_valid,
-    met: met_valid,
-    clo: clo_valid,
-  } = check_standard_compliance_array(standard, {
-    tdb: [tdb],
-    tr: [tr],
-    v: [vr],
-    met: [met],
-    clo: [clo],
+  const compliance_warnings = check_standard_compliance(standard, {
+    tdb,
+    tr,
+    v: vr,
+    met,
+    clo,
     airspeed_control: kwargs.airspeed_control,
   });
   let ce = 0;
@@ -206,11 +200,7 @@ export function pmv_ppd(
 
     if (
       isNaN(pmv) ||
-      tdb_valid.includes(NaN) ||
-      tr_valid.includes(NaN) ||
-      v_valid.includes(NaN) ||
-      met_valid.includes(NaN) ||
-      clo_valid.includes(NaN) ||
+      compliance_warnings.length > 0 ||
       pmv_valid.includes(NaN)
     ) {
       pmv = NaN;

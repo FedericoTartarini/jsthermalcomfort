@@ -1,6 +1,6 @@
 import { t_o } from "../psychrometrics/t_o.js";
 import {
-  check_standard_compliance_array,
+  check_standard_compliance,
   round,
   units_converter,
   validateInputs,
@@ -124,24 +124,9 @@ export function adaptive_ashrae(
   let t_cmf = 0.31 * t_running_mean + 17.8;
 
   if (limit_inputs) {
-    const {
-      tdb: tdb_valid,
-      tr: tr_valid,
-      v: v_valid,
-    } = check_standard_compliance_array(standard, {
-      tdb: [tdb],
-      tr: [tr],
-      v: [v],
-    });
-    const trm_valid =
-      t_running_mean >= 10.0 && t_running_mean <= 33.5 ? t_running_mean : NaN;
-    if (
-      isNaN(tdb_valid[0]) ||
-      isNaN(tr_valid[0]) ||
-      isNaN(v_valid[0]) ||
-      isNaN(trm_valid)
-    )
-      t_cmf = NaN;
+    const warnings = check_standard_compliance(standard, { tdb, tr, v });
+    const trm_valid = t_running_mean >= 10.0 && t_running_mean <= 33.5;
+    if (warnings.length > 0 || !trm_valid) t_cmf = NaN;
   }
 
   t_cmf = round(t_cmf, 1);

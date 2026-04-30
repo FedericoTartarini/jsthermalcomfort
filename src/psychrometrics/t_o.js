@@ -27,36 +27,6 @@ export function t_o(tdb, tr, v, standard = "ISO") {
 }
 
 /**
- * Calculates operative temperature in accordance with ISO 7726:1998 {@link #ref_5|[5]}.
- *
- * @public
- * @memberof psychrometrics
- *
- * @see {@link t_o} for a version that supports scalar arguments
- *
- * @param {number[]} tdb - air temperature [C]
- * @param {number[]} tr - mean radiant temperature [C]
- * @param {number[]} v - air speed [m/s]
- * @param {("ISO" | "ASHRAE")} standard - the standard to use
- * @returns {number[]} operative temperature [C]
- */
-export function t_o_array(tdb, tr, v, standard = "ISO") {
-  if (tdb.length !== tr.length || tr.length !== v.length) {
-    throw new Error("Provided arrays are not the same lengths");
-  }
-  if (standard === "ISO")
-    return tdb.map((_tdb, index) =>
-      _t_o_calculation_iso(_tdb, tr[index], v[index]),
-    );
-  if (standard === "ASHRAE")
-    return tdb.map((_tdb, index) =>
-      _t_o_calculation_ashrae(_tdb, tr[index], v[index]),
-    );
-
-  throw new Error("standard must be one of ISO or ASHRAE");
-}
-
-/**
  * Runs the ISO t_o calculation for scalar values
  *
  * @param {number} tdb

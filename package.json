@@ -64,5 +64,8 @@
   "dependencies": {
     "mathjs": "^15.2.0",
     "node-fetch": "^3.3.2"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
   }
 }

@@ -770,6 +770,25 @@
                   </section>
                 
                   
+                  <section class='keyline-top-not py2' id='120'>
+                    <h2 class='mt0 '>1.2.0</h2>
+                    
+                    
+                      <section class='py2 clearfix'>
+
+  
+    <ul>
+<li>Removed <code>check_standard_compliance_array</code> from public exports. This is a breaking change for consumers that imported the array helper directly. Internal callers (<code>adaptive_ashrae</code>, <code>pmv_ppd</code>, <code>set_tmp</code>, <code>use_fans_heatwaves</code>) have been migrated to the scalar <code>check_standard_compliance</code> helper, which now also covers the ASHRAE <code>airspeed_control</code> cross-field check (pass <code>airspeed_control: false</code> to enable) and the <code>FAN_HEATWAVES</code> standard.</li>
+<li>Migration: replace <code>check_standard_compliance_array(standard, kwargs)</code> with <code>check_standard_compliance(standard, kwargs)</code> and check <code>warnings.length === 0</code> for compliance.</li>
+<li>Removed <code>t_o_array</code> public export. The function was retained in 1.1.0 as an internal helper for <code>check_standard_compliance_array</code>; with that helper now removed, <code>t_o_array</code> no longer has any in-tree caller. Migration: use scalar <code>t_o</code> instead.</li>
+</ul>
+
+  
+</section>
+                    
+                  </section>
+                
+                  
                   <section class='keyline-top-not py2' id='110-2026-06-31'>
                     <h2 class='mt0 '>1.1.0 (2026-06-31)</h2>
                     
@@ -779,7 +798,7 @@
   
     <ul>
 <li>Removed all <code>*_array</code> function exports from models, utilities and psychrometrics. This is a breaking change compared with previous versions.</li>
-<li>Removed functions: <code>adaptive_ashrae_array</code>, <code>adaptive_en_array</code>, <code>a_pmv_array</code>, <code>athb_array</code>, <code>clo_tout_array</code>, <code>discomfort_index_array</code>, <code>e_pmv_array</code>, <code>pmv_array</code>, <code>pmv_ppd_array</code>, <code>set_tmp_array</code>, <code>two_nodes_array</code>, <code>utci_array</code>, <code>v_relative_array</code>, <code>clo_dynamic_array</code>, <code>units_converter_array</code>, <code>p_sat_torr_array</code>, <code>t_mrt_array</code>, <code>t_o_array</code>.</li>
+<li>Removed functions: <code>adaptive_ashrae_array</code>, <code>adaptive_en_array</code>, <code>a_pmv_array</code>, <code>athb_array</code>, <code>clo_tout_array</code>, <code>discomfort_index_array</code>, <code>e_pmv_array</code>, <code>pmv_array</code>, <code>pmv_ppd_array</code>, <code>set_tmp_array</code>, <code>two_nodes_array</code>, <code>utci_array</code>, <code>v_relative_array</code>, <code>clo_dynamic_array</code>, <code>units_converter_array</code>, <code>p_sat_torr_array</code>, <code>t_mrt_array</code>.</li>
 <li>Migration: use <code>Array.map()</code> with the scalar equivalent. See PR #141 for before/after examples.</li>
 </ul>
 
@@ -899,6 +918,12 @@
                       <ul class="visible nav section-nav flex-column">
                         
                           
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#120">1.2.0</a>
+                            
+                          </li>
+                        
                           
                           <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#110-2026-06-31">1.1.0 (2026-06-31)</a>

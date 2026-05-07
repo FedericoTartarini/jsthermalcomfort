@@ -217,11 +217,18 @@ export function phs(
   const met_watt = met * MET_WATT_PER_MET;
   const wme_watt = wme * MET_WATT_PER_MET;
 
-  const warnings = check_standard_compliance("ISO7933", {
+  let p_a;
+  if (model === "7933-2023") {
+    p_a = 0.6105 * Math.exp((17.27 * tdb) / (tdb + 237.3)) * (rh / 100);
+  } else {
+    p_a = ((p_sat(tdb) / 1000) * rh) / 100;
+  }
+
+  const warnings = check_standard_compliance(model, {
     tdb,
     tr,
     v,
-    rh,
+    p_a,
     met: met_watt * body_surface_area(joint_kwargs.weight, joint_kwargs.height),
     clo,
   });
@@ -240,13 +247,6 @@ export function phs(
       sweat_loss_g: NaN,
       evap_load_wm2_min: NaN,
     };
-  }
-
-  let p_a;
-  if (model === "7933-2023") {
-    p_a = 0.6105 * Math.exp((17.27 * tdb) / (tdb + 237.3)) * (rh / 100);
-  } else {
-    p_a = ((p_sat(tdb) / 1000) * rh) / 100;
   }
 
   const variables_for_loop = _calculate_variables_for_loop(

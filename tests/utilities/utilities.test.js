@@ -508,14 +508,19 @@ describe("validateInputs", () => {
 // check_standard_compliance ISO7933
 // ---------------------------------------------------------------------------
 describe("check_standard_compliance ISO7933", () => {
-  const base = { tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 272, clo: 0.5 };
+  // tdb=40, rh=33.85 → p_a ≈ 2.5 kPa (valid for both 2004 and 2023)
+  const base = { tdb: 40, tr: 40, v: 0.3, p_a: 2.5, met: 272, clo: 0.5 };
 
-  test("returns no warnings for valid inputs", () => {
-    expect(check_standard_compliance("ISO7933", base)).toHaveLength(0);
+  test("returns no warnings for valid inputs (2004)", () => {
+    expect(check_standard_compliance("7933-2004", base)).toHaveLength(0);
+  });
+
+  test("returns no warnings for valid inputs (2023)", () => {
+    expect(check_standard_compliance("7933-2023", base)).toHaveLength(0);
   });
 
   test("warns when tr < 0 (fixed: was checking tr - tdb)", () => {
-    const warnings = check_standard_compliance("ISO7933", {
+    const warnings = check_standard_compliance("7933-2004", {
       ...base,
       tr: -5,
     });
@@ -524,7 +529,7 @@ describe("check_standard_compliance ISO7933", () => {
   });
 
   test("warns when tr > 60 (fixed: was checking tr - tdb)", () => {
-    const warnings = check_standard_compliance("ISO7933", {
+    const warnings = check_standard_compliance("7933-2004", {
       ...base,
       tr: 65,
     });
@@ -534,21 +539,34 @@ describe("check_standard_compliance ISO7933", () => {
 
   test("does not warn when tr < tdb but tr is within [0, 60]", () => {
     // tr=20 < tdb=40, old buggy check (tr-tdb < 0) would have warned
-    const warnings = check_standard_compliance("ISO7933", {
+    const warnings = check_standard_compliance("7933-2004", {
       ...base,
       tr: 20,
     });
     expect(warnings).toHaveLength(0);
   });
 
-  test("warns when p_a > 4.5 kPa (fixed: was comparing kPa against %)", () => {
-    // tdb=40, rh=90 → p_a ≈ 6.6 kPa > 4.5
-    const warnings = check_standard_compliance("ISO7933", {
+  test("warns when p_a > 4.5 kPa", () => {
+    const warnings = check_standard_compliance("7933-2004", {
       ...base,
-      rh: 90,
+      p_a: 6.6,
     });
     expect(warnings.length).toBeGreaterThan(0);
     expect(warnings[0]).toMatch(/p_a/i);
+  });
+
+  test("warns when p_a < 0.5 kPa for 2023 but not for 2004", () => {
+    const warnings2004 = check_standard_compliance("7933-2004", {
+      ...base,
+      p_a: 0.2,
+    });
+    const warnings2023 = check_standard_compliance("7933-2023", {
+      ...base,
+      p_a: 0.2,
+    });
+    expect(warnings2004).toHaveLength(0);
+    expect(warnings2023.length).toBeGreaterThan(0);
+    expect(warnings2023[0]).toMatch(/p_a/i);
   });
 });
 

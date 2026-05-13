@@ -504,55 +504,59 @@ describe("validateInputs", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// check_standard_compliance ISO7933
-// ---------------------------------------------------------------------------
-describe("check_standard_compliance ISO7933", () => {
-  const base = { tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 272, clo: 0.5 };
-
-  test("returns no warnings for valid inputs", () => {
-    expect(check_standard_compliance("ISO7933", base)).toHaveLength(0);
-  });
-
-  test("warns when tr < 0 (fixed: was checking tr - tdb)", () => {
-    const warnings = check_standard_compliance("ISO7933", {
-      ...base,
-      tr: -5,
-    });
-    expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings[0]).toMatch(/tr/i);
-  });
-
-  test("warns when tr > 60 (fixed: was checking tr - tdb)", () => {
-    const warnings = check_standard_compliance("ISO7933", {
-      ...base,
-      tr: 65,
-    });
-    expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings[0]).toMatch(/tr/i);
-  });
-
-  test("does not warn when tr < tdb but tr is within [0, 60]", () => {
-    // tr=20 < tdb=40, old buggy check (tr-tdb < 0) would have warned
-    const warnings = check_standard_compliance("ISO7933", {
-      ...base,
-      tr: 20,
-    });
-    expect(warnings).toHaveLength(0);
-  });
-
-  test("warns when p_a > 4.5 kPa (fixed: was comparing kPa against %)", () => {
-    // tdb=40, rh=90 → p_a ≈ 6.6 kPa > 4.5
-    const warnings = check_standard_compliance("ISO7933", {
-      ...base,
-      rh: 90,
-    });
-    expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings[0]).toMatch(/p_a/i);
-  });
-});
-
 describe("check_standard_compliance", () => {
+  // ---------------------------------------------------------------------------
+  // ISO 7933 (2004 and 2023)
+  // ---------------------------------------------------------------------------
+  describe("ISO 7933 compliance", () => {
+    // tdb=40, tr=40, v=0.3, p_a=2.5 kPa, met=272, clo=0.5 — valid for both standards
+    const base = { tdb: 40, tr: 40, v: 0.3, p_a: 2.5, met: 272, clo: 0.5 };
+
+    test("returns no warnings for valid inputs (2004)", () => {
+      expect(check_standard_compliance("7933-2004", base)).toHaveLength(0);
+    });
+
+    test("returns no warnings for valid inputs (2023)", () => {
+      expect(check_standard_compliance("7933-2023", base)).toHaveLength(0);
+    });
+
+    // Shared boundary conditions — limits are identical for both standards,
+    // so testing with one model is sufficient.
+    it.each([
+      ["tdb < 15 ºC", { tdb: 10 }],
+      ["tdb > 50 ºC", { tdb: 55 }],
+      ["tr < 0 ºC (fixed: was checking tr - tdb)", { tr: -5 }],
+      ["tr > 60 ºC (fixed: was checking tr - tdb)", { tr: 65 }],
+      ["v > 3 m/s", { v: 4 }],
+      ["met < 100 W/m²", { met: 50 }],
+      ["met > 450 W/m²", { met: 500 }],
+      ["clo < 0.1", { clo: 0.05 }],
+      ["clo > 1", { clo: 1.5 }],
+      ["p_a > 4.5 kPa", { p_a: 6.6 }],
+    ])("warns when %s", (_, override) => {
+      const warnings = check_standard_compliance("7933-2004", {
+        ...base,
+        ...override,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+    });
+
+    test("does not warn when tr < tdb but tr is within [0, 60]", () => {
+      // tr=20 < tdb=40; old buggy check (tr-tdb < 0) would have warned
+      expect(
+        check_standard_compliance("7933-2004", { ...base, tr: 20 }),
+      ).toHaveLength(0);
+    });
+
+    test("warns when p_a < 0.5 kPa for 2023 but not for 2004 (diverging lower bound)", () => {
+      // 2004 lower limit is 0 kPa; 2023 lower limit is 0.5 kPa
+      const input = { ...base, p_a: 0.2 };
+      expect(check_standard_compliance("7933-2004", input)).toHaveLength(0);
+      const warnings2023 = check_standard_compliance("7933-2023", input);
+      expect(warnings2023.length).toBeGreaterThan(0);
+      expect(warnings2023[0]).toMatch(/p_a/i);
+    });
+  });
   describe("ASHRAE airspeed_control branch", () => {
     it("flags v > 0.8 with low clo and met when occupant has no airspeed control", () => {
       const warnings = check_standard_compliance("ASHRAE", {

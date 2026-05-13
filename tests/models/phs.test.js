@@ -274,4 +274,18 @@ describe("phs scalar tests — inputs outside ISO 7933 applicability limits retu
       expect(Number.isFinite(result[key])).toBe(true),
     );
   });
+
+  test("returns all NaN when p_a < 0.5 kPa with model 7933-2023 (2023 lower limit)", () => {
+    // tdb=20, rh=5 → p_a ≈ 0.12 kPa, valid for 2004 (≥ 0) but invalid for 2023 (< 0.5)
+    const result = phs(20, 20, 0.3, 5, 2.5, 0.5, "standing", 0, "7933-2023");
+    NAN_RESULT_KEYS.forEach((key) => expect(result[key]).toBeNaN());
+  });
+
+  test("returns finite results when p_a < 0.5 kPa with model 7933-2004 (2004 lower limit is 0)", () => {
+    // same input, 2004 accepts p_a ≥ 0
+    const result = phs(20, 20, 0.3, 5, 2.5, 0.5, "standing", 0, "7933-2004");
+    NAN_RESULT_KEYS.forEach((key) =>
+      expect(Number.isFinite(result[key])).toBe(true),
+    );
+  });
 });

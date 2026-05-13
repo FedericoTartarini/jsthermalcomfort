@@ -71,7 +71,19 @@ export function transpose_sharp_altitude(sharp, altitude) {
  */
 
 /**
- * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "FAN_HEATWAVES" | "ISO" | "ISO7933"} Standard
+ * Standard names accepted by {@link check_standard_compliance}.
+ */
+export const Standard = Object.freeze({
+  ANKLE_DRAFT: "ANKLE_DRAFT",
+  ASHRAE: "ASHRAE",
+  FAN_HEATWAVES: "FAN_HEATWAVES",
+  ISO: "ISO",
+  ISO_7933_2004: "7933-2004",
+  ISO_7933_2023: "7933-2023",
+});
+
+/**
+ * @typedef {(typeof Standard)[keyof typeof Standard]} Standard
  */
 
 /**
@@ -84,16 +96,18 @@ export function transpose_sharp_altitude(sharp, altitude) {
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case "ANKLE_DRAFT":
+    case Standard.ANKLE_DRAFT:
       return _ankle_draft_compliance(kwargs);
-    case "ASHRAE":
+    case Standard.ASHRAE:
       return _ashrae_compliance(kwargs);
-    case "FAN_HEATWAVES":
+    case Standard.FAN_HEATWAVES:
       return _fan_heatwaves_compliance(kwargs);
-    case "ISO":
+    case Standard.ISO:
       return _iso_compliance(kwargs);
-    case "ISO7933":
-      return _iso7933_compliance(kwargs);
+    case Standard.ISO_7933_2004:
+      return _iso7933_2004_compliance(kwargs);
+    case Standard.ISO_7933_2023:
+      return _iso7933_2023_compliance(kwargs);
     default:
       throw new Error("Unknown standard");
   }
@@ -275,17 +289,18 @@ function _iso_compliance(kwargs) {
  *
  * @returns {string[]} strings with warnings emitted
  */
-function _iso7933_compliance(kwargs) {
+function _iso7933_2004_compliance(kwargs) {
+  // based on ISO 7933:2004 Annex A
   if (
     kwargs.tdb === undefined ||
-    kwargs.rh === undefined ||
+    kwargs.p_a === undefined ||
     kwargs.tr === undefined ||
     kwargs.v === undefined ||
     kwargs.met === undefined ||
     kwargs.clo === undefined
   ) {
     throw new Error(
-      `Missing arguments for ISO7933 compliance check, got: ${kwargs} and requires tdb, rh, tr, v, met and clo`,
+      `Missing arguments for ISO 7933:2004 compliance check, got: ${kwargs} and requires tdb, p_a, tr, v, met and clo`,
     );
   }
   /** @type {string[]} */
@@ -295,11 +310,7 @@ function _iso7933_compliance(kwargs) {
     warnings.push(
       "ISO 7933:2004 air temperature applicability limits between 15 and 50 ºC",
     );
-
-  const p_sat_result = p_sat(kwargs.tdb);
-  const p_a = ((p_sat_result / 1000) * kwargs.rh) / 100;
-
-  if (p_a > 4.5 || p_a < 0)
+  if (kwargs.p_a > 4.5 || kwargs.p_a < 0)
     warnings.push(
       "ISO 7933:2004 p_a applicability limits between 0 and 4.5 kPa",
     );
@@ -316,6 +327,48 @@ function _iso7933_compliance(kwargs) {
   if (kwargs.clo > 1 || kwargs.clo < 0.1)
     warnings.push(
       "ISO 7933:2004 clo applicability limits between 0.1 and 1 clo",
+    );
+  return warnings;
+}
+
+function _iso7933_2023_compliance(kwargs) {
+  // based on ISO 7933:2023 Annex A
+  if (
+    kwargs.tdb === undefined ||
+    kwargs.p_a === undefined ||
+    kwargs.tr === undefined ||
+    kwargs.v === undefined ||
+    kwargs.met === undefined ||
+    kwargs.clo === undefined
+  ) {
+    throw new Error(
+      `Missing arguments for ISO 7933:2023 compliance check, got: ${kwargs} and requires tdb, p_a, tr, v, met and clo`,
+    );
+  }
+  /** @type {string[]} */
+  let warnings = [];
+
+  if (kwargs.tdb > 50 || kwargs.tdb < 15)
+    warnings.push(
+      "ISO 7933:2023 air temperature applicability limits between 15 and 50 ºC",
+    );
+  if (kwargs.p_a > 4.5 || kwargs.p_a < 0.5)
+    warnings.push(
+      "ISO 7933:2023 p_a applicability limits between 0.5 and 4.5 kPa",
+    );
+  if (kwargs.tr > 60 || kwargs.tr < 0)
+    warnings.push("ISO 7933:2023 tr applicability limits between 0 and 60 ºC");
+  if (kwargs.v > 3 || kwargs.v < 0)
+    warnings.push(
+      "ISO 7933:2023 air speed applicability limits between 0 and 3 m/s",
+    );
+  if (kwargs.met > 450 || kwargs.met < 100)
+    warnings.push(
+      "ISO 7933:2023 met applicability limits between 100 and 450 met",
+    );
+  if (kwargs.clo > 1 || kwargs.clo < 0.1)
+    warnings.push(
+      "ISO 7933:2023 clo applicability limits between 0.1 and 1 clo",
     );
   return warnings;
 }

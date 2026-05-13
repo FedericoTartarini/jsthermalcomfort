@@ -71,7 +71,19 @@ export function transpose_sharp_altitude(sharp, altitude) {
  */
 
 /**
- * @typedef {"ANKLE_DRAFT" | "ASHRAE" | "FAN_HEATWAVES" | "ISO" | "7933-2004" | "7933-2023"} Standard
+ * Standard names accepted by {@link check_standard_compliance}.
+ */
+export const Standard = Object.freeze({
+  ANKLE_DRAFT: "ANKLE_DRAFT",
+  ASHRAE: "ASHRAE",
+  FAN_HEATWAVES: "FAN_HEATWAVES",
+  ISO: "ISO",
+  ISO_7933_2004: "7933-2004",
+  ISO_7933_2023: "7933-2023",
+});
+
+/**
+ * @typedef {(typeof Standard)[keyof typeof Standard]} Standard
  */
 
 /**
@@ -84,17 +96,17 @@ export function transpose_sharp_altitude(sharp, altitude) {
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case "ANKLE_DRAFT":
+    case Standard.ANKLE_DRAFT:
       return _ankle_draft_compliance(kwargs);
-    case "ASHRAE":
+    case Standard.ASHRAE:
       return _ashrae_compliance(kwargs);
-    case "FAN_HEATWAVES":
+    case Standard.FAN_HEATWAVES:
       return _fan_heatwaves_compliance(kwargs);
-    case "ISO":
+    case Standard.ISO:
       return _iso_compliance(kwargs);
-    case "7933-2004":
+    case Standard.ISO_7933_2004:
       return _iso7933_2004_compliance(kwargs);
-    case "7933-2023":
+    case Standard.ISO_7933_2023:
       return _iso7933_2023_compliance(kwargs);
     default:
       throw new Error("Unknown standard");

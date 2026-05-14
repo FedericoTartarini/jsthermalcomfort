@@ -19,10 +19,7 @@ import { round, validateInputs } from "../utilities/utilities.js";
  *
  * @param {number} tdb - dry-bulb air temperature, [°C]
  * @param {number} v - wind speed 10 m above ground level, [km/h]
- * @param {object} [kwargs] (Optional) Other parameters.
- * @param {boolean} [kwargs.round_output=true] - if true, rounds the
- *   returned value to one decimal place; if false, returns the unrounded
- *   value.
+ * @param {boolean} [round_output=true] - if true, rounds the returned value to one decimal place; if false, returns the unrounded value.
  * @returns {{wct: number}} wind chill temperature, [°C]
  */
 const WCT_SCHEMA = {
@@ -31,10 +28,8 @@ const WCT_SCHEMA = {
   round_output: { type: "boolean", required: false },
 };
 
-export function wind_chill_temperature(tdb, v, kwargs = {}) {
-  const options = { round_output: true, ...kwargs };
-
-  validateInputs({ tdb, v, round_output: options.round_output }, WCT_SCHEMA);
+export function wind_chill_temperature(tdb, v, round_output = true) {
+  validateInputs({ tdb, v, round_output }, WCT_SCHEMA);
 
   let wct =
     13.12 +
@@ -42,7 +37,7 @@ export function wind_chill_temperature(tdb, v, kwargs = {}) {
     11.37 * Math.pow(v, 0.16) +
     0.3965 * tdb * Math.pow(v, 0.16);
 
-  if (options.round_output) {
+  if (round_output) {
     wct = round(wct, 1);
   }
   return { wct };

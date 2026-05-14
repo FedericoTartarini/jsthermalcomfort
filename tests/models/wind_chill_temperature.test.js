@@ -28,12 +28,7 @@ describe("test_wind_chill_temperature", () => {
   test.each(testCases)("Test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
     const { tdb, v, round_output } = inputs;
-    // Only build a kwargs object when round_output is explicit in the
-    // row, so rows without that key exercise the function's own default
-    // (true). Without this guard, undefined would coerce to skipping
-    // rounding and silently widen the assertion window.
-    const kwargs = round_output !== undefined ? { round_output } : undefined;
-    const modelResult = wind_chill_temperature(tdb, v, kwargs);
+    const modelResult = wind_chill_temperature(tdb, v, round_output);
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
 });
@@ -46,18 +41,14 @@ describe("test_wind_chill_temperature", () => {
 // binary value.
 describe("wind_chill_temperature unrounded path", () => {
   test("round_output:false returns the full-precision pythermalcomfort value", () => {
-    const result = wind_chill_temperature(-5, 5.5, { round_output: false });
+    const result = wind_chill_temperature(-5, 5.5, false);
     expect(Math.abs(result.wct - -7.527137645688018)).toBeLessThan(1e-10);
   });
 });
 
-// Passing an empty kwargs object must still apply the documented
-// round_output=true default. Without the explicit merge in the function
-// body, kwargs.round_output would be undefined and the branch would
-// silently return an unrounded value.
-describe("wind_chill_temperature kwargs defaults", () => {
-  test("empty kwargs keeps round_output default true", () => {
-    expect(wind_chill_temperature(-5, 5.5, {}).wct).toBe(-7.5);
+describe("wind_chill_temperature round_output default", () => {
+  test("omitting round_output keeps the default true", () => {
+    expect(wind_chill_temperature(-5, 5.5).wct).toBe(-7.5);
   });
 });
 
@@ -70,8 +61,6 @@ describe("wind_chill_temperature input validation", () => {
   });
 
   test("throws TypeError if round_output is not a boolean", () => {
-    expect(() =>
-      wind_chill_temperature(0, 5, { round_output: "true" }),
-    ).toThrow(TypeError);
+    expect(() => wind_chill_temperature(0, 5, "true")).toThrow(TypeError);
   });
 });

@@ -158,6 +158,12 @@ describe("NPM Package", () => {
     );
   });
 
+  it("should have utilities.check_standard_compliance", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty(
+      "check_standard_compliance",
+    );
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });

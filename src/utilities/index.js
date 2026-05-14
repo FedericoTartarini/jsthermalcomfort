@@ -8,6 +8,7 @@ import {
   met_typical_tasks,
   clo_typical_ensembles,
   clo_individual_garments,
+  check_standard_compliance,
 } from "./utilities.js";
 
 /**
@@ -25,6 +26,7 @@ export {
   met_typical_tasks,
   clo_typical_ensembles,
   clo_individual_garments,
+  check_standard_compliance,
 };
 
 export default {
@@ -37,6 +39,7 @@ export default {
   met_typical_tasks,
   clo_typical_ensembles,
   clo_individual_garments,
+  check_standard_compliance,
 };
 
 /**

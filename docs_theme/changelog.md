@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 ## 1.4.0
 
 - Added `wind_chill_temperature(tdb, v)`, which returns the Wind Chill Temperature in °C using the North American formula adopted by the US National Weather Service and Environment Canada. Mirrors `pythermalcomfort` 3.9.3 `wind_chill_temperature`. Wind speed `v` is in km/h, which differs from the existing `wc()` Wind Chill Index that uses m/s. Returns `{ wct }`.
+- Added optional `round_output` parameter to `adaptive_ashrae(tdb, tr, t_running_mean, v, units, limit_inputs, round_output)` and `adaptive_en(tdb, tr, t_running_mean, v, units, limit_inputs, round_output)`. Defaults to `true`, preserving current behaviour. Passing `false` returns full-precision comfort temperatures and bounds, useful when chaining downstream calculations or when the caller applies its own formatting. This parameter is a jsthermalcomfort-specific enhancement and is not present in `pythermalcomfort`.
 
 ## 1.3.1 (2026-05-06)
 

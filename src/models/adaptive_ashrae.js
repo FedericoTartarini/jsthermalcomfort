@@ -45,6 +45,7 @@ import { get_ce } from "./adaptive_en.js";
  * @param {boolean} limit_inputs - By default, if the inputs are outsude the standard applicability limits the
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
+ * @param {boolean} [round_output=true] - if true, rounds `t_cmf` to one decimal place in SI before bounds are derived; if false, returns the unrounded values. Under `units = 'IP'` the rounded SI value is then converted to °F, so IP outputs carry the additional decimals from the °C-to-°F conversion.
  *
  * @returns {AdaptiveAshraeResult} set containing results for the model
  *
@@ -88,6 +89,7 @@ const ADAPTIVE_ASHRAE_SCHEMA = {
   v: { type: "number" },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
+  round_output: { type: "boolean", required: false },
 };
 
 export function adaptive_ashrae(
@@ -97,9 +99,18 @@ export function adaptive_ashrae(
   v,
   units = "SI",
   limit_inputs = true,
+  round_output = true,
 ) {
   validateInputs(
-    { tdb, tr, t_running_mean, v, units: units.toUpperCase(), limit_inputs },
+    {
+      tdb,
+      tr,
+      t_running_mean,
+      v,
+      units: units.toUpperCase(),
+      limit_inputs,
+      round_output,
+    },
     ADAPTIVE_ASHRAE_SCHEMA,
   );
 
@@ -129,7 +140,9 @@ export function adaptive_ashrae(
     if (warnings.length > 0 || !trm_valid) t_cmf = NaN;
   }
 
-  t_cmf = round(t_cmf, 1);
+  if (round_output) {
+    t_cmf = round(t_cmf, 1);
+  }
 
   let tmp_cmf_80_low = t_cmf - 3.5;
   let tmp_cmf_90_low = t_cmf - 2.5;

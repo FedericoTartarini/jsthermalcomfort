@@ -48,6 +48,7 @@ import {
  * @param {boolean} [limit_inputs=true] - By default, if the inputs are outsude the standard applicability limits the
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
+ * @param {boolean} [round_output=true] - if true, rounds the returned comfort temperature and bounds to one decimal place in the output unit (rounding is applied after any IP unit conversion); if false, returns the unrounded values.
  *
  * @returns {AdaptiveEnResult} result set
  *
@@ -75,6 +76,7 @@ const ADAPTIVE_EN_SCHEMA = {
   v: { type: "number" },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
+  round_output: { type: "boolean", required: false },
 };
 
 export function adaptive_en(
@@ -84,9 +86,18 @@ export function adaptive_en(
   v,
   units = "SI",
   limit_inputs = true,
+  round_output = true,
 ) {
   validateInputs(
-    { tdb, tr, t_running_mean, v, units: units.toUpperCase(), limit_inputs },
+    {
+      tdb,
+      tr,
+      t_running_mean,
+      v,
+      units: units.toUpperCase(),
+      limit_inputs,
+      round_output,
+    },
     ADAPTIVE_EN_SCHEMA,
   );
 
@@ -152,17 +163,27 @@ export function adaptive_en(
     ));
   }
 
+  if (round_output) {
+    t_cmf = round(t_cmf, 1);
+    t_cmf_i_lower = round(t_cmf_i_lower, 1);
+    t_cmf_ii_lower = round(t_cmf_ii_lower, 1);
+    t_cmf_iii_lower = round(t_cmf_iii_lower, 1);
+    t_cmf_i_upper = round(t_cmf_i_upper, 1);
+    t_cmf_ii_upper = round(t_cmf_ii_upper, 1);
+    t_cmf_iii_upper = round(t_cmf_iii_upper, 1);
+  }
+
   return {
-    tmp_cmf: round(t_cmf, 1),
+    tmp_cmf: t_cmf,
     acceptability_cat_i: acceptability_i,
     acceptability_cat_ii: acceptability_ii,
     acceptability_cat_iii: acceptability_iii,
-    tmp_cmf_cat_i_up: round(t_cmf_i_upper, 1),
-    tmp_cmf_cat_ii_up: round(t_cmf_ii_upper, 1),
-    tmp_cmf_cat_iii_up: round(t_cmf_iii_upper, 1),
-    tmp_cmf_cat_i_low: round(t_cmf_i_lower, 1),
-    tmp_cmf_cat_ii_low: round(t_cmf_ii_lower, 1),
-    tmp_cmf_cat_iii_low: round(t_cmf_iii_lower, 1),
+    tmp_cmf_cat_i_up: t_cmf_i_upper,
+    tmp_cmf_cat_ii_up: t_cmf_ii_upper,
+    tmp_cmf_cat_iii_up: t_cmf_iii_upper,
+    tmp_cmf_cat_i_low: t_cmf_i_lower,
+    tmp_cmf_cat_ii_low: t_cmf_ii_lower,
+    tmp_cmf_cat_iii_low: t_cmf_iii_lower,
   };
 }
 /**

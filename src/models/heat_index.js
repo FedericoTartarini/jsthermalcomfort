@@ -129,10 +129,6 @@ export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
   return { hi: hi, stress_category: mapping(hiSi) };
 }
 
-attachModelDocs(
-  heat_index,
-  "Heat Index",
-  "Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature. The HI equation is derived by multiple regression analysis in temperature and relative humidity from the first version of Steadman’s (1979) apparent temperature (AT).",
-);
+attachModelDocs(heat_index, "Heat Index", "Calculates the Heat Index (HI).");
 attachBins(mapping, HEAT_INDEX_BINS);
 heat_index.mapping = mapping;

@@ -730,7 +730,7 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
 attachModelDocs(
   phs,
   "Predicted Heat Strain (PHS) Index",
-  "Calculates the Predicted Heat Strain (PHS) index based in compliance with the ISO 7933:2004 Standard or the ISO 7933:2023 Standard. The ISO 7933 provides a method for the analytical evaluation and interpretation of the thermal stress experienced by a subject in a hot environment.",
+  "Calculates the Predicted Heat Strain (PHS) index based in compliance with the ISO 7933:2004 Standard or the ISO 7933:2023 Standard.",
 );
 phs.RECTAL_TEMPERATURE_LIMIT = 38;
 phs.WATER_LOSS_FRACTION_NO_DRINK = 0.03;

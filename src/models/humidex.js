@@ -99,7 +99,7 @@ export function humidex(tdb, rh, options = { round: true }) {
 attachModelDocs(
   humidex,
   "Humidex",
-  'Calculates the humidex (short for "humidity index"). It has been developed by the Canadian Meteorological service. It was introduced in 1965 and then it was revised by Masterson and Richardson (1979). It aims to describe how hot, humid weather is felt by the average person. The Humidex differs from the heat index in being related to the dew point rather than relative humidity.',
+  'Calculates the humidex (short for "humidity index").',
 );
 attachBins(mapping, HUMIDEX_BINS);
 humidex.mapping = mapping;

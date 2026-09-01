@@ -217,7 +217,7 @@ export function adaptive_ashrae(
 attachModelDocs(
   adaptive_ashrae,
   "Adaptive ASHRAE",
-  "Determines the adaptive thermal comfort based on ASHRAE 55. The adaptive model relates indoor design temperatures or acceptable temperature ranges to outdoor meteorological or climatological parameters.",
+  "Determines the adaptive thermal comfort based on ASHRAE 55.",
 );
 adaptive_ashrae.offsets = ADAPTIVE_ASHRAE_OFFSETS;
 adaptive_ashrae.t_running_mean_limits = T_RUNNING_MEAN_LIMITS;

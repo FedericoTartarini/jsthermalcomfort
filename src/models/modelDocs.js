@@ -1,6 +1,6 @@
 /**
  * Display name and summary on a model function.
- * `label` matches `@docname`; `description` matches the leading JSDoc paragraph.
+ * `label` matches `@docname`; `description` matches the leading JSDoc first sentence.
  *
  * @typedef {object} ModelDocs
  * @property {string} label

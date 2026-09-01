@@ -105,17 +105,52 @@ describe("PHS exported ISO limits", () => {
 
 describe("model label and description", () => {
   test.each([
-    ["Heat Index", heat_index],
-    ["Humidex", humidex],
-    ["Universal Thermal Climate Index (UTCI)", utci],
-    ["Wind chill index", wc],
-    ["Predicted Heat Strain (PHS) Index", phs],
-    ["Adaptive ASHRAE", adaptive_ashrae],
-    ["Adaptive EN", adaptive_en],
-    ["PMV/PPD (ASHRAE 55)", pmv_ppd_ashrae],
-    ["PMV/PPD (ISO 7730)", pmv_ppd_iso],
-  ])("%s.label matches @docname", (label, model) => {
-    expect(model.label).toBe(label);
-    expect(model.description.length).toBeGreaterThan(0);
-  });
+    ["Heat Index", heat_index, "Calculates the Heat Index (HI)."],
+    [
+      "Humidex",
+      humidex,
+      'Calculates the humidex (short for "humidity index").',
+    ],
+    [
+      "Universal Thermal Climate Index (UTCI)",
+      utci,
+      "Determines the Universal Thermal Climate Index (UTCI).",
+    ],
+    [
+      "Wind chill index",
+      wc,
+      "Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9.",
+    ],
+    [
+      "Predicted Heat Strain (PHS) Index",
+      phs,
+      "Calculates the Predicted Heat Strain (PHS) index based in compliance with the ISO 7933:2004 Standard or the ISO 7933:2023 Standard.",
+    ],
+    [
+      "Adaptive ASHRAE",
+      adaptive_ashrae,
+      "Determines the adaptive thermal comfort based on ASHRAE 55.",
+    ],
+    [
+      "Adaptive EN",
+      adaptive_en,
+      "Determines the adaptive thermal comfort based on EN 16798-1 2019.",
+    ],
+    [
+      "PMV/PPD (ASHRAE 55)",
+      pmv_ppd_ashrae,
+      "Calculate PMV and PPD in accordance with ASHRAE 55.",
+    ],
+    [
+      "PMV/PPD (ISO 7730)",
+      pmv_ppd_iso,
+      "Calculate PMV and PPD in accordance with ISO 7730.",
+    ],
+  ])(
+    "%s.label matches @docname and description is the first JSDoc sentence",
+    (label, model, description) => {
+      expect(model.label).toBe(label);
+      expect(model.description).toBe(description);
+    },
+  );
 });

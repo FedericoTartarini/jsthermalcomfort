@@ -48,5 +48,5 @@ export function wc(tdb, v, kwargs = { round: true }) {
 attachModelDocs(
   wc,
   "Wind chill index",
-  "Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9. The wind chill index (WCI) is an empirical index based on cooling measurements taken on a cylindrical flask partially filled with water in Antarctica (Siple and Passel 1945). For a surface temperature of 33°C, the index describes the rate of heat loss from the cylinder via radiation and convection as a function of ambient temperature and wind velocity.",
+  "Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9.",
 );

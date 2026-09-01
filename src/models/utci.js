@@ -563,7 +563,7 @@ function utci_optimized(tdb, v, delta_t_tr, pa) {
 attachModelDocs(
   utci,
   "Universal Thermal Climate Index (UTCI)",
-  "Determines the Universal Thermal Climate Index (UTCI). The UTCI is the equivalent temperature for the environment derived from a reference environment. It is defined as the air temperature of the reference environment which produces the same strain index value in comparison with the reference individual's response to the real environment.",
+  "Determines the Universal Thermal Climate Index (UTCI).",
 );
 attachBins(mapping, UTCI_BINS);
 utci.mapping = mapping;

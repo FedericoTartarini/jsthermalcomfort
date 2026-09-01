@@ -127,4 +127,20 @@ describe("pmv_ppd_ashrae tsv and compliance", () => {
   test("ASHRAE tsv is NaN above Python's last thermal_sensation key", () => {
     expect(pmv_ppd_ashrae.tsv(10.001)).toBeNaN();
   });
+
+  test("compliance uses unrounded PMV; tsv uses returned (rounded) PMV", () => {
+    // Unrounded PMV is 0.497..., which is inside (-0.5, 0.5); rounding to 2
+    // decimals yields 0.50, which would fail the open interval.
+    const args = [25.9, 25.9, 0.1, 50, 1.1, 0.7];
+    const raw = pmv_ppd_ashrae(...args, 0, { round_output: false });
+    const rounded = pmv_ppd_ashrae(...args);
+
+    expect(raw.pmv).toBeGreaterThan(0.495);
+    expect(raw.pmv).toBeLessThan(0.5);
+    expect(rounded.pmv).toBe(0.5);
+    expect(rounded.compliance).toBe(true);
+    expect(pmv_ppd_ashrae.compliance(rounded.pmv)).toBe(false);
+    expect(rounded.compliance).toBe(pmv_ppd_ashrae.compliance(raw.pmv));
+    expect(rounded.tsv).toBe(pmv_ppd_ashrae.tsv(rounded.pmv));
+  });
 });

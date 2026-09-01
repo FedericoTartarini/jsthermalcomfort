@@ -1,4 +1,4 @@
-import { validateInputs } from "../utilities/utilities.js";
+import { round, validateInputs } from "../utilities/utilities.js";
 import { attachModelDocs } from "./modelDocs.js";
 import { pmv_ppd } from "./pmv_ppd.js";
 import { tsv_ashrae } from "./pmv_tsv.js";
@@ -18,7 +18,7 @@ import { tsv_ashrae } from "./pmv_tsv.js";
  * @property {number} pmv - Predicted Mean Vote on the ASHRAE 55 scale [-3, +3]
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal sensation vote label, or NaN
- * @property {boolean|number} compliance - True when -0.5 < PMV < 0.5, or NaN
+ * @property {boolean|number} compliance - True when -0.5 < unrounded PMV < 0.5, or NaN
  * @public
  */
 
@@ -82,7 +82,7 @@ compliance_ashrae.bounds = ASHRAE_COMPLIANCE_BOUNDS;
  * @param {'SI'|'IP'} [kwargs.units='SI'] - Unit system
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
  * @param {boolean}   [kwargs.airspeed_control=true] - Occupant controls airspeed
- * @param {boolean}   [kwargs.round_output=true] - Round pmv to 2 decimal places and ppd to 1
+ * @param {boolean}   [kwargs.round_output=true] - Round pmv to 2 decimal places and ppd to 1. `compliance` is computed from the unrounded PMV (pythermalcomfort); `tsv` uses the returned PMV.
  * @returns {PmvPpdAshrae} PMV, PPD, TSV, and ASHRAE compliance
  *
  * @example
@@ -132,11 +132,19 @@ export function pmv_ppd_ashrae(
     },
     PMV_PPD_ASHRAE_SCHEMA,
   );
-  const result = pmv_ppd(tdb, tr, vr, rh, met, clo, wme, "ASHRAE", kwargs);
+  // Match pythermalcomfort: compliance from unrounded PMV; tsv from returned PMV.
+  const round_output = kwargs.round_output !== false;
+  const raw = pmv_ppd(tdb, tr, vr, rh, met, clo, wme, "ASHRAE", {
+    ...kwargs,
+    round_output: false,
+  });
+  const pmv = round_output ? round(raw.pmv, 2) : raw.pmv;
+  const ppd = round_output ? round(raw.ppd, 1) : raw.ppd;
   return {
-    ...result,
-    tsv: tsv_ashrae(result.pmv),
-    compliance: compliance_ashrae(result.pmv),
+    pmv,
+    ppd,
+    tsv: tsv_ashrae(pmv),
+    compliance: compliance_ashrae(raw.pmv),
   };
 }
 

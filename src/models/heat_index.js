@@ -1,10 +1,43 @@
 import { round, validateInputs } from "../utilities/utilities.js";
+import { attachBins, classifyFromBins } from "./classifierBins.js";
+import { attachModelDocs } from "./modelDocs.js";
 
 /**
  * @typedef {object} HeatIndexResult
  * @property {number} hi - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
+ * @property {string|number} stress_category - Rothfusz stress category, or
+ * NaN when `hi` is non-finite or above the last mapped bin (1000 °C).
  * @public
  */
+
+/** @type {ClassifierBins} */
+const HEAT_INDEX_BINS = {
+  edges: [27, 32, 41, 54, 1000],
+  labels: [
+    "no risk",
+    "caution",
+    "extreme caution",
+    "danger",
+    "extreme danger",
+  ],
+  right: true,
+};
+
+/**
+ * Maps a Heat Index [°C] to the Rothfusz stress category.
+ * Right-closed bins match pythermalcomfort `heat_index_rothfusz`
+ * (`np.digitize(..., right=True)`): 27 no risk, 32 caution, 41 extreme
+ * caution, 54 danger, 1000 extreme danger.
+ *
+ * @public
+ * @param {number} value - Heat Index in SI [°C]
+ * @returns {string|number} Category label, or NaN for non-finite / unmapped
+ * @property {ClassifierBins} bins
+ */
+export function mapping(value) {
+  return classifyFromBins(value, HEAT_INDEX_BINS);
+}
+
 /**
  * Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.
  * The HI equation {@link #ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
@@ -19,6 +52,10 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @memberof models
  * @docname Heat Index
  *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
+ * @property {ClassifierFn} mapping - Rothfusz stress-category classifier (`mapping.bins`)
+ *
  * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
  * @param {number} rh Relative humidity, [%].
  * @param {Object} [options] (Optional) Other parameters.
@@ -29,9 +66,9 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @returns {HeatIndexResult} set containing results for the model
  *
  * @example
- * const hi = heat_index(25, 50); // returns {hi: NaN} (below 27 °C threshold)
- * const hi2 = heat_index(25, 50, { limit_inputs: false }); // returns {hi: 25.9}
- * const hi3 = heat_index(30, 80); // returns {hi: 37.7}
+ * const hi = heat_index(25, 50); // returns {hi: NaN, stress_category: NaN} (below 27 °C threshold)
+ * const hi2 = heat_index(25, 50, { limit_inputs: false }); // returns {hi: 25.9, stress_category: "no risk"}
+ * const hi3 = heat_index(30, 80); // returns {hi: 37.7, stress_category: "extreme caution"}
  *
  * @category Thermophysiological models
  */
@@ -60,7 +97,7 @@ export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
   if (limit_inputs) {
     const threshold = options.units === "IP" ? 80.6 : 27;
     if (tdb < threshold) {
-      return { hi: NaN };
+      return { hi: NaN, stress_category: NaN };
     }
   }
 
@@ -94,5 +131,15 @@ export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
 
   hi = options.round === undefined || options.round ? round(hi, 1) : hi;
 
-  return { hi: hi };
+  const hiSi = options.units === "IP" ? ((hi - 32) * 5) / 9 : hi;
+  return { hi: hi, stress_category: mapping(hiSi) };
 }
+
+attachModelDocs(
+  heat_index,
+  "Heat Index",
+  "Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature. The HI equation is derived by multiple regression analysis in temperature and relative humidity from the first version of Steadman’s (1979) apparent temperature (AT).",
+);
+attachBins(mapping, HEAT_INDEX_BINS);
+heat_index.mapping = mapping;
+

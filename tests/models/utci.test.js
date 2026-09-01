@@ -53,6 +53,7 @@ describe("mapping() stress category classification (Issue #147)", () => {
     [42, "very strong heat stress"],
     [47, "extreme heat stress"],
     [100, "extreme heat stress"],
+    [1000, "extreme heat stress"],
     [0.001, "slight cold stress"],
   ])("UTCI %p should map to %p", (utciValue, expectedCategory) => {
     expect(mapping(utciValue)).toBe(expectedCategory);
@@ -73,7 +74,7 @@ describe("mapping() stress category classification (Issue #147)", () => {
     expect(mapping(utciValue)).toBe(expectedCategory);
   });
 
-  test.each([[NaN], [Infinity], [-Infinity]])(
+  test.each([[NaN], [Infinity], [-Infinity], [1000.001]])(
     "UTCI %p should map to NaN",
     (utciValue) => {
       expect(mapping(utciValue)).toBeNaN();
@@ -88,6 +89,20 @@ describe("utci() stress_category with invalid inputs (Issue #147)", () => {
     const result = utci(51, 22, 16, 50, "SI", true);
     expect(result.utci).toBeNaN();
     expect(result.stress_category).toBeNaN();
+  });
+});
+
+describe("utci() IP stress_category uses SI mapping (pythermalcomfort)", () => {
+  test("classifies the SI equivalent, not the published °F value", () => {
+    const ip = utci(77, 77, 3.28, 50, "IP", true);
+    const si = utci(25, 25, 1.0, 50, "SI", true);
+
+    expect(ip.utci).toBeCloseTo(76.4, 1);
+    expect(si.utci).toBeCloseTo(24.6, 1);
+    expect(ip.stress_category).toBe(si.stress_category);
+    expect(ip.stress_category).toBe(mapping(si.utci));
+    expect(ip.stress_category).not.toBe(mapping(ip.utci));
+    expect(ip.stress_category).toBe("no thermal stress");
   });
 });
 

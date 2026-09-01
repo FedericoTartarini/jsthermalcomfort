@@ -1,4 +1,5 @@
 import { round, validateInputs } from "../utilities/utilities.js";
+import { attachModelDocs } from "./modelDocs.js";
 
 /**
  * Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 {@link #ref_18|[18]}.
@@ -16,6 +17,9 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @public
  * @memberof models
  * @docname Wind chill index
+ *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
  *
  * @param {number} tdb - dry bulb air temperature,[°C]
  * @param {number} v - wind speed 10m above ground level, [m/s]
@@ -40,3 +44,9 @@ export function wc(tdb, v, kwargs = { round: true }) {
   }
   return { wci: wci };
 }
+
+attachModelDocs(
+  wc,
+  "Wind chill index",
+  "Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9. The wind chill index (WCI) is an empirical index based on cooling measurements taken on a cylindrical flask partially filled with water in Antarctica (Siple and Passel 1945). For a surface temperature of 33°C, the index describes the rate of heat loss from the cylinder via radiation and convection as a function of ambient temperature and wind velocity.",
+);

@@ -43,6 +43,7 @@ describe("pmv_ppd_iso", () => {
     const result = pmv_ppd_iso(35, 35, 0.5, 80, 2.0, 0.3);
     expect(result.pmv).toBeNaN();
     expect(result.ppd).toBeNaN();
+    expect(result.tsv).toBeNaN();
   });
 });
 
@@ -78,5 +79,36 @@ describe("pmv_ppd_iso input validation", () => {
     expect(() =>
       pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { round_output: "true" }),
     ).toThrow(TypeError);
+  });
+});
+
+describe("pmv_ppd_iso tsv", () => {
+  test.each([
+    [-2.5001, "Cold"],
+    [-2.5, "Cool"],
+    [-1.5, "Slightly Cool"],
+    [-0.5, "Neutral"],
+    [0.5, "Slightly Warm"],
+    [1.5, "Warm"],
+    [2.5, "Hot"],
+    [-0.499, "Neutral"],
+    [0.499, "Neutral"],
+  ])("ISO tsv(%p) is %p (left-closed)", (pmv, expected) => {
+    expect(pmv_ppd_iso.tsv(pmv)).toBe(expected);
+  });
+
+  test.each([[NaN], [Infinity], [-Infinity], [10]])(
+    "unmapped PMV %p yields NaN tsv",
+    (pmv) => {
+      expect(pmv_ppd_iso.tsv(pmv)).toBeNaN();
+    },
+  );
+
+  test("result uses Python field names: tsv, no compliance", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5);
+    expect(result).toHaveProperty("tsv");
+    expect(result).not.toHaveProperty("compliance");
+    expect(result).not.toHaveProperty("acceptability");
+    expect(result.tsv).toBe("Neutral");
   });
 });

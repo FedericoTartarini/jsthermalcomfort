@@ -4,6 +4,8 @@ import {
   valid_range,
   validateInputs,
 } from "../utilities/utilities.js";
+import { attachBins, classifyFromBins } from "./classifierBins.js";
+import { attachModelDocs } from "./modelDocs.js";
 
 const g = [
   -2836.5744,
@@ -28,6 +30,24 @@ const stress_categories = [
   "extreme heat stress",
 ];
 
+/** @type {ClassifierBins} */
+const UTCI_BINS = {
+  edges: [-40, -27, -13, 0, 9, 26, 32, 38, 46, 1000],
+  labels: stress_categories,
+  right: true,
+};
+
+/**
+ * Maps a temperature to the stress category.
+ * @public
+ * @param {number} value - UTCI equivalent temperature in SI [°C]
+ * @returns {string|number} Stress category label, or NaN for non-finite input.
+ * @property {ClassifierBins} bins
+ */
+export function mapping(value) {
+  return classifyFromBins(value, UTCI_BINS);
+}
+
 /**
  * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
     equivalent temperature for the environment derived from a reference
@@ -44,6 +64,10 @@ const stress_categories = [
  * @public
  * @memberof models
  * @docname Universal Thermal Climate Index (UTCI)
+ *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
+ * @property {ClassifierFn} mapping - Thermal-stress classifier (`mapping.bins`)
  * 
  * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
@@ -126,6 +150,9 @@ export function utci(
     utci_approx = all_valid ? utci_approx : NaN;
   }
 
+  // Stress-category thresholds are in °C; keep SI before any IP conversion.
+  let utci_si = utci_approx;
+
   if (units.toLowerCase() == "ip") {
     kwargs = {
       tmp: utci_approx,
@@ -134,33 +161,14 @@ export function utci(
   }
 
   utci_approx = round(utci_approx, 1);
+  utci_si = round(utci_si, 1);
   if (return_stress_category) {
     return {
       utci: utci_approx,
-      stress_category: mapping(utci_approx),
+      stress_category: mapping(utci_si),
     };
   }
   return { utci: utci_approx };
-}
-
-/**
- * Maps a temperature to the stress category.
- * @param {number} val
- * @returns {string|number} Stress category label, or NaN for non-finite input.
- */
-export function mapping(val) {
-  // Right-inclusive thresholds; matches pythermalcomfort np.digitize(right=True).
-  if (!Number.isFinite(val)) return NaN;
-  if (val <= -40) return stress_categories[0];
-  if (val <= -27) return stress_categories[1];
-  if (val <= -13) return stress_categories[2];
-  if (val <= 0) return stress_categories[3];
-  if (val <= 9) return stress_categories[4];
-  if (val <= 26) return stress_categories[5];
-  if (val <= 32) return stress_categories[6];
-  if (val <= 38) return stress_categories[7];
-  if (val <= 46) return stress_categories[8];
-  return stress_categories[9];
 }
 
 /**
@@ -551,3 +559,11 @@ function utci_optimized(tdb, v, delta_t_tr, pa) {
     0.00148348065 * pa * pa * pa * pa * pa * pa
   );
 }
+
+attachModelDocs(
+  utci,
+  "Universal Thermal Climate Index (UTCI)",
+  "Determines the Universal Thermal Climate Index (UTCI). The UTCI is the equivalent temperature for the environment derived from a reference environment. It is defined as the air temperature of the reference environment which produces the same strain index value in comparison with the reference individual's response to the real environment.",
+);
+attachBins(mapping, UTCI_BINS);
+utci.mapping = mapping;

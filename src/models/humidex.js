@@ -1,4 +1,6 @@
 import { round, validateInputs } from "../utilities/utilities.js";
+import { attachBins, classifyFromBins } from "./classifierBins.js";
+import { attachModelDocs } from "./modelDocs.js";
 
 /**
  * @typedef {object} HumidexResult - a result set containing the humidex and
@@ -9,6 +11,32 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * would be felt by the average person.
  * @public
  */
+
+/** @type {ClassifierBins} */
+const HUMIDEX_BINS = {
+  edges: [30, 35, 40, 45, 54],
+  labels: [
+    "Little or no discomfort",
+    "Noticeable discomfort",
+    "Evident discomfort",
+    "Intense discomfort; avoid exertion",
+    "Dangerous discomfort",
+    "Heat stroke probable",
+  ],
+  right: true,
+};
+
+/**
+ * Maps a Humidex value to the discomfort category.
+ *
+ * @public
+ * @param {number} value - Humidex value
+ * @returns {string|number}
+ * @property {ClassifierBins} bins
+ */
+export function mapping(value) {
+  return classifyFromBins(value, HUMIDEX_BINS);
+}
 
 /**
  * Calculates the humidex (short for "humidity index"). It has been
@@ -24,6 +52,10 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @public
  * @memberof models
  * @docname Humidex
+ *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
+ * @property {ClassifierFn} mapping - Discomfort classifier (`mapping.bins`)
  *
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]
@@ -53,27 +85,21 @@ export function humidex(tdb, rh, options = { round: true }) {
     throw new RangeError("Relative humidity must be between 0 and 100%");
   }
 
-  let hi =
+  let value =
     tdb +
     (5 / 9) * ((6.112 * 10 ** ((7.5 * tdb) / (237.7 + tdb)) * rh) / 100 - 10);
 
   if (options.round) {
-    hi = round(hi, 1);
+    value = round(value, 1);
   }
 
-  let stress_category = "Heat stroke probable";
-
-  if (hi <= 30) {
-    stress_category = "Little or no discomfort";
-  } else if (hi <= 35) {
-    stress_category = "Noticeable discomfort";
-  } else if (hi <= 40) {
-    stress_category = "Evident discomfort";
-  } else if (hi <= 45) {
-    stress_category = "Intense discomfort; avoid exertion";
-  } else if (hi <= 54) {
-    stress_category = "Dangerous discomfort";
-  }
-
-  return { humidex: hi, discomfort: stress_category };
+  return { humidex: value, discomfort: mapping(value) };
 }
+
+attachModelDocs(
+  humidex,
+  "Humidex",
+  'Calculates the humidex (short for "humidity index"). It has been developed by the Canadian Meteorological service. It was introduced in 1965 and then it was revised by Masterson and Richardson (1979). It aims to describe how hot, humid weather is felt by the average person. The Humidex differs from the heat index in being related to the dew point rather than relative humidity.',
+);
+attachBins(mapping, HUMIDEX_BINS);
+humidex.mapping = mapping;

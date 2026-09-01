@@ -6,6 +6,7 @@ import {
   validateInputs,
 } from "../utilities/utilities.js";
 import { get_ce } from "./adaptive_en.js";
+import { attachModelDocs } from "./modelDocs.js";
 
 /**
  * @typedef {object} AdaptiveAshraeResult
@@ -18,6 +19,28 @@ import { get_ce } from "./adaptive_en.js";
  * @property {boolean} acceptability_90 - Acceptability for 90% occupants
  * @public
  */
+
+/**
+ * Acceptability-band offsets from `t_cmf` [°C]. `id` matches the return-field
+ * stem (`acceptability_80`, `tmp_cmf_80_low`). Upper bound is before `ce`.
+ *
+ * @type {readonly AdaptiveOffset[]}
+ */
+const ADAPTIVE_ASHRAE_OFFSETS = [
+  { id: "80", lower: -3.5, upper: 3.5 },
+  { id: "90", lower: -2.5, upper: 2.5 },
+];
+
+/** @type {RunningMeanLimits} */
+const T_RUNNING_MEAN_LIMITS = { min: 10, max: 33.5 };
+
+function offsetById(id) {
+  const offset = ADAPTIVE_ASHRAE_OFFSETS.find((item) => item.id === id);
+  if (!offset) {
+    throw new Error(`Missing adaptive ASHRAE offset: ${id}`);
+  }
+  return offset;
+}
 
 /**
  * Determines the adaptive thermal comfort based on ASHRAE 55. The adaptive
@@ -35,6 +58,11 @@ import { get_ce } from "./adaptive_en.js";
  * @public
  * @memberof models
  * @docname Adaptive ASHRAE
+ *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
+ * @property {AdaptiveOffset[]} offsets - Acceptability-band offsets from `t_cmf`, [°C]
+ * @property {RunningMeanLimits} t_running_mean_limits - Prevailing-mean outdoor temperature applicability, [°C]
  *
  * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
@@ -136,7 +164,9 @@ export function adaptive_ashrae(
 
   if (limit_inputs) {
     const warnings = check_standard_compliance(standard, { tdb, tr, v });
-    const trm_valid = t_running_mean >= 10.0 && t_running_mean <= 33.5;
+    const trm_valid =
+      t_running_mean >= T_RUNNING_MEAN_LIMITS.min &&
+      t_running_mean <= T_RUNNING_MEAN_LIMITS.max;
     if (warnings.length > 0 || !trm_valid) t_cmf = NaN;
   }
 
@@ -144,10 +174,12 @@ export function adaptive_ashrae(
     t_cmf = round(t_cmf, 1);
   }
 
-  let tmp_cmf_80_low = t_cmf - 3.5;
-  let tmp_cmf_90_low = t_cmf - 2.5;
-  let tmp_cmf_80_up = t_cmf + 3.5 + ce;
-  let tmp_cmf_90_up = t_cmf + 2.5 + ce;
+  const offset80 = offsetById("80");
+  const offset90 = offsetById("90");
+  let tmp_cmf_80_low = t_cmf + offset80.lower;
+  let tmp_cmf_90_low = t_cmf + offset90.lower;
+  let tmp_cmf_80_up = t_cmf + offset80.upper + ce;
+  let tmp_cmf_90_up = t_cmf + offset90.upper + ce;
 
   const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
   const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
@@ -181,3 +213,11 @@ export function adaptive_ashrae(
     acceptability_90,
   };
 }
+
+attachModelDocs(
+  adaptive_ashrae,
+  "Adaptive ASHRAE",
+  "Determines the adaptive thermal comfort based on ASHRAE 55. The adaptive model relates indoor design temperatures or acceptable temperature ranges to outdoor meteorological or climatological parameters.",
+);
+adaptive_ashrae.offsets = ADAPTIVE_ASHRAE_OFFSETS;
+adaptive_ashrae.t_running_mean_limits = T_RUNNING_MEAN_LIMITS;

@@ -81,3 +81,50 @@ describe("pmv_ppd_ashrae input validation", () => {
     ).toThrow(TypeError);
   });
 });
+
+describe("pmv_ppd_ashrae tsv and compliance", () => {
+  test.each([
+    [-2.5, "Cold"],
+    [-1.5, "Cool"],
+    [-0.5, "Slightly Cool"],
+    [0.5, "Neutral"],
+    [1.5, "Slightly Warm"],
+    [2.5, "Warm"],
+    [10, "Hot"],
+    [-0.499, "Neutral"],
+    [0.501, "Slightly Warm"],
+  ])("ASHRAE tsv(%p) is %p (right-closed)", (pmv, expected) => {
+    expect(pmv_ppd_ashrae.tsv(pmv)).toBe(expected);
+  });
+
+  test.each([
+    [-0.5, false],
+    [0.5, false],
+    [0, true],
+    [-0.499, true],
+    [0.499, true],
+  ])("ASHRAE compliance(%p) is %p (open interval)", (pmv, expected) => {
+    expect(pmv_ppd_ashrae.compliance(pmv)).toBe(expected);
+  });
+
+  test.each([[NaN], [Infinity], [-Infinity]])(
+    "non-finite PMV %p yields NaN tsv and compliance",
+    (pmv) => {
+      expect(pmv_ppd_ashrae.tsv(pmv)).toBeNaN();
+      expect(pmv_ppd_ashrae.compliance(pmv)).toBeNaN();
+    },
+  );
+
+  test("result uses Python field names tsv and compliance", () => {
+    const result = pmv_ppd_ashrae(25, 25, 0.1, 50, 1.2, 0.5);
+    expect(result).toHaveProperty("tsv");
+    expect(result).toHaveProperty("compliance");
+    expect(result).not.toHaveProperty("acceptability");
+    expect(result.tsv).toBe("Neutral");
+    expect(result.compliance).toBe(true);
+  });
+
+  test("ASHRAE tsv is NaN above Python's last thermal_sensation key", () => {
+    expect(pmv_ppd_ashrae.tsv(10.001)).toBeNaN();
+  });
+});

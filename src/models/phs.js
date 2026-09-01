@@ -5,8 +5,7 @@ import {
   round,
   validateInputs,
 } from "../utilities/utilities.js";
-
-const MET_WATT_PER_MET = 58.15;
+import { attachModelDocs } from "./modelDocs.js";
 
 /**
  * @typedef {Object} PhsReturnType
@@ -68,6 +67,8 @@ const MET_WATT_PER_MET = 58.15;
  * @property {string} model
  */
 
+const MET_WATT_PER_MET = 58.15;
+
 /**
  * Calculates the Predicted Heat Strain (PHS) index based in compliance with
  * the ISO 7933:2004 Standard {@link #ref_8|[8]} or the ISO 7933:2023 Standard.
@@ -85,6 +86,14 @@ const MET_WATT_PER_MET = 58.15;
  * @public
  * @memberof models
  * @docname Predicted Heat Strain (PHS) Index
+ *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
+ * @property {number} RECTAL_TEMPERATURE_LIMIT - ISO 7933 rectal-temperature exposure limit, [°C]
+ * @property {number} WATER_LOSS_FRACTION_NO_DRINK - ISO 7933:2023 water-loss mass fraction when workers cannot drink
+ * @property {number} WATER_LOSS_FRACTION_DRINK - ISO 7933:2023 water-loss mass fraction when workers can drink freely
+ * @property {number} WATER_LOSS_FRACTION_2004_MEAN - ISO 7933:2004 mean-subject water-loss mass fraction
+ * @property {number} WATER_LOSS_FRACTION_2004_95 - ISO 7933:2004 95th-percentile water-loss mass fraction
  *
  * @param {number} tdb - dry bulb air temperature, default in [°C]
  * @param {number} tr - mean radiant temperature, default in [°C]
@@ -717,3 +726,14 @@ function _phs_loop(tdb, tr, v, met, clo, wme, p_a, kwargs, variables) {
     evap_load_wm2_min,
   };
 }
+
+attachModelDocs(
+  phs,
+  "Predicted Heat Strain (PHS) Index",
+  "Calculates the Predicted Heat Strain (PHS) index based in compliance with the ISO 7933:2004 Standard or the ISO 7933:2023 Standard. The ISO 7933 provides a method for the analytical evaluation and interpretation of the thermal stress experienced by a subject in a hot environment.",
+);
+phs.RECTAL_TEMPERATURE_LIMIT = 38;
+phs.WATER_LOSS_FRACTION_NO_DRINK = 0.03;
+phs.WATER_LOSS_FRACTION_DRINK = 0.05;
+phs.WATER_LOSS_FRACTION_2004_MEAN = 0.075;
+phs.WATER_LOSS_FRACTION_2004_95 = 0.05;

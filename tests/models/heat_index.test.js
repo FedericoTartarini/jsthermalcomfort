@@ -63,6 +63,7 @@ describe("heat_index Rothfusz applicability gate", () => {
   ])("returns NaN under default limit_inputs when %s", (_, tdb, rh, units) => {
     const result = heat_index(tdb, rh, units ? { units } : undefined);
     expect(result.hi).toBeNaN();
+    expect(result.stress_category).toBeNaN();
   });
 
   test.each([
@@ -75,16 +76,43 @@ describe("heat_index Rothfusz applicability gate", () => {
     (_, tdb, rh, units, _expectFinite) => {
       const result = heat_index(tdb, rh, units ? { units } : undefined);
       expect(Number.isFinite(result.hi)).toBe(true);
+      expect(typeof result.stress_category).toBe("string");
     },
   );
 
   test("limit_inputs=false bypasses the gate and computes for tdb < 27 °C", () => {
     const result = heat_index(25, 50, { limit_inputs: false });
     expect(result.hi).toBe(25.9);
+    expect(result.stress_category).toBe("no risk");
   });
 
   test("limit_inputs=false bypasses the gate in IP mode", () => {
     const result = heat_index(70, 50, { units: "IP", limit_inputs: false });
     expect(Number.isFinite(result.hi)).toBe(true);
   });
+});
+
+describe("heat_index.mapping Rothfusz categories", () => {
+  test.each([
+    [27, "no risk"],
+    [26.9, "no risk"],
+    [0, "no risk"],
+    [32, "caution"],
+    [27.001, "caution"],
+    [41, "extreme caution"],
+    [32.001, "extreme caution"],
+    [54, "danger"],
+    [41.001, "danger"],
+    [54.001, "extreme danger"],
+    [1000, "extreme danger"],
+  ])("HI %p maps to %p", (hi, expected) => {
+    expect(heat_index.mapping(hi)).toBe(expected);
+  });
+
+  test.each([[NaN], [Infinity], [-Infinity], [1000.001]])(
+    "HI %p maps to NaN",
+    (hi) => {
+      expect(heat_index.mapping(hi)).toBeNaN();
+    },
+  );
 });

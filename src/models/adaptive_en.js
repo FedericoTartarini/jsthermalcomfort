@@ -4,6 +4,7 @@ import {
   round,
   validateInputs,
 } from "../utilities/utilities.js";
+import { attachModelDocs } from "./modelDocs.js";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -21,6 +22,48 @@ import {
  */
 
 /**
+ * Category-band offsets from `t_cmf` [°C]. `id` matches the return-field
+ * stem (`acceptability_cat_i`, `tmp_cmf_cat_i_low`). Upper bound is before `ce`.
+ *
+ * @type {readonly AdaptiveOffset[]}
+ */
+const ADAPTIVE_EN_OFFSETS = [
+  { id: "cat_i", lower: -3, upper: 2 },
+  { id: "cat_ii", lower: -4, upper: 3 },
+  { id: "cat_iii", lower: -5, upper: 4 },
+];
+
+/** @type {RunningMeanLimits} */
+const T_RUNNING_MEAN_LIMITS = { min: 10, max: 33.5 };
+
+function offsetById(id) {
+  const offset = ADAPTIVE_EN_OFFSETS.find((item) => item.id === id);
+  if (!offset) {
+    throw new Error(`Missing adaptive EN offset: ${id}`);
+  }
+  return offset;
+}
+
+/**
+ * @param {number} v
+ * @param {number} to
+ * @returns {number}
+ */
+export function get_ce(v, to) {
+  let ce = 0;
+  if (v >= 0.6 && to >= 25.0) {
+    if (v < 0.9) {
+      ce = 1.2;
+    } else if (v < 1.2) {
+      ce = 1.8;
+    } else {
+      ce = 2.2;
+    }
+  }
+  return ce;
+}
+
+/**
  * Determines the adaptive thermal comfort based on EN 16798-1 2019 {@link #ref_3|[3]}
  *
  * Note: You can use this function to calculate if your conditions are within the EN
@@ -30,6 +73,11 @@ import {
  * @public
  * @memberof models
  * @docname Adaptive EN
+ *
+ * @property {string} label - Display name (`@docname`)
+ * @property {string} description - Leading JSDoc summary
+ * @property {AdaptiveOffset[]} offsets - Category-band offsets from `t_cmf`, [°C]
+ * @property {RunningMeanLimits} t_running_mean_limits - Prevailing-mean outdoor temperature applicability, [°C]
  *
  * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
@@ -119,16 +167,21 @@ export function adaptive_en(
   let t_cmf = 0.33 * t_running_mean + 18.8;
 
   if (limit_inputs) {
-    const trm_valid = t_running_mean >= 10.0 && t_running_mean <= 33.5;
+    const trm_valid =
+      t_running_mean >= T_RUNNING_MEAN_LIMITS.min &&
+      t_running_mean <= T_RUNNING_MEAN_LIMITS.max;
     if (!trm_valid) t_cmf = NaN;
   }
 
-  let t_cmf_i_lower = t_cmf - 3.0;
-  let t_cmf_ii_lower = t_cmf - 4.0;
-  let t_cmf_iii_lower = t_cmf - 5.0;
-  let t_cmf_i_upper = t_cmf + 2.0 + ce;
-  let t_cmf_ii_upper = t_cmf + 3.0 + ce;
-  let t_cmf_iii_upper = t_cmf + 4.0 + ce;
+  const offsetI = offsetById("cat_i");
+  const offsetII = offsetById("cat_ii");
+  const offsetIII = offsetById("cat_iii");
+  let t_cmf_i_lower = t_cmf + offsetI.lower;
+  let t_cmf_ii_lower = t_cmf + offsetII.lower;
+  let t_cmf_iii_lower = t_cmf + offsetIII.lower;
+  let t_cmf_i_upper = t_cmf + offsetI.upper + ce;
+  let t_cmf_ii_upper = t_cmf + offsetII.upper + ce;
+  let t_cmf_iii_upper = t_cmf + offsetIII.upper + ce;
 
   const acceptability_i = t_cmf_i_lower <= to && to <= t_cmf_i_upper;
   const acceptability_ii = t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
@@ -186,22 +239,11 @@ export function adaptive_en(
     tmp_cmf_cat_iii_low: t_cmf_iii_lower,
   };
 }
-/**
- *
- * @param {number} v
- * @param {number} to
- * @returns {number}
- */
-export function get_ce(v, to) {
-  let ce = 0;
-  if (v >= 0.6 && to >= 25.0) {
-    if (v < 0.9) {
-      ce = 1.2;
-    } else if (v < 1.2) {
-      ce = 1.8;
-    } else {
-      ce = 2.2;
-    }
-  }
-  return ce;
-}
+
+attachModelDocs(
+  adaptive_en,
+  "Adaptive EN",
+  "Determines the adaptive thermal comfort based on EN 16798-1 2019.",
+);
+adaptive_en.offsets = ADAPTIVE_EN_OFFSETS;
+adaptive_en.t_running_mean_limits = T_RUNNING_MEAN_LIMITS;

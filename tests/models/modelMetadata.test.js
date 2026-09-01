@@ -21,10 +21,22 @@ describe("adaptive ASHRAE exported offsets and running-mean limits", () => {
     const offset80 = offsetById(adaptive_ashrae.offsets, "80");
     const offset90 = offsetById(adaptive_ashrae.offsets, "90");
     expect(result.tmp_cmf).toBe(24);
-    expect(result.tmp_cmf_80_low).toBeCloseTo(result.tmp_cmf + offset80.lower, 10);
-    expect(result.tmp_cmf_80_up).toBeCloseTo(result.tmp_cmf + offset80.upper, 10);
-    expect(result.tmp_cmf_90_low).toBeCloseTo(result.tmp_cmf + offset90.lower, 10);
-    expect(result.tmp_cmf_90_up).toBeCloseTo(result.tmp_cmf + offset90.upper, 10);
+    expect(result.tmp_cmf_80_low).toBeCloseTo(
+      result.tmp_cmf + offset80.lower,
+      10,
+    );
+    expect(result.tmp_cmf_80_up).toBeCloseTo(
+      result.tmp_cmf + offset80.upper,
+      10,
+    );
+    expect(result.tmp_cmf_90_low).toBeCloseTo(
+      result.tmp_cmf + offset90.lower,
+      10,
+    );
+    expect(result.tmp_cmf_90_up).toBeCloseTo(
+      result.tmp_cmf + offset90.upper,
+      10,
+    );
     expect(result.tmp_cmf_80_low).toBeCloseTo(20.5, 10);
     expect(result.tmp_cmf_80_up).toBeCloseTo(27.5, 10);
   });
@@ -45,13 +57,22 @@ describe("adaptive EN exported offsets and running-mean limits", () => {
     const catII = offsetById(adaptive_en.offsets, "cat_ii");
     const catIII = offsetById(adaptive_en.offsets, "cat_iii");
     expect(result.tmp_cmf).toBeCloseTo(25.4, 10);
-    expect(result.tmp_cmf_cat_i_low).toBeCloseTo(result.tmp_cmf + catI.lower, 10);
-    expect(result.tmp_cmf_cat_i_up).toBeCloseTo(result.tmp_cmf + catI.upper, 10);
+    expect(result.tmp_cmf_cat_i_low).toBeCloseTo(
+      result.tmp_cmf + catI.lower,
+      10,
+    );
+    expect(result.tmp_cmf_cat_i_up).toBeCloseTo(
+      result.tmp_cmf + catI.upper,
+      10,
+    );
     expect(result.tmp_cmf_cat_ii_low).toBeCloseTo(
       result.tmp_cmf + catII.lower,
       10,
     );
-    expect(result.tmp_cmf_cat_ii_up).toBeCloseTo(result.tmp_cmf + catII.upper, 10);
+    expect(result.tmp_cmf_cat_ii_up).toBeCloseTo(
+      result.tmp_cmf + catII.upper,
+      10,
+    );
     expect(result.tmp_cmf_cat_iii_low).toBeCloseTo(
       result.tmp_cmf + catIII.lower,
       10,

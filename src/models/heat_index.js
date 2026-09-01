@@ -13,13 +13,7 @@ import { attachModelDocs } from "./modelDocs.js";
 /** @type {ClassifierBins} */
 const HEAT_INDEX_BINS = {
   edges: [27, 32, 41, 54, 1000],
-  labels: [
-    "no risk",
-    "caution",
-    "extreme caution",
-    "danger",
-    "extreme danger",
-  ],
+  labels: ["no risk", "caution", "extreme caution", "danger", "extreme danger"],
   right: true,
 };
 
@@ -142,4 +136,3 @@ attachModelDocs(
 );
 attachBins(mapping, HEAT_INDEX_BINS);
 heat_index.mapping = mapping;
-

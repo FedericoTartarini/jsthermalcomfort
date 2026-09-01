@@ -97,4 +97,3 @@ attachModelDocs(
   "Calculate PMV and PPD in accordance with ISO 7730.",
 );
 pmv_ppd_iso.tsv = tsv_iso;
-

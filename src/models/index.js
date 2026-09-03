@@ -47,7 +47,6 @@ export {
   heat_index,
   heat_index_rothfusz,
   humidex,
-  JOS3,
   net,
   phs,
   pet_steady,
@@ -80,7 +79,6 @@ export default {
   heat_index,
   heat_index_rothfusz,
   humidex,
-  JOS3,
   net,
   phs,
   pet_steady,
@@ -97,4 +95,5 @@ export default {
   wbgt,
   wc,
   wind_chill_temperature,
+  JOS3,
 };

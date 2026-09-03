@@ -276,7 +276,7 @@ function _iso_compliance(kwargs) {
       );
     if ((key === "v" || key === "vr") && (value > 1 || value < 0))
       warnings.push("ISO air speed applicability limits between 0 and 1 m/s");
-    if (key === "met" && (value > 4 || value < 0))
+    if (key === "met" && (value > 4 || value < 0.8))
       warnings.push("ISO met applicability limits between 0.8 and 4.0 met");
     if (key === "clo" && (value > 2 || value < 0))
       warnings.push("ISO clo applicability limits between 0.0 and 2 clo");

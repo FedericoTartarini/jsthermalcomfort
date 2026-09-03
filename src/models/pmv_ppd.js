@@ -6,6 +6,7 @@ import {
   validateInputs,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
+import { classifyFromBins } from "./classifierBins.js";
 
 /**
  * @typedef {Object} Pmv_ppdKwargs
@@ -33,8 +34,45 @@ import { cooling_effect } from "./cooling_effect.js";
  * @typedef {Object} Pmv_ppdReturns
  * @property { number } pmv - Predicted Mean Vote
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
+ * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the unrounded pmv.
  * @public
  */
+
+/**
+ * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
+ * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
+ */
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = {
+  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
+  labels: [
+    "Cold",
+    "Cool",
+    "Slightly Cool",
+    "Neutral",
+    "Slightly Warm",
+    "Warm",
+    "Hot",
+  ],
+  right: false,
+};
+
+/**
+ * Thermal Sensation Vote bins used by pmv_ppd_ashrae (right-inclusive).
+ * Note: pmv_ppd_iso uses left-inclusive; see pythermalcomfort#382.
+ */
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = {
+  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
+  labels: [
+    "Cold",
+    "Cool",
+    "Slightly Cool",
+    "Neutral",
+    "Slightly Warm",
+    "Warm",
+    "Hot",
+  ],
+  right: true,
+};
 
 /**
  * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and
@@ -191,6 +229,14 @@ export function pmv_ppd(
     95.0 *
       Math.exp(-0.03353 * Math.pow(pmv, 4.0) - 0.2179 * Math.pow(pmv, 2.0));
 
+  // Classify from unrounded PMV value before checking limits/clamping.
+  // Use left-inclusive for ISO, right-inclusive for ASHRAE (intentional divergence per pythermalcomfort#382).
+  const bins =
+    standard === "ISO"
+      ? PMV_THERMAL_SENSATION_VOTE_BINS_ISO
+      : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
+  let tsv = classifyFromBins(pmv, bins);
+
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   if (kwargs.limit_inputs) {
     // ISO 7730 limits PMV applicability to [-2, 2]; ASHRAE 55 has no equivalent output bound
@@ -200,6 +246,7 @@ export function pmv_ppd(
     if (isNaN(pmv) || compliance_warnings.length > 0 || pmv_outside_iso_range) {
       pmv = NaN;
       ppd = NaN;
+      tsv = NaN;
     }
   }
 
@@ -207,9 +254,10 @@ export function pmv_ppd(
     return {
       pmv: round(pmv, 2),
       ppd: round(ppd, 1),
+      tsv,
     };
   }
-  return { pmv, ppd };
+  return { pmv, ppd, tsv };
 }
 
 /**

@@ -1,8 +1,10 @@
 import { round, validateInputs } from "../utilities/utilities.js";
+import { classifyFromBins } from "./classifierBins.js";
 
 /**
  * @typedef {object} HeatIndexResult
  * @property {number} hi - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
+ * @property {string|number} stress_category - Thermal stress category, or NaN if hi is NaN. Classified from the unrounded SI value (see note below).
  * @public
  */
 /**
@@ -11,15 +13,20 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * of Steadman’s (1979) apparent temperature (AT) {@link #ref_13|[13]}.
  *
  * The Rothfusz regression is only valid above 27 °C (80.6 °F). Under the
- * default `limit_inputs=true` the function returns `{ hi: NaN }` when `tdb`
+ * default `limit_inputs=true` the function returns `{ hi: NaN, stress_category: NaN }` when `tdb`
  * is below this threshold; pass `limit_inputs=false` to compute regardless.
  * Matches pythermalcomfort 3.9.3 `heat_index_rothfusz`.
+ *
+ * **Note on stress_category classification:** The returned `stress_category` is determined from the
+ * unrounded SI value of `hi`, then the `hi` value is rounded for return. This ensures rounding does not
+ * change the category, fixing pythermalcomfort#381. Once that issue is resolved upstream, this note
+ * can be removed.
  *
  * @public
  * @memberof models
  * @docname Heat Index
  *
- * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
+ * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = ‘IP’.
  * @param {number} rh Relative humidity, [%].
  * @param {Object} [options] (Optional) Other parameters.
  * @param {boolean} [options.round=true] - If True rounds output value, if False it does not round it.
@@ -29,9 +36,9 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @returns {HeatIndexResult} set containing results for the model
  *
  * @example
- * const hi = heat_index(25, 50); // returns {hi: NaN} (below 27 °C threshold)
- * const hi2 = heat_index(25, 50, { limit_inputs: false }); // returns {hi: 25.9}
- * const hi3 = heat_index(30, 80); // returns {hi: 37.7}
+ * const hi = heat_index(25, 50); // returns {hi: NaN, stress_category: NaN} (below 27 °C threshold)
+ * const hi2 = heat_index(25, 50, { limit_inputs: false }); // returns {hi: 25.9, stress_category: "no risk"}
+ * const hi3 = heat_index(30, 80); // returns {hi: 37.7, stress_category: "extreme caution"}
  *
  * @category Thermophysiological models
  */
@@ -41,6 +48,22 @@ const HEAT_INDEX_SCHEMA = {
   round: { type: "boolean", required: false },
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
+};
+
+/**
+ * Stress category bins for heat index classification (right-inclusive).
+ * Edges are [27, 32, 41, 54, 1000], giving categories:
+ * - hi <= 27: "no risk"
+ * - 27 < hi <= 32: "caution"
+ * - 32 < hi <= 41: "extreme caution"
+ * - 41 < hi <= 54: "danger"
+ * - 54 < hi <= 1000: "extreme danger"
+ * - hi > 1000: NaN
+ */
+export const HEAT_INDEX_STRESS_CATEGORY_BINS = {
+  edges: [27, 32, 41, 54, 1000],
+  labels: ["no risk", "caution", "extreme caution", "danger", "extreme danger"],
+  right: true,
 };
 
 export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
@@ -60,7 +83,7 @@ export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
   if (limit_inputs) {
     const threshold = options.units === "IP" ? 80.6 : 27;
     if (tdb < threshold) {
-      return { hi: NaN };
+      return { hi: NaN, stress_category: NaN };
     }
   }
 
@@ -92,7 +115,18 @@ export function heat_index(tdb, rh, options = { round: true, units: "SI" }) {
       0.00000199 * tdb_squared * rh_squared;
   }
 
+  // Classify from unrounded SI value. In IP mode, convert hi to SI for classification,
+  // but keep the returned hi in IP units.
+  let hi_si_for_classification = hi;
+  if (options.units === "IP") {
+    hi_si_for_classification = ((hi - 32) * 5) / 9;
+  }
+  const stress_category = classifyFromBins(
+    hi_si_for_classification,
+    HEAT_INDEX_STRESS_CATEGORY_BINS,
+  );
+
   hi = options.round === undefined || options.round ? round(hi, 1) : hi;
 
-  return { hi: hi };
+  return { hi: hi, stress_category };
 }

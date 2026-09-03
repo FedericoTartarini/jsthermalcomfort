@@ -3,6 +3,11 @@
 import { describe, expect, test } from "@jest/globals";
 import { pmv_ppd_ashrae } from "../../src/models/pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "../../src/models/pmv_ppd_iso.js";
+import { classifyFromBins } from "../../src/models/classifierBins.js";
+import {
+  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+} from "../../src/models/pmv_ppd.js";
 import { testDataUrls } from "./comftest";
 import {
   assertNonEmptyRows,
@@ -146,32 +151,50 @@ describe("pmv_ppd_ashrae tsv classification (right-inclusive)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Intentional divergence between ISO and ASHRAE at boundary values
-// This documents pythermalcomfort#382 where the two models use different
-// interval conventions (left-inclusive vs right-inclusive) and cooling effects
+// Intentional divergence between ISO and ASHRAE (pythermalcomfort#382)
 // ---------------------------------------------------------------------------
-describe("pmv_ppd_iso vs pmv_ppd_ashrae divergence at boundaries (pythermalcomfort#382)", () => {
-  // Note: This test documents genuine TSV divergence between ISO and ASHRAE.
-  // The divergence occurs due to:
-  // 1. Different bin interval conventions (ISO left-inclusive, ASHRAE right-inclusive)
-  // 2. ASHRAE's cooling_effect adjustment (when vr > 0.1) that changes tdb/tr before PMV computation
-  // At tdb=22.5, tr=22.5, vr=0.5, the cooling_effect causes ASHRAE to compute a different PMV
-  // that lands in a different TSV category than ISO.
-  test("ISO and ASHRAE return different TSV labels at boundary conditions", () => {
-    // This input triggers ASHRAE's cooling_effect (vr=0.5 > 0.1):
-    // - ISO computes PMV=-1.52, classifying as "Cool" (left-inclusive: -1.5 <= pmv < -0.5)
-    // - ASHRAE computes PMV=-1.50, classifying as "Slightly Cool" (right-inclusive: -1.5 < pmv <= -0.5)
-    // The different PMV values stem from ASHRAE's temperature adjustment via cooling_effect.
-    const iso_result = pmv_ppd_iso(22.5, 22.5, 0.5, 50, 1.2, 0.5, 0, {
-      limit_inputs: false,
-    });
-    const ashrae_result = pmv_ppd_ashrae(22.5, 22.5, 0.5, 50, 1.2, 0.5, 0, {
-      limit_inputs: false,
-    });
+describe("ISO vs ASHRAE TSV interval convention (pythermalcomfort#382)", () => {
+  // The two models share identical bin edges and labels but opposite interval
+  // conventions: ISO is left-inclusive, ASHRAE is right-inclusive. Classify the
+  // SAME value under both bin sets so the convention is the only variable —
+  // going through the models instead would confound this with the fact that
+  // ASHRAE applies a cooling effect and therefore computes a different PMV.
+  test.each([-2.5, -1.5, -0.5, 0.5, 1.5, 2.5])(
+    "pmv = %s is labelled differently by the two conventions",
+    (pmv) => {
+      const iso = classifyFromBins(pmv, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
+      const ashrae = classifyFromBins(
+        pmv,
+        PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+      );
+      expect(iso).not.toBe(ashrae);
+    },
+  );
 
-    expect(iso_result.pmv).toBe(-1.52);
-    expect(iso_result.tsv).toBe("Cool");
-    expect(ashrae_result.pmv).toBe(-1.5);
-    expect(ashrae_result.tsv).toBe("Slightly Cool");
+  test("at pmv = -1.5 exactly, ISO says Slightly Cool and ASHRAE says Cool", () => {
+    // ISO is left-inclusive, so -1.5 opens the [-1.5, -0.5) bin -> "Slightly Cool".
+    // ASHRAE is right-inclusive, so -1.5 closes the (-2.5, -1.5] bin -> "Cool".
+    expect(classifyFromBins(-1.5, PMV_THERMAL_SENSATION_VOTE_BINS_ISO)).toBe(
+      "Slightly Cool",
+    );
+    expect(classifyFromBins(-1.5, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE)).toBe(
+      "Cool",
+    );
+  });
+
+  test("the two models can also disagree end-to-end, for a separate reason", () => {
+    // Here the labels differ because ASHRAE's cooling effect (vr = 0.5) makes it
+    // compute a DIFFERENT pmv from ISO -- not because of the interval convention.
+    // Recorded so the two causes of divergence are not conflated.
+    const iso = pmv_ppd_iso(22.5, 22.5, 0.5, 50, 1.2, 0.5, 0, {
+      limit_inputs: false,
+    });
+    const ashrae = pmv_ppd_ashrae(22.5, 22.5, 0.5, 50, 1.2, 0.5, 0, {
+      limit_inputs: false,
+    });
+    expect(iso.pmv).toBe(-1.52);
+    expect(iso.tsv).toBe("Cool");
+    expect(ashrae.pmv).toBe(-1.5);
+    expect(ashrae.tsv).toBe("Slightly Cool");
   });
 });

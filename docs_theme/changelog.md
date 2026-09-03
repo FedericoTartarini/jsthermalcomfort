@@ -1,5 +1,9 @@
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- `check_standard_compliance("ISO", ...)` now enforces the ISO 7730 metabolic-rate lower limit of 0.8 met; it previously compared against 0 while its own warning message claimed 0.8. The bound is inclusive: `met = 0.8` is valid. This is a breaking change compared with previous versions; calls with `0 <= met < 0.8` and `limit_inputs` enabled now return NaN where they previously returned a number, affecting models of sleeping (~0.7 met) and reclining occupants. Callers needing the previous behaviour should pass `{ limit_inputs: false }`. This matches `pythermalcomfort` `pmv_ppd_iso`.
+
 ## 1.4.0
 
 - Added `wind_chill_temperature(tdb, v)`, which returns the Wind Chill Temperature in °C using the North American formula adopted by the US National Weather Service and Environment Canada. Mirrors `pythermalcomfort` 3.9.3 `wind_chill_temperature`. Wind speed `v` is in km/h, which differs from the existing `wc()` Wind Chill Index that uses m/s. Returns `{ wct }`.

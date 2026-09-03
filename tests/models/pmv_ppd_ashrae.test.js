@@ -96,14 +96,12 @@ describe("pmv_ppd_ashrae tsv classification (right-inclusive)", () => {
 
   // Test that tsv is NaN when pmv is NaN
   test("tsv is NaN when pmv is NaN (out of range)", () => {
-    const result = pmv_ppd_ashrae(35, 35, 0.5, 80, 2.0, 0.3);
-    // ASHRAE has more lenient range than ISO
-    // Try a more extreme case
-    const result2 = pmv_ppd_ashrae(50, 50, 0.5, 80, 2.0, 0.3, 0, {
+    // ASHRAE has more lenient range than ISO, so try an extreme case
+    const result = pmv_ppd_ashrae(50, 50, 0.5, 80, 2.0, 0.3, 0, {
       limit_inputs: true,
     });
-    expect(result2.pmv).toBeNaN();
-    expect(result2.tsv).toBeNaN();
+    expect(result.pmv).toBeNaN();
+    expect(result.tsv).toBeNaN();
   });
 
   // Test that tsv is unaffected by round_output

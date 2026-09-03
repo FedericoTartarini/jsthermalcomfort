@@ -394,7 +394,7 @@ describe("classifyFromBins - mirroring PMV bins (right-inclusive)", () => {
 
 describe("classifyFromBins - divergence at boundary (intentional)", () => {
   // Verify that left-inclusive and right-inclusive give different results at boundary
-  // This mirrors the pyth ermalcomfort #382 inconsistency between ISO and ASHRAE models
+  // This mirrors the pythermalcomfort #382 inconsistency between ISO and ASHRAE models
   const pmvEdges = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10];
   const pmvLabels = [
     "Cold",

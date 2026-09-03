@@ -1,5 +1,10 @@
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- **Fix: `adaptive_ashrae` acceptability bug**: `acceptability_80` and `acceptability_90` were previously derived from the ROUNDED comfort temperature when `round_output=true`, so the formatting flag could flip an acceptability decision for operative temperatures near a bound. These booleans are now always computed from unrounded values and are unaffected by `round_output`.
+- **Behaviour change: `adaptive_ashrae` IP output rounding**: IP-mode numeric outputs (`tmp_cmf`, bounds) are now rounded to one decimal place AFTER unit conversion (°C→°F). Values that previously carried extra decimals from the conversion (e.g., 65.12°F) now return 65.1°F. This aligns `adaptive_ashrae` with the correct pattern in `adaptive_en`.
+
 ## 1.4.0
 
 - Added `wind_chill_temperature(tdb, v)`, which returns the Wind Chill Temperature in °C using the North American formula adopted by the US National Weather Service and Environment Canada. Mirrors `pythermalcomfort` 3.9.3 `wind_chill_temperature`. Wind speed `v` is in km/h, which differs from the existing `wc()` Wind Chill Index that uses m/s. Returns `{ wct }`.

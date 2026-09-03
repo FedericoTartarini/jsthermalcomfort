@@ -45,7 +45,7 @@ import { get_ce } from "./adaptive_en.js";
  * @param {boolean} limit_inputs - By default, if the inputs are outsude the standard applicability limits the
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
- * @param {boolean} [round_output=true] - if true, rounds the returned comfort temperature and bounds to one decimal place in the output unit (rounding is applied after any IP unit conversion); if false, returns the unrounded values.
+ * @param {boolean} [round_output=true] - if true, rounds the returned comfort temperature and bounds to one decimal place in the output unit (rounding is applied after any IP unit conversion); if false, returns the unrounded values. Note: `acceptability_80` and `acceptability_90` are always computed from unrounded values and are unaffected by this parameter.
  *
  * @returns {AdaptiveAshraeResult} set containing results for the model
  *

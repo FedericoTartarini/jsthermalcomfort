@@ -652,4 +652,52 @@ describe("check_standard_compliance", () => {
       expect(warnings.length).toBeGreaterThan(0);
     });
   });
+
+  describe("ISO branch met range check", () => {
+    it("flags met below 0.8 m/s", () => {
+      const warnings = check_standard_compliance("ISO", {
+        tdb: 25,
+        tr: 25,
+        v: 0.1,
+        met: 0.7,
+        clo: 0.5,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+      expect(warnings[0]).toMatch(/met/i);
+    });
+
+    it("returns no warnings when met is exactly 0.8 (inclusive lower bound)", () => {
+      const warnings = check_standard_compliance("ISO", {
+        tdb: 25,
+        tr: 25,
+        v: 0.1,
+        met: 0.8,
+        clo: 0.5,
+      });
+      expect(warnings).toHaveLength(0);
+    });
+
+    it("returns no warnings when met is exactly 4.0 (inclusive upper bound)", () => {
+      const warnings = check_standard_compliance("ISO", {
+        tdb: 25,
+        tr: 25,
+        v: 0.1,
+        met: 4.0,
+        clo: 0.5,
+      });
+      expect(warnings).toHaveLength(0);
+    });
+
+    it("flags met above 4.0", () => {
+      const warnings = check_standard_compliance("ISO", {
+        tdb: 25,
+        tr: 25,
+        v: 0.1,
+        met: 4.1,
+        clo: 0.5,
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+      expect(warnings[0]).toMatch(/met/i);
+    });
+  });
 });

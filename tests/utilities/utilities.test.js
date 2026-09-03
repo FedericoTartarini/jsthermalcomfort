@@ -654,7 +654,7 @@ describe("check_standard_compliance", () => {
   });
 
   describe("ISO branch met range check", () => {
-    it("flags met below 0.8 m/s", () => {
+    it("flags met below 0.8 met", () => {
       const warnings = check_standard_compliance("ISO", {
         tdb: 25,
         tr: 25,

@@ -770,6 +770,23 @@
                   </section>
                 
                   
+                  <section class='keyline-top-not py2' id='unreleased'>
+                    <h2 class='mt0 '>Unreleased</h2>
+                    
+                    
+                      <section class='py2 clearfix'>
+
+  
+    <ul>
+<li><code>check_standard_compliance("ISO", ...)</code> now enforces the ISO 7730 metabolic-rate lower limit of 0.8 met; it previously compared against 0 while its own warning message claimed 0.8. The bound is inclusive: <code>met = 0.8</code> is valid. This is a breaking change compared with previous versions; calls with <code>0 &#x3C;= met &#x3C; 0.8</code> and <code>limit_inputs</code> enabled now return NaN where they previously returned a number, affecting models of sleeping (~0.7 met) and reclining occupants. Callers needing the previous behaviour should pass <code>{ limit_inputs: false }</code>. This matches <code>pythermalcomfort</code> <code>pmv_ppd_iso</code>.</li>
+</ul>
+
+  
+</section>
+                    
+                  </section>
+                
+                  
                   <section class='keyline-top-not py2' id='140'>
                     <h2 class='mt0 '>1.4.0</h2>
                     
@@ -953,6 +970,12 @@
                       <ul class="visible nav section-nav flex-column">
                         
                           
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#unreleased">Unreleased</a>
+                            
+                          </li>
+                        
                           
                           <li class="toc-h2 nav-item toc-entry">
                             <a class="reference internal nav-link" href="#140">1.4.0</a>

@@ -26,7 +26,7 @@ import { classifyFromBins } from "./classifierBins.js";
  * @memberof models
  * @docname Heat Index
  *
- * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = ‘IP’.
+ * @param {number} tdb Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'.
  * @param {number} rh Relative humidity, [%].
  * @param {Object} [options] (Optional) Other parameters.
  * @param {boolean} [options.round=true] - If True rounds output value, if False it does not round it.

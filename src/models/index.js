@@ -1,4 +1,4 @@
-import { heat_index } from "./heat_index.js";
+import { heat_index_rothfusz, heat_index } from "./heat_index.js";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
@@ -45,7 +45,9 @@ export {
   cooling_effect,
   discomfort_index,
   heat_index,
+  heat_index_rothfusz,
   humidex,
+  JOS3,
   net,
   phs,
   pet_steady,
@@ -76,7 +78,9 @@ export default {
   cooling_effect,
   discomfort_index,
   heat_index,
+  heat_index_rothfusz,
   humidex,
+  JOS3,
   net,
   phs,
   pet_steady,
@@ -93,5 +97,4 @@ export default {
   wbgt,
   wc,
   wind_chill_temperature,
-  JOS3,
 };

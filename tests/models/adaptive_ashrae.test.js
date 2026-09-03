@@ -124,21 +124,20 @@ describe("adaptive_ashrae cooling-effect boundary", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Input validation tests
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
 // Regression test for issue #179:
 // round_output should only affect numeric output formatting, not acceptability.
 // The acceptability flags are derived from unrounded values and must be
 // identical regardless of round_output setting.
 // ---------------------------------------------------------------------------
 describe("adaptive_ashrae round_output acceptability regression (issue #179)", () => {
-  test("acceptability_80 identical for round_output:true and round_output:false at boundary input (SI)", () => {
+  test("acceptability at boundary input (SI): unrounded bounds correctly identify acceptability", () => {
     // t_running_mean = 12.40 gives t_cmf ≈ 21.644
-    // Rounded: 21.6, unrounded: 21.644
-    // Upper 80 bound: rounded 25.1, unrounded 25.144
-    // to = 25.12 is just above rounded but within unrounded.
-    // Both should now return the same acceptability (true, based on unrounded).
+    // Unrounded: t_cmf = 21.644
+    // Upper 80 bound: 21.644 + 3.5 + 0 = 25.144 (ce=0 since to < 25)
+    // Upper 90 bound: 21.644 + 2.5 + 0 = 24.144
+    // Operative temperature 25.12:
+    // - Within 80 bound (25.12 < 25.144) → acceptability_80 = true
+    // - Outside 90 bound (25.12 > 24.144) → acceptability_90 = false
     const rounded = adaptive_ashrae(25.12, 25.12, 12.4, 0.1, "SI", true, true);
     const unrounded = adaptive_ashrae(
       25.12,
@@ -149,13 +148,22 @@ describe("adaptive_ashrae round_output acceptability regression (issue #179)", (
       true,
       false,
     );
-    expect(rounded.acceptability_80).toBe(unrounded.acceptability_80);
-    expect(rounded.acceptability_90).toBe(unrounded.acceptability_90);
+    // Both should match because acceptability is computed from unrounded values
+    expect(rounded.acceptability_80).toBe(true);
+    expect(unrounded.acceptability_80).toBe(true);
+    expect(rounded.acceptability_90).toBe(false);
+    expect(unrounded.acceptability_90).toBe(false);
   });
 
-  test("acceptability_80 identical for round_output:true and round_output:false at boundary input (IP)", () => {
+  test("acceptability at boundary input (IP): unrounded bounds correctly identify acceptability", () => {
     // Convert the same test case to IP units:
-    // 25.12°C = 77.216°F, t_running_mean 12.40°C = 54.32°F
+    // 25.12°C = 77.216°F, t_running_mean 12.40°C = 54.32°F, v=0.1 m/s ≈ 0.328 ft/s
+    // Same acceptability calculation should apply in IP mode:
+    // t_cmf ≈ 21.644°C ≈ 70.96°F
+    // Upper 80 bound ≈ 25.144°C ≈ 77.26°F
+    // Upper 90 bound ≈ 24.144°C ≈ 75.46°F
+    // Operative temperature ≈ 77.216°F (> 75.46°F)
+    // Expected: acceptability_80 = true, acceptability_90 = false
     const rounded = adaptive_ashrae(
       77.216,
       77.216,
@@ -174,8 +182,10 @@ describe("adaptive_ashrae round_output acceptability regression (issue #179)", (
       true,
       false,
     );
-    expect(rounded.acceptability_80).toBe(unrounded.acceptability_80);
-    expect(rounded.acceptability_90).toBe(unrounded.acceptability_90);
+    expect(rounded.acceptability_80).toBe(true);
+    expect(unrounded.acceptability_80).toBe(true);
+    expect(rounded.acceptability_90).toBe(false);
+    expect(unrounded.acceptability_90).toBe(false);
   });
 
   test("acceptability flags are identical across wide range of inputs", () => {
@@ -208,6 +218,27 @@ describe("adaptive_ashrae round_output acceptability regression (issue #179)", (
       expect(rounded.acceptability_80).toBe(unrounded.acceptability_80);
       expect(rounded.acceptability_90).toBe(unrounded.acceptability_90);
     });
+  });
+
+  test("IP output values are rounded to 1 decimal place when round_output:true", () => {
+    // t_running_mean (IP) = 68°F = 20°C; t_cmf = 0.31 * 20 + 17.8 = 24.0°C = 75.2°F
+    // Lower 90 bound (SI) = 24.0 - 2.5 = 21.5°C
+    // Converted to IP: 21.5°C = 70.7°F (exact)
+    // With unrounded calculation it would be 70.7°F
+    // With round_output:true, output should be rounded to 1 decimal place
+    const resultIP = adaptive_ashrae(77, 77, 68, 0.3, "IP", true, true);
+    // All output numeric values should have at most 1 decimal place
+    const checkDecimalPlaces = (value) => {
+      const str = value.toString();
+      const decimalPart = str.split(".")[1] || "";
+      return decimalPart.length;
+    };
+    expect(checkDecimalPlaces(resultIP.tmp_cmf_90_low)).toBeLessThanOrEqual(1);
+    expect(checkDecimalPlaces(resultIP.tmp_cmf_80_low)).toBeLessThanOrEqual(1);
+    expect(checkDecimalPlaces(resultIP.tmp_cmf_90_up)).toBeLessThanOrEqual(1);
+    expect(checkDecimalPlaces(resultIP.tmp_cmf_80_up)).toBeLessThanOrEqual(1);
+    // Verify the concrete value for the lower 90 bound
+    expect(resultIP.tmp_cmf_90_low).toBe(70.7);
   });
 });
 

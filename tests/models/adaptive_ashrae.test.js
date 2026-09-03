@@ -221,24 +221,37 @@ describe("adaptive_ashrae round_output acceptability regression (issue #179)", (
   });
 
   test("IP output values are rounded to 1 decimal place when round_output:true", () => {
-    // t_running_mean (IP) = 68°F = 20°C; t_cmf = 0.31 * 20 + 17.8 = 24.0°C = 75.2°F
-    // Lower 90 bound (SI) = 24.0 - 2.5 = 21.5°C
-    // Converted to IP: 21.5°C = 70.7°F (exact)
-    // With unrounded calculation it would be 70.7°F
-    // With round_output:true, output should be rounded to 1 decimal place
-    const resultIP = adaptive_ashrae(77, 77, 68, 0.3, "IP", true, true);
+    // t_running_mean (IP) = 54.32°F = 12.4°C
+    // SI calculation: t_cmf = 0.31 * 12.4 + 17.8 = 21.644°C
+    // All SI bounds computed from unrounded t_cmf, then converted to IP and rounded.
+    // With round_output=true: t_cmf (SI) = 21.644 → 21.6 (rounded for display)
+    // Bounds (SI): 80_low = 18.144, 80_up = 25.144, 90_low = 19.144, 90_up = 24.144
+    // Converted to IP and rounded: tmp_cmf = 71, tmp_cmf_80_low = 64.7,
+    //   tmp_cmf_80_up = 77.3, tmp_cmf_90_low = 66.5, tmp_cmf_90_up = 75.5
+    //
+    // REGRESSION TEST: This test FAILS against the pre-fix implementation, which would
+    // round t_cmf (21.644 → 21.6) BEFORE computing bounds. The rounded SI value
+    // (21.6°C = 70.88°F) differs from the final IP value (71°F) computed from
+    // unrounded SI values, proving the fix changes IP output formatting.
+    const resultIP = adaptive_ashrae(77, 77, 54.32, 0.328, "IP", true, true);
     // All output numeric values should have at most 1 decimal place
     const checkDecimalPlaces = (value) => {
       const str = value.toString();
       const decimalPart = str.split(".")[1] || "";
       return decimalPart.length;
     };
-    expect(checkDecimalPlaces(resultIP.tmp_cmf_90_low)).toBeLessThanOrEqual(1);
+    expect(checkDecimalPlaces(resultIP.tmp_cmf)).toBeLessThanOrEqual(1);
     expect(checkDecimalPlaces(resultIP.tmp_cmf_80_low)).toBeLessThanOrEqual(1);
-    expect(checkDecimalPlaces(resultIP.tmp_cmf_90_up)).toBeLessThanOrEqual(1);
     expect(checkDecimalPlaces(resultIP.tmp_cmf_80_up)).toBeLessThanOrEqual(1);
-    // Verify the concrete value for the lower 90 bound
-    expect(resultIP.tmp_cmf_90_low).toBe(70.7);
+    expect(checkDecimalPlaces(resultIP.tmp_cmf_90_low)).toBeLessThanOrEqual(1);
+    expect(checkDecimalPlaces(resultIP.tmp_cmf_90_up)).toBeLessThanOrEqual(1);
+    // Assert concrete expected values for all five outputs
+    // (computed from actual execution of fixed code)
+    expect(resultIP.tmp_cmf).toBe(71);
+    expect(resultIP.tmp_cmf_80_low).toBe(64.7);
+    expect(resultIP.tmp_cmf_80_up).toBe(77.3);
+    expect(resultIP.tmp_cmf_90_low).toBe(66.5);
+    expect(resultIP.tmp_cmf_90_up).toBe(75.5);
   });
 });
 

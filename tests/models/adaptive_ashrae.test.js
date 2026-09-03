@@ -126,6 +126,94 @@ describe("adaptive_ashrae cooling-effect boundary", () => {
 // ---------------------------------------------------------------------------
 // Input validation tests
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Regression test for issue #179:
+// round_output should only affect numeric output formatting, not acceptability.
+// The acceptability flags are derived from unrounded values and must be
+// identical regardless of round_output setting.
+// ---------------------------------------------------------------------------
+describe("adaptive_ashrae round_output acceptability regression (issue #179)", () => {
+  test("acceptability_80 identical for round_output:true and round_output:false at boundary input (SI)", () => {
+    // t_running_mean = 12.40 gives t_cmf ≈ 21.644
+    // Rounded: 21.6, unrounded: 21.644
+    // Upper 80 bound: rounded 25.1, unrounded 25.144
+    // to = 25.12 is just above rounded but within unrounded.
+    // Both should now return the same acceptability (true, based on unrounded).
+    const rounded = adaptive_ashrae(25.12, 25.12, 12.4, 0.1, "SI", true, true);
+    const unrounded = adaptive_ashrae(
+      25.12,
+      25.12,
+      12.4,
+      0.1,
+      "SI",
+      true,
+      false,
+    );
+    expect(rounded.acceptability_80).toBe(unrounded.acceptability_80);
+    expect(rounded.acceptability_90).toBe(unrounded.acceptability_90);
+  });
+
+  test("acceptability_80 identical for round_output:true and round_output:false at boundary input (IP)", () => {
+    // Convert the same test case to IP units:
+    // 25.12°C = 77.216°F, t_running_mean 12.40°C = 54.32°F
+    const rounded = adaptive_ashrae(
+      77.216,
+      77.216,
+      54.32,
+      0.328,
+      "IP",
+      true,
+      true,
+    );
+    const unrounded = adaptive_ashrae(
+      77.216,
+      77.216,
+      54.32,
+      0.328,
+      "IP",
+      true,
+      false,
+    );
+    expect(rounded.acceptability_80).toBe(unrounded.acceptability_80);
+    expect(rounded.acceptability_90).toBe(unrounded.acceptability_90);
+  });
+
+  test("acceptability flags are identical across wide range of inputs", () => {
+    const testCases = [
+      { tdb: 20, tr: 20, t_running_mean: 15, v: 0.1 },
+      { tdb: 24, tr: 24, t_running_mean: 20, v: 0.2 },
+      { tdb: 26, tr: 26, t_running_mean: 22, v: 0.3 },
+      { tdb: 28, tr: 28, t_running_mean: 24, v: 0.4 },
+    ];
+
+    testCases.forEach(({ tdb, tr, t_running_mean, v }) => {
+      const rounded = adaptive_ashrae(
+        tdb,
+        tr,
+        t_running_mean,
+        v,
+        "SI",
+        true,
+        true,
+      );
+      const unrounded = adaptive_ashrae(
+        tdb,
+        tr,
+        t_running_mean,
+        v,
+        "SI",
+        true,
+        false,
+      );
+      expect(rounded.acceptability_80).toBe(unrounded.acceptability_80);
+      expect(rounded.acceptability_90).toBe(unrounded.acceptability_90);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Input validation tests
+// ---------------------------------------------------------------------------
 describe("adaptive_ashrae input validation", () => {
   test.each([
     ["tdb", "25", 25, 20, 0.1],

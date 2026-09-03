@@ -145,27 +145,28 @@ describe("heat_index stress_category", () => {
   // Test that stress_category is same whether round=true or round=false
   test("stress_category is same whether round=true or round=false", () => {
     // Rounding must never change the category - this proves it
-    const result_rounded = heat_index(30, 80, {
+    // Using heat_index(30, 91) produces hi values very close to a bin boundary:
+    // - rounded: hi = 41.0 exactly (bin edge, stress_category = "danger")
+    // - unrounded: hi = 41.047576332000055 (also "danger")
+    // If the code classified the rounded value BEFORE computing the category,
+    // a broken implementation would give "extreme caution" instead of "danger"
+    // (since 32 < 41 <= 41 is an edge case). This fixture tests that the
+    // category is computed from the unrounded value.
+    const result_rounded = heat_index(30, 91, {
       round: true,
       limit_inputs: false,
     });
-    const result_unrounded = heat_index(30, 80, {
+    const result_unrounded = heat_index(30, 91, {
       round: false,
       limit_inputs: false,
     });
-    // Both should compute the same unrounded SI value and thus same category
+
+    expect(result_rounded.hi).toBe(41);
+    expect(result_unrounded.hi).toBeGreaterThan(41);
     expect(result_rounded.stress_category).toBe(
       result_unrounded.stress_category,
     );
-    // Verify the category is from the valid set (proving it's correctly classified)
-    const validCategories = [
-      "no risk",
-      "caution",
-      "extreme caution",
-      "danger",
-      "extreme danger",
-    ];
-    expect(validCategories).toContain(result_rounded.stress_category);
+    expect(result_rounded.stress_category).toBe("danger");
   });
 
   // Test IP mode: classification should be from SI value, not IP value

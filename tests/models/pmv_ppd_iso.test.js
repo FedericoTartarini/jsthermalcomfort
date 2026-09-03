@@ -101,13 +101,24 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
 
   // Test that tsv is unaffected by round_output
   test("tsv is same whether round_output=true or round_output=false", () => {
-    const result_rounded = pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, {
+    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044 (just above the 0.5 bin edge).
+    // ISO is left-inclusive: [0.5, 1.5) = "Slightly Warm"
+    // This tests that TSV is computed from the unrounded PMV, not the rounded one.
+    // If a broken implementation rounded PMV to 0.50 before classifying, it would
+    // place pmv=0.50 into the [-0.5, 0.5) bin as "Neutral" instead of the
+    // correct [0.5, 1.5) bin as "Slightly Warm". This input verifies the
+    // implementation uses the true unrounded value for classification.
+    const result_rounded = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       round_output: true,
+      limit_inputs: false,
     });
-    const result_unrounded = pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, {
+    const result_unrounded = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       round_output: false,
+      limit_inputs: false,
     });
     expect(result_rounded.tsv).toBe(result_unrounded.tsv);
+    // Both should classify in the "Slightly Warm" bin
+    expect(result_rounded.tsv).toBe("Slightly Warm");
   });
 
   // Test specific TSV values
@@ -117,10 +128,14 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
   });
 
   test("warm comfort (pmv ~1) -> Slightly Warm", () => {
-    const result = pmv_ppd_iso(30, 30, 0.1, 50, 1.2, 0.5, 0, {
+    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044, classifying into
+    // the left-inclusive interval [0.5, 1.5) = "Slightly Warm".
+    // This test verifies the exact classification, not a set of possibilities,
+    // so that rounding errors or classification bugs are caught.
+    const result = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       limit_inputs: false,
     });
-    // 30°C should give a positive PMV, likely in "Slightly Warm" range
-    expect(["Slightly Warm", "Warm", "Hot"]).toContain(result.tsv);
+    // Must be exactly "Slightly Warm", not one of three options
+    expect(result.tsv).toBe("Slightly Warm");
   });
 });

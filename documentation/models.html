@@ -763,19 +763,23 @@
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/heat_index.js#L38-L44' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/heat_index.js#L45-L51' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
   
 
-  <p>Calculates the Heat Index (HI). It combines air temperature and relative humidity to determine an apparent temperature.
+  <p>Calculates the Heat Index (HI) using the Rothfusz regression. It combines air temperature and relative humidity to determine an apparent temperature.
 The HI equation <a href="#ref_12">[12]</a> is derived by multiple regression analysis in temperature and relative humidity from the first version
 of Steadman’s (1979) apparent temperature (AT) <a href="#ref_13">[13]</a>.</p>
 <p>The Rothfusz regression is only valid above 27 °C (80.6 °F). Under the
-default <code>limit_inputs=true</code> the function returns <code>{ hi: NaN }</code> when <code>tdb</code>
+default <code>limit_inputs=true</code> the function returns <code>{ hi: NaN, stress_category: NaN }</code> when <code>tdb</code>
 is below this threshold; pass <code>limit_inputs=false</code> to compute regardless.
 Matches pythermalcomfort 3.9.3 <code>heat_index_rothfusz</code>.</p>
+<p><strong>Note on stress_category classification:</strong> The returned <code>stress_category</code> is determined from the
+unrounded SI value of <code>hi</code>, then the <code>hi</code> value is rounded for return. This ensures rounding does not
+change the category, fixing pythermalcomfort#381. Once that issue is resolved upstream, this note
+can be removed.</p>
 
   
   
@@ -891,9 +895,158 @@ Matches pythermalcomfort 3.9.3 <code>heat_index_rothfusz</code>.</p>
     <div class='py1 quiet mt1 prose-big' id='heat_index_schema-example'>Example</div>
     
       
-      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> hi = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns {hi: NaN} (below 27 °C threshold)</span>
-<span class="hljs-keyword">const</span> hi2 = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>, { <span class="hljs-attr">limit_inputs</span>: <span class="hljs-literal">false</span> }); <span class="hljs-comment">// returns {hi: 25.9}</span>
-<span class="hljs-keyword">const</span> hi3 = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">30</span>, <span class="hljs-number">80</span>); <span class="hljs-comment">// returns {hi: 37.7}</span></pre>
+      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> hi = <span class="hljs-title function_">heat_index_rothfusz</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns {hi: NaN, stress_category: NaN} (below 27 °C threshold)</span>
+<span class="hljs-keyword">const</span> hi2 = <span class="hljs-title function_">heat_index_rothfusz</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>, { <span class="hljs-attr">limit_inputs</span>: <span class="hljs-literal">false</span> }); <span class="hljs-comment">// returns {hi: 25.9, stress_category: &quot;no risk&quot;}</span>
+<span class="hljs-keyword">const</span> hi3 = <span class="hljs-title function_">heat_index_rothfusz</span>(<span class="hljs-number">30</span>, <span class="hljs-number">80</span>); <span class="hljs-comment">// returns {hi: 37.7, stress_category: &quot;extreme caution&quot;}</span></pre>
+    
+  
+
+  
+
+</section>
+
+                    
+                  </section>
+                
+                  
+                  <section class='keyline-top-not py2' id='heat_index'>
+                    <h2 class='mt0 '>Heat Index (HI)</h2>
+                    
+                    
+                      <section class='p2 mb2 clearfix model-section'>
+
+  
+  <div class='clearfix mb1'>
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/heat_index.js#L161-L161' title="Source code">
+        <i class="fa-solid fa-link"></i> Source code
+      </a>
+  </div>
+  
+
+  <p>Backwards-compatible alias for <a href="heat_index_rothfusz">heat_index_rothfusz</a>.
+This name is deprecated in favor of <code>heat_index_rothfusz</code> for consistency with pythermalcomfort,
+but will continue to be supported indefinitely.</p>
+
+  
+  
+  
+
+  <div>Deprecated: Use 
+<a href="heat_index_rothfusz">heat_index_rothfusz</a>
+ instead. This alias will not be removed.
+</div>
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='heat_index-parameters'>Parameters</div>
+    <div class='prose'>
+      <ul class="param-list">
+        
+          <li>
+            <span class='code bold'>tdb</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+            Dry bulb air temperature, default in [°C] in [°F] if 
+<code>units</code>
+ = 'IP'.
+
+            
+          </li>
+        
+          <li>
+            <span class='code bold'>rh</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+            Relative humidity, [%].
+
+            
+          </li>
+        
+          <li>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?)</code>
+            (Optional) Other parameters.
+
+            
+            <table class='mt1 mb2 fixed-table h5 col-12'>
+              <colgroup>
+                <col width='30%' />
+                <col width='70%' />
+              </colgroup>
+              <thead>
+                <tr class='bold fill-light'>
+                  <th>Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody class='mt1'>
+                
+                  <tr>
+  <td class='break-word'><span class='code bold'>options.round</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>true</code>)
+  </td>
+  <td class='break-word'><span>If True rounds output value, if False it does not round it.
+</span></td>
+</tr>
+
+
+                
+                  <tr>
+  <td class='break-word'><span class='code bold'>options.units</span> <code class='quiet'>(<code>"SI"</code> | <code>"IP"</code>)</code>
+  
+    (default <code>&quot;SI&quot;</code>)
+  </td>
+  <td class='break-word'><span>Select the SI (International System of Units) or the IP (Imperial Units) system.
+</span></td>
+</tr>
+
+
+                
+                  <tr>
+  <td class='break-word'><span class='code bold'>options.limit_inputs</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>
+  
+    (default <code>true</code>)
+  </td>
+  <td class='break-word'><span>If True (default), 
+<code>tdb</code>
+ below the Rothfusz applicability threshold (27 °C / 80.6 °F) returns 
+<code>NaN</code>
+. If False, the regression is evaluated regardless of input range.
+</span></td>
+</tr>
+
+
+                
+              </tbody>
+            </table>
+            
+          </li>
+        
+      </ul>
+    </div>
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big' id='heat_index-returns'>Returns</div>
+      <code><a href="#heatindexresult">HeatIndexResult</a></code>
+      
+        :
+        set containing results for the model
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big' id='heat_index-example'>Example</div>
+    
+      
+      <pre class='hljs p1 overflow-auto round'><span class="hljs-keyword">const</span> hi = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>); <span class="hljs-comment">// returns {hi: NaN, stress_category: NaN} (below 27 °C threshold)</span>
+<span class="hljs-keyword">const</span> hi2 = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">25</span>, <span class="hljs-number">50</span>, { <span class="hljs-attr">limit_inputs</span>: <span class="hljs-literal">false</span> }); <span class="hljs-comment">// returns {hi: 25.9, stress_category: &quot;no risk&quot;}</span>
+<span class="hljs-keyword">const</span> hi3 = <span class="hljs-title function_">heat_index</span>(<span class="hljs-number">30</span>, <span class="hljs-number">80</span>); <span class="hljs-comment">// returns {hi: 37.7, stress_category: &quot;extreme caution&quot;}</span></pre>
     
   
 
@@ -913,7 +1066,7 @@ Matches pythermalcomfort 3.9.3 <code>heat_index_rothfusz</code>.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/phs.js#L107-L136' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/phs.js#L107-L136' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1063,7 +1216,7 @@ heat flow, and rectal temperature.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/humidex.js#L43-L47' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/humidex.js#L43-L47' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1213,7 +1366,7 @@ relative humidity.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/net.js#L43-L48' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/net.js#L43-L48' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1351,7 +1504,7 @@ false, it does not.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/wbgt.js#L60-L66' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/wbgt.js#L60-L66' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1513,7 +1666,7 @@ setting
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/discomfort_index.js#L34-L37' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/discomfort_index.js#L34-L37' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1602,7 +1755,7 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/two_nodes.js#L113-L129' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/two_nodes.js#L113-L129' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1799,7 +1952,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/set_tmp.js#L58-L73' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/set_tmp.js#L58-L73' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -1967,7 +2120,7 @@ and activity level <a href="#ref_10">[10]</a>.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/wc.js#L26-L30' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/wc.js#L26-L30' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2083,7 +2236,7 @@ for velocities below 80 km/h <a href="#ref_18">[18]</a>.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/wind_chill_temperature.js#L25-L29' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/wind_chill_temperature.js#L25-L29' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2174,7 +2327,7 @@ formula is computed for any finite input.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/adaptive_en.js#L72-L80' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/adaptive_en.js#L72-L80' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2325,7 +2478,7 @@ outside the applicability limits of the model.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/at.js#L40-L46' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/at.js#L40-L46' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2462,7 +2615,7 @@ Please specify q if you want to estimate AT with solar load.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/pmv_ppd.js#L114-L127' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/pmv_ppd.js#L152-L165' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2643,7 +2796,7 @@ zone boundaries are adjusted based on the SET model. This change was introduced 
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/pmv_ppd_ashrae.js#L49-L61' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/pmv_ppd_ashrae.js#L50-L62' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -2841,7 +2994,7 @@ elevated air speed is present.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/pmv_ppd_iso.js#L50-L61' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/pmv_ppd_iso.js#L51-L62' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3030,7 +3183,7 @@ ranges cause the function to return NaN:</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/adaptive_ashrae.js#L85-L93' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/adaptive_ashrae.js#L85-L93' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3200,7 +3353,7 @@ Calculations with comply with the ASHRAE 55 2020 Standard <a href="#ref_1">[1]</
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/solar_gain.js#L100-L110' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/solar_gain.js#L100-L110' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3362,7 +3515,7 @@ on skin and clothing color. More information is available in Blum (1945).</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/cooling_effect.js#L59-L68' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/cooling_effect.js#L59-L68' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3516,7 +3669,7 @@ can be calculated using the function <code>clo_dynamic</code> which is in .utili
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/athb.js#L54-L61' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/athb.js#L54-L61' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3646,7 +3799,7 @@ jsthermalcomfort.utilities.running_mean_outdoor_temperature.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/pmv.js#L99-L112' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/pmv.js#L99-L112' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3824,7 +3977,7 @@ boundaries are adjusted based on the SET model. This change was introduced by th
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/a_pmv.js#L73-L84' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/a_pmv.js#L73-L84' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -3986,7 +4139,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/ankle_draft.js#L58-L67' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/ankle_draft.js#L58-L67' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4134,7 +4287,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/e_pmv.js#L76-L87' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/e_pmv.js#L76-L87' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4299,7 +4452,7 @@ can be calculated using the function clo_dynamic in utilities.js.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/vertical_tmp_grad_ppd.js#L52-L61' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/vertical_tmp_grad_ppd.js#L52-L61' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4433,7 +4586,7 @@ clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/use_fans_heatwave.js#L103-L119' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/use_fans_heatwave.js#L103-L119' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4619,7 +4772,7 @@ This occurs when either the following variables reaches its maximum value:</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/clo_tout.js#L33-L36' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/clo_tout.js#L33-L36' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4701,7 +4854,7 @@ or the IP (Imperial Units) system.
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/utci.js#L64-L72' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/utci.js#L64-L72' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -4830,7 +4983,7 @@ outside the applicability limits of the model. The valid input ranges are
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/pet_steady.js#L62-L76' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/pet_steady.js#L62-L76' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5012,7 +5165,7 @@ suite or the project's issue tracker for more details.</p>
 
   
   <div class='clearfix mb1'>
-      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/5c848043d7a3c0acab4444f18a788354d2092d7b/src/models/JOS3.js#L112-L1297' title="Source code">
+      <a class="model-link-icon fr" href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/1918f5c15da0efc4e96fdc8893bb239fd97cd439/src/models/JOS3.js#L112-L1297' title="Source code">
         <i class="fa-solid fa-link"></i> Source code
       </a>
   </div>
@@ -5183,6 +5336,30 @@ the computational load.
                                 
                                 
                                   <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index_schema-example">Example</a></li>
+                                
+                                
+                                  
+                                
+                                
+                                  
+                                
+                              </ul>
+                            
+                          </li>
+                        
+                          
+                          <li class="toc-h2 nav-item toc-entry">
+                            <a class="reference internal nav-link" href="#heat_index">Heat Index (HI)</a>
+                            
+                              <ul class="nav section-nav flex-column">
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index-parameters">Parameters</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index-returns">Returns</a></li>
+                                
+                                
+                                  <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#heat_index-example">Example</a></li>
                                 
                                 
                                   

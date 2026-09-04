@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - The shared `pmv_ppd()` function, also publicly exported from the models namespace, now returns `tsv` determined by the `standard` argument (ISO → left-inclusive, ASHRAE → right-inclusive).
 - A new internal helper `classifyFromBins(value, bins)` is available from `src/models/classifierBins.js`. It is **not** re-exported from the models namespace and is not part of the public API. It classifies a scalar value into named categories from a bin configuration, matching numpy's `digitize` semantics with explicit control over interval convention (left- or right-inclusive).
 - **Breaking change for snapshot tests**: return-type additions to `heat_index`, `pmv_ppd_iso`, `pmv_ppd_ashrae`, and `pmv_ppd` may break downstream deep-equality assertions in snapshot tests. Update test expectations to match the new shapes `{ hi, stress_category }` and `{ pmv, ppd, tsv }` as appropriate.
+- **Fix: `adaptive_ashrae` acceptability bug**: `acceptability_80` and `acceptability_90` were previously derived from the ROUNDED comfort temperature when `round_output=true`, so the formatting flag could flip an acceptability decision for operative temperatures near a bound. These booleans are now always computed from unrounded values and are unaffected by `round_output`.
+- **Behaviour change: `adaptive_ashrae` IP output rounding**: IP-mode numeric outputs (`tmp_cmf`, bounds) are now rounded to one decimal place AFTER unit conversion (°C→°F). Values that previously carried extra decimals from the conversion (e.g., 65.12°F) now return 65.1°F. This aligns `adaptive_ashrae` with the correct pattern in `adaptive_en`.
 
 ## 1.4.0
 

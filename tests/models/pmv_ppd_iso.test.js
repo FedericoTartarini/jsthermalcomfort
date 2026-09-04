@@ -44,6 +44,34 @@ describe("pmv_ppd_iso", () => {
     expect(result.pmv).toBeNaN();
     expect(result.ppd).toBeNaN();
   });
+
+  // Tests for ISO met lower bound fix (issue #180)
+  // met=0.7 is below the ISO 7730 lower bound of 0.8, so should return NaN with limit_inputs enabled
+  test("met=0.7 (below lower bound) returns NaN when limit_inputs is enabled", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.7, 0.5, 0, {
+      limit_inputs: true,
+    });
+    expect(result.pmv).toBeNaN();
+    expect(result.ppd).toBeNaN();
+  });
+
+  // met=0.8 is the inclusive lower bound of ISO 7730, so should return valid numbers
+  test("met=0.8 (inclusive lower bound) returns valid numbers when limit_inputs is enabled", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.8, 0.5, 0, {
+      limit_inputs: true,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+    expect(Number.isFinite(result.ppd)).toBe(true);
+  });
+
+  // met=0.7 with limit_inputs=false should return valid numbers (opt-out works)
+  test("met=0.7 returns valid numbers when limit_inputs is disabled (opt-out)", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.7, 0.5, 0, {
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+    expect(Number.isFinite(result.ppd)).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------

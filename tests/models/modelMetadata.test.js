@@ -1,30 +1,20 @@
 import { describe, expect, test } from "@jest/globals";
+import * as pkg from "../../src/index.js";
 import {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-  classifyFromBins,
   heat_index_rothfusz,
   pmv_ppd_iso,
 } from "../../src/index.js";
 import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 
 describe("Model Metadata Exports — enumeration test", () => {
-  test("all expected metadata and constant exports are available from package root", () => {
-    // Load all exports from the package root
-    const importMap = {
-      HEAT_INDEX_ROTHFUSZ_INFO,
-      HEAT_INDEX_STRESS_CATEGORY_BINS,
-      PMV_PPD_ISO_INFO,
-      PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
-      PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-      classifyFromBins,
-    };
-
-    // Expected exports list (in alphabetical order)
-    const expectedExports = [
+  test("all model metadata and classifier exports are available from package root", () => {
+    // All currently published metadata and bins
+    const expectedMetadataExports = [
       "HEAT_INDEX_ROTHFUSZ_INFO",
       "HEAT_INDEX_STRESS_CATEGORY_BINS",
       "PMV_PPD_ISO_INFO",
@@ -33,12 +23,16 @@ describe("Model Metadata Exports — enumeration test", () => {
       "classifyFromBins",
     ];
 
-    const actualExports = Object.keys(importMap).sort();
-
-    expect(actualExports).toEqual(expectedExports);
-    // Also verify that none are undefined
-    expectedExports.forEach((name) => {
-      expect(importMap[name]).toBeDefined();
+    const packageExports = Object.keys(pkg).sort();
+    // Every expected export must be present in the package root.
+    // This catches the JOS3 failure mode: a model whose constants exist
+    // but are never added to src/models/index.js or src/index.js.
+    expectedMetadataExports.forEach((name) => {
+      expect(packageExports).toContain(
+        name,
+        `Expected export "${name}" not found in package root`,
+      );
+      expect(pkg[name]).toBeDefined();
     });
   });
 });
@@ -269,53 +263,83 @@ describe("Identity — bins exported separately are the same object as in INFO",
 });
 
 describe("Enforcement — extracted constants match runtime validation", () => {
-  test("ISO_MET_MIN 0.8 is the lower bound; met < 0.8 returns NaN, met >= 0.8 returns finite", () => {
-    // Just below boundary (0.7) with limit_inputs=true should return NaN
-    const resultBelow = pmv_ppd_iso(25, 30, 0.1, 50, 0.7, 0.5, 0, {
+  test("ISO_MET_MIN 0.8 is enforced: below boundary returns NaN (limit=true), on boundary returns finite (limit=true), and just below returns finite (limit=false inside [-2,2])", () => {
+    // Part 1: Just below boundary (0.7) with limit_inputs=true should return NaN
+    const resultBelowLimit = pmv_ppd_iso(25, 30, 0.1, 50, 0.7, 0.5, 0, {
       limit_inputs: true,
     });
-    expect(resultBelow.pmv).toBeNaN();
+    expect(resultBelowLimit.pmv).toBeNaN();
 
-    // At the boundary (0.8) with limit_inputs=false should return finite PMV
-    const resultAt = pmv_ppd_iso(25, 30, 0.1, 50, 0.8, 0.5, 0, {
+    // Part 2: At the boundary (0.8) with limit_inputs=true should return finite
+    // (proving 0.8 is accepted, bound is inclusive)
+    const resultAtLimit = pmv_ppd_iso(25, 30, 0.1, 50, 0.8, 0.5, 0, {
+      limit_inputs: true,
+    });
+    expect(Number.isFinite(resultAtLimit.pmv)).toBe(true);
+
+    // Part 3: Just below boundary (0.7) with limit_inputs=false should return finite
+    // AND inside [-2, 2] (proving the NaN at met=0.7 limit=true came from the met
+    // bound, not the PMV output gate)
+    const resultBelowNoLimit = pmv_ppd_iso(25, 30, 0.1, 50, 0.7, 0.5, 0, {
       limit_inputs: false,
     });
-    expect(Number.isFinite(resultAt.pmv)).toBe(true);
-    expect(resultAt.pmv).toBeGreaterThanOrEqual(-2);
-    expect(resultAt.pmv).toBeLessThanOrEqual(2);
+    expect(Number.isFinite(resultBelowNoLimit.pmv)).toBe(true);
+    expect(resultBelowNoLimit.pmv).toBeGreaterThanOrEqual(-2);
+    expect(resultBelowNoLimit.pmv).toBeLessThanOrEqual(2);
   });
 
-  test("ISO_CLO_MIN 0 and ISO_CLO_MAX 2 are enforced; outside range returns NaN with limit_inputs=true", () => {
-    // Below lower boundary (-0.01) should return NaN
-    const resultBelow = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, -0.01, 0, {
+  test("ISO_CLO_MIN 0 and ISO_CLO_MAX 2 are enforced: outside range returns NaN (limit=true), on boundary returns finite (limit=true), and outside returns finite (limit=false inside [-2,2])", () => {
+    // Test lower boundary: 0 (inclusive, so -0.01 is outside)
+    // Part 1: Just below boundary (-0.01) with limit_inputs=true should return NaN
+    const resultBelowMinLimit = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, -0.01, 0, {
       limit_inputs: true,
     });
-    expect(resultBelow.pmv).toBeNaN();
+    expect(resultBelowMinLimit.pmv).toBeNaN();
 
-    // At lower boundary (0) with limit_inputs=false should return finite
-    const resultAtMin = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 0, 0, {
-      limit_inputs: false,
-    });
-    expect(Number.isFinite(resultAtMin.pmv)).toBe(true);
-
-    // At upper boundary (2) with limit_inputs=false should return finite
-    const resultAtMax = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2, 0, {
-      limit_inputs: false,
-    });
-    expect(Number.isFinite(resultAtMax.pmv)).toBe(true);
-
-    // Above upper boundary (2.01) should return NaN
-    const resultAbove = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2.01, 0, {
+    // Part 2: At lower boundary (0) with limit_inputs=true should return finite
+    const resultAtMinLimit = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 0, 0, {
       limit_inputs: true,
     });
-    expect(resultAbove.pmv).toBeNaN();
+    expect(Number.isFinite(resultAtMinLimit.pmv)).toBe(true);
+
+    // Part 3: Just below boundary (-0.01) with limit_inputs=false should return finite
+    // AND inside [-2, 2] (proving NaN came from clo bound, not PMV output gate)
+    const resultBelowMinNoLimit = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, -0.01, 0, {
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(resultBelowMinNoLimit.pmv)).toBe(true);
+    expect(resultBelowMinNoLimit.pmv).toBeGreaterThanOrEqual(-2);
+    expect(resultBelowMinNoLimit.pmv).toBeLessThanOrEqual(2);
+
+    // Test upper boundary: 2 (inclusive, so 2.01 is outside)
+    // Part 1: Just above boundary (2.01) with limit_inputs=true should return NaN
+    const resultAboveMaxLimit = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2.01, 0, {
+      limit_inputs: true,
+    });
+    expect(resultAboveMaxLimit.pmv).toBeNaN();
+
+    // Part 2: At upper boundary (2) with limit_inputs=true should return finite
+    const resultAtMaxLimit = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2, 0, {
+      limit_inputs: true,
+    });
+    expect(Number.isFinite(resultAtMaxLimit.pmv)).toBe(true);
+
+    // Part 3: Just above boundary (2.01) with limit_inputs=false should return finite
+    // AND inside [-2, 2] (proving NaN came from clo bound, not PMV output gate)
+    const resultAboveMaxNoLimit = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2.01, 0, {
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(resultAboveMaxNoLimit.pmv)).toBe(true);
+    expect(resultAboveMaxNoLimit.pmv).toBeGreaterThanOrEqual(-2);
+    expect(resultAboveMaxNoLimit.pmv).toBeLessThanOrEqual(2);
   });
 
   // NOTE on issue #195: A vapour pressure bound test cannot be written yet.
   // pythermalcomfort enforces vapour pressure in [0, 2700] Pa, but jsthermalcomfort
   // has no such check (see issue #195). When that is fixed, add a test here similar
-  // to the met/clo tests above, checking both limit_inputs=true (NaN) and
-  // limit_inputs=false (finite output) at the boundaries.
+  // to the met/clo tests above, using the three-part pattern:
+  // (1) outside limit_inputs=true -> NaN, (2) on bound limit_inputs=true -> finite,
+  // (3) outside limit_inputs=false -> finite AND inside [-2, 2].
 });
 
 describe("Outputs staleness — heat_index output matches INFO", () => {

@@ -587,13 +587,13 @@ function numericalDerivatives(f, values, evaluated, h = 1e-2, matrix) {
 
 /**
  * @callback NewtonRaphsonFunction
- * @param {[number, number, number]}
+ * @param {[number, number, number]} inputs
  * @returns {[number, number, number]}
  */
 
 /**
  * @callback NewtonRaphsonSingleFunction
- * @param {[number]}
+ * @param {[number]} input
  * @returns {[number]}
  */
 

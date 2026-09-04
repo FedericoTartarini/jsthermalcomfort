@@ -1,4 +1,4 @@
-import { heat_index } from "./heat_index.js";
+import { heat_index_rothfusz, heat_index } from "./heat_index.js";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
@@ -45,6 +45,7 @@ export {
   cooling_effect,
   discomfort_index,
   heat_index,
+  heat_index_rothfusz,
   humidex,
   net,
   phs,
@@ -76,6 +77,7 @@ export default {
   cooling_effect,
   discomfort_index,
   heat_index,
+  heat_index_rothfusz,
   humidex,
   net,
   phs,

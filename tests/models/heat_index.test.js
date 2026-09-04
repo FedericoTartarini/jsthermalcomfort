@@ -1,5 +1,13 @@
 import { describe, expect, test } from "@jest/globals";
-import { heat_index } from "../../src/models/heat_index";
+import { heat_index, heat_index_rothfusz } from "../../src/models/heat_index";
+import {
+  heat_index as heat_index_from_models,
+  heat_index_rothfusz as heat_index_rothfusz_from_models,
+} from "../../src/models/index.js";
+import {
+  heat_index as heat_index_from_root,
+  heat_index_rothfusz as heat_index_rothfusz_from_root,
+} from "../../src/index.js";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities
 
@@ -181,5 +189,80 @@ describe("heat_index stress_category", () => {
     const result = heat_index(80, 50, { units: "IP", limit_inputs: false });
     expect(result.hi).toBe(80.8);
     expect(result.stress_category).toBe("caution");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests for the renamed function and backwards-compatible alias
+// ---------------------------------------------------------------------------
+describe("heat_index_rothfusz (renamed function)", () => {
+  test("heat_index_rothfusz produces identical results to heat_index", () => {
+    const testCases = [
+      [25, 50, { limit_inputs: false }],
+      [30, 80],
+      [35, 75, { units: "IP", limit_inputs: false }],
+      [27, 40, { round: false, limit_inputs: false }],
+    ];
+
+    testCases.forEach(([tdb, rh, options]) => {
+      const result_rothfusz = heat_index_rothfusz(tdb, rh, options);
+      const result_alias = heat_index(tdb, rh, options);
+
+      expect(result_rothfusz).toEqual(result_alias);
+    });
+  });
+
+  test("heat_index_rothfusz and heat_index are the same function", () => {
+    expect(heat_index_rothfusz).toBe(heat_index);
+  });
+
+  test("heat_index_rothfusz is exported from models/index.js", () => {
+    expect(heat_index_rothfusz_from_models).toBe(heat_index_rothfusz);
+  });
+
+  test("heat_index alias is exported from models/index.js", () => {
+    expect(heat_index_from_models).toBe(heat_index);
+  });
+
+  test("both names return identical results for various inputs", () => {
+    const inputs = [
+      [27, 30, { limit_inputs: false }],
+      [30, 50],
+      [35, 90, { units: "IP", limit_inputs: false }],
+      [50, 40, { round: false, limit_inputs: false }],
+    ];
+
+    inputs.forEach(([tdb, rh, options]) => {
+      const result1 = heat_index_rothfusz(tdb, rh, options);
+      const result2 = heat_index(tdb, rh, options);
+
+      // Compare hi values
+      if (isNaN(result1.hi)) {
+        expect(isNaN(result2.hi)).toBe(true);
+      } else {
+        expect(result2.hi).toBe(result1.hi);
+      }
+
+      // Compare stress_category
+      if (isNaN(result1.stress_category)) {
+        expect(isNaN(result2.stress_category)).toBe(true);
+      } else {
+        expect(result2.stress_category).toBe(result1.stress_category);
+      }
+    });
+  });
+
+  test("both names are exported from package root (src/index.js)", () => {
+    expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
+    expect(heat_index_from_root).toBe(heat_index);
+  });
+
+  test("both names from package root produce correct results", () => {
+    const result1 = heat_index_rothfusz_from_root(30, 80);
+    const result2 = heat_index_from_root(30, 80);
+
+    expect(result1).toEqual(result2);
+    expect(Number.isFinite(result1.hi)).toBe(true);
+    expect(typeof result1.stress_category === "string").toBe(true);
   });
 });

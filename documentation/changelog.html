@@ -779,6 +779,8 @@
   
     <ul>
 <li><code>check_standard_compliance("ISO", ...)</code> now enforces the ISO 7730 metabolic-rate lower limit of 0.8 met; it previously compared against 0 while its own warning message claimed 0.8. The bound is inclusive: <code>met = 0.8</code> is valid. This is a breaking change compared with previous versions; calls with <code>0 &#x3C;= met &#x3C; 0.8</code> and <code>limit_inputs</code> enabled now return NaN where they previously returned a number, affecting models of sleeping (~0.7 met) and reclining occupants. Callers needing the previous behaviour should pass <code>{ limit_inputs: false }</code>. This matches <code>pythermalcomfort</code> <code>pmv_ppd_iso</code>.</li>
+<li><strong>Fix: <code>adaptive_ashrae</code> acceptability bug</strong>: <code>acceptability_80</code> and <code>acceptability_90</code> were previously derived from the ROUNDED comfort temperature when <code>round_output=true</code>, so the formatting flag could flip an acceptability decision for operative temperatures near a bound. These booleans are now always computed from unrounded values and are unaffected by <code>round_output</code>.</li>
+<li><strong>Behaviour change: <code>adaptive_ashrae</code> IP output rounding</strong>: IP-mode numeric outputs (<code>tmp_cmf</code>, bounds) are now rounded to one decimal place AFTER unit conversion (°C→°F). Values that previously carried extra decimals from the conversion (e.g., 65.12°F) now return 65.1°F. This aligns <code>adaptive_ashrae</code> with the correct pattern in <code>adaptive_en</code>.</li>
 </ul>
 
   

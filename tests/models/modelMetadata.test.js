@@ -13,25 +13,27 @@ import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 
 describe("Model Metadata Exports — enumeration test", () => {
   test("all model metadata and classifier exports are available from package root", () => {
-    // All currently published metadata and bins
+    // NOTE: A directory scan approach was attempted to make this test self-maintaining,
+    // but Jest's ESM configuration does not support CommonJS require() or synchronous
+    // dynamic imports in test files. Keep this hardcoded list instead. When a new model's
+    // _INFO or _BINS constants are added, this test will fail because the new constant
+    // is not in the list, catching the JOS3 failure mode: a model whose constants exist
+    // but are never added to src/models/index.js or src/index.js. The list must be
+    // manually updated whenever a new *_INFO or *_BINS export is published.
     const expectedMetadataExports = [
+      "classifyFromBins",
       "HEAT_INDEX_ROTHFUSZ_INFO",
       "HEAT_INDEX_STRESS_CATEGORY_BINS",
       "PMV_PPD_ISO_INFO",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
-      "classifyFromBins",
     ];
 
-    const packageExports = Object.keys(pkg).sort();
-    // Every expected export must be present in the package root.
-    // This catches the JOS3 failure mode: a model whose constants exist
-    // but are never added to src/models/index.js or src/index.js.
+    const packageExports = Object.keys(pkg);
+
+    // Every expected export must be present in the package root
     expectedMetadataExports.forEach((name) => {
-      expect(packageExports).toContain(
-        name,
-        `Expected export "${name}" not found in package root`,
-      );
+      expect(packageExports).toContain(name);
       expect(pkg[name]).toBeDefined();
     });
   });

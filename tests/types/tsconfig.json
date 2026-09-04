@@ -1,0 +1,15 @@
+{
+  "extends": "../../configs/tsconfig.json",
+  "compilerOptions": {
+    "outDir": null,
+    "noEmit": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "skipLibCheck": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false
+  },
+  "include": ["consumer-check.ts"],
+  "references": []
+}

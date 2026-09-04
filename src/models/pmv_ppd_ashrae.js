@@ -5,6 +5,7 @@ import { validateInputs } from "../utilities/utilities.js";
  * @typedef {Object} PmvPpdAshrae
  * @property {number} pmv - Predicted Mean Vote on the ASHRAE 55 scale [-3, +3]
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
+ * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses right-inclusive bins (pythermalcomfort#382).
  * @public
  */
 

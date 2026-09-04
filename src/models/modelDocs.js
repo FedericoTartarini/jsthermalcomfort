@@ -48,21 +48,29 @@
  * Deep-freezes an object and all nested objects, preventing accidental mutations.
  *
  * Used to lock down model metadata so consumers and the runtime cannot diverge.
+ * Handles cycles via WeakSet tracking and recurses into already-frozen objects
+ * to ensure their properties are also frozen.
  *
  * @param {Object} obj - The object to freeze.
  * @returns {Object} The same object, now frozen.
  * @internal
  */
-export function deepFreeze(obj) {
+export function deepFreeze(obj, visited = new WeakSet()) {
+  // Prevent infinite recursion on circular references
+  if (visited.has(obj)) {
+    return obj;
+  }
+  visited.add(obj);
+
   // Freeze the object itself
   Object.freeze(obj);
 
-  // Recursively freeze all owned properties
+  // Recursively freeze all owned properties, regardless of current frozen state
   Object.getOwnPropertyNames(obj).forEach((prop) => {
     const value = obj[prop];
-    // Only freeze if it's an object (including arrays) and not already frozen
-    if (value !== null && (typeof value === "object") && !Object.isFrozen(value)) {
-      deepFreeze(value);
+    // Only recurse if it's an object (including arrays)
+    if (value !== null && typeof value === "object") {
+      deepFreeze(value, visited);
     }
   });
 

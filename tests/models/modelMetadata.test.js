@@ -9,48 +9,37 @@ import {
   heat_index_rothfusz,
   pmv_ppd_iso,
 } from "../../src/index.js";
-import {
-  ISO_TDB_MIN,
-  ISO_TDB_MAX,
-  ISO_TR_MIN,
-  ISO_TR_MAX,
-  ISO_VR_MIN,
-  ISO_VR_MAX,
-  ISO_MET_MIN,
-  ISO_MET_MAX,
-  ISO_CLO_MIN,
-  ISO_CLO_MAX,
-} from "../../src/utilities/utilities.js";
+import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 
-describe("Model Metadata Exports", () => {
-  test("HEAT_INDEX_ROTHFUSZ_INFO is exported from package root", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO).toBeDefined();
-    expect(typeof HEAT_INDEX_ROTHFUSZ_INFO).toBe("object");
-  });
+describe("Model Metadata Exports — enumeration test", () => {
+  test("all expected metadata and constant exports are available from package root", () => {
+    // Load all exports from the package root
+    const importMap = {
+      HEAT_INDEX_ROTHFUSZ_INFO,
+      HEAT_INDEX_STRESS_CATEGORY_BINS,
+      PMV_PPD_ISO_INFO,
+      PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+      PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+      classifyFromBins,
+    };
 
-  test("PMV_PPD_ISO_INFO is exported from package root", () => {
-    expect(PMV_PPD_ISO_INFO).toBeDefined();
-    expect(typeof PMV_PPD_ISO_INFO).toBe("object");
-  });
+    // Expected exports list (in alphabetical order)
+    const expectedExports = [
+      "HEAT_INDEX_ROTHFUSZ_INFO",
+      "HEAT_INDEX_STRESS_CATEGORY_BINS",
+      "PMV_PPD_ISO_INFO",
+      "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
+      "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
+      "classifyFromBins",
+    ];
 
-  test("HEAT_INDEX_STRESS_CATEGORY_BINS is exported from package root", () => {
-    expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toBeDefined();
-    expect(typeof HEAT_INDEX_STRESS_CATEGORY_BINS).toBe("object");
-  });
+    const actualExports = Object.keys(importMap).sort();
 
-  test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO is exported from package root", () => {
-    expect(PMV_THERMAL_SENSATION_VOTE_BINS_ISO).toBeDefined();
-    expect(typeof PMV_THERMAL_SENSATION_VOTE_BINS_ISO).toBe("object");
-  });
-
-  test("PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE is exported from package root", () => {
-    expect(PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE).toBeDefined();
-    expect(typeof PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE).toBe("object");
-  });
-
-  test("classifyFromBins function is exported from package root", () => {
-    expect(classifyFromBins).toBeDefined();
-    expect(typeof classifyFromBins).toBe("function");
+    expect(actualExports).toEqual(expectedExports);
+    // Also verify that none are undefined
+    expectedExports.forEach((name) => {
+      expect(importMap[name]).toBeDefined();
+    });
   });
 });
 
@@ -76,7 +65,7 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs).toHaveProperty("rh");
   });
 
-  test("tdb input has applicability minimum of 27", () => {
+  test("tdb input has applicability minimum of 27 (SI unit)", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBeDefined();
     expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability.min).toBe(27);
   });
@@ -100,12 +89,14 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
 
   test("stress_category output is dimensionless with classifier", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.unit).toBeNull();
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toBeDefined();
+    expect(
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
+    ).toBeDefined();
   });
 
   test("stress_category classifier references HEAT_INDEX_STRESS_CATEGORY_BINS", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toBe(
-      HEAT_INDEX_STRESS_CATEGORY_BINS
+      HEAT_INDEX_STRESS_CATEGORY_BINS,
     );
   });
 });
@@ -137,29 +128,53 @@ describe("PMV_PPD_ISO_INFO structure", () => {
     expect(PMV_PPD_ISO_INFO.inputs).toHaveProperty("wme");
   });
 
-  test("tdb has correct applicability bounds", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability.min).toBe(ISO_TDB_MIN);
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability.max).toBe(ISO_TDB_MAX);
+  test("tdb has correct applicability bounds from ISO_7730_LIMITS", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability.min).toBe(
+      ISO_7730_LIMITS.tdb.min,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability.max).toBe(
+      ISO_7730_LIMITS.tdb.max,
+    );
   });
 
-  test("tr has correct applicability bounds", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability.min).toBe(ISO_TR_MIN);
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability.max).toBe(ISO_TR_MAX);
+  test("tr has correct applicability bounds from ISO_7730_LIMITS", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability.min).toBe(
+      ISO_7730_LIMITS.tr.min,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability.max).toBe(
+      ISO_7730_LIMITS.tr.max,
+    );
   });
 
-  test("vr has correct applicability bounds", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability.min).toBe(ISO_VR_MIN);
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability.max).toBe(ISO_VR_MAX);
+  test("vr has correct applicability bounds from ISO_7730_LIMITS", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability.min).toBe(
+      ISO_7730_LIMITS.vr.min,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability.max).toBe(
+      ISO_7730_LIMITS.vr.max,
+    );
   });
 
-  test("met has correct applicability bounds", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability.min).toBe(ISO_MET_MIN);
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability.max).toBe(ISO_MET_MAX);
+  test("met has correct applicability bounds from ISO_7730_LIMITS", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.met.applicability.min).toBe(
+      ISO_7730_LIMITS.met.min,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.met.applicability.max).toBe(
+      ISO_7730_LIMITS.met.max,
+    );
   });
 
-  test("clo has correct applicability bounds", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability.min).toBe(ISO_CLO_MIN);
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability.max).toBe(ISO_CLO_MAX);
+  test("clo has correct applicability bounds from ISO_7730_LIMITS", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability.min).toBe(
+      ISO_7730_LIMITS.clo.min,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability.max).toBe(
+      ISO_7730_LIMITS.clo.max,
+    );
+  });
+
+  test("wme has unit 'met' (not W/m²)", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.wme.unit).toBe("met");
   });
 
   test("outputs contains pmv, ppd, and tsv", () => {
@@ -185,7 +200,7 @@ describe("PMV_PPD_ISO_INFO structure", () => {
 
   test("tsv classifier references PMV_THERMAL_SENSATION_VOTE_BINS_ISO", () => {
     expect(PMV_PPD_ISO_INFO.outputs.tsv.classifier).toBe(
-      PMV_THERMAL_SENSATION_VOTE_BINS_ISO
+      PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
     );
   });
 });
@@ -207,9 +222,12 @@ describe("Deep freezing — objects are immutable", () => {
     expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.outputs)).toBe(true);
   });
 
-  test("HEAT_INDEX_STRESS_CATEGORY_BINS in INFO is the same frozen object referenced in outputs", () => {
-    const classifier = HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier;
+  test("HEAT_INDEX_STRESS_CATEGORY_BINS nested in INFO is frozen", () => {
+    const classifier =
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier;
     expect(Object.isFrozen(classifier)).toBe(true);
+    expect(Object.isFrozen(classifier.edges)).toBe(true);
+    expect(Object.isFrozen(classifier.labels)).toBe(true);
   });
 
   test("PMV_PPD_ISO_INFO is frozen", () => {
@@ -228,66 +246,76 @@ describe("Deep freezing — objects are immutable", () => {
     expect(Object.isFrozen(PMV_PPD_ISO_INFO.outputs)).toBe(true);
   });
 
-  test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO in INFO is frozen", () => {
+  test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO nested in INFO is frozen", () => {
     const classifier = PMV_PPD_ISO_INFO.outputs.tsv.classifier;
     expect(Object.isFrozen(classifier)).toBe(true);
+    expect(Object.isFrozen(classifier.edges)).toBe(true);
+    expect(Object.isFrozen(classifier.labels)).toBe(true);
   });
 });
 
 describe("Identity — bins exported separately are the same object as in INFO", () => {
   test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO === PMV_PPD_ISO_INFO.outputs.tsv.classifier", () => {
     expect(PMV_THERMAL_SENSATION_VOTE_BINS_ISO).toBe(
-      PMV_PPD_ISO_INFO.outputs.tsv.classifier
+      PMV_PPD_ISO_INFO.outputs.tsv.classifier,
     );
   });
 
   test("HEAT_INDEX_STRESS_CATEGORY_BINS === HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier", () => {
     expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toBe(
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
     );
   });
 });
 
 describe("Enforcement — extracted constants match runtime validation", () => {
-  test("ISO_MET_MIN 0.8 is the lower bound; met < 0.8 returns NaN", () => {
-    // Just below boundary (0.7) - should return NaN due to met < 0.8
-    const result1 = pmv_ppd_iso(25, 30, 0.1, 50, 0.7, 0.5, 0, {
+  test("ISO_MET_MIN 0.8 is the lower bound; met < 0.8 returns NaN, met >= 0.8 returns finite", () => {
+    // Just below boundary (0.7) with limit_inputs=true should return NaN
+    const resultBelow = pmv_ppd_iso(25, 30, 0.1, 50, 0.7, 0.5, 0, {
       limit_inputs: true,
     });
-    expect(result1.pmv).toBeNaN();
+    expect(resultBelow.pmv).toBeNaN();
 
-    // At the boundary (0.8) - should return valid result
-    const result2 = pmv_ppd_iso(25, 30, 0.1, 50, 0.8, 0.5, 0, {
-      limit_inputs: true,
+    // At the boundary (0.8) with limit_inputs=false should return finite PMV
+    const resultAt = pmv_ppd_iso(25, 30, 0.1, 50, 0.8, 0.5, 0, {
+      limit_inputs: false,
     });
-    expect(Number.isFinite(result2.pmv)).toBe(true);
+    expect(Number.isFinite(resultAt.pmv)).toBe(true);
+    expect(resultAt.pmv).toBeGreaterThanOrEqual(-2);
+    expect(resultAt.pmv).toBeLessThanOrEqual(2);
   });
 
-  test("ISO_CLO_MIN 0 and ISO_CLO_MAX 2 are enforced", () => {
-    // Below lower boundary (-0.01) - should return NaN
-    const result1 = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, -0.01, 0, {
+  test("ISO_CLO_MIN 0 and ISO_CLO_MAX 2 are enforced; outside range returns NaN with limit_inputs=true", () => {
+    // Below lower boundary (-0.01) should return NaN
+    const resultBelow = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, -0.01, 0, {
       limit_inputs: true,
     });
-    expect(result1.pmv).toBeNaN();
+    expect(resultBelow.pmv).toBeNaN();
 
-    // At lower boundary (0) - should return valid result
-    const result2 = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 0, 0, {
-      limit_inputs: true,
+    // At lower boundary (0) with limit_inputs=false should return finite
+    const resultAtMin = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 0, 0, {
+      limit_inputs: false,
     });
-    expect(Number.isFinite(result2.pmv)).toBe(true);
+    expect(Number.isFinite(resultAtMin.pmv)).toBe(true);
 
-    // At upper boundary (2) - should return valid result
-    const result3 = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2, 0, {
-      limit_inputs: true,
+    // At upper boundary (2) with limit_inputs=false should return finite
+    const resultAtMax = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2, 0, {
+      limit_inputs: false,
     });
-    expect(Number.isFinite(result3.pmv)).toBe(true);
+    expect(Number.isFinite(resultAtMax.pmv)).toBe(true);
 
-    // Above upper boundary (2.01) - should return NaN
-    const result4 = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2.01, 0, {
+    // Above upper boundary (2.01) should return NaN
+    const resultAbove = pmv_ppd_iso(25, 30, 0.1, 50, 1.0, 2.01, 0, {
       limit_inputs: true,
     });
-    expect(result4.pmv).toBeNaN();
+    expect(resultAbove.pmv).toBeNaN();
   });
+
+  // NOTE on issue #195: A vapour pressure bound test cannot be written yet.
+  // pythermalcomfort enforces vapour pressure in [0, 2700] Pa, but jsthermalcomfort
+  // has no such check (see issue #195). When that is fixed, add a test here similar
+  // to the met/clo tests above, checking both limit_inputs=true (NaN) and
+  // limit_inputs=false (finite output) at the boundaries.
 });
 
 describe("Outputs staleness — heat_index output matches INFO", () => {
@@ -307,7 +335,7 @@ describe("Outputs staleness — heat_index output matches INFO", () => {
 
 describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
   test("pmv_ppd_iso output keys match PMV_PPD_ISO_INFO.outputs", () => {
-    const result = pmv_ppd_iso(22, 22, 0.1, 50, 1.0, 0.5, 0, "ISO", {
+    const result = pmv_ppd_iso(22, 22, 0.1, 50, 1.0, 0.5, 0, {
       limit_inputs: false,
     });
     const resultKeys = Object.keys(result).sort();
@@ -316,7 +344,7 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
   });
 
   test("pmv_ppd_iso always returns pmv, ppd, and tsv", () => {
-    const result = pmv_ppd_iso(22, 22, 0.1, 50, 1.0, 0.5, 0, "ISO");
+    const result = pmv_ppd_iso(22, 22, 0.1, 50, 1.0, 0.5, 0);
     expect(result).toHaveProperty("pmv");
     expect(result).toHaveProperty("ppd");
     expect(result).toHaveProperty("tsv");

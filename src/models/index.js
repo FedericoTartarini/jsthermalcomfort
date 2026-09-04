@@ -1,4 +1,9 @@
-import { heat_index_rothfusz, heat_index, HEAT_INDEX_ROTHFUSZ_INFO, HEAT_INDEX_STRESS_CATEGORY_BINS } from "./heat_index.js";
+import {
+  heat_index_rothfusz,
+  heat_index,
+  HEAT_INDEX_ROTHFUSZ_INFO,
+  HEAT_INDEX_STRESS_CATEGORY_BINS,
+} from "./heat_index.js";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
@@ -27,7 +32,11 @@ import { clo_tout } from "./clo_tout.js";
 import { utci } from "./utci.js";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
-import { PMV_PPD_ISO_INFO, PMV_THERMAL_SENSATION_VOTE_BINS_ISO, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE } from "./pmv_ppd.js";
+import {
+  PMV_PPD_ISO_INFO,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+} from "./pmv_ppd.js";
 import { classifyFromBins } from "./classifierBins.js";
 
 /**

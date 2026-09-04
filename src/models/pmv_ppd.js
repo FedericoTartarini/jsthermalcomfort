@@ -4,20 +4,15 @@ import {
   units_converter,
   valid_range,
   validateInputs,
-  ISO_TDB_MIN,
-  ISO_TDB_MAX,
-  ISO_TR_MIN,
-  ISO_TR_MAX,
-  ISO_VR_MIN,
-  ISO_VR_MAX,
-  ISO_MET_MIN,
-  ISO_MET_MAX,
-  ISO_CLO_MIN,
-  ISO_CLO_MAX,
+  ISO_7730_LIMITS,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
 import { classifyFromBins } from "./classifierBins.js";
 import { deepFreeze } from "./modelDocs.js";
+
+/**
+ * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
+ */
 
 /**
  * @typedef {Object} Pmv_ppdKwargs
@@ -48,6 +43,22 @@ import { deepFreeze } from "./modelDocs.js";
  * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the unrounded pmv.
  * @public
  */
+
+/**
+ * ISO 7730 PMV output applicability gate (lower bound).
+ * When limit_inputs is true, pmv and ppd are set to NaN if pmv < this value.
+ * Runtime enforcement and metadata both read this constant.
+ * @type {number}
+ */
+const PMV_ISO_OUTPUT_MIN = -2;
+
+/**
+ * ISO 7730 PMV output applicability gate (upper bound).
+ * When limit_inputs is true, pmv and ppd are set to NaN if pmv > this value.
+ * Runtime enforcement and metadata both read this constant.
+ * @type {number}
+ */
+const PMV_ISO_OUTPUT_MAX = 2;
 
 /**
  * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
@@ -97,16 +108,49 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
   label: "PMV / PPD (ISO 7730)",
   description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
   inputs: {
-    tdb: { unit: "°C", applicability: { min: ISO_TDB_MIN, max: ISO_TDB_MAX } },
-    tr: { unit: "°C", applicability: { min: ISO_TR_MIN, max: ISO_TR_MAX } },
-    vr: { unit: "m/s", applicability: { min: ISO_VR_MIN, max: ISO_VR_MAX } },
-    met: { unit: "met", applicability: { min: ISO_MET_MIN, max: ISO_MET_MAX } },
-    clo: { unit: "clo", applicability: { min: ISO_CLO_MIN, max: ISO_CLO_MAX } },
+    tdb: {
+      unit: "°C",
+      applicability: {
+        min: ISO_7730_LIMITS.tdb.min,
+        max: ISO_7730_LIMITS.tdb.max,
+      },
+    },
+    tr: {
+      unit: "°C",
+      applicability: {
+        min: ISO_7730_LIMITS.tr.min,
+        max: ISO_7730_LIMITS.tr.max,
+      },
+    },
+    vr: {
+      unit: "m/s",
+      applicability: {
+        min: ISO_7730_LIMITS.vr.min,
+        max: ISO_7730_LIMITS.vr.max,
+      },
+    },
+    met: {
+      unit: "met",
+      applicability: {
+        min: ISO_7730_LIMITS.met.min,
+        max: ISO_7730_LIMITS.met.max,
+      },
+    },
+    clo: {
+      unit: "clo",
+      applicability: {
+        min: ISO_7730_LIMITS.clo.min,
+        max: ISO_7730_LIMITS.clo.max,
+      },
+    },
     rh: { unit: "%" },
-    wme: { unit: "W/m²" },
+    wme: { unit: "met" },
   },
   outputs: {
-    pmv: { unit: null, applicability: { min: -2, max: 2 } },
+    pmv: {
+      unit: null,
+      applicability: { min: PMV_ISO_OUTPUT_MIN, max: PMV_ISO_OUTPUT_MAX },
+    },
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
   },
@@ -279,7 +323,10 @@ export function pmv_ppd(
   if (kwargs.limit_inputs) {
     // ISO 7730 limits PMV applicability to [-2, 2]; ASHRAE 55 has no equivalent output bound
     const pmv_outside_iso_range =
-      standard === "ISO" && valid_range([pmv], [-2, 2]).includes(NaN);
+      standard === "ISO" &&
+      valid_range([pmv], [PMV_ISO_OUTPUT_MIN, PMV_ISO_OUTPUT_MAX]).includes(
+        NaN,
+      );
 
     if (isNaN(pmv) || compliance_warnings.length > 0 || pmv_outside_iso_range) {
       pmv = NaN;

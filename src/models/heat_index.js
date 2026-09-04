@@ -3,6 +3,10 @@ import { classifyFromBins } from "./classifierBins.js";
 import { deepFreeze } from "./modelDocs.js";
 
 /**
+ * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
+ */
+
+/**
  * @typedef {object} HeatIndexResult
  * @property {number} hi - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
  * @property {string|number} stress_category - Thermal stress category, or NaN if hi is NaN. Classified from the unrounded SI value (see note below).
@@ -43,6 +47,22 @@ import { deepFreeze } from "./modelDocs.js";
  *
  * @category Thermophysiological models
  */
+
+/**
+ * Rothfusz regression applicability threshold, SI units [°C].
+ * Metadata and runtime enforcement both read this constant.
+ * @type {number}
+ */
+const HEAT_INDEX_TDB_MIN_SI = 27;
+
+/**
+ * Rothfusz regression applicability threshold, IP units [°F].
+ * Corresponds to HEAT_INDEX_TDB_MIN_SI converted to Fahrenheit.
+ * Metadata describes limits in °C only; IP threshold provided for runtime.
+ * @type {number}
+ */
+const HEAT_INDEX_TDB_MIN_IP = 80.6;
+
 const HEAT_INDEX_SCHEMA = {
   tdb: { type: "number" },
   rh: { type: "number" },
@@ -79,12 +99,15 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
   label: "Heat Index (Rothfusz)",
   description: "Apparent temperature — how hot it feels at a given humidity.",
   inputs: {
-    tdb: { unit: "°C", applicability: { min: 27 } },
+    tdb: { unit: "°C", applicability: { min: HEAT_INDEX_TDB_MIN_SI } },
     rh: { unit: "%" },
   },
   outputs: {
     hi: { unit: "°C" },
-    stress_category: { unit: null, classifier: HEAT_INDEX_STRESS_CATEGORY_BINS },
+    stress_category: {
+      unit: null,
+      classifier: HEAT_INDEX_STRESS_CATEGORY_BINS,
+    },
   },
 });
 
@@ -107,7 +130,8 @@ export function heat_index_rothfusz(
 
   const limit_inputs = options.limit_inputs ?? true;
   if (limit_inputs) {
-    const threshold = options.units === "IP" ? 80.6 : 27;
+    const threshold =
+      options.units === "IP" ? HEAT_INDEX_TDB_MIN_IP : HEAT_INDEX_TDB_MIN_SI;
     if (tdb < threshold) {
       return { hi: NaN, stress_category: NaN };
     }

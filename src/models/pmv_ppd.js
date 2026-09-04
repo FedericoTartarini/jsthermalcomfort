@@ -4,9 +4,20 @@ import {
   units_converter,
   valid_range,
   validateInputs,
+  ISO_TDB_MIN,
+  ISO_TDB_MAX,
+  ISO_TR_MIN,
+  ISO_TR_MAX,
+  ISO_VR_MIN,
+  ISO_VR_MAX,
+  ISO_MET_MIN,
+  ISO_MET_MAX,
+  ISO_CLO_MIN,
+  ISO_CLO_MAX,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
 import { classifyFromBins } from "./classifierBins.js";
+import { deepFreeze } from "./modelDocs.js";
 
 /**
  * @typedef {Object} Pmv_ppdKwargs
@@ -73,6 +84,33 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = {
   ],
   right: true,
 };
+
+/**
+ * Model metadata for PMV / PPD (ISO 7730).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * @type {ModelInfo}
+ * @public
+ */
+export const PMV_PPD_ISO_INFO = deepFreeze({
+  label: "PMV / PPD (ISO 7730)",
+  description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
+  inputs: {
+    tdb: { unit: "°C", applicability: { min: ISO_TDB_MIN, max: ISO_TDB_MAX } },
+    tr: { unit: "°C", applicability: { min: ISO_TR_MIN, max: ISO_TR_MAX } },
+    vr: { unit: "m/s", applicability: { min: ISO_VR_MIN, max: ISO_VR_MAX } },
+    met: { unit: "met", applicability: { min: ISO_MET_MIN, max: ISO_MET_MAX } },
+    clo: { unit: "clo", applicability: { min: ISO_CLO_MIN, max: ISO_CLO_MAX } },
+    rh: { unit: "%" },
+    wme: { unit: "W/m²" },
+  },
+  outputs: {
+    pmv: { unit: null, applicability: { min: -2, max: 2 } },
+    ppd: { unit: "%" },
+    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
+  },
+});
 
 /**
  * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and

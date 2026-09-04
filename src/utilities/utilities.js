@@ -87,6 +87,96 @@ export const Standard = Object.freeze({
  */
 
 /**
+ * ISO 7730 compliance limits for dry bulb air temperature [°C].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_TDB_MIN = 10;
+
+/**
+ * ISO 7730 compliance limits for dry bulb air temperature [°C].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_TDB_MAX = 30;
+
+/**
+ * ISO 7730 compliance limits for mean radiant temperature [°C].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_TR_MIN = 10;
+
+/**
+ * ISO 7730 compliance limits for mean radiant temperature [°C].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_TR_MAX = 40;
+
+/**
+ * ISO 7730 compliance limits for relative air speed [m/s].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_VR_MIN = 0;
+
+/**
+ * ISO 7730 compliance limits for relative air speed [m/s].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_VR_MAX = 1;
+
+/**
+ * ISO 7730 compliance limits for metabolic rate [met].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_MET_MIN = 0.8;
+
+/**
+ * ISO 7730 compliance limits for metabolic rate [met].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_MET_MAX = 4;
+
+/**
+ * ISO 7730 compliance limits for clothing insulation [clo].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_CLO_MIN = 0;
+
+/**
+ * ISO 7730 compliance limits for clothing insulation [clo].
+ * Used by `_iso_compliance` and exported for model metadata.
+ *
+ * @type {number}
+ * @public
+ */
+export const ISO_CLO_MAX = 2;
+
+/**
  * Check that the values comply with the standard provided
  *
  * @param {Standard} standard
@@ -266,19 +356,19 @@ function _iso_compliance(kwargs) {
   let warnings = [];
   for (const [key, value] of Object.entries(kwargs)) {
     if (value === undefined) continue;
-    if (key === "tdb" && (value > 30 || value < 10))
+    if (key === "tdb" && (value > ISO_TDB_MAX || value < ISO_TDB_MIN))
       warnings.push(
         "ISO air temperature applicability limits between 10 and 30 ºC",
       );
-    if (key === "tr" && (value > 40 || value < 10))
+    if (key === "tr" && (value > ISO_TR_MAX || value < ISO_TR_MIN))
       warnings.push(
         "ISO mean radiant temperature applicability limits between 10 and 40 ºC",
       );
-    if ((key === "v" || key === "vr") && (value > 1 || value < 0))
+    if ((key === "v" || key === "vr") && (value > ISO_VR_MAX || value < ISO_VR_MIN))
       warnings.push("ISO air speed applicability limits between 0 and 1 m/s");
-    if (key === "met" && (value > 4 || value < 0.8))
+    if (key === "met" && (value > ISO_MET_MAX || value < ISO_MET_MIN))
       warnings.push("ISO met applicability limits between 0.8 and 4.0 met");
-    if (key === "clo" && (value > 2 || value < 0))
+    if (key === "clo" && (value > ISO_CLO_MAX || value < ISO_CLO_MIN))
       warnings.push("ISO clo applicability limits between 0.0 and 2 clo");
   }
   return warnings;

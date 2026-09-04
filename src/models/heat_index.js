@@ -1,5 +1,6 @@
 import { round, validateInputs } from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.js";
+import { deepFreeze } from "./modelDocs.js";
 
 /**
  * @typedef {object} HeatIndexResult
@@ -65,6 +66,27 @@ export const HEAT_INDEX_STRESS_CATEGORY_BINS = {
   labels: ["no risk", "caution", "extreme caution", "danger", "extreme danger"],
   right: true,
 };
+
+/**
+ * Model metadata for Heat Index (Rothfusz regression).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * @type {ModelInfo}
+ * @public
+ */
+export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
+  label: "Heat Index (Rothfusz)",
+  description: "Apparent temperature — how hot it feels at a given humidity.",
+  inputs: {
+    tdb: { unit: "°C", applicability: { min: 27 } },
+    rh: { unit: "%" },
+  },
+  outputs: {
+    hi: { unit: "°C" },
+    stress_category: { unit: null, classifier: HEAT_INDEX_STRESS_CATEGORY_BINS },
+  },
+});
 
 export function heat_index_rothfusz(
   tdb,

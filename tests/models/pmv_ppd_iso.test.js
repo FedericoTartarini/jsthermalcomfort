@@ -44,6 +44,34 @@ describe("pmv_ppd_iso", () => {
     expect(result.pmv).toBeNaN();
     expect(result.ppd).toBeNaN();
   });
+
+  // Tests for ISO met lower bound fix (issue #180)
+  // met=0.7 is below the ISO 7730 lower bound of 0.8, so should return NaN with limit_inputs enabled
+  test("met=0.7 (below lower bound) returns NaN when limit_inputs is enabled", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.7, 0.5, 0, {
+      limit_inputs: true,
+    });
+    expect(result.pmv).toBeNaN();
+    expect(result.ppd).toBeNaN();
+  });
+
+  // met=0.8 is the inclusive lower bound of ISO 7730, so should return valid numbers
+  test("met=0.8 (inclusive lower bound) returns valid numbers when limit_inputs is enabled", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.8, 0.5, 0, {
+      limit_inputs: true,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+    expect(Number.isFinite(result.ppd)).toBe(true);
+  });
+
+  // met=0.7 with limit_inputs=false should return valid numbers (opt-out works)
+  test("met=0.7 returns valid numbers when limit_inputs is disabled (opt-out)", () => {
+    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.7, 0.5, 0, {
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+    expect(Number.isFinite(result.ppd)).toBe(true);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -101,13 +129,24 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
 
   // Test that tsv is unaffected by round_output
   test("tsv is same whether round_output=true or round_output=false", () => {
-    const result_rounded = pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, {
+    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044 (just above the 0.5 bin edge).
+    // ISO is left-inclusive: [0.5, 1.5) = "Slightly Warm"
+    // This tests that TSV is computed from the unrounded PMV, not the rounded one.
+    // If a broken implementation rounded PMV to 0.50 before classifying, it would
+    // place pmv=0.50 into the [-0.5, 0.5) bin as "Neutral" instead of the
+    // correct [0.5, 1.5) bin as "Slightly Warm". This input verifies the
+    // implementation uses the true unrounded value for classification.
+    const result_rounded = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       round_output: true,
+      limit_inputs: false,
     });
-    const result_unrounded = pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, {
+    const result_unrounded = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       round_output: false,
+      limit_inputs: false,
     });
     expect(result_rounded.tsv).toBe(result_unrounded.tsv);
+    // Both should classify in the "Slightly Warm" bin
+    expect(result_rounded.tsv).toBe("Slightly Warm");
   });
 
   // Test specific TSV values
@@ -117,10 +156,14 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
   });
 
   test("warm comfort (pmv ~1) -> Slightly Warm", () => {
-    const result = pmv_ppd_iso(30, 30, 0.1, 50, 1.2, 0.5, 0, {
+    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044, classifying into
+    // the left-inclusive interval [0.5, 1.5) = "Slightly Warm".
+    // This test verifies the exact classification, not a set of possibilities,
+    // so that rounding errors or classification bugs are caught.
+    const result = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       limit_inputs: false,
     });
-    // 30°C should give a positive PMV, likely in "Slightly Warm" range
-    expect(["Slightly Warm", "Warm", "Hot"]).toContain(result.tsv);
+    // Must be exactly "Slightly Warm", not one of three options
+    expect(result.tsv).toBe("Slightly Warm");
   });
 });

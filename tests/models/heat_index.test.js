@@ -3,6 +3,7 @@ import {
   heat_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
+  HEAT_INDEX_ROTHFUSZ_LIMITS,
 } from "../../src/models/heat_index";
 import {
   heat_index as heat_index_from_models,
@@ -287,9 +288,14 @@ describe("heat_index_rothfusz applicability threshold across unit systems", () =
     ).toBe(true);
   });
 
-  test("the metadata reports the SI threshold and is frozen", () => {
-    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability;
-    expect(bound).toEqual({ min: 27 });
-    expect(Object.isFrozen(bound)).toBe(true);
+  test("the metadata references the limits object rather than copying it", () => {
+    // `toBe`, not `toEqual`: a rebuilt { min: 27 } literal would satisfy
+    // equality and then be free to drift from what the runtime enforces.
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBe(
+      HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+    );
+    expect(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb).toEqual({ min: 27 });
+    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS)).toBe(true);
+    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb)).toBe(true);
   });
 });

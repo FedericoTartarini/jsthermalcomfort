@@ -64,9 +64,15 @@ import { deepFreeze } from "./modelDocs.js";
  * with 27 °C. The conversion is exact in floating point (27 * 9/5 + 32 ===
  * 80.6), so nothing is lost by deriving it.
  *
+ * Exported so a test can assert that the metadata references this object
+ * rather than a literal copy of it. It is deliberately NOT added to
+ * `src/models/index.js`, so it does not become public API -- the consumer
+ * path is `HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability`. Same
+ * arrangement as `ISO_7730_LIMITS`.
+ *
  * @type {Readonly<{tdb: Readonly<{min: number}>}>}
  */
-const HEAT_INDEX_ROTHFUSZ_LIMITS = Object.freeze({
+export const HEAT_INDEX_ROTHFUSZ_LIMITS = Object.freeze({
   tdb: Object.freeze({ min: 27 }),
 });
 

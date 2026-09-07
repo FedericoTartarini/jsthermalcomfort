@@ -1,37 +1,50 @@
 /**
- * Consumer TypeScript fixture to verify that the published .d.ts files
- * have correct syntax and that model metadata types are accessible.
+ * Type-level fixture compiled by `npm run check:types`.
  *
- * This fixture is compiled during CI to catch regressions in type definitions,
- * especially syntax errors that break every TypeScript consumer of this package.
+ * It stands in for a TypeScript front end consuming this package, and it
+ * guards two separate things:
  *
- * See: npm run check:types
+ *   1. The published .d.ts files parse at all. A malformed JSDoc tag makes
+ *      `tsc` emit invalid declarations, which breaks every TypeScript
+ *      consumer while the build still reports success (see issue #196).
+ *
+ *   2. The model metadata is actually typed. A plain exported const emits as
+ *      `any` unless it carries an explicit `@type` annotation, and `any`
+ *      fails silently: every assignment below would still compile. The
+ *      `@ts-expect-error` lines are what make that failure loud.
+ *
+ * Imports use the package name rather than a relative path into `lib/`, so
+ * the `types` entry in package.json is exercised the way a consumer hits it.
  */
 
-import type {
-  ModelInfo,
-  Bound,
-  VariableInfo,
-} from "../../lib/esm/types/index.d.ts";
+import type { Bound, ModelInfo, VariableInfo } from "jsthermalcomfort";
+import {
+  HEAT_INDEX_ROTHFUSZ_INFO,
+  HEAT_INDEX_STRESS_CATEGORY_BINS,
+  PMV_PPD_ISO_INFO,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  classifyFromBins,
+} from "jsthermalcomfort";
 
-// Verify that types can be assigned with proper structure
-// This tests that the .d.ts syntax is correct and types resolve
-const exampleInfo: ModelInfo = {
-  label: "Example Model",
-  description: "An example for type checking",
-  inputs: {
-    temp: { unit: "°C", applicability: { min: 0, max: 40 } },
-  },
-  outputs: {
-    result: { unit: "dimensionless" },
-  },
-};
+// The published metadata must satisfy the published type.
+const iso: ModelInfo = PMV_PPD_ISO_INFO;
+const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 
-// Verify that Bound and VariableInfo types are available
-const bound: Bound = { min: 10, max: 30 };
-const varInfo: VariableInfo = {
-  unit: "°C",
-  applicability: bound,
-};
+// The shape a front end actually reaches for: a per-model applicability limit.
+const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
+const minTdb: number | undefined = tdbBound?.min;
+const ppd: VariableInfo = iso.outputs.ppd;
 
-console.log("TypeScript consumer check passed: all types resolve correctly");
+// Bins are exported directly as well as through the metadata (issue #184 §3.4).
+const label = classifyFromBins(28.5, HEAT_INDEX_STRESS_CATEGORY_BINS);
+const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
+
+// Guards against the metadata silently degrading to `any`.
+// If these stop being errors, tsc fails with "Unused '@ts-expect-error'
+// directive" — which is the point: `any` would accept both assignments.
+// @ts-expect-error `label` is a string, not a number.
+const notANumber: number = PMV_PPD_ISO_INFO.label;
+// @ts-expect-error `inputs` has no `nonexistent_variable` key.
+const notAKey: VariableInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
+
+export { iso, heatIndex, minTdb, ppd, label, tsvLabel, notANumber, notAKey };

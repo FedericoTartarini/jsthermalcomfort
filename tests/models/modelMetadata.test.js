@@ -250,6 +250,33 @@ describe("Deep freezing — objects are immutable", () => {
   });
 });
 
+describe("Identity — applicability bounds are shared, not copied", () => {
+  // Same rule as the bins below: a bound in the metadata must BE the object the
+  // runtime checks against, not a literal rebuilt from it. A copy compares
+  // equal on the day it is written and can drift silently afterwards.
+  test("PMV_PPD_ISO_INFO input bounds are the ISO_7730_LIMITS objects", () => {
+    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability).toBe(ISO_7730_LIMITS.tdb);
+    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability).toBe(ISO_7730_LIMITS.tr);
+    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability).toBe(ISO_7730_LIMITS.vr);
+    expect(PMV_PPD_ISO_INFO.inputs.met.applicability).toBe(ISO_7730_LIMITS.met);
+    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability).toBe(ISO_7730_LIMITS.clo);
+  });
+
+  test("the PMV output gate in the metadata is the object the runtime gates on", () => {
+    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability).toBe(
+      ISO_7730_LIMITS.pmv,
+    );
+    expect(ISO_7730_LIMITS.pmv).toEqual({ min: -2, max: 2 });
+  });
+
+  test("every ISO_7730_LIMITS entry is frozen, not just the container", () => {
+    expect(Object.isFrozen(ISO_7730_LIMITS)).toBe(true);
+    for (const key of Object.keys(ISO_7730_LIMITS)) {
+      expect(Object.isFrozen(ISO_7730_LIMITS[key])).toBe(true);
+    }
+  });
+});
+
 describe("Identity — bins exported separately are the same object as in INFO", () => {
   test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO === PMV_PPD_ISO_INFO.outputs.tsv.classifier", () => {
     expect(PMV_THERMAL_SENSATION_VOTE_BINS_ISO).toBe(

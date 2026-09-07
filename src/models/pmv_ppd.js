@@ -45,22 +45,6 @@ import { deepFreeze } from "./modelDocs.js";
  */
 
 /**
- * ISO 7730 PMV output applicability gate (lower bound).
- * When limit_inputs is true, pmv and ppd are set to NaN if pmv < this value.
- * Runtime enforcement and metadata both read this constant.
- * @type {number}
- */
-const PMV_ISO_OUTPUT_MIN = -2;
-
-/**
- * ISO 7730 PMV output applicability gate (upper bound).
- * When limit_inputs is true, pmv and ppd are set to NaN if pmv > this value.
- * Runtime enforcement and metadata both read this constant.
- * @type {number}
- */
-const PMV_ISO_OUTPUT_MAX = 2;
-
-/**
  * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
  * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
  */
@@ -108,49 +92,16 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
   label: "PMV / PPD (ISO 7730)",
   description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
   inputs: {
-    tdb: {
-      unit: "°C",
-      applicability: {
-        min: ISO_7730_LIMITS.tdb.min,
-        max: ISO_7730_LIMITS.tdb.max,
-      },
-    },
-    tr: {
-      unit: "°C",
-      applicability: {
-        min: ISO_7730_LIMITS.tr.min,
-        max: ISO_7730_LIMITS.tr.max,
-      },
-    },
-    vr: {
-      unit: "m/s",
-      applicability: {
-        min: ISO_7730_LIMITS.vr.min,
-        max: ISO_7730_LIMITS.vr.max,
-      },
-    },
-    met: {
-      unit: "met",
-      applicability: {
-        min: ISO_7730_LIMITS.met.min,
-        max: ISO_7730_LIMITS.met.max,
-      },
-    },
-    clo: {
-      unit: "clo",
-      applicability: {
-        min: ISO_7730_LIMITS.clo.min,
-        max: ISO_7730_LIMITS.clo.max,
-      },
-    },
+    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr },
+    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr },
+    met: { unit: "met", applicability: ISO_7730_LIMITS.met },
+    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo },
     rh: { unit: "%" },
     wme: { unit: "met" },
   },
   outputs: {
-    pmv: {
-      unit: null,
-      applicability: { min: PMV_ISO_OUTPUT_MIN, max: PMV_ISO_OUTPUT_MAX },
-    },
+    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
   },
@@ -324,9 +275,10 @@ export function pmv_ppd(
     // ISO 7730 limits PMV applicability to [-2, 2]; ASHRAE 55 has no equivalent output bound
     const pmv_outside_iso_range =
       standard === "ISO" &&
-      valid_range([pmv], [PMV_ISO_OUTPUT_MIN, PMV_ISO_OUTPUT_MAX]).includes(
-        NaN,
-      );
+      valid_range(
+        [pmv],
+        [ISO_7730_LIMITS.pmv.min, ISO_7730_LIMITS.pmv.max],
+      ).includes(NaN);
 
     if (isNaN(pmv) || compliance_warnings.length > 0 || pmv_outside_iso_range) {
       pmv = NaN;

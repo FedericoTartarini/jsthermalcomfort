@@ -101,6 +101,11 @@ export const ISO_7730_LIMITS = Object.freeze({
   vr: Object.freeze({ min: 0, max: 1 }),
   met: Object.freeze({ min: 0.8, max: 4 }),
   clo: Object.freeze({ min: 0, max: 2 }),
+  // The PMV output gate. Grouped here rather than kept separate because
+  // pythermalcomfort applies it in the same `valid_range` block as the input
+  // limits above (pmv_ppd_iso.py:181-187), and because #182 will generate the
+  // whole object from one place.
+  pmv: Object.freeze({ min: -2, max: 2 }),
 });
 
 /**

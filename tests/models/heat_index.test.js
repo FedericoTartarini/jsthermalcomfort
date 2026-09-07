@@ -1,5 +1,9 @@
 import { describe, expect, test } from "@jest/globals";
-import { heat_index, heat_index_rothfusz } from "../../src/models/heat_index";
+import {
+  heat_index,
+  heat_index_rothfusz,
+  HEAT_INDEX_ROTHFUSZ_INFO,
+} from "../../src/models/heat_index";
 import {
   heat_index as heat_index_from_models,
   heat_index_rothfusz as heat_index_rothfusz_from_models,
@@ -264,5 +268,28 @@ describe("heat_index_rothfusz (renamed function)", () => {
     expect(result1).toEqual(result2);
     expect(Number.isFinite(result1.hi)).toBe(true);
     expect(typeof result1.stress_category === "string").toBe(true);
+  });
+});
+
+// The IP applicability threshold used to be a second stored literal (80.6).
+// It is now derived from the SI value, so these two cannot drift apart.
+describe("heat_index_rothfusz applicability threshold across unit systems", () => {
+  test("the SI gate is inclusive at 27 degC and excludes just below", () => {
+    expect(heat_index_rothfusz(26.99, 50).hi).toBeNaN();
+    expect(Number.isFinite(heat_index_rothfusz(27, 50).hi)).toBe(true);
+  });
+
+  test("the IP gate is inclusive at 80.6 degF and excludes just below", () => {
+    // 80.6 degF is exactly 27 degC; the conversion is exact in float64.
+    expect(heat_index_rothfusz(80.59, 50, { units: "IP" }).hi).toBeNaN();
+    expect(
+      Number.isFinite(heat_index_rothfusz(80.6, 50, { units: "IP" }).hi),
+    ).toBe(true);
+  });
+
+  test("the metadata reports the SI threshold and is frozen", () => {
+    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability;
+    expect(bound).toEqual({ min: 27 });
+    expect(Object.isFrozen(bound)).toBe(true);
   });
 });

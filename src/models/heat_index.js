@@ -1,4 +1,8 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import {
+  round,
+  units_converter,
+  validateInputs,
+} from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.js";
 import { deepFreeze } from "./modelDocs.js";
 
@@ -49,19 +53,22 @@ import { deepFreeze } from "./modelDocs.js";
  */
 
 /**
- * Rothfusz regression applicability threshold, SI units [°C].
- * Metadata and runtime enforcement both read this constant.
- * @type {number}
+ * Applicability limits of the Rothfusz regression, in SI units.
+ *
+ * Same shape as `ISO_7730_LIMITS`, so both read the same way and both match
+ * what #182 will generate from `limits.json`. Frozen, and referenced by
+ * identity from `HEAT_INDEX_ROTHFUSZ_INFO` rather than copied into it.
+ *
+ * SI only, on purpose: the IP threshold is derived at the point of use rather
+ * than stored, so 80.6 °F is not a second number that can drift out of step
+ * with 27 °C. The conversion is exact in floating point (27 * 9/5 + 32 ===
+ * 80.6), so nothing is lost by deriving it.
+ *
+ * @type {Readonly<{tdb: Readonly<{min: number}>}>}
  */
-const HEAT_INDEX_TDB_MIN_SI = 27;
-
-/**
- * Rothfusz regression applicability threshold, IP units [°F].
- * Corresponds to HEAT_INDEX_TDB_MIN_SI converted to Fahrenheit.
- * Metadata describes limits in °C only; IP threshold provided for runtime.
- * @type {number}
- */
-const HEAT_INDEX_TDB_MIN_IP = 80.6;
+const HEAT_INDEX_ROTHFUSZ_LIMITS = Object.freeze({
+  tdb: Object.freeze({ min: 27 }),
+});
 
 const HEAT_INDEX_SCHEMA = {
   tdb: { type: "number" },
@@ -99,7 +106,7 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
   label: "Heat Index (Rothfusz)",
   description: "Apparent temperature — how hot it feels at a given humidity.",
   inputs: {
-    tdb: { unit: "°C", applicability: { min: HEAT_INDEX_TDB_MIN_SI } },
+    tdb: { unit: "°C", applicability: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb },
     rh: { unit: "%" },
   },
   outputs: {
@@ -131,7 +138,9 @@ export function heat_index_rothfusz(
   const limit_inputs = options.limit_inputs ?? true;
   if (limit_inputs) {
     const threshold =
-      options.units === "IP" ? HEAT_INDEX_TDB_MIN_IP : HEAT_INDEX_TDB_MIN_SI;
+      options.units === "IP"
+        ? units_converter({ tdb: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb.min }, "SI").tdb
+        : HEAT_INDEX_ROTHFUSZ_LIMITS.tdb.min;
     if (tdb < threshold) {
       return { hi: NaN, stress_category: NaN };
     }

@@ -129,3 +129,68 @@ describe("pmv_ppd input validation", () => {
     ).toThrow(TypeError);
   });
 });
+
+// Issue #195. pythermalcomfort's pmv_ppd_iso applies the ISO 7730 Clause 4
+// limit on partial water vapour pressure; jsthermalcomfort did not, so warm
+// humid conditions returned a number where Python returned NaN.
+//
+// pa = rh * 10 * exp(16.6536 - 4030.183 / (tdb + 235)), and pa = 2700 Pa falls
+// at these relative humidities. Values from solving the equation, not measured
+// from either library.
+describe("pmv_ppd ISO vapour pressure limit (#195)", () => {
+  const AT_LIMIT = [
+    { tdb: 25, rh: 85.244688 },
+    { tdb: 28, rh: 71.429553 },
+    { tdb: 30, rh: 63.628386 },
+  ];
+
+  test.each(AT_LIMIT)(
+    "pa exactly at 2700 Pa is valid (tdb=$tdb, rh=$rh)",
+    ({ tdb, rh }) => {
+      const result = pmv_ppd(tdb, tdb, 0.1, rh, 1.2, 0.5, 0, "ISO", {
+        limit_inputs: true,
+      });
+      // The bound is inclusive in both libraries, so exactly on it must return
+      // a number. An approximate rh would not have caught an off-by-epsilon.
+      expect(Number.isFinite(result.pmv)).toBe(true);
+      expect(Number.isFinite(result.ppd)).toBe(true);
+    },
+  );
+
+  test.each(AT_LIMIT)(
+    "pa just above 2700 Pa NaNs pmv, ppd and tsv (tdb=$tdb)",
+    ({ tdb, rh }) => {
+      const result = pmv_ppd(tdb, tdb, 0.1, rh + 0.02, 1.2, 0.5, 0, "ISO", {
+        limit_inputs: true,
+      });
+      expect(result.pmv).toBeNaN();
+      expect(result.ppd).toBeNaN();
+      expect(result.tsv).toBeNaN();
+    },
+  );
+
+  test("the NaN comes from the vapour pressure bound, not the PMV output gate", () => {
+    // Every input is inside its own limit here, and with limits off the PMV is
+    // well inside [-2, 2]. So the NaN above can only be the pa bound.
+    const unlimited = pmv_ppd(30, 30, 0.1, 90, 1.2, 0.5, 0, "ISO", {
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(unlimited.pmv)).toBe(true);
+    expect(unlimited.pmv).toBeGreaterThan(-2);
+    expect(unlimited.pmv).toBeLessThan(2);
+
+    const limited = pmv_ppd(30, 30, 0.1, 90, 1.2, 0.5, 0, "ISO", {
+      limit_inputs: true,
+    });
+    expect(limited.pmv).toBeNaN();
+  });
+
+  test("the bound is ISO-only; ASHRAE is unaffected", () => {
+    // ASHRAE 55 has no vapour pressure limit, and pythermalcomfort's
+    // pmv_ppd_ashrae does not apply one either.
+    const result = pmv_ppd(30, 30, 0.1, 90, 1.2, 0.5, 0, "ASHRAE", {
+      limit_inputs: true,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+  });
+});

@@ -3,6 +3,7 @@
 import { describe, expect, test } from "@jest/globals";
 import { pmv_ppd_iso } from "../../src/models/pmv_ppd_iso.js";
 import { testDataUrls } from "./comftest";
+import { Standard } from "../../src/utilities/utilities.js";
 import {
   assertNonEmptyRows,
   loadTestData,
@@ -32,7 +33,17 @@ describe("pmv_ppd_iso", () => {
     // are handled correctly.
     const kwargs = { limit_inputs };
 
-    const modelResult = pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme, kwargs);
+    const modelResult = pmv_ppd_iso(
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      Standard.iso_7730_2025,
+      kwargs,
+    );
 
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
@@ -48,27 +59,57 @@ describe("pmv_ppd_iso", () => {
   // Tests for ISO met lower bound fix (issue #180)
   // met=0.7 is below the ISO 7730 lower bound of 0.8, so should return NaN with limit_inputs enabled
   test("met=0.7 (below lower bound) returns NaN when limit_inputs is enabled", () => {
-    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.7, 0.5, 0, {
-      limit_inputs: true,
-    });
+    const result = pmv_ppd_iso(
+      25,
+      25,
+      0.1,
+      50,
+      0.7,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        limit_inputs: true,
+      },
+    );
     expect(result.pmv).toBeNaN();
     expect(result.ppd).toBeNaN();
   });
 
   // met=0.8 is the inclusive lower bound of ISO 7730, so should return valid numbers
   test("met=0.8 (inclusive lower bound) returns valid numbers when limit_inputs is enabled", () => {
-    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.8, 0.5, 0, {
-      limit_inputs: true,
-    });
+    const result = pmv_ppd_iso(
+      25,
+      25,
+      0.1,
+      50,
+      0.8,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        limit_inputs: true,
+      },
+    );
     expect(Number.isFinite(result.pmv)).toBe(true);
     expect(Number.isFinite(result.ppd)).toBe(true);
   });
 
   // met=0.7 with limit_inputs=false should return valid numbers (opt-out works)
   test("met=0.7 returns valid numbers when limit_inputs is disabled (opt-out)", () => {
-    const result = pmv_ppd_iso(25, 25, 0.1, 50, 0.7, 0.5, 0, {
-      limit_inputs: false,
-    });
+    const result = pmv_ppd_iso(
+      25,
+      25,
+      0.1,
+      50,
+      0.7,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        limit_inputs: false,
+      },
+    );
     expect(Number.isFinite(result.pmv)).toBe(true);
     expect(Number.isFinite(result.ppd)).toBe(true);
   });
@@ -92,19 +133,25 @@ describe("pmv_ppd_iso input validation", () => {
 
   test("throws Error if kwargs.units is not a valid enum", () => {
     expect(() =>
-      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { units: "INVALID" }),
+      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        units: "INVALID",
+      }),
     ).toThrow(Error);
   });
 
   test("throws TypeError if kwargs.limit_inputs is not a boolean", () => {
     expect(() =>
-      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { limit_inputs: "true" }),
+      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        limit_inputs: "true",
+      }),
     ).toThrow(TypeError);
   });
 
   test("throws TypeError if kwargs.round_output is not a boolean", () => {
     expect(() =>
-      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, { round_output: "true" }),
+      pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        round_output: "true",
+      }),
     ).toThrow(TypeError);
   });
 });
@@ -136,14 +183,34 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
     // place pmv=0.50 into the [-0.5, 0.5) bin as "Neutral" instead of the
     // correct [0.5, 1.5) bin as "Slightly Warm". This input verifies the
     // implementation uses the true unrounded value for classification.
-    const result_rounded = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
-      round_output: true,
-      limit_inputs: false,
-    });
-    const result_unrounded = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
-      round_output: false,
-      limit_inputs: false,
-    });
+    const result_rounded = pmv_ppd_iso(
+      26.4,
+      26.4,
+      0.1,
+      50,
+      1.2,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        round_output: true,
+        limit_inputs: false,
+      },
+    );
+    const result_unrounded = pmv_ppd_iso(
+      26.4,
+      26.4,
+      0.1,
+      50,
+      1.2,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        round_output: false,
+        limit_inputs: false,
+      },
+    );
     expect(result_rounded.tsv).toBe(result_unrounded.tsv);
     // Both should classify in the "Slightly Warm" bin
     expect(result_rounded.tsv).toBe("Slightly Warm");
@@ -160,9 +227,19 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
     // the left-inclusive interval [0.5, 1.5) = "Slightly Warm".
     // This test verifies the exact classification, not a set of possibilities,
     // so that rounding errors or classification bugs are caught.
-    const result = pmv_ppd_iso(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
-      limit_inputs: false,
-    });
+    const result = pmv_ppd_iso(
+      26.4,
+      26.4,
+      0.1,
+      50,
+      1.2,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        limit_inputs: false,
+      },
+    );
     // Must be exactly "Slightly Warm", not one of three options
     expect(result.tsv).toBe("Slightly Warm");
   });

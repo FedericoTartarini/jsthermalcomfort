@@ -3,6 +3,7 @@ import {
   check_standard_compliance,
   round,
   validateInputs,
+  LimitSet,
 } from "../utilities/utilities.js";
 import { two_nodes } from "../models/two_nodes.js";
 
@@ -213,7 +214,7 @@ export function use_fans_heatwaves(
   Object.assign(joint_output, heatwave_output);
 
   if (joint_kwargs.limit_inputs) {
-    const warnings = check_standard_compliance("FAN_HEATWAVES", {
+    const warnings = check_standard_compliance(LimitSet.use_fans_heatwaves, {
       tdb,
       tr,
       v,

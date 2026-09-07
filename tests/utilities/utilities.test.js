@@ -14,6 +14,7 @@ import {
   check_standard_compliance,
 } from "../../src/utilities/utilities";
 import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
+import { LimitSet, Standard } from "../../src/utilities/utilities.js";
 
 const DEFAULT_TOLERANCE = 0.01;
 
@@ -79,21 +80,21 @@ describe("clo_dynamic", () => {
     {
       clo: 1,
       met: 1,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: 1,
       tolerance: 4,
     },
     {
       clo: 1,
       met: 0.5,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: 1,
       tolerance: 4,
     },
     {
       clo: 2,
       met: 0.5,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: 2,
       tolerance: 4,
     },
@@ -121,14 +122,14 @@ describe("clo_dynamic", () => {
     {
       clo: 1.0,
       met: 1.0,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: 1,
       tolerance: 4,
     },
     {
       clo: 1.0,
       met: 2.0,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: 0.8,
       tolerance: 4,
     },
@@ -559,7 +560,7 @@ describe("check_standard_compliance", () => {
   });
   describe("ASHRAE airspeed_control branch", () => {
     it("flags v > 0.8 with low clo and met when occupant has no airspeed control", () => {
-      const warnings = check_standard_compliance("ASHRAE", {
+      const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
         tdb: 26,
         tr: 26,
         v: 1.0,
@@ -571,7 +572,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("flags v above the operative-temperature limit when 23 < to < 25.5", () => {
-      const warnings = check_standard_compliance("ASHRAE", {
+      const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
         tdb: 24,
         tr: 24,
         v: 0.4,
@@ -583,7 +584,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("flags v > 0.2 when to <= 23 with low clo and met", () => {
-      const warnings = check_standard_compliance("ASHRAE", {
+      const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
         tdb: 20,
         tr: 20,
         v: 0.5,
@@ -595,7 +596,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("does not flag the same inputs when airspeed_control is true", () => {
-      const warnings = check_standard_compliance("ASHRAE", {
+      const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
         tdb: 26,
         tr: 26,
         v: 1.0,
@@ -619,19 +620,25 @@ describe("check_standard_compliance", () => {
       { field: "clo", value: 1.5 },
     ])("flags an out-of-range $field of $value", ({ field, value }) => {
       const kwargs = { ...valid, [field]: value };
-      const warnings = check_standard_compliance("FAN_HEATWAVES", kwargs);
+      const warnings = check_standard_compliance(
+        LimitSet.use_fans_heatwaves,
+        kwargs,
+      );
       expect(warnings.length).toBeGreaterThan(0);
     });
 
     it("returns no warnings when all fields are within range", () => {
-      const warnings = check_standard_compliance("FAN_HEATWAVES", valid);
+      const warnings = check_standard_compliance(
+        LimitSet.use_fans_heatwaves,
+        valid,
+      );
       expect(warnings).toHaveLength(0);
     });
   });
 
   describe("ISO branch v range check", () => {
     it("returns no warnings when v is within [0, 1]", () => {
-      const warnings = check_standard_compliance("ISO", {
+      const warnings = check_standard_compliance(Standard.iso_7730_2025, {
         tdb: 25,
         tr: 25,
         v: 0.1,
@@ -642,7 +649,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("flags v above 1 m/s", () => {
-      const warnings = check_standard_compliance("ISO", {
+      const warnings = check_standard_compliance(Standard.iso_7730_2025, {
         tdb: 25,
         tr: 25,
         v: 1.5,
@@ -655,7 +662,7 @@ describe("check_standard_compliance", () => {
 
   describe("ISO branch met range check", () => {
     it("flags met below 0.8 met", () => {
-      const warnings = check_standard_compliance("ISO", {
+      const warnings = check_standard_compliance(Standard.iso_7730_2025, {
         tdb: 25,
         tr: 25,
         v: 0.1,
@@ -667,7 +674,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("returns no warnings when met is exactly 0.8 (inclusive lower bound)", () => {
-      const warnings = check_standard_compliance("ISO", {
+      const warnings = check_standard_compliance(Standard.iso_7730_2025, {
         tdb: 25,
         tr: 25,
         v: 0.1,
@@ -678,7 +685,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("returns no warnings when met is exactly 4.0 (inclusive upper bound)", () => {
-      const warnings = check_standard_compliance("ISO", {
+      const warnings = check_standard_compliance(Standard.iso_7730_2025, {
         tdb: 25,
         tr: 25,
         v: 0.1,
@@ -689,7 +696,7 @@ describe("check_standard_compliance", () => {
     });
 
     it("flags met above 4.0", () => {
-      const warnings = check_standard_compliance("ISO", {
+      const warnings = check_standard_compliance(Standard.iso_7730_2025, {
         tdb: 25,
         tr: 25,
         v: 0.1,

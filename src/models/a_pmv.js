@@ -1,4 +1,4 @@
-import { validateInputs, round } from "../utilities/utilities.js";
+import { validateInputs, round, Standard } from "../utilities/utilities.js";
 import { pmv } from "./pmv.js";
 
 /**
@@ -117,7 +117,17 @@ export function a_pmv(
 
   kwargs = Object.assign(default_kwargs, kwargs);
 
-  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs).pmv;
+  let _pmv = pmv(
+    tdb,
+    tr,
+    vr,
+    rh,
+    met,
+    clo,
+    wme,
+    Standard.iso_7730_2025,
+    kwargs,
+  ).pmv;
   _pmv = round(_pmv / (1 + a_coefficient * _pmv), 2);
 
   return { a_pmv: _pmv };

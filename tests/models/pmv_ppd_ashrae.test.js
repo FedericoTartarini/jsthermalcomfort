@@ -9,6 +9,7 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "../../src/models/pmv_ppd.js";
 import { testDataUrls } from "./comftest";
+import { Standard } from "../../src/utilities/utilities.js";
 import {
   assertNonEmptyRows,
   loadTestData,
@@ -186,9 +187,19 @@ describe("ISO vs ASHRAE TSV interval convention (pythermalcomfort#382)", () => {
     // Here the labels differ because ASHRAE's cooling effect (vr = 0.5) makes it
     // compute a DIFFERENT pmv from ISO -- not because of the interval convention.
     // Recorded so the two causes of divergence are not conflated.
-    const iso = pmv_ppd_iso(22.5, 22.5, 0.5, 50, 1.2, 0.5, 0, {
-      limit_inputs: false,
-    });
+    const iso = pmv_ppd_iso(
+      22.5,
+      22.5,
+      0.5,
+      50,
+      1.2,
+      0.5,
+      0,
+      Standard.iso_7730_2025,
+      {
+        limit_inputs: false,
+      },
+    );
     const ashrae = pmv_ppd_ashrae(22.5, 22.5, 0.5, 50, 1.2, 0.5, 0, {
       limit_inputs: false,
     });

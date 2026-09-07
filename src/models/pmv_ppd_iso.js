@@ -1,5 +1,5 @@
 import { pmv_ppd } from "./pmv_ppd.js";
-import { validateInputs } from "../utilities/utilities.js";
+import { validateInputs, Standard } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} PmvPpdIso
@@ -33,6 +33,19 @@ import { validateInputs } from "../utilities/utilities.js";
  * @param {number} met - Metabolic rate [met]
  * @param {number} clo - Clothing insulation [clo]
  * @param {number} [wme=0] - External work [met]
+ * @param {Standard} [model=Standard.iso_7730_2025] - which edition of ISO 7730
+ *    the calculation is being performed against. Accepts `"7730-2005"` or
+ *    `"7730-2025"`.
+ *
+ *    **The two editions specify identical equations and applicability limits**,
+ *    so this argument does not change the result. It exists so a caller can
+ *    record which edition they are working to, and so the library can confirm
+ *    it implements it — passing an unsupported edition throws rather than
+ *    silently computing something else. It also gives a future divergence
+ *    somewhere to live.
+ *
+ *    Mirrors the `model` argument on `pythermalcomfort`'s `pmv_ppd_iso`,
+ *    including the default.
  * @param {Object} [kwargs={}] - Optional overrides
  * @param {'SI'|'IP'} [kwargs.units='SI'] - Unit system
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
@@ -59,9 +72,20 @@ const PMV_PPD_ISO_SCHEMA = {
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
   round_output: { type: "boolean", required: false },
+  model: { enum: [Standard.iso_7730_2005, Standard.iso_7730_2025] },
 };
 
-export function pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme = 0, kwargs = {}) {
+export function pmv_ppd_iso(
+  tdb,
+  tr,
+  vr,
+  rh,
+  met,
+  clo,
+  wme = 0,
+  model = Standard.iso_7730_2025,
+  kwargs = {},
+) {
   validateInputs(
     {
       tdb,
@@ -71,11 +95,12 @@ export function pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme = 0, kwargs = {}) {
       met,
       clo,
       wme,
+      model,
       units: kwargs.units?.toUpperCase(),
       limit_inputs: kwargs.limit_inputs,
       round_output: kwargs.round_output,
     },
     PMV_PPD_ISO_SCHEMA,
   );
-  return pmv_ppd(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs);
+  return pmv_ppd(tdb, tr, vr, rh, met, clo, wme, model, kwargs);
 }

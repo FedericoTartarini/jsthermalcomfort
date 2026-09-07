@@ -3,6 +3,7 @@ import {
   round,
   units_converter,
   validateInputs,
+  Standard,
 } from "../utilities/utilities.js";
 import { pmv } from "./pmv.js";
 
@@ -90,12 +91,12 @@ export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
 
   kwargs = { tdb: tdb, tr: tr, v_limited: vr, rh: rh, met: met, clo: clo };
 
-  const warns = check_standard_compliance("ASHRAE", kwargs);
+  const warns = check_standard_compliance(Standard.ashrae_55_2023, kwargs);
   for (const warn of warns) {
     console.warn("Warning:", warn);
   }
 
-  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE").pmv;
+  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, Standard.ashrae_55_2023).pmv;
   const ppd_val = round(
     (Math.exp(-2.58 + 3.05 * v_ankle - 1.06 * tsv) /
       (1 + Math.exp(-2.58 + 3.05 * v_ankle - 1.06 * tsv))) *

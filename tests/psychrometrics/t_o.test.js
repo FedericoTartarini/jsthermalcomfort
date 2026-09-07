@@ -1,5 +1,6 @@
 import { expect, describe, it } from "@jest/globals";
 import { t_o } from "../../src/psychrometrics/t_o";
+import { LimitSet, Standard } from "../../src/utilities/utilities.js";
 
 describe("t_o", () => {
   it.each([
@@ -7,56 +8,56 @@ describe("t_o", () => {
       airTemperature: 0,
       meanRadiantTemperature: 0,
       airSpeed: 0,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: 0,
     },
     {
       airTemperature: 1,
       meanRadiantTemperature: 1,
       airSpeed: 1,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: 1,
     },
     {
       airTemperature: -1,
       meanRadiantTemperature: -1,
       airSpeed: 1,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: -1,
     },
     {
       airTemperature: -273,
       meanRadiantTemperature: 0,
       airSpeed: 1,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: -207.4109109748925,
     },
     {
       airTemperature: 0,
       meanRadiantTemperature: -273,
       airSpeed: 1,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
       expected: -65.5890890251075,
     },
     {
       airTemperature: 0,
       meanRadiantTemperature: 0,
       airSpeed: 0,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: 0,
     },
     {
       airTemperature: 1,
       meanRadiantTemperature: 1,
       airSpeed: 1,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: 1,
     },
     {
       airTemperature: -1,
       meanRadiantTemperature: -1,
       airSpeed: 1,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: -1,
     },
     {
@@ -64,14 +65,14 @@ describe("t_o", () => {
       airTemperature: -273,
       meanRadiantTemperature: -1,
       airSpeed: 1,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: -191.4,
     },
     {
       airTemperature: 0,
       meanRadiantTemperature: -273,
       airSpeed: 1,
-      standard: "ASHRAE",
+      standard: Standard.ashrae_55_2023,
       expected: -81.9,
     },
   ])(
@@ -95,12 +96,14 @@ describe("t_o", () => {
   );
 
   it("throws an error if the airSpeed is negative", () => {
-    expect(() => t_o(0, 0, -1, "ISO")).toThrow("v cannot be negative");
+    expect(() => t_o(0, 0, -1, Standard.iso_7730_2025)).toThrow(
+      "v cannot be negative",
+    );
   });
 
   it("throws an error if standard is not valid", () => {
     expect(() => t_o(0, 0, 0, "JORDAN")).toThrow(
-      "standard must be one of ISO or ASHRAE",
+      /^Unknown standard "JORDAN"\./,
     );
   });
 });

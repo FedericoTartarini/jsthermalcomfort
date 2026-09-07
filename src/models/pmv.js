@@ -1,5 +1,5 @@
 import { pmv_ppd } from "./pmv_ppd.js";
-import { validateInputs } from "../utilities/utilities.js";
+import { validateInputs, Standard } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} PmvKwargs
@@ -104,7 +104,7 @@ const PMV_SCHEMA = {
   met: { type: "number" },
   clo: { type: "number" },
   wme: { type: "number" },
-  standard: { enum: ["ISO", "ASHRAE"] },
+  standard: { enum: [...Object.values(Standard)] },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
@@ -119,7 +119,7 @@ export function pmv(
   met,
   clo,
   wme = 0,
-  standard = "ISO",
+  standard = Standard.iso_7730_2025,
   kwargs = {},
 ) {
   const default_kwargs = {

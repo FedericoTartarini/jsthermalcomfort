@@ -73,17 +73,59 @@ export function transpose_sharp_altitude(sharp, altitude) {
 /**
  * Standard names accepted by {@link check_standard_compliance}.
  */
+/**
+ * Canonical identifiers for the comfort standards this library implements.
+ *
+ * Mirrors `pythermalcomfort.utilities.Models` exactly: the **property name** is
+ * the canonical key, shared across both libraries and used to key the limits
+ * file in #182; the **value** is the string a caller passes. Keeping both forms
+ * means neither library has to translate, and a binding test can assert that
+ * the two key sets are identical.
+ *
+ * @public
+ */
 export const Standard = Object.freeze({
-  ANKLE_DRAFT: "ANKLE_DRAFT",
-  ASHRAE: "ASHRAE",
-  FAN_HEATWAVES: "FAN_HEATWAVES",
-  ISO: "ISO",
-  ISO_7933_2004: "7933-2004",
-  ISO_7933_2023: "7933-2023",
+  ashrae_55_2023: "55-2023",
+  iso_7730_2005: "7730-2005",
+  iso_7730_2025: "7730-2025",
+  iso_7933_2004: "7933-2004",
+  iso_7933_2023: "7933-2023",
+});
+
+/**
+ * Applicability limit sets that are not standards in their own right.
+ *
+ * These were previously mixed into `Standard`, which conflated two things: a
+ * published standard, and the range over which one particular model has been
+ * validated. pythermalcomfort keeps them apart and this now matches.
+ *
+ * The two are deliberately different shapes, because they are different in
+ * pythermalcomfort:
+ *
+ * - `ankle_draft` inherits ASHRAE 55 and narrows it (`met` and `clo`), the same
+ *   way `ankle_draft.py` calls `_check_ashrae55_compliance` and then applies
+ *   extra checks.
+ * - `use_fans_heatwaves` has **no parent**. Its limits are unrelated to ASHRAE
+ *   55 -- `tdb` 20-50 against 10-40, `v` 0.1-4.5 against 0-2, `met` 0.7-2
+ *   against 1-4 -- and `use_fans_heatwaves.py` uses bare `valid_range` calls
+ *   with no standard identifier at all.
+ *
+ * Flattening these into one pattern would mean inventing a parent for
+ * `use_fans_heatwaves` or losing the inheritance for `ankle_draft`.
+ *
+ * @public
+ */
+export const LimitSet = Object.freeze({
+  ankle_draft: "ankle_draft",
+  use_fans_heatwaves: "use_fans_heatwaves",
 });
 
 /**
  * @typedef {(typeof Standard)[keyof typeof Standard]} Standard
+ */
+
+/**
+ * @typedef {(typeof LimitSet)[keyof typeof LimitSet]} LimitSet
  */
 
 /**
@@ -113,6 +155,23 @@ export const ISO_7730_LIMITS = Object.freeze({
 });
 
 /**
+ * True when `standard` is one of the ISO 7730 editions.
+ *
+ * The two editions specify identical equations and limits, so almost every
+ * check that used to read `standard === "ISO"` means "either edition". Using a
+ * predicate rather than repeating the pair keeps a future third edition to one
+ * edit.
+ *
+ * @param {string} standard
+ * @returns {boolean}
+ */
+export function is_iso_7730(standard) {
+  return (
+    standard === Standard.iso_7730_2005 || standard === Standard.iso_7730_2025
+  );
+}
+
+/**
  * Check that the values comply with the standard provided
  *
  * @param {Standard} standard
@@ -122,20 +181,30 @@ export const ISO_7730_LIMITS = Object.freeze({
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case Standard.ANKLE_DRAFT:
+    case LimitSet.ankle_draft:
       return _ankle_draft_compliance(kwargs);
-    case Standard.ASHRAE:
+    case Standard.ashrae_55_2023:
       return _ashrae_compliance(kwargs);
-    case Standard.FAN_HEATWAVES:
+    case LimitSet.use_fans_heatwaves:
       return _fan_heatwaves_compliance(kwargs);
-    case Standard.ISO:
+    // The two ISO 7730 editions specify identical limits, so both resolve to
+    // the same check. They are listed separately rather than collapsed so that
+    // a future divergence has an obvious place to go.
+    case Standard.iso_7730_2005:
+    case Standard.iso_7730_2025:
       return _iso_compliance(kwargs);
-    case Standard.ISO_7933_2004:
+    case Standard.iso_7933_2004:
       return _iso7933_2004_compliance(kwargs);
-    case Standard.ISO_7933_2023:
+    case Standard.iso_7933_2023:
       return _iso7933_2023_compliance(kwargs);
     default:
-      throw new Error("Unknown standard");
+      throw new Error(
+        `Unknown standard "${standard}". Expected one of: ` +
+          `${Object.values(Standard).join(", ")}, ` +
+          `${Object.values(LimitSet).join(", ")}. ` +
+          `The unversioned "ISO" and "ASHRAE" identifiers were removed in v2 ` +
+          `-- use "7730-2025" and "55-2023".`,
+      );
   }
 }
 
@@ -494,12 +563,15 @@ function _v_relative_single(v, met) {
  * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
  * @returns {number} dunamic clothing insulation, [clo]
  */
-export function clo_dynamic(clo, met, standard = "ASHRAE") {
-  if (standard !== "ASHRAE" && standard !== "ISO")
+export function clo_dynamic(clo, met, standard = Standard.ashrae_55_2023) {
+  if (standard !== Standard.ashrae_55_2023 && !is_iso_7730(standard))
     throw new Error(
       "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
     );
-  if ((standard === "ASHRAE" && met <= 1.2) || (standard === "ISO" && met <= 1))
+  if (
+    (standard === Standard.ashrae_55_2023 && met <= 1.2) ||
+    (is_iso_7730(standard) && met <= 1)
+  )
     return clo;
   return _clo_dynamic_single(clo, met);
 }

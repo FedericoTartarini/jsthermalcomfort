@@ -1,5 +1,6 @@
 import { describe } from "@jest/globals";
 import { pmv } from "../../src/models/pmv.js";
+import { Standard } from "../../src/utilities/utilities.js";
 import { validateResult } from "./testUtils.js";
 
 describe("pmv", () => {
@@ -16,7 +17,7 @@ describe("pmv", () => {
       vr: 0.1,
       met: 1.2,
       clo: 0.5,
-      standard: "ISO",
+      standard: Standard.iso_7730_2025,
     };
 
     const outputs = {
@@ -52,25 +53,33 @@ describe("pmv input validation", () => {
 
   test("throws Error if kwargs.units is not a valid enum", () => {
     expect(() =>
-      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { units: "INVALID" }),
+      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        units: "INVALID",
+      }),
     ).toThrow(Error);
   });
 
   test("throws TypeError if kwargs.limit_inputs is not a boolean", () => {
     expect(() =>
-      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { limit_inputs: "true" }),
+      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        limit_inputs: "true",
+      }),
     ).toThrow(TypeError);
   });
 
   test("throws TypeError if kwargs.airspeed_control is not a boolean", () => {
     expect(() =>
-      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { airspeed_control: "true" }),
+      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        airspeed_control: "true",
+      }),
     ).toThrow(TypeError);
   });
 
   test("throws TypeError if kwargs.round_output is not a boolean", () => {
     expect(() =>
-      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { round_output: "true" }),
+      pmv(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        round_output: "true",
+      }),
     ).toThrow(TypeError);
   });
 });

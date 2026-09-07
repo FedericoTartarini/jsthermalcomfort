@@ -17,7 +17,12 @@
  * the `types` entry in package.json is exercised the way a consumer hits it.
  */
 
-import type { Bound, ModelInfo, VariableInfo } from "jsthermalcomfort";
+import type {
+  Bound,
+  ClassifierBins,
+  ModelInfo,
+  VariableInfo,
+} from "jsthermalcomfort";
 import {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
@@ -39,6 +44,12 @@ const ppd: VariableInfo = iso.outputs.ppd;
 const label = classifyFromBins(28.5, HEAT_INDEX_STRESS_CATEGORY_BINS);
 const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
 
+// The classifier reached through the metadata is typed, not `Object`, so a
+// consumer can read the edge convention without casting.
+const bins: ClassifierBins | undefined = iso.outputs.tsv.classifier;
+const rightInclusive: boolean | undefined = bins?.right;
+const edgeCount: number | undefined = bins?.edges.length;
+
 // Guards against the metadata silently degrading to `any`.
 // If these stop being errors, tsc fails with "Unused '@ts-expect-error'
 // directive" — which is the point: `any` would accept both assignments.
@@ -47,4 +58,16 @@ const notANumber: number = PMV_PPD_ISO_INFO.label;
 // @ts-expect-error `inputs` has no `nonexistent_variable` key.
 const notAKey: VariableInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
 
-export { iso, heatIndex, minTdb, ppd, label, tsvLabel, notANumber, notAKey };
+export {
+  iso,
+  heatIndex,
+  minTdb,
+  ppd,
+  label,
+  tsvLabel,
+  bins,
+  rightInclusive,
+  edgeCount,
+  notANumber,
+  notAKey,
+};

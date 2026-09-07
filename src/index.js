@@ -12,6 +12,9 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/modelDocs.js").ModelInfo} ModelInfo
  */
+/**
+ * @typedef {import("./models/modelDocs.js").ClassifierBins} ClassifierBins
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

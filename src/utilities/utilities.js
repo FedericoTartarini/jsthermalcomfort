@@ -679,8 +679,8 @@ export function f_svv(w, h, d) {
 /**
  * Filter values based on a valid range (It turns the filtered values to NaNs)
  *
- * @param {number[]} range - the range to limit; `undefined` yields an empty array
- * @param {[number, number]} valid - the [min, max] to constrian the range to
+ * @param {number[] | undefined} range - the range to limit; `undefined` yields an empty array
+ * @param {[number, number]} valid - the [min, max] to constrain the range to
  * @returns {number[]} the constrained range with NaNs for values that are outside the min, max range
  */
 export function valid_range(range, [min, max]) {

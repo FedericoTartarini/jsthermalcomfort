@@ -17,15 +17,32 @@
  */
 
 /**
+ * Bin configuration for `classifyFromBins`.
+ *
+ * @typedef {object} ClassifierBins
+ * @property {number[]} edges - Upper bin boundaries, ascending.
+ * @property {string[]} labels - One label per bin, same length as `edges`.
+ * @property {boolean} right - `true` for right-inclusive bins (`value <= edge`),
+ *    `false` for left-inclusive (`value < edge`). The two conventions disagree
+ *    on values landing exactly on an edge, so this is not incidental.
+ */
+
+/**
  * Metadata for a single input or output variable of a model.
  *
  * @typedef {object} VariableInfo
  * @property {string|null} unit - Unit of measurement, or `null` if dimensionless.
- * @property {Bound} [applicability] - Applicability limits for this variable (inputs only).
- *    For outputs, describes the valid range of the output (e.g. PMV output is valid in [-2, 2]).
- * @property {Object} [classifier] - If present, a bin configuration for `classifyFromBins`.
- *    Has shape `{ edges: number[], labels: string[], right: boolean }`.
- *    Used to convert continuous outputs into categorical labels.
+ * @property {Bound} [applicability] - The range over which the model is applicable.
+ *
+ *    This is an **applicability gate, not a clamp**. Outside it, and only when
+ *    `limit_inputs` is enabled, the model returns NaN — it does not constrain
+ *    the value to the bound. On an output such as `pmv_ppd_iso`'s `pmv`, read
+ *    it as "results outside this band are suppressed", not "the output is
+ *    guaranteed to fall inside it". A front end should surface it as a
+ *    condition on the answer rather than as a slider limit.
+ * @property {ClassifierBins} [classifier] - If present, the bins used to turn
+ *    this continuous output into a categorical label. Pass it to
+ *    `classifyFromBins` rather than reimplementing the edge handling.
  */
 
 /**

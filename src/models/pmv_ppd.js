@@ -116,13 +116,7 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
     // Computed from tdb and rh, not supplied by the caller. Exposed so a
     // front end can explain why a warm, humid combination that looks inside
     // every input limit still returns NaN.
-    pa: {
-      unit: "Pa",
-      applicability: {
-        min: ISO_7730_LIMITS.pa.min,
-        max: ISO_7730_LIMITS.pa.max,
-      },
-    },
+    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa },
   },
 });
 

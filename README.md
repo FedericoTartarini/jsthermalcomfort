@@ -86,25 +86,41 @@ npm run build
 
 ## Releasing
 
-Releases are triggered by pushing a git tag. There is no automatic publish on
-merge — nothing reaches npm until someone tags deliberately.
+Releases are triggered by **pushing a git tag**. Merging publishes nothing —
+nothing reaches npm until someone tags deliberately.
+
+### Tags, not branches
+
+The publish workflow fires on any `v*` tag and has no branch filter. A git tag
+points at a _commit_, not a branch, so a release can be cut from any branch:
+
+```
+main     ──●──●──●                 ← v1.4.0 tagged here
+              \
+dev-v2         ●──●──●──●          ← v2.0.0-next.1 tagged here
+```
+
+Both publish through the same workflow. What differs is the dist-tag, and that
+is derived from the version rather than chosen by whoever runs the release.
+
+### Cutting a release
 
 ```bash
-# 1. set the version in package.json (it must match the tag exactly,
-#    the workflow fails the build otherwise)
+# 1. set the version in package.json — it must match the tag exactly,
+#    the workflow fails the build otherwise
 npm version 2.0.0 --no-git-tag-version
 
 # 2. commit and push the version bump
 git commit -am "2.0.0" && git push
 
-# 3. tag and push the tag — this is what publishes
+# 3. tag and push the tag — this is the step that publishes
 git tag v2.0.0 && git push origin v2.0.0
 ```
 
 ### Prereleases
 
-A tag containing a hyphen is treated as a semver prerelease and published under
-the **`next`** dist-tag instead of `latest`:
+A version containing a hyphen is a semver prerelease and is published under the
+**`next`** dist-tag instead of `latest`:
 
 ```bash
 npm version 2.0.0-next.1 --no-git-tag-version
@@ -112,17 +128,38 @@ git commit -am "2.0.0-next.1" && git push
 git tag v2.0.0-next.1 && git push origin v2.0.0-next.1
 ```
 
-Consumers then opt in explicitly, and nobody on `^1.x` is affected:
+Consumers opt in explicitly, and nobody on `^1.x` is affected:
 
 ```bash
 npm install jsthermalcomfort@next
 ```
 
-This is how work on `dev-v2` gets into the hands of front ends before the major
-release, so packaging problems surface before they reach everyone. Publishing a
-prerelease without a dist-tag would set `latest` and hand every existing user a
-preview, which is why the workflow derives the tag from the version rather than
-leaving it to whoever runs the release.
+This is how work on `dev-v2` reaches front ends before the major release, so
+packaging problems surface before they reach everyone. Cut as many as you like
+— `next.1`, `next.2` and so on — each is a real installable package.
+
+### What protects you
+
+| Guard                                       | Effect                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| Version contains a hyphen → `--tag next`    | Never touches `latest`; `^1.x` users see nothing                 |
+| Version must equal the tag                  | Build fails on a mismatch rather than publishing the wrong thing |
+| `check:format`, `npm test`, `npm run build` | All run before the publish step                                  |
+| GitHub release marked prerelease            | Matches the npm dist-tag, so the two do not disagree             |
+
+`npm publish` writes `latest` unless told otherwise, which is why the dist-tag
+is computed in the workflow. Leaving it to the person releasing is exactly how
+a preview ends up as the default install.
+
+### One thing to be careful about
+
+**Do not tag a final version (no hyphen) from `dev-v2` while it is still work in
+progress.** Without a hyphen it publishes as `latest`, and `npm install
+jsthermalcomfort` starts handing out an unfinished major. It is not easily
+undone — npm allows unpublishing only within a short window.
+
+Prereleases from `dev-v2`; the final `vX.0.0` after `dev-v2` merges into `main`,
+so `latest` and the default branch agree about what the current release is.
 
 Validation datasets for model tests are fetched from
 `FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).

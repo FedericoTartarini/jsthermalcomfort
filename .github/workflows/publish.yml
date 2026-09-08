@@ -50,9 +50,29 @@ jobs:
           registry-url: "https://registry.npmjs.org/"
 
       - run: npm ci
-      - run: npm publish --provenance
+
+      # A semver prerelease tag (anything with a hyphen, e.g. v2.0.0-next.1)
+      # publishes under the `next` dist-tag; everything else under `latest`.
+      #
+      # This matters more than it looks. `npm publish` writes `latest` unless
+      # told otherwise, so publishing a prerelease without a --tag would make
+      # `npm install jsthermalcomfort` hand every existing user a v2 preview.
+      - name: Determine npm dist-tag
+        id: disttag
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            echo "tag=next" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Publishing ${GITHUB_REF_NAME} under dist-tag: $(grep '^tag=' "$GITHUB_OUTPUT" | cut -d= -f2)"
+
+      - run: npm publish --provenance --tag "${{ steps.disttag.outputs.tag }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
+          prerelease: ${{ steps.disttag.outputs.prerelease }}

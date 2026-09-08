@@ -84,6 +84,46 @@ npm run check:format
 npm run build
 ```
 
+## Releasing
+
+Releases are triggered by pushing a git tag. There is no automatic publish on
+merge — nothing reaches npm until someone tags deliberately.
+
+```bash
+# 1. set the version in package.json (it must match the tag exactly,
+#    the workflow fails the build otherwise)
+npm version 2.0.0 --no-git-tag-version
+
+# 2. commit and push the version bump
+git commit -am "2.0.0" && git push
+
+# 3. tag and push the tag — this is what publishes
+git tag v2.0.0 && git push origin v2.0.0
+```
+
+### Prereleases
+
+A tag containing a hyphen is treated as a semver prerelease and published under
+the **`next`** dist-tag instead of `latest`:
+
+```bash
+npm version 2.0.0-next.1 --no-git-tag-version
+git commit -am "2.0.0-next.1" && git push
+git tag v2.0.0-next.1 && git push origin v2.0.0-next.1
+```
+
+Consumers then opt in explicitly, and nobody on `^1.x` is affected:
+
+```bash
+npm install jsthermalcomfort@next
+```
+
+This is how work on `dev-v2` gets into the hands of front ends before the major
+release, so packaging problems surface before they reach everyone. Publishing a
+prerelease without a dist-tag would set `latest` and hand every existing user a
+preview, which is why the workflow derives the tag from the version rather than
+leaving it to whoever runs the release.
+
 Validation datasets for model tests are fetched from
 `FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).
 By default tests use the `main` branch. To pin tests to a specific ref (tag/branch/commit), set

@@ -20,21 +20,7 @@
  */
 
 /**
- * Bin configuration for `classifyFromBins`.
- *
- * Readonly, including the arrays — see `Bound`.
- *
- * @typedef {Readonly<{
- *   edges: ReadonlyArray<number>,
- *   labels: ReadonlyArray<string>,
- *   right: boolean,
- * }>} ClassifierBins
- *
- * `edges` are the upper bin boundaries, ascending. `labels` has one entry per
- * bin, the same length as `edges`. `right` is `true` for right-inclusive bins
- * (`value <= edge`) and `false` for left-inclusive (`value < edge`); the two
- * conventions disagree on values landing exactly on an edge, so this is not
- * incidental.
+ * @typedef {import("./classifierBins.js").ClassifierBins} ClassifierBins
  */
 
 /**

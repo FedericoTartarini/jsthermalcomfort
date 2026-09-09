@@ -97,7 +97,7 @@ const HEAT_INDEX_SCHEMA = {
  * - 54 < hi <= 1000: "extreme danger"
  * - hi > 1000: NaN
  *
- * @type {ClassifierBins}
+ * @type {Readonly<ClassifierBins>}
  */
 export const HEAT_INDEX_STRESS_CATEGORY_BINS = Object.freeze({
   edges: [27, 32, 41, 54, 1000],

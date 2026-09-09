@@ -1,5 +1,21 @@
 /**
- * @typedef {import("./modelDocs.js").ClassifierBins} ClassifierBins
+ * Bin configuration for {@link classifyFromBins}.
+ *
+ * The arrays are `ReadonlyArray` because the bin constants this library
+ * publishes are frozen: `edges[0] = 0` would type-check and then throw, since
+ * an ES module is always strict. Use `Readonly<ClassifierBins>` to lock the
+ * properties as well as their contents -- the published constants are declared
+ * that way.
+ *
+ * `right` selects the interval convention: `true` for right-inclusive
+ * (`value <= edge`), `false` for left-inclusive (`value < edge`). The two
+ * disagree on values landing exactly on an edge, so this is not incidental.
+ *
+ * @typedef {object} ClassifierBins
+ * @property {ReadonlyArray<number>} edges - Upper bin boundaries, ascending.
+ * @property {ReadonlyArray<string>} labels - One label per bin, same length as `edges`.
+ * @property {boolean} right - `true` for right-inclusive bins, `false` for left-inclusive.
+ * @public
  */
 
 /**
@@ -22,7 +38,7 @@
  * - +Infinity returns NaN (beyond all bins).
  *
  * @param {number} value - The value to classify.
- * @param {ClassifierBins} bins - The bin configuration: strictly increasing
+ * @param {Readonly<ClassifierBins>} bins - The bin configuration: strictly increasing
  *    `edges`, one `label` per bin, and `right` selecting right-inclusive
  *    (`value <= edge`) or left-inclusive (`value < edge`) semantics.
  *

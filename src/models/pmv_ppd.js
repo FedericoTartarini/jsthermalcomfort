@@ -51,7 +51,7 @@ import { deepFreeze } from "./modelDocs.js";
  * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
  * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
  *
- * @type {ClassifierBins}
+ * @type {Readonly<ClassifierBins>}
  */
 export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = Object.freeze({
   edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
@@ -71,7 +71,7 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = Object.freeze({
  * Thermal Sensation Vote bins used by pmv_ppd_ashrae (right-inclusive).
  * Note: pmv_ppd_iso uses left-inclusive; see pythermalcomfort#382.
  *
- * @type {ClassifierBins}
+ * @type {Readonly<ClassifierBins>}
  */
 export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = Object.freeze({
   edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],

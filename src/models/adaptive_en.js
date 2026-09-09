@@ -3,6 +3,7 @@ import {
   units_converter,
   round,
   validateInputs,
+  Standard,
 } from "../utilities/utilities.js";
 
 /**
@@ -101,7 +102,7 @@ export function adaptive_en(
     ADAPTIVE_EN_SCHEMA,
   );
 
-  const standard = "ISO";
+  const standard = Standard.iso_7730_2025;
 
   if (units.toLowerCase() == "ip") {
     ({

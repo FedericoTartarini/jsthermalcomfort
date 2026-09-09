@@ -1,4 +1,4 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import { round, validateInputs, Standard } from "../utilities/utilities.js";
 import { pmv } from "./pmv.js";
 
 /**
@@ -118,10 +118,30 @@ export function e_pmv(
     E_PMV_SCHEMA,
   );
 
-  let _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs).pmv;
+  let _pmv = pmv(
+    tdb,
+    tr,
+    vr,
+    rh,
+    met,
+    clo,
+    wme,
+    Standard.iso_7730_2025,
+    kwargs,
+  ).pmv;
 
   met = _pmv > 0 ? met * (1 + _pmv * -0.067) : met;
-  _pmv = pmv(tdb, tr, vr, rh, met, clo, wme, "ISO", kwargs).pmv;
+  _pmv = pmv(
+    tdb,
+    tr,
+    vr,
+    rh,
+    met,
+    clo,
+    wme,
+    Standard.iso_7730_2025,
+    kwargs,
+  ).pmv;
   _pmv = round(_pmv * e_coefficient, 2);
 
   return { e_pmv: _pmv };

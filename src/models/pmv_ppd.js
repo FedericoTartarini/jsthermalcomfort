@@ -5,6 +5,8 @@ import {
   valid_range,
   validateInputs,
   ISO_7730_LIMITS,
+  is_iso_7730,
+  Standard,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
 import { classifyFromBins } from "./classifierBins.js";
@@ -203,7 +205,7 @@ const PMV_PPD_SCHEMA = {
   met: { type: "number" },
   clo: { type: "number" },
   wme: { type: "number" },
-  standard: { enum: ["ISO", "ASHRAE"] },
+  standard: { enum: [...Object.values(Standard)] },
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
@@ -233,7 +235,7 @@ export function pmv_ppd(
   met,
   clo,
   wme = 0,
-  standard = "ISO",
+  standard = Standard.iso_7730_2025,
   kwargs = {},
 ) {
   const default_kwargs = {
@@ -280,7 +282,7 @@ export function pmv_ppd(
     airspeed_control: kwargs.airspeed_control,
   });
   let ce = 0;
-  if (standard === "ASHRAE") {
+  if (standard === Standard.ashrae_55_2023) {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
     ce = vr > 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme).ce : 0;
   }
@@ -297,17 +299,16 @@ export function pmv_ppd(
 
   // Classify from unrounded PMV value before checking limits/clamping.
   // Use left-inclusive for ISO, right-inclusive for ASHRAE (intentional divergence per pythermalcomfort#382).
-  const bins =
-    standard === "ISO"
-      ? PMV_THERMAL_SENSATION_VOTE_BINS_ISO
-      : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
+  const bins = is_iso_7730(standard)
+    ? PMV_THERMAL_SENSATION_VOTE_BINS_ISO
+    : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
   let tsv = classifyFromBins(pmv, bins);
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   if (kwargs.limit_inputs) {
     // ISO 7730 limits PMV applicability to [-2, 2]; ASHRAE 55 has no equivalent output bound
     const pmv_outside_iso_range =
-      standard === "ISO" &&
+      is_iso_7730(standard) &&
       valid_range(
         [pmv],
         [ISO_7730_LIMITS.pmv.min, ISO_7730_LIMITS.pmv.max],
@@ -318,7 +319,7 @@ export function pmv_ppd(
     // check_standard_compliance. ASHRAE 55 has no equivalent bound, and
     // pythermalcomfort's pmv_ppd_ashrae does not apply one either.
     const pa_outside_iso_range =
-      standard === "ISO" &&
+      is_iso_7730(standard) &&
       valid_range(
         [pa],
         [ISO_7730_LIMITS.pa.min, ISO_7730_LIMITS.pa.max],

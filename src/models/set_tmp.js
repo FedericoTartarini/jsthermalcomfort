@@ -4,6 +4,7 @@ import {
   round,
   units_converter,
   validateInputs,
+  Standard,
 } from "../utilities/utilities.js";
 
 /**
@@ -157,7 +158,7 @@ export function set_tmp(
   }
 
   if (limit_inputs) {
-    const warnings = check_standard_compliance("ASHRAE", {
+    const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
       tdb,
       tr,
       v,

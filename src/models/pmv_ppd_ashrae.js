@@ -1,5 +1,5 @@
 import { pmv_ppd } from "./pmv_ppd.js";
-import { validateInputs } from "../utilities/utilities.js";
+import { validateInputs, Standard } from "../utilities/utilities.js";
 
 /**
  * @typedef {Object} PmvPpdAshrae
@@ -87,5 +87,15 @@ export function pmv_ppd_ashrae(
     },
     PMV_PPD_ASHRAE_SCHEMA,
   );
-  return pmv_ppd(tdb, tr, vr, rh, met, clo, wme, "ASHRAE", kwargs);
+  return pmv_ppd(
+    tdb,
+    tr,
+    vr,
+    rh,
+    met,
+    clo,
+    wme,
+    Standard.ashrae_55_2023,
+    kwargs,
+  );
 }

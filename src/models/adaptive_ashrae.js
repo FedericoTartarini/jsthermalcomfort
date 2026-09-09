@@ -4,6 +4,7 @@ import {
   round,
   units_converter,
   validateInputs,
+  Standard,
 } from "../utilities/utilities.js";
 import { get_ce } from "./adaptive_en.js";
 
@@ -114,7 +115,7 @@ export function adaptive_ashrae(
     ADAPTIVE_ASHRAE_SCHEMA,
   );
 
-  const standard = "ASHRAE";
+  const standard = Standard.ashrae_55_2023;
   if (units.toUpperCase() === "IP") {
     ({
       tdb,

@@ -4,6 +4,7 @@ import {
   round,
   units_converter,
   validateInputs,
+  Standard,
 } from "../utilities/utilities.js";
 
 /**
@@ -85,7 +86,7 @@ export function vertical_tmp_grad_ppd(
 
     vertical_tmp_grad = (vertical_tmp_grad / 1.8) * 3.28;
   }
-  const warnings = check_standard_compliance("ASHRAE", {
+  const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
     tdb: tdb,
     tr: tr,
     v_limited: vr,
@@ -95,7 +96,7 @@ export function vertical_tmp_grad_ppd(
   });
   warnings.forEach((warning) => console.warn(warning));
 
-  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, "ASHRAE").pmv;
+  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, Standard.ashrae_55_2023).pmv;
   const ppd_vg = calculate_ppd_vg(tsv, vertical_tmp_grad);
   const acceptability = check_acceptability(ppd_vg);
 

@@ -9,6 +9,9 @@ import {
   clo_typical_ensembles,
   clo_individual_garments,
   check_standard_compliance,
+  is_iso_7730,
+  LimitSet,
+  Standard,
 } from "./utilities.js";
 
 /**
@@ -27,6 +30,9 @@ export {
   clo_typical_ensembles,
   clo_individual_garments,
   check_standard_compliance,
+  is_iso_7730,
+  LimitSet,
+  Standard,
 };
 
 export default {
@@ -40,6 +46,9 @@ export default {
   clo_typical_ensembles,
   clo_individual_garments,
   check_standard_compliance,
+  is_iso_7730,
+  LimitSet,
+  Standard,
 };
 
 /**

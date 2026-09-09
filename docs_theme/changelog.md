@@ -2,6 +2,18 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
+
+  | Before | After | Also available as |
+  |---|---|---|
+  | `"ISO"` | `"7730-2025"` | `Standard.iso_7730_2025` |
+  | `"ISO"` (2005 edition) | `"7730-2005"` | `Standard.iso_7730_2005` |
+  | `"ASHRAE"` | `"55-2023"` | `Standard.ashrae_55_2023` |
+  | `"ANKLE_DRAFT"` | `"ankle_draft"` | `LimitSet.ankle_draft` |
+  | `"FAN_HEATWAVES"` | `"use_fans_heatwaves"` | `LimitSet.use_fans_heatwaves` |
+
+  Passing a removed identifier throws with a message naming the replacement. `Standard` and the new `LimitSet` are now importable from the package root, together with the `is_iso_7730()` predicate; previously `Standard` existed but was unreachable, so callers of the public `check_standard_compliance()` had to pass bare strings. `LimitSet` is separate from `Standard` because `ankle_draft` and `use_fans_heatwaves` are model applicability ranges rather than published standards — `use_fans_heatwaves` in particular has limits unrelated to ASHRAE 55. This also affects `t_o()` and `clo_dynamic()`, which take the same identifiers.
+- **Breaking:** `pmv_ppd_iso()` gains a `model` parameter **before** `kwargs`, mirroring `pythermalcomfort`'s signature: `pmv_ppd_iso(tdb, tr, vr, rh, met, clo, wme, model, kwargs)`. Existing calls that passed `kwargs` in the eighth position now throw rather than silently misreading it. `model` accepts `"7730-2005"` or `"7730-2025"` and defaults to `"7730-2025"`, as in `pythermalcomfort`. The two editions specify identical equations and applicability limits, so this does not change any result — it records which edition a caller is working to, rejects editions the library does not implement, and gives a future divergence somewhere to live.
 - **Breaking:** `pmv_ppd(..., "ISO", ...)` and `pmv_ppd_iso()` now enforce the ISO 7730 Clause 4 limit on partial water vapour pressure, 0–2700 Pa. Outside it, `pmv`, `ppd` and `tsv` are set to NaN, suppressed by `{ limit_inputs: false }` as with every other applicability limit. The bound is inclusive: exactly 2700 Pa is valid. This limit was missing entirely, so warm humid conditions returned a number where `pythermalcomfort` returned NaN — at `tdb = 30 °C` the bound starts biting near `rh = 63.6 %`. Vapour pressure is derived from `tdb` and `rh` rather than supplied, so it is reported through `PMV_PPD_ISO_INFO.derived.pa` rather than `.inputs`. ASHRAE 55 has no equivalent bound and is unaffected. Fixes #195.
 - **Fix:** `valid_range()`'s JSDoc marked its first parameter optional while the second was required, so the generated `.d.ts` declared a required parameter after an optional one (`TS1016`). The parameter is now declared required, matching how the function is actually called. Runtime behaviour is unchanged — passing `undefined` still returns an empty array. TypeScript callers that relied on omitting the first argument must now pass it explicitly.
 - **Fix: TypeScript consumer compatibility (#196)**: Fixed syntax errors in generated `.d.ts` type declaration files (`pet_steady.d.ts`) that were causing TypeScript compilation failures in every consumer of this package. JSDoc `@callback` parameters now include names as required by TypeScript, allowing the package to be imported in strict TypeScript projects.

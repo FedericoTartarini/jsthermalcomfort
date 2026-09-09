@@ -3,8 +3,10 @@ name: Snyk Security Check
 on:
   push:
     branches: [main]
+  # No `branches` filter: a PR whose base is a feature branch (a stacked PR, or
+  # anything targeting dev-v2) would otherwise get no check from this workflow
+  # at all. An absent check reads as a passing one. See #200.
   pull_request:
-    branches: [main]
 
 jobs:
   security:

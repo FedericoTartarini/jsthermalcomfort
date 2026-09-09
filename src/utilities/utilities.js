@@ -92,7 +92,7 @@ export const Standard = Object.freeze({
  * Used by `_iso_compliance` and exported for model metadata.
  * The shape matches the output of #182 (limits.json generation).
  *
- * @type {Object.<string, {min: number, max: number}>}
+ * @type {Readonly<Record<string, Readonly<{ min: number, max: number }>>>}
  * @public
  */
 export const ISO_7730_LIMITS = Object.freeze({

@@ -9,6 +9,9 @@ import { deepFreeze } from "./modelDocs.js";
 /**
  * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
  */
+/**
+ * @typedef {import("./modelDocs.js").ClassifierBins} ClassifierBins
+ */
 
 /**
  * @typedef {object} HeatIndexResult
@@ -93,12 +96,14 @@ const HEAT_INDEX_SCHEMA = {
  * - 41 < hi <= 54: "danger"
  * - 54 < hi <= 1000: "extreme danger"
  * - hi > 1000: NaN
+ *
+ * @type {ClassifierBins}
  */
-export const HEAT_INDEX_STRESS_CATEGORY_BINS = {
+export const HEAT_INDEX_STRESS_CATEGORY_BINS = Object.freeze({
   edges: [27, 32, 41, 54, 1000],
   labels: ["no risk", "caution", "extreme caution", "danger", "extreme danger"],
   right: true,
-};
+});
 
 /**
  * Model metadata for Heat Index (Rothfusz regression).

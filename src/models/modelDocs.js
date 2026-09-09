@@ -11,55 +11,78 @@
 /**
  * A bound on a variable (minimum and/or maximum).
  *
- * @typedef {object} Bound
- * @property {number} [min] - Minimum value (inclusive).
- * @property {number} [max] - Maximum value (inclusive).
+ * Readonly, because the runtime value is frozen. Without that, a consumer could
+ * write `INFO.inputs.tdb.applicability.min = 5`, type-check cleanly, and then
+ * throw at runtime — an ES module is always strict, so the assignment is not
+ * silently ignored.
+ *
+ * @typedef {Readonly<{ min?: number, max?: number }>} Bound
  */
 
 /**
  * Bin configuration for `classifyFromBins`.
  *
- * @typedef {object} ClassifierBins
- * @property {number[]} edges - Upper bin boundaries, ascending.
- * @property {string[]} labels - One label per bin, same length as `edges`.
- * @property {boolean} right - `true` for right-inclusive bins (`value <= edge`),
- *    `false` for left-inclusive (`value < edge`). The two conventions disagree
- *    on values landing exactly on an edge, so this is not incidental.
+ * Readonly, including the arrays — see `Bound`.
+ *
+ * @typedef {Readonly<{
+ *   edges: ReadonlyArray<number>,
+ *   labels: ReadonlyArray<string>,
+ *   right: boolean,
+ * }>} ClassifierBins
+ *
+ * `edges` are the upper bin boundaries, ascending. `labels` has one entry per
+ * bin, the same length as `edges`. `right` is `true` for right-inclusive bins
+ * (`value <= edge`) and `false` for left-inclusive (`value < edge`); the two
+ * conventions disagree on values landing exactly on an edge, so this is not
+ * incidental.
  */
 
 /**
  * Metadata for a single input or output variable of a model.
  *
- * @typedef {object} VariableInfo
- * @property {string|null} unit - Unit of measurement, or `null` if dimensionless.
- * @property {Bound} [applicability] - The range over which the model is applicable.
+ * @typedef {Readonly<{
+ *   unit: string | null,
+ *   applicability?: Bound,
+ *   classifier?: ClassifierBins,
+ * }>} VariableInfo
  *
- *    This is an **applicability gate, not a clamp**. Outside it, and only when
- *    `limit_inputs` is enabled, the model returns NaN — it does not constrain
- *    the value to the bound. On an output such as `pmv_ppd_iso`'s `pmv`, read
- *    it as "results outside this band are suppressed", not "the output is
- *    guaranteed to fall inside it". A front end should surface it as a
- *    condition on the answer rather than as a slider limit.
- * @property {ClassifierBins} [classifier] - If present, the bins used to turn
- *    this continuous output into a categorical label. Pass it to
- *    `classifyFromBins` rather than reimplementing the edge handling.
- */
+ * `unit` is the unit of measurement, or `null` if dimensionless.
+ *
+ * `applicability` is the range over which the model is applicable. It is an
+ * **applicability gate, not a clamp**. Outside it, and only when `limit_inputs`
+ * is enabled, the model returns NaN — it does not constrain the value to the
+ * bound. On an output such as `pmv_ppd_iso`'s `pmv`, read it as "results
+ * outside this band are suppressed", not "the output is guaranteed to fall
+ * inside it". A front end should surface it as a condition on the answer rather
+ * than as a slider limit.
+ *
+ * `classifier`, if present, holds the bins used to turn this continuous output
+ * into a categorical label. Pass it to `classifyFromBins` rather than
+ * reimplementing the edge handling.
 
 /**
  * Metadata describing a thermal comfort model.
  *
  * Experimental — the shape may change before release.
  *
- * @typedef {object} ModelInfo
- * @property {string} label - Human-readable model name (e.g. "Heat Index (Rothfusz)").
- * @property {string} description - One-sentence summary of what the model computes.
- * @property {Object.<string, VariableInfo>} inputs - Input variables, keyed by name.
- *    Lists physical quantities only; control parameters (`round`, `units`, etc.) are excluded.
- * @property {Object.<string, VariableInfo>} outputs - Output variables, keyed by name.
- * @property {Object.<string, VariableInfo>} [derived] - Derived outputs computed from inputs
- *    (e.g. offsets on `t_cmf` in adaptive models). Optional.
+ * @typedef {Readonly<{
+ *   label: string,
+ *   description: string,
+ *   inputs: Readonly<Record<string, VariableInfo>>,
+ *   outputs: Readonly<Record<string, VariableInfo>>,
+ *   derived?: Readonly<Record<string, VariableInfo>>,
+ * }>} ModelInfo
+ *
+ * `label` is the human-readable model name, `description` a one-sentence
+ * summary of what it computes.
+ *
+ * `inputs` lists physical quantities only; control parameters (`round`,
+ * `units`, `limit_inputs` and so on) are excluded. `outputs` are the returned
+ * values. `derived` covers quantities computed from the inputs rather than
+ * supplied by the caller — vapour pressure in `pmv_ppd_iso`, for instance,
+ * which has an applicability bound of its own.
+ *
  * @public
- */
 
 /**
  * Deep-freezes an object and all nested objects, preventing accidental mutations.

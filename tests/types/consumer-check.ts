@@ -58,6 +58,22 @@ const notANumber: number = PMV_PPD_ISO_INFO.label;
 // @ts-expect-error `inputs` has no `nonexistent_variable` key.
 const notAKey: VariableInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
 
+// The runtime values are deep-frozen, so the types must reject writes too.
+// Without these, a consumer could assign, type-check cleanly, and then throw:
+// an ES module is always strict, so the assignment is not silently ignored.
+// If any of these stop being errors the readonly modifiers have been lost, and
+// tsc fails with "Unused '@ts-expect-error' directive".
+// @ts-expect-error applicability bounds are readonly.
+PMV_PPD_ISO_INFO.inputs.tdb.applicability!.min = 5;
+// @ts-expect-error the inputs map is readonly.
+PMV_PPD_ISO_INFO.inputs.tdb = { unit: "°C" };
+// @ts-expect-error the metadata object itself is readonly.
+PMV_PPD_ISO_INFO.label = "something else";
+// @ts-expect-error classifier bin edges are a readonly array.
+PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
+// @ts-expect-error push mutates, and the array is readonly.
+HEAT_INDEX_STRESS_CATEGORY_BINS.labels.push("new label");
+
 export {
   iso,
   heatIndex,

@@ -101,6 +101,10 @@ export const ISO_7730_LIMITS = Object.freeze({
   vr: Object.freeze({ min: 0, max: 1 }),
   met: Object.freeze({ min: 0.8, max: 4 }),
   clo: Object.freeze({ min: 0, max: 2 }),
+  // Partial water vapour pressure [Pa]. Derived from tdb and rh rather than
+  // supplied directly, so it is checked in pmv_ppd rather than in
+  // `_iso_compliance`, which only iterates over supplied inputs.
+  pa: Object.freeze({ min: 0, max: 2700 }),
   // The PMV output gate. Grouped here rather than kept separate because
   // pythermalcomfort applies it in the same `valid_range` block as the input
   // limits above (pmv_ppd_iso.py:181-187), and because #182 will generate the

@@ -262,6 +262,11 @@ describe("Identity — applicability bounds are shared, not copied", () => {
     expect(PMV_PPD_ISO_INFO.inputs.clo.applicability).toBe(ISO_7730_LIMITS.clo);
   });
 
+  test("the derived pa bound is the ISO_7730_LIMITS object", () => {
+    expect(PMV_PPD_ISO_INFO.derived.pa.applicability).toBe(ISO_7730_LIMITS.pa);
+    expect(ISO_7730_LIMITS.pa).toEqual({ min: 0, max: 2700 });
+  });
+
   test("the PMV output gate in the metadata is the object the runtime gates on", () => {
     expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability).toBe(
       ISO_7730_LIMITS.pmv,

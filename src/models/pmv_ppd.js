@@ -112,6 +112,12 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
   },
+  derived: {
+    // Computed from tdb and rh, not supplied by the caller. Exposed so a
+    // front end can explain why a warm, humid combination that looks inside
+    // every input limit still returns NaN.
+    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa },
+  },
 });
 
 /**
@@ -204,6 +210,21 @@ const PMV_PPD_SCHEMA = {
   round_output: { type: "boolean", required: false },
 };
 
+/**
+ * Partial water vapour pressure, using the Antoine relation ISO 7730 uses.
+ *
+ * Kept in one place so the PMV heat-loss terms and the ISO applicability
+ * check cannot disagree at the boundary. Matches pythermalcomfort's
+ * `pmv_ppd_iso` exactly.
+ *
+ * @param {number} tdb - dry bulb air temperature, [°C]
+ * @param {number} rh - relative humidity, [%]
+ * @returns {number} partial water vapour pressure, [Pa]
+ */
+function partial_vapour_pressure(tdb, rh) {
+  return rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
+}
+
 export function pmv_ppd(
   tdb,
   tr,
@@ -244,6 +265,11 @@ export function pmv_ppd(
     // Conversion from IP to SI units
     ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
   }
+
+  // Computed from the SI inputs before the ASHRAE cooling effect shifts tdb.
+  // ce is always 0 under ISO, so this is the same tdb either way, but taking
+  // it here makes the independence explicit.
+  const pa = partial_vapour_pressure(tdb, rh);
 
   const compliance_warnings = check_standard_compliance(standard, {
     tdb,
@@ -287,7 +313,23 @@ export function pmv_ppd(
         [ISO_7730_LIMITS.pmv.min, ISO_7730_LIMITS.pmv.max],
       ).includes(NaN);
 
-    if (isNaN(pmv) || compliance_warnings.length > 0 || pmv_outside_iso_range) {
+    // ISO 7730 Clause 4 also limits partial water vapour pressure. It is
+    // derived from tdb and rh, not supplied, so it cannot go through
+    // check_standard_compliance. ASHRAE 55 has no equivalent bound, and
+    // pythermalcomfort's pmv_ppd_ashrae does not apply one either.
+    const pa_outside_iso_range =
+      standard === "ISO" &&
+      valid_range(
+        [pa],
+        [ISO_7730_LIMITS.pa.min, ISO_7730_LIMITS.pa.max],
+      ).includes(NaN);
+
+    if (
+      isNaN(pmv) ||
+      compliance_warnings.length > 0 ||
+      pmv_outside_iso_range ||
+      pa_outside_iso_range
+    ) {
       pmv = NaN;
       ppd = NaN;
       tsv = NaN;
@@ -316,7 +358,7 @@ export function pmv_ppd(
  * @returns {number} _pmv
  */
 export function pmv_calculation(tdb, tr, vr, rh, met, clo, wme) {
-  const pa = rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
+  const pa = partial_vapour_pressure(tdb, rh);
 
   const icl = 0.155 * clo; //thermal insulation of the clothing in M2K/W
   const m = met * 58.15; //metabolic rate in W/M2

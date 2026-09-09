@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import { pmv_ppd } from "../../src/models/pmv_ppd.js";
+import { ISO_7730_LIMITS, valid_range } from "../../src/utilities/utilities.js";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils.js";
 
@@ -127,5 +128,102 @@ describe("pmv_ppd input validation", () => {
     expect(() =>
       pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, "ISO", { round_output: "true" }),
     ).toThrow(TypeError);
+  });
+});
+
+// Issue #195. pythermalcomfort's pmv_ppd_iso applies the ISO 7730 Clause 4
+// limit on partial water vapour pressure; jsthermalcomfort did not, so warm
+// humid conditions returned a number where Python returned NaN.
+describe("pmv_ppd ISO vapour pressure limit (#195)", () => {
+  // pa = rh * 10 * exp(16.6536 - 4030.183 / (tdb + 235)). These rh values are
+  // solved from that equation for pa = 2700 Pa, and land a few parts in 1e-6
+  // BELOW the limit rather than exactly on it -- an rh that hits 2700.0 exactly
+  // in float64 needs ~20 significant digits and depends on Math.exp being
+  // bit-identical across engines, which is not guaranteed. So the pair below
+  // brackets the limit tightly from both sides, and the inclusivity of the
+  // comparison itself is asserted separately in the last test.
+  const NEAR_LIMIT = [
+    { tdb: 25, rh: 85.244688 }, // pa = 2699.999995
+    { tdb: 28, rh: 71.429553 }, // pa = 2699.999996
+    { tdb: 30, rh: 63.628386 }, // pa = 2699.999991
+  ];
+
+  // Enough to cross the limit but still far tighter than any realistic input:
+  // dpa/drh is about 32 Pa per %rh here, so this lands ~3e-4 Pa above 2700.
+  const STEP_OVER = 1e-5;
+
+  test.each(NEAR_LIMIT)(
+    "pa just below 2700 Pa is valid (tdb=$tdb, rh=$rh)",
+    ({ tdb, rh }) => {
+      const result = pmv_ppd(tdb, tdb, 0.1, rh, 1.2, 0.5, 0, "ISO", {
+        limit_inputs: true,
+      });
+      expect(Number.isFinite(result.pmv)).toBe(true);
+      expect(Number.isFinite(result.ppd)).toBe(true);
+    },
+  );
+
+  test.each(NEAR_LIMIT)(
+    "pa just above 2700 Pa NaNs pmv, ppd and tsv (tdb=$tdb)",
+    ({ tdb, rh }) => {
+      const result = pmv_ppd(
+        tdb,
+        tdb,
+        0.1,
+        rh + STEP_OVER,
+        1.2,
+        0.5,
+        0,
+        "ISO",
+        { limit_inputs: true },
+      );
+      expect(result.pmv).toBeNaN();
+      expect(result.ppd).toBeNaN();
+      expect(result.tsv).toBeNaN();
+    },
+  );
+
+  test("the NaN comes from the vapour pressure bound, not the PMV output gate", () => {
+    // Every input is inside its own limit here, and with limits off the PMV is
+    // well inside [-2, 2]. So the NaN below can only be the pa bound.
+    const unlimited = pmv_ppd(30, 30, 0.1, 90, 1.2, 0.5, 0, "ISO", {
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(unlimited.pmv)).toBe(true);
+    expect(unlimited.pmv).toBeGreaterThan(-2);
+    expect(unlimited.pmv).toBeLessThan(2);
+
+    const limited = pmv_ppd(30, 30, 0.1, 90, 1.2, 0.5, 0, "ISO", {
+      limit_inputs: true,
+    });
+    expect(limited.pmv).toBeNaN();
+  });
+
+  test("the bound is ISO-only; ASHRAE is unaffected", () => {
+    // ASHRAE 55 has no vapour pressure limit, and pythermalcomfort's
+    // pmv_ppd_ashrae does not apply one either.
+    const result = pmv_ppd(30, 30, 0.1, 90, 1.2, 0.5, 0, "ASHRAE", {
+      limit_inputs: true,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+  });
+
+  test("2700 Pa itself is inside the bound, not outside it", () => {
+    // Asserts the comparison is `<=` and not `<`, without routing through
+    // exp() and so without depending on floating-point reproducibility.
+    // This is the half the bracketing cases above cannot prove.
+    const { min, max } = ISO_7730_LIMITS.pa;
+    expect(max).toBe(2700);
+    expect(min).toBe(0);
+
+    // Both ends are inclusive: the bound value passes through unchanged.
+    // Asserted on the returned value rather than with `not.toContain(NaN)`,
+    // which passes vacuously -- toContain uses indexOf, and NaN !== NaN.
+    expect(valid_range([max], [min, max])).toEqual([max]);
+    expect(valid_range([min], [min, max])).toEqual([min]);
+
+    // A hair outside either end is replaced with NaN.
+    expect(valid_range([max + 1e-9], [min, max])[0]).toBeNaN();
+    expect(valid_range([min - 1e-9], [min, max])[0]).toBeNaN();
   });
 });

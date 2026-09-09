@@ -174,7 +174,7 @@ export function is_iso_7730(standard) {
 /**
  * Check that the values comply with the standard provided
  *
- * @param {Standard} standard
+ * @param {"7730-2005"|"7730-2025"|"55-2023"|"7933-2004"|"7933-2023"|"ankle_draft"|"use_fans_heatwaves"} standard
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted

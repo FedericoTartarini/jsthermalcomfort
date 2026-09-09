@@ -10,7 +10,7 @@ import { is_iso_7730, Standard } from "../utilities/utilities.js";
  * @param {number} tdb - air temperature [C]
  * @param {number} tr - mean radiant temperature [C]
  * @param {number} v - air speed [m/s]
- * @param {Standard} [standard=Standard.iso_7730_2025] - which convention to use
+ * @param {"7730-2005"|"7730-2025"|"55-2023"} [standard=Standard.iso_7730_2025] - which convention to use
  *    for the weighting.
  *
  *    The identifiers are the comfort-standard ones from `Standard`, because

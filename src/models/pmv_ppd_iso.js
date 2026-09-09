@@ -33,7 +33,7 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * @param {number} met - Metabolic rate [met]
  * @param {number} clo - Clothing insulation [clo]
  * @param {number} [wme=0] - External work [met]
- * @param {Standard} [model=Standard.iso_7730_2025] - which edition of ISO 7730
+ * @param {"7730-2005"|"7730-2025"} [model=Standard.iso_7730_2025] - which edition of ISO 7730
  *    the calculation is being performed against. Accepts `"7730-2005"` or
  *    `"7730-2025"`.
  *

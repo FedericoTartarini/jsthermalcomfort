@@ -1,0 +1,28 @@
+{
+  // Compiles tests/types/consumer-check.ts against the built lib/ output.
+  // Run by `npm run check:types`, which CI runs after `npm run build`.
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": [],
+
+    // Left on because mathjs ships an `export =` declaration that is invalid
+    // under ESM checking and reaches this graph transitively. Syntax errors in
+    // our own published .d.ts still surface regardless of this flag, which is
+    // the class of breakage issue #196 was.
+    "skipLibCheck": true,
+
+    // Resolve by package name rather than by a relative path into lib/, so the
+    // `types` entry in package.json is exercised the way a consumer hits it.
+    "baseUrl": "../..",
+    "paths": {
+      "jsthermalcomfort": ["lib/esm/types/index.d.ts"]
+    }
+  },
+  "include": ["consumer-check.ts"]
+}

@@ -1,5 +1,17 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import {
+  round,
+  units_converter,
+  validateInputs,
+} from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.js";
+import { deepFreeze } from "./modelDocs.js";
+
+/**
+ * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
+ */
+/**
+ * @typedef {import("./modelDocs.js").ClassifierBins} ClassifierBins
+ */
 
 /**
  * @typedef {object} HeatIndexResult
@@ -42,6 +54,31 @@ import { classifyFromBins } from "./classifierBins.js";
  *
  * @category Thermophysiological models
  */
+
+/**
+ * Applicability limits of the Rothfusz regression, in SI units.
+ *
+ * Same shape as `ISO_7730_LIMITS`, so both read the same way and both match
+ * what #182 will generate from `limits.json`. Frozen, and referenced by
+ * identity from `HEAT_INDEX_ROTHFUSZ_INFO` rather than copied into it.
+ *
+ * SI only, on purpose: the IP threshold is derived at the point of use rather
+ * than stored, so 80.6 °F is not a second number that can drift out of step
+ * with 27 °C. The conversion is exact in floating point (27 * 9/5 + 32 ===
+ * 80.6), so nothing is lost by deriving it.
+ *
+ * Exported so a test can assert that the metadata references this object
+ * rather than a literal copy of it. It is deliberately NOT added to
+ * `src/models/index.js`, so it does not become public API -- the consumer
+ * path is `HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability`. Same
+ * arrangement as `ISO_7730_LIMITS`.
+ *
+ * @type {Readonly<{tdb: Readonly<{min: number}>}>}
+ */
+export const HEAT_INDEX_ROTHFUSZ_LIMITS = Object.freeze({
+  tdb: Object.freeze({ min: 27 }),
+});
+
 const HEAT_INDEX_SCHEMA = {
   tdb: { type: "number" },
   rh: { type: "number" },
@@ -59,12 +96,38 @@ const HEAT_INDEX_SCHEMA = {
  * - 41 < hi <= 54: "danger"
  * - 54 < hi <= 1000: "extreme danger"
  * - hi > 1000: NaN
+ *
+ * @type {Readonly<ClassifierBins>}
  */
-export const HEAT_INDEX_STRESS_CATEGORY_BINS = {
+export const HEAT_INDEX_STRESS_CATEGORY_BINS = Object.freeze({
   edges: [27, 32, 41, 54, 1000],
   labels: ["no risk", "caution", "extreme caution", "danger", "extreme danger"],
   right: true,
-};
+});
+
+/**
+ * Model metadata for Heat Index (Rothfusz regression).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * @type {ModelInfo}
+ * @public
+ */
+export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
+  label: "Heat Index (Rothfusz)",
+  description: "Apparent temperature — how hot it feels at a given humidity.",
+  inputs: {
+    tdb: { unit: "°C", applicability: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb },
+    rh: { unit: "%" },
+  },
+  outputs: {
+    hi: { unit: "°C" },
+    stress_category: {
+      unit: null,
+      classifier: HEAT_INDEX_STRESS_CATEGORY_BINS,
+    },
+  },
+});
 
 export function heat_index_rothfusz(
   tdb,
@@ -85,7 +148,10 @@ export function heat_index_rothfusz(
 
   const limit_inputs = options.limit_inputs ?? true;
   if (limit_inputs) {
-    const threshold = options.units === "IP" ? 80.6 : 27;
+    const threshold =
+      options.units === "IP"
+        ? units_converter({ tdb: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb.min }, "SI").tdb
+        : HEAT_INDEX_ROTHFUSZ_LIMITS.tdb.min;
     if (tdb < threshold) {
       return { hi: NaN, stress_category: NaN };
     }

@@ -4,9 +4,18 @@ import {
   units_converter,
   valid_range,
   validateInputs,
+  ISO_7730_LIMITS,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
 import { classifyFromBins } from "./classifierBins.js";
+import { deepFreeze } from "./modelDocs.js";
+
+/**
+ * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
+ */
+/**
+ * @typedef {import("./modelDocs.js").ClassifierBins} ClassifierBins
+ */
 
 /**
  * @typedef {Object} Pmv_ppdKwargs
@@ -41,8 +50,10 @@ import { classifyFromBins } from "./classifierBins.js";
 /**
  * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
  * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
+ *
+ * @type {Readonly<ClassifierBins>}
  */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = {
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = Object.freeze({
   edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
   labels: [
     "Cold",
@@ -54,13 +65,15 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = {
     "Hot",
   ],
   right: false,
-};
+});
 
 /**
  * Thermal Sensation Vote bins used by pmv_ppd_ashrae (right-inclusive).
  * Note: pmv_ppd_iso uses left-inclusive; see pythermalcomfort#382.
+ *
+ * @type {Readonly<ClassifierBins>}
  */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = {
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = Object.freeze({
   edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
   labels: [
     "Cold",
@@ -72,7 +85,34 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = {
     "Hot",
   ],
   right: true,
-};
+});
+
+/**
+ * Model metadata for PMV / PPD (ISO 7730).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * @type {ModelInfo}
+ * @public
+ */
+export const PMV_PPD_ISO_INFO = deepFreeze({
+  label: "PMV / PPD (ISO 7730)",
+  description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
+  inputs: {
+    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr },
+    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr },
+    met: { unit: "met", applicability: ISO_7730_LIMITS.met },
+    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo },
+    rh: { unit: "%" },
+    wme: { unit: "met" },
+  },
+  outputs: {
+    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
+    ppd: { unit: "%" },
+    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
+  },
+});
 
 /**
  * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and
@@ -241,7 +281,11 @@ export function pmv_ppd(
   if (kwargs.limit_inputs) {
     // ISO 7730 limits PMV applicability to [-2, 2]; ASHRAE 55 has no equivalent output bound
     const pmv_outside_iso_range =
-      standard === "ISO" && valid_range([pmv], [-2, 2]).includes(NaN);
+      standard === "ISO" &&
+      valid_range(
+        [pmv],
+        [ISO_7730_LIMITS.pmv.min, ISO_7730_LIMITS.pmv.max],
+      ).includes(NaN);
 
     if (isNaN(pmv) || compliance_warnings.length > 0 || pmv_outside_iso_range) {
       pmv = NaN;

@@ -87,6 +87,28 @@ export const Standard = Object.freeze({
  */
 
 /**
+ * ISO 7730 compliance limits for all variables.
+ * Each variable has `min` and `max` inclusive bounds.
+ * Used by `_iso_compliance` and exported for model metadata.
+ * The shape matches the output of #182 (limits.json generation).
+ *
+ * @type {Readonly<Record<string, Readonly<{ min: number, max: number }>>>}
+ * @public
+ */
+export const ISO_7730_LIMITS = Object.freeze({
+  tdb: Object.freeze({ min: 10, max: 30 }),
+  tr: Object.freeze({ min: 10, max: 40 }),
+  vr: Object.freeze({ min: 0, max: 1 }),
+  met: Object.freeze({ min: 0.8, max: 4 }),
+  clo: Object.freeze({ min: 0, max: 2 }),
+  // The PMV output gate. Grouped here rather than kept separate because
+  // pythermalcomfort applies it in the same `valid_range` block as the input
+  // limits above (pmv_ppd_iso.py:181-187), and because #182 will generate the
+  // whole object from one place.
+  pmv: Object.freeze({ min: -2, max: 2 }),
+});
+
+/**
  * Check that the values comply with the standard provided
  *
  * @param {Standard} standard
@@ -266,20 +288,41 @@ function _iso_compliance(kwargs) {
   let warnings = [];
   for (const [key, value] of Object.entries(kwargs)) {
     if (value === undefined) continue;
-    if (key === "tdb" && (value > 30 || value < 10))
-      warnings.push(
-        "ISO air temperature applicability limits between 10 and 30 ºC",
-      );
-    if (key === "tr" && (value > 40 || value < 10))
-      warnings.push(
-        "ISO mean radiant temperature applicability limits between 10 and 40 ºC",
-      );
-    if ((key === "v" || key === "vr") && (value > 1 || value < 0))
-      warnings.push("ISO air speed applicability limits between 0 and 1 m/s");
-    if (key === "met" && (value > 4 || value < 0.8))
-      warnings.push("ISO met applicability limits between 0.8 and 4.0 met");
-    if (key === "clo" && (value > 2 || value < 0))
-      warnings.push("ISO clo applicability limits between 0.0 and 2 clo");
+    if (key === "tdb" && ISO_7730_LIMITS.tdb) {
+      const { min, max } = ISO_7730_LIMITS.tdb;
+      if (value > max || value < min)
+        warnings.push(
+          `ISO air temperature applicability limits between ${min} and ${max} ºC`,
+        );
+    }
+    if (key === "tr" && ISO_7730_LIMITS.tr) {
+      const { min, max } = ISO_7730_LIMITS.tr;
+      if (value > max || value < min)
+        warnings.push(
+          `ISO mean radiant temperature applicability limits between ${min} and ${max} ºC`,
+        );
+    }
+    if ((key === "v" || key === "vr") && ISO_7730_LIMITS.vr) {
+      const { min, max } = ISO_7730_LIMITS.vr;
+      if (value > max || value < min)
+        warnings.push(
+          `ISO air speed applicability limits between ${min} and ${max} m/s`,
+        );
+    }
+    if (key === "met" && ISO_7730_LIMITS.met) {
+      const { min, max } = ISO_7730_LIMITS.met;
+      if (value > max || value < min)
+        warnings.push(
+          `ISO met applicability limits between ${min} and ${max} met`,
+        );
+    }
+    if (key === "clo" && ISO_7730_LIMITS.clo) {
+      const { min, max } = ISO_7730_LIMITS.clo;
+      if (value > max || value < min)
+        warnings.push(
+          `ISO clo applicability limits between ${min} and ${max} clo`,
+        );
+    }
   }
   return warnings;
 }
@@ -636,8 +679,8 @@ export function f_svv(w, h, d) {
 /**
  * Filter values based on a valid range (It turns the filtered values to NaNs)
  *
- * @param {number[]} [range] - the range to limit
- * @param {[number, number]} valid - the [min, max] to constrian the range to
+ * @param {number[] | undefined} range - the range to limit; `undefined` yields an empty array
+ * @param {[number, number]} valid - the [min, max] to constrain the range to
  * @returns {number[]} the constrained range with NaNs for values that are outside the min, max range
  */
 export function valid_range(range, [min, max]) {

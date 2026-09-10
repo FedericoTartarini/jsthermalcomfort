@@ -75,6 +75,7 @@ async function copyDir(sorce, dest) {
  * Checks if a section represents a Type definition.
  */
 function isType(section) {
+  if (section.kind === "interface") return true;
   if (section.type === undefined) return false;
   return section.type.type === "NameExpression";
 }

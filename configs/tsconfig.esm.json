@@ -5,6 +5,7 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "verbatimModuleSyntax": true,
     "outDir": "../lib/esm",
     "declarationDir": "../lib/esm/types"
   }

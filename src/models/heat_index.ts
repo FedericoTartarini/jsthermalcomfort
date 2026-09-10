@@ -3,22 +3,19 @@ import {
   units_converter,
   validateInputs,
 } from "../utilities/utilities.js";
-import { classifyFromBins } from "./classifierBins.js";
-import { deepFreeze } from "./modelDocs.js";
+import { classifyFromBins } from "./classifierBins.ts";
+import { deepFreeze } from "./modelDocs.ts";
+import type { ClassifierBins, ModelInfo } from "./modelDocs.ts";
 
 /**
- * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
- */
-/**
- * @typedef {import("./modelDocs.js").ClassifierBins} ClassifierBins
- */
-
-/**
- * @typedef {object} HeatIndexResult
  * @property {number} hi - Heat Index, default in [°C] in [°F] if `units` = 'IP'.
  * @property {string|number} stress_category - Thermal stress category, or NaN if hi is NaN. Classified from the unrounded SI value (see note below).
  * @public
  */
+export interface HeatIndexResult {
+  hi: number;
+  stress_category: string | number;
+}
 /**
  * Calculates the Heat Index (HI) using the Rothfusz regression. It combines air temperature and relative humidity to determine an apparent temperature.
  * The HI equation {@link #ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
@@ -72,8 +69,6 @@ import { deepFreeze } from "./modelDocs.js";
  * `src/models/index.js`, so it does not become public API -- the consumer
  * path is `HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability`. Same
  * arrangement as `ISO_7730_LIMITS`.
- *
- * @type {Readonly<{tdb: Readonly<{min: number}>}>}
  */
 export const HEAT_INDEX_ROTHFUSZ_LIMITS = Object.freeze({
   tdb: Object.freeze({ min: 27 }),
@@ -96,24 +91,28 @@ const HEAT_INDEX_SCHEMA = {
  * - 41 < hi <= 54: "danger"
  * - 54 < hi <= 1000: "extreme danger"
  * - hi > 1000: NaN
- *
- * @type {Readonly<ClassifierBins>}
  */
-export const HEAT_INDEX_STRESS_CATEGORY_BINS = Object.freeze({
-  edges: [27, 32, 41, 54, 1000],
-  labels: ["no risk", "caution", "extreme caution", "danger", "extreme danger"],
-  right: true,
-});
+export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
+  Object.freeze({
+    edges: [27, 32, 41, 54, 1000],
+    labels: [
+      "no risk",
+      "caution",
+      "extreme caution",
+      "danger",
+      "extreme danger",
+    ],
+    right: true,
+  });
 
 /**
  * Model metadata for Heat Index (Rothfusz regression).
  *
  * Experimental — the shape of `ModelInfo` may change before release.
  *
- * @type {ModelInfo}
  * @public
  */
-export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
+export const HEAT_INDEX_ROTHFUSZ_INFO: ModelInfo = deepFreeze({
   label: "Heat Index (Rothfusz)",
   description: "Apparent temperature — how hot it feels at a given humidity.",
   inputs: {
@@ -130,11 +129,16 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
 });
 
 export function heat_index_rothfusz(
-  tdb,
-  rh,
-  options = { round: true, units: "SI" },
-) {
-  if (options.units) options.units = options.units.toUpperCase();
+  tdb: number,
+  rh: number,
+  options: { round?: boolean; units?: "SI" | "IP"; limit_inputs?: boolean } = {
+    round: true,
+    units: "SI",
+  },
+): HeatIndexResult {
+  // The assertion holds because validateInputs below rejects anything other
+  // than "SI" or "IP".
+  if (options.units) options.units = options.units.toUpperCase() as "SI" | "IP";
   validateInputs(
     {
       tdb,

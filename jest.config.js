@@ -1,3 +1,4 @@
 export default {
-  transform: {},
+  transform: { "\\.ts$": "./jest.strip-types.js" },
+  extensionsToTreatAsEsm: [".ts"],
 };

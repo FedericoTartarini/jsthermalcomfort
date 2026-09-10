@@ -1,7 +1,7 @@
 import { describe } from "@jest/globals";
 import { pmv } from "../../src/models/pmv.js";
 import { Standard } from "../../src/utilities/utilities.js";
-import { validateResult } from "./testUtils.js";
+import { validateResult } from "./testUtils.ts";
 
 describe("pmv", () => {
   test("Test case with default parameters", () => {

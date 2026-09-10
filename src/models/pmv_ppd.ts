@@ -9,18 +9,14 @@ import {
   Standard,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.js";
-import { classifyFromBins } from "./classifierBins.js";
-import { deepFreeze } from "./modelDocs.js";
+import { classifyFromBins } from "./classifierBins.ts";
+import { deepFreeze } from "./modelDocs.ts";
+import type { ClassifierBins, ModelInfo } from "./modelDocs.ts";
+
+/** One of the identifiers in `Standard`, e.g. `"7730-2025"` or `"55-2023"`. */
+type StandardId = (typeof Standard)[keyof typeof Standard];
 
 /**
- * @typedef {import("./modelDocs.js").ModelInfo} ModelInfo
- */
-/**
- * @typedef {import("./modelDocs.js").ClassifierBins} ClassifierBins
- */
-
-/**
- * @typedef {Object} Pmv_ppdKwargs
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
@@ -40,64 +36,71 @@ import { deepFreeze } from "./modelDocs.js";
  * @property { boolean } round_output - If true, rounds pmv to 2 decimal places and ppd to 1. Defaults to true.
  * @public
  */
+export interface Pmv_ppdKwargs {
+  units?: "SI" | "IP";
+  limit_inputs?: boolean;
+  airspeed_control?: boolean;
+  round_output?: boolean;
+}
 
 /**
- * @typedef {Object} Pmv_ppdReturns
  * @property { number } pmv - Predicted Mean Vote
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the unrounded pmv.
  * @public
  */
+export interface Pmv_ppdReturns {
+  pmv: number;
+  ppd: number;
+  tsv: string | number;
+}
 
 /**
  * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
  * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
- *
- * @type {Readonly<ClassifierBins>}
  */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO = Object.freeze({
-  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
-  labels: [
-    "Cold",
-    "Cool",
-    "Slightly Cool",
-    "Neutral",
-    "Slightly Warm",
-    "Warm",
-    "Hot",
-  ],
-  right: false,
-});
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO: Readonly<ClassifierBins> =
+  Object.freeze({
+    edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
+    labels: [
+      "Cold",
+      "Cool",
+      "Slightly Cool",
+      "Neutral",
+      "Slightly Warm",
+      "Warm",
+      "Hot",
+    ],
+    right: false,
+  });
 
 /**
  * Thermal Sensation Vote bins used by pmv_ppd_ashrae (right-inclusive).
  * Note: pmv_ppd_iso uses left-inclusive; see pythermalcomfort#382.
- *
- * @type {Readonly<ClassifierBins>}
  */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE = Object.freeze({
-  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
-  labels: [
-    "Cold",
-    "Cool",
-    "Slightly Cool",
-    "Neutral",
-    "Slightly Warm",
-    "Warm",
-    "Hot",
-  ],
-  right: true,
-});
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE: Readonly<ClassifierBins> =
+  Object.freeze({
+    edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
+    labels: [
+      "Cold",
+      "Cool",
+      "Slightly Cool",
+      "Neutral",
+      "Slightly Warm",
+      "Warm",
+      "Hot",
+    ],
+    right: true,
+  });
 
 /**
  * Model metadata for PMV / PPD (ISO 7730).
  *
  * Experimental — the shape of `ModelInfo` may change before release.
  *
- * @type {ModelInfo}
  * @public
  */
-export const PMV_PPD_ISO_INFO = deepFreeze({
+export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
   label: "PMV / PPD (ISO 7730)",
   description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
   inputs: {
@@ -223,21 +226,21 @@ const PMV_PPD_SCHEMA = {
  * @param {number} rh - relative humidity, [%]
  * @returns {number} partial water vapour pressure, [Pa]
  */
-function partial_vapour_pressure(tdb, rh) {
+function partial_vapour_pressure(tdb: number, rh: number): number {
   return rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
 }
 
 export function pmv_ppd(
-  tdb,
-  tr,
-  vr,
-  rh,
-  met,
-  clo,
+  tdb: number,
+  tr: number,
+  vr: number,
+  rh: number,
+  met: number,
+  clo: number,
   wme = 0,
-  standard = Standard.iso_7730_2025,
-  kwargs = {},
-) {
+  standard: StandardId = Standard.iso_7730_2025,
+  kwargs: Pmv_ppdKwargs = {},
+): Pmv_ppdReturns {
   const default_kwargs = {
     units: "SI",
     limit_inputs: true,
@@ -358,7 +361,15 @@ export function pmv_ppd(
  *
  * @returns {number} _pmv
  */
-export function pmv_calculation(tdb, tr, vr, rh, met, clo, wme) {
+export function pmv_calculation(
+  tdb: number,
+  tr: number,
+  vr: number,
+  rh: number,
+  met: number,
+  clo: number,
+  wme: number,
+): number {
   const pa = partial_vapour_pressure(tdb, rh);
 
   const icl = 0.155 * clo; //thermal insulation of the clothing in M2K/W

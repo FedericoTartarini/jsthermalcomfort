@@ -1,0 +1,27 @@
+{
+  // Type-checks the TypeScript test files against the sources in src/.
+  // Run by `npm run check:types:tests`. Nothing else checks tests/: the Jest
+  // transform only strips types, so without this a `.test.ts` file would be
+  // TypeScript in name only.
+  //
+  // tests/types/ is excluded because it checks the *built* package by name
+  // (see tests/types/tsconfig.json) rather than the sources.
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "types": ["node"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["types"]
+}

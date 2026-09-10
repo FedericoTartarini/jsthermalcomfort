@@ -8,7 +8,7 @@ import {
   assertNonEmptyRows,
   loadTestData,
   validateResult,
-} from "./testUtils.js";
+} from "./testUtils.ts";
 
 // Load test data from the shared repository (filters out array-input rows).
 let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd, false);

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { classifyFromBins } from "../../src/models/classifierBins";
+import { classifyFromBins } from "../../src/models/classifierBins.ts";
 
 /**
  * Test classifyFromBins function matching numpy.digitize behavior

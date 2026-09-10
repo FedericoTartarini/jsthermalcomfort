@@ -2,6 +2,9 @@
   "include": ["./src/**/*"],
   "compilerOptions": {
     "allowJs": true,
+    "rewriteRelativeImportExtensions": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
     "declaration": true,
     "emitDeclarationOnly": false,
     "declarationMap": true,

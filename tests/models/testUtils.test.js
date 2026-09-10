@@ -18,7 +18,7 @@ import {
   validateResult,
   filterScalarRows,
   assertNonEmptyRows,
-} from "./testUtils.js";
+} from "./testUtils.ts";
 
 // validateResult logs failure context via console.log inside its catch
 // block. Meta-tests deliberately trigger throws to verify behaviour, so

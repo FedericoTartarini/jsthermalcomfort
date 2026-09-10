@@ -1,12 +1,12 @@
 import { describe, expect, test } from "@jest/globals";
-import { pmv_ppd } from "../../src/models/pmv_ppd.js";
+import { pmv_ppd } from "../../src/models/pmv_ppd.ts";
 import {
   ISO_7730_LIMITS,
   Standard,
   valid_range,
 } from "../../src/utilities/utilities.js";
-import { testDataUrls } from "./comftest";
-import { loadTestData, validateResult } from "./testUtils.js";
+import { testDataUrls } from "./comftest.ts";
+import { loadTestData, validateResult } from "./testUtils.ts";
 
 let returnArray = false;
 
@@ -37,7 +37,19 @@ describe("pmv_pdd", () => {
       units,
       limit_inputs,
       airspeed_control,
-    } = inputs;
+    } = inputs as {
+      tdb: number;
+      tr: number;
+      vr: number;
+      rh: number;
+      met: number;
+      clo: number;
+      wme: number;
+      standard: string;
+      units?: "SI" | "IP";
+      limit_inputs?: boolean;
+      airspeed_control?: boolean;
+    };
 
     const kwargs = {
       units,
@@ -57,7 +69,8 @@ describe("pmv_pdd", () => {
       met,
       clo,
       wme,
-      FIXTURE_STANDARD[standard] ?? standard,
+      ((FIXTURE_STANDARD as Record<string, string>)[standard] ??
+        standard) as Parameters<typeof pmv_ppd>[7],
       kwargs,
     );
 
@@ -135,14 +148,17 @@ describe("pmv_ppd input validation", () => {
     ["met", 25, 25, 0.1, 50, "1.2", 0.5],
     ["clo", 25, 25, 0.1, 50, 1.2, "0.5"],
   ])("throws TypeError if %s is not a number", (_, ...args) => {
+    // @ts-expect-error deliberately passing non-number args to test the runtime TypeError
     expect(() => pmv_ppd(...args)).toThrow(TypeError);
   });
 
   test("throws TypeError if wme is not a number", () => {
+    // @ts-expect-error deliberately passing a non-number wme to test the runtime TypeError
     expect(() => pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, "0")).toThrow(TypeError);
   });
 
   test("throws Error if standard is not a valid enum", () => {
+    // @ts-expect-error deliberately passing an invalid standard enum to test the runtime Error
     expect(() => pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, "INVALID")).toThrow(
       Error,
     );
@@ -151,6 +167,7 @@ describe("pmv_ppd input validation", () => {
   test("throws Error if units is not a valid enum", () => {
     expect(() =>
       pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        // @ts-expect-error deliberately passing an invalid units enum to test the runtime Error
         units: "INVALID",
       }),
     ).toThrow(Error);
@@ -159,6 +176,7 @@ describe("pmv_ppd input validation", () => {
   test("throws TypeError if limit_inputs is not a boolean", () => {
     expect(() =>
       pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        // @ts-expect-error deliberately passing a non-boolean limit_inputs to test the runtime TypeError
         limit_inputs: "true",
       }),
     ).toThrow(TypeError);
@@ -167,6 +185,7 @@ describe("pmv_ppd input validation", () => {
   test("throws TypeError if airspeed_control is not a boolean", () => {
     expect(() =>
       pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        // @ts-expect-error deliberately passing a non-boolean airspeed_control to test the runtime TypeError
         airspeed_control: "true",
       }),
     ).toThrow(TypeError);
@@ -175,6 +194,7 @@ describe("pmv_ppd input validation", () => {
   test("throws TypeError if round_output is not a boolean", () => {
     expect(() =>
       pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        // @ts-expect-error deliberately passing a non-boolean round_output to test the runtime TypeError
         round_output: "true",
       }),
     ).toThrow(TypeError);

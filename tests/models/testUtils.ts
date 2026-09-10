@@ -1,4 +1,19 @@
+import { expect } from "@jest/globals";
 import fetch from "node-fetch"; // Import node-fetch to support data fetching
+
+/** One row of a validation-data fixture: the model inputs and expected outputs. */
+export interface FixtureRow {
+  inputs: Record<string, unknown>;
+  outputs: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+/** A validation-data fixture file as fetched from the shared repository. */
+export interface Fixture {
+  data: FixtureRow[];
+  tolerance?: Record<string, number>;
+  [key: string]: unknown;
+}
 
 /**
  * Drop rows whose `inputs` contain any array-valued field. Pure helper so it
@@ -7,7 +22,9 @@ import fetch from "node-fetch"; // Import node-fetch to support data fetching
  * @param {Array<{ inputs: Object }>} rows
  * @returns {Array}
  */
-export function filterScalarRows(rows) {
+export function filterScalarRows<T extends { inputs: Record<string, unknown> }>(
+  rows: T[],
+): T[] {
   return rows.filter((row) =>
     Object.values(row.inputs).every((value) => !Array.isArray(value)),
   );
@@ -23,7 +40,7 @@ export function filterScalarRows(rows) {
  * @param {string} label - human-readable description for the error message
  * @returns {Array} the same rows, unchanged, when non-empty
  */
-export function assertNonEmptyRows(rows, label) {
+export function assertNonEmptyRows<T>(rows: T[], label: string): T[] {
   if (!Array.isArray(rows) || rows.length === 0) {
     throw new Error(
       `${label}: 0 rows after filtering. ` +
@@ -34,15 +51,21 @@ export function assertNonEmptyRows(rows, label) {
 }
 
 // Load test data and extract tolerance
-export async function loadTestData(url, returnArray = false) {
-  let testData;
-  let tolerances;
+export async function loadTestData(
+  url: string,
+  returnArray = false,
+): Promise<{
+  testData: Fixture;
+  tolerances: Record<string, number> | undefined;
+}> {
+  let testData: Fixture;
+  let tolerances: Record<string, number> | undefined;
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    testData = await response.json();
+    testData = (await response.json()) as Fixture;
     tolerances = testData.tolerance;
   } catch (error) {
     console.error("Unable to fetch or parse test data:", error);
@@ -72,11 +95,11 @@ export async function loadTestData(url, returnArray = false) {
  */
 
 export function validateResult(
-  modelResult,
-  expectedOutputs,
-  tolerances,
-  inputs,
-) {
+  modelResult: unknown,
+  expectedOutputs: Record<string, unknown>,
+  tolerances: Record<string, number> | undefined,
+  inputs: unknown,
+): void {
   // Silent-skip guards. Without these, an empty/missing `expectedOutputs`
   // makes Object.keys(...).forEach run zero assertions and the test reports
   // green. A null/undefined `modelResult` against non-empty expectations is
@@ -107,7 +130,9 @@ export function validateResult(
     expectedKeys.forEach((key) => {
       const expectedValue =
         expectedOutputs[key] === null ? NaN : expectedOutputs[key];
-      const actualValue = modelResult[key];
+      // A primitive modelResult indexes to undefined, which the assertions
+      // below then report against the expected value.
+      const actualValue = (modelResult as Record<string, unknown>)[key];
 
       // Use the specified tolerance if available, otherwise default to a strict 0.0001
       const tol =
@@ -119,8 +144,8 @@ export function validateResult(
         // Length check guards against the silent-skip where a longer actual
         // array slips trailing elements past the per-index loop.
         expect(actualValue).toHaveLength(expectedValue.length);
-        expectedValue.forEach((exp, index) => {
-          const act = actualValue[index];
+        expectedValue.forEach((exp: unknown, index) => {
+          const act = (actualValue as unknown[])[index];
           if (typeof exp === "number") {
             if (isNaN(exp)) {
               expect(act).toBeNaN();
@@ -129,7 +154,7 @@ export function validateResult(
               // null - 0, false - 0, [] - 0, "1" - 1 all evaluate to a
               // tolerable difference in plain Math.abs comparison.
               expect(typeof act).toBe("number");
-              expect(Math.abs(act - exp)).toBeLessThanOrEqual(
+              expect(Math.abs((act as number) - exp)).toBeLessThanOrEqual(
                 tol + Number.EPSILON * 100,
               );
             }
@@ -144,9 +169,9 @@ export function validateResult(
         } else {
           // typeof guard prevents JS coercion false-passes (see array branch).
           expect(typeof actualValue).toBe("number");
-          expect(Math.abs(actualValue - expectedValue)).toBeLessThanOrEqual(
-            tol + Number.EPSILON * 100,
-          );
+          expect(
+            Math.abs((actualValue as number) - expectedValue),
+          ).toBeLessThanOrEqual(tol + Number.EPSILON * 100);
         }
       } else {
         // For booleans or other types

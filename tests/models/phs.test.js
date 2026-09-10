@@ -5,7 +5,7 @@ import {
   assertNonEmptyRows,
   loadTestData,
   validateResult,
-} from "./testUtils.js";
+} from "./testUtils.ts";
 
 // Validated against pythermalcomfort 3.9.3.
 

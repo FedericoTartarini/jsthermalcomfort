@@ -3,18 +3,18 @@
 import { describe, expect, test } from "@jest/globals";
 import { pmv_ppd_ashrae } from "../../src/models/pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "../../src/models/pmv_ppd_iso.js";
-import { classifyFromBins } from "../../src/models/classifierBins.js";
+import { classifyFromBins } from "../../src/models/classifierBins.ts";
 import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-} from "../../src/models/pmv_ppd.js";
+} from "../../src/models/pmv_ppd.ts";
 import { testDataUrls } from "./comftest";
 import { Standard } from "../../src/utilities/utilities.js";
 import {
   assertNonEmptyRows,
   loadTestData,
   validateResult,
-} from "./testUtils.js";
+} from "./testUtils.ts";
 
 // Load test data from the shared repository (filters out array-input rows).
 let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd, false);

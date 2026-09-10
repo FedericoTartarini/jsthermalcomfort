@@ -4,7 +4,7 @@ import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_ROTHFUSZ_LIMITS,
-} from "../../src/models/heat_index";
+} from "../../src/models/heat_index.ts";
 import {
   heat_index as heat_index_from_models,
   heat_index_rothfusz as heat_index_rothfusz_from_models,
@@ -13,8 +13,8 @@ import {
   heat_index as heat_index_from_root,
   heat_index_rothfusz as heat_index_rothfusz_from_root,
 } from "../../src/index.js";
-import { testDataUrls } from "./comftest";
-import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities
+import { testDataUrls } from "./comftest.ts";
+import { loadTestData, validateResult } from "./testUtils.ts"; // Import shared utilities
 
 // Validated against pythermalcomfort 3.9.3 heat_index_rothfusz.
 
@@ -29,7 +29,11 @@ let { testData, tolerances } = await loadTestData(
 describe("heat_index", () => {
   test.each(testData.data)("Test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, rh, options } = inputs;
+    const { tdb, rh, options } = inputs as {
+      tdb: number;
+      rh: number;
+      options?: { round?: boolean; units?: "SI" | "IP" };
+    };
     // Mirror pythermalcomfort's test harness which calls
     // `heat_index_rothfusz(**inputs, limit_inputs=False)` so the shared
     // fixture validates the Rothfusz formula independently of the gate.
@@ -47,20 +51,24 @@ describe("heat_index input validation", () => {
     ["tdb", "25", 50],
     ["rh", 25, "50"],
   ])("throws TypeError if %s is not a number", (_, ...args) => {
+    // @ts-expect-error deliberately passing non-number args to test the runtime TypeError
     expect(() => heat_index(...args)).toThrow(TypeError);
   });
 
   test("throws TypeError if round is not a boolean", () => {
+    // @ts-expect-error deliberately passing a non-boolean round to test the runtime TypeError
     expect(() => heat_index(25, 50, { round: "true" })).toThrow(TypeError);
   });
 
   test("throws TypeError if limit_inputs is not a boolean", () => {
+    // @ts-expect-error deliberately passing a non-boolean limit_inputs to test the runtime TypeError
     expect(() => heat_index(30, 50, { limit_inputs: "true" })).toThrow(
       TypeError,
     );
   });
 
   test("throws Error if units is not a valid enum", () => {
+    // @ts-expect-error deliberately passing an invalid units enum to test the runtime Error
     expect(() => heat_index(25, 50, { units: "INVALID" })).toThrow(Error);
   });
 });
@@ -74,7 +82,11 @@ describe("heat_index Rothfusz applicability gate", () => {
     ["IP tdb just below 80.6", 80.5, 50, "IP"],
     ["IP tdb well below 80.6", 60, 50, "IP"],
   ])("returns NaN under default limit_inputs when %s", (_, tdb, rh, units) => {
-    const result = heat_index(tdb, rh, units ? { units } : undefined);
+    const result = heat_index(
+      tdb,
+      rh,
+      units ? { units: units as "SI" | "IP" } : undefined,
+    );
     expect(result.hi).toBeNaN();
   });
 
@@ -86,7 +98,11 @@ describe("heat_index Rothfusz applicability gate", () => {
   ])(
     "returns a finite hi under default limit_inputs when %s",
     (_, tdb, rh, units, _expectFinite) => {
-      const result = heat_index(tdb, rh, units ? { units } : undefined);
+      const result = heat_index(
+        tdb,
+        rh,
+        units ? { units: units as "SI" | "IP" } : undefined,
+      );
       expect(Number.isFinite(result.hi)).toBe(true);
     },
   );
@@ -202,7 +218,11 @@ describe("heat_index stress_category", () => {
 // ---------------------------------------------------------------------------
 describe("heat_index_rothfusz (renamed function)", () => {
   test("heat_index_rothfusz produces identical results to heat_index", () => {
-    const testCases = [
+    const testCases: [
+      number,
+      number,
+      Parameters<typeof heat_index_rothfusz>[2]?,
+    ][] = [
       [25, 50, { limit_inputs: false }],
       [30, 80],
       [35, 75, { units: "IP", limit_inputs: false }],
@@ -230,7 +250,11 @@ describe("heat_index_rothfusz (renamed function)", () => {
   });
 
   test("both names return identical results for various inputs", () => {
-    const inputs = [
+    const inputs: [
+      number,
+      number,
+      Parameters<typeof heat_index_rothfusz>[2]?,
+    ][] = [
       [27, 30, { limit_inputs: false }],
       [30, 50],
       [35, 90, { units: "IP", limit_inputs: false }],
@@ -249,8 +273,8 @@ describe("heat_index_rothfusz (renamed function)", () => {
       }
 
       // Compare stress_category
-      if (isNaN(result1.stress_category)) {
-        expect(isNaN(result2.stress_category)).toBe(true);
+      if (isNaN(result1.stress_category as number)) {
+        expect(isNaN(result2.stress_category as number)).toBe(true);
       } else {
         expect(result2.stress_category).toBe(result1.stress_category);
       }

@@ -1,5 +1,5 @@
 import { expect, describe, it, jest } from "@jest/globals";
-import { validateResult } from "./testUtils.js";
+import { validateResult } from "./testUtils.ts";
 
 describe("validateResult (Testing the Test)", () => {
   it("should pass when model result matches expected result exactly", () => {

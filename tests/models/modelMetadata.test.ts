@@ -34,7 +34,7 @@ describe("Model Metadata Exports — enumeration test", () => {
     // Every expected export must be present in the package root
     expectedMetadataExports.forEach((name) => {
       expect(packageExports).toContain(name);
-      expect(pkg[name]).toBeDefined();
+      expect((pkg as Record<string, unknown>)[name]).toBeDefined();
     });
   });
 });
@@ -63,7 +63,7 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
 
   test("tdb input has applicability minimum of 27 (SI unit)", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBeDefined();
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability.min).toBe(27);
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability!.min).toBe(27);
   });
 
   test("tdb input has unit °C", () => {
@@ -125,46 +125,46 @@ describe("PMV_PPD_ISO_INFO structure", () => {
   });
 
   test("tdb has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability.min).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability!.min).toBe(
       ISO_7730_LIMITS.tdb.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability.max).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability!.max).toBe(
       ISO_7730_LIMITS.tdb.max,
     );
   });
 
   test("tr has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability.min).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability!.min).toBe(
       ISO_7730_LIMITS.tr.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability.max).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability!.max).toBe(
       ISO_7730_LIMITS.tr.max,
     );
   });
 
   test("vr has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability.min).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability!.min).toBe(
       ISO_7730_LIMITS.vr.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability.max).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability!.max).toBe(
       ISO_7730_LIMITS.vr.max,
     );
   });
 
   test("met has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability.min).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.met.applicability!.min).toBe(
       ISO_7730_LIMITS.met.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability.max).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.met.applicability!.max).toBe(
       ISO_7730_LIMITS.met.max,
     );
   });
 
   test("clo has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability.min).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability!.min).toBe(
       ISO_7730_LIMITS.clo.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability.max).toBe(
+    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability!.max).toBe(
       ISO_7730_LIMITS.clo.max,
     );
   });
@@ -181,8 +181,8 @@ describe("PMV_PPD_ISO_INFO structure", () => {
 
   test("pmv output has applicability bounds [-2, 2]", () => {
     expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability).toBeDefined();
-    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability.min).toBe(-2);
-    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability.max).toBe(2);
+    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability!.min).toBe(-2);
+    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability!.max).toBe(2);
   });
 
   test("ppd output has unit %", () => {
@@ -220,7 +220,7 @@ describe("Deep freezing — objects are immutable", () => {
 
   test("HEAT_INDEX_STRESS_CATEGORY_BINS nested in INFO is frozen", () => {
     const classifier =
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier;
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
     expect(Object.isFrozen(classifier.edges)).toBe(true);
     expect(Object.isFrozen(classifier.labels)).toBe(true);
@@ -243,7 +243,7 @@ describe("Deep freezing — objects are immutable", () => {
   });
 
   test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO nested in INFO is frozen", () => {
-    const classifier = PMV_PPD_ISO_INFO.outputs.tsv.classifier;
+    const classifier = PMV_PPD_ISO_INFO.outputs.tsv.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
     expect(Object.isFrozen(classifier.edges)).toBe(true);
     expect(Object.isFrozen(classifier.labels)).toBe(true);
@@ -263,7 +263,7 @@ describe("Identity — applicability bounds are shared, not copied", () => {
   });
 
   test("the derived pa bound is the ISO_7730_LIMITS object", () => {
-    expect(PMV_PPD_ISO_INFO.derived.pa.applicability).toBe(ISO_7730_LIMITS.pa);
+    expect(PMV_PPD_ISO_INFO.derived!.pa.applicability).toBe(ISO_7730_LIMITS.pa);
     expect(ISO_7730_LIMITS.pa).toEqual({ min: 0, max: 2700 });
   });
 

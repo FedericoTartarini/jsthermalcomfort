@@ -3,7 +3,7 @@ import {
   heat_index,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
-} from "./heat_index.js";
+} from "./heat_index.ts";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
@@ -15,7 +15,7 @@ import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
-import { pmv_ppd } from "./pmv_ppd.js";
+import { pmv_ppd } from "./pmv_ppd.ts";
 import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
 import { adaptive_ashrae } from "./adaptive_ashrae.js";
@@ -36,8 +36,8 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-} from "./pmv_ppd.js";
-import { classifyFromBins } from "./classifierBins.js";
+} from "./pmv_ppd.ts";
+import { classifyFromBins } from "./classifierBins.ts";
 
 /**
  * @public

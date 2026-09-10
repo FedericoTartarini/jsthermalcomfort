@@ -11,12 +11,16 @@
  * (`value <= edge`), `false` for left-inclusive (`value < edge`). The two
  * disagree on values landing exactly on an edge, so this is not incidental.
  *
- * @typedef {object} ClassifierBins
  * @property {ReadonlyArray<number>} edges - Upper bin boundaries, ascending.
  * @property {ReadonlyArray<string>} labels - One label per bin, same length as `edges`.
  * @property {boolean} right - `true` for right-inclusive bins, `false` for left-inclusive.
  * @public
  */
+export interface ClassifierBins {
+  edges: ReadonlyArray<number>;
+  labels: ReadonlyArray<string>;
+  right: boolean;
+}
 
 /**
  * Classifies a value into bins, matching numpy's digitize behavior.
@@ -62,7 +66,10 @@
  *
  * @public
  */
-export function classifyFromBins(value, bins) {
+export function classifyFromBins(
+  value: number,
+  bins: Readonly<ClassifierBins>,
+): string | number {
   // NaN in -> NaN out
   if (Number.isNaN(value)) {
     return NaN;

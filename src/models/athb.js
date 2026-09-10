@@ -1,5 +1,5 @@
 import { round, validateInputs } from "../utilities/utilities.js";
-import { pmv_calculation } from "./pmv_ppd.js";
+import { pmv_calculation } from "./pmv_ppd.ts";
 
 /**
  * @typedef {Object} AthbResult

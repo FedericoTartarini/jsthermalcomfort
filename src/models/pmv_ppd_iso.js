@@ -1,4 +1,4 @@
-import { pmv_ppd } from "./pmv_ppd.js";
+import { pmv_ppd } from "./pmv_ppd.ts";
 import { validateInputs, Standard } from "../utilities/utilities.js";
 
 /**

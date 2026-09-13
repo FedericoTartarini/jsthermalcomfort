@@ -187,4 +187,22 @@ describe("NPM Package", () => {
   it("should have psychrometrics.t_dp", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_dp");
   });
+
+  it("should have psychrometrics.hr_to_rh", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("hr_to_rh");
+  });
+
+  it("should have psychrometrics.rh_from_dew_point", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("rh_from_dew_point");
+  });
+
+  it("should have psychrometrics.rh_from_wet_bulb", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("rh_from_wet_bulb");
+  });
+
+  it("should have psychrometrics.rh_from_vapour_pressure", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty(
+      "rh_from_vapour_pressure",
+    );
+  });
 });

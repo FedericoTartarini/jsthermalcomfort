@@ -9,6 +9,20 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * @public
  */
 
+const PMV_PPD_ISO_SCHEMA = {
+  tdb: { type: "number" },
+  tr: { type: "number" },
+  vr: { type: "number" },
+  rh: { type: "number" },
+  met: { type: "number" },
+  clo: { type: "number" },
+  wme: { type: "number" },
+  units: { enum: ["SI", "IP"], required: false },
+  limit_inputs: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
+  model: { enum: [Standard.iso_7730_2005, Standard.iso_7730_2025] },
+};
+
 /**
  * Calculate PMV and PPD in accordance with ISO 7730.
  *
@@ -46,7 +60,8 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  *
  *    Mirrors the `model` argument on `pythermalcomfort`'s `pmv_ppd_iso`,
  *    including the default.
- * @param {Object} [kwargs={}] - Optional overrides
+ * @param {Omit<import("./pmv_ppd.ts").Pmv_ppdKwargs, "airspeed_control">} [kwargs={}] - Optional overrides.
+ *    `airspeed_control` is omitted: it only applies to the ASHRAE standard.
  * @param {'SI'|'IP'} [kwargs.units='SI'] - Unit system
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
  * @param {boolean}   [kwargs.round_output=true] - Round pmv to 2 decimal places and ppd to 1
@@ -61,20 +76,6 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * @memberof models
  * @docname PMV/PPD (ISO 7730)
  */
-const PMV_PPD_ISO_SCHEMA = {
-  tdb: { type: "number" },
-  tr: { type: "number" },
-  vr: { type: "number" },
-  rh: { type: "number" },
-  met: { type: "number" },
-  clo: { type: "number" },
-  wme: { type: "number" },
-  units: { enum: ["SI", "IP"], required: false },
-  limit_inputs: { type: "boolean", required: false },
-  round_output: { type: "boolean", required: false },
-  model: { enum: [Standard.iso_7730_2005, Standard.iso_7730_2025] },
-};
-
 export function pmv_ppd_iso(
   tdb,
   tr,

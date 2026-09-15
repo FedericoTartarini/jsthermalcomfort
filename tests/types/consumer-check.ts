@@ -28,7 +28,9 @@ import {
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  Standard,
   classifyFromBins,
+  pmv_ppd_iso,
 } from "jsthermalcomfort";
 
 // The published metadata must satisfy the published type.
@@ -74,6 +76,30 @@ PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
 HEAT_INDEX_STRESS_CATEGORY_BINS.labels.push("new label");
 
+// pmv_ppd_iso's JSDoc must be attached to the function itself, not to its
+// schema constant, or every parameter degrades to `any` and `model` degrades
+// to the single literal it happened to default to (issue #196-class defect).
+const pmvIso = pmv_ppd_iso(
+  25,
+  25,
+  0.1,
+  50,
+  1.2,
+  0.5,
+  0,
+  Standard.iso_7730_2005,
+);
+// @ts-expect-error tdb must be a number.
+pmv_ppd_iso("25", 25, 0.1, 50, 1.2, 0.5);
+// @ts-expect-error model must be one of the two ISO 7730 Standard values.
+pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, "not-a-standard");
+// airspeed_control is an ASHRAE-only kwarg; the ISO wrapper must not expose
+// it, since its own JSDoc never documents it.
+pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2005, {
+  // @ts-expect-error airspeed_control does not exist on the ISO kwargs type.
+  airspeed_control: true,
+});
+
 export {
   iso,
   heatIndex,
@@ -86,4 +112,5 @@ export {
   edgeCount,
   notANumber,
   notAKey,
+  pmvIso,
 };

@@ -3,7 +3,7 @@ import { wbgt } from "../../src/models/wbgt";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, validateResult } from "./testUtils"; // Import utility functions
 
-let returnArray = false;
+let returnArray = true;
 
 // use top-level await to load test data before tests are defined.
 let { testData, tolerances } = await loadTestData(
@@ -11,21 +11,27 @@ let { testData, tolerances } = await loadTestData(
   returnArray,
 );
 
-describe("wbgt", () => {
-  test.each(testData.data)("Test case #%#", (testCase) => {
+describe("test_wbgt_with_url_cases", () => {
+  test.each(testData.data)("case %#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
     const { twb, tg, tdb, with_solar_load, round_output } = inputs;
     const modelResult = wbgt(twb, tg, { tdb, with_solar_load, round_output });
 
     validateResult(modelResult, expectedOutput, tolerances, inputs);
   });
+});
 
-  it("should throw an error when with_solar_load is set and tdb is not provided", () => {
-    expect(() => wbgt(0, 0, { with_solar_load: true })).toThrow(
-      "Please enter the dry bulb air temperature",
-    );
-  });
+test("test_wbgt", () => {
+  expect(() => wbgt(25, 32, { with_solar_load: true })).toThrow(
+    "Please enter the dry bulb air temperature",
+  );
+});
 
+test("test_calculate_wbgt_with_twb_and_tg_set_to_none", () => {
+  expect(() => wbgt(null, null)).toThrow(TypeError);
+});
+
+describe("wbgt additional behavior", () => {
   it("round_output:true returns value rounded to 1 decimal place", () => {
     const result = wbgt(17.3, 40, { round_output: true });
     expect(result.wbgt).toBe(24.1);

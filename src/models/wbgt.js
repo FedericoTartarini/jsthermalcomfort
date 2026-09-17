@@ -6,11 +6,45 @@ const optionDefaults = {
   with_solar_load: false,
 };
 
+/** @typedef {number | number[]} NumericInput */
+
 /**
  * @typedef {object} WbgtResult
- * @property {number} wbgt - Wet Bulb Globe Temperature Index, [°C]
+ * @property {NumericInput} wbgt - Wet Bulb Globe Temperature Index, [°C]
  * @public
  */
+
+const WBGT_SCHEMA = {
+  round_output: { type: "boolean", required: false },
+  with_solar_load: { type: "boolean", required: false },
+};
+
+function validateNumericInput(value, name) {
+  const values = Array.isArray(value) ? value : [value];
+  if (
+    values.some((item) => typeof item !== "number" || !Number.isFinite(item))
+  ) {
+    throw new TypeError(
+      `Parameter "${name}" must be a valid finite number or an array of valid finite numbers`,
+    );
+  }
+}
+
+function calculateWbgt(twb, tg, tdb, withSolarLoad) {
+  if (withSolarLoad) {
+    return 0.7 * twb + 0.2 * tg + 0.1 * tdb;
+  }
+  return 0.7 * twb + 0.3 * tg;
+}
+
+function broadcastValue(value, index, outputLength, name) {
+  if (!Array.isArray(value)) return value;
+  if (value.length === outputLength) return value[index];
+  if (value.length === 1) return value[0];
+  throw new RangeError(
+    `Parameter "${name}" has length ${value.length}; input arrays must have compatible lengths`,
+  );
+}
 
 /**
  * Calculates the Wet Bulb Globe Temperature (WBGT) index calculated in
@@ -35,12 +69,12 @@ const optionDefaults = {
  * @memberof models
  * @docname Wet Bulb Globe Temperature Index (WBGT)
  *
- * @param {number} twb - natural (no forced air flow) wet bulb temperature, [°C]
- * @param {number} tg - globe temperature, [°C]
+ * @param {NumericInput} twb - natural (no forced air flow) wet bulb temperature, [°C]
+ * @param {NumericInput} tg - globe temperature, [°C]
  * @param {object} [options] - configuration options for the function.
  * @param {boolean} [options.round_output = true] - If true rounds output value. If
  * false it does not round it.
- * @param {number} [options.tdb = undefined] - Dry bulb air temperature, [°C].
+ * @param {NumericInput} [options.tdb = undefined] - Dry bulb air temperature, [°C].
  * This value is needed as input if the person is exposed to direct solar
  * radiation.
  * @param {boolean} [options.with_solar_load = false] - If the globe sensor is
@@ -54,45 +88,47 @@ const optionDefaults = {
  * console.log(result); // -> {"wbgt": 27.1}
  *
  * @example
- * const result = wbgt(25, 32, { tdb: 20, with_solar_radiation: true });
+ * const result = wbgt(25, 32, { tdb: 20, with_solar_load: true });
  * console.log(result); // -> {"wbgt": 25.9}
  */
-const WBGT_SCHEMA = {
-  twb: { type: "number" },
-  tg: { type: "number" },
-  round_output: { type: "boolean", required: false },
-  tdb: { type: "number", required: false },
-  with_solar_load: { type: "boolean", required: false },
-};
-
 export function wbgt(twb, tg, options) {
   const opt = Object.assign({}, optionDefaults, options);
+  validateNumericInput(twb, "twb");
+  validateNumericInput(tg, "tg");
+  if (opt.tdb !== undefined) validateNumericInput(opt.tdb, "tdb");
   validateInputs(
     {
-      twb,
-      tg,
       round_output: opt.round_output,
-      tdb: opt.tdb,
       with_solar_load: opt.with_solar_load,
     },
     WBGT_SCHEMA,
   );
 
-  let t_wbg;
-
-  if (opt.with_solar_load) {
-    if (opt.tdb === undefined) {
-      throw new Error("Please enter the dry bulb air temperature");
-    }
-
-    t_wbg = 0.7 * twb + 0.2 * tg + 0.1 * opt.tdb;
-  } else {
-    t_wbg = 0.7 * twb + 0.3 * tg;
+  if (opt.with_solar_load && opt.tdb === undefined) {
+    throw new Error("Please enter the dry bulb air temperature");
   }
 
-  if (opt.round_output) {
-    t_wbg = round(t_wbg, 1);
+  const numericInputs = opt.with_solar_load ? [twb, tg, opt.tdb] : [twb, tg];
+  const arrayInputs = numericInputs.filter(Array.isArray);
+
+  if (arrayInputs.length === 0) {
+    let t_wbg = calculateWbgt(twb, tg, opt.tdb, opt.with_solar_load);
+    if (opt.round_output) t_wbg = round(t_wbg, 1);
+    return { wbgt: t_wbg };
   }
+
+  const outputLength = Math.max(...arrayInputs.map((value) => value.length));
+  const t_wbg = Array.from({ length: outputLength }, (_, index) => {
+    const value = calculateWbgt(
+      broadcastValue(twb, index, outputLength, "twb"),
+      broadcastValue(tg, index, outputLength, "tg"),
+      opt.with_solar_load
+        ? broadcastValue(opt.tdb, index, outputLength, "tdb")
+        : undefined,
+      opt.with_solar_load,
+    );
+    return opt.round_output ? round(value, 1) : value;
+  });
 
   return { wbgt: t_wbg };
 }

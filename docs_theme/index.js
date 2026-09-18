@@ -158,7 +158,6 @@ const displayNameMap = {
   f_svv: "Sky Vault View Factor (f_svv)",
   // Clo
   clo_typical_ensembles: "Typical Ensembles (Clo)",
-  clo_typical_ensembles_table: "Typical Ensembles Table (Clo)",
   clo_individual_garments: "Individual Garments (Clo)",
   // Met
   met_typical_tasks: "Typical Tasks (Met)",

@@ -8,7 +8,6 @@ import {
   f_svv,
   valid_range,
   clo_typical_ensembles,
-  clo_typical_ensembles_table,
   met_typical_tasks,
   clo_individual_garments,
   transpose_sharp_altitude,
@@ -326,41 +325,27 @@ describe("valid_range", () => {
 });
 
 describe("clo_typical_ensembles", () => {
-  it.each([
-    { ensembles: "Walking shorts, short-sleeve shirt", expected: 0.36 },
-    { ensembles: "Trousers, long-sleeve shirt", expected: 0.61 },
-    { ensembles: "Sweat pants, long-sleeve sweatshirt", expected: 0.74 },
-    { ensembles: "Typical winter indoor clothing", expected: 1.0 },
-  ])(
-    "returns $expected when ensemble is $ensembles",
-    ({ ensembles, expected }) => {
-      const result = clo_typical_ensembles(ensembles);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
-        DEFAULT_TOLERANCE,
-      );
-    },
-  );
-
-  it("throws an error if the ensemble is not valid", () => {
-    expect(() =>
-      clo_typical_ensembles("Sweet pants, short-sleeve shirt"),
-    ).toThrow();
+  it("is keyed the same way pythermalcomfort keys clo_typical_ensembles", () => {
+    expect(clo_typical_ensembles["Walking shorts, short-sleeve shirt"]).toBe(
+      0.36,
+    );
+    expect(clo_typical_ensembles["Trousers, long-sleeve shirt"]).toBe(0.61);
+    expect(clo_typical_ensembles["Sweat pants, long-sleeve sweatshirt"]).toBe(
+      0.74,
+    );
+    expect(clo_typical_ensembles["Typical winter indoor clothing"]).toBe(1.0);
   });
 
   it("includes the 0.57 ensemble missing from the old type union", () => {
     expect(
-      clo_typical_ensembles(
-        "Trousers, short-sleeve shirt, socks, shoes, underwear",
-      ),
+      clo_typical_ensembles[
+        "Trousers, short-sleeve shirt, socks, shoes, underwear"
+      ],
     ).toBe(0.57);
   });
 
-  it("is backed by clo_typical_ensembles_table", () => {
-    for (const [ensemble, value] of Object.entries(
-      clo_typical_ensembles_table,
-    )) {
-      expect(clo_typical_ensembles(ensemble)).toBe(value);
-    }
+  it("is frozen", () => {
+    expect(Object.isFrozen(clo_typical_ensembles)).toBe(true);
   });
 });
 

@@ -816,14 +816,14 @@ export const met_typical_tasks = Object.freeze({
  * pythermalcomfort keys `clo_typical_ensembles` in `utilities.py`.
  * @public
  * @memberof reference_values
- * @docname Typical ensembles insulation table, [clo]
+ * @docname Typical ensembles insulation, [clo]
  * @constant
  * @example
- * import { clo_typical_ensembles_table } from "jsthermalcomfort/utilities";
- * console.log(clo_typical_ensembles_table["Trousers, long-sleeve shirt"]);
+ * import { clo_typical_ensembles } from "jsthermalcomfort/utilities";
+ * console.log(clo_typical_ensembles["Trousers, long-sleeve shirt"]);
  * // output 0.61
  */
-export const clo_typical_ensembles_table = Object.freeze({
+export const clo_typical_ensembles = Object.freeze({
   "Walking shorts, short-sleeve shirt": 0.36,
   "Typical summer indoor clothing": 0.5,
   "Knee-length skirt, short-sleeve shirt, sandals, underwear": 0.54,
@@ -834,36 +834,6 @@ export const clo_typical_ensembles_table = Object.freeze({
   "Jacket, Trousers, long-sleeve shirt": 0.96,
   "Typical winter indoor clothing": 1.0,
 });
-
-/**
- * Total Clothing insulation of typical ensembles
- * @public
- * @memberof reference_values
- * @docname Typical ensembles insulation, [clo]
- *
- * @param {keyof typeof clo_typical_ensembles_table} ensembles - Typical ensembles. One of:
- *   - "Walking shorts, short-sleeve shirt"
- *   - "Typical summer indoor clothing"
- *   - "Knee-length skirt, short-sleeve shirt, sandals, underwear"
- *   - "Trousers, short-sleeve shirt, socks, shoes, underwear"
- *   - "Trousers, long-sleeve shirt"
- *   - "Knee-length skirt, long-sleeve shirt, full slip"
- *   - "Sweat pants, long-sleeve sweatshirt"
- *   - "Jacket, Trousers, long-sleeve shirt"
- *   - "Typical winter indoor clothing"
- *
- * @returns {number} - Clothing insulation of the given ensembles
- * @example
- * const result = clo_typical_ensembles("Trousers, long-sleeve shirt"); // returns 0.61
- */
-export function clo_typical_ensembles(ensembles) {
-  if (
-    Object.prototype.hasOwnProperty.call(clo_typical_ensembles_table, ensembles)
-  ) {
-    return clo_typical_ensembles_table[ensembles];
-  }
-  throw new Error("No such ensemble");
-}
 
 /**
  * Clo values of individual clothing elements. To calculate the total clothing

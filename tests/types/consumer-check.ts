@@ -30,6 +30,7 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   Standard,
   classifyFromBins,
+  clo_typical_ensembles,
   pmv_ppd_iso,
 } from "jsthermalcomfort";
 
@@ -100,6 +101,16 @@ pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2005, {
   airspeed_control: true,
 });
 
+// clo_typical_ensembles is a table keyed like pythermalcomfort's dict, typed
+// from its entries: a known ensemble reads as a number, an unknown one and a
+// write are type errors, so neither `any` nor a mutable record gets through.
+const winterClo: number =
+  clo_typical_ensembles["Typical winter indoor clothing"];
+// @ts-expect-error "Sweet pants" is not one of the table's keys.
+clo_typical_ensembles["Sweet pants, short-sleeve shirt"];
+// @ts-expect-error the table is frozen, so its type is readonly.
+clo_typical_ensembles["Typical winter indoor clothing"] = 1.1;
+
 export {
   iso,
   heatIndex,
@@ -113,4 +124,5 @@ export {
   notANumber,
   notAKey,
   pmvIso,
+  winterClo,
 };

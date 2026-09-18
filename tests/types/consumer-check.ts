@@ -18,6 +18,7 @@
  */
 
 import type {
+  ApplicabilityWarning,
   Bound,
   ClassifierBins,
   ModelInfo,
@@ -31,6 +32,8 @@ import {
   Standard,
   classifyFromBins,
   clo_typical_ensembles,
+  pmv_ppd,
+  pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "jsthermalcomfort";
 
@@ -109,6 +112,31 @@ pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2005, {
   airspeed_control: true,
 });
 
+// Both wrappers return the applicability rows a call broke (issue #199), typed
+// through to the bound, so a front end can phrase "35 °C is above 30 °C"
+// without casting.
+const isoWarnings: ApplicabilityWarning[] = pmvIso.warnings;
+const isoRowMax: number | undefined = pmvIso.warnings[0].bound.max;
+const ashraeRowMax: number | undefined = pmv_ppd_ashrae(
+  45,
+  25,
+  0.1,
+  50,
+  1.2,
+  0.5,
+).warnings[0].bound.max;
+// @ts-expect-error role is one of three literals, not any string.
+const notARole: ApplicabilityWarning["role"] = "somewhere";
+// @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
+pmvIso.warnings[0].bound.max = 50;
+
+// pmv_ppd implements ISO 7730 and ASHRAE 55 only. Standard also lists ISO
+// 7933, which PMV does not implement, so the type must refuse it rather than
+// leave it to the runtime check.
+pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.ashrae_55_2023);
+// @ts-expect-error ISO 7933 is not a standard pmv_ppd implements.
+pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7933_2004);
+
 // clo_typical_ensembles is a table keyed like pythermalcomfort's dict, typed
 // from its entries: a known ensemble reads as a number, an unknown one and a
 // write are type errors, so neither `any` nor a mutable record gets through.
@@ -134,5 +162,9 @@ export {
   notANumber,
   notAKey,
   pmvIso,
+  isoWarnings,
+  isoRowMax,
+  ashraeRowMax,
+  notARole,
   winterClo,
 };

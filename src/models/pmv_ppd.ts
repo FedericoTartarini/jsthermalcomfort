@@ -1,9 +1,9 @@
 import {
-  check_standard_compliance,
   round,
   units_converter,
-  valid_range,
   validateInputs,
+  ASHRAE_55_LIMITS,
+  _ashrae_airspeed_bounds_broken,
   ISO_7730_LIMITS,
   is_iso_7730,
   Standard,
@@ -11,7 +11,12 @@ import {
 import { cooling_effect } from "./cooling_effect.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { ClassifierBins, ModelInfo, StandardId } from "./modelDocs.ts";
+import type {
+  ApplicabilityWarning,
+  Bound,
+  ClassifierBins,
+  ModelInfo,
+} from "./modelDocs.ts";
 
 /**
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
@@ -44,12 +49,14 @@ export interface Pmv_ppdKwargs {
  * @property { number } pmv - Predicted Mean Vote
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the unrounded pmv.
+ * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export interface Pmv_ppdReturns {
   pmv: number;
   ppd: number;
   tsv: string | number;
+  readonly warnings: ApplicabilityWarning[];
 }
 
 /**
@@ -122,6 +129,21 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
     pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa },
   },
 });
+
+/**
+ * The standards PMV implements: pythermalcomfort's pmv_ppd_iso and
+ * pmv_ppd_ashrae accept only these. Both the `standard` parameter's type and
+ * the runtime schema come from this list, so any other Standard (ISO 7933, say)
+ * is refused rather than checked against ASHRAE 55's bounds by default.
+ */
+const PMV_STANDARDS = [
+  Standard.iso_7730_2005,
+  Standard.iso_7730_2025,
+  Standard.ashrae_55_2023,
+] as const;
+
+/** One of the standards `pmv_ppd` implements. */
+export type PmvStandard = (typeof PMV_STANDARDS)[number];
 
 /**
  * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and
@@ -206,7 +228,7 @@ const PMV_PPD_SCHEMA = {
   met: { type: "number" },
   clo: { type: "number" },
   wme: { type: "number" },
-  standard: { enum: [...Object.values(Standard)] },
+  standard: { enum: PMV_STANDARDS },
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
@@ -236,7 +258,7 @@ export function pmv_ppd(
   met: number,
   clo: number,
   wme = 0,
-  standard: StandardId = Standard.iso_7730_2025,
+  standard: PmvStandard = Standard.iso_7730_2025,
   kwargs: Pmv_ppdKwargs = {},
 ): Pmv_ppdReturns {
   const default_kwargs = {
@@ -274,14 +296,40 @@ export function pmv_ppd(
   // it here makes the independence explicit.
   const pa = partial_vapour_pressure(tdb, rh);
 
-  const compliance_warnings = check_standard_compliance(standard, {
-    tdb,
-    tr,
-    v: vr,
-    met,
-    clo,
-    airspeed_control: kwargs.airspeed_control,
-  });
+  // The rows a call broke (#199), built on every call whatever limit_inputs
+  // is. Apart from a PMV the calculation itself failed to produce, they are
+  // all the limit_inputs gate below reads, so a NaN and its explanation cannot
+  // disagree. The checks and bounds are
+  // pythermalcomfort's; unlike its warnings, the rows are also filled with
+  // limit_inputs off, so a caller that shows out-of-range numbers can say why.
+  // Inputs are taken here, before the ASHRAE cooling effect shifts them.
+  const iso = is_iso_7730(standard);
+  const input_limits = iso ? ISO_7730_LIMITS : ASHRAE_55_LIMITS;
+  const warnings: ApplicabilityWarning[] = [];
+  const check = (
+    key: string,
+    role: ApplicabilityWarning["role"],
+    value: number,
+    bound: Required<Bound>,
+  ) => {
+    // A NaN value is not outside the bound, so it adds no row.
+    if (value < bound.min || value > bound.max) {
+      warnings.push({ key, role, value, bound });
+    }
+  };
+  for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
+    check(key, "input", value, input_limits[key]);
+  }
+  // ASHRAE 55's airspeed limits when the occupant cannot control the airspeed
+  // are upper bounds only, and the operative-temperature one moves with the
+  // call, so they arrive as bounds already broken rather than through check().
+  if (!iso && kwargs.airspeed_control === false) {
+    for (const bound of _ashrae_airspeed_bounds_broken(tdb, tr, vr, met, clo)) {
+      warnings.push({ key: "vr", role: "input", value: vr, bound });
+    }
+  }
+  if (iso) check("pa", "derived", pa, ISO_7730_LIMITS.pa);
+
   let ce = 0;
   if (standard === Standard.ashrae_55_2023) {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
@@ -305,37 +353,13 @@ export function pmv_ppd(
     : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
   let tsv = classifyFromBins(pmv, bins);
 
+  if (iso) check("pmv", "output", pmv, ISO_7730_LIMITS.pmv);
+
   // Checks that inputs are within the bounds accepted by the model if not return NaN
-  if (kwargs.limit_inputs) {
-    // ISO 7730 limits PMV applicability to [-2, 2]; ASHRAE 55 has no equivalent output bound
-    const pmv_outside_iso_range =
-      is_iso_7730(standard) &&
-      valid_range(
-        [pmv],
-        [ISO_7730_LIMITS.pmv.min, ISO_7730_LIMITS.pmv.max],
-      ).includes(NaN);
-
-    // ISO 7730 Clause 4 also limits partial water vapour pressure. It is
-    // derived from tdb and rh, not supplied, so it cannot go through
-    // check_standard_compliance. ASHRAE 55 has no equivalent bound, and
-    // pythermalcomfort's pmv_ppd_ashrae does not apply one either.
-    const pa_outside_iso_range =
-      is_iso_7730(standard) &&
-      valid_range(
-        [pa],
-        [ISO_7730_LIMITS.pa.min, ISO_7730_LIMITS.pa.max],
-      ).includes(NaN);
-
-    if (
-      isNaN(pmv) ||
-      compliance_warnings.length > 0 ||
-      pmv_outside_iso_range ||
-      pa_outside_iso_range
-    ) {
-      pmv = NaN;
-      ppd = NaN;
-      tsv = NaN;
-    }
+  if (kwargs.limit_inputs && (isNaN(pmv) || warnings.length > 0)) {
+    pmv = NaN;
+    ppd = NaN;
+    tsv = NaN;
   }
 
   if (kwargs.round_output) {
@@ -343,9 +367,10 @@ export function pmv_ppd(
       pmv: round(pmv, 2),
       ppd: round(ppd, 1),
       tsv,
+      warnings,
     };
   }
-  return { pmv, ppd, tsv };
+  return { pmv, ppd, tsv, warnings };
 }
 
 /**

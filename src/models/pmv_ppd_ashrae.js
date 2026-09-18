@@ -6,6 +6,7 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * @property {number} pmv - Predicted Mean Vote on the ASHRAE 55 scale [-3, +3]
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses right-inclusive bins (pythermalcomfort#382).
+ * @property {import("./modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 

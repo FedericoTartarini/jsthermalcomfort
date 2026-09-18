@@ -155,6 +155,70 @@ export const ISO_7730_LIMITS = Object.freeze({
 });
 
 /**
+ * ASHRAE 55 compliance limits for the PMV inputs, the numbers
+ * `_ashrae_compliance` enforces. Each variable has `min` and `max` inclusive
+ * bounds. Read by `pmv_ppd`'s `warnings` rows; `_ashrae_compliance` keeps its
+ * own literals so `check_standard_compliance` stays as it was. ASHRAE 55 bounds neither vapour pressure nor the PMV output,
+ * so unlike `ISO_7730_LIMITS` there is no `pa` or `pmv` entry.
+ *
+ * @type {Readonly<Record<string, Readonly<{ min: number, max: number }>>>}
+ * @public
+ */
+export const ASHRAE_55_LIMITS = Object.freeze({
+  tdb: Object.freeze({ min: 10, max: 40 }),
+  tr: Object.freeze({ min: 10, max: 40 }),
+  vr: Object.freeze({ min: 0, max: 2 }),
+  met: Object.freeze({ min: 1, max: 4 }),
+  clo: Object.freeze({ min: 0, max: 1.5 }),
+});
+
+/**
+ * The fixed airspeed bounds `_ashrae_airspeed_bounds_broken` applies: `any`
+ * at every operative temperature, `cool` when to <= 23 °C.
+ */
+const ASHRAE_55_AIRSPEED_NO_CONTROL = Object.freeze({
+  any: Object.freeze({ max: 0.8 }),
+  cool: Object.freeze({ max: 0.2 }),
+});
+
+/**
+ * ASHRAE 55's airspeed limits when the occupant cannot control the airspeed
+ * and wears little (clo < 0.7) while barely active (met < 1.3), from
+ * pythermalcomfort's `_check_ashrae55_compliance`:
+ *
+ * - v above 0.8 m/s, at any operative temperature;
+ * - v above 50.49 - 4.4047 to + 0.096425 to² when 23 < to < 25.5 °C;
+ * - v above 0.2 m/s when to <= 23 °C.
+ *
+ * Returns the bound of each rule v breaks, in that order, for `pmv_ppd`'s
+ * `warnings` rows, which its `limit_inputs` gate also reads.
+ * `_ashrae_compliance` applies the same three rules inline for its string, so a
+ * change to one belongs in both. The two fixed bounds are shared frozen objects; the operative-temperature one
+ * depends on the call, so it is built and frozen per call.
+ *
+ * @param {number} tdb - dry bulb air temperature, [°C]
+ * @param {number} tr - mean radiant temperature, [°C]
+ * @param {number} v - air speed, [m/s]
+ * @param {number} met - metabolic rate, [met]
+ * @param {number} clo - clothing insulation, [clo]
+ * @returns {Readonly<{ max: number }>[]} the bounds broken; empty when none
+ */
+export function _ashrae_airspeed_bounds_broken(tdb, tr, v, met, clo) {
+  if (!(clo < 0.7 && met < 1.3)) return [];
+  const to = t_o(tdb, tr, v);
+  const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
+  /** @type {Readonly<{ max: number }>[]} */
+  const broken = [];
+  if (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max)
+    broken.push(ASHRAE_55_AIRSPEED_NO_CONTROL.any);
+  if (to > 23 && to < 25.5 && v > v_limit)
+    broken.push(Object.freeze({ max: v_limit }));
+  if (to <= 23 && v > ASHRAE_55_AIRSPEED_NO_CONTROL.cool.max)
+    broken.push(ASHRAE_55_AIRSPEED_NO_CONTROL.cool);
+  return broken;
+}
+
+/**
  * True when `standard` is one of the ISO 7730 editions.
  *
  * The two editions specify identical equations and limits, so almost every

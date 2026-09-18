@@ -540,9 +540,25 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
         limit_inputs: false,
       },
     );
-    const resultKeys = Object.keys(result).sort();
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
     const infoKeys = Object.keys(PMV_PPD_ISO_INFO.outputs).sort();
     expect(resultKeys).toEqual(infoKeys);
+  });
+
+  test("pmv_ppd_iso's warnings rows carry the bounds INFO references", () => {
+    const { warnings } = pmv_ppd_iso(35, 45, 0.1, 30, 1.0, 0.5, 0);
+    const expected = [
+      PMV_PPD_ISO_INFO.inputs.tdb.applicability,
+      PMV_PPD_ISO_INFO.inputs.tr.applicability,
+      PMV_PPD_ISO_INFO.outputs.pmv.applicability,
+    ];
+    expect(warnings).toHaveLength(expected.length);
+    // Identity, not equality: the rows reference INFO's frozen bounds.
+    warnings.forEach((w, i) => expect(w.bound).toBe(expected[i]));
   });
 
   test("pmv_ppd_iso always returns pmv, ppd, and tsv", () => {

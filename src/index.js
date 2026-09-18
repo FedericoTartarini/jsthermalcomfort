@@ -7,6 +7,9 @@ export * from "./models/index.js";
  * @typedef {import("./models/modelDocs.js").Bound} Bound
  */
 /**
+ * @typedef {import("./models/modelDocs.js").ApplicabilityWarning} ApplicabilityWarning
+ */
+/**
  * @typedef {import("./models/modelDocs.js").VariableInfo} VariableInfo
  */
 /**

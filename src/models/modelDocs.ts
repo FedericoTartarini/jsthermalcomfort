@@ -27,6 +27,35 @@ export interface Bound {
   readonly max?: number;
 }
 
+/**
+ * One applicability bound a call broke.
+ *
+ * `key` names the quantity, `value` is what the call had for it (SI, and for a
+ * `derived` or `output` row the unrounded value the gate compared), and `bound`
+ * is the range it fell outside. `bound` is frozen. For a fixed limit it is the
+ * shared object the model's `*_INFO` metadata references, not a copy; for a
+ * limit that depends on the call, such as ASHRAE 55's airspeed limit between
+ * 23 and 25.5 °C operative temperature when the occupant cannot control the
+ * airspeed, it is built for that call. One quantity can break more than one
+ * limit, so `key` can repeat.
+ *
+ * `role` says where the quantity comes from: `input` for one the caller
+ * supplied, `derived` for one computed from the inputs (vapour pressure in
+ * `pmv_ppd_iso`), `output` for a result the standard gates (the PMV band in
+ * `pmv_ppd_iso`).
+ *
+ * Reported whatever `limit_inputs` is: with it on these are the reasons the
+ * result is NaN, with it off they are what the numbers were computed despite.
+ *
+ * @public
+ */
+export interface ApplicabilityWarning {
+  readonly key: string;
+  readonly role: "input" | "derived" | "output";
+  readonly value: number;
+  readonly bound: Bound;
+}
+
 export type { ClassifierBins };
 
 /**

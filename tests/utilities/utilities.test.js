@@ -8,6 +8,8 @@ import {
   f_svv,
   valid_range,
   clo_typical_ensembles,
+  met_typical_tasks,
+  clo_individual_garments,
   transpose_sharp_altitude,
   assertNumber,
   validateInputs,
@@ -323,25 +325,51 @@ describe("valid_range", () => {
 });
 
 describe("clo_typical_ensembles", () => {
-  it.each([
-    { ensembles: "Walking shorts, short-sleeve shirt", expected: 0.36 },
-    { ensembles: "Trousers, long-sleeve shirt", expected: 0.61 },
-    { ensembles: "Sweat pants, long-sleeve sweatshirt", expected: 0.74 },
-    { ensembles: "Typical winter indoor clothing", expected: 1.0 },
-  ])(
-    "returns $expected when ensemble is $ensembles",
-    ({ ensembles, expected }) => {
-      const result = clo_typical_ensembles(ensembles);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
-        DEFAULT_TOLERANCE,
-      );
-    },
-  );
+  it("is keyed the same way pythermalcomfort keys clo_typical_ensembles", () => {
+    expect(clo_typical_ensembles["Walking shorts, short-sleeve shirt"]).toBe(
+      0.36,
+    );
+    expect(clo_typical_ensembles["Trousers, long-sleeve shirt"]).toBe(0.61);
+    expect(clo_typical_ensembles["Sweat pants, long-sleeve sweatshirt"]).toBe(
+      0.74,
+    );
+    expect(clo_typical_ensembles["Typical winter indoor clothing"]).toBe(1.0);
+  });
 
-  it("throws an error if the ensemble is not valid", () => {
-    expect(() =>
-      clo_typical_ensembles("Sweet pants, short-sleeve shirt"),
-    ).toThrow();
+  it("includes the 0.57 ensemble missing from the old type union", () => {
+    expect(
+      clo_typical_ensembles[
+        "Trousers, short-sleeve shirt, socks, shoes, underwear"
+      ],
+    ).toBe(0.57);
+  });
+
+  it("is frozen", () => {
+    expect(Object.isFrozen(clo_typical_ensembles)).toBe(true);
+  });
+});
+
+describe("met_typical_tasks", () => {
+  it("is keyed the same way pythermalcomfort keys met_typical_tasks", () => {
+    expect(met_typical_tasks["Seated, quiet"]).toBe(1.0);
+    expect(met_typical_tasks["Walking 2mph (3.2kmh)"]).toBe(2.0);
+    expect(met_typical_tasks["Wrestling"]).toBe(7.8);
+  });
+
+  it("is frozen", () => {
+    expect(Object.isFrozen(met_typical_tasks)).toBe(true);
+  });
+});
+
+describe("clo_individual_garments", () => {
+  it("is keyed the same way pythermalcomfort keys clo_individual_garments", () => {
+    expect(clo_individual_garments["Metal chair"]).toBe(0.0);
+    expect(clo_individual_garments["Women's underwear"]).toBe(0.03);
+    expect(clo_individual_garments["Double-breasted coat (thick)"]).toBe(0.48);
+  });
+
+  it("is frozen", () => {
+    expect(Object.isFrozen(clo_individual_garments)).toBe(true);
   });
 });
 

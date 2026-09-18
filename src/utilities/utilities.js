@@ -765,258 +765,148 @@ export function valid_range(range, [min, max]) {
 }
 
 /**
- * Met values of typical tasks.
+ * Met values of typical tasks. Keyed the same way pythermalcomfort keys
+ * `met_typical_tasks` in `utilities.py`.
  * @public
  * @memberof reference_values
  * @docname Met typical tasks, [met]
  * @constant
- * @type {Object}
- * @property {number} Sleeping - 0.7
- * @property {number} Reclining - 0.8
- * @property {number} Seated_Cquiet - 1.0
- * @property {number} Reading_seated - 1.0
- * @property {number} Writing - 1.0
- * @property {number} Reading_seatedTyping - 1.1
- * @property {number} Standing_relaxed - 1.2
- * @property {number} Filing_seated - 1.2
- * @property {number} Flying_aircraft_routine - 1.2
- * @property {number} Filing_standing - 1.4
- * @property {number} Driving_a_car - 1.5
- * @property {number} Walking_about - 1.7
- * @property {number} Cooking - 1.8
- * @property {number} Table_sawing - 1.8
- * @property {number} Walking_2mph_3_2kmh - 2.0
- * @property {number} Lifting_packing - 2.1
- * @property {number} Seated_heavy_limb_movement - 2.2
- * @property {number} Light_machine_work - 2.2
- * @property {number} Flying_aircraft_combat - 2.4
- * @property {number} Walking_3mph_4_8kmh - 2.6
- * @property {number} House_cleaning - 2.7
- * @property {number} Driving_heavy_vehicle - 3.2
- * @property {number} Dancing - 3.4
- * @property {number} Calisthenics - 3.5
- * @property {number} Walking_4mph_6_4kmh - 3.8
- * @property {number} Tennis - 3.8
- * @property {number} Heavy_machine_work - 4.0
- * @property {number} Handling_100lb_45_kg_bags - 4.0
- * @property {number} Pick_and_shovel_work - 4.4
- * @property {number} Basketball - 6.3
- * @property {number} Wrestling - 7.8
+ * @type {Readonly<Record<string, number>>}
  * @example
  * import { met_typical_tasks } from "jsthermalcomfort/utilities"; //The path to utilities
- * console.log(met_typical_tasks['Seated_Cquiet']);
+ * console.log(met_typical_tasks["Seated, quiet"]);
  * // output 1.0
  */
-export const met_typical_tasks = {
+export const met_typical_tasks = Object.freeze({
   Sleeping: 0.7,
   Reclining: 0.8,
-  Seated_Cquiet: 1.0,
-  Reading_seated: 1.0,
+  "Seated, quiet": 1.0,
+  "Reading, seated": 1.0,
   Writing: 1.0,
   Typing: 1.1,
-  Standing_relaxed: 1.2,
-  Filing_seated: 1.2,
-  Flying_aircraft_routine: 1.2,
-  Filing_standing: 1.4,
-  Driving_a_car: 1.5,
-  Walking_about: 1.7,
+  "Standing, relaxed": 1.2,
+  "Filing, seated": 1.2,
+  "Flying aircraft, routine": 1.2,
+  "Filing, standing": 1.4,
+  "Driving a car": 1.5,
+  "Walking about": 1.7,
   Cooking: 1.8,
-  Table_sawing: 1.8,
-  Walking_2mph_3_2kmh: 2.0,
-  Lifting_packing: 2.1,
-  Seated_heavy_limb_movement: 2.2,
-  Light_machine_work: 2.2,
-  Flying_aircraft_combat: 2.4,
-  Walking_3mph_4_8kmh: 2.6,
-  House_cleaning: 2.7,
-  Driving_heavy_vehicle: 3.2,
+  "Table sawing": 1.8,
+  "Walking 2mph (3.2kmh)": 2.0,
+  "Lifting/packing": 2.1,
+  "Seated, heavy limb movement": 2.2,
+  "Light machine work": 2.2,
+  "Flying aircraft, combat": 2.4,
+  "Walking 3mph (4.8kmh)": 2.6,
+  "House cleaning": 2.7,
+  "Driving, heavy vehicle": 3.2,
   Dancing: 3.4,
   Calisthenics: 3.5,
-  Walking_4mph_6_4kmh: 3.8,
+  "Walking 4mph (6.4kmh)": 3.8,
   Tennis: 3.8,
-  Heavy_machine_work: 4.0,
-  Handling_100lb_45_kg_bags: 4.0,
-  Pick_and_shovel_work: 4.4,
+  "Heavy machine work": 4.0,
+  "Handling 100lb (45 kg) bags": 4.0,
+  "Pick and shovel work": 4.4,
   Basketball: 6.3,
   Wrestling: 7.8,
-};
+});
 
 /**
- * Total Clothing insulation of typical ensembles
+ * Total clothing insulation of typical ensembles, keyed the same way
+ * pythermalcomfort keys `clo_typical_ensembles` in `utilities.py`.
  * @public
  * @memberof reference_values
  * @docname Typical ensembles insulation, [clo]
- *
- * @param {"Walking shorts, short-sleeve shirt" | "Typical summer indoor clothing" |
- * "Knee-length skirt, short-sleeve shirt, sandals, underwear" | "Trousers, long-sleeve shirt" |
- * "Knee-length skirt, long-sleeve shirt, full slip" | "Sweat pants, long-sleeve sweatshirt" |
- * "Jacket, Trousers, long-sleeve shirt" | "Typical winter indoor clothing"} ensembles - Typical ensembles. One of:
- *   - "Walking shorts, short-sleeve shirt"
- *   - "Typical summer indoor clothing"
- *   - "Knee-length skirt, short-sleeve shirt, sandals, underwear"
- *   - "Trousers, short-sleeve shirt, socks, shoes, underwear"
- *   - "Trousers, long-sleeve shirt"
- *   - "Knee-length skirt, long-sleeve shirt, full slip"
- *   - "Sweat pants, long-sleeve sweatshirt"
- *   - "Jacket, Trousers, long-sleeve shirt"
- *   - "Typical winter indoor clothing"
- *
- * @returns {number} - Clothing insulation of the given ensembles
+ * @constant
  * @example
- * const result = clo_typical_ensembles("Trousers, long-sleeve shirt"); // returns 0.61
+ * import { clo_typical_ensembles } from "jsthermalcomfort/utilities";
+ * console.log(clo_typical_ensembles["Trousers, long-sleeve shirt"]);
+ * // output 0.61
  */
-
-export function clo_typical_ensembles(ensembles) {
-  switch (ensembles) {
-    case "Walking shorts, short-sleeve shirt":
-      return 0.36;
-    case "Typical summer indoor clothing":
-      return 0.5;
-    case "Knee-length skirt, short-sleeve shirt, sandals, underwear":
-      return 0.54;
-    case "Trousers, short-sleeve shirt, socks, shoes, underwear":
-      return 0.57;
-    case "Trousers, long-sleeve shirt":
-      return 0.61;
-    case "Knee-length skirt, long-sleeve shirt, full slip":
-      return 0.67;
-    case "Sweat pants, long-sleeve sweatshirt":
-      return 0.74;
-    case "Jacket, Trousers, long-sleeve shirt":
-      return 0.96;
-    case "Typical winter indoor clothing":
-      return 1.0;
-    default:
-      throw new Error("No such ensemble");
-  }
-}
+export const clo_typical_ensembles = Object.freeze({
+  "Walking shorts, short-sleeve shirt": 0.36,
+  "Typical summer indoor clothing": 0.5,
+  "Knee-length skirt, short-sleeve shirt, sandals, underwear": 0.54,
+  "Trousers, short-sleeve shirt, socks, shoes, underwear": 0.57,
+  "Trousers, long-sleeve shirt": 0.61,
+  "Knee-length skirt, long-sleeve shirt, full slip": 0.67,
+  "Sweat pants, long-sleeve sweatshirt": 0.74,
+  "Jacket, Trousers, long-sleeve shirt": 0.96,
+  "Typical winter indoor clothing": 1.0,
+});
 
 /**
- * Clo values of individual clothing elements. To calculate the total clothing insulation you need to add these values together.
+ * Clo values of individual clothing elements. To calculate the total clothing
+ * insulation you need to add these values together. Keyed the same way
+ * pythermalcomfort keys `clo_individual_garments` in `utilities.py`.
  * @public
  * @memberof reference_values
  * @docname Insulation of individual garments, [clo]
  * @constant
- * @type {Object}
- * @property {number} Metal_chair - 0.0
- * @property {number} Bra - 0.01
- * @property {number} Wooden_stool - 0.01
- * @property {number} Ankle_socks - 0.02
- * @property {number} Shoes_or_sandals - 0.02
- * @property {number} Slippers - 0.03
- * @property {number} Panty_hose - 0.02
- * @property {number} Calf_length_socks - 0.03
- * @property {number} Women_underwear - 0.03
- * @property {number} Men_underwear - 0.04
- * @property {number} Knee_socks_thick - 0.06
- * @property {number} Short_shorts - 0.06
- * @property {number} Walking_shorts: 0.08,
- * @property {number} T_shirt - 0.08
- * @property {number} Standard_office_chair - 0.1
- * @property {number} Executive_chair - 0.15
- * @property {number} Boots - 0.1
- * @property {number} Sleeveless_scoop_neck_blouse - 0.12
- * @property {number} Half_slip - 0.14
- * @property {number} Long_underwear_bottoms - 0.15
- * @property {number} Full_slip - 0.16
- * @property {number} Short_sleeve_knit_shirt - 0.17
- * @property {number} Sleeveless_vest_thin - 0.1
- * @property {number} Sleeveless_vest_thick - 0.17
- * @property {number} Sleeveless_short_gown_thin - 0.18
- * @property {number} Short_sleeve_dress_shirt - 0.19
- * @property {number} Sleeveless_long_gown_thin - 0.2
- * @property {number} Long_underwear_top - 0.2
- * @property {number} Thick_skirt - 0.23
- * @property {number} Long_sleeve_dress_shirt - 0.25
- * @property {number} Long_sleeve_flannel_shirt - 0.34
- * @property {number} Long_sleeve_sweat_shirt - 0.34
- * @property {number} Short_sleeve_hospital_gown - 0.31
- * @property {number} Short_sleeve_short_robe_thin - 0.34
- * @property {number} Short_sleeve_pajamas - 0.42
- * @property {number} Long_sleeve_long_gown - 0.46
- * @property {number} Long_sleeve_short_wrap_robe_thick - 0.48
- * @property {number} Long_sleeve_pajamas_thick - 0.57
- * @property {number} Long_sleeve_long_wrap_robe_thick - 0.69
- * @property {number} Thin_trousers - 0.15
- * @property {number} Thick_trousers - 0.24
- * @property {number} Sweatpants - 0.28
- * @property {number} Overalls - 0.3
- * @property {number} Coveralls - 0.49
- * @property {number} Thin_skirt - 0.14
- * @property {number} Long_sleeve_shirt_dress_thin - 0.33
- * @property {number} Long_sleeve_shirt_dress_thick - 0.47
- * @property {number} Short_sleeve_shirt_dress - 0.29
- * @property {number} Sleeveless_scoop_neck_shirt_thin - 0.23
- * @property {number} Sleeveless_scoop_neck_shirt_thick - 0.27
- * @property {number} Long_sleeve_shirt_thin - 0.25
- * @property {number} Long_sleeve_shirt_thick - 0.36
- * @property {number} Single_breasted_coat_thin - 0.36
- * @property {number} Single_breasted_coat_thick - 0.44
- * @property {number} Double_breasted_coat_thin - 0.42
- * @property {number} Double_breasted_coat_thick - 0.48
+ * @type {Readonly<Record<string, number>>}
  * @example
  * import { clo_individual_garments } from "jsthermalcomfort/utilities"; //The path to utilities
- * console.log(clo_individual_garments['Metal_chair']);
+ * console.log(clo_individual_garments["Metal chair"]);
  * // output 0.0
  */
-export const clo_individual_garments = {
-  Metal_chair: 0.0,
+export const clo_individual_garments = Object.freeze({
+  "Metal chair": 0.0,
   Bra: 0.01,
-  Wooden_stool: 0.01,
-  Ankle_socks: 0.02,
-  Shoes_or_sandals: 0.02,
+  "Wooden stool": 0.01,
+  "Ankle socks": 0.02,
+  "Shoes or sandals": 0.02,
   Slippers: 0.03,
-  Panty_hose: 0.02,
-  Calf_length_socks: 0.03,
-  Women_underwear: 0.03,
-  Men_underwear: 0.04,
-  Knee_socks_thick: 0.06,
-  Short_shorts: 0.06,
-  Walking_shorts: 0.08,
-  T_shirt: 0.08,
-  Standard_office_chair: 0.1,
-  Executive_chair: 0.15,
+  "Panty hose": 0.02,
+  "Calf length socks": 0.03,
+  "Women's underwear": 0.03,
+  "Men's underwear": 0.04,
+  "Knee socks (thick)": 0.06,
+  "Short shorts": 0.06,
+  "Walking shorts": 0.08,
+  "T-shirt": 0.08,
+  "Standard office chair": 0.1,
+  "Executive chair": 0.15,
   Boots: 0.1,
-  Sleeveless_scoop_neck_blouse: 0.12,
-  Half_slip: 0.14,
-  Long_underwear_bottoms: 0.15,
-  Full_slip: 0.16,
-  Short_sleeve_knit_shirt: 0.17,
-  Sleeveless_vest_thin: 0.1,
-  Sleeveless_vest_thick: 0.17,
-  Sleeveless_short_gown_thin: 0.18,
-  Short_sleeve_dress_shirt: 0.19,
-  Sleeveless_long_gown_thin: 0.2,
-  Long_underwear_top: 0.2,
-  Thick_skirt: 0.23,
-  Long_sleeve_dress_shirt: 0.25,
-  Long_sleeve_flannel_shirt: 0.34,
-  Long_sleeve_sweat_shirt: 0.34,
-  Short_sleeve_hospital_gown: 0.31,
-  Short_sleeve_short_robe_thin: 0.34,
-  Short_sleeve_pajamas: 0.42,
-  Long_sleeve_long_gown: 0.46,
-  Long_sleeve_short_wrap_robe_thick: 0.48,
-  Long_sleeve_pajamas_thick: 0.57,
-  Long_sleeve_long_wrap_robe_thick: 0.69,
-  Thin_trousers: 0.15,
-  Thick_trousers: 0.24,
+  "Sleeveless scoop-neck blouse": 0.12,
+  "Half slip": 0.14,
+  "Long underwear bottoms": 0.15,
+  "Full slip": 0.16,
+  "Short-sleeve knit shirt": 0.17,
+  "Sleeveless vest (thin)": 0.1,
+  "Sleeveless vest (thick)": 0.17,
+  "Sleeveless short gown (thin)": 0.18,
+  "Short-sleeve dress shirt": 0.19,
+  "Sleeveless long gown (thin)": 0.2,
+  "Long underwear top": 0.2,
+  "Thick skirt": 0.23,
+  "Long-sleeve dress shirt": 0.25,
+  "Long-sleeve flannel shirt": 0.34,
+  "Long-sleeve sweat shirt": 0.34,
+  "Short-sleeve hospital gown": 0.31,
+  "Short-sleeve short robe (thin)": 0.34,
+  "Short-sleeve pajamas": 0.42,
+  "Long-sleeve long gown": 0.46,
+  "Long-sleeve short wrap robe (thick)": 0.48,
+  "Long-sleeve pajamas (thick)": 0.57,
+  "Long-sleeve long wrap robe (thick)": 0.69,
+  "Thin trousers": 0.15,
+  "Thick trousers": 0.24,
   Sweatpants: 0.28,
   Overalls: 0.3,
   Coveralls: 0.49,
-  Thin_skirt: 0.14,
-  Long_sleeve_shirt_dress_thin: 0.33,
-  Long_sleeve_shirt_dress_thick: 0.47,
-  Short_sleeve_shirt_dress: 0.29,
-  Sleeveless_scoop_neck_shirt_thin: 0.23,
-  Sleeveless_scoop_neck_shirt_thick: 0.27,
-  Long_sleeve_shirt_thin: 0.25,
-  Long_sleeve_shirt_thick: 0.36,
-  Single_breasted_coat_thin: 0.36,
-  Single_breasted_coat_thick: 0.44,
-  Double_breasted_coat_thin: 0.42,
-  Double_breasted_coat_thick: 0.48,
-};
+  "Thin skirt": 0.14,
+  "Long-sleeve shirt dress (thin)": 0.33,
+  "Long-sleeve shirt dress (thick)": 0.47,
+  "Short-sleeve shirt dress": 0.29,
+  "Sleeveless, scoop-neck shirt (thin)": 0.23,
+  "Sleeveless, scoop-neck shirt (thick)": 0.27,
+  "Long sleeve shirt (thin)": 0.25,
+  "Long sleeve shirt (thick)": 0.36,
+  "Single-breasted coat (thin)": 0.36,
+  "Single-breasted coat (thick)": 0.44,
+  "Double-breasted coat (thin)": 0.42,
+  "Double-breasted coat (thick)": 0.48,
+});
 
 /**
  * Asserts that a value is a valid number (not NaN).

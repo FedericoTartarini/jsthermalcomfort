@@ -43,6 +43,12 @@ const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
 const ppd: VariableInfo = iso.outputs.ppd;
 
+// Which standard a model is for, as data (issue #184): a list of Standard
+// values, empty for a model with no standard.
+const isoStandards: readonly (typeof Standard)[keyof typeof Standard][] =
+  iso.standards;
+const heatIndexStandards: readonly string[] = heatIndex.standards;
+
 // Bins are exported directly as well as through the metadata (issue #184 §3.4).
 const label = classifyFromBins(28.5, HEAT_INDEX_STRESS_CATEGORY_BINS);
 const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
@@ -72,6 +78,8 @@ PMV_PPD_ISO_INFO.inputs.tdb.applicability!.min = 5;
 PMV_PPD_ISO_INFO.inputs.tdb = { unit: "°C" };
 // @ts-expect-error the metadata object itself is readonly.
 PMV_PPD_ISO_INFO.label = "something else";
+// @ts-expect-error push mutates, and the standards array is readonly.
+PMV_PPD_ISO_INFO.standards.push(Standard.ashrae_55_2023);
 // @ts-expect-error classifier bin edges are a readonly array.
 PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
@@ -115,6 +123,8 @@ export {
   iso,
   heatIndex,
   minTdb,
+  isoStandards,
+  heatIndexStandards,
   ppd,
   label,
   tsvLabel,

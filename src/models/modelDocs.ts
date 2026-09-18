@@ -1,4 +1,8 @@
 import type { ClassifierBins } from "./classifierBins.ts";
+import type { Standard } from "../utilities/utilities.js";
+
+/** One of the identifiers in `Standard`, e.g. `"7730-2025"` or `"55-2023"`. */
+export type StandardId = (typeof Standard)[keyof typeof Standard];
 
 /**
  * Shared JSDoc typedefs and utilities for model metadata.
@@ -62,11 +66,15 @@ export interface VariableInfo {
  * supplied by the caller — vapour pressure in `pmv_ppd_iso`, for instance,
  * which has an applicability bound of its own.
  *
+ * `standards` lists the editions this function accepts, default first; empty
+ * for a model with no standard. Every entry is a `Standard` value.
+ *
  * @public
  */
 export interface ModelInfo {
   readonly label: string;
   readonly description: string;
+  readonly standards: readonly StandardId[];
   readonly inputs: Readonly<Record<string, VariableInfo>>;
   readonly outputs: Readonly<Record<string, VariableInfo>>;
   readonly derived?: Readonly<Record<string, VariableInfo>>;

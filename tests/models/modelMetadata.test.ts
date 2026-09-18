@@ -10,6 +10,7 @@ import {
   pmv_ppd_iso,
 } from "../../src/index.js";
 import { ISO_7730_LIMITS, Standard } from "../../src/utilities/utilities.js";
+import type { ModelInfo } from "../../src/models/modelDocs.ts";
 
 describe("Model Metadata Exports — enumeration test", () => {
   test("all model metadata and classifier exports are available from package root", () => {
@@ -198,6 +199,49 @@ describe("PMV_PPD_ISO_INFO structure", () => {
     expect(PMV_PPD_ISO_INFO.outputs.tsv.classifier).toBe(
       PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
     );
+  });
+});
+
+describe("standards — the editions each model accepts", () => {
+  const infos = Object.entries(pkg as Record<string, unknown>)
+    .filter(([name]) => name.endsWith("_INFO"))
+    .map(([, info]) => info as ModelInfo);
+
+  test("every exported _INFO lists only Standard values", () => {
+    expect(infos.length).toBeGreaterThan(0);
+    const known: readonly string[] = Object.values(Standard);
+    for (const info of infos) {
+      for (const standard of info.standards) {
+        expect(known).toContain(standard);
+      }
+    }
+  });
+
+  test("PMV_PPD_ISO_INFO.standards is the set pmv_ppd_iso's model validation accepts", () => {
+    // Probe the runtime rather than read its schema: a value belongs in the
+    // metadata exactly when pmv_ppd_iso does not throw on it.
+    const accepted = Object.values(Standard).filter((standard) => {
+      try {
+        pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, standard as never);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    expect([...PMV_PPD_ISO_INFO.standards].sort()).toEqual(accepted.sort());
+  });
+
+  test("PMV_PPD_ISO_INFO.standards puts pmv_ppd_iso's default first", () => {
+    expect(PMV_PPD_ISO_INFO.standards[0]).toBe(Standard.iso_7730_2025);
+  });
+
+  test("HEAT_INDEX_ROTHFUSZ_INFO.standards is empty: the model has no standard", () => {
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.standards).toEqual([]);
+  });
+
+  test("standards arrays are frozen", () => {
+    expect(Object.isFrozen(PMV_PPD_ISO_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.standards)).toBe(true);
   });
 });
 

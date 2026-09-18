@@ -115,6 +115,7 @@ export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
 export const HEAT_INDEX_ROTHFUSZ_INFO: ModelInfo = deepFreeze({
   label: "Heat Index (Rothfusz)",
   description: "Apparent temperature — how hot it feels at a given humidity.",
+  standards: [],
   inputs: {
     tdb: { unit: "°C", applicability: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb },
     rh: { unit: "%" },

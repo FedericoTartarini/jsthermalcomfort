@@ -11,10 +11,7 @@ import {
 import { cooling_effect } from "./cooling_effect.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { ClassifierBins, ModelInfo } from "./modelDocs.ts";
-
-/** One of the identifiers in `Standard`, e.g. `"7730-2025"` or `"55-2023"`. */
-type StandardId = (typeof Standard)[keyof typeof Standard];
+import type { ClassifierBins, ModelInfo, StandardId } from "./modelDocs.ts";
 
 /**
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
@@ -103,6 +100,7 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE: Readonly<ClassifierBins> =
 export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
   label: "PMV / PPD (ISO 7730)",
   description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
+  standards: [Standard.iso_7730_2025, Standard.iso_7730_2005],
   inputs: {
     tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb },
     tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr },

@@ -6,7 +6,7 @@ import {
 
 /**
  * @typedef {object} CloToutResult
- * @property {number} clo - Representative clothing insulation Icl, [clo]
+ * @property {number} clo_tout - Representative clothing insulation Icl, [clo]
  * @public
  */
 

@@ -3,20 +3,76 @@ import { adaptive_en } from "../../src/models/adaptive_en";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // use the utils
 
-let returnArray = false;
+const returnArray = false;
 
-let { testData, tolerances } = await loadTestData(
+const { testData, tolerances } = await loadTestData(
   testDataUrls.adaptiveEn,
   returnArray,
 );
 
 describe("adaptive_en", () => {
-  test.each(testData.data)("Test case #%#", (testCase) => {
+  test.each(testData.data)("test_adaptive_en case %#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, tr, t_running_mean, v, units } = inputs;
-    const modelResult = adaptive_en(tdb, tr, t_running_mean, v, units);
+    const { tdb, tr, t_running_mean, v } = inputs;
+    const modelResult = adaptive_en(tdb, tr, t_running_mean, v);
 
     validateResult(modelResult, expectedOutput, tolerances, inputs);
+  });
+
+  test("test_ashrae_inputs_invalid_units", () => {
+    expect(() => adaptive_en(25, 25, 20, 0.1, "INVALID")).toThrow(Error);
+  });
+
+  test("test_ashrae_inputs_invalid_tdb_type", () => {
+    expect(() => adaptive_en("invalid", 25, 20, 0.1)).toThrow(TypeError);
+  });
+
+  test("test_ashrae_inputs_invalid_tr_type", () => {
+    expect(() => adaptive_en(25, "invalid", 20, 0.1)).toThrow(TypeError);
+  });
+
+  test("test_ashrae_inputs_invalid_t_running_mean_type", () => {
+    expect(() => adaptive_en(25, 25, "invalid", 0.1)).toThrow(TypeError);
+  });
+
+  test("test_ashrae_inputs_invalid_v_type", () => {
+    expect(() => adaptive_en(25, 25, 20, "invalid")).toThrow(TypeError);
+  });
+
+  test("test_round_output_default_preserves_behaviour", () => {
+    const defaultResult = adaptive_en(25, 25, 20.5, 0.1);
+    const explicitResult = adaptive_en(25, 25, 20.5, 0.1, "SI", true, true);
+
+    expect(defaultResult.tmp_cmf).toBe(explicitResult.tmp_cmf);
+    expect(defaultResult.tmp_cmf_cat_i_up).toBe(
+      explicitResult.tmp_cmf_cat_i_up,
+    );
+    expect(defaultResult.tmp_cmf_cat_i_low).toBe(
+      explicitResult.tmp_cmf_cat_i_low,
+    );
+    expect(defaultResult.tmp_cmf_cat_ii_up).toBe(
+      explicitResult.tmp_cmf_cat_ii_up,
+    );
+    expect(defaultResult.tmp_cmf_cat_iii_low).toBe(
+      explicitResult.tmp_cmf_cat_iii_low,
+    );
+  });
+
+  test("test_round_output_false_returns_unrounded", () => {
+    const unrounded = adaptive_en(25, 25, 20.5, 0.1, "SI", true, false);
+    const rounded = adaptive_en(25, 25, 20.5, 0.1, "SI", true, true);
+
+    expect(unrounded.tmp_cmf).toBeCloseTo(25.565);
+    expect(rounded.tmp_cmf).toBeCloseTo(25.6);
+    expect(unrounded.tmp_cmf).not.toBe(rounded.tmp_cmf);
+    expect(unrounded.tmp_cmf_cat_i_low).toBeCloseTo(25.565 - 3.0);
+    expect(unrounded.tmp_cmf_cat_ii_up).toBeCloseTo(25.565 + 3.0);
+  });
+
+  test("test_round_output_invalid_type_raises", () => {
+    expect(() => adaptive_en(25, 25, 20, 0.1, "SI", true, "yes")).toThrow(
+      TypeError,
+    );
   });
 });
 
@@ -74,32 +130,6 @@ describe("adaptive_en scalar tests (hardcoded)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// round_output unrounded path
-// Reference value is derived analytically from the model equation
-// t_cmf = 0.33 * t_running_mean + 18.8, giving 26.06 at t_running_mean = 22.
-// Default round_output = true yields 26.1.
-// ---------------------------------------------------------------------------
-describe("adaptive_en unrounded path", () => {
-  test("round_output:false returns the unrounded comfort temperature and bounds", () => {
-    const rounded = adaptive_en(25, 25, 22, 0.1);
-    const unrounded = adaptive_en(25, 25, 22, 0.1, "SI", true, false);
-    expect(rounded.tmp_cmf).toBe(26.1);
-    expect(Math.abs(unrounded.tmp_cmf - 26.06)).toBeLessThan(1e-10);
-    expect(unrounded.tmp_cmf).not.toBe(rounded.tmp_cmf);
-    // tmp_cmf_cat_ii_low = t_cmf - 4.0: 26.06 - 4.0 = 22.06 unrounded; 22.1 rounded.
-    expect(rounded.tmp_cmf_cat_ii_low).toBe(22.1);
-    expect(Math.abs(unrounded.tmp_cmf_cat_ii_low - 22.06)).toBeLessThan(1e-10);
-    expect(unrounded.tmp_cmf_cat_ii_low).not.toBe(rounded.tmp_cmf_cat_ii_low);
-  });
-});
-
-describe("adaptive_en round_output default", () => {
-  test("omitting round_output keeps the default true", () => {
-    expect(adaptive_en(25, 25, 22, 0.1).tmp_cmf).toBe(26.1);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Cooling-effect acceptability boundary
 // Locks the cooling-effect gate (get_ce) inside adaptive_en. At
 // v >= 0.6 and to >= 25, ce = 1.2 widens the category I upper bound
@@ -125,30 +155,8 @@ describe("adaptive_en cooling-effect boundary", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Input validation tests
-// ---------------------------------------------------------------------------
-describe("adaptive_en input validation", () => {
-  test.each([
-    ["tdb", "25", 25, 20, 0.1],
-    ["tr", 25, "25", 20, 0.1],
-    ["t_running_mean", 25, 25, "20", 0.1],
-    ["v", 25, 25, 20, "0.1"],
-  ])("throws TypeError if %s is not a number", (_, ...args) => {
-    expect(() => adaptive_en(...args)).toThrow(TypeError);
-  });
-
-  test("throws Error if units is invalid", () => {
-    expect(() => adaptive_en(25, 25, 20, 0.1, "INVALID")).toThrow(Error);
-  });
-
-  test("throws TypeError if limit_inputs is not a boolean", () => {
+describe("adaptive_en additional input validation", () => {
+  test("limit_inputs must be a boolean", () => {
     expect(() => adaptive_en(25, 25, 20, 0.1, "SI", "true")).toThrow(TypeError);
-  });
-
-  test("throws TypeError if round_output is not a boolean", () => {
-    expect(() => adaptive_en(25, 25, 20, 0.1, "SI", true, "true")).toThrow(
-      TypeError,
-    );
   });
 });

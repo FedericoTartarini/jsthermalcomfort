@@ -1,15 +1,24 @@
 import { describe, expect, test } from "@jest/globals";
 import * as pkg from "../../src/index.js";
 import {
+  ADAPTIVE_ASHRAE_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
+  PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+  adaptive_ashrae,
   heat_index_rothfusz,
+  pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "../../src/index.js";
-import { ISO_7730_LIMITS, Standard } from "../../src/utilities/utilities.js";
+import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.js";
+import {
+  ASHRAE_55_LIMITS,
+  ISO_7730_LIMITS,
+  Standard,
+} from "../../src/utilities/utilities.js";
 import type { ModelInfo } from "../../src/models/modelDocs.ts";
 
 describe("Model Metadata Exports — enumeration test", () => {
@@ -22,9 +31,11 @@ describe("Model Metadata Exports — enumeration test", () => {
     // but are never added to src/models/index.js or src/index.js. The list must be
     // manually updated whenever a new *_INFO or *_BINS export is published.
     const expectedMetadataExports = [
+      "ADAPTIVE_ASHRAE_INFO",
       "classifyFromBins",
       "HEAT_INDEX_ROTHFUSZ_INFO",
       "HEAT_INDEX_STRESS_CATEGORY_BINS",
+      "PMV_PPD_ASHRAE_INFO",
       "PMV_PPD_ISO_INFO",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
@@ -566,5 +577,209 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
     expect(result).toHaveProperty("pmv");
     expect(result).toHaveProperty("ppd");
     expect(result).toHaveProperty("tsv");
+  });
+});
+
+describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
+  test("labels the model and lists ASHRAE 55 as its only standard", () => {
+    expect(PMV_PPD_ASHRAE_INFO.label).toBe("PMV / PPD (ASHRAE 55)");
+    expect(typeof PMV_PPD_ASHRAE_INFO.description).toBe("string");
+    expect(PMV_PPD_ASHRAE_INFO.standards).toEqual([Standard.ashrae_55_2023]);
+  });
+
+  test("inputs are the physical quantities pmv_ppd_ashrae takes, with the ISO wrapper's units", () => {
+    expect(Object.keys(PMV_PPD_ASHRAE_INFO.inputs).sort()).toEqual(
+      Object.keys(PMV_PPD_ISO_INFO.inputs).sort(),
+    );
+    for (const key of Object.keys(PMV_PPD_ASHRAE_INFO.inputs)) {
+      expect(PMV_PPD_ASHRAE_INFO.inputs[key].unit).toBe(
+        PMV_PPD_ISO_INFO.inputs[key].unit,
+      );
+    }
+  });
+
+  test("input bounds are the ASHRAE_55_LIMITS objects, not copies", () => {
+    expect(PMV_PPD_ASHRAE_INFO.inputs.tdb.applicability).toBe(
+      ASHRAE_55_LIMITS.tdb,
+    );
+    expect(PMV_PPD_ASHRAE_INFO.inputs.tr.applicability).toBe(
+      ASHRAE_55_LIMITS.tr,
+    );
+    expect(PMV_PPD_ASHRAE_INFO.inputs.vr.applicability).toBe(
+      ASHRAE_55_LIMITS.vr,
+    );
+    expect(PMV_PPD_ASHRAE_INFO.inputs.met.applicability).toBe(
+      ASHRAE_55_LIMITS.met,
+    );
+    expect(PMV_PPD_ASHRAE_INFO.inputs.clo.applicability).toBe(
+      ASHRAE_55_LIMITS.clo,
+    );
+    expect(PMV_PPD_ASHRAE_INFO.inputs.rh.applicability).toBeUndefined();
+    expect(PMV_PPD_ASHRAE_INFO.inputs.wme.applicability).toBeUndefined();
+  });
+
+  test("pmv_ppd_ashrae's warnings rows carry the bounds INFO references", () => {
+    const { warnings } = pmv_ppd_ashrae(45, 25, 2.5, 50, 1.2, 1.6, 0);
+    const expected = [
+      PMV_PPD_ASHRAE_INFO.inputs.tdb.applicability,
+      PMV_PPD_ASHRAE_INFO.inputs.vr.applicability,
+      PMV_PPD_ASHRAE_INFO.inputs.clo.applicability,
+    ];
+    expect(warnings).toHaveLength(expected.length);
+    warnings.forEach((w, i) => expect(w.bound).toBe(expected[i]));
+  });
+
+  test("pmv_ppd_ashrae output keys match PMV_PPD_ASHRAE_INFO.outputs", () => {
+    const result = pmv_ppd_ashrae(22, 22, 0.1, 50, 1.0, 0.5, 0, {
+      limit_inputs: false,
+    });
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(Object.keys(PMV_PPD_ASHRAE_INFO.outputs).sort());
+  });
+
+  test("tsv's classifier is the ASHRAE bins object, which is not the ISO one", () => {
+    expect(PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier).toBe(
+      PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+    );
+    // Same edges and labels, opposite edge convention (pythermalcomfort#382),
+    // so the two constants are distinct objects and INFO must not share them.
+    expect(PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE).not.toBe(
+      PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+    );
+    expect(PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE.right).toBe(true);
+    expect(PMV_THERMAL_SENSATION_VOTE_BINS_ISO.right).toBe(false);
+  });
+
+  test("no derived row and no pmv gate: ASHRAE 55 bounds neither vapour pressure nor the PMV output", () => {
+    expect(PMV_PPD_ASHRAE_INFO.derived).toBeUndefined();
+    expect(PMV_PPD_ASHRAE_INFO.outputs.pmv.applicability).toBeUndefined();
+    // 39 °C at 90 % rh is about 6300 Pa, far above ISO 7730's 2700 Pa
+    // ceiling, and the resulting PMV is well outside ISO's [-2, 2] band. The
+    // ASHRAE wrapper gates neither, so with every input inside
+    // ASHRAE_55_LIMITS it still returns a finite PMV.
+    const result = pmv_ppd_ashrae(39, 39, 0.1, 90, 1.2, 0.5);
+    expect(Number.isFinite(result.pmv)).toBe(true);
+    expect(result.pmv).toBeGreaterThan(2);
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO)).toBe(true);
+    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.inputs.met)).toBe(true);
+    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.outputs)).toBe(true);
+    const classifier = PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier!;
+    expect(Object.isFrozen(classifier)).toBe(true);
+    expect(Object.isFrozen(classifier.edges)).toBe(true);
+    expect(Object.isFrozen(classifier.labels)).toBe(true);
+  });
+});
+
+describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
+  test("labels the model and lists ASHRAE 55 as its only standard", () => {
+    expect(ADAPTIVE_ASHRAE_INFO.label).toBe("Adaptive (ASHRAE 55)");
+    expect(typeof ADAPTIVE_ASHRAE_INFO.description).toBe("string");
+    expect(ADAPTIVE_ASHRAE_INFO.standards).toEqual([Standard.ashrae_55_2023]);
+  });
+
+  test("inputs are adaptive_ashrae's four positional quantities", () => {
+    expect(Object.keys(ADAPTIVE_ASHRAE_INFO.inputs)).toEqual([
+      "tdb",
+      "tr",
+      "t_running_mean",
+      "v",
+    ]);
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tdb.unit).toBe("°C");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tr.unit).toBe("°C");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.unit).toBe("°C");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.v.unit).toBe("m/s");
+  });
+
+  test("input bounds are the limits objects the gate reads, not copies", () => {
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tdb.applicability).toBe(
+      ASHRAE_55_LIMITS.tdb,
+    );
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tr.applicability).toBe(
+      ASHRAE_55_LIMITS.tr,
+    );
+    // The function's input is `v`; `_ashrae_compliance` applies the same
+    // limit to `v` and `vr`, and ASHRAE_55_LIMITS names the PMV input.
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.v.applicability).toBe(
+      ASHRAE_55_LIMITS.vr,
+    );
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability).toBe(
+      ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
+    );
+    expect(ADAPTIVE_ASHRAE_LIMITS.t_running_mean).toEqual({
+      min: 10,
+      max: 33.5,
+    });
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_LIMITS)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_LIMITS.t_running_mean)).toBe(true);
+  });
+
+  test("the t_running_mean bound is the one adaptive_ashrae gates on, inclusive at both ends", () => {
+    const { min, max } = ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean
+      .applicability as { min: number; max: number };
+    const tmp_cmf = (trm: number) => adaptive_ashrae(25, 25, trm, 0.1).tmp_cmf;
+    expect(tmp_cmf(min - 0.01)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(min))).toBe(true);
+    expect(Number.isFinite(tmp_cmf(max))).toBe(true);
+    expect(tmp_cmf(max + 0.01)).toBeNaN();
+    // With limit_inputs off the same values compute, so the NaN above came
+    // from the bound and not from the arithmetic.
+    expect(
+      Number.isFinite(
+        adaptive_ashrae(25, 25, min - 0.01, 0.1, "SI", false).tmp_cmf,
+      ),
+    ).toBe(true);
+  });
+
+  test("the tdb, tr and v bounds are the ones adaptive_ashrae gates on", () => {
+    const tmp_cmf = (tdb: number, tr: number, v: number) =>
+      adaptive_ashrae(tdb, tr, 20, v).tmp_cmf;
+    const { tdb, tr, vr } = ASHRAE_55_LIMITS;
+    expect(tmp_cmf(tdb.max + 0.01, 25, 0.1)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(tdb.max, 25, 0.1))).toBe(true);
+    expect(tmp_cmf(25, tr.min - 0.01, 0.1)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(25, tr.min, 0.1))).toBe(true);
+    expect(tmp_cmf(25, 25, vr.max + 0.01)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(25, 25, vr.max))).toBe(true);
+  });
+
+  test("adaptive_ashrae output keys match ADAPTIVE_ASHRAE_INFO.outputs", () => {
+    const result = adaptive_ashrae(25, 25, 20, 0.1);
+    expect(Object.keys(result).sort()).toEqual(
+      Object.keys(ADAPTIVE_ASHRAE_INFO.outputs).sort(),
+    );
+  });
+
+  test("temperature outputs are in °C, boolean outputs are unitless and unclassified", () => {
+    const result = adaptive_ashrae(25, 25, 20, 0.1) as Record<string, unknown>;
+    for (const [key, info] of Object.entries(ADAPTIVE_ASHRAE_INFO.outputs)) {
+      if (typeof result[key] === "boolean") {
+        expect(info.unit).toBeNull();
+        expect(info.classifier).toBeUndefined();
+      } else {
+        expect(typeof result[key]).toBe("number");
+        expect(info.unit).toBe("°C");
+      }
+    }
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean)).toBe(
+      true,
+    );
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80)).toBe(
+      true,
+    );
   });
 });

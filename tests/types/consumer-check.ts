@@ -25,8 +25,10 @@ import type {
   VariableInfo,
 } from "jsthermalcomfort";
 import {
+  ADAPTIVE_ASHRAE_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
+  PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   Standard,
@@ -39,7 +41,11 @@ import {
 
 // The published metadata must satisfy the published type.
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
+const ashrae: ModelInfo = PMV_PPD_ASHRAE_INFO;
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
+// ADAPTIVE_ASHRAE_INFO is declared in a .js file through a JSDoc `@type`, the
+// path that emits `any` when the tag is missing (see 2. above).
+const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
@@ -69,6 +75,8 @@ const edgeCount: number | undefined = bins?.edges.length;
 const notANumber: number = PMV_PPD_ISO_INFO.label;
 // @ts-expect-error `inputs` has no `nonexistent_variable` key.
 const notAKey: VariableInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
+// @ts-expect-error `label` is a string, not a number (the JSDoc-typed constant).
+const notANumberEither: number = ADAPTIVE_ASHRAE_INFO.label;
 
 // The runtime values are deep-frozen, so the types must reject writes too.
 // Without these, a consumer could assign, type-check cleanly, and then throw:
@@ -83,6 +91,10 @@ PMV_PPD_ISO_INFO.inputs.tdb = { unit: "°C" };
 PMV_PPD_ISO_INFO.label = "something else";
 // @ts-expect-error push mutates, and the standards array is readonly.
 PMV_PPD_ISO_INFO.standards.push(Standard.ashrae_55_2023);
+// @ts-expect-error the JSDoc-typed metadata is readonly too.
+ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability!.max = 40;
+// @ts-expect-error the ASHRAE PMV metadata is readonly.
+PMV_PPD_ASHRAE_INFO.outputs.pmv = { unit: null };
 // @ts-expect-error classifier bin edges are a readonly array.
 PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
@@ -149,7 +161,10 @@ clo_typical_ensembles["Typical winter indoor clothing"] = 1.1;
 
 export {
   iso,
+  ashrae,
   heatIndex,
+  adaptive,
+  notANumberEither,
   minTdb,
   isoStandards,
   heatIndexStandards,

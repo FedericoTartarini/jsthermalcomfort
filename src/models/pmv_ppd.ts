@@ -131,6 +131,42 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
 });
 
 /**
+ * Model metadata for PMV / PPD (ASHRAE 55).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * No `derived` row and no `pmv` applicability: ASHRAE 55 bounds neither
+ * vapour pressure nor the PMV output, and `pmv_ppd` gates both under ISO 7730
+ * only (`if (iso) check("pa", ...)` and `if (iso) check("pmv", ...)` above).
+ * The airspeed limits that apply when the occupant cannot control the
+ * airspeed depend on the call (operative temperature, met and clo), so they
+ * have no fixed `Bound` here; a call that breaks one reports it in
+ * `warnings` with a bound built for that call.
+ *
+ * @public
+ */
+export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
+  label: "PMV / PPD (ASHRAE 55)",
+  description:
+    "Predicted Mean Vote and Predicted Percentage Dissatisfied, with the ASHRAE 55 cooling effect of elevated air speed.",
+  standards: [Standard.ashrae_55_2023],
+  inputs: {
+    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
+    vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
+    met: { unit: "met", applicability: ASHRAE_55_LIMITS.met },
+    clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo },
+    rh: { unit: "%" },
+    wme: { unit: "met" },
+  },
+  outputs: {
+    pmv: { unit: null },
+    ppd: { unit: "%" },
+    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE },
+  },
+});
+
+/**
  * The standards PMV implements: pythermalcomfort's pmv_ppd_iso and
  * pmv_ppd_ashrae accept only these. Both the `standard` parameter's type and
  * the runtime schema come from this list, so any other Standard (ISO 7933, say)

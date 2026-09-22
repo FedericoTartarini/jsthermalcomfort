@@ -4,9 +4,11 @@ import {
   round,
   units_converter,
   validateInputs,
+  ASHRAE_55_LIMITS,
   Standard,
 } from "../utilities/utilities.js";
 import { get_ce } from "./adaptive_en.js";
+import { deepFreeze } from "./modelDocs.ts";
 
 /**
  * @typedef {object} AdaptiveAshraeResult
@@ -19,6 +21,59 @@ import { get_ce } from "./adaptive_en.js";
  * @property {boolean} acceptability_90 - Acceptability for 90% occupants
  * @public
  */
+
+/**
+ * Applicability limit of the adaptive model's own input, in SI units.
+ *
+ * `tdb`, `tr` and `v` are gated by `check_standard_compliance`, whose numbers
+ * `ASHRAE_55_LIMITS` holds; the running mean outdoor temperature is gated by
+ * this model alone, so its bound lives here. Same arrangement as
+ * `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity from
+ * `ADAPTIVE_ASHRAE_INFO` and read by the gate below, so the metadata and the
+ * NaN cannot disagree. Exported for that identity test, deliberately not
+ * added to `src/models/index.js`.
+ */
+export const ADAPTIVE_ASHRAE_LIMITS = Object.freeze({
+  t_running_mean: Object.freeze({ min: 10, max: 33.5 }),
+});
+
+/**
+ * Model metadata for the ASHRAE 55 adaptive model.
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * `v` is bounded by `ASHRAE_55_LIMITS.vr`: `_ashrae_compliance` applies the
+ * same 0–2 m/s limit to `v` and `vr`, and the table names the PMV input.
+ * The acceptability outputs are booleans, so they carry no unit and no
+ * classifier.
+ *
+ * @type {import("./modelDocs.ts").ModelInfo}
+ * @public
+ */
+export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
+  label: "Adaptive (ASHRAE 55)",
+  description:
+    "Adaptive comfort temperature and its 80 % and 90 % acceptability ranges from the running mean outdoor temperature.",
+  standards: [Standard.ashrae_55_2023],
+  inputs: {
+    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
+    t_running_mean: {
+      unit: "°C",
+      applicability: ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
+    },
+    v: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
+  },
+  outputs: {
+    tmp_cmf: { unit: "°C" },
+    tmp_cmf_80_low: { unit: "°C" },
+    tmp_cmf_80_up: { unit: "°C" },
+    tmp_cmf_90_low: { unit: "°C" },
+    tmp_cmf_90_up: { unit: "°C" },
+    acceptability_80: { unit: null },
+    acceptability_90: { unit: null },
+  },
+});
 
 /**
  * Determines the adaptive thermal comfort based on ASHRAE 55. The adaptive
@@ -137,7 +192,9 @@ export function adaptive_ashrae(
 
   if (limit_inputs) {
     const warnings = check_standard_compliance(standard, { tdb, tr, v });
-    const trm_valid = t_running_mean >= 10.0 && t_running_mean <= 33.5;
+    const trm_valid =
+      t_running_mean >= ADAPTIVE_ASHRAE_LIMITS.t_running_mean.min &&
+      t_running_mean <= ADAPTIVE_ASHRAE_LIMITS.t_running_mean.max;
     if (warnings.length > 0 || !trm_valid) t_cmf = NaN;
   }
 

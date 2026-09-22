@@ -18,7 +18,7 @@ import { at } from "./at.js";
 import { pmv_ppd } from "./pmv_ppd.ts";
 import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
-import { adaptive_ashrae } from "./adaptive_ashrae.js";
+import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.js";
 import { solar_gain } from "./solar_gain.js";
 import { cooling_effect } from "./cooling_effect.js";
 import { athb } from "./athb.js";
@@ -33,6 +33,7 @@ import { utci } from "./utci.js";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import {
+  PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
@@ -46,6 +47,7 @@ import { classifyFromBins } from "./classifierBins.ts";
  */
 export {
   adaptive_ashrae,
+  ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
   a_pmv,
   athb,
@@ -68,6 +70,7 @@ export {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
+  PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
@@ -84,6 +87,7 @@ export {
 
 export default {
   adaptive_ashrae,
+  ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
   a_pmv,
   athb,
@@ -106,6 +110,7 @@ export default {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
+  PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,

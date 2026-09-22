@@ -61,6 +61,28 @@ You can also import it in the website directly, and caution that you need to mar
 
 # Examples and Tutorials
 
+## Temperature-Humidity Index (THI)
+
+The development version includes `thi(tdb, rh, round_output = true)`, using
+the same equation and parameter names as Python's `thi`. Temperature is in
+Celsius and relative humidity is in percent (0 to 100).
+
+```javascript
+import { thi } from "jsthermalcomfort";
+
+thi(30, 70); // { thi: 81.4 }
+thi(30, 70, false); // { thi: 81.38 }
+[30, 20].map((t, i) => thi(t, [70, 50][i]).thi); // [81.4, 65.2]
+```
+
+This API is not yet available in the published 1.4.0 package. For a local
+checkout, run `npm run build` and import from `./lib/esm/index.js` instead.
+Results are returned in a `thi` field; rounding uses ties-to-even to one
+decimal place. Inputs must be finite scalar numbers; arrays, `NaN` and
+`Infinity` are rejected. Use `Array.map()` for multiple readings, as shown above.
+
+## More Examples
+
 We developed a few [examples](https://github.com/FedericoTartarini/jsthermalcomfort/tree/main/docs/examples) files on how to use some of the functions.
 
 Here is a list of examples running in the browser:

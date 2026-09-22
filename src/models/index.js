@@ -8,6 +8,7 @@ import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
+import { thi } from "./thi.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { two_nodes } from "./two_nodes.js";
 import { set_tmp } from "./set_tmp.js";
@@ -73,6 +74,7 @@ export {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
   set_tmp,
+  thi,
   two_nodes,
   utci,
   use_fans_heatwaves,
@@ -111,6 +113,7 @@ export default {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
   set_tmp,
+  thi,
   two_nodes,
   utci,
   use_fans_heatwaves,

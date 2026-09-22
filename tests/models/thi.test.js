@@ -19,9 +19,9 @@ describe("thi", () => {
     expect(thi(tdb, rh, false).thi).toBeCloseTo(expected, 6);
   });
   test("test_list_input", () => {
-    const result = thi([30, 20], [70, 50]);
-    expect(Array.isArray(result.thi)).toBe(true);
-    expect(result.thi).toEqual([81.4, 65.2]);
+    // JS intentionally uses scalar calls instead of NumPy broadcasting (#215).
+    const result = [30, 20].map((t, i) => thi(t, [70, 50][i]).thi);
+    expect(result).toEqual([81.4, 65.2]);
   });
   test.each([
     [25.0, -5.0, RangeError],
@@ -34,37 +34,28 @@ describe("thi", () => {
     expect(publicThi).toBe(thi);
     expect(library.models.thi).toBe(thi);
   });
-  test("broadcast scalar and singleton inputs", () => {
-    expect(thi([30, 20], 50).thi).toEqual([78.3, 65.2]);
-    expect(thi([30, 20], [50]).thi).toEqual([78.3, 65.2]);
-    expect(thi(30, [70, 50]).thi).toEqual([81.4, 78.3]);
-    expect(thi([30], [70, 50]).thi).toEqual([81.4, 78.3]);
-    expect(thi([], 50).thi).toEqual([]);
-    expect(thi(30, []).thi).toEqual([]);
-    expect(thi([], []).thi).toEqual([]);
-    expect(thi([], [50]).thi).toEqual([]);
-    expect(thi([30], []).thi).toEqual([]);
-  });
   test("humidity boundaries and negative temperatures", () => {
-    expect(thi([0, 30], [0, 100]).thi).toEqual([46.3, 86]);
+    expect(thi(0, 0).thi).toBe(46.3);
+    expect(thi(30, 100).thi).toBe(86);
     expect(thi(-50, 100).thi).toBe(-58);
   });
-  test("array output without rounding", () => {
-    expect(thi([30, 20], [70, 50], false).thi).toEqual([81.38, 65.25]);
-  });
-  // Current JS validation policy; Python parity is tracked in issue #215.
+  // Retain the shared finite-number validation, as confirmed in #215.
   test.each([NaN, Infinity, -Infinity, null, undefined, true, "25"])(
     "reject unsupported numeric inputs (%s)",
     (value) => {
       expect(() => thi(value, 50)).toThrow(TypeError);
       expect(() => thi(25, value)).toThrow(TypeError);
-      expect(() => thi([value], 50)).toThrow(TypeError);
-      expect(() => thi(25, [value])).toThrow(TypeError);
     },
   );
-  test("reject nested arrays", () => {
-    expect(() => thi([[30], [20]], [70, 50])).toThrow(TypeError);
-    expect(() => thi(30, [[70, 50]])).toThrow(TypeError);
+  test.each([
+    { value: [] },
+    { value: [30] },
+    { value: [30, 20] },
+    { value: [[30], [20]] },
+  ])("reject array input ($value)", ({ value }) => {
+    expect(() => thi(value, 50)).toThrow(TypeError);
+    expect(() => thi(25, value)).toThrow(TypeError);
+    expect(() => thi(value, value)).toThrow(TypeError);
   });
   test("round halfway values to even", () => {
     expect(thi(25, 0).thi).toBe(66.6);
@@ -72,11 +63,7 @@ describe("thi", () => {
     expect(thi(20, 50).thi).toBe(65.2);
     expect(thi(20, 50, false).thi).toBe(65.25);
   });
-  test("validate array elements, lengths and rounding flag", () => {
-    expect(() => thi([25, "hot"], 50)).toThrow(TypeError);
-    expect(() => thi(25, [50, 150])).toThrow(RangeError);
-    expect(() => thi([20, 25], [40, 50, 60])).toThrow(RangeError);
-    expect(() => thi([], [40, 50])).toThrow(RangeError);
+  test("validate rounding flag", () => {
     expect(() => thi(25, 50, "false")).toThrow(TypeError);
   });
 });

@@ -72,16 +72,14 @@ import { thi } from "jsthermalcomfort";
 
 thi(30, 70); // { thi: 81.4 }
 thi(30, 70, false); // { thi: 81.38 }
-thi([30, 20], [70, 50]); // { thi: [81.4, 65.2] }
+[30, 20].map((t, i) => thi(t, [70, 50][i]).thi); // [81.4, 65.2]
 ```
 
 This API is not yet available in the published 1.4.0 package. For a local
 checkout, run `npm run build` and import from `./lib/esm/index.js` instead.
 Results are returned in a `thi` field; rounding uses ties-to-even to one
-decimal place. Scalars and one-dimensional arrays are supported, including
-scalar and single-element broadcasting. Unlike Python, nested arrays and
-non-finite inputs are currently rejected; their intended support is tracked
-in [#215](https://github.com/FedericoTartarini/jsthermalcomfort/issues/215).
+decimal place. Inputs must be finite scalar numbers; arrays, `NaN` and
+`Infinity` are rejected. Use `Array.map()` for multiple readings, as shown above.
 
 ## More Examples
 

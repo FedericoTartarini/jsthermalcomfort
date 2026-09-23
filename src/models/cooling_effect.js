@@ -46,6 +46,7 @@ import { set_tmp } from "./set_tmp.js";
  *
  * @param {number} [wme=0] - external work
  * @param {'SI'|'IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [suppress_warnings=false] - If true, writes nothing to the console when the cooling effect cannot be calculated and is assumed to be 0.
  * @returns {CoolingEffectResult} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
  *
  * @example
@@ -65,6 +66,7 @@ const COOLING_EFFECT_SCHEMA = {
   clo: { type: "number" },
   wme: { type: "number" },
   units: { enum: ["SI", "IP"] },
+  suppress_warnings: { type: "boolean" },
 };
 
 export function cooling_effect(
@@ -76,9 +78,20 @@ export function cooling_effect(
   clo,
   wme = 0,
   units = "SI",
+  suppress_warnings = false,
 ) {
   validateInputs(
-    { tdb, tr, vr, rh, met, clo, wme, units: units.toUpperCase() },
+    {
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      units: units.toUpperCase(),
+      suppress_warnings,
+    },
     COOLING_EFFECT_SCHEMA,
   );
 
@@ -145,7 +158,10 @@ export function cooling_effect(
     ce = 0;
   }
 
-  if (ce === 0) {
+  // pythermalcomfort raises a Python warning here, which its callers silence
+  // with the warnings module; JavaScript has no such facility, so
+  // suppress_warnings is the port of it rather than a new behaviour.
+  if (ce === 0 && !suppress_warnings) {
     console.warn(
       `Assuming cooling effect = 0 since it could not be calculated for this set of inputs tdb=${tdb}, tr=${tr}, rh=${rh}, vr=${vr}, clo=${clo}, met=${met}`,
     );

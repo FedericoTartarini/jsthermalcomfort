@@ -1,5 +1,6 @@
-import { describe, expect, test } from "@jest/globals";
+import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { pmv_ppd } from "../../src/models/pmv_ppd.ts";
+import type { Pmv_ppdKwargs } from "../../src/models/pmv_ppd.ts";
 import {
   ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
@@ -212,6 +213,52 @@ describe("pmv_ppd input validation", () => {
         round_output: "true",
       }),
     ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if suppress_warnings is not a boolean", () => {
+    expect(() =>
+      pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025, {
+        // @ts-expect-error deliberately passing a non-boolean suppress_warnings to test the runtime TypeError
+        suppress_warnings: "true",
+      }),
+    ).toThrow(TypeError);
+  });
+});
+
+describe("pmv_ppd suppress_warnings", () => {
+  // At 45 °C and 90 % RH the still-air SET root is not bracketed, so
+  // cooling_effect falls back to 0 and says so on the console.
+  const fallback = (kwargs: Pmv_ppdKwargs = {}) =>
+    pmv_ppd(45, 45, 0.5, 90, 1.2, 0.5, 0, Standard.ashrae_55_2023, {
+      limit_inputs: false,
+      ...kwargs,
+    });
+
+  const spyConsole = () =>
+    (["log", "info", "warn", "error"] as const).map((method) =>
+      jest.spyOn(console, method).mockImplementation(() => {}),
+    );
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test("a call that falls back writes nothing with the switch on", () => {
+    const spies = spyConsole();
+    fallback({ suppress_warnings: true });
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+  });
+
+  test("a call that falls back still writes with the switch off or absent", () => {
+    const [, , warn] = spyConsole();
+    fallback({ suppress_warnings: false });
+    fallback();
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  test("the switch changes nothing but the console", () => {
+    spyConsole();
+    expect(fallback({ suppress_warnings: true })).toEqual(fallback());
   });
 });
 

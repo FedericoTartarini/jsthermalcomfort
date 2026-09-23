@@ -37,6 +37,7 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
  * @param {boolean}   [kwargs.airspeed_control=true] - Occupant controls airspeed
  * @param {boolean}   [kwargs.round_output=true] - Round pmv to 2 decimal places and ppd to 1
+ * @param {boolean}   [kwargs.suppress_warnings=false] - Write nothing to the console when the cooling effect cannot be calculated and is assumed to be 0; the returned `warnings` are unaffected
  * @returns {PmvPpdAshrae} PMV and PPD values
  *
  * @example
@@ -60,6 +61,7 @@ const PMV_PPD_ASHRAE_SCHEMA = {
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
   round_output: { type: "boolean", required: false },
+  suppress_warnings: { type: "boolean", required: false },
 };
 
 export function pmv_ppd_ashrae(
@@ -85,6 +87,7 @@ export function pmv_ppd_ashrae(
       limit_inputs: kwargs.limit_inputs,
       airspeed_control: kwargs.airspeed_control,
       round_output: kwargs.round_output,
+      suppress_warnings: kwargs.suppress_warnings,
     },
     PMV_PPD_ASHRAE_SCHEMA,
   );

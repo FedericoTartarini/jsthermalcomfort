@@ -1,6 +1,6 @@
 // Validation data loaded from the shared validation-data-comfort-models
 // repository via the same URL-based mechanism as the original pmv_ppd.test.js.
-import { describe, expect, test } from "@jest/globals";
+import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { pmv_ppd_ashrae } from "../../src/models/pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "../../src/models/pmv_ppd_iso.js";
 import { classifyFromBins } from "../../src/models/classifierBins.ts";
@@ -86,6 +86,29 @@ describe("pmv_ppd_ashrae input validation", () => {
     expect(() =>
       pmv_ppd_ashrae(25, 25, 0.1, 50, 1.2, 0.5, 0, { round_output: "true" }),
     ).toThrow(TypeError);
+  });
+
+  test("throws TypeError if kwargs.suppress_warnings is not a boolean", () => {
+    expect(() =>
+      pmv_ppd_ashrae(25, 25, 0.1, 50, 1.2, 0.5, 0, {
+        suppress_warnings: "true",
+      }),
+    ).toThrow(TypeError);
+  });
+});
+
+describe("pmv_ppd_ashrae suppress_warnings", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  // At 45 °C and 90 % RH the cooling effect falls back to 0 with a warning.
+  test("passes the switch through to the cooling effect", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    pmv_ppd_ashrae(45, 45, 0.5, 90, 1.2, 0.5, 0, { suppress_warnings: true });
+    expect(warn).not.toHaveBeenCalled();
+    pmv_ppd_ashrae(45, 45, 0.5, 90, 1.2, 0.5, 0);
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 });
 

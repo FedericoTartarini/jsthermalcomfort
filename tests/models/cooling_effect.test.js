@@ -47,4 +47,10 @@ describe("cooling_effect input validation", () => {
       cooling_effect(25, 25, 0.3, 50, 1.2, 0.5, 0, "INVALID"),
     ).toThrow(Error);
   });
+
+  test("throws TypeError if suppress_warnings is not a boolean", () => {
+    expect(() =>
+      cooling_effect(25, 25, 0.3, 50, 1.2, 0.5, 0, "SI", "true"),
+    ).toThrow(TypeError);
+  });
 });

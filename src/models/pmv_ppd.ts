@@ -36,6 +36,8 @@ import type {
  *    the ASHRAE 55 imposes an upper limit for v which varies as a function of
  *    the operative temperature, for more information please consult the Standard.
  * @property { boolean } round_output - If true, rounds pmv to 2 decimal places and ppd to 1. Defaults to true.
+ * @property { boolean } suppress_warnings - If true, writes nothing to the console when the ASHRAE cooling effect
+ *    cannot be calculated and is assumed to be 0. Defaults to false. The returned `warnings` are unaffected.
  * @public
  */
 export interface Pmv_ppdKwargs {
@@ -43,6 +45,7 @@ export interface Pmv_ppdKwargs {
   limit_inputs?: boolean;
   airspeed_control?: boolean;
   round_output?: boolean;
+  suppress_warnings?: boolean;
 }
 
 /**
@@ -269,6 +272,7 @@ const PMV_PPD_SCHEMA = {
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
   round_output: { type: "boolean", required: false },
+  suppress_warnings: { type: "boolean", required: false },
 };
 
 /**
@@ -302,6 +306,7 @@ export function pmv_ppd(
     limit_inputs: true,
     airspeed_control: true,
     round_output: true,
+    suppress_warnings: false,
   };
   kwargs = Object.assign(default_kwargs, kwargs);
   validateInputs(
@@ -318,6 +323,7 @@ export function pmv_ppd(
       limit_inputs: kwargs.limit_inputs,
       airspeed_control: kwargs.airspeed_control,
       round_output: kwargs.round_output,
+      suppress_warnings: kwargs.suppress_warnings,
     },
     PMV_PPD_SCHEMA,
   );
@@ -369,7 +375,23 @@ export function pmv_ppd(
   let ce = 0;
   if (standard === Standard.ashrae_55_2023) {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-    ce = vr > 0.1 ? cooling_effect(tdb, tr, vr, rh, met, clo, wme).ce : 0;
+    // suppress_warnings has no pythermalcomfort counterpart: it stands in for
+    // Python's warnings filter, which JavaScript lacks (see cooling_effect).
+    // The inputs are SI by now, hence "SI" rather than kwargs.units.
+    ce =
+      vr > 0.1
+        ? cooling_effect(
+            tdb,
+            tr,
+            vr,
+            rh,
+            met,
+            clo,
+            wme,
+            "SI",
+            kwargs.suppress_warnings,
+          ).ce
+        : 0;
   }
 
   tdb = tdb - ce;

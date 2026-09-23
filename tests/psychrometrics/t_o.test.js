@@ -1,6 +1,22 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it, test } from "@jest/globals";
 import { t_o } from "../../src/psychrometrics/t_o";
 import { LimitSet, Standard } from "../../src/utilities/utilities.js";
+
+// Mirrors pythermalcomfort v4.6.0 tests/test_environment.py. Upstream's
+// operative_tmp takes "ISO" (the default) or "ASHRAE"; t_o takes the Standard
+// identifiers, so "ASHRAE" is Standard.ashrae_55_2023 here.
+describe("test_environment", () => {
+  test("test_t_o", () => {
+    expect(t_o(25, 25, 0.1)).toBe(25);
+    // operative_tmp([25, 20], 30, 0.3) ≈ [26.83, 23.66], atol 1e-2, element-wise.
+    expect(Math.abs(t_o(25, 30, 0.3) - 26.83)).toBeLessThanOrEqual(1e-2);
+    expect(Math.abs(t_o(20, 30, 0.3) - 23.66)).toBeLessThanOrEqual(1e-2);
+    expect(t_o(25, 25, 0.1, Standard.ashrae_55_2023)).toBe(25);
+    expect(t_o(20, 30, 0.1, Standard.ashrae_55_2023)).toBe(25);
+    expect(t_o(20, 30, 0.3, Standard.ashrae_55_2023)).toBe(24);
+    expect(t_o(20, 30, 0.7, Standard.ashrae_55_2023)).toBe(23);
+  });
+});
 
 describe("t_o", () => {
   it.each([

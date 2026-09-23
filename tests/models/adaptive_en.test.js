@@ -101,7 +101,7 @@ describe("adaptive_en round_output default", () => {
 
 // ---------------------------------------------------------------------------
 // Cooling-effect acceptability boundary
-// Locks the cooling-effect gate (get_ce) inside adaptive_en. At
+// Locks the cooling-effect gate (adaptive_cooling_effect) inside adaptive_en. At
 // v >= 0.6 and to >= 25, ce = 1.2 widens the category I upper bound
 // from t_cmf + 2.0 to t_cmf + 2.0 + 1.2, which flips
 // acceptability_cat_i from false (no cooling effect, v = 0.1) to true

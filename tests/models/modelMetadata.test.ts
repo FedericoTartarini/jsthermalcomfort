@@ -13,7 +13,7 @@ import {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "../../src/index.js";
-import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.js";
+import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
 import {
   ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
@@ -724,7 +724,8 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
   test("the t_running_mean bound is the one adaptive_ashrae gates on, inclusive at both ends", () => {
     const { min, max } = ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean
       .applicability as { min: number; max: number };
-    const tmp_cmf = (trm: number) => adaptive_ashrae(25, 25, trm, 0.1).tmp_cmf;
+    const tmp_cmf = (trm: number) =>
+      adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: trm, v: 0.1 }).tmp_cmf;
     expect(tmp_cmf(min - 0.01)).toBeNaN();
     expect(Number.isFinite(tmp_cmf(min))).toBe(true);
     expect(Number.isFinite(tmp_cmf(max))).toBe(true);
@@ -733,14 +734,21 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
     // from the bound and not from the arithmetic.
     expect(
       Number.isFinite(
-        adaptive_ashrae(25, 25, min - 0.01, 0.1, "SI", false).tmp_cmf,
+        adaptive_ashrae({
+          tdb: 25,
+          tr: 25,
+          t_running_mean: min - 0.01,
+          v: 0.1,
+          units: "SI",
+          limit_inputs: false,
+        }).tmp_cmf,
       ),
     ).toBe(true);
   });
 
   test("the tdb, tr and v bounds are the ones adaptive_ashrae gates on", () => {
     const tmp_cmf = (tdb: number, tr: number, v: number) =>
-      adaptive_ashrae(tdb, tr, 20, v).tmp_cmf;
+      adaptive_ashrae({ tdb, tr, t_running_mean: 20, v }).tmp_cmf;
     const { tdb, tr, vr } = ASHRAE_55_LIMITS;
     expect(tmp_cmf(tdb.max + 0.01, 25, 0.1)).toBeNaN();
     expect(Number.isFinite(tmp_cmf(tdb.max, 25, 0.1))).toBe(true);
@@ -751,14 +759,24 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
   });
 
   test("adaptive_ashrae output keys match ADAPTIVE_ASHRAE_INFO.outputs", () => {
-    const result = adaptive_ashrae(25, 25, 20, 0.1);
+    const result = adaptive_ashrae({
+      tdb: 25,
+      tr: 25,
+      t_running_mean: 20,
+      v: 0.1,
+    });
     expect(Object.keys(result).sort()).toEqual(
       Object.keys(ADAPTIVE_ASHRAE_INFO.outputs).sort(),
     );
   });
 
   test("temperature outputs are in °C, boolean outputs are unitless and unclassified", () => {
-    const result = adaptive_ashrae(25, 25, 20, 0.1) as Record<string, unknown>;
+    const result = adaptive_ashrae({
+      tdb: 25,
+      tr: 25,
+      t_running_mean: 20,
+      v: 0.1,
+    }) as Record<string, unknown>;
     for (const [key, info] of Object.entries(ADAPTIVE_ASHRAE_INFO.outputs)) {
       if (typeof result[key] === "boolean") {
         expect(info.unit).toBeNull();

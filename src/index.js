@@ -18,6 +18,12 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/modelDocs.js").ClassifierBins} ClassifierBins
  */
+/**
+ * @typedef {import("./models/adaptive_ashrae.js").AdaptiveAshraeParams} AdaptiveAshraeParams
+ */
+/**
+ * @typedef {import("./models/adaptive_ashrae.js").AdaptiveAshraeResult} AdaptiveAshraeResult
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

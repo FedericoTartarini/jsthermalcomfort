@@ -5,6 +5,7 @@ import {
   validateInputs,
   Standard,
 } from "../utilities/utilities.js";
+import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -115,7 +116,7 @@ export function adaptive_en(
 
   const to = t_o(tdb, tr, v, standard);
 
-  const ce = get_ce(v, to);
+  const ce = adaptive_cooling_effect(v, to);
 
   let t_cmf = 0.33 * t_running_mean + 18.8;
 
@@ -186,23 +187,4 @@ export function adaptive_en(
     tmp_cmf_cat_ii_low: t_cmf_ii_lower,
     tmp_cmf_cat_iii_low: t_cmf_iii_lower,
   };
-}
-/**
- *
- * @param {number} v
- * @param {number} to
- * @returns {number}
- */
-export function get_ce(v, to) {
-  let ce = 0;
-  if (v >= 0.6 && to >= 25.0) {
-    if (v < 0.9) {
-      ce = 1.2;
-    } else if (v < 1.2) {
-      ce = 1.8;
-    } else {
-      ce = 2.2;
-    }
-  }
-  return ce;
 }

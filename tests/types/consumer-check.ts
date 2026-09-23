@@ -18,6 +18,8 @@
  */
 
 import type {
+  AdaptiveAshraeParams,
+  AdaptiveAshraeResult,
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
@@ -32,6 +34,7 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   Standard,
+  adaptive_ashrae,
   classifyFromBins,
   clo_typical_ensembles,
   pmv_ppd,
@@ -43,8 +46,6 @@ import {
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
 const ashrae: ModelInfo = PMV_PPD_ASHRAE_INFO;
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
-// ADAPTIVE_ASHRAE_INFO is declared in a .js file through a JSDoc `@type`, the
-// path that emits `any` when the tag is missing (see 2. above).
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 
 // The shape a front end actually reaches for: a per-model applicability limit.
@@ -75,7 +76,7 @@ const edgeCount: number | undefined = bins?.edges.length;
 const notANumber: number = PMV_PPD_ISO_INFO.label;
 // @ts-expect-error `inputs` has no `nonexistent_variable` key.
 const notAKey: VariableInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
-// @ts-expect-error `label` is a string, not a number (the JSDoc-typed constant).
+// @ts-expect-error `label` is a string, not a number.
 const notANumberEither: number = ADAPTIVE_ASHRAE_INFO.label;
 
 // The runtime values are deep-frozen, so the types must reject writes too.
@@ -91,7 +92,7 @@ PMV_PPD_ISO_INFO.inputs.tdb = { unit: "°C" };
 PMV_PPD_ISO_INFO.label = "something else";
 // @ts-expect-error push mutates, and the standards array is readonly.
 PMV_PPD_ISO_INFO.standards.push(Standard.ashrae_55_2023);
-// @ts-expect-error the JSDoc-typed metadata is readonly too.
+// @ts-expect-error the adaptive metadata is readonly too.
 ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability!.max = 40;
 // @ts-expect-error the ASHRAE PMV metadata is readonly.
 PMV_PPD_ASHRAE_INFO.outputs.pmv = { unit: null };
@@ -123,6 +124,35 @@ pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2005, {
   // @ts-expect-error airspeed_control does not exist on the ISO kwargs type.
   airspeed_control: true,
 });
+
+// adaptive_ashrae takes one params object keyed like upstream's keyword
+// arguments (ADR 0002), and both the params and the result types are exported
+// by name. If the published signature degrades to `any`, the lines below stop
+// being errors and tsc fails with "Unused '@ts-expect-error' directive".
+const adaptiveParams: AdaptiveAshraeParams = {
+  tdb: 77,
+  tr: 77,
+  t_running_mean: 68,
+  v: 0.3,
+  units: "IP",
+  limit_inputs: false,
+  round_output: false,
+};
+const adaptiveResult: AdaptiveAshraeResult = adaptive_ashrae(adaptiveParams);
+// @ts-expect-error `round` is not a param; the switch is `round_output`.
+adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 20, v: 0.1, round: false });
+// @ts-expect-error t_running_mean is a required quantity.
+adaptive_ashrae({ tdb: 25, tr: 25, v: 0.1 });
+adaptive_ashrae({
+  tdb: 25,
+  tr: 25,
+  t_running_mean: 20,
+  v: 0.1,
+  // @ts-expect-error units is "SI" or "IP".
+  units: "metric",
+});
+// @ts-expect-error tdb must be a number.
+adaptive_ashrae({ tdb: "25", tr: 25, t_running_mean: 20, v: 0.1 });
 
 // Both wrappers return the applicability rows a call broke (issue #199), typed
 // through to the bound, so a front end can phrase "35 °C is above 30 °C"
@@ -164,6 +194,7 @@ export {
   ashrae,
   heatIndex,
   adaptive,
+  adaptiveResult,
   notANumberEither,
   minTdb,
   isoStandards,

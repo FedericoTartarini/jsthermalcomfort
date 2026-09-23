@@ -13,6 +13,9 @@
  *   (`test("test_pmv_ppd_iso_standard_validation", ...)`).
  * - `@pytest.mark.parametrize` becomes `test.each`, using upstream's `ids` as
  *   the case names where it gives them.
+ * - A fixture row is passed to the model unchanged, `fn(inputs)`, as
+ *   upstream's `fn(**inputs)`: the model takes one params object keyed like
+ *   upstream's keyword arguments (ADR 0002).
  * - Same inputs, same expected values. Use upstream's tolerance where it
  *   states one (`pytest.approx(..., abs=...)`, a fixture's `tolerance`), 1e-6
  *   otherwise, which is also `validateResult`'s default for a key the

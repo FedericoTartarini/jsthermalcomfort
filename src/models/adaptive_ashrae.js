@@ -42,11 +42,11 @@ import { get_ce } from "./adaptive_en.js";
  * @param {number} t_running_mean - running mean temperature, default in [°C] in [°C] in [°F] if `units` = 'IP'
  * The running mean temperature can be calculated using the function {@link #running_mean_outdoor_temperature|running_mean_outdoor_temperature}
  * @param {number} v - air speed, default in [m/s] in [fps] if `units` = 'IP'
- * @param {"SI" | "IP"} units - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} limit_inputs - By default, if the inputs are outsude the standard applicability limits the
+ * @param {"SI" | "IP"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [limit_inputs=true] - By default, if the inputs are outsude the standard applicability limits the
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
- * @param {boolean} [round_output=true] - if true, rounds the returned comfort temperature and bounds to one decimal place in the output unit (rounding is applied after any IP unit conversion); if false, returns the unrounded values. Note: `acceptability_80` and `acceptability_90` are always computed from unrounded values and are unaffected by this parameter.
+ * @param {boolean} [round_output=true] - if true, rounds `tmp_cmf` to one decimal place in SI before the comfort bounds are derived, so the bounds inherit that rounding. If false, returns the comfort temperature and derived bounds at full precision. Under `units="IP"`, the rounded SI values are then converted to °F.
  *
  * @returns {AdaptiveAshraeResult} set containing results for the model
  *
@@ -141,6 +141,10 @@ export function adaptive_ashrae(
     if (warnings.length > 0 || !trm_valid) t_cmf = NaN;
   }
 
+  if (round_output) {
+    t_cmf = round(t_cmf, 1);
+  }
+
   let tmp_cmf_80_low = t_cmf - 3.5;
   let tmp_cmf_90_low = t_cmf - 2.5;
   let tmp_cmf_80_up = t_cmf + 3.5 + ce;
@@ -166,14 +170,6 @@ export function adaptive_ashrae(
       },
       "SI",
     ));
-  }
-
-  if (round_output) {
-    t_cmf = round(t_cmf, 1);
-    tmp_cmf_80_low = round(tmp_cmf_80_low, 1);
-    tmp_cmf_80_up = round(tmp_cmf_80_up, 1);
-    tmp_cmf_90_low = round(tmp_cmf_90_low, 1);
-    tmp_cmf_90_up = round(tmp_cmf_90_up, 1);
   }
 
   return {

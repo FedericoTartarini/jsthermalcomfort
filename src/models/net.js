@@ -1,4 +1,25 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+
+/**
+ * Round to a fixed precision using NumPy's ties-to-even rule.
+ *
+ * @param {number} value - value to round
+ * @param {number} precision - number of decimal places
+ * @returns {number} rounded value
+ * @private
+ */
+function roundToEven(value, precision) {
+  const factor = 10 ** precision;
+  const scaled = value * factor;
+  const lower = Math.floor(scaled);
+
+  if (scaled - lower === 0.5) {
+    return (lower + (Math.abs(lower) % 2)) / factor;
+  }
+
+  return Math.round(scaled) / factor;
+}
+
 /**
  * @typedef {object} NetResult
  * @property {number} net - Normal Effective Temperature, [°C]
@@ -30,11 +51,10 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]
  * @param {number} v - wind speed [m/s] at 1.2 m above the ground
- * @param {object} [options] - configuration options for the function.
- * @param {boolean} [options.round = true] - If true, rounds output value. If
- * false, it does not.
+ * @param {boolean} [round_output=true] - If true, rounds the output value to
+ * one decimal place. If false, returns the unrounded value.
  *
- * @returns {NetResult} set containing results for the
+ * @returns {NetResult} result containing the Normal Effective Temperature
  *
  * @example
  * const result = net(37, 100, 0.1);
@@ -44,19 +64,19 @@ const NET_SCHEMA = {
   tdb: { type: "number" },
   rh: { type: "number" },
   v: { type: "number" },
-  round: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
 };
 
-export function net(tdb, rh, v, options = { round: true }) {
-  validateInputs({ tdb, rh, v, round: options.round }, NET_SCHEMA);
+export function net(tdb, rh, v, round_output = true) {
+  validateInputs({ tdb, rh, v, round_output }, NET_SCHEMA);
   const frac = 1.0 / (1.76 + 1.4 * v ** 0.75);
   let et =
     37 -
     (37 - tdb) / (0.68 - 0.0014 * rh + frac) -
     0.29 * tdb * (1 - 0.01 * rh);
 
-  if (options.round) {
-    et = round(et, 1);
+  if (round_output) {
+    et = roundToEven(et, 1);
   }
 
   return { net: et };

@@ -2,6 +2,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- **Breaking: `net()` rounding argument:** `net(tdb, rh, v, round_output)` now accepts `round_output` directly as a boolean, matching `pythermalcomfort`. Replace `net(tdb, rh, v, { round: false })` with `net(tdb, rh, v, false)`. The default remains `true`, and halfway values now use NumPy-compatible ties-to-even rounding.
 - **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
 
   | Before | After | Also available as |

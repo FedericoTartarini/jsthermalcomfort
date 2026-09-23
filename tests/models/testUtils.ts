@@ -1,3 +1,40 @@
+/**
+ * Shared harness for the model tests: loads the validation-data fixtures that
+ * pythermalcomfort's tests use and checks a model's result against a row.
+ *
+ * Mirroring an upstream test. A mirrored test carries an upstream test's
+ * name, inputs and expected values into Jest; follow these conventions so a
+ * gap or a regression can be found by grepping either side:
+ *
+ * - One `describe` per upstream test file, named after that file
+ *   (`test_pmv_ppd_iso.py` → `describe("test_pmv_ppd_iso", ...)`).
+ * - A pytest class becomes a nested `describe` with the class name.
+ * - Each test keeps the upstream function name verbatim
+ *   (`test("test_pmv_ppd_iso_standard_validation", ...)`).
+ * - `@pytest.mark.parametrize` becomes `test.each`, using upstream's `ids` as
+ *   the case names where it gives them.
+ * - Same inputs, same expected values. Use upstream's tolerance where it
+ *   states one (`pytest.approx(..., abs=...)`, a fixture's `tolerance`), 1e-6
+ *   otherwise, which is also `validateResult`'s default for a key the
+ *   fixture's `tolerance` does not name.
+ * - Array or vector inputs run element-wise: one scalar case per element,
+ *   the expected outputs indexed the same way. `loadTestData` does this for
+ *   fixture rows (see `expandArrayRows`).
+ * - A fixture test runs every row its upstream counterpart means to run, even
+ *   where upstream's filter misses rows (the PMV tests match lowercase
+ *   `"iso"`/`"ashrae"` against the fixture's uppercase labels).
+ * - Error classes: `ValueError` → `Error`, `TypeError` → `TypeError`. Assert
+ *   the message too where upstream matches one (`pytest.raises(match=...)`).
+ * - A `UserWarning` assertion becomes an assertion on the `warnings` rows
+ *   where the model returns them (PMV). Otherwise, and for any upstream test
+ *   that cannot be ported, write `test.todo("<upstream name>: <reason>")`
+ *   so the gap stays visible in the test runner.
+ * - Whole-object equality (`assert result == {...}`) becomes a field-by-field
+ *   check of upstream's fields; extra JS-only fields on the result are fine.
+ * - JS-only tests live in their own `describe` in the same file, after the
+ *   mirrored ones. A JS-only test that a mirrored test now covers with the
+ *   same inputs is deleted.
+ */
 import { expect } from "@jest/globals";
 import fetch from "node-fetch"; // Import node-fetch to support data fetching
 
@@ -16,18 +53,53 @@ export interface Fixture {
 }
 
 /**
- * Drop rows whose `inputs` contain any array-valued field. Pure helper so it
- * can be unit-tested without a network round trip.
+ * Expand every row whose `inputs` hold arrays into one scalar case per
+ * element: element `i` of each array input and of each array output, with
+ * the scalar inputs and outputs repeated. Rows without array inputs are kept
+ * as they are, and the order of the cases follows the fixture. Pure helper so
+ * it can be unit-tested without a network round trip.
  *
- * @param {Array<{ inputs: Object }>} rows
- * @returns {Array}
+ * @param {Array<{ inputs: Object, outputs?: Object }>} rows
+ * @returns {Array} the scalar cases
  */
-export function filterScalarRows<T extends { inputs: Record<string, unknown> }>(
-  rows: T[],
-): T[] {
-  return rows.filter((row) =>
-    Object.values(row.inputs).every((value) => !Array.isArray(value)),
-  );
+export function expandArrayRows<
+  T extends {
+    inputs: Record<string, unknown>;
+    outputs?: Record<string, unknown>;
+  },
+>(rows: T[]): T[] {
+  return rows.flatMap((row) => {
+    const lengths = new Set(
+      Object.values(row.inputs)
+        .filter(Array.isArray)
+        .map((value) => value.length),
+    );
+    if (lengths.size === 0) return [row];
+    if (lengths.size > 1) {
+      throw new Error(
+        `expandArrayRows: array inputs differ in length in ${JSON.stringify(row.inputs)}`,
+      );
+    }
+    const [length] = lengths;
+    const elementAt = (values: Record<string, unknown>, index: number) =>
+      Object.fromEntries(
+        Object.entries(values).map(([key, value]) => {
+          if (!Array.isArray(value)) return [key, value];
+          if (value.length !== length) {
+            throw new Error(
+              `expandArrayRows: "${key}" has length ${value.length}, ` +
+                `the row's array inputs have length ${length}`,
+            );
+          }
+          return [key, value[index]];
+        }),
+      );
+    return Array.from({ length }, (_, index) => ({
+      ...row,
+      inputs: elementAt(row.inputs, index),
+      ...(row.outputs && { outputs: elementAt(row.outputs, index) }),
+    }));
+  });
 }
 
 /**
@@ -72,14 +144,14 @@ export async function loadTestData(
     throw error;
   }
 
-  // If returnArray is false, filter out test cases that have array inputs.
+  // If returnArray is false, expand rows with array inputs into scalar cases.
   // Callers iterate `testData.data`, so an empty dataset would register
   // zero tests yet report green; assertNonEmptyRows turns that into a hard
   // failure with a descriptive message.
   if (!returnArray && Array.isArray(testData.data)) {
     testData.data = assertNonEmptyRows(
-      filterScalarRows(testData.data),
-      `loadTestData scalar filter (url=${url})`,
+      expandArrayRows(testData.data),
+      `loadTestData (url=${url})`,
     );
   }
   return { testData, tolerances };
@@ -134,9 +206,9 @@ export function validateResult(
       // below then report against the expected value.
       const actualValue = (modelResult as Record<string, unknown>)[key];
 
-      // Use the specified tolerance if available, otherwise default to a strict 0.0001
+      // Use the specified tolerance if available, otherwise upstream's 1e-6
       const tol =
-        tolerances && tolerances[key] !== undefined ? tolerances[key] : 0.0001;
+        tolerances && tolerances[key] !== undefined ? tolerances[key] : 1e-6;
 
       // Handle arrays
       if (Array.isArray(expectedValue)) {

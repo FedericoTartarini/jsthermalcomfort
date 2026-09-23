@@ -28,19 +28,9 @@ let { testData, tolerances } = await loadTestData(
 describe("pmv_pdd", () => {
   test.each(testData.data)("Test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const {
-      tdb,
-      tr,
-      vr,
-      rh,
-      met,
-      clo,
-      wme,
-      standard,
-      units,
-      limit_inputs,
-      airspeed_control,
-    } = inputs as {
+    // The row's remaining keys become the options, only those it carries:
+    // an explicit `limit_inputs: undefined` would override the default.
+    const { tdb, tr, vr, rh, met, clo, wme, standard, ...kwargs } = inputs as {
       tdb: number;
       tr: number;
       vr: number;
@@ -52,12 +42,6 @@ describe("pmv_pdd", () => {
       units?: "SI" | "IP";
       limit_inputs?: boolean;
       airspeed_control?: boolean;
-    };
-
-    const kwargs = {
-      units,
-      limit_inputs,
-      airspeed_control,
     };
 
     // The shared fixture files predate versioned identifiers and still carry

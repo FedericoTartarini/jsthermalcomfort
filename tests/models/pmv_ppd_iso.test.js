@@ -10,28 +10,23 @@ import {
   validateResult,
 } from "./testUtils.ts";
 
-// Load test data from the shared repository (filters out array-input rows).
+// Load test data from the shared repository (array rows run element-wise).
 let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd, false);
 
-// Keep only scalar SI ISO rows.
+// Keep the ISO rows, SI and IP alike. A row without a standard is ISO, as
+// upstream's test_pmv_ppd treats it.
 const isoData = assertNonEmptyRows(
-  testData.data.filter((testCase) => {
-    const { standard, units } = testCase.inputs;
-    const isISO = standard === "ISO";
-    const isSI = !units || units.toLowerCase() === "si";
-    return isISO && isSI;
-  }),
-  "pmv_ppd_iso scalar SI ISO rows",
+  testData.data.filter(({ inputs }) => (inputs.standard ?? "ISO") === "ISO"),
+  "pmv_ppd_iso ISO rows",
 );
 
 describe("pmv_ppd_iso", () => {
   test.each(isoData)("ISO test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, tr, vr, rh, met, clo, wme, limit_inputs } = inputs;
-
-    // Pass limit_inputs through kwargs so rows with limit_inputs=false
-    // are handled correctly.
-    const kwargs = { limit_inputs };
+    // The row's remaining keys (units, limit_inputs) become the options, as
+    // upstream's `pmv_ppd_iso(**inputs)`. Only the keys a row carries: an
+    // explicit `limit_inputs: undefined` would override the model's default.
+    const { tdb, tr, vr, rh, met, clo, wme, standard, ...kwargs } = inputs;
 
     const modelResult = pmv_ppd_iso(
       tdb,

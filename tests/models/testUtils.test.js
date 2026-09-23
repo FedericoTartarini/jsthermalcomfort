@@ -16,7 +16,7 @@ import {
 } from "@jest/globals";
 import {
   validateResult,
-  filterScalarRows,
+  expandArrayRows,
   assertNonEmptyRows,
 } from "./testUtils.ts";
 
@@ -88,15 +88,27 @@ describe("validateResult — numeric comparison", () => {
     ).toThrow();
   });
 
-  test("falls back to default tolerance 0.0001 when tolerances is missing", () => {
+  test("falls back to upstream's default tolerance 1e-6 when tolerances is missing", () => {
     expect.hasAssertions();
     // Within default tolerance — passes.
     expect(() =>
-      validateResult({ a: 1.00005 }, { a: 1.0 }, undefined, {}),
+      validateResult({ a: 1.0000005 }, { a: 1.0 }, undefined, {}),
     ).not.toThrow();
     // Outside default tolerance — throws.
     expect(() =>
-      validateResult({ a: 1.001 }, { a: 1.0 }, undefined, {}),
+      validateResult({ a: 1.00001 }, { a: 1.0 }, undefined, {}),
+    ).toThrow();
+  });
+
+  test("falls back to 1e-6 for a key the tolerances object does not name", () => {
+    expect.hasAssertions();
+    expect(() =>
+      validateResult(
+        { a: 1.0, b: 1.00001 },
+        { a: 1.0, b: 1.0 },
+        { a: 0.1 },
+        {},
+      ),
     ).toThrow();
   });
 
@@ -210,34 +222,78 @@ describe("validateResult — non-numeric comparison", () => {
   });
 });
 
-describe("filterScalarRows", () => {
-  test("keeps rows whose inputs are all scalar", () => {
+describe("expandArrayRows", () => {
+  test("keeps a row whose inputs are all scalar as it is", () => {
     expect.hasAssertions();
     const rows = [
       { inputs: { tdb: 25, rh: 50 }, outputs: { x: 1 } },
       { inputs: { tdb: 26, rh: 60 }, outputs: { x: 2 } },
     ];
-    expect(filterScalarRows(rows)).toHaveLength(2);
+    expect(expandArrayRows(rows)).toEqual(rows);
   });
 
-  test("drops rows containing any array input", () => {
+  test("expands an array row into one scalar case per element", () => {
     expect.hasAssertions();
     const rows = [
-      { inputs: { tdb: 25, rh: 50 }, outputs: { x: 1 } },
-      { inputs: { tdb: [25, 26], rh: 50 }, outputs: { x: 2 } },
+      {
+        inputs: { tdb: [25, 26], tr: [24, 23], rh: 50, units: "IP" },
+        outputs: { x: [1, 2], label: ["a", "b"] },
+      },
     ];
-    const kept = filterScalarRows(rows);
-    expect(kept).toHaveLength(1);
-    expect(kept[0].inputs.tdb).toBe(25);
+    expect(expandArrayRows(rows)).toEqual([
+      {
+        inputs: { tdb: 25, tr: 24, rh: 50, units: "IP" },
+        outputs: { x: 1, label: "a" },
+      },
+      {
+        inputs: { tdb: 26, tr: 23, rh: 50, units: "IP" },
+        outputs: { x: 2, label: "b" },
+      },
+    ]);
   });
 
-  test("returns empty array when every row has array inputs", () => {
+  test("keeps a scalar output of an array row on every case", () => {
+    expect.hasAssertions();
+    const rows = [{ inputs: { tdb: [25, 26] }, outputs: { x: [1, 2], y: 7 } }];
+    expect(expandArrayRows(rows).map((row) => row.outputs)).toEqual([
+      { x: 1, y: 7 },
+      { x: 2, y: 7 },
+    ]);
+  });
+
+  test("keeps the row order, scalar and expanded rows interleaved", () => {
     expect.hasAssertions();
     const rows = [
-      { inputs: { tdb: [25, 26] }, outputs: { x: 1 } },
-      { inputs: { rh: [50, 60] }, outputs: { x: 2 } },
+      { inputs: { tdb: 20 }, outputs: { x: 0 } },
+      { inputs: { tdb: [25, 26] }, outputs: { x: [1, 2] } },
+      { inputs: { tdb: 30 }, outputs: { x: 3 } },
     ];
-    expect(filterScalarRows(rows)).toEqual([]);
+    expect(expandArrayRows(rows).map((row) => row.inputs.tdb)).toEqual([
+      20, 25, 26, 30,
+    ]);
+  });
+
+  test("keeps a row without outputs, expanding only its inputs", () => {
+    expect.hasAssertions();
+    const rows = [{ inputs: { tdb: [25, 26] } }];
+    expect(expandArrayRows(rows)).toEqual([
+      { inputs: { tdb: 25 } },
+      { inputs: { tdb: 26 } },
+    ]);
+  });
+
+  test("throws when the array inputs of a row differ in length", () => {
+    expect.hasAssertions();
+    const rows = [
+      { inputs: { tdb: [25, 26], tr: [25] }, outputs: { x: [1, 2] } },
+    ];
+    expect(() => expandArrayRows(rows)).toThrow(/length/);
+  });
+
+  test("throws when an array output's length differs from the inputs'", () => {
+    expect.hasAssertions();
+    const rows = [{ inputs: { tdb: [25, 26] }, outputs: { x: [1, 2, 3] } }];
+    expect(() => expandArrayRows(rows)).toThrow(/length/);
   });
 });
 

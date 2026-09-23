@@ -16,29 +16,23 @@ import {
   validateResult,
 } from "./testUtils.ts";
 
-// Load test data from the shared repository (filters out array-input rows).
+// Load test data from the shared repository (array rows run element-wise).
 let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd, false);
 
-// Keep only scalar SI ASHRAE rows.
+// Keep the ASHRAE rows, SI and IP alike.
 const ashraeData = assertNonEmptyRows(
-  testData.data.filter((testCase) => {
-    const { standard, units } = testCase.inputs;
-    const isAshrae = standard === "ASHRAE";
-    const isSI = !units || units.toLowerCase() === "si";
-    return isAshrae && isSI;
-  }),
-  "pmv_ppd_ashrae scalar SI ASHRAE rows",
+  testData.data.filter(({ inputs }) => inputs.standard === "ASHRAE"),
+  "pmv_ppd_ashrae ASHRAE rows",
 );
 
 describe("pmv_ppd_ashrae", () => {
   test.each(ashraeData)("ASHRAE test case #%#", (testCase) => {
     const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, tr, vr, rh, met, clo, wme, limit_inputs, airspeed_control } =
-      inputs;
-
-    // Pass optional flags through kwargs so rows with limit_inputs=false
-    // or airspeed_control=false are handled correctly.
-    const kwargs = { limit_inputs, airspeed_control };
+    // The row's remaining keys (units, limit_inputs, airspeed_control) become
+    // the options, as upstream's `pmv_ppd_ashrae(**inputs)`. Only the keys a
+    // row carries: an explicit `limit_inputs: undefined` would override the
+    // model's default.
+    const { tdb, tr, vr, rh, met, clo, wme, standard, ...kwargs } = inputs;
 
     const modelResult = pmv_ppd_ashrae(tdb, tr, vr, rh, met, clo, wme, kwargs);
 

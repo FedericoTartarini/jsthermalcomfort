@@ -14,11 +14,39 @@ import {
   assertNumber,
   validateInputs,
   check_standard_compliance,
+  round,
 } from "../../src/utilities/utilities";
 import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
 import { LimitSet, Standard } from "../../src/utilities/utilities.js";
 
 const DEFAULT_TOLERANCE = 0.01;
+
+// JS-only: upstream rounds with numpy, so `round` must round half to even
+// on the scaled value exactly as `np.round` does.
+describe("round", () => {
+  test.each([
+    [26.25, 1, 26.2],
+    [26.35, 1, 26.4],
+    [-2.5, 0, -2],
+    [-1.5, 0, -2],
+    [0.5, 0, 0],
+    [1.5, 0, 2],
+    [2.5, 0, 2],
+    [26.26, 1, 26.3],
+    [-26.26, 1, -26.3],
+  ])("round(%p, %p) is %p", (number, precision, expected) => {
+    expect(round(number, precision)).toBe(expected);
+  });
+
+  test("keeps the sign of a negative value that rounds to zero, like numpy", () => {
+    expect(round(-0.4, 0)).toBe(-0);
+    expect(round(-0.5, 0)).toBe(-0);
+  });
+
+  test("passes NaN through", () => {
+    expect(round(NaN, 1)).toBeNaN();
+  });
+});
 
 describe("transpose_sharp_altitude", () => {
   it.each([

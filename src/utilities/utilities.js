@@ -2,7 +2,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
 import { t_o } from "../psychrometrics/t_o.js";
 
 /**
- * Rounds a number to the given precision.
+ * Rounds a number to the given precision, half to even, as numpy's `round` does.
  *
  * @param {number} number - the number to round
  * @param {number} precision - the number of decimal places to round to
@@ -10,7 +10,11 @@ import { t_o } from "../psychrometrics/t_o.js";
  */
 export function round(number, precision) {
   const smudge = 10 ** precision;
-  return Math.round(number * smudge) / smudge;
+  const scaled = number * smudge;
+  let rounded = Math.round(scaled);
+  // Math.round sends a tie up; numpy's rint sends it to the even neighbour.
+  if (rounded - scaled === 0.5 && rounded % 2 !== 0) rounded -= 1;
+  return rounded / smudge;
 }
 
 /**

@@ -33,8 +33,8 @@ describe("validateResult (Testing the Test)", () => {
     ).toThrow();
   });
 
-  it("should use default tolerance of 0.0001 if no tolerance is provided for a key", () => {
-    const modelResult = { a: 25.50005 };
+  it("should use default tolerance of 1e-6 if no tolerance is provided for a key", () => {
+    const modelResult = { a: 25.5000005 };
     const expectedOutput = { a: 25.5 };
     const tolerances = {}; // No tolerance for 'a'
 
@@ -42,7 +42,7 @@ describe("validateResult (Testing the Test)", () => {
       validateResult(modelResult, expectedOutput, tolerances),
     ).not.toThrow();
 
-    const failingResult = { a: 25.5002 };
+    const failingResult = { a: 25.500002 };
     expect(() =>
       validateResult(failingResult, expectedOutput, tolerances),
     ).toThrow();

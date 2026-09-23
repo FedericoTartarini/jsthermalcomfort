@@ -42,8 +42,8 @@ import { get_ce } from "./adaptive_en.js";
  * @param {number} t_running_mean - running mean temperature, default in [°C] in [°C] in [°F] if `units` = 'IP'
  * The running mean temperature can be calculated using the function {@link #running_mean_outdoor_temperature|running_mean_outdoor_temperature}
  * @param {number} v - air speed, default in [m/s] in [fps] if `units` = 'IP'
- * @param {"SI" | "IP"} units - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} limit_inputs - By default, if the inputs are outsude the standard applicability limits the
+ * @param {"SI" | "IP"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [limit_inputs=true] - By default, if the inputs are outsude the standard applicability limits the
  * function returns nan. If False returns pmv and ppd values even if input values are
  * outside the applicability limits of the model.
  * @param {boolean} [round_output=true] - if true, rounds `tmp_cmf` to one decimal place in SI before the comfort bounds are derived, so the bounds inherit that rounding. If false, returns the comfort temperature and derived bounds at full precision. Under `units="IP"`, the rounded SI values are then converted to °F.

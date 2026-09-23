@@ -40,3 +40,17 @@ describe("at input validation", () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// Deviation from upstream's unasserted test_at_q value (jsthermalcomfort#219)
+// ---------------------------------------------------------------------------
+describe("Deviation from upstream's unasserted test_at_q value (jsthermalcomfort#219)", () => {
+  // Mirrors pythermalcomfort's test_at_q, but with the correct expected
+  // value. Upstream's test_at_q calls is_equal(...) without asserting the
+  // result, so its hardcoded 25.3 was never actually checked. The real value
+  // for these inputs is 30.9 on both sides.
+  test("calculates AT correctly when q is provided", () => {
+    const result = at(25, 30, 0.1, 100);
+    expect(result.at).toBeCloseTo(30.9, 1);
+  });
+});

@@ -22,6 +22,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("heat_index");
   });
 
+  it("should have models.esi", () => {
+    expect(jsthermalcomfort.models.esi(30.2, 42.2, 766)).toEqual({ esi: 26.2 });
+  });
+
   it("should have models.wc", () => {
     expect(jsthermalcomfort.models).toHaveProperty("wc");
   });

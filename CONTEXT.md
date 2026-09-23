@@ -20,9 +20,9 @@ _Avoid_: variant, model function, facade
 A boolean option a model takes, named as upstream names it (`limit_inputs`, `round_output`, `airspeed_control`).
 _Avoid_: flag, toggle, kwarg
 
-**Options**:
-The single trailing object that carries a model's switches and its non-numeric settings (`units`, `standard`).
-_Avoid_: kwargs, config, params
+**Params**:
+The single object a model takes, whose keys are upstream's keyword parameters: physical quantities and switches alike, named and defaulted as upstream names and defaults them.
+_Avoid_: options, kwargs, config, arguments object
 
 **Standard**:
 A versioned identifier for a published standard (`Standard.ashrae_55_2023`, value `"55-2023"`), the `standard` option that selects one. Upstream calls this `Models`/`model`; a model here is a function such as `pmv_ppd_iso`.
@@ -39,6 +39,10 @@ _Avoid_: pattern, app surface, extras
 **Model info**:
 The published metadata for one model (`<MODEL>_INFO`): label, description, standards, and per-quantity unit and applicability. Upstream has no equivalent.
 _Avoid_: schema, metadata object, model docs
+
+**Classifier**:
+A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one exactly when upstream computes that output with `_mapping()`; a bound that moves with another input (adaptive acceptability) is not a classifier. The labelled output's `classifies` names the output whose value the bins cut (`tsv` classifies `pmv`).
+_Avoid_: mapping, thresholds, category table
 
 **Warnings rows**:
 The applicability bounds a PMV call broke, returned as data instead of emitted as a Python `UserWarning`. Filled whatever `limit_inputs` is.

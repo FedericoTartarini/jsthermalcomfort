@@ -28,6 +28,8 @@ import type {
   ModelInfo,
   PmvPpdAshraeParams,
   PmvPpdAshraeResult,
+  PmvPpdIsoParams,
+  PmvPpdIsoResult,
   VariableInfo,
 } from "jsthermalcomfort";
 import {
@@ -107,27 +109,75 @@ PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
 HEAT_INDEX_STRESS_CATEGORY_BINS.labels.push("new label");
 
-// pmv_ppd_iso's JSDoc must be attached to the function itself, not to its
-// schema constant, or every parameter degrades to `any` and `model` degrades
-// to the single literal it happened to default to (issue #196-class defect).
-const pmvIso = pmv_ppd_iso(
-  25,
-  25,
-  0.1,
-  50,
-  1.2,
-  0.5,
-  0,
-  Standard.iso_7730_2005,
-);
+// pmv_ppd_iso takes one params object too (ADR 0002), with its params and
+// result types exported by name; the lines below are errors only while the
+// published signature is typed.
+const pmvIsoParams: PmvPpdIsoParams = {
+  tdb: 77,
+  tr: 77,
+  vr: 0.328,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  wme: 0,
+  standard: Standard.iso_7730_2005,
+  units: "IP",
+  limit_inputs: false,
+  round_output: false,
+};
+const pmvIsoIp: PmvPpdIsoResult = pmv_ppd_iso(pmvIsoParams);
+const pmvIso = pmv_ppd_iso({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+});
+pmv_ppd_iso({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error `round` is not a param; the switch is `round_output`.
+  round: false,
+});
+// @ts-expect-error clo is a required quantity.
+pmv_ppd_iso({ tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2 });
+pmv_ppd_iso({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error units is "SI" or "IP".
+  units: "metric",
+});
 // @ts-expect-error tdb must be a number.
-pmv_ppd_iso("25", 25, 0.1, 50, 1.2, 0.5);
-// @ts-expect-error model must be one of the two ISO 7730 Standard values.
-pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, "not-a-standard");
-// airspeed_control is an ASHRAE-only kwarg; the ISO wrapper must not expose
-// it, since its own JSDoc never documents it.
-pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2005, {
-  // @ts-expect-error airspeed_control does not exist on the ISO kwargs type.
+pmv_ppd_iso({ tdb: "25", tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 });
+pmv_ppd_iso({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error standard is one of the two ISO 7730 editions.
+  standard: Standard.ashrae_55_2023,
+});
+// airspeed_control is an ASHRAE-only switch; the ISO wrapper must not expose
+// it, as upstream's pmv_ppd_iso has no such parameter.
+pmv_ppd_iso({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error airspeed_control does not exist on PmvPpdIsoParams.
   airspeed_control: true,
 });
 
@@ -296,6 +346,7 @@ export {
   notANumber,
   notAKey,
   pmvIso,
+  pmvIsoIp,
   isoWarnings,
   isoRowMax,
   ashraeRowMax,

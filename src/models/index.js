@@ -16,7 +16,7 @@ import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
 import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.ts";
-import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
+import { pmv_ppd_iso } from "./pmv_ppd_iso.ts";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain } from "./solar_gain.js";
 import { cooling_effect } from "./cooling_effect.ts";

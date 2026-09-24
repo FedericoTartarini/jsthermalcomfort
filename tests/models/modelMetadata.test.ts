@@ -229,12 +229,21 @@ describe("standards — the editions each model accepts", () => {
     }
   });
 
-  test("PMV_PPD_ISO_INFO.standards is the set pmv_ppd_iso's model validation accepts", () => {
+  test("PMV_PPD_ISO_INFO.standards is the set pmv_ppd_iso's standard validation accepts", () => {
     // Probe the runtime rather than read its schema: a value belongs in the
     // metadata exactly when pmv_ppd_iso does not throw on it.
     const accepted = Object.values(Standard).filter((standard) => {
       try {
-        pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, standard as never);
+        pmv_ppd_iso({
+          tdb: 25,
+          tr: 25,
+          vr: 0.1,
+          rh: 50,
+          met: 1.2,
+          clo: 0.5,
+          wme: 0,
+          standard: standard as never,
+        });
         return true;
       } catch {
         return false;
@@ -355,54 +364,48 @@ describe("Identity — bins exported separately are the same object as in INFO",
 describe("Enforcement — extracted constants match runtime validation", () => {
   test("ISO_MET_MIN 0.8 is enforced: below boundary returns NaN (limit=true), on boundary returns finite (limit=true), and just below returns finite (limit=false inside [-2,2])", () => {
     // Part 1: Just below boundary (0.7) with limit_inputs=true should return NaN
-    const resultBelowLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      0.7,
-      0.5,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: true,
-      },
-    );
+    const resultBelowLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 0.7,
+      clo: 0.5,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: true,
+    });
     expect(resultBelowLimit.pmv).toBeNaN();
 
     // Part 2: At the boundary (0.8) with limit_inputs=true should return finite
     // (proving 0.8 is accepted, bound is inclusive)
-    const resultAtLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      0.8,
-      0.5,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: true,
-      },
-    );
+    const resultAtLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 0.8,
+      clo: 0.5,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: true,
+    });
     expect(Number.isFinite(resultAtLimit.pmv)).toBe(true);
 
     // Part 3: Just below boundary (0.7) with limit_inputs=false should return finite
     // AND inside [-2, 2] (proving the NaN at met=0.7 limit=true came from the met
     // bound, not the PMV output gate)
-    const resultBelowNoLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      0.7,
-      0.5,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: false,
-      },
-    );
+    const resultBelowNoLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 0.7,
+      clo: 0.5,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: false,
+    });
     expect(Number.isFinite(resultBelowNoLimit.pmv)).toBe(true);
     expect(resultBelowNoLimit.pmv).toBeGreaterThanOrEqual(-2);
     expect(resultBelowNoLimit.pmv).toBeLessThanOrEqual(2);
@@ -411,104 +414,92 @@ describe("Enforcement — extracted constants match runtime validation", () => {
   test("ISO_CLO_MIN 0 and ISO_CLO_MAX 2 are enforced: outside range returns NaN (limit=true), on boundary returns finite (limit=true), and outside returns finite (limit=false inside [-2,2])", () => {
     // Test lower boundary: 0 (inclusive, so -0.01 is outside)
     // Part 1: Just below boundary (-0.01) with limit_inputs=true should return NaN
-    const resultBelowMinLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      1.0,
-      -0.01,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: true,
-      },
-    );
+    const resultBelowMinLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: -0.01,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: true,
+    });
     expect(resultBelowMinLimit.pmv).toBeNaN();
 
     // Part 2: At lower boundary (0) with limit_inputs=true should return finite
-    const resultAtMinLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      1.0,
-      0,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: true,
-      },
-    );
+    const resultAtMinLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 0,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: true,
+    });
     expect(Number.isFinite(resultAtMinLimit.pmv)).toBe(true);
 
     // Part 3: Just below boundary (-0.01) with limit_inputs=false should return finite
     // AND inside [-2, 2] (proving NaN came from clo bound, not PMV output gate)
-    const resultBelowMinNoLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      1.0,
-      -0.01,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: false,
-      },
-    );
+    const resultBelowMinNoLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: -0.01,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: false,
+    });
     expect(Number.isFinite(resultBelowMinNoLimit.pmv)).toBe(true);
     expect(resultBelowMinNoLimit.pmv).toBeGreaterThanOrEqual(-2);
     expect(resultBelowMinNoLimit.pmv).toBeLessThanOrEqual(2);
 
     // Test upper boundary: 2 (inclusive, so 2.01 is outside)
     // Part 1: Just above boundary (2.01) with limit_inputs=true should return NaN
-    const resultAboveMaxLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      1.0,
-      2.01,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: true,
-      },
-    );
+    const resultAboveMaxLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 2.01,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: true,
+    });
     expect(resultAboveMaxLimit.pmv).toBeNaN();
 
     // Part 2: At upper boundary (2) with limit_inputs=true should return finite
-    const resultAtMaxLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      1.0,
-      2,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: true,
-      },
-    );
+    const resultAtMaxLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 2,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: true,
+    });
     expect(Number.isFinite(resultAtMaxLimit.pmv)).toBe(true);
 
     // Part 3: Just above boundary (2.01) with limit_inputs=false should return finite
     // AND inside [-2, 2] (proving NaN came from clo bound, not PMV output gate)
-    const resultAboveMaxNoLimit = pmv_ppd_iso(
-      25,
-      30,
-      0.1,
-      50,
-      1.0,
-      2.01,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: false,
-      },
-    );
+    const resultAboveMaxNoLimit = pmv_ppd_iso({
+      tdb: 25,
+      tr: 30,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 2.01,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: false,
+    });
     expect(Number.isFinite(resultAboveMaxNoLimit.pmv)).toBe(true);
     expect(resultAboveMaxNoLimit.pmv).toBeGreaterThanOrEqual(-2);
     expect(resultAboveMaxNoLimit.pmv).toBeLessThanOrEqual(2);
@@ -539,19 +530,17 @@ describe("Outputs staleness — heat_index output matches INFO", () => {
 
 describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
   test("pmv_ppd_iso output keys match PMV_PPD_ISO_INFO.outputs", () => {
-    const result = pmv_ppd_iso(
-      22,
-      22,
-      0.1,
-      50,
-      1.0,
-      0.5,
-      0,
-      Standard.iso_7730_2025,
-      {
-        limit_inputs: false,
-      },
-    );
+    const result = pmv_ppd_iso({
+      tdb: 22,
+      tr: 22,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 0.5,
+      wme: 0,
+      standard: Standard.iso_7730_2025,
+      limit_inputs: false,
+    });
     // `warnings` lists the bounds a call broke; it is not a quantity, so
     // INFO.outputs does not describe it (#199).
     const resultKeys = Object.keys(result)
@@ -562,7 +551,15 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
   });
 
   test("pmv_ppd_iso's warnings rows carry the bounds INFO references", () => {
-    const { warnings } = pmv_ppd_iso(35, 45, 0.1, 30, 1.0, 0.5, 0);
+    const { warnings } = pmv_ppd_iso({
+      tdb: 35,
+      tr: 45,
+      vr: 0.1,
+      rh: 30,
+      met: 1.0,
+      clo: 0.5,
+      wme: 0,
+    });
     const expected = [
       PMV_PPD_ISO_INFO.inputs.tdb.applicability,
       PMV_PPD_ISO_INFO.inputs.tr.applicability,
@@ -574,7 +571,15 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
   });
 
   test("pmv_ppd_iso always returns pmv, ppd, and tsv", () => {
-    const result = pmv_ppd_iso(22, 22, 0.1, 50, 1.0, 0.5, 0);
+    const result = pmv_ppd_iso({
+      tdb: 22,
+      tr: 22,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 0.5,
+      wme: 0,
+    });
     expect(result).toHaveProperty("pmv");
     expect(result).toHaveProperty("ppd");
     expect(result).toHaveProperty("tsv");

@@ -608,19 +608,17 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       // used to differ too, while ASHRAE classified its unrounded pmv (just above
       // -1.5); classified from the rounded -1.5, as upstream does, the
       // right-inclusive (-2.5, -1.5] bin makes it "Cool" like ISO's -1.52.
-      const iso = pmv_ppd_iso(
-        22.5,
-        22.5,
-        0.5,
-        50,
-        1.2,
-        0.5,
-        0,
-        Standard.iso_7730_2025,
-        {
-          limit_inputs: false,
-        },
-      );
+      const iso = pmv_ppd_iso({
+        tdb: 22.5,
+        tr: 22.5,
+        vr: 0.5,
+        rh: 50,
+        met: 1.2,
+        clo: 0.5,
+        wme: 0,
+        standard: Standard.iso_7730_2025,
+        limit_inputs: false,
+      });
       const ashrae = pmv_ppd_ashrae({
         tdb: 22.5,
         tr: 22.5,

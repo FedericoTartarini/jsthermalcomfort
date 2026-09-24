@@ -36,6 +36,12 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/pmv_ppd_ashrae.js").PmvPpdAshraeResult} PmvPpdAshraeResult
  */
+/**
+ * @typedef {import("./models/pmv_ppd_iso.js").PmvPpdIsoParams} PmvPpdIsoParams
+ */
+/**
+ * @typedef {import("./models/pmv_ppd_iso.js").PmvPpdIsoResult} PmvPpdIsoResult
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

@@ -48,6 +48,12 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/pmv_ppd_iso.js").PmvPpdIsoResult} PmvPpdIsoResult
  */
+/**
+ * @typedef {import("./models/utci.js").UtciParams} UtciParams
+ */
+/**
+ * @typedef {import("./models/utci.js").UtciResult} UtciResult
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

@@ -8,12 +8,16 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+  UTCI_INFO,
+  UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
   heat_index_rothfusz,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  utci,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
+import { UTCI_LIMITS } from "../../src/models/utci.ts";
 import {
   ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
@@ -40,6 +44,8 @@ describe("Model Metadata Exports — enumeration test", () => {
       "PMV_PPD_ISO_INFO",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
+      "UTCI_INFO",
+      "UTCI_STRESS_CATEGORY_BINS",
     ];
 
     const packageExports = Object.keys(pkg);
@@ -357,6 +363,12 @@ describe("Identity — bins exported separately are the same object as in INFO",
   test("HEAT_INDEX_STRESS_CATEGORY_BINS === HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier", () => {
     expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toBe(
       HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
+    );
+  });
+
+  test("UTCI_STRESS_CATEGORY_BINS === UTCI_INFO.outputs.stress_category.classifier", () => {
+    expect(UTCI_STRESS_CATEGORY_BINS).toBe(
+      UTCI_INFO.outputs.stress_category.classifier,
     );
   });
 });
@@ -831,5 +843,112 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
     expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80)).toBe(
       true,
     );
+  });
+});
+
+describe("UTCI_INFO — the UTCI model's metadata", () => {
+  test("labels the model and lists no standard", () => {
+    expect(UTCI_INFO.label).toBe("UTCI");
+    expect(typeof UTCI_INFO.description).toBe("string");
+    expect(UTCI_INFO.standards).toEqual([]);
+  });
+
+  test("inputs are utci's four quantities", () => {
+    expect(Object.keys(UTCI_INFO.inputs)).toEqual(["tdb", "tr", "v", "rh"]);
+    expect(UTCI_INFO.inputs.tdb.unit).toBe("°C");
+    expect(UTCI_INFO.inputs.tr.unit).toBe("°C");
+    expect(UTCI_INFO.inputs.v.unit).toBe("m/s");
+    expect(UTCI_INFO.inputs.rh.unit).toBe("%");
+  });
+
+  test("bounds are the UTCI_LIMITS objects the gate reads, not copies", () => {
+    // `toBe`, not `toEqual`: a rebuilt literal would satisfy equality and
+    // then be free to drift from what the runtime enforces.
+    expect(UTCI_INFO.inputs.tdb.applicability).toBe(UTCI_LIMITS.tdb);
+    expect(UTCI_INFO.inputs.v.applicability).toBe(UTCI_LIMITS.v);
+    expect(UTCI_INFO.derived!.tr_minus_tdb.applicability).toBe(
+      UTCI_LIMITS.tr_minus_tdb,
+    );
+    expect(UTCI_LIMITS).toEqual({
+      tdb: { min: -50, max: 50 },
+      v: { min: 0.5, max: 17 },
+      tr_minus_tdb: { min: -30, max: 70 },
+    });
+    // tr is bounded only through its difference from tdb, and rh not at all.
+    expect(UTCI_INFO.inputs.tr.applicability).toBeUndefined();
+    expect(UTCI_INFO.inputs.rh.applicability).toBeUndefined();
+    expect(Object.keys(UTCI_INFO.derived!)).toEqual(["tr_minus_tdb"]);
+    expect(UTCI_INFO.derived!.tr_minus_tdb.unit).toBe("°C");
+  });
+
+  test("every UTCI_LIMITS entry is frozen, not just the container", () => {
+    expect(Object.isFrozen(UTCI_LIMITS)).toBe(true);
+    for (const bound of Object.values(UTCI_LIMITS)) {
+      expect(Object.isFrozen(bound)).toBe(true);
+    }
+  });
+
+  test("the published bounds are the ones utci gates on, inclusive at both ends", () => {
+    const value = (tdb: number, tr: number, v: number) =>
+      utci({ tdb, tr, v, rh: 50 }).utci;
+    const { tdb, v } = UTCI_INFO.inputs;
+    const { min: tdbMin, max: tdbMax } = tdb.applicability as {
+      min: number;
+      max: number;
+    };
+    const { min: vMin, max: vMax } = v.applicability as {
+      min: number;
+      max: number;
+    };
+    const { min: diffMin, max: diffMax } = UTCI_INFO.derived!.tr_minus_tdb
+      .applicability as { min: number; max: number };
+    expect(Number.isFinite(value(tdbMax, tdbMax, 1))).toBe(true);
+    expect(value(tdbMax + 0.01, tdbMax, 1)).toBeNaN();
+    expect(Number.isFinite(value(tdbMin, tdbMin, 1))).toBe(true);
+    expect(value(tdbMin - 0.01, tdbMin, 1)).toBeNaN();
+    expect(Number.isFinite(value(20, 20, vMin))).toBe(true);
+    expect(value(20, 20, vMin - 0.01)).toBeNaN();
+    expect(Number.isFinite(value(20, 20, vMax))).toBe(true);
+    expect(value(20, 20, vMax + 0.01)).toBeNaN();
+    expect(Number.isFinite(value(20, 20 + diffMax, 1))).toBe(true);
+    expect(value(20, 20 + diffMax + 0.01, 1)).toBeNaN();
+    expect(Number.isFinite(value(20, 20 + diffMin, 1))).toBe(true);
+    expect(value(20, 20 + diffMin - 0.01, 1)).toBeNaN();
+  });
+
+  test("stress_category is dimensionless and classified by UTCI_STRESS_CATEGORY_BINS", () => {
+    expect(UTCI_INFO.outputs.utci.unit).toBe("°C");
+    expect(UTCI_INFO.outputs.stress_category.unit).toBeNull();
+    expect(UTCI_INFO.outputs.stress_category.classifier).toBe(
+      UTCI_STRESS_CATEGORY_BINS,
+    );
+    expect(UTCI_STRESS_CATEGORY_BINS.right).toBe(true);
+    expect(UTCI_STRESS_CATEGORY_BINS.edges).toEqual([
+      -40, -27, -13, 0, 9, 26, 32, 38, 46, 1000,
+    ]);
+    expect(UTCI_STRESS_CATEGORY_BINS.labels).toHaveLength(
+      UTCI_STRESS_CATEGORY_BINS.edges.length,
+    );
+  });
+
+  test("utci output keys match UTCI_INFO.outputs", () => {
+    const result = utci({ tdb: 25, tr: 25, v: 1, rh: 50 });
+    expect(Object.keys(result).sort()).toEqual(
+      Object.keys(UTCI_INFO.outputs).sort(),
+    );
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(UTCI_INFO)).toBe(true);
+    expect(Object.isFrozen(UTCI_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(UTCI_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(UTCI_INFO.inputs.tdb)).toBe(true);
+    expect(Object.isFrozen(UTCI_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(UTCI_INFO.derived)).toBe(true);
+    expect(Object.isFrozen(UTCI_INFO.derived!.tr_minus_tdb)).toBe(true);
+    const classifier = UTCI_INFO.outputs.stress_category.classifier!;
+    expect(Object.isFrozen(classifier)).toBe(true);
+    expect(Object.isFrozen(classifier.edges)).toBe(true);
+    expect(Object.isFrozen(classifier.labels)).toBe(true);
   });
 });

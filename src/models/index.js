@@ -27,7 +27,7 @@ import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout } from "./clo_tout.js";
-import { utci } from "./utci.js";
+import { utci, UTCI_INFO, UTCI_STRESS_CATEGORY_BINS } from "./utci.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import {
@@ -76,6 +76,8 @@ export {
   set_tmp,
   two_nodes,
   utci,
+  UTCI_INFO,
+  UTCI_STRESS_CATEGORY_BINS,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
   wbgt,
@@ -115,6 +117,8 @@ export default {
   set_tmp,
   two_nodes,
   utci,
+  UTCI_INFO,
+  UTCI_STRESS_CATEGORY_BINS,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
   wbgt,

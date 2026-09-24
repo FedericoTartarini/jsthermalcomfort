@@ -32,6 +32,8 @@ import type {
   PmvPpdAshraeResult,
   PmvPpdIsoParams,
   PmvPpdIsoResult,
+  UtciParams,
+  UtciResult,
   VariableInfo,
 } from "jsthermalcomfort";
 import {
@@ -43,6 +45,8 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   Standard,
+  UTCI_INFO,
+  UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
   classifyFromBins,
   clo_typical_ensembles,
@@ -50,6 +54,7 @@ import {
   heat_index_rothfusz,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  utci,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 
@@ -58,6 +63,7 @@ const iso: ModelInfo = PMV_PPD_ISO_INFO;
 const ashrae: ModelInfo = PMV_PPD_ASHRAE_INFO;
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
+const utciInfo: ModelInfo = UTCI_INFO;
 
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
@@ -73,6 +79,7 @@ const heatIndexStandards: readonly string[] = heatIndex.standards;
 // Bins are exported directly as well as through the metadata (issue #184 §3.4).
 const label = classifyFromBins(28.5, HEAT_INDEX_STRESS_CATEGORY_BINS);
 const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
+const utciLabel = classifyFromBins(24.6, UTCI_STRESS_CATEGORY_BINS);
 
 // The classifier reached through the metadata is typed, not `Object`, so a
 // consumer can read the edge convention without casting.
@@ -111,6 +118,8 @@ PMV_PPD_ASHRAE_INFO.outputs.pmv = { unit: null };
 PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
 HEAT_INDEX_STRESS_CATEGORY_BINS.labels.push("new label");
+// @ts-expect-error the UTCI metadata is readonly, its derived bound included.
+UTCI_INFO.derived!.tr_minus_tdb.applicability!.max = 80;
 
 // pmv_ppd_iso takes one params object too (ADR 0002), with its params and
 // result types exported by name; the lines below are errors only while the
@@ -332,6 +341,35 @@ const notARole: ApplicabilityWarning["role"] = "somewhere";
 // @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
 pmvIso.warnings[0].bound.max = 50;
 
+// utci takes one params object too (ADR 0002), with its params and result
+// types exported by name; the lines below are errors only while the published
+// signature is typed.
+const utciParams: UtciParams = {
+  tdb: 77,
+  tr: 77,
+  v: 3.28084,
+  rh: 50,
+  units: "IP",
+  limit_inputs: false,
+  round_output: false,
+};
+const utciResult: UtciResult = utci(utciParams);
+const utciCategory: string | number = utciResult.stress_category;
+// @ts-expect-error `return_stress_category` is not a param; stress_category is always returned.
+utci({ tdb: 25, tr: 25, v: 1, rh: 50, return_stress_category: true });
+// @ts-expect-error rh is a required quantity.
+utci({ tdb: 25, tr: 25, v: 1 });
+utci({
+  tdb: 25,
+  tr: 25,
+  v: 1,
+  rh: 50,
+  // @ts-expect-error units is "SI" or "IP".
+  units: "metric",
+});
+// @ts-expect-error tdb must be a number.
+utci({ tdb: "25", tr: 25, v: 1, rh: 50 });
+
 // The shared PMV module is not part of the package, as upstream has no public
 // pmv_ppd: a consumer calls pmv_ppd_iso or pmv_ppd_ashrae.
 // @ts-expect-error pmv_ppd is not exported.
@@ -354,6 +392,9 @@ export {
   heatIndexResult,
   adaptive,
   adaptiveResult,
+  utciInfo,
+  utciLabel,
+  utciCategory,
   coolingEffect,
   ashraeCompliance,
   complianceMax,

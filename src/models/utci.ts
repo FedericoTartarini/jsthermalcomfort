@@ -1,9 +1,11 @@
 import {
   round,
   units_converter,
-  valid_range,
   validateInputs,
 } from "../utilities/utilities.js";
+import { classifyFromBins } from "./classifierBins.ts";
+import { deepFreeze } from "./modelDocs.ts";
+import type { ClassifierBins, ModelInfo } from "./modelDocs.ts";
 
 const g = [
   -2836.5744,
@@ -15,18 +17,103 @@ const g = [
   -1.8680009 * Math.pow(10.0, -13),
 ];
 
-const stress_categories = [
-  "extreme cold stress",
-  "very strong cold stress",
-  "strong cold stress",
-  "moderate cold stress",
-  "slight cold stress",
-  "no thermal stress",
-  "moderate heat stress",
-  "strong heat stress",
-  "very strong heat stress",
-  "extreme heat stress",
-];
+// A type alias rather than an interface, like AdaptiveAshraeResult, so it
+// stays assignable to Record<string, unknown>.
+/**
+ * The result of `utci`: the index, in [°C] or in [°F] if `units` = 'IP', and
+ * its thermal stress category, classified from the SI value (rounded when
+ * `round_output` is on), or NaN if utci is NaN.
+ */
+export type UtciResult = {
+  utci: number;
+  stress_category: string | number;
+};
+
+/**
+ * The params of `utci`: upstream's keyword parameters, quantities and
+ * switches alike, with upstream's defaults (ADR 0002). Documented on the
+ * function's `params`.
+ */
+export interface UtciParams {
+  tdb: number;
+  tr: number;
+  v: number;
+  rh: number;
+  units?: "SI" | "IP";
+  limit_inputs?: boolean;
+  round_output?: boolean;
+}
+
+/**
+ * Applicability limits of the UTCI regression, in SI units, inclusive at both
+ * ends as upstream's `_valid_range`.
+ *
+ * `tr` has no bound of its own: upstream bounds its difference from `tdb`,
+ * which is `tr_minus_tdb` here and a `derived` row in `UTCI_INFO`. Same
+ * arrangement as `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity
+ * from `UTCI_INFO` and read by the gate in `utci`, so the metadata and the
+ * NaN cannot disagree. Exported for that identity test, deliberately not
+ * added to `src/models/index.js`.
+ */
+export const UTCI_LIMITS = Object.freeze({
+  tdb: Object.freeze({ min: -50, max: 50 }),
+  v: Object.freeze({ min: 0.5, max: 17 }),
+  tr_minus_tdb: Object.freeze({ min: -30, max: 70 }),
+});
+
+/**
+ * Stress category bins for UTCI classification (right-inclusive), in °C.
+ * Upstream's edges and labels: a value on an edge belongs to the lower
+ * category, and a value above the last edge (1000) is NaN.
+ */
+export const UTCI_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
+  Object.freeze({
+    edges: [-40, -27, -13, 0, 9, 26, 32, 38, 46, 1000],
+    labels: [
+      "extreme cold stress",
+      "very strong cold stress",
+      "strong cold stress",
+      "moderate cold stress",
+      "slight cold stress",
+      "no thermal stress",
+      "moderate heat stress",
+      "strong heat stress",
+      "very strong heat stress",
+      "extreme heat stress",
+    ],
+    right: true,
+  });
+
+/**
+ * Model metadata for the Universal Thermal Climate Index.
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * `tr` carries no applicability of its own; its bound is on `tr - tdb`, a
+ * quantity computed from two inputs, so it is the `derived` row
+ * `tr_minus_tdb`.
+ *
+ * @public
+ */
+export const UTCI_INFO: ModelInfo = deepFreeze({
+  label: "UTCI",
+  description:
+    "Universal Thermal Climate Index — the air temperature of a reference outdoor environment with the same physiological strain.",
+  standards: [],
+  inputs: {
+    tdb: { unit: "°C", applicability: UTCI_LIMITS.tdb },
+    tr: { unit: "°C" },
+    v: { unit: "m/s", applicability: UTCI_LIMITS.v },
+    rh: { unit: "%" },
+  },
+  outputs: {
+    utci: { unit: "°C" },
+    stress_category: { unit: null, classifier: UTCI_STRESS_CATEGORY_BINS },
+  },
+  derived: {
+    tr_minus_tdb: { unit: "°C", applicability: UTCI_LIMITS.tr_minus_tdb },
+  },
+});
 
 /**
  * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
@@ -45,41 +132,44 @@ const stress_categories = [
  * @memberof models
  * @docname Universal Thermal Climate Index (UTCI)
  * 
- * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} v - wind speed 10m above ground level, default in [m/s] in [fps] if `units` = 'IP'
- * @param {number} rh - relative humidity, [%]
- * @param {"SI"|"IP"} units - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} return_stress_category - default False if True returns the UTCI categorized in terms of thermal stress.
- * @param {boolean} limit_inputs - default True. By default, if the inputs are outsude the standard applicability limits the
+ * @param {Object} params - the model's parameters, named as in pythermalcomfort.
+ * @param {number} params.tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {number} params.tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {number} params.v - wind speed 10m above ground level, default in [m/s] in [fps] if `units` = 'IP'
+ * @param {number} params.rh - relative humidity, [%]
+ * @param {"SI"|"IP"} [params.units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [params.limit_inputs=true] - default True. By default, if the inputs are outsude the standard applicability limits the
         function returns nan. If False returns UTCI values even if input values are
         outside the applicability limits of the model. The valid input ranges are
-        -50 < tdb [°C] < 50, tdb - 70 < tr [°C] < tdb + 30, and for 0.5 < v [m/s] < 17.0.
+        -50 < tdb [°C] < 50, tdb - 30 < tr [°C] < tdb + 70, and for 0.5 < v [m/s] < 17.0.
+ * @param {boolean} [params.round_output=true] - If True, rounds output value. If False, it does not round it. The stress category is classified from the SI value, rounded when this is True.
  * @example
- * console.log(utci(25, 25, 1.0, 50)) // will print 24.6
- * console.log(utci(77, 77, 3.28, 50, 'ip')) // will print 76.4
- * console.log(utci(25, 25, 1.0, 50, 'si', true))
+ * console.log(utci({ tdb: 25, tr: 25, v: 1.0, rh: 50 }))
  * // will print {utci: 24.6, stress_category: "no thermal stress"}
+ * console.log(utci({ tdb: 77, tr: 77, v: 3.28, rh: 50, units: "IP" }).utci) // will print 76.3
  */
+// A non-finite number throws a TypeError here, where upstream lets it
+// propagate (ADR 0001, reason three). round_output is not validated, as
+// upstream's UTCIInputs is not given it.
 const UTCI_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
   v: { type: "number" },
   rh: { type: "number" },
   units: { enum: ["SI", "IP"] },
-  return_stress_category: { type: "boolean" },
   limit_inputs: { type: "boolean" },
 };
 
-export function utci(
-  tdb,
-  tr,
-  v,
-  rh,
-  units = "SI",
-  return_stress_category = false,
-  limit_inputs = true,
-) {
+export function utci(params: UtciParams): UtciResult {
+  // Every argument was positional before v2 (ADR 0002); a call still written
+  // that way fails here, naming the shape it should have.
+  if (typeof params !== "object" || params === null) {
+    throw new TypeError(`utci takes one params object, got ${String(params)}`);
+  }
+  let { tdb, tr, v } = params;
+  const { rh } = params;
+  // Destructuring defaults also apply to a switch passed as undefined.
+  const { units = "SI", limit_inputs = true, round_output = true } = params;
   validateInputs(
     {
       tdb,
@@ -87,98 +177,62 @@ export function utci(
       v,
       rh,
       units: units.toUpperCase(),
-      return_stress_category,
       limit_inputs,
     },
     UTCI_SCHEMA,
   );
 
-  let kwargs;
-  let ret;
-  if (units.toLowerCase() == "ip") {
-    kwargs = {
-      tdb: tdb,
-      tr: tr,
-      v: v,
-    };
-    ret = units_converter(kwargs);
-    tdb = ret["tdb"];
-    tr = ret["tr"];
-    v = ret["v"];
+  const ip = units.toUpperCase() === "IP";
+  if (ip) {
+    ({ tdb, tr, v } = units_converter({ tdb, tr, v }));
   }
 
   const eh_pa = exponential(tdb) * (rh / 100.0);
   const delta_t_tr = tr - tdb;
   const pa = eh_pa / 10.0; // convert vapour pressure to kPa
 
-  let utci_approx = utci_optimized(tdb, v, delta_t_tr, pa);
+  let utci_approx = _utci_optimized(tdb, v, delta_t_tr, pa);
 
   // Checks that inputs are within the bounds accepted by the model if not return nan
+  // Upstream also emits a UserWarning here. JavaScript has no warnings filter
+  // (ADR 0001), and `warnings` rows stay PMV-only in v2, so the NaN comes alone.
   if (limit_inputs) {
-    const tdb_valid = tdb >= -50.0 && tdb <= 50.0 ? tdb : NaN;
-    const diff_valid = delta_t_tr >= -30 && delta_t_tr <= 70 ? delta_t_tr : NaN;
-    const v_valid = v >= 0.5 && v <= 17 ? v : NaN;
-    const all_valid = !(
-      isNaN(tdb_valid) ||
-      isNaN(diff_valid) ||
-      isNaN(v_valid)
-    );
-    utci_approx = all_valid ? utci_approx : NaN;
+    const { tdb: tdb_limits, v: v_limits, tr_minus_tdb } = UTCI_LIMITS;
+    const all_valid =
+      tdb >= tdb_limits.min &&
+      tdb <= tdb_limits.max &&
+      delta_t_tr >= tr_minus_tdb.min &&
+      delta_t_tr <= tr_minus_tdb.max &&
+      v >= v_limits.min &&
+      v <= v_limits.max;
+    if (!all_valid) utci_approx = NaN;
   }
 
-  if (units.toLowerCase() == "ip") {
-    kwargs = {
-      tmp: utci_approx,
-    };
-    utci_approx = units_converter(kwargs, "SI")["tmp"];
+  // Stress-category thresholds are in °C; keep the SI value before IP conversion.
+  let utci_si = utci_approx;
+
+  if (ip) {
+    utci_approx = units_converter({ tmp: utci_approx }, "SI").tmp;
   }
 
-  utci_approx = round(utci_approx, 1);
-  if (return_stress_category) {
-    return {
-      utci: utci_approx,
-      stress_category: mapping(utci_approx),
-    };
+  if (round_output) {
+    utci_approx = round(utci_approx, 1);
+    utci_si = round(utci_si, 1);
   }
-  return { utci: utci_approx };
-}
 
-/**
- * Maps a temperature to the stress category.
- * @param {number} val
- * @returns {string|number} Stress category label, or NaN for non-finite input.
- */
-export function mapping(val) {
-  // Right-inclusive thresholds; matches pythermalcomfort np.digitize(right=True).
-  if (!Number.isFinite(val)) return NaN;
-  if (val <= -40) return stress_categories[0];
-  if (val <= -27) return stress_categories[1];
-  if (val <= -13) return stress_categories[2];
-  if (val <= 0) return stress_categories[3];
-  if (val <= 9) return stress_categories[4];
-  if (val <= 26) return stress_categories[5];
-  if (val <= 32) return stress_categories[6];
-  if (val <= 38) return stress_categories[7];
-  if (val <= 46) return stress_categories[8];
-  return stress_categories[9];
-}
-
-/**
- * Maps a temperature array to stress categories.
- * @param {number[]} val
- * @returns {string[]}
- */
-function mapping_arr(val) {
-  return val.map((_v) => mapping(_v));
+  return {
+    utci: utci_approx,
+    stress_category: classifyFromBins(utci_si, UTCI_STRESS_CATEGORY_BINS),
+  };
 }
 
 /**
  * @param {number} t_db
  * @returns {number}
  */
-function exponential(t_db) {
+function exponential(t_db: number): number {
   const tk = t_db + 273.15; // air temp in K
-  let es = 2.7150305 * Math.log1p(tk);
+  let es = 2.7150305 * Math.log(tk);
   for (let i = 0; i < g.length; i++) {
     es = es + g[i] * Math.pow(tk, i - 2);
   }
@@ -186,6 +240,8 @@ function exponential(t_db) {
   return es;
 }
 
+// Exported for the mirrored tests, which import it as upstream's do; not
+// added to src/models/index.js.
 /**
  * @param {number} tdb
  * @param {number} v
@@ -193,7 +249,12 @@ function exponential(t_db) {
  * @param {number} pa
  * @returns {number}
  */
-function utci_optimized(tdb, v, delta_t_tr, pa) {
+export function _utci_optimized(
+  tdb: number,
+  v: number,
+  delta_t_tr: number,
+  pa: number,
+): number {
   return (
     tdb +
     0.607562052 +

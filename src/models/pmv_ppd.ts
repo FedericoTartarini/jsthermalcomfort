@@ -19,6 +19,18 @@ import type {
 } from "./modelDocs.ts";
 
 /**
+ * The parameters the PMV wrappers share, keyed like upstream's keyword
+ * arguments (ADR 0002). `standard` is upstream's `model` (ADR 0003). The
+ * wrappers' own params types narrow it to what each standard accepts.
+ *
+ * @property { number } tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @property { number } tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @property { number } vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
+ * @property { number } rh - relative humidity, [%]
+ * @property { number } met - metabolic rate
+ * @property { number } clo - clothing insulation
+ * @property { number } [wme=0] - external work
+ * @property { PmvStandard } [standard="7730-2025"] - comfort standard used for calculation
  * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
  * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
  *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
@@ -38,9 +50,16 @@ import type {
  * @property { boolean } round_output - If true, rounds pmv to 2 decimal places and ppd to 1. Defaults to true.
  * @property { boolean } suppress_warnings - If true, writes nothing to the console when the ASHRAE cooling effect
  *    cannot be calculated and is assumed to be 0. Defaults to false. The returned `warnings` are unaffected.
- * @public
  */
-export interface Pmv_ppdKwargs {
+export interface PmvPpdParams {
+  tdb: number;
+  tr: number;
+  vr: number;
+  rh: number;
+  met: number;
+  clo: number;
+  wme?: number;
+  standard?: PmvStandard;
   units?: "SI" | "IP";
   limit_inputs?: boolean;
   airspeed_control?: boolean;
@@ -51,9 +70,8 @@ export interface Pmv_ppdKwargs {
 /**
  * @property { number } pmv - Predicted Mean Vote
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
- * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the unrounded pmv.
+ * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the returned pmv, so from the rounded one when `round_output` is true.
  * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- * @public
  */
 export interface Pmv_ppdReturns {
   pmv: number;
@@ -206,22 +224,22 @@ export type PmvStandard = (typeof PMV_STANDARDS)[number];
  *
  * This is a version that supports scalar arguments.
  *
- * @public
- * @memberof models
- * @docname Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
+ * Not exported from the package: upstream has no public `pmv_ppd`, only the
+ * `pmv_ppd_iso` and `pmv_ppd_ashrae` wrappers, which call this.
  *
- * @param { number } tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param { number } tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param { number } vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
+ * @param { PmvPpdParams } params - the parameters, named as in pythermalcomfort.
+ * @param { number } params.tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param { number } params.tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param { number } params.vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
  *
  * Note: vr is the relative air speed caused by body movement and not the air
  * speed measured by the air speed sensor. The relative air speed is the sum of the
  * average air speed measured by the sensor plus the activity-generated air speed
  * (Vag). Where Vag is the activity-generated air speed caused by motion of
  * individual body parts. vr can be calculated using the function `v_relative` which is in .utilities.js.
- * @param { number } rh - relative humidity, [%]
- * @param { number } met - metabolic rate
- * @param { number } clo - clothing insulation
+ * @param { number } params.rh - relative humidity, [%]
+ * @param { number } params.met - metabolic rate
+ * @param { number } params.clo - clothing insulation
  *
  * Note: The activity as well as the air speed modify the insulation characteristics
  * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
@@ -229,18 +247,19 @@ export type PmvStandard = (typeof PMV_STANDARDS)[number];
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
- * @param { number } [wme=0] - external work
- * @param { "ISO"|"ASHRAE" } [standard="ISO"] - comfort standard used for calculation
+ * @param { number } [params.wme=0] - external work
+ * @param { PmvStandard } [params.standard="7730-2025"] - comfort standard used for calculation
  *
- * · If "ISO", then the ISO Equation is used
+ * · If an ISO 7730 edition, then the ISO Equation is used
  *
- * · If "ASHRAE", then the ASHRAE Equation is used
+ * · If "55-2023", then the ASHRAE Equation is used
  *
  * Note: While the PMV equation is the same for both the ISO and ASHRAE standards, the ASHRAE Standard Use of
  * the PMV model is limited to air speeds below 0.10m/s (20 fpm). When air speeds exceed 0.10 m/s (20 fpm), the comfort
  * zone boundaries are adjusted based on the SET model. This change was introduced by the
  * {@link https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf|Addendum_C to Standard 55-2020}
- * @param { Pmv_ppdKwargs }kwargs - additional arguments
+ * The switches (`units`, `limit_inputs`, `airspeed_control`, `round_output`,
+ * `suppress_warnings`) are described on {@link PmvPpdParams}.
  *
  * @returns { Pmv_ppdReturns } - Result of pmv and ppd
  *
@@ -255,7 +274,7 @@ export type PmvStandard = (typeof PMV_STANDARDS)[number];
  * const v_r = v_relative(v, met);
  * // Calculate dynamic clothing
  * const clo_d = clo_dynamic(clo, met);
- * const results = pmv_ppd(tdb, tr, v_r, rh, met, clo_d);
+ * const results = pmv_ppd({ tdb, tr, vr: v_r, rh, met, clo: clo_d });
  * console.log(results); // Output: { pmv: 0.06, ppd: 5.1 }
  * console.log(results.pmv); // Output: -0.06
  */
@@ -290,25 +309,20 @@ function partial_vapour_pressure(tdb: number, rh: number): number {
   return rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
 }
 
-export function pmv_ppd(
-  tdb: number,
-  tr: number,
-  vr: number,
-  rh: number,
-  met: number,
-  clo: number,
-  wme = 0,
-  standard: PmvStandard = Standard.iso_7730_2025,
-  kwargs: Pmv_ppdKwargs = {},
-): Pmv_ppdReturns {
-  const default_kwargs = {
-    units: "SI",
-    limit_inputs: true,
-    airspeed_control: true,
-    round_output: true,
-    suppress_warnings: false,
-  };
-  kwargs = Object.assign(default_kwargs, kwargs);
+export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
+  let { tdb, tr, vr } = params;
+  const { rh, met, clo } = params;
+  // Destructuring defaults also apply to a key passed as undefined, so a
+  // caller building `{ limit_inputs }` from a missing value keeps the gate on.
+  const {
+    wme = 0,
+    standard = Standard.iso_7730_2025,
+    units = "SI",
+    limit_inputs = true,
+    airspeed_control = true,
+    round_output = true,
+    suppress_warnings = false,
+  } = params;
   validateInputs(
     {
       tdb,
@@ -319,16 +333,16 @@ export function pmv_ppd(
       clo,
       wme,
       standard,
-      units: kwargs.units?.toUpperCase(),
-      limit_inputs: kwargs.limit_inputs,
-      airspeed_control: kwargs.airspeed_control,
-      round_output: kwargs.round_output,
-      suppress_warnings: kwargs.suppress_warnings,
+      units: units.toUpperCase(),
+      limit_inputs,
+      airspeed_control,
+      round_output,
+      suppress_warnings,
     },
     PMV_PPD_SCHEMA,
   );
 
-  if (kwargs.units && kwargs.units.toUpperCase() === "IP") {
+  if (units.toUpperCase() === "IP") {
     // Conversion from IP to SI units
     ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
   }
@@ -365,7 +379,7 @@ export function pmv_ppd(
   // ASHRAE 55's airspeed limits when the occupant cannot control the airspeed
   // are upper bounds only, and the operative-temperature one moves with the
   // call, so they arrive as bounds already broken rather than through check().
-  if (!iso && kwargs.airspeed_control === false) {
+  if (!iso && airspeed_control === false) {
     for (const bound of _ashrae_airspeed_bounds_broken(tdb, tr, vr, met, clo)) {
       warnings.push({ key: "vr", role: "input", value: vr, bound });
     }
@@ -377,7 +391,7 @@ export function pmv_ppd(
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
     // suppress_warnings has no pythermalcomfort counterpart: it stands in for
     // Python's warnings filter, which JavaScript lacks (see cooling_effect).
-    // The inputs are SI by now, hence "SI" rather than kwargs.units.
+    // The inputs are SI by now, hence "SI" rather than units.
     ce =
       vr > 0.1
         ? cooling_effect(
@@ -389,7 +403,7 @@ export function pmv_ppd(
             clo,
             wme,
             "SI",
-            kwargs.suppress_warnings,
+            suppress_warnings,
           ).ce
         : 0;
   }
@@ -398,36 +412,33 @@ export function pmv_ppd(
   tr = tr - ce;
   vr = ce > 0 ? 0.1 : vr;
 
-  let pmv = pmv_calculation(tdb, tr, vr, rh, met, clo, wme);
+  let pmv = _pmv_ppd_optimized(tdb, tr, vr, rh, met, clo, wme);
   let ppd =
     100.0 -
     95.0 *
       Math.exp(-0.03353 * Math.pow(pmv, 4.0) - 0.2179 * Math.pow(pmv, 2.0));
 
-  // Classify from unrounded PMV value before checking limits/clamping.
-  // Use left-inclusive for ISO, right-inclusive for ASHRAE (intentional divergence per pythermalcomfort#382).
-  const bins = is_iso_7730(standard)
-    ? PMV_THERMAL_SENSATION_VOTE_BINS_ISO
-    : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
-  let tsv = classifyFromBins(pmv, bins);
-
   if (iso) check("pmv", "output", pmv, ISO_7730_LIMITS.pmv);
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
-  if (kwargs.limit_inputs && (isNaN(pmv) || warnings.length > 0)) {
+  if (limit_inputs && (isNaN(pmv) || warnings.length > 0)) {
     pmv = NaN;
     ppd = NaN;
-    tsv = NaN;
   }
 
-  if (kwargs.round_output) {
-    return {
-      pmv: round(pmv, 2),
-      ppd: round(ppd, 1),
-      tsv,
-      warnings,
-    };
+  if (round_output) {
+    pmv = round(pmv, 2);
+    ppd = round(ppd, 1);
   }
+
+  // Classified from the pmv returned, so after rounding, as upstream does: the
+  // label never disagrees with the number shown. Left-inclusive for ISO,
+  // right-inclusive for ASHRAE (intentional divergence per pythermalcomfort#382).
+  const bins = iso
+    ? PMV_THERMAL_SENSATION_VOTE_BINS_ISO
+    : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
+  const tsv = classifyFromBins(pmv, bins);
+
   return { pmv, ppd, tsv, warnings };
 }
 
@@ -442,7 +453,7 @@ export function pmv_ppd(
  *
  * @returns {number} _pmv
  */
-export function pmv_calculation(
+export function _pmv_ppd_optimized(
   tdb: number,
   tr: number,
   vr: number,
@@ -472,7 +483,8 @@ export function pmv_calculation(
 
   const taa = tdb + 273;
   const tra = tr + 273;
-  const t_cla = taa + (35.5 - tdb) / (3.5 * icl + 0.1);
+  // initial guess for clothing surface temperature, per ISO 7730:2025 Annex D
+  const t_cla = taa + (35.5 - tdb) / (3.5 * (6.45 * icl + 0.1));
 
   const p1 = icl * f_cl;
   const p2 = p1 * 3.96;

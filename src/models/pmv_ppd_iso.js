@@ -61,7 +61,7 @@ const PMV_PPD_ISO_SCHEMA = {
  *
  *    Mirrors the `model` argument on `pythermalcomfort`'s `pmv_ppd_iso`,
  *    including the default.
- * @param {Omit<import("./pmv_ppd.ts").Pmv_ppdKwargs, "airspeed_control">} [kwargs={}] - Optional overrides.
+ * @param {Pick<import("./pmv_ppd.ts").PmvPpdParams, "units" | "limit_inputs" | "round_output" | "suppress_warnings">} [kwargs={}] - Optional overrides.
  *    `airspeed_control` is omitted: it only applies to the ASHRAE standard.
  * @param {'SI'|'IP'} [kwargs.units='SI'] - Unit system
  * @param {boolean}   [kwargs.limit_inputs=true] - Return NaN for out-of-range inputs
@@ -104,5 +104,15 @@ export function pmv_ppd_iso(
     },
     PMV_PPD_ISO_SCHEMA,
   );
-  return pmv_ppd(tdb, tr, vr, rh, met, clo, wme, model, kwargs);
+  return pmv_ppd({
+    ...kwargs,
+    tdb,
+    tr,
+    vr,
+    rh,
+    met,
+    clo,
+    wme,
+    standard: model,
+  });
 }

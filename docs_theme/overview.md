@@ -36,10 +36,10 @@ npm install jsthermalcomfort
 To get started with `jsthermalcomfort`, you can install it via npm and run a simple calculation:
 
 ```javascript
-import { pmv_ppd } from 'jsthermalcomfort';
+import { pmv_ppd_iso } from 'jsthermalcomfort';
 
 // Calculate PMV and PPD
-const results = pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5);
+const results = pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5);
 console.log(`PMV: ${results.pmv}, PPD: ${results.ppd}%`);
 ```
 

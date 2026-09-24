@@ -1,5 +1,5 @@
 import { round, validateInputs } from "../utilities/utilities.js";
-import { pmv_calculation } from "./pmv_ppd.ts";
+import { _pmv_ppd_optimized } from "./pmv_ppd.ts";
 
 /**
  * @typedef {Object} AthbResult
@@ -73,7 +73,15 @@ export function athb(tdb, tr, vr, rh, met, t_running_mean) {
       0.00527 * t_running_mean * met_adapted,
   );
 
-  const pmv_res = pmv_calculation(tdb, tr, vr, rh, met_adapted, clo_adapted, 0);
+  const pmv_res = _pmv_ppd_optimized(
+    tdb,
+    tr,
+    vr,
+    rh,
+    met_adapted,
+    clo_adapted,
+    0,
+  );
   const ts = 0.303 * Math.exp(-0.036 * met_adapted * 58.15) + 0.028;
   const l_adapted = pmv_res / ts;
 

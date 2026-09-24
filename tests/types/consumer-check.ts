@@ -37,10 +37,10 @@ import {
   adaptive_ashrae,
   classifyFromBins,
   clo_typical_ensembles,
-  pmv_ppd,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "jsthermalcomfort";
+import * as jsthermalcomfort from "jsthermalcomfort";
 
 // The published metadata must satisfy the published type.
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
@@ -172,12 +172,10 @@ const notARole: ApplicabilityWarning["role"] = "somewhere";
 // @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
 pmvIso.warnings[0].bound.max = 50;
 
-// pmv_ppd implements ISO 7730 and ASHRAE 55 only. Standard also lists ISO
-// 7933, which PMV does not implement, so the type must refuse it rather than
-// leave it to the runtime check.
-pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.ashrae_55_2023);
-// @ts-expect-error ISO 7933 is not a standard pmv_ppd implements.
-pmv_ppd(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7933_2004);
+// The shared PMV module is not part of the package, as upstream has no public
+// pmv_ppd: a consumer calls pmv_ppd_iso or pmv_ppd_ashrae.
+// @ts-expect-error pmv_ppd is not exported.
+jsthermalcomfort.pmv_ppd;
 
 // clo_typical_ensembles is a table keyed like pythermalcomfort's dict, typed
 // from its entries: a known ensemble reads as a number, an unknown one and a

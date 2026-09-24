@@ -15,7 +15,6 @@ import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
-import { pmv_ppd } from "./pmv_ppd.ts";
 import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
@@ -66,7 +65,6 @@ export {
   net,
   phs,
   pet_steady,
-  pmv_ppd,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
@@ -106,7 +104,6 @@ export default {
   net,
   phs,
   pet_steady,
-  pmv_ppd,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,

@@ -148,7 +148,8 @@ export function pmv(
     PMV_SCHEMA,
   );
 
-  const pmv_ppdValue = pmv_ppd(
+  const pmv_ppdValue = pmv_ppd({
+    ...kwargs,
     tdb,
     tr,
     vr,
@@ -157,8 +158,7 @@ export function pmv(
     clo,
     wme,
     standard,
-    kwargs,
-  );
+  });
 
   if (!pmv_ppdValue.hasOwnProperty("pmv")) {
     throw new Error("pmv property not found in pmv_ppdValue");

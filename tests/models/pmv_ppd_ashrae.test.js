@@ -127,15 +127,14 @@ describe("pmv_ppd_ashrae tsv classification (right-inclusive)", () => {
     expect(result.tsv).toBeNaN();
   });
 
-  // Test that tsv is unaffected by round_output
-  test("tsv is same whether round_output=true or round_output=false", () => {
-    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044 (just above the 0.5 bin edge).
-    // ASHRAE is right-inclusive: (0.5, 1.5] = "Slightly Warm"
-    // This tests that TSV is computed from the unrounded PMV, not the rounded one.
-    // If a broken implementation rounded PMV to 0.50 before classifying, it would
-    // place pmv=0.50 into the (-0.5, 0.5] bin as "Neutral" instead of the
-    // correct (0.5, 1.5] bin as "Slightly Warm". This input verifies the
-    // implementation uses the true unrounded value for classification.
+  // This test used to assert the opposite: tsv from the unrounded pmv whatever
+  // round_output was. Upstream classifies the pmv it returns, after rounding
+  // (pmv_ppd_ashrae.py in 4.6.0), so the label never disagrees with the number
+  // shown. Expected values from pythermalcomfort 4.6.0 at these inputs.
+  test("tsv is classified from the pmv returned, rounded or not", () => {
+    // pmv ≈ 0.5044, just above the 0.5 edge. ASHRAE is right-inclusive, so
+    // the rounded 0.5 closes (-0.5, 0.5] = "Neutral", while the unrounded
+    // value falls in (0.5, 1.5] = "Slightly Warm".
     const result_rounded = pmv_ppd_ashrae(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
       round_output: true,
       limit_inputs: false,
@@ -144,9 +143,10 @@ describe("pmv_ppd_ashrae tsv classification (right-inclusive)", () => {
       round_output: false,
       limit_inputs: false,
     });
-    expect(result_rounded.tsv).toBe(result_unrounded.tsv);
-    // Both should classify in the "Slightly Warm" bin
-    expect(result_rounded.tsv).toBe("Slightly Warm");
+    expect(result_rounded.pmv).toBe(0.5);
+    expect(result_rounded.tsv).toBe("Neutral");
+    expect(result_unrounded.pmv).toBeGreaterThan(0.5);
+    expect(result_unrounded.tsv).toBe("Slightly Warm");
   });
 
   // Test specific TSV values
@@ -156,11 +156,13 @@ describe("pmv_ppd_ashrae tsv classification (right-inclusive)", () => {
   });
 
   test("warm comfort (pmv ~1) -> Slightly Warm", () => {
-    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044, classifying into
-    // the right-inclusive interval (0.5, 1.5] = "Slightly Warm" (ASHRAE).
+    // tdb=26.4 used to be asserted "Slightly Warm" here from its unrounded
+    // pmv ≈ 0.5044; rounded by default to 0.5, it is "Neutral" (the test
+    // above), as upstream classifies the rounded pmv. tdb=27 gives pmv ≈ 0.68,
+    // inside the right-inclusive interval (0.5, 1.5] = "Slightly Warm" (ASHRAE).
     // This test verifies the exact classification, not a set of possibilities,
     // so that rounding errors or classification bugs are caught.
-    const result = pmv_ppd_ashrae(26.4, 26.4, 0.1, 50, 1.2, 0.5, 0, {
+    const result = pmv_ppd_ashrae(27, 27, 0.1, 50, 1.2, 0.5, 0, {
       limit_inputs: false,
     });
     // Must be exactly "Slightly Warm", not one of three options
@@ -201,9 +203,12 @@ describe("ISO vs ASHRAE TSV interval convention (pythermalcomfort#382)", () => {
   });
 
   test("the two models can also disagree end-to-end, for a separate reason", () => {
-    // Here the labels differ because ASHRAE's cooling effect (vr = 0.5) makes it
+    // Here the pmvs differ because ASHRAE's cooling effect (vr = 0.5) makes it
     // compute a DIFFERENT pmv from ISO -- not because of the interval convention.
-    // Recorded so the two causes of divergence are not conflated.
+    // Recorded so the two causes of divergence are not conflated. The labels
+    // used to differ too, while ASHRAE classified its unrounded pmv (just above
+    // -1.5); classified from the rounded -1.5, as upstream does, the
+    // right-inclusive (-2.5, -1.5] bin makes it "Cool" like ISO's -1.52.
     const iso = pmv_ppd_iso(
       22.5,
       22.5,
@@ -223,6 +228,6 @@ describe("ISO vs ASHRAE TSV interval convention (pythermalcomfort#382)", () => {
     expect(iso.pmv).toBe(-1.52);
     expect(iso.tsv).toBe("Cool");
     expect(ashrae.pmv).toBe(-1.5);
-    expect(ashrae.tsv).toBe("Slightly Cool");
+    expect(ashrae.tsv).toBe("Cool");
   });
 });

@@ -1,5 +1,5 @@
 import { expect, describe, it } from "@jest/globals";
-import jsthermalcomfort from "../src";
+import jsthermalcomfort, * as namedExports from "../src";
 
 describe("NPM Package", () => {
   it("should be an object", () => {
@@ -66,8 +66,16 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("at");
   });
 
-  it("should have models.pmv_ppd", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd");
+  // Upstream has no public pmv_ppd, only its two wrappers; the module stays,
+  // holding the kernel and the logic the wrappers, athb and pmv share.
+  it("should not have models.pmv_ppd", () => {
+    expect(jsthermalcomfort.models).not.toHaveProperty("pmv_ppd");
+    expect(namedExports).not.toHaveProperty("pmv_ppd");
+  });
+
+  it("should have models.pmv_ppd_iso and models.pmv_ppd_ashrae", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd_iso");
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_ppd_ashrae");
   });
 
   it("should have models.adaptive_ashrae", () => {

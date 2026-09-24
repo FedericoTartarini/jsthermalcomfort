@@ -169,18 +169,19 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
     expect(result.tsv).toBeNaN();
   });
 
-  // Test that tsv is unaffected by round_output
-  test("tsv is same whether round_output=true or round_output=false", () => {
-    // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044 (just above the 0.5 bin edge).
-    // ISO is left-inclusive: [0.5, 1.5) = "Slightly Warm"
-    // This tests that TSV is computed from the unrounded PMV, not the rounded one.
-    // If a broken implementation rounded PMV to 0.50 before classifying, it would
-    // place pmv=0.50 into the [-0.5, 0.5) bin as "Neutral" instead of the
-    // correct [0.5, 1.5) bin as "Slightly Warm". This input verifies the
-    // implementation uses the true unrounded value for classification.
+  // This test used to assert the opposite: tsv from the unrounded pmv whatever
+  // round_output was (at tdb=26.4, whose pmv ≈ 0.5044 gives "Slightly Warm"
+  // either way, so it could not tell the two rules apart). Upstream classifies
+  // the pmv it returns, after rounding (pmv_ppd_iso.py in 4.6.0), so the label
+  // never disagrees with the number shown. Expected values from
+  // pythermalcomfort 4.6.0 at these inputs.
+  test("tsv is classified from the pmv returned, rounded or not", () => {
+    // pmv ≈ 0.4983, just below the 0.5 edge. ISO is left-inclusive, so the
+    // rounded 0.5 opens [0.5, 1.5) = "Slightly Warm", while the unrounded
+    // value stays in [-0.5, 0.5) = "Neutral".
     const result_rounded = pmv_ppd_iso(
-      26.4,
-      26.4,
+      26.38,
+      26.38,
       0.1,
       50,
       1.2,
@@ -193,8 +194,8 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
       },
     );
     const result_unrounded = pmv_ppd_iso(
-      26.4,
-      26.4,
+      26.38,
+      26.38,
       0.1,
       50,
       1.2,
@@ -206,9 +207,10 @@ describe("pmv_ppd_iso tsv classification (left-inclusive)", () => {
         limit_inputs: false,
       },
     );
-    expect(result_rounded.tsv).toBe(result_unrounded.tsv);
-    // Both should classify in the "Slightly Warm" bin
+    expect(result_rounded.pmv).toBe(0.5);
     expect(result_rounded.tsv).toBe("Slightly Warm");
+    expect(result_unrounded.pmv).toBeLessThan(0.5);
+    expect(result_unrounded.tsv).toBe("Neutral");
   });
 
   // Test specific TSV values

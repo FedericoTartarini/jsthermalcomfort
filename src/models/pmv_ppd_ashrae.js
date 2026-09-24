@@ -91,7 +91,8 @@ export function pmv_ppd_ashrae(
     },
     PMV_PPD_ASHRAE_SCHEMA,
   );
-  return pmv_ppd(
+  return pmv_ppd({
+    ...kwargs,
     tdb,
     tr,
     vr,
@@ -99,7 +100,6 @@ export function pmv_ppd_ashrae(
     met,
     clo,
     wme,
-    Standard.ashrae_55_2023,
-    kwargs,
-  );
+    standard: Standard.ashrae_55_2023,
+  });
 }

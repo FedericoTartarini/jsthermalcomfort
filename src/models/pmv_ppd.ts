@@ -2,21 +2,17 @@ import {
   round,
   units_converter,
   validateInputs,
-  ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
-  is_iso_7730,
   Standard,
 } from "../utilities/utilities.js";
 import { cooling_effect } from "./cooling_effect.ts";
 import { classifyFromBins } from "./classifierBins.ts";
-import { deepFreeze } from "./modelDocs.ts";
 import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
 import { _valid_range } from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
-  ModelInfo,
 } from "./modelDocs.ts";
 
 /**
@@ -135,78 +131,6 @@ export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
   Object.freeze({ min: -0.5, max: 0.5 });
 
 /**
- * Model metadata for PMV / PPD (ISO 7730).
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * @public
- */
-export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
-  name: "pmv_ppd_iso",
-  label: "PMV / PPD (ISO 7730)",
-  description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
-  standards: [Standard.iso_7730_2025, Standard.iso_7730_2005],
-  inputs: {
-    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb },
-    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr },
-    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr },
-    met: { unit: "met", applicability: ISO_7730_LIMITS.met },
-    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo },
-    rh: { unit: "%" },
-    wme: { unit: "met" },
-  },
-  outputs: {
-    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
-    ppd: { unit: "%" },
-    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
-  },
-  derived: {
-    // Computed from tdb and rh, not supplied by the caller. Exposed so a
-    // front end can explain why a warm, humid combination that looks inside
-    // every input limit still returns NaN.
-    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa },
-  },
-});
-
-/**
- * Model metadata for PMV / PPD (ASHRAE 55).
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * No `derived` row and no `pmv` applicability: ASHRAE 55 bounds neither
- * vapour pressure nor the PMV output, and `pmv_ppd` gates both under ISO 7730
- * only (the `pa` and `pmv` rows in its ISO branch).
- * The airspeed limits that apply when the occupant cannot control the
- * airspeed depend on the call (operative temperature, met and clo), so they
- * have no fixed `Bound` here; a call that breaks one reports it in
- * `warnings` with a bound built for that call.
- *
- * @public
- */
-export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
-  name: "pmv_ppd_ashrae",
-  label: "PMV / PPD (ASHRAE 55)",
-  description:
-    "Predicted Mean Vote and Predicted Percentage Dissatisfied, with the ASHRAE 55 cooling effect of elevated air speed.",
-  standards: [Standard.ashrae_55_2023],
-  inputs: {
-    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
-    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
-    vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
-    met: { unit: "met", applicability: ASHRAE_55_LIMITS.met },
-    clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo },
-    rh: { unit: "%" },
-    wme: { unit: "met" },
-  },
-  outputs: {
-    pmv: { unit: null },
-    ppd: { unit: "%" },
-    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE },
-    compliance: { unit: null },
-  },
-});
-
-/**
  * The standards PMV implements: pythermalcomfort's pmv_ppd_iso and
  * pmv_ppd_ashrae accept only these. Both the `standard` parameter's type and
  * the runtime schema come from this list, so any other Standard (ISO 7933, say)
@@ -220,6 +144,49 @@ const PMV_STANDARDS = [
 
 /** One of the standards `pmv_ppd` implements. */
 export type PmvStandard = (typeof PMV_STANDARDS)[number];
+
+/**
+ * What `pmv_ppd` does differently under a standard, which upstream splits
+ * between `pmv_ppd_iso` and `pmv_ppd_ashrae`.
+ *
+ * - `ashrae55`: the inputs go through `_check_ashrae55_compliance`, which
+ *   reads `ASHRAE_55_LIMITS` itself, the cooling effect of elevated air
+ *   speed applies, and the result carries `compliance`. Otherwise the inputs
+ *   are checked inline against `limits`, which only such a standard has; the
+ *   type ties the two, so they cannot disagree.
+ * - `pa`, `pmv`: the bounds on the derived vapour pressure and on the PMV,
+ *   or null where the standard gates neither.
+ * - `tsv_bins`: the thermal sensation vote bins, whose edge convention
+ *   differs (pythermalcomfort#382).
+ */
+type PmvStandardRules = (
+  | { ashrae55: false; limits: typeof ISO_7730_LIMITS }
+  | { ashrae55: true }
+) & {
+  pa: Readonly<Bound> | null;
+  pmv: Readonly<Bound> | null;
+  tsv_bins: Readonly<ClassifierBins>;
+};
+
+const ISO_7730_RULES: PmvStandardRules = {
+  ashrae55: false,
+  limits: ISO_7730_LIMITS,
+  pa: ISO_7730_LIMITS.pa,
+  pmv: ISO_7730_LIMITS.pmv,
+  tsv_bins: PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+};
+
+/** The rules of every standard `pmv_ppd` implements, one entry each. */
+const PMV_STANDARD_RULES: Readonly<Record<PmvStandard, PmvStandardRules>> = {
+  [Standard.iso_7730_2005]: ISO_7730_RULES,
+  [Standard.iso_7730_2025]: ISO_7730_RULES,
+  [Standard.ashrae_55_2023]: {
+    ashrae55: true,
+    pa: null,
+    pmv: null,
+    tsv_bins: PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+  },
+};
 
 /**
  * Returns Predicted Mean Vote ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#PMV/PPD_method|PMV} ) and
@@ -380,13 +347,14 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   // Inputs are taken here, before the ASHRAE cooling effect shifts them.
   // ISO 7730's checks are inline, as in upstream's pmv_ppd_iso; ASHRAE 55's
   // go through the shared helper, as in upstream's pmv_ppd_ashrae.
-  const iso = is_iso_7730(standard);
+  const rules = PMV_STANDARD_RULES[standard];
   const warnings: ApplicabilityWarning[] = [];
-  if (iso) {
+  // `in`, not `ashrae55`: the build's non-strict config narrows no union on a
+  // boolean.
+  if ("limits" in rules) {
     for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
-      _valid_range(warnings, key, "input", value, ISO_7730_LIMITS[key]);
+      _valid_range(warnings, key, "input", value, rules.limits[key]);
     }
-    _valid_range(warnings, "pa", "derived", pa, ISO_7730_LIMITS.pa);
   } else {
     _check_ashrae55_compliance(warnings, {
       tdb,
@@ -398,9 +366,10 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
       v_param_name: "vr",
     });
   }
+  if (rules.pa) _valid_range(warnings, "pa", "derived", pa, rules.pa);
 
   let ce = 0;
-  if (standard === Standard.ashrae_55_2023) {
+  if (rules.ashrae55) {
     //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
     // suppress_warnings has no pythermalcomfort counterpart: it stands in for
     // Python's warnings filter, which JavaScript lacks (see cooling_effect).
@@ -431,7 +400,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     95.0 *
       Math.exp(-0.03353 * Math.pow(pmv, 4.0) - 0.2179 * Math.pow(pmv, 2.0));
 
-  if (iso) _valid_range(warnings, "pmv", "output", pmv, ISO_7730_LIMITS.pmv);
+  if (rules.pmv) _valid_range(warnings, "pmv", "output", pmv, rules.pmv);
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   const gated = limit_inputs && (isNaN(pmv) || warnings.length > 0);
@@ -458,14 +427,11 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   // Classified from the pmv returned, so after rounding, as upstream does: the
   // label never disagrees with the number shown. Left-inclusive for ISO,
   // right-inclusive for ASHRAE (intentional divergence per pythermalcomfort#382).
-  const bins = iso
-    ? PMV_THERMAL_SENSATION_VOTE_BINS_ISO
-    : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
-  const tsv = classifyFromBins(pmv, bins);
+  const tsv = classifyFromBins(pmv, rules.tsv_bins);
 
-  return iso
-    ? { pmv, ppd, tsv, warnings }
-    : { pmv, ppd, tsv, compliance, warnings };
+  return rules.ashrae55
+    ? { pmv, ppd, tsv, compliance, warnings }
+    : { pmv, ppd, tsv, warnings };
 }
 
 /**

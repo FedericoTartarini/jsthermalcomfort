@@ -510,11 +510,6 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
   });
 
   describe("tsv classification (right-inclusive)", () => {
-    // At comfortable neutral conditions (25°C, symmetric), pmv should be ~0, so tsv should be "Neutral"
-    test("returns tsv field with correct value", () => {
-      expect(pmv_ppd_ashrae(neutral).tsv).toBe("Neutral");
-    });
-
     // ASHRAE has more lenient range than ISO, so try an extreme case
     test("tsv is NaN when pmv is NaN (out of range)", () => {
       const result = pmv_ppd_ashrae({
@@ -547,6 +542,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result_unrounded.tsv).toBe("Slightly Warm");
     });
 
+    // At comfortable neutral conditions (25°C, symmetric), pmv should be ~0, so tsv should be "Neutral"
     test("neutral comfort (pmv ~0) -> Neutral", () => {
       expect(pmv_ppd_ashrae(neutral).tsv).toBe("Neutral");
     });

@@ -1,7 +1,7 @@
 import { round, validateInputs } from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import { _valid_range } from "../_internal/validation.ts";
+import { _check_params_object, _valid_range } from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   ClassifierBins,
@@ -141,11 +141,7 @@ export function heat_index_rothfusz(
 ): HeatIndexRothfuszResult {
   // tdb and rh were positional before v2 (ADR 0002); a call still written
   // that way fails here, naming the shape it should have.
-  if (typeof params !== "object" || params === null) {
-    throw new TypeError(
-      `heat_index_rothfusz takes one params object, got ${String(params)}`,
-    );
-  }
+  _check_params_object(params, "heat_index_rothfusz");
   const { tdb, rh } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   const { round_output = true, limit_inputs = true } = params;

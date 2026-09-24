@@ -140,9 +140,10 @@ export function deepFreeze<T extends object>(
   // Freeze the object itself
   Object.freeze(obj);
 
-  // Recursively freeze all owned properties, regardless of current frozen state
-  Object.getOwnPropertyNames(obj).forEach((prop) => {
-    const value = (obj as Record<string, unknown>)[prop];
+  // Recursively freeze all owned properties, symbol-keyed ones included,
+  // regardless of current frozen state
+  Reflect.ownKeys(obj).forEach((prop) => {
+    const value = (obj as Record<PropertyKey, unknown>)[prop];
     // Only recurse if it's an object (including arrays)
     if (value !== null && typeof value === "object") {
       deepFreeze(value, visited);

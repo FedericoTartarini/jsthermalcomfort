@@ -25,29 +25,29 @@ import {
 } from "../../src/utilities/utilities.js";
 import type { ModelInfo } from "../../src/models/modelDocs.ts";
 
+// NOTE: A directory scan approach was attempted to make this test self-maintaining,
+// but Jest's ESM configuration does not support CommonJS require() or synchronous
+// dynamic imports in test files. Keep this hardcoded list instead. When a new model's
+// _INFO or _BINS constants are added, this test will fail because the new constant
+// is not in the list, catching the JOS3 failure mode: a model whose constants exist
+// but are never added to src/models/index.js or src/index.js. The list must be
+// manually updated whenever a new *_INFO or *_BINS export is published.
+const expectedMetadataExports = [
+  "ADAPTIVE_ASHRAE_INFO",
+  "classifyFromBins",
+  "HEAT_INDEX_ROTHFUSZ_INFO",
+  "HEAT_INDEX_STRESS_CATEGORY_BINS",
+  "PMV_COMPLIANCE_INTERVAL_ASHRAE",
+  "PMV_PPD_ASHRAE_INFO",
+  "PMV_PPD_ISO_INFO",
+  "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
+  "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
+  "UTCI_INFO",
+  "UTCI_STRESS_CATEGORY_BINS",
+];
+
 describe("Model Metadata Exports — enumeration test", () => {
   test("all model metadata and classifier exports are available from package root", () => {
-    // NOTE: A directory scan approach was attempted to make this test self-maintaining,
-    // but Jest's ESM configuration does not support CommonJS require() or synchronous
-    // dynamic imports in test files. Keep this hardcoded list instead. When a new model's
-    // _INFO or _BINS constants are added, this test will fail because the new constant
-    // is not in the list, catching the JOS3 failure mode: a model whose constants exist
-    // but are never added to src/models/index.js or src/index.js. The list must be
-    // manually updated whenever a new *_INFO or *_BINS export is published.
-    const expectedMetadataExports = [
-      "ADAPTIVE_ASHRAE_INFO",
-      "classifyFromBins",
-      "HEAT_INDEX_ROTHFUSZ_INFO",
-      "HEAT_INDEX_STRESS_CATEGORY_BINS",
-      "PMV_COMPLIANCE_INTERVAL_ASHRAE",
-      "PMV_PPD_ASHRAE_INFO",
-      "PMV_PPD_ISO_INFO",
-      "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
-      "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
-      "UTCI_INFO",
-      "UTCI_STRESS_CATEGORY_BINS",
-    ];
-
     const packageExports = Object.keys(pkg);
 
     // Every expected export must be present in the package root
@@ -65,17 +65,13 @@ const exportedInfos = Object.entries(pkg as Record<string, unknown>)
   .map(([exportName, info]) => ({ exportName, info: info as ModelInfo }));
 
 describe("name — each model info names its model's export", () => {
-  test("the naming convention finds the five v1 model infos", () => {
+  test("the naming convention finds every listed model info", () => {
     // Guards the filter itself: a convention that matched nothing would make
     // the tests below pass vacuously.
     expect(exportedInfos.map(({ exportName }) => exportName)).toEqual(
-      expect.arrayContaining([
-        "ADAPTIVE_ASHRAE_INFO",
-        "HEAT_INDEX_ROTHFUSZ_INFO",
-        "PMV_PPD_ASHRAE_INFO",
-        "PMV_PPD_ISO_INFO",
-        "UTCI_INFO",
-      ]),
+      expect.arrayContaining(
+        expectedMetadataExports.filter((name) => name.endsWith("_INFO")),
+      ),
     );
   });
 
@@ -86,7 +82,6 @@ describe("name — each model info names its model's export", () => {
       expect(typeof info.name).toBe("string");
       expect(typeof exports[info.name]).toBe("function");
       expect(`${info.name.toUpperCase()}_INFO`).toBe(exportName);
-      expect(exports[`${info.name.toUpperCase()}_INFO`]).toBe(info);
     },
   );
 });

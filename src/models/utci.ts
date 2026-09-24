@@ -5,7 +5,7 @@ import {
 } from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import { _valid_range } from "../_internal/validation.ts";
+import { _check_params_object, _valid_range } from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   ClassifierBins,
@@ -172,9 +172,7 @@ const UTCI_SCHEMA = {
 export function utci(params: UtciParams): UtciResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
   // that way fails here, naming the shape it should have.
-  if (typeof params !== "object" || params === null) {
-    throw new TypeError(`utci takes one params object, got ${String(params)}`);
-  }
+  _check_params_object(params, "utci");
   let { tdb, tr, v } = params;
   const { rh } = params;
   // Destructuring defaults also apply to a switch passed as undefined.

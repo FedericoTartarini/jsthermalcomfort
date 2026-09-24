@@ -31,3 +31,22 @@ export function _valid_range(
   if (out_of_range) warnings.push({ key, role, value, bound });
   return !out_of_range;
 }
+
+/**
+ * Throws a `TypeError` unless `params` is an object: every v1 model takes one
+ * params object keyed like upstream's keyword arguments (ADR 0002), so a call
+ * still written positionally fails here, naming the shape it should have.
+ * Upstream has no counterpart, as Python's keyword arguments need none.
+ *
+ * Private: not exported from the package root.
+ *
+ * @param {unknown} params - what the model was called with
+ * @param {string} name - the model's function name, for the message
+ */
+export function _check_params_object(params: unknown, name: string): void {
+  if (typeof params !== "object" || params === null) {
+    throw new TypeError(
+      `${name} takes one params object, got ${String(params)}`,
+    );
+  }
+}

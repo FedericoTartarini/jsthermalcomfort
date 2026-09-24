@@ -1,7 +1,13 @@
-import { pmv_ppd } from "./pmv_ppd.ts";
+import { pmv_ppd, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE } from "./pmv_ppd.ts";
 import type { PmvPpdParams } from "./pmv_ppd.ts";
-import { validateInputs, Standard } from "../utilities/utilities.js";
-import type { ApplicabilityWarning } from "./modelDocs.ts";
+import {
+  validateInputs,
+  ASHRAE_55_LIMITS,
+  Standard,
+} from "../utilities/utilities.js";
+import { deepFreeze } from "./modelDocs.ts";
+import { _check_params_object } from "../_internal/validation.ts";
+import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not. Renamed from
@@ -32,6 +38,44 @@ export type PmvPpdAshraeResult = {
 export interface PmvPpdAshraeParams extends Omit<PmvPpdParams, "standard"> {
   standard?: typeof Standard.ashrae_55_2023;
 }
+
+/**
+ * Model metadata for PMV / PPD (ASHRAE 55).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * No `derived` row and no `pmv` applicability: ASHRAE 55 bounds neither
+ * vapour pressure nor the PMV output, and `pmv_ppd` gates both under ISO 7730
+ * only (the `pa` and `pmv` bounds of its ISO 7730 rules).
+ * The airspeed limits that apply when the occupant cannot control the
+ * airspeed depend on the call (operative temperature, met and clo), so they
+ * have no fixed `Bound` here; a call that breaks one reports it in
+ * `warnings` with a bound built for that call.
+ *
+ * @public
+ */
+export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
+  name: "pmv_ppd_ashrae",
+  label: "PMV / PPD (ASHRAE 55)",
+  description:
+    "Predicted Mean Vote and Predicted Percentage Dissatisfied, with the ASHRAE 55 cooling effect of elevated air speed.",
+  standards: [Standard.ashrae_55_2023],
+  inputs: {
+    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
+    vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
+    met: { unit: "met", applicability: ASHRAE_55_LIMITS.met },
+    clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo },
+    rh: { unit: "%" },
+    wme: { unit: "met" },
+  },
+  outputs: {
+    pmv: { unit: null },
+    ppd: { unit: "%" },
+    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE },
+    compliance: { unit: null },
+  },
+});
 
 /**
  * Calculate PMV and PPD in accordance with ASHRAE 55.
@@ -98,11 +142,7 @@ const PMV_PPD_ASHRAE_SCHEMA = {
 export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
   // The quantities were positional before v2 (ADR 0002); a call still written
   // that way fails here, naming the shape it should have.
-  if (typeof params !== "object" || params === null) {
-    throw new TypeError(
-      `pmv_ppd_ashrae takes one params object, got ${String(params)}`,
-    );
-  }
+  _check_params_object(params, "pmv_ppd_ashrae");
   const { tdb, tr, vr, rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   // suppress_warnings has no pythermalcomfort counterpart: it stands in for

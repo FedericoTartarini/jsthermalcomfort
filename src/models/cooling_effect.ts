@@ -4,6 +4,7 @@ import {
   validateInputs,
 } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
+import { _check_params_object } from "../_internal/validation.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not.
@@ -100,11 +101,7 @@ export function cooling_effect(
 ): CoolingEffectResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
   // that way fails here, naming the shape it should have.
-  if (typeof params !== "object" || params === null) {
-    throw new TypeError(
-      `cooling_effect takes one params object, got ${String(params)}`,
-    );
-  }
+  _check_params_object(params, "cooling_effect");
   let { tdb, tr, vr } = params;
   const { rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
@@ -124,7 +121,7 @@ export function cooling_effect(
     COOLING_EFFECT_SCHEMA,
   );
 
-  if (units.toLowerCase() === "ip") {
+  if (units.toUpperCase() === "IP") {
     const result = units_converter({ tdb, tr, vr }, "IP");
     tdb = result.tdb;
     tr = result.tr;
@@ -137,7 +134,7 @@ export function cooling_effect(
 
   const still_air_threshold = 0.1;
 
-  const initial_set_tmp = set_tmp(
+  const initial_set_tmp = _set_for_cooling_effect(
     tdb,
     tr,
     vr,
@@ -145,20 +142,11 @@ export function cooling_effect(
     met,
     clo,
     wme,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    false,
-    {
-      round: false,
-      calculate_ce: true,
-    },
-  ).set;
+  );
 
   function func(x: number): number {
     return (
-      set_tmp(
+      _set_for_cooling_effect(
         tdb - x,
         tr - x,
         still_air_threshold,
@@ -166,16 +154,7 @@ export function cooling_effect(
         met,
         clo,
         wme,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        false,
-        {
-          round: false,
-          calculate_ce: true,
-        },
-      ).set - initial_set_tmp
+      ) - initial_set_tmp
     );
   }
 
@@ -197,13 +176,47 @@ export function cooling_effect(
     console.warn("Cooling effect could not be calculated. Returning 0.");
   }
 
-  if (units.toLowerCase() === "ip") {
+  if (units.toUpperCase() === "IP") {
     ce = (ce / 1.8) * 3.28;
   }
 
   ce = round(ce, 2);
 
   return { ce: ce };
+}
+
+// Upstream's `_set_for_cooling_effect` (`cooling_effect.py`): the unrounded
+// SET with `calculate_ce`, inputs unlimited, in SI. Upstream calls the
+// two-node model directly, to skip the public stack's validation, and says it
+// mirrors `set_tmp(..., calculate_ce=True, limit_inputs=False).set`; this
+// makes that set_tmp call.
+function _set_for_cooling_effect(
+  tdb: number,
+  tr: number,
+  v: number,
+  rh: number,
+  met: number,
+  clo: number,
+  wme: number,
+): number {
+  return set_tmp(
+    tdb,
+    tr,
+    v,
+    rh,
+    met,
+    clo,
+    wme,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    false,
+    {
+      round: false,
+      calculate_ce: true,
+    },
+  ).set;
 }
 
 // Brent's one recoverable failure, a class of its own so that cooling_effect

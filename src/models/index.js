@@ -14,8 +14,8 @@ import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
-import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.ts";
-import { pmv_ppd_iso } from "./pmv_ppd_iso.ts";
+import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
+import { pmv_ppd_iso, PMV_PPD_ISO_INFO } from "./pmv_ppd_iso.ts";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain } from "./solar_gain.js";
 import { cooling_effect } from "./cooling_effect.ts";
@@ -32,8 +32,6 @@ import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import {
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
-  PMV_PPD_ASHRAE_INFO,
-  PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "./pmv_ppd.ts";

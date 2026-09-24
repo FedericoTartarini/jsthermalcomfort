@@ -42,6 +42,10 @@ describe("cooling_effect (JS-only)", () => {
     jest.restoreAllMocks();
   });
 
+  // Records console.warn calls without printing them; afterEach restores it.
+  const silenceConsoleWarn = () =>
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+
   // Expected value from pythermalcomfort 4.6.0, cooling_effect(..., wme=0.1).
   test("wme reaches the SET calculation", () => {
     expect(cooling_effect({ ...still, wme: 0.1 }).ce).toBe(1.47);
@@ -49,7 +53,7 @@ describe("cooling_effect (JS-only)", () => {
 
   describe("solver fallback", () => {
     test("an unbracketed root returns 0 with upstream's warning", () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const warn = silenceConsoleWarn();
       expect(cooling_effect(unbracketed).ce).toBe(0);
       expect(warn).toHaveBeenCalledTimes(1);
       expect(warn).toHaveBeenCalledWith(
@@ -58,7 +62,7 @@ describe("cooling_effect (JS-only)", () => {
     });
 
     test("suppress_warnings silences the warning, not the fallback", () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const warn = silenceConsoleWarn();
       expect(
         cooling_effect({ ...unbracketed, suppress_warnings: true }).ce,
       ).toBe(0);
@@ -67,7 +71,7 @@ describe("cooling_effect (JS-only)", () => {
 
     // Upstream returns before solving when vr <= 0.1, so it does not warn.
     test("still air returns 0 without a warning", () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const warn = silenceConsoleWarn();
       expect(cooling_effect({ ...still, vr: 0.1 }).ce).toBe(0);
       expect(warn).not.toHaveBeenCalled();
     });

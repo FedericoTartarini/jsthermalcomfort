@@ -1,7 +1,13 @@
-import { pmv_ppd } from "./pmv_ppd.ts";
+import { pmv_ppd, PMV_THERMAL_SENSATION_VOTE_BINS_ISO } from "./pmv_ppd.ts";
 import type { PmvPpdParams } from "./pmv_ppd.ts";
-import { validateInputs, Standard } from "../utilities/utilities.js";
-import type { ApplicabilityWarning } from "./modelDocs.ts";
+import {
+  validateInputs,
+  ISO_7730_LIMITS,
+  Standard,
+} from "../utilities/utilities.js";
+import { deepFreeze } from "./modelDocs.ts";
+import { _check_params_object } from "../_internal/validation.ts";
+import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not. Renamed from
@@ -34,6 +40,40 @@ export interface PmvPpdIsoParams extends Omit<
 > {
   standard?: typeof Standard.iso_7730_2005 | typeof Standard.iso_7730_2025;
 }
+
+/**
+ * Model metadata for PMV / PPD (ISO 7730).
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * @public
+ */
+export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
+  name: "pmv_ppd_iso",
+  label: "PMV / PPD (ISO 7730)",
+  description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
+  standards: [Standard.iso_7730_2025, Standard.iso_7730_2005],
+  inputs: {
+    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr },
+    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr },
+    met: { unit: "met", applicability: ISO_7730_LIMITS.met },
+    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo },
+    rh: { unit: "%" },
+    wme: { unit: "met" },
+  },
+  outputs: {
+    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
+    ppd: { unit: "%" },
+    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
+  },
+  derived: {
+    // Computed from tdb and rh, not supplied by the caller. Exposed so a
+    // front end can explain why a warm, humid combination that looks inside
+    // every input limit still returns NaN.
+    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa },
+  },
+});
 
 // A non-finite number throws a TypeError here, where upstream lets it
 // propagate (ADR 0001, reason three).
@@ -113,11 +153,7 @@ const PMV_PPD_ISO_SCHEMA = {
 export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
   // The quantities and the standard were positional before v2 (ADR 0002); a
   // call still written that way fails here, naming the shape it should have.
-  if (typeof params !== "object" || params === null) {
-    throw new TypeError(
-      `pmv_ppd_iso takes one params object, got ${String(params)}`,
-    );
-  }
+  _check_params_object(params, "pmv_ppd_iso");
   const { tdb, tr, vr, rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   const {

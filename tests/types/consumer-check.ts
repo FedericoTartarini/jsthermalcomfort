@@ -87,9 +87,8 @@ const bins: ClassifierBins | undefined = iso.outputs.tsv.classifier;
 const rightInclusive: boolean | undefined = bins?.right;
 const edgeCount: number | undefined = bins?.edges.length;
 
-// Model info names the model it belongs to. The read and the `nameless` line
-// are errors against a build without the field; the other `@ts-expect-error`
-// line guards its type once it exists.
+// Model info names the model it belongs to: `name` reads as a string, no
+// other type, and a ModelInfo without it is rejected.
 const modelName: string = iso.name;
 // @ts-expect-error `name` is a string, not a number.
 const nameNotANumber: number = PMV_PPD_ISO_INFO.name;

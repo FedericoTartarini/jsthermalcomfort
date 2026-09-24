@@ -5,7 +5,12 @@ import {
 } from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { ClassifierBins, ModelInfo } from "./modelDocs.ts";
+import { _valid_range } from "../_internal/validation.ts";
+import type {
+  ApplicabilityWarning,
+  ClassifierBins,
+  ModelInfo,
+} from "./modelDocs.ts";
 
 const g = [
   -2836.5744,
@@ -23,10 +28,13 @@ const g = [
  * The result of `utci`: the index, in [°C] or in [°F] if `units` = 'IP', and
  * its thermal stress category, classified from the SI value (rounded when
  * `round_output` is on), or NaN if utci is NaN.
+ *
+ * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  */
 export type UtciResult = {
   utci: number;
   stress_category: string | number;
+  readonly warnings: ApplicabilityWarning[];
 };
 
 /**
@@ -195,19 +203,21 @@ export function utci(params: UtciParams): UtciResult {
   let utci_approx = _utci_optimized(tdb, v, delta_t_tr, pa);
 
   // Checks that inputs are within the bounds accepted by the model if not return nan
-  // Upstream also emits a UserWarning here. JavaScript has no warnings filter
-  // (ADR 0001), and `warnings` rows stay PMV-only in v2, so the NaN comes alone.
-  if (limit_inputs) {
-    const { tdb: tdb_limits, v: v_limits, tr_minus_tdb } = UTCI_LIMITS;
-    const all_valid =
-      tdb >= tdb_limits.min &&
-      tdb <= tdb_limits.max &&
-      delta_t_tr >= tr_minus_tdb.min &&
-      delta_t_tr <= tr_minus_tdb.max &&
-      v >= v_limits.min &&
-      v <= v_limits.max;
-    if (!all_valid) utci_approx = NaN;
-  }
+  // The rows are the channel for upstream's UserWarning, which JavaScript has
+  // no warnings filter for (ADR 0001). Upstream checks only under
+  // limit_inputs; the rows are built on every call, so with the gate off they
+  // say what the number was computed despite. The gate reads the rows.
+  const warnings: ApplicabilityWarning[] = [];
+  _valid_range(warnings, "tdb", "input", tdb, UTCI_LIMITS.tdb);
+  _valid_range(
+    warnings,
+    "tr_minus_tdb",
+    "derived",
+    delta_t_tr,
+    UTCI_LIMITS.tr_minus_tdb,
+  );
+  _valid_range(warnings, "v", "input", v, UTCI_LIMITS.v);
+  if (limit_inputs && warnings.length > 0) utci_approx = NaN;
 
   // Stress-category thresholds are in °C; keep the SI value before IP conversion.
   let utci_si = utci_approx;
@@ -224,6 +234,7 @@ export function utci(params: UtciParams): UtciResult {
   return {
     utci: utci_approx,
     stress_category: classifyFromBins(utci_si, UTCI_STRESS_CATEGORY_BINS),
+    warnings,
   };
 }
 

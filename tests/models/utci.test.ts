@@ -2,6 +2,7 @@ import { describe, expect, test } from "@jest/globals";
 import {
   _utci_optimized,
   utci,
+  UTCI_INFO,
   UTCI_LIMITS,
   UTCI_STRESS_CATEGORY_BINS,
 } from "../../src/models/utci.ts";
@@ -130,6 +131,7 @@ describe("utci (JS-only)", () => {
     expect(utci({ tdb: 40, tr: 40, v: 1, rh: 80 })).toEqual({
       utci: 60.6,
       stress_category: "extreme heat stress",
+      warnings: [],
     });
   });
 
@@ -260,6 +262,125 @@ describe("utci (JS-only)", () => {
       expect(
         Number.isFinite(utci({ ...params, limit_inputs: false }).utci),
       ).toBe(true);
+    });
+  });
+
+  describe("warnings rows", () => {
+    const { tdb, v, tr_minus_tdb } = UTCI_LIMITS;
+
+    test.each([
+      ["tdb at its maximum", { tdb: tdb.max, tr: tdb.max, v: 1 }],
+      ["tdb at its minimum", { tdb: tdb.min, tr: tdb.min, v: 1 }],
+      ["v at its minimum", { tdb: 20, tr: 20, v: v.min }],
+      ["v at its maximum", { tdb: 20, tr: 20, v: v.max }],
+      ["tr - tdb at its maximum", { tdb: 20, tr: 20 + tr_minus_tdb.max, v: 1 }],
+      ["tr - tdb at its minimum", { tdb: 20, tr: 20 + tr_minus_tdb.min, v: 1 }],
+    ])("no row on the bound: %s", (_, inputs) => {
+      expect(utci({ ...inputs, rh: 50 }).warnings).toEqual([]);
+    });
+
+    // One step outside each bound: one row, whose bound is the object
+    // UTCI_INFO references (`toBe`), and whose tr_minus_tdb value is tr - tdb.
+    const step = 0.01;
+    test.each([
+      {
+        name: "tdb above its maximum",
+        inputs: { tdb: tdb.max + step, tr: tdb.max, v: 1 },
+        key: "tdb",
+        role: "input",
+        value: tdb.max + step,
+        bound: UTCI_INFO.inputs.tdb.applicability,
+      },
+      {
+        name: "tdb below its minimum",
+        inputs: { tdb: tdb.min - step, tr: tdb.min, v: 1 },
+        key: "tdb",
+        role: "input",
+        value: tdb.min - step,
+        bound: UTCI_INFO.inputs.tdb.applicability,
+      },
+      {
+        name: "v below its minimum",
+        inputs: { tdb: 20, tr: 20, v: v.min - step },
+        key: "v",
+        role: "input",
+        value: v.min - step,
+        bound: UTCI_INFO.inputs.v.applicability,
+      },
+      {
+        name: "v above its maximum",
+        inputs: { tdb: 20, tr: 20, v: v.max + step },
+        key: "v",
+        role: "input",
+        value: v.max + step,
+        bound: UTCI_INFO.inputs.v.applicability,
+      },
+      {
+        name: "tr - tdb above its maximum",
+        inputs: { tdb: 20, tr: 20 + tr_minus_tdb.max + step, v: 1 },
+        key: "tr_minus_tdb",
+        role: "derived",
+        value: 20 + tr_minus_tdb.max + step - 20,
+        bound: UTCI_INFO.derived!.tr_minus_tdb.applicability,
+      },
+      {
+        name: "tr - tdb below its minimum",
+        inputs: { tdb: 20, tr: 20 + tr_minus_tdb.min - step, v: 1 },
+        key: "tr_minus_tdb",
+        role: "derived",
+        value: 20 + tr_minus_tdb.min - step - 20,
+        bound: UTCI_INFO.derived!.tr_minus_tdb.applicability,
+      },
+    ])(
+      "one row one step outside: $name",
+      ({ inputs, key, role, value, bound }) => {
+        const on = utci({ ...inputs, rh: 50 });
+        expect(on.warnings).toEqual([{ key, role, value, bound }]);
+        expect(on.warnings[0].bound).toBe(bound);
+        expect(on.utci).toBeNaN();
+        // The same rows with the gate off, beside a finite utci.
+        const off = utci({ ...inputs, rh: 50, limit_inputs: false });
+        expect(off.warnings).toEqual(on.warnings);
+        expect(Number.isFinite(off.utci)).toBe(true);
+      },
+    );
+
+    test("rows come in upstream's order: tdb, tr - tdb, v", () => {
+      const { warnings } = utci({ tdb: 60, tr: 140, v: 20, rh: 50 });
+      expect(warnings.map((w) => w.key)).toEqual(["tdb", "tr_minus_tdb", "v"]);
+    });
+
+    // Row values are SI, as ApplicabilityWarning says: 68 °F is 20 °C and
+    // 212 °F is 100 °C, so tr - tdb is 80 K, not 144 °F.
+    test("under IP the row values are SI", () => {
+      const { warnings } = utci({
+        tdb: 68,
+        tr: 212,
+        v: 3.28084,
+        rh: 50,
+        units: "IP",
+      });
+      expect(warnings.map((w) => w.key)).toEqual(["tr_minus_tdb"]);
+      expect(warnings[0].value).toBeCloseTo(80, 6);
+    });
+
+    test("a NaN under the gate never comes without a row", () => {
+      for (const t of [-60, -50, 0, 30, 50, 55])
+        for (const dt of [-40, -30, 0, 70, 80])
+          for (const speed of [0.2, 0.5, 5, 17, 20]) {
+            const { utci: value, warnings } = utci({
+              tdb: t,
+              tr: t + dt,
+              v: speed,
+              rh: 50,
+            });
+            expect({ t, dt, speed, gated: warnings.length > 0 }).toEqual({
+              t,
+              dt,
+              speed,
+              gated: Number.isNaN(value),
+            });
+          }
     });
   });
 

@@ -1,18 +1,25 @@
 import { round, validateInputs } from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { ClassifierBins, ModelInfo } from "./modelDocs.ts";
+import { _valid_range } from "../_internal/validation.ts";
+import type {
+  ApplicabilityWarning,
+  ClassifierBins,
+  ModelInfo,
+} from "./modelDocs.ts";
 
 // Renamed from HeatIndexResult to <Model>Result, the name every converted
 // model's result has.
 /**
  * @property {number} hi - Heat Index, [°C].
  * @property {string|number} stress_category - Thermal stress category, or NaN if hi is NaN. Classified from the unrounded value.
+ * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export interface HeatIndexRothfuszResult {
   hi: number;
   stress_category: string | number;
+  readonly warnings: ApplicabilityWarning[];
 }
 
 /**
@@ -145,10 +152,14 @@ export function heat_index_rothfusz(
   validateInputs({ tdb, rh, round_output, limit_inputs }, HEAT_INDEX_SCHEMA);
 
   // heat index should only be calculated for temperatures above 27 °C
-  // Upstream also emits a UserWarning here. JavaScript has no warnings filter
-  // (ADR 0001), and `warnings` rows stay PMV-only in v2, so the NaN comes alone.
-  if (limit_inputs && tdb < HEAT_INDEX_ROTHFUSZ_LIMITS.tdb.min) {
-    return { hi: NaN, stress_category: NaN };
+  // The row is the channel for upstream's UserWarning, which JavaScript has
+  // no warnings filter for (ADR 0001). Upstream checks only under
+  // limit_inputs; the row is built on every call, so with the gate off it
+  // says what the number was computed despite. The gate reads the row.
+  const warnings: ApplicabilityWarning[] = [];
+  _valid_range(warnings, "tdb", "input", tdb, HEAT_INDEX_ROTHFUSZ_LIMITS.tdb);
+  if (limit_inputs && warnings.length > 0) {
+    return { hi: NaN, stress_category: NaN, warnings };
   }
 
   const tdb_squared = Math.pow(tdb, 2);
@@ -168,5 +179,5 @@ export function heat_index_rothfusz(
   // cannot drop the category.
   const stress_category = classifyFromBins(hi, HEAT_INDEX_STRESS_CATEGORY_BINS);
 
-  return { hi: round_output ? round(hi, 1) : hi, stress_category };
+  return { hi: round_output ? round(hi, 1) : hi, stress_category, warnings };
 }

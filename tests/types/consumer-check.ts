@@ -385,6 +385,16 @@ utci({
 // @ts-expect-error tdb must be a number.
 utci({ tdb: "25", tr: 25, v: 1, rh: 50 });
 
+// adaptive_ashrae, heat_index_rothfusz and utci return the same rows as the
+// PMV wrappers, typed through to the bound.
+const adaptiveWarnings: ApplicabilityWarning[] = adaptiveResult.warnings;
+const adaptiveRowMax: number | undefined = adaptiveResult.warnings[0].bound.max;
+const heatIndexWarnings: ApplicabilityWarning[] = heatIndexResult.warnings;
+const heatIndexRowMax: number | undefined =
+  heatIndexResult.warnings[0].bound.max;
+const utciWarnings: ApplicabilityWarning[] = utciResult.warnings;
+const utciRowMax: number | undefined = utciResult.warnings[0].bound.max;
+
 // The shared PMV module is not part of the package, as upstream has no public
 // pmv_ppd: a consumer calls pmv_ppd_iso or pmv_ppd_ashrae.
 // @ts-expect-error pmv_ppd is not exported.
@@ -431,5 +441,11 @@ export {
   isoRowMax,
   ashraeRowMax,
   notARole,
+  adaptiveWarnings,
+  adaptiveRowMax,
+  heatIndexWarnings,
+  heatIndexRowMax,
+  utciWarnings,
+  utciRowMax,
   winterClo,
 };

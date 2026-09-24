@@ -1,5 +1,8 @@
 import { describe, expect, test } from "@jest/globals";
-import { adaptive_ashrae } from "../../src/models/index.js";
+import {
+  adaptive_ashrae,
+  ADAPTIVE_ASHRAE_INFO,
+} from "../../src/models/index.js";
 import type { AdaptiveAshraeParams } from "../../src/models/adaptive_ashrae.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -12,11 +15,10 @@ const close = (actual: number, expected: number) =>
 // Mirrors pythermalcomfort v4.6.0 tests/test_adaptive_ashrae.py.
 //
 // The ASHRAE 55 compliance tests in tests/test_internal.py
-// (TestCheckAshrae55Compliance) are mirrored with pmv_ppd_ashrae, not here.
-// Three take the airspeed_control=False path with met and clo, which
-// adaptive_ashrae never reaches: it checks tdb, tr and v only, under the
-// default airspeed_control=True. The fourth asserts that no UserWarning is
-// emitted, which only PMV's warnings rows can express.
+// (TestCheckAshrae55Compliance) are mirrored with pmv_ppd_ashrae, not here:
+// all four pass met and clo, and three take the airspeed_control=False path,
+// while adaptive_ashrae passes the helper tdb, tr and v only, as upstream's
+// does.
 describe("test_adaptive_ashrae", () => {
   test.each(testData.data)("test_adaptive_ashrae: fixture case %#", (row) => {
     const { inputs, outputs } = row;
@@ -218,6 +220,116 @@ describe("adaptive_ashrae (JS-only)", () => {
     expect(result.tmp_cmf).toBeNaN();
     expect(result.acceptability_80).toBe(false);
     expect(result.acceptability_90).toBe(false);
+  });
+
+  describe("warnings rows", () => {
+    const { inputs } = ADAPTIVE_ASHRAE_INFO;
+    const bound = (key: keyof typeof inputs) => inputs[key].applicability!;
+
+    test.each([
+      ["tdb", bound("tdb").min!],
+      ["tdb", bound("tdb").max!],
+      ["tr", bound("tr").min!],
+      ["tr", bound("tr").max!],
+      ["v", bound("v").min!],
+      ["v", bound("v").max!],
+      ["t_running_mean", bound("t_running_mean").min!],
+      ["t_running_mean", bound("t_running_mean").max!],
+    ])("no row on the bound: %s = %s", (key, value) => {
+      expect(adaptive_ashrae({ ...neutral, [key]: value }).warnings).toEqual(
+        [],
+      );
+    });
+
+    // One step outside each bound: one row, whose bound is the object
+    // ADAPTIVE_ASHRAE_INFO references (`toBe`). v one step below 0 is not
+    // here: the operative temperature throws on a negative v first.
+    const step = 0.01;
+    test.each<[string, number]>([
+      ["tdb", bound("tdb").min! - step],
+      ["tdb", bound("tdb").max! + step],
+      ["tr", bound("tr").min! - step],
+      ["tr", bound("tr").max! + step],
+      ["v", bound("v").max! + step],
+      ["t_running_mean", bound("t_running_mean").min! - step],
+      ["t_running_mean", bound("t_running_mean").max! + step],
+    ])("one row one step outside: %s = %s", (key, value) => {
+      const on = adaptive_ashrae({ ...neutral, [key]: value });
+      expect(on.warnings).toEqual([
+        { key, role: "input", value, bound: bound(key) },
+      ]);
+      expect(on.warnings[0].bound).toBe(bound(key));
+      expect(on.tmp_cmf).toBeNaN();
+      // The same rows with the gate off, beside a finite tmp_cmf.
+      const off = adaptive_ashrae({
+        ...neutral,
+        [key]: value,
+        limit_inputs: false,
+      });
+      expect(off.warnings).toEqual(on.warnings);
+      expect(Number.isFinite(off.tmp_cmf)).toBe(true);
+    });
+
+    test("rows come in upstream's order: tdb, tr, v, t_running_mean", () => {
+      const { warnings } = adaptive_ashrae({
+        tdb: 45,
+        tr: 45,
+        v: 3,
+        t_running_mean: 40,
+      });
+      expect(warnings.map((w) => w.key)).toEqual([
+        "tdb",
+        "tr",
+        "v",
+        "t_running_mean",
+      ]);
+    });
+
+    // Upstream passes no airspeed_control, met or clo, so a v that would
+    // break the no-control airspeed limits gives no row.
+    test("no airspeed_control rule applies", () => {
+      expect(
+        adaptive_ashrae({ tdb: 20, tr: 20, t_running_mean: 20, v: 1.5 })
+          .warnings,
+      ).toEqual([]);
+    });
+
+    // Row values are SI, as ApplicabilityWarning says: 106 °F is 41.1 °C.
+    test("under IP the row values are SI", () => {
+      const { warnings } = adaptive_ashrae({
+        tdb: 106,
+        tr: 77,
+        t_running_mean: 68,
+        v: 0.3,
+        units: "IP",
+      });
+      expect(warnings.map((w) => w.key)).toEqual(["tdb"]);
+      expect(warnings[0].value).toBeCloseTo(((106 - 32) * 5) / 9, 6);
+    });
+
+    test("a NaN under the gate never comes without a row", () => {
+      for (const t of [5, 10, 25, 40, 45])
+        for (const speed of [0, 1, 2, 2.5])
+          for (const t_running_mean of [5, 10, 20, 33.5, 40]) {
+            const { tmp_cmf, warnings } = adaptive_ashrae({
+              tdb: t,
+              tr: t,
+              v: speed,
+              t_running_mean,
+            });
+            expect({
+              t,
+              speed,
+              t_running_mean,
+              gated: warnings.length > 0,
+            }).toEqual({
+              t,
+              speed,
+              t_running_mean,
+              gated: Number.isNaN(tmp_cmf),
+            });
+          }
+    });
   });
 
   // t_cmf = 0.31 * 22 + 17.8 = 24.62, rounded 24.6.

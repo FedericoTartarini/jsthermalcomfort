@@ -567,7 +567,11 @@ describe("Outputs staleness — heat_index_rothfusz output matches INFO", () => 
       rh: 60,
       limit_inputs: false,
     });
-    const resultKeys = Object.keys(result).sort();
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
     const infoKeys = Object.keys(HEAT_INDEX_ROTHFUSZ_INFO.outputs).sort();
     expect(resultKeys).toEqual(infoKeys);
   });
@@ -846,7 +850,12 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
       t_running_mean: 20,
       v: 0.1,
     });
-    expect(Object.keys(result).sort()).toEqual(
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(
       Object.keys(ADAPTIVE_ASHRAE_INFO.outputs).sort(),
     );
   });
@@ -971,9 +980,12 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
 
   test("utci output keys match UTCI_INFO.outputs", () => {
     const result = utci({ tdb: 25, tr: 25, v: 1, rh: 50 });
-    expect(Object.keys(result).sort()).toEqual(
-      Object.keys(UTCI_INFO.outputs).sort(),
-    );
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(Object.keys(UTCI_INFO.outputs).sort());
   });
 
   test("is deep-frozen", () => {

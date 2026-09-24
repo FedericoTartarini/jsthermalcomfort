@@ -33,39 +33,67 @@ describe("test_heat_index_rothfusz", () => {
     expect(result.stress_category).toBe("caution");
   });
 
-  // Upstream wraps the call in `pytest.warns(UserWarning)`; the JS model
-  // emits no warnings, so only the values port.
+  // Upstream's `pytest.warns(UserWarning)` becomes the `tdb` row.
   test("test_below_threshold_produces_nan", () => {
     const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
+    expect(result.warnings.map((w) => w.key)).toEqual(["tdb"]);
     expect(result.hi).toBeNaN();
     expect(result.stress_category).toBeNaN();
   });
 
-  test.todo(
-    "test_below_threshold_warns_scalar: asserts only the UserWarning text, and the JS model emits no warnings",
-  );
+  // Upstream matches the UserWarning's text ('tdb', 25.0, [27.0, inf]); the
+  // row carries the same key, value and bound.
+  test("test_below_threshold_warns_scalar", () => {
+    expect(heat_index_rothfusz({ tdb: 25, rh: 80 }).warnings).toEqual([
+      {
+        key: "tdb",
+        role: "input",
+        value: 25,
+        bound: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+      },
+    ]);
+  });
 
-  // Upstream's arrays, element-wise; the UserWarning does not port.
+  // Upstream's arrays, element-wise: the UserWarning's value 20.0 at index 1
+  // becomes a row on that element alone.
   test("test_below_threshold_warns_array", () => {
     const tdb = [30.0, 20.0, 28.5];
     const rh = [70.0, 90.0, 50.0];
-    const hi = tdb.map((t, i) => heat_index_rothfusz({ tdb: t, rh: rh[i] }).hi);
+    const results = tdb.map((t, i) =>
+      heat_index_rothfusz({ tdb: t, rh: rh[i] }),
+    );
+    const hi = results.map((result) => result.hi);
+    expect(results.map((result) => result.warnings)).toEqual([
+      [],
+      [
+        {
+          key: "tdb",
+          role: "input",
+          value: 20,
+          bound: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+        },
+      ],
+      [],
+    ]);
     expect(hi[1]).toBeNaN();
     expect(Number.isFinite(hi[0]) && Number.isFinite(hi[2])).toBe(true);
   });
 
-  // Upstream also asserts no warning was recorded, which holds by
-  // construction here: the JS model emits none.
+  // Upstream also asserts no warning was recorded: it checks only under
+  // limit_inputs. That assertion does not port, because the rows here are
+  // built whatever limit_inputs is, so this call has its `tdb` row.
   test("test_limit_inputs_false_no_warning", () => {
     const result = heat_index_rothfusz({
       tdb: 25,
       rh: 80,
       limit_inputs: false,
     });
+    expect(result.warnings.map((w) => w.key)).toEqual(["tdb"]);
     expect(Number.isFinite(result.hi)).toBe(true);
   });
 
-  // Upstream's vectors, element-wise; the UserWarning does not port.
+  // Upstream's vectors, element-wise; its `pytest.warns(UserWarning)` becomes
+  // the row on the element below 27 °C.
   test("test_vector_input_no_rounding", () => {
     const tdb = [30.0, 20.0, 28.5];
     const rh = [70.0, 90.0, 50.0];
@@ -73,6 +101,7 @@ describe("test_heat_index_rothfusz", () => {
       heat_index_rothfusz({ tdb: t, rh: rh[i], round_output: false }),
     );
     const hi = results.map((result) => result.hi);
+    expect(results.map((result) => result.warnings.length)).toEqual([0, 1, 0]);
     // First element has multiple decimals and matches expected formula
     expect(Math.abs(hi[0] - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
     // Second element below threshold ⇒ NaN
@@ -129,7 +158,7 @@ describe("test_heat_index_rothfusz", () => {
   );
 
   // Upstream broadcasts rh = 50 over the tdb array; element-wise here, and
-  // the UserWarning does not port.
+  // its `pytest.warns(UserWarning)` becomes the row on the last element.
   test.each([
     { id: "True", round_output: true },
     { id: "False", round_output: false },
@@ -143,6 +172,9 @@ describe("test_heat_index_rothfusz", () => {
       expect(
         results.slice(0, 3).map((result) => result.stress_category),
       ).toEqual(["extreme caution", "danger", "extreme danger"]);
+      expect(results.map((result) => result.warnings.length)).toEqual([
+        0, 0, 0, 1,
+      ]);
       expect(results[3].hi).toBeNaN();
       expect(results[3].stress_category).toBeNaN();
     },
@@ -295,6 +327,50 @@ describe("heat_index_rothfusz (JS-only)", () => {
       expect(unrounded.hi).toBeGreaterThan(41);
       expect(rounded.stress_category).toBe(unrounded.stress_category);
       expect(rounded.stress_category).toBe("danger");
+    });
+  });
+
+  describe("warnings rows", () => {
+    const { tdb: bound } = HEAT_INDEX_ROTHFUSZ_LIMITS;
+
+    test("no row at the bound, one row one step below it", () => {
+      expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).warnings).toEqual([]);
+      const { warnings } = heat_index_rothfusz({ tdb: 26.9, rh: 50 });
+      expect(warnings).toEqual([
+        { key: "tdb", role: "input", value: 26.9, bound },
+      ]);
+      // `toBe`: the row carries the object HEAT_INDEX_ROTHFUSZ_INFO references.
+      expect(warnings[0].bound).toBe(
+        HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability,
+      );
+    });
+
+    // The bound has no max, as upstream's (27.0, np.inf).
+    test("no row however far above the bound", () => {
+      expect(heat_index_rothfusz({ tdb: 1e6, rh: 50 }).warnings).toEqual([]);
+    });
+
+    test("the rows are the same with limit_inputs off, beside a finite hi", () => {
+      const on = heat_index_rothfusz({ tdb: 26.9, rh: 50 });
+      const off = heat_index_rothfusz({
+        tdb: 26.9,
+        rh: 50,
+        limit_inputs: false,
+      });
+      expect(Number.isFinite(off.hi)).toBe(true);
+      expect(off.warnings).toEqual(on.warnings);
+    });
+
+    test("a NaN under the gate never comes without a row", () => {
+      for (const tdb of [-40, 0, 20, 26.99, 27, 30, 45, 60])
+        for (const rh of [0, 50, 100]) {
+          const { hi, warnings } = heat_index_rothfusz({ tdb, rh });
+          expect({ tdb, rh, gated: warnings.length > 0 }).toEqual({
+            tdb,
+            rh,
+            gated: Number.isNaN(hi),
+          });
+        }
     });
   });
 

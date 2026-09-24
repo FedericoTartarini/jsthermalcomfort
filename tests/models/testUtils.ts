@@ -29,7 +29,7 @@
  * - Error classes: `ValueError` → `Error`, `TypeError` → `TypeError`. Assert
  *   the message too where upstream matches one (`pytest.raises(match=...)`).
  * - A `UserWarning` assertion becomes an assertion on the `warnings` rows
- *   where the model returns them (PMV). Otherwise, and for any upstream test
+ *   where the model returns them (every v1 model). Otherwise, and for any upstream test
  *   that cannot be ported, write `test.todo("<upstream name>: <reason>")`
  *   so the gap stays visible in the test runner.
  * - Whole-object equality (`assert result == {...}`) becomes a field-by-field

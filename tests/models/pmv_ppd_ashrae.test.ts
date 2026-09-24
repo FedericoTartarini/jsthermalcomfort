@@ -285,10 +285,10 @@ describe("test_pmv_ppd_ashrae", () => {
 
 // Mirrors TestCheckAshrae55Compliance in pythermalcomfort v4.6.0
 // tests/test_internal.py. Upstream calls the private helper
-// _check_ashrae55_compliance, which has no JS counterpart to call: the same
-// rules run inside pmv_ppd_ashrae and come back as its warnings rows, so the
-// tests go through the model, with upstream's v as vr and an rh the model
-// needs and the helper does not take.
+// _check_ashrae55_compliance directly. Its JS counterpart
+// (src/_internal/ashrae55.ts) pushes rows instead of warning, and
+// pmv_ppd_ashrae returns them, so the tests go through the model, with
+// upstream's v as vr and an rh the model needs and the helper does not take.
 describe("test_internal", () => {
   describe("TestCheckAshrae55Compliance", () => {
     const at = (tdb: number, vr: number, airspeed_control: boolean) =>

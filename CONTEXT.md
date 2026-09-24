@@ -33,7 +33,7 @@ A documented difference from upstream, allowed only because JavaScript or TypeSc
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
-What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, and for PMV the `warnings` rows and the exported sensation bins.
+What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
@@ -45,7 +45,7 @@ A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turn
 _Avoid_: mapping, thresholds, category table
 
 **Warnings rows**:
-The applicability bounds a PMV call broke, returned as data instead of emitted as a Python `UserWarning`. Filled whatever `limit_inputs` is.
+The applicability bounds a call broke, as upstream checks them, returned as data instead of a Python `UserWarning`. Filled whatever `limit_inputs` is.
 _Avoid_: console warnings, errors, validation messages
 
 **Mirrored test**:

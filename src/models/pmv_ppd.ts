@@ -3,7 +3,6 @@ import {
   units_converter,
   validateInputs,
   ASHRAE_55_LIMITS,
-  _ashrae_airspeed_bounds_broken,
   ISO_7730_LIMITS,
   is_iso_7730,
   Standard,
@@ -11,6 +10,8 @@ import {
 import { cooling_effect } from "./cooling_effect.ts";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
+import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
+import { _valid_range } from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   Bound,
@@ -174,7 +175,7 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
  *
  * No `derived` row and no `pmv` applicability: ASHRAE 55 bounds neither
  * vapour pressure nor the PMV output, and `pmv_ppd` gates both under ISO 7730
- * only (`if (iso) check("pa", ...)` and `if (iso) check("pmv", ...)` above).
+ * only (the `pa` and `pmv` rows in its ISO branch).
  * The airspeed limits that apply when the occupant cannot control the
  * airspeed depend on the call (operative temperature, met and clo), so they
  * have no fixed `Bound` here; a call that breaks one reports it in
@@ -377,32 +378,26 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   // pythermalcomfort's; unlike its warnings, the rows are also filled with
   // limit_inputs off, so a caller that shows out-of-range numbers can say why.
   // Inputs are taken here, before the ASHRAE cooling effect shifts them.
+  // ISO 7730's checks are inline, as in upstream's pmv_ppd_iso; ASHRAE 55's
+  // go through the shared helper, as in upstream's pmv_ppd_ashrae.
   const iso = is_iso_7730(standard);
-  const input_limits = iso ? ISO_7730_LIMITS : ASHRAE_55_LIMITS;
   const warnings: ApplicabilityWarning[] = [];
-  const check = (
-    key: string,
-    role: ApplicabilityWarning["role"],
-    value: number,
-    bound: Required<Bound>,
-  ) => {
-    // A NaN value is not outside the bound, so it adds no row.
-    if (value < bound.min || value > bound.max) {
-      warnings.push({ key, role, value, bound });
+  if (iso) {
+    for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
+      _valid_range(warnings, key, "input", value, ISO_7730_LIMITS[key]);
     }
-  };
-  for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
-    check(key, "input", value, input_limits[key]);
+    _valid_range(warnings, "pa", "derived", pa, ISO_7730_LIMITS.pa);
+  } else {
+    _check_ashrae55_compliance(warnings, {
+      tdb,
+      tr,
+      v: vr,
+      met,
+      clo,
+      airspeed_control,
+      v_param_name: "vr",
+    });
   }
-  // ASHRAE 55's airspeed limits when the occupant cannot control the airspeed
-  // are upper bounds only, and the operative-temperature one moves with the
-  // call, so they arrive as bounds already broken rather than through check().
-  if (!iso && airspeed_control === false) {
-    for (const bound of _ashrae_airspeed_bounds_broken(tdb, tr, vr, met, clo)) {
-      warnings.push({ key: "vr", role: "input", value: vr, bound });
-    }
-  }
-  if (iso) check("pa", "derived", pa, ISO_7730_LIMITS.pa);
 
   let ce = 0;
   if (standard === Standard.ashrae_55_2023) {
@@ -436,7 +431,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     95.0 *
       Math.exp(-0.03353 * Math.pow(pmv, 4.0) - 0.2179 * Math.pow(pmv, 2.0));
 
-  if (iso) check("pmv", "output", pmv, ISO_7730_LIMITS.pmv);
+  if (iso) _valid_range(warnings, "pmv", "output", pmv, ISO_7730_LIMITS.pmv);
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   const gated = limit_inputs && (isNaN(pmv) || warnings.length > 0);

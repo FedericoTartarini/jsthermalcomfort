@@ -1,6 +1,5 @@
 import { t_o } from "../psychrometrics/t_o.js";
 import {
-  check_standard_compliance,
   round,
   units_converter,
   validateInputs,
@@ -9,7 +8,9 @@ import {
 } from "../utilities/utilities.js";
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { ModelInfo } from "./modelDocs.ts";
+import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
+import { _valid_range } from "../_internal/validation.ts";
+import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // Comfort temperature as a linear function of the running mean outdoor
 // temperature, t_cmf = SLOPE * t_running_mean + INTERCEPT, as upstream names them.
@@ -31,6 +32,7 @@ const ACCEPTABILITY_90_OFFSET = 2.5;
  * @property {number} tmp_cmf_90_up - Upper acceptable comfort temperature for 90% occupants, default in [°C] or in [°F]
  * @property {boolean} acceptability_80 - Acceptability for 80% occupants
  * @property {boolean} acceptability_90 - Acceptability for 90% occupants
+ * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export type AdaptiveAshraeResult = {
@@ -41,6 +43,7 @@ export type AdaptiveAshraeResult = {
   tmp_cmf_90_up: number;
   acceptability_80: boolean;
   acceptability_90: boolean;
+  readonly warnings: ApplicabilityWarning[];
 };
 
 /**
@@ -61,8 +64,8 @@ export interface AdaptiveAshraeParams {
 /**
  * Applicability limit of the adaptive model's own input, in SI units.
  *
- * `tdb`, `tr` and `v` are gated by `check_standard_compliance`, whose numbers
- * `ASHRAE_55_LIMITS` holds; the running mean outdoor temperature is gated by
+ * `tdb`, `tr` and `v` are gated by `_check_ashrae55_compliance`, which reads
+ * `ASHRAE_55_LIMITS`; the running mean outdoor temperature is gated by
  * this model alone, so its bound lives here. Same arrangement as
  * `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity from
  * `ADAPTIVE_ASHRAE_INFO` and read by the gate below, so the metadata and the
@@ -233,13 +236,21 @@ export function adaptive_ashrae(
   // Relation between comfort and outdoor temperature
   let t_cmf = SLOPE * t_running_mean + INTERCEPT;
 
-  if (limit_inputs) {
-    const warnings = check_standard_compliance(standard, { tdb, tr, v });
-    const trm_valid =
-      t_running_mean >= ADAPTIVE_ASHRAE_LIMITS.t_running_mean.min &&
-      t_running_mean <= ADAPTIVE_ASHRAE_LIMITS.t_running_mean.max;
-    if (warnings.length > 0 || !trm_valid) t_cmf = NaN;
-  }
+  // The rows are the channel for upstream's UserWarning, which JavaScript has
+  // no warnings filter for (ADR 0001). Upstream checks only under
+  // limit_inputs; the rows are built on every call, so with the gate off they
+  // say what the numbers were computed despite. The gate reads the rows.
+  // Upstream passes no airspeed_control, so the no-control rules never apply.
+  const warnings: ApplicabilityWarning[] = [];
+  _check_ashrae55_compliance(warnings, { tdb, tr, v });
+  _valid_range(
+    warnings,
+    "t_running_mean",
+    "input",
+    t_running_mean,
+    ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
+  );
+  if (limit_inputs && warnings.length > 0) t_cmf = NaN;
 
   // Rounded in SI before the bounds and the acceptability are derived, and not
   // rounded again after the IP conversion, as upstream does (ADR 0001 reverts
@@ -281,5 +292,6 @@ export function adaptive_ashrae(
     tmp_cmf_90_up,
     acceptability_80,
     acceptability_90,
+    warnings,
   };
 }

@@ -513,16 +513,20 @@ describe("Enforcement — extracted constants match runtime validation", () => {
   // (3) outside limit_inputs=false -> finite AND inside [-2, 2].
 });
 
-describe("Outputs staleness — heat_index output matches INFO", () => {
+describe("Outputs staleness — heat_index_rothfusz output matches INFO", () => {
   test("heat_index_rothfusz output keys match HEAT_INDEX_ROTHFUSZ_INFO.outputs", () => {
-    const result = heat_index_rothfusz(28, 60, { limit_inputs: false });
+    const result = heat_index_rothfusz({
+      tdb: 28,
+      rh: 60,
+      limit_inputs: false,
+    });
     const resultKeys = Object.keys(result).sort();
     const infoKeys = Object.keys(HEAT_INDEX_ROTHFUSZ_INFO.outputs).sort();
     expect(resultKeys).toEqual(infoKeys);
   });
 
   test("heat_index_rothfusz always returns hi and stress_category", () => {
-    const result = heat_index_rothfusz(28, 60);
+    const result = heat_index_rothfusz({ tdb: 28, rh: 60 });
     expect(result).toHaveProperty("hi");
     expect(result).toHaveProperty("stress_category");
   });

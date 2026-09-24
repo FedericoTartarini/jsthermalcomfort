@@ -25,6 +25,8 @@ import type {
   ClassifierBins,
   CoolingEffectParams,
   CoolingEffectResult,
+  HeatIndexRothfuszParams,
+  HeatIndexRothfuszResult,
   ModelInfo,
   PmvPpdAshraeParams,
   PmvPpdAshraeResult,
@@ -45,6 +47,7 @@ import {
   classifyFromBins,
   clo_typical_ensembles,
   cooling_effect,
+  heat_index_rothfusz,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "jsthermalcomfort";
@@ -244,6 +247,26 @@ cooling_effect({
 // @ts-expect-error vr must be a number.
 cooling_effect({ tdb: 25, tr: 25, vr: "0.3", rh: 50, met: 1.2, clo: 0.5 });
 
+// heat_index_rothfusz takes one params object too (ADR 0002), with its params
+// and result types exported by name; the lines below are errors only while
+// the published signature is typed.
+const heatIndexParams: HeatIndexRothfuszParams = {
+  tdb: 30,
+  rh: 80,
+  round_output: false,
+  limit_inputs: false,
+};
+const heatIndexResult: HeatIndexRothfuszResult =
+  heat_index_rothfusz(heatIndexParams);
+// @ts-expect-error `round` is not a param; the switch is `round_output`.
+heat_index_rothfusz({ tdb: 30, rh: 80, round: false });
+// @ts-expect-error `units` is not a param; the model is SI only, as upstream's.
+heat_index_rothfusz({ tdb: 30, rh: 80, units: "SI" });
+// @ts-expect-error rh is a required quantity.
+heat_index_rothfusz({ tdb: 30 });
+// @ts-expect-error tdb must be a number.
+heat_index_rothfusz({ tdb: "30", rh: 80 });
+
 // pmv_ppd_ashrae takes one params object too (ADR 0002), with its params and
 // result types exported by name; the lines below are errors only while the
 // published signature is typed.
@@ -328,6 +351,7 @@ export {
   iso,
   ashrae,
   heatIndex,
+  heatIndexResult,
   adaptive,
   adaptiveResult,
   coolingEffect,

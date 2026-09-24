@@ -1,6 +1,5 @@
 import {
   heat_index_rothfusz,
-  heat_index,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
 } from "./heat_index.ts";
@@ -58,7 +57,6 @@ export {
   clo_tout,
   cooling_effect,
   discomfort_index,
-  heat_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
@@ -98,7 +96,6 @@ export default {
   clo_tout,
   cooling_effect,
   discomfort_index,
-  heat_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,

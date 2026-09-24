@@ -18,8 +18,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toBeInstanceOf(Object);
   });
 
-  it("should have models.heat_index", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("heat_index");
+  it("should have models.heat_index_rothfusz", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("heat_index_rothfusz");
   });
 
   it("should have models.wc", () => {

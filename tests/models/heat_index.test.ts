@@ -1,325 +1,328 @@
 import { describe, expect, test } from "@jest/globals";
 import {
-  heat_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_ROTHFUSZ_LIMITS,
 } from "../../src/models/heat_index.ts";
-import {
-  heat_index as heat_index_from_models,
-  heat_index_rothfusz as heat_index_rothfusz_from_models,
-} from "../../src/models/index.js";
-import {
-  heat_index as heat_index_from_root,
-  heat_index_rothfusz as heat_index_rothfusz_from_root,
-} from "../../src/index.js";
+import type { HeatIndexRothfuszParams } from "../../src/models/heat_index.ts";
+import { heat_index_rothfusz as heat_index_rothfusz_from_models } from "../../src/models/index.js";
+import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.js";
 import { testDataUrls } from "./comftest.ts";
-import { loadTestData, validateResult } from "./testUtils.ts"; // Import shared utilities
+import { loadTestData, validateResult } from "./testUtils.ts";
 
-// Validated against pythermalcomfort 3.9.3 heat_index_rothfusz.
+let { testData, tolerances } = await loadTestData(testDataUrls.heatIndex);
 
-let returnArray = false;
-
-// use top-level await to load test data before tests are defined.
-let { testData, tolerances } = await loadTestData(
-  testDataUrls.heatIndex,
-  returnArray,
-);
-
-describe("heat_index", () => {
-  test.each(testData.data)("Test case #%#", (testCase) => {
-    const { inputs, outputs: expectedOutput } = testCase;
-    const { tdb, rh, options } = inputs as {
-      tdb: number;
-      rh: number;
-      options?: { round?: boolean; units?: "SI" | "IP" };
-    };
-    // Mirror pythermalcomfort's test harness which calls
-    // `heat_index_rothfusz(**inputs, limit_inputs=False)` so the shared
-    // fixture validates the Rothfusz formula independently of the gate.
-    const modelResult = heat_index(tdb, rh, {
-      ...options,
+// Mirrors pythermalcomfort v4.6.0 tests/test_heat_index_rothfusz.py.
+describe("test_heat_index_rothfusz", () => {
+  test.each(testData.data)("test_heat_index: fixture case %#", (row) => {
+    const { inputs, outputs } = row;
+    // As upstream, `heat_index_rothfusz(**inputs, limit_inputs=False)`, so
+    // the fixture validates the regression independently of the gate.
+    const result = heat_index_rothfusz({
+      ...inputs,
       limit_inputs: false,
-    });
+    } as unknown as HeatIndexRothfuszParams);
 
-    validateResult(modelResult, expectedOutput, tolerances, inputs);
-  });
-});
-
-describe("heat_index input validation", () => {
-  test.each([
-    ["tdb", "25", 50],
-    ["rh", 25, "50"],
-  ])("throws TypeError if %s is not a number", (_, ...args) => {
-    // @ts-expect-error deliberately passing non-number args to test the runtime TypeError
-    expect(() => heat_index(...args)).toThrow(TypeError);
+    validateResult(result, outputs, tolerances, inputs);
   });
 
-  test("throws TypeError if round is not a boolean", () => {
-    // @ts-expect-error deliberately passing a non-boolean round to test the runtime TypeError
-    expect(() => heat_index(25, 50, { round: "true" })).toThrow(TypeError);
+  test("test_single_input_caution", () => {
+    // Upstream also asserts a zero-dim ndarray; a JS scalar has no shape.
+    const result = heat_index_rothfusz({ tdb: 29, rh: 50, round_output: true });
+    expect(Math.abs(result.hi - 29.7)).toBeLessThanOrEqual(29.7 * 1e-3);
+    expect(result.stress_category).toBe("caution");
   });
 
-  test("throws TypeError if limit_inputs is not a boolean", () => {
-    // @ts-expect-error deliberately passing a non-boolean limit_inputs to test the runtime TypeError
-    expect(() => heat_index(30, 50, { limit_inputs: "true" })).toThrow(
-      TypeError,
-    );
-  });
-
-  test("throws Error if units is not a valid enum", () => {
-    // @ts-expect-error deliberately passing an invalid units enum to test the runtime Error
-    expect(() => heat_index(25, 50, { units: "INVALID" })).toThrow(Error);
-  });
-});
-
-// Matches pythermalcomfort 3.9.3 heat_index_rothfusz default behaviour.
-describe("heat_index Rothfusz applicability gate", () => {
-  test.each([
-    ["SI tdb just below 27", 26.9, 50, undefined],
-    ["SI tdb well below 27", 20, 50, undefined],
-    ["SI tdb at 0", 0, 50, undefined],
-    ["IP tdb just below 80.6", 80.5, 50, "IP"],
-    ["IP tdb well below 80.6", 60, 50, "IP"],
-  ])("returns NaN under default limit_inputs when %s", (_, tdb, rh, units) => {
-    const result = heat_index(
-      tdb,
-      rh,
-      units ? { units: units as "SI" | "IP" } : undefined,
-    );
+  // Upstream wraps the call in `pytest.warns(UserWarning)`; the JS model
+  // emits no warnings, so only the values port.
+  test("test_below_threshold_produces_nan", () => {
+    const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
     expect(result.hi).toBeNaN();
-  });
-
-  test.each([
-    ["SI tdb at 27", 27, 50, undefined, true],
-    ["SI tdb above 27", 35, 80, undefined, true],
-    ["IP tdb at 80.6", 80.6, 50, "IP", true],
-    ["IP tdb above 80.6", 95, 50, "IP", true],
-  ])(
-    "returns a finite hi under default limit_inputs when %s",
-    (_, tdb, rh, units, _expectFinite) => {
-      const result = heat_index(
-        tdb,
-        rh,
-        units ? { units: units as "SI" | "IP" } : undefined,
-      );
-      expect(Number.isFinite(result.hi)).toBe(true);
-    },
-  );
-
-  test("limit_inputs=false bypasses the gate and computes for tdb < 27 °C", () => {
-    const result = heat_index(25, 50, { limit_inputs: false });
-    expect(result.hi).toBe(25.9);
-  });
-
-  test("limit_inputs=false bypasses the gate in IP mode", () => {
-    const result = heat_index(70, 50, { units: "IP", limit_inputs: false });
-    expect(Number.isFinite(result.hi)).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Stress category classification tests
-// ---------------------------------------------------------------------------
-describe("heat_index stress_category", () => {
-  // Test that stress_category is NaN when hi is NaN (below threshold)
-  test("returns NaN stress_category when below applicability threshold", () => {
-    const result = heat_index(25, 50, { limit_inputs: true });
     expect(result.stress_category).toBeNaN();
   });
 
-  // Direct classification tests using computed hi values
-  // Rather than setting tdb to hit exact hi values, we test that the
-  // classification function correctly categorizes the computed hi.
-  test("stress_category classification returns valid categories", () => {
-    // Test that we can get different categories by varying tdb
-    const validCategories = [
-      "no risk",
-      "caution",
-      "extreme caution",
-      "danger",
-      "extreme danger",
-    ];
+  test.todo(
+    "test_below_threshold_warns_scalar: asserts only the UserWarning text, and the JS model emits no warnings",
+  );
 
-    const low = heat_index(27, 30, { limit_inputs: false });
-    expect(validCategories).toContain(low.stress_category);
-
-    const mid = heat_index(35, 80, { limit_inputs: false });
-    expect(validCategories).toContain(mid.stress_category);
-
-    const high = heat_index(50, 80, { limit_inputs: false });
-    expect(validCategories).toContain(high.stress_category);
+  // Upstream's arrays, element-wise; the UserWarning does not port.
+  test("test_below_threshold_warns_array", () => {
+    const tdb = [30.0, 20.0, 28.5];
+    const rh = [70.0, 90.0, 50.0];
+    const hi = tdb.map((t, i) => heat_index_rothfusz({ tdb: t, rh: rh[i] }).hi);
+    expect(hi[1]).toBeNaN();
+    expect(Number.isFinite(hi[0]) && Number.isFinite(hi[2])).toBe(true);
   });
 
-  // Test boundary behavior with limit_inputs=false to get values we can classify
-  test("returns valid stress categories for various conditions", () => {
-    // Verify that increasing temperature increases stress level
-    const low = heat_index(27, 40, { limit_inputs: false });
-    const mid = heat_index(30, 80, { limit_inputs: false });
-    const high = heat_index(35, 80, { limit_inputs: false });
-
-    // All should return categories from the valid set
-    const validCategories = [
-      "no risk",
-      "caution",
-      "extreme caution",
-      "danger",
-      "extreme danger",
-    ];
-    expect(validCategories).toContain(low.stress_category);
-    expect(validCategories).toContain(mid.stress_category);
-    expect(validCategories).toContain(high.stress_category);
+  // Upstream also asserts no warning was recorded, which holds by
+  // construction here: the JS model emits none.
+  test("test_limit_inputs_false_no_warning", () => {
+    const result = heat_index_rothfusz({
+      tdb: 25,
+      rh: 80,
+      limit_inputs: false,
+    });
+    expect(Number.isFinite(result.hi)).toBe(true);
   });
 
-  // Test that stress_category is same whether round=true or round=false
-  test("stress_category is same whether round=true or round=false", () => {
-    // Rounding must never change the category - this proves it
-    // Using heat_index(30, 91) produces hi values very close to a bin boundary:
-    // - rounded: hi = 41.0 exactly (bin edge, stress_category = "danger")
-    // - unrounded: hi = 41.047576332000055 (also "danger")
-    // If the code classified the rounded value BEFORE computing the category,
-    // a broken implementation would give "extreme caution" instead of "danger"
-    // (since 32 < 41 <= 41 is an edge case). This fixture tests that the
-    // category is computed from the unrounded value.
-    const result_rounded = heat_index(30, 91, {
-      round: true,
-      limit_inputs: false,
-    });
-    const result_unrounded = heat_index(30, 91, {
-      round: false,
-      limit_inputs: false,
-    });
-
-    expect(result_rounded.hi).toBe(41);
-    expect(result_unrounded.hi).toBeGreaterThan(41);
-    expect(result_rounded.stress_category).toBe(
-      result_unrounded.stress_category,
+  // Upstream's vectors, element-wise; the UserWarning does not port.
+  test("test_vector_input_no_rounding", () => {
+    const tdb = [30.0, 20.0, 28.5];
+    const rh = [70.0, 90.0, 50.0];
+    const results = tdb.map((t, i) =>
+      heat_index_rothfusz({ tdb: t, rh: rh[i], round_output: false }),
     );
-    expect(result_rounded.stress_category).toBe("danger");
+    const hi = results.map((result) => result.hi);
+    // First element has multiple decimals and matches expected formula
+    expect(Math.abs(hi[0] - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
+    // Second element below threshold ⇒ NaN
+    expect(hi[1]).toBeNaN();
+    // Third element above threshold ⇒ finite number
+    expect(Number.isFinite(hi[2])).toBe(true);
+    expect(results[0].stress_category).toBe("extreme caution");
   });
 
-  // Test IP mode: classification should be from SI value, not IP value
-  test("stress_category in IP mode is classified from SI value", () => {
-    // This test proves SI-based classification by using concrete expected values.
-    // heat_index(80, 50, IP) computes hi_ip = 80.8029°F = 27.1127°C (unrounded SI).
-    // Range check: 27 < 27.1127 <= 32 -> category should be "caution".
-    // CRITICAL: If the code classified hi_ip (80.8) instead of hi_si (27.11),
-    // the category would be "extreme danger" (54 < 80.8 <= 1000).
-    // That contrast is the whole point of this test — if this assertion weakens,
-    // the test no longer proves SI-based classification.
-    const result = heat_index(80, 50, { units: "IP", limit_inputs: false });
-    expect(result.hi).toBe(80.8);
-    expect(result.stress_category).toBe("caution");
-  });
+  // Upstream's parametrize has no ids; `id` is the one pytest generates, which
+  // Jest's %s would print as 27 rather than 27.0.
+  test.each([
+    {
+      id: "26.583615-27.0-caution",
+      tdb: 26.583615,
+      boundary: 27.0,
+      category: "caution",
+    },
+    {
+      id: "30.645013-32.0-extreme caution",
+      tdb: 30.645013,
+      boundary: 32.0,
+      category: "extreme caution",
+    },
+    {
+      id: "35.152822-41.0-danger",
+      tdb: 35.152822,
+      boundary: 41.0,
+      category: "danger",
+    },
+    {
+      id: "39.775673-54.0-extreme danger",
+      tdb: 39.775673,
+      boundary: 54.0,
+      category: "extreme danger",
+    },
+  ])(
+    "test_category_uses_unrounded_heat_index[$id]",
+    ({ tdb, boundary, category }) => {
+      const rounded = heat_index_rothfusz({ tdb, rh: 50, limit_inputs: false });
+      const unrounded = heat_index_rothfusz({
+        tdb,
+        rh: 50,
+        round_output: false,
+        limit_inputs: false,
+      });
+
+      expect(unrounded.hi).toBeGreaterThan(boundary);
+      expect(unrounded.hi).toBeLessThan(boundary + 0.05);
+      expect(rounded.hi).toBe(boundary);
+      expect(rounded.stress_category).toBe(category);
+      expect(unrounded.stress_category).toBe(category);
+    },
+  );
+
+  // Upstream broadcasts rh = 50 over the tdb array; element-wise here, and
+  // the UserWarning does not port.
+  test.each([
+    { id: "True", round_output: true },
+    { id: "False", round_output: false },
+  ])(
+    "test_category_rounding_with_broadcast_and_invalid_input[$id]",
+    ({ round_output }) => {
+      const results = [30.645013, 35.152822, 39.775673, 25].map((tdb) =>
+        heat_index_rothfusz({ tdb, rh: 50, round_output }),
+      );
+
+      expect(
+        results.slice(0, 3).map((result) => result.stress_category),
+      ).toEqual(["extreme caution", "danger", "extreme danger"]);
+      expect(results[3].hi).toBeNaN();
+      expect(results[3].stress_category).toBeNaN();
+    },
+  );
 });
 
-// ---------------------------------------------------------------------------
-// Tests for the renamed function and backwards-compatible alias
-// ---------------------------------------------------------------------------
-describe("heat_index_rothfusz (renamed function)", () => {
-  test("heat_index_rothfusz produces identical results to heat_index", () => {
-    const testCases: [
-      number,
-      number,
-      Parameters<typeof heat_index_rothfusz>[2]?,
-    ][] = [
-      [25, 50, { limit_inputs: false }],
+describe("heat_index_rothfusz (JS-only)", () => {
+  const hot = { tdb: 30, rh: 80 };
+
+  describe("input validation", () => {
+    const quantities = ["tdb", "rh"] as const;
+
+    // A numeric string is not coerced, unlike in arithmetic.
+    test.each(quantities)("throws TypeError if %s is not a number", (key) => {
+      // Cast: deliberately passing a string to test the runtime TypeError.
+      const params = {
+        ...hot,
+        [key]: "25",
+      } as unknown as HeatIndexRothfuszParams;
+      expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
+    });
+
+    // A missing quantity is a TypeError, as a missing keyword argument is in
+    // Python.
+    test.each(quantities)("throws TypeError if %s is missing", (key) => {
+      const params: Partial<HeatIndexRothfuszParams> = { ...hot };
+      delete params[key];
+      // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
+      expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
+    });
+
+    // ADR 0001: a non-finite number throws rather than propagating as NaN.
+    test.each(quantities)("throws TypeError if %s is not finite", (key) => {
+      for (const bad of [NaN, Infinity, -Infinity]) {
+        expect(() => heat_index_rothfusz({ ...hot, [key]: bad })).toThrow(
+          TypeError,
+        );
+      }
+    });
+
+    // tdb and rh were positional before v2 (ADR 0002). A call still written
+    // that way throws rather than running on anything else.
+    test("throws TypeError if called positionally", () => {
+      // @ts-expect-error the model takes one params object
+      expect(() => heat_index_rothfusz(30, 80)).toThrow(TypeError);
+      expect(() =>
+        // @ts-expect-error the model takes one params object
+        heat_index_rothfusz(30, 80, { round: false, units: "IP" }),
+      ).toThrow(TypeError);
+      // @ts-expect-error null is not a params object
+      expect(() => heat_index_rothfusz(null)).toThrow(TypeError);
+      // @ts-expect-error the params object is required
+      expect(() => heat_index_rothfusz()).toThrow(TypeError);
+    });
+
+    test.each(["round_output", "limit_inputs"] as const)(
+      "throws TypeError if %s is not a boolean",
+      (key) => {
+        // Cast: deliberately passing a string to test the runtime TypeError.
+        const params = {
+          ...hot,
+          [key]: "true",
+        } as unknown as HeatIndexRothfuszParams;
+        expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
+      },
+    );
+
+    test("a switch passed as undefined takes its default", () => {
+      expect(
+        heat_index_rothfusz({
+          tdb: 25,
+          rh: 50,
+          round_output: undefined,
+          limit_inputs: undefined,
+        }).hi,
+      ).toBeNaN();
+      expect(heat_index_rothfusz({ ...hot, round_output: undefined }).hi).toBe(
+        37.7,
+      );
+    });
+  });
+
+  describe("applicability gate", () => {
+    test.each([
+      ["tdb just below 27", 26.9, 50],
+      ["tdb well below 27", 20, 50],
+      ["tdb at 0", 0, 50],
+    ])("returns NaN under default limit_inputs when %s", (_, tdb, rh) => {
+      expect(heat_index_rothfusz({ tdb, rh }).hi).toBeNaN();
+    });
+
+    test.each([
+      ["tdb at 27", 27, 50],
+      ["tdb above 27", 35, 80],
+    ])(
+      "returns a finite hi under default limit_inputs when %s",
+      (_, tdb, rh) => {
+        expect(Number.isFinite(heat_index_rothfusz({ tdb, rh }).hi)).toBe(true);
+      },
+    );
+  });
+
+  describe("stress_category", () => {
+    test("returns NaN stress_category when below applicability threshold", () => {
+      const result = heat_index_rothfusz({
+        tdb: 25,
+        rh: 50,
+        limit_inputs: true,
+      });
+      expect(result.stress_category).toBeNaN();
+    });
+
+    const validCategories = [
+      "no risk",
+      "caution",
+      "extreme caution",
+      "danger",
+      "extreme danger",
+    ];
+
+    test.each([
+      [27, 30],
+      [35, 80],
+      [50, 80],
+      [27, 40],
       [30, 80],
-      [35, 75, { units: "IP", limit_inputs: false }],
-      [27, 40, { round: false, limit_inputs: false }],
-    ];
+    ])("returns a valid category for tdb=%s, rh=%s", (tdb, rh) => {
+      const result = heat_index_rothfusz({ tdb, rh, limit_inputs: false });
+      expect(validCategories).toContain(result.stress_category);
+    });
 
-    testCases.forEach(([tdb, rh, options]) => {
-      const result_rothfusz = heat_index_rothfusz(tdb, rh, options);
-      const result_alias = heat_index(tdb, rh, options);
+    // heat_index_rothfusz(30, 91) rounds onto the 41 bin edge: rounded
+    // hi = 41.0, unrounded 41.0476. Classifying the rounded value would give
+    // "extreme caution" (32 < 41 <= 41); the unrounded one gives "danger".
+    test("stress_category is same whether round_output is true or false", () => {
+      const rounded = heat_index_rothfusz({
+        tdb: 30,
+        rh: 91,
+        round_output: true,
+        limit_inputs: false,
+      });
+      const unrounded = heat_index_rothfusz({
+        tdb: 30,
+        rh: 91,
+        round_output: false,
+        limit_inputs: false,
+      });
 
-      expect(result_rothfusz).toEqual(result_alias);
+      expect(rounded.hi).toBe(41);
+      expect(unrounded.hi).toBeGreaterThan(41);
+      expect(rounded.stress_category).toBe(unrounded.stress_category);
+      expect(rounded.stress_category).toBe("danger");
     });
   });
 
-  test("heat_index_rothfusz and heat_index are the same function", () => {
-    expect(heat_index_rothfusz).toBe(heat_index);
-  });
+  describe("exports", () => {
+    test("heat_index_rothfusz is exported from models/index.js", () => {
+      expect(heat_index_rothfusz_from_models).toBe(heat_index_rothfusz);
+    });
 
-  test("heat_index_rothfusz is exported from models/index.js", () => {
-    expect(heat_index_rothfusz_from_models).toBe(heat_index_rothfusz);
-  });
-
-  test("heat_index alias is exported from models/index.js", () => {
-    expect(heat_index_from_models).toBe(heat_index);
-  });
-
-  test("both names return identical results for various inputs", () => {
-    const inputs: [
-      number,
-      number,
-      Parameters<typeof heat_index_rothfusz>[2]?,
-    ][] = [
-      [27, 30, { limit_inputs: false }],
-      [30, 50],
-      [35, 90, { units: "IP", limit_inputs: false }],
-      [50, 40, { round: false, limit_inputs: false }],
-    ];
-
-    inputs.forEach(([tdb, rh, options]) => {
-      const result1 = heat_index_rothfusz(tdb, rh, options);
-      const result2 = heat_index(tdb, rh, options);
-
-      // Compare hi values
-      if (isNaN(result1.hi)) {
-        expect(isNaN(result2.hi)).toBe(true);
-      } else {
-        expect(result2.hi).toBe(result1.hi);
-      }
-
-      // Compare stress_category
-      if (isNaN(result1.stress_category as number)) {
-        expect(isNaN(result2.stress_category as number)).toBe(true);
-      } else {
-        expect(result2.stress_category).toBe(result1.stress_category);
-      }
+    test("heat_index_rothfusz is exported from package root (src/index.js)", () => {
+      expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
     });
   });
 
-  test("both names are exported from package root (src/index.js)", () => {
-    expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
-    expect(heat_index_from_root).toBe(heat_index);
-  });
+  describe("applicability threshold", () => {
+    test("the gate is inclusive at 27 degC and excludes just below", () => {
+      expect(heat_index_rothfusz({ tdb: 26.99, rh: 50 }).hi).toBeNaN();
+      expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).hi).toBe(27.4);
+    });
 
-  test("both names from package root produce correct results", () => {
-    const result1 = heat_index_rothfusz_from_root(30, 80);
-    const result2 = heat_index_from_root(30, 80);
-
-    expect(result1).toEqual(result2);
-    expect(Number.isFinite(result1.hi)).toBe(true);
-    expect(typeof result1.stress_category === "string").toBe(true);
-  });
-});
-
-// The IP applicability threshold used to be a second stored literal (80.6).
-// It is now derived from the SI value, so these two cannot drift apart.
-describe("heat_index_rothfusz applicability threshold across unit systems", () => {
-  test("the SI gate is inclusive at 27 degC and excludes just below", () => {
-    expect(heat_index_rothfusz(26.99, 50).hi).toBeNaN();
-    expect(Number.isFinite(heat_index_rothfusz(27, 50).hi)).toBe(true);
-  });
-
-  test("the IP gate is inclusive at 80.6 degF and excludes just below", () => {
-    // 80.6 degF is exactly 27 degC; the conversion is exact in float64.
-    expect(heat_index_rothfusz(80.59, 50, { units: "IP" }).hi).toBeNaN();
-    expect(
-      Number.isFinite(heat_index_rothfusz(80.6, 50, { units: "IP" }).hi),
-    ).toBe(true);
-  });
-
-  test("the metadata references the limits object rather than copying it", () => {
-    // `toBe`, not `toEqual`: a rebuilt { min: 27 } literal would satisfy
-    // equality and then be free to drift from what the runtime enforces.
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBe(
-      HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
-    );
-    expect(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb).toEqual({ min: 27 });
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS)).toBe(true);
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb)).toBe(true);
+    test("the metadata references the limits object rather than copying it", () => {
+      // `toBe`, not `toEqual`: a rebuilt { min: 27 } literal would satisfy
+      // equality and then be free to drift from what the runtime enforces.
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBe(
+        HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+      );
+      expect(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb).toEqual({ min: 27 });
+      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS)).toBe(true);
+      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb)).toBe(true);
+    });
   });
 });

@@ -4,7 +4,7 @@ JavaScript port of pythermalcomfort (thermal comfort, thermal stress and thermop
 
 - Tests are Jest under `--experimental-vm-modules`; single file: `npm test -- tests/<file>`. Type-check tests with `npm run check:types:tests`.
 - Converted `.ts` files keep the original JSDoc verbatim: documentation.js builds the docs from the JSDoc, not the TS annotations.
-- Commit messages: `type(#issue): summary`, semantic-release on `main`.
+- Commit messages: `type(scope): summary`, scope the model or module touched, `!` after the scope for a breaking change, `type(#issue)` only when a GitHub issue exists; semantic-release on `main`.
 - Follow pythermalcomfort's current release: adopt its logic, reference values _and_ naming by default; when upstream renames something, rename here too. Deviate only where TypeScript requires it, and write the reason at the site.
 - `lib/` is the published surface. Run `npm run build` after any change under `src/`: `prepack` only fires on publish, so a consumer linked with `file:` keeps seeing the stale build until you do.
 

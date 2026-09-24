@@ -96,6 +96,7 @@ export const UTCI_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
  * @public
  */
 export const UTCI_INFO: ModelInfo = deepFreeze({
+  name: "utci",
   label: "UTCI",
   description:
     "Universal Thermal Climate Index — the air temperature of a reference outdoor environment with the same physiological strain.",

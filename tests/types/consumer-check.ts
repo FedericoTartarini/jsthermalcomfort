@@ -87,6 +87,21 @@ const bins: ClassifierBins | undefined = iso.outputs.tsv.classifier;
 const rightInclusive: boolean | undefined = bins?.right;
 const edgeCount: number | undefined = bins?.edges.length;
 
+// Model info names the model it belongs to. The read and the `nameless` line
+// are errors against a build without the field; the other `@ts-expect-error`
+// line guards its type once it exists.
+const modelName: string = iso.name;
+// @ts-expect-error `name` is a string, not a number.
+const nameNotANumber: number = PMV_PPD_ISO_INFO.name;
+// @ts-expect-error `name` is required: a ModelInfo without it is rejected.
+const nameless: ModelInfo = {
+  label: "l",
+  description: "d",
+  standards: [],
+  inputs: {},
+  outputs: {},
+};
+
 // Guards against the metadata silently degrading to `any`.
 // If these stop being errors, tsc fails with "Unused '@ts-expect-error'
 // directive" — which is the point: `any` would accept both assignments.

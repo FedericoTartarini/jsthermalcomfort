@@ -3,8 +3,8 @@ import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_ROTHFUSZ_LIMITS,
-} from "../../src/models/heat_index.ts";
-import type { HeatIndexRothfuszParams } from "../../src/models/heat_index.ts";
+} from "../../src/models/heat_index_rothfusz.ts";
+import type { HeatIndexRothfuszParams } from "../../src/models/heat_index_rothfusz.ts";
 import { heat_index_rothfusz as heat_index_rothfusz_from_models } from "../../src/models/index.js";
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.js";
 import { testDataUrls } from "./comftest.ts";

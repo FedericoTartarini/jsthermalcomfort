@@ -87,6 +87,7 @@ export const ADAPTIVE_ASHRAE_LIMITS = Object.freeze({
  * @public
  */
 export const ADAPTIVE_ASHRAE_INFO: ModelInfo = deepFreeze({
+  name: "adaptive_ashrae",
   label: "Adaptive (ASHRAE 55)",
   description:
     "Adaptive comfort temperature and its 80 % and 90 % acceptability ranges from the running mean outdoor temperature.",

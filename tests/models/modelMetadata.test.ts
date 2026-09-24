@@ -58,8 +58,42 @@ describe("Model Metadata Exports — enumeration test", () => {
   });
 });
 
+// Every exported model info, found by the naming convention rather than listed,
+// so a sixth `_INFO` is covered by the name test on arrival.
+const exportedInfos = Object.entries(pkg as Record<string, unknown>)
+  .filter(([exportName]) => exportName.endsWith("_INFO"))
+  .map(([exportName, info]) => ({ exportName, info: info as ModelInfo }));
+
+describe("name — each model info names its model's export", () => {
+  test("the naming convention finds the five v1 model infos", () => {
+    // Guards the filter itself: a convention that matched nothing would make
+    // the tests below pass vacuously.
+    expect(exportedInfos.map(({ exportName }) => exportName)).toEqual(
+      expect.arrayContaining([
+        "ADAPTIVE_ASHRAE_INFO",
+        "HEAT_INDEX_ROTHFUSZ_INFO",
+        "PMV_PPD_ASHRAE_INFO",
+        "PMV_PPD_ISO_INFO",
+        "UTCI_INFO",
+      ]),
+    );
+  });
+
+  test.each(exportedInfos)(
+    "$exportName.name is an exported function whose _INFO is this object",
+    ({ exportName, info }) => {
+      const exports = pkg as Record<string, unknown>;
+      expect(typeof info.name).toBe("string");
+      expect(typeof exports[info.name]).toBe("function");
+      expect(`${info.name.toUpperCase()}_INFO`).toBe(exportName);
+      expect(exports[`${info.name.toUpperCase()}_INFO`]).toBe(info);
+    },
+  );
+});
+
 describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
   test("has required top-level properties", () => {
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.name).toBe("heat_index_rothfusz");
     expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("label");
     expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("description");
     expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("inputs");
@@ -118,6 +152,7 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
 
 describe("PMV_PPD_ISO_INFO structure", () => {
   test("has required top-level properties", () => {
+    expect(PMV_PPD_ISO_INFO.name).toBe("pmv_ppd_iso");
     expect(PMV_PPD_ISO_INFO).toHaveProperty("label");
     expect(PMV_PPD_ISO_INFO).toHaveProperty("description");
     expect(PMV_PPD_ISO_INFO).toHaveProperty("inputs");
@@ -604,6 +639,7 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
 
 describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
   test("labels the model and lists ASHRAE 55 as its only standard", () => {
+    expect(PMV_PPD_ASHRAE_INFO.name).toBe("pmv_ppd_ashrae");
     expect(PMV_PPD_ASHRAE_INFO.label).toBe("PMV / PPD (ASHRAE 55)");
     expect(typeof PMV_PPD_ASHRAE_INFO.description).toBe("string");
     expect(PMV_PPD_ASHRAE_INFO.standards).toEqual([Standard.ashrae_55_2023]);
@@ -724,6 +760,7 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
 
 describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
   test("labels the model and lists ASHRAE 55 as its only standard", () => {
+    expect(ADAPTIVE_ASHRAE_INFO.name).toBe("adaptive_ashrae");
     expect(ADAPTIVE_ASHRAE_INFO.label).toBe("Adaptive (ASHRAE 55)");
     expect(typeof ADAPTIVE_ASHRAE_INFO.description).toBe("string");
     expect(ADAPTIVE_ASHRAE_INFO.standards).toEqual([Standard.ashrae_55_2023]);
@@ -848,6 +885,7 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
 
 describe("UTCI_INFO — the UTCI model's metadata", () => {
   test("labels the model and lists no standard", () => {
+    expect(UTCI_INFO.name).toBe("utci");
     expect(UTCI_INFO.label).toBe("UTCI");
     expect(typeof UTCI_INFO.description).toBe("string");
     expect(UTCI_INFO.standards).toEqual([]);

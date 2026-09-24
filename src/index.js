@@ -31,10 +31,10 @@ export * from "./models/index.js";
  * @typedef {import("./models/cooling_effect.js").CoolingEffectResult} CoolingEffectResult
  */
 /**
- * @typedef {import("./models/heat_index.js").HeatIndexRothfuszParams} HeatIndexRothfuszParams
+ * @typedef {import("./models/heat_index_rothfusz.js").HeatIndexRothfuszParams} HeatIndexRothfuszParams
  */
 /**
- * @typedef {import("./models/heat_index.js").HeatIndexRothfuszResult} HeatIndexRothfuszResult
+ * @typedef {import("./models/heat_index_rothfusz.js").HeatIndexRothfuszResult} HeatIndexRothfuszResult
  */
 /**
  * @typedef {import("./models/pmv_ppd_ashrae.js").PmvPpdAshraeParams} PmvPpdAshraeParams

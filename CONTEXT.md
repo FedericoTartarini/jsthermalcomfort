@@ -37,11 +37,11 @@ What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's fun
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
-The published metadata for one model (`<MODEL>_INFO`): label, description, standards, and per-quantity unit and applicability. Upstream has no equivalent.
+The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under, label, description, standards, and per-quantity unit, applicability and, on a labelled output, classifier. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
 _Avoid_: schema, metadata object, model docs
 
 **Classifier**:
-A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one exactly when upstream computes that output with `_mapping()`; a bound that moves with another input (adaptive acceptability) is not a classifier. The labelled output's `classifies` names the output whose value the bins cut (`tsv` classifies `pmv`).
+A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one exactly when upstream computes that output with `_mapping()`; a bound that moves with another input (adaptive acceptability) is not a classifier. The model info does not say which output the bins cut (`tsv`'s bins cut `pmv`): a consumer that bands a number states that pairing itself, as the app's dynamic-chart declaration does with `output` and `bands`.
 _Avoid_: mapping, thresholds, category table
 
 **Warnings rows**:

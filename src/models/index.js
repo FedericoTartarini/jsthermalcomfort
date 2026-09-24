@@ -2,7 +2,7 @@ import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
-} from "./heat_index.ts";
+} from "./heat_index_rothfusz.ts";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";

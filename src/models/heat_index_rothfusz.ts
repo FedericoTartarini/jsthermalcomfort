@@ -112,6 +112,7 @@ export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
  * @public
  */
 export const HEAT_INDEX_ROTHFUSZ_INFO: ModelInfo = deepFreeze({
+  name: "heat_index_rothfusz",
   label: "Heat Index (Rothfusz)",
   description: "Apparent temperature — how hot it feels at a given humidity.",
   standards: [],

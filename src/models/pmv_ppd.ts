@@ -141,6 +141,7 @@ export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
  * @public
  */
 export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
+  name: "pmv_ppd_iso",
   label: "PMV / PPD (ISO 7730)",
   description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
   standards: [Standard.iso_7730_2025, Standard.iso_7730_2005],
@@ -182,6 +183,7 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
  * @public
  */
 export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
+  name: "pmv_ppd_ashrae",
   label: "PMV / PPD (ASHRAE 55)",
   description:
     "Predicted Mean Vote and Predicted Percentage Dissatisfied, with the ASHRAE 55 cooling effect of elevated air speed.",

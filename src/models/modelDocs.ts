@@ -86,6 +86,12 @@ export interface VariableInfo {
  *
  * Experimental — the shape may change before release.
  *
+ * `name` is the name the model is exported under, written once, and it is
+ * exactly pythermalcomfort's function name for the model:
+ * `PMV_PPD_ISO_INFO.name` is `"pmv_ppd_iso"`, and `name.toUpperCase() +
+ * "_INFO"` is this object's own export name. A front end can key a model by
+ * it without keeping its own copy of the string.
+ *
  * `label` is the human-readable model name, `description` a one-sentence
  * summary of what it computes.
  *
@@ -101,6 +107,7 @@ export interface VariableInfo {
  * @public
  */
 export interface ModelInfo {
+  readonly name: string;
   readonly label: string;
   readonly description: string;
   readonly standards: readonly StandardId[];

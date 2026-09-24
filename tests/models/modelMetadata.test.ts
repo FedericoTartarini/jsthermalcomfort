@@ -35,6 +35,7 @@ describe("Model Metadata Exports — enumeration test", () => {
       "classifyFromBins",
       "HEAT_INDEX_ROTHFUSZ_INFO",
       "HEAT_INDEX_STRESS_CATEGORY_BINS",
+      "PMV_COMPLIANCE_INTERVAL_ASHRAE",
       "PMV_PPD_ASHRAE_INFO",
       "PMV_PPD_ISO_INFO",
       "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
@@ -619,7 +620,15 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
   });
 
   test("pmv_ppd_ashrae's warnings rows carry the bounds INFO references", () => {
-    const { warnings } = pmv_ppd_ashrae(45, 25, 2.5, 50, 1.2, 1.6, 0);
+    const { warnings } = pmv_ppd_ashrae({
+      tdb: 45,
+      tr: 25,
+      vr: 2.5,
+      rh: 50,
+      met: 1.2,
+      clo: 1.6,
+      wme: 0,
+    });
     const expected = [
       PMV_PPD_ASHRAE_INFO.inputs.tdb.applicability,
       PMV_PPD_ASHRAE_INFO.inputs.vr.applicability,
@@ -630,7 +639,14 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
   });
 
   test("pmv_ppd_ashrae output keys match PMV_PPD_ASHRAE_INFO.outputs", () => {
-    const result = pmv_ppd_ashrae(22, 22, 0.1, 50, 1.0, 0.5, 0, {
+    const result = pmv_ppd_ashrae({
+      tdb: 22,
+      tr: 22,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 0.5,
+      wme: 0,
       limit_inputs: false,
     });
     const resultKeys = Object.keys(result)
@@ -659,7 +675,14 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
     // ceiling, and the resulting PMV is well outside ISO's [-2, 2] band. The
     // ASHRAE wrapper gates neither, so with every input inside
     // ASHRAE_55_LIMITS it still returns a finite PMV.
-    const result = pmv_ppd_ashrae(39, 39, 0.1, 90, 1.2, 0.5);
+    const result = pmv_ppd_ashrae({
+      tdb: 39,
+      tr: 39,
+      vr: 0.1,
+      rh: 90,
+      met: 1.2,
+      clo: 0.5,
+    });
     expect(Number.isFinite(result.pmv)).toBe(true);
     expect(result.pmv).toBeGreaterThan(2);
     expect(result.warnings).toEqual([]);

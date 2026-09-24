@@ -71,12 +71,14 @@ export interface PmvPpdParams {
  * @property { number } pmv - Predicted Mean Vote
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the returned pmv, so from the rounded one when `round_output` is true.
+ * @property { boolean|number } [compliance] - ASHRAE 55 only: whether the unrounded pmv lies inside `PMV_COMPLIANCE_INTERVAL_ASHRAE`, or NaN when `limit_inputs` suppressed the pmv. Absent under ISO 7730.
  * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  */
 export interface Pmv_ppdReturns {
   pmv: number;
   ppd: number;
   tsv: string | number;
+  compliance?: boolean | number;
   readonly warnings: ApplicabilityWarning[];
 }
 
@@ -117,6 +119,19 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE: Readonly<ClassifierBins> =
     ],
     right: true,
   });
+
+/**
+ * The PMV interval inside which pmv_ppd_ashrae reports `compliance` true:
+ * -0.5 < pmv < 0.5, both ends excluded, read from the unrounded PMV, as
+ * upstream's `pmv_ppd_ashrae` computes it. Unlike an applicability bound it
+ * gates nothing: a PMV outside it is still returned, as non-compliant.
+ *
+ * Upstream writes the interval inline. It is a named export here because a
+ * consumer needs it (ADR 0001): the app draws the comfort zone from the same
+ * interval the model reads, instead of keeping its own ±0.5.
+ */
+export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
+  Object.freeze({ min: -0.5, max: 0.5 });
 
 /**
  * Model metadata for PMV / PPD (ISO 7730).
@@ -184,6 +199,7 @@ export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
     pmv: { unit: null },
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE },
+    compliance: { unit: null },
   },
 });
 
@@ -421,7 +437,18 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   if (iso) check("pmv", "output", pmv, ISO_7730_LIMITS.pmv);
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
-  if (limit_inputs && (isNaN(pmv) || warnings.length > 0)) {
+  const gated = limit_inputs && (isNaN(pmv) || warnings.length > 0);
+
+  // ASHRAE 55 only, as upstream's pmv_ppd_ashrae computes it: from the
+  // unrounded pmv, and NaN where limit_inputs finds an input out of bounds.
+  // Upstream masks on the inputs alone, not on a NaN pmv, so neither does this.
+  const compliance =
+    limit_inputs && warnings.length > 0
+      ? NaN
+      : pmv > PMV_COMPLIANCE_INTERVAL_ASHRAE.min &&
+        pmv < PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
+
+  if (gated) {
     pmv = NaN;
     ppd = NaN;
   }
@@ -439,7 +466,9 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     : PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE;
   const tsv = classifyFromBins(pmv, bins);
 
-  return { pmv, ppd, tsv, warnings };
+  return iso
+    ? { pmv, ppd, tsv, warnings }
+    : { pmv, ppd, tsv, compliance, warnings };
 }
 
 /**

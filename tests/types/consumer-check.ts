@@ -26,12 +26,15 @@ import type {
   CoolingEffectParams,
   CoolingEffectResult,
   ModelInfo,
+  PmvPpdAshraeParams,
+  PmvPpdAshraeResult,
   VariableInfo,
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
+  PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
@@ -191,19 +194,66 @@ cooling_effect({
 // @ts-expect-error vr must be a number.
 cooling_effect({ tdb: 25, tr: 25, vr: "0.3", rh: 50, met: 1.2, clo: 0.5 });
 
+// pmv_ppd_ashrae takes one params object too (ADR 0002), with its params and
+// result types exported by name; the lines below are errors only while the
+// published signature is typed.
+const pmvAshraeParams: PmvPpdAshraeParams = {
+  tdb: 77,
+  tr: 77,
+  vr: 0.328,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  wme: 0,
+  standard: Standard.ashrae_55_2023,
+  units: "IP",
+  limit_inputs: false,
+  airspeed_control: false,
+  round_output: false,
+  suppress_warnings: true,
+};
+const pmvAshrae: PmvPpdAshraeResult = pmv_ppd_ashrae(pmvAshraeParams);
+const ashraeCompliance: boolean | number = pmvAshrae.compliance;
+// The interval compliance is read against, published once.
+const complianceMax: number = PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
+pmv_ppd_ashrae({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error `airspeed_controll` is misspelled; the switch is `airspeed_control`.
+  airspeed_controll: false,
+});
+// @ts-expect-error clo is a required quantity.
+pmv_ppd_ashrae({ tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2 });
+pmv_ppd_ashrae({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error standard is "55-2023"; an ISO 7730 standard is for pmv_ppd_iso.
+  standard: Standard.iso_7730_2025,
+});
+// @ts-expect-error PMV_COMPLIANCE_INTERVAL_ASHRAE is frozen, so its type is readonly.
+PMV_COMPLIANCE_INTERVAL_ASHRAE.max = 1;
+
 // Both wrappers return the applicability rows a call broke (issue #199), typed
 // through to the bound, so a front end can phrase "35 °C is above 30 °C"
 // without casting.
 const isoWarnings: ApplicabilityWarning[] = pmvIso.warnings;
 const isoRowMax: number | undefined = pmvIso.warnings[0].bound.max;
-const ashraeRowMax: number | undefined = pmv_ppd_ashrae(
-  45,
-  25,
-  0.1,
-  50,
-  1.2,
-  0.5,
-).warnings[0].bound.max;
+const ashraeRowMax: number | undefined = pmv_ppd_ashrae({
+  tdb: 45,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+}).warnings[0].bound.max;
 // @ts-expect-error role is one of three literals, not any string.
 const notARole: ApplicabilityWarning["role"] = "somewhere";
 // @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
@@ -231,6 +281,8 @@ export {
   adaptive,
   adaptiveResult,
   coolingEffect,
+  ashraeCompliance,
+  complianceMax,
   notANumberEither,
   minTdb,
   isoStandards,

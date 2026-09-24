@@ -45,10 +45,9 @@ interface Ashrae55Params {
  * objects. `check_standard_compliance` keeps its own copy of these rules for
  * its strings, so a change to one belongs in both.
  *
- * The rows come in the order tdb, tr, v, met, clo, then the airspeed rules,
- * where upstream warns on the airspeed rules before met and clo: that is the
- * order `pmv_ppd`'s rows had before this helper, kept so they are unchanged.
- * Upstream's `v_limited` branch is left out: no caller here passes it.
+ * The rows come in upstream's order: tdb, tr, v, the airspeed rules, then
+ * met and clo. Upstream's `v_limited` branch is left out: no caller here
+ * passes it.
  *
  * Private: not exported from the package root.
  *
@@ -67,30 +66,34 @@ export function _check_ashrae55_compliance(
   if (v !== undefined) {
     _valid_range(warnings, v_param_name, "input", v, ASHRAE_55_LIMITS.vr);
   }
+
+  if (
+    !airspeed_control &&
+    v !== undefined &&
+    met !== undefined &&
+    clo !== undefined &&
+    clo < 0.7 &&
+    met < 1.3
+  ) {
+    // Upper bounds only, and the operative-temperature one moves with the
+    // call, so they are pushed as broken rather than through _valid_range.
+    const pushAirspeedRow = (bound: Readonly<{ max: number }>) =>
+      warnings.push({ key: v_param_name, role: "input", value: v, bound });
+    const to = t_o(tdb, tr, v);
+    const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
+    if (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max)
+      pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.any);
+    if (to > 23 && to < 25.5 && v > v_limit)
+      pushAirspeedRow(Object.freeze({ max: v_limit }));
+    if (to <= 23 && v > ASHRAE_55_AIRSPEED_NO_CONTROL.cool.max)
+      pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.cool);
+  }
+
+  // Upstream checks met and clo when met is given (`"met" in params`) and
+  // then reads clo unguarded. Requiring both is the same for every caller,
+  // which passes both or neither, and lets TypeScript narrow clo.
   if (met !== undefined && clo !== undefined) {
     _valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met);
     _valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo);
   }
-
-  if (
-    airspeed_control ||
-    v === undefined ||
-    met === undefined ||
-    clo === undefined ||
-    !(clo < 0.7 && met < 1.3)
-  ) {
-    return;
-  }
-  // Upper bounds only, and the operative-temperature one moves with the
-  // call, so they are pushed as broken rather than through _valid_range.
-  const pushAirspeedRow = (bound: Readonly<{ max: number }>) =>
-    warnings.push({ key: v_param_name, role: "input", value: v, bound });
-  const to = t_o(tdb, tr, v);
-  const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
-  if (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max)
-    pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.any);
-  if (to > 23 && to < 25.5 && v > v_limit)
-    pushAirspeedRow(Object.freeze({ max: v_limit }));
-  if (to <= 23 && v > ASHRAE_55_AIRSPEED_NO_CONTROL.cool.max)
-    pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.cool);
 }

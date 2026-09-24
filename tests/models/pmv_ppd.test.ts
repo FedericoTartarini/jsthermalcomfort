@@ -522,6 +522,15 @@ describe("pmv_ppd applicability warnings (#199)", () => {
       ]);
     });
 
+    // Upstream's _check_ashrae55_compliance checks the airspeed rules before
+    // met and clo, so their rows come first.
+    test("the airspeed rows come before the met and clo rows, as upstream's", () => {
+      expect(ashrae(20, 0.3, { met: 0.9 }).warnings).toEqual([
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
+        { key: "met", role: "input", value: 0.9, bound: ASHRAE_55_LIMITS.met },
+      ]);
+    });
+
     test("the same call with airspeed control gives no row", () => {
       expect(ashrae(20, 0.3, { airspeed_control: true }).warnings).toEqual([]);
     });

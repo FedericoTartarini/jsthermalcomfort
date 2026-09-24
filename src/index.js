@@ -24,6 +24,12 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/adaptive_ashrae.js").AdaptiveAshraeResult} AdaptiveAshraeResult
  */
+/**
+ * @typedef {import("./models/cooling_effect.js").CoolingEffectParams} CoolingEffectParams
+ */
+/**
+ * @typedef {import("./models/cooling_effect.js").CoolingEffectResult} CoolingEffectResult
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

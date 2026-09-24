@@ -23,6 +23,8 @@ import type {
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
+  CoolingEffectParams,
+  CoolingEffectResult,
   ModelInfo,
   VariableInfo,
 } from "jsthermalcomfort";
@@ -37,6 +39,7 @@ import {
   adaptive_ashrae,
   classifyFromBins,
   clo_typical_ensembles,
+  cooling_effect,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "jsthermalcomfort";
@@ -154,6 +157,40 @@ adaptive_ashrae({
 // @ts-expect-error tdb must be a number.
 adaptive_ashrae({ tdb: "25", tr: 25, t_running_mean: 20, v: 0.1 });
 
+// cooling_effect takes one params object too (ADR 0002), with its params and
+// result types exported by name; the lines below are errors only while the
+// published signature is typed.
+const coolingEffectParams: CoolingEffectParams = {
+  tdb: 77,
+  tr: 77,
+  vr: 1.64,
+  rh: 50,
+  met: 1,
+  clo: 0.6,
+  wme: 0,
+  units: "IP",
+  suppress_warnings: true,
+};
+const coolingEffectResult: CoolingEffectResult =
+  cooling_effect(coolingEffectParams);
+const coolingEffect: number = coolingEffectResult.ce;
+// @ts-expect-error `v` is not a param; the relative air speed is `vr`.
+cooling_effect({ tdb: 25, tr: 25, v: 0.3, rh: 50, met: 1.2, clo: 0.5 });
+// @ts-expect-error clo is a required quantity.
+cooling_effect({ tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2 });
+cooling_effect({
+  tdb: 25,
+  tr: 25,
+  vr: 0.3,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  // @ts-expect-error units is "SI" or "IP".
+  units: "metric",
+});
+// @ts-expect-error vr must be a number.
+cooling_effect({ tdb: 25, tr: 25, vr: "0.3", rh: 50, met: 1.2, clo: 0.5 });
+
 // Both wrappers return the applicability rows a call broke (issue #199), typed
 // through to the bound, so a front end can phrase "35 °C is above 30 °C"
 // without casting.
@@ -193,6 +230,7 @@ export {
   heatIndex,
   adaptive,
   adaptiveResult,
+  coolingEffect,
   notANumberEither,
   minTdb,
   isoStandards,

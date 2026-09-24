@@ -5,11 +5,34 @@ import {
 } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
 
+// A type alias, as the JSDoc typedef it replaces emitted, so the result stays
+// assignable to Record<string, unknown>; an interface is not.
 /**
  * @typedef {object} CoolingEffectResult
  * @property {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
  * @public
  */
+export type CoolingEffectResult = {
+  ce: number;
+};
+
+/**
+ * The params of `cooling_effect`: upstream's keyword parameters, quantities
+ * and switches alike, with upstream's defaults (ADR 0002). Documented on the
+ * function's `params`.
+ */
+export interface CoolingEffectParams {
+  tdb: number;
+  tr: number;
+  vr: number;
+  rh: number;
+  met: number;
+  clo: number;
+  wme?: number;
+  units?: "SI" | "IP";
+  suppress_warnings?: boolean;
+}
+
 /**
  * Returns the value of the Cooling Effect ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} )
  * calculated in compliance with the ASHRAE 55 2020 Standard {@link #ref_1|[1]}.
@@ -23,9 +46,10 @@ import { set_tmp } from "./set_tmp.js";
  * @memberof models
  * @docname Cooling Effect (CE)
  *
- * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
+ * @param {Object} params - the model's parameters, named as in pythermalcomfort.
+ * @param {number} params.tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {number} params.tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {number} params.vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
  *
  * Note: vr is the relative air speed caused by body movement and not the air
  * speed measured by the air speed sensor. The relative air speed is the sum of the
@@ -33,9 +57,9 @@ import { set_tmp } from "./set_tmp.js";
  * (Vag). Where Vag is the activity-generated air speed caused by motion of individual body parts.
  * vr can be calculated using the function `v_relative` which is in .utilities.js.
  *
- * @param {number} rh - relative humidity, [%]
- * @param {number} met - metabolic rate, [met]
- * @param {number} clo - clothing insulation, [clo]
+ * @param {number} params.rh - relative humidity, [%]
+ * @param {number} params.met - metabolic rate, [met]
+ * @param {number} params.clo - clothing insulation, [clo]
  *
  * Note: The activity as well as the air speed modify the insulation characteristics
  * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
@@ -44,19 +68,21 @@ import { set_tmp } from "./set_tmp.js";
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  * can be calculated using the function `clo_dynamic` which is in .utilities.js.
  *
- * @param {number} [wme=0] - external work
- * @param {'SI'|'IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [suppress_warnings=false] - If true, writes nothing to the console when the cooling effect cannot be calculated and is assumed to be 0.
+ * @param {number} [params.wme=0] - external work
+ * @param {'SI'|'IP'} [params.units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param {boolean} [params.suppress_warnings=false] - If true, writes nothing to the console when the cooling effect cannot be calculated and is assumed to be 0.
  * @returns {CoolingEffectResult} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
  *
  * @example
- * const CE = cooling_effect(25, 25, 0.3, 50, 1.2, 0.5);
- * console.log(CE); // Output: {ce: 1.64}
+ * const CE = cooling_effect({ tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 });
+ * console.log(CE); // Output: {ce: 1.68}
  *
  * // For users who want to use the IP system
- * const CE_IP = cooling_effect(77, 77, 1.64, 50, 1, 0.6, "IP");
- * console.log(CE_IP); // Output: {ce: 3.74}
+ * const CE_IP = cooling_effect({ tdb: 77, tr: 77, vr: 1.64, rh: 50, met: 1, clo: 0.6, units: "IP" });
+ * console.log(CE_IP); // Output: {ce: 3.95}
  */
+// A non-finite number throws a TypeError here, where upstream lets it
+// propagate (ADR 0001, reason three).
 const COOLING_EFFECT_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
@@ -70,16 +96,19 @@ const COOLING_EFFECT_SCHEMA = {
 };
 
 export function cooling_effect(
-  tdb,
-  tr,
-  vr,
-  rh,
-  met,
-  clo,
-  wme = 0,
-  units = "SI",
-  suppress_warnings = false,
-) {
+  params: CoolingEffectParams,
+): CoolingEffectResult {
+  // Every argument was positional before v2 (ADR 0002); a call still written
+  // that way fails here, naming the shape it should have.
+  if (typeof params !== "object" || params === null) {
+    throw new TypeError(
+      `cooling_effect takes one params object, got ${String(params)}`,
+    );
+  }
+  let { tdb, tr, vr } = params;
+  const { rh, met, clo } = params;
+  // Destructuring defaults also apply to a switch passed as undefined.
+  const { wme = 0, units = "SI", suppress_warnings = false } = params;
   validateInputs(
     {
       tdb,
@@ -127,7 +156,7 @@ export function cooling_effect(
     },
   ).set;
 
-  function func(x) {
+  function func(x: number): number {
     return (
       set_tmp(
         tdb - x,
@@ -155,6 +184,9 @@ export function cooling_effect(
     // Find a root of a function in a bracketing interval
     ce = brent(func, 0, 40);
   } catch (error) {
+    // Only the not-bracketed failure falls back to 0, as upstream catches only
+    // the ValueError brentq raises for it; anything else propagates.
+    if (!(error instanceof RootNotBracketedError)) throw error;
     ce = 0;
   }
 
@@ -162,9 +194,7 @@ export function cooling_effect(
   // with the warnings module; JavaScript has no such facility, so
   // suppress_warnings is the port of it rather than a new behaviour.
   if (ce === 0 && !suppress_warnings) {
-    console.warn(
-      `Assuming cooling effect = 0 since it could not be calculated for this set of inputs tdb=${tdb}, tr=${tr}, rh=${rh}, vr=${vr}, clo=${clo}, met=${met}`,
-    );
+    console.warn("Cooling effect could not be calculated. Returning 0.");
   }
 
   if (units.toLowerCase() === "ip") {
@@ -176,18 +206,24 @@ export function cooling_effect(
   return { ce: ce };
 }
 
+// Brent's one recoverable failure, a class of its own so that cooling_effect
+// can catch it and nothing else, as upstream catches brentq's ValueError.
+class RootNotBracketedError extends Error {
+  name = "RootNotBracketedError";
+}
+
 // https://gist.github.com/ryanspradlin/18c1010b7dd2d875284933d018c5c908
 // Derived from: https://en.wikipedia.org/wiki/Brent%27s_method#Algorithm
 // Brent's method is a hybrid root-finding algorithm that combines the
 // faster/less-reliable inverse quadradic interpolation and secant methods with
 // the slower/more-reliable bisection method.
 export function brent(
-  f,
-  lowerBound,
-  upperBound,
+  f: (x: number) => number,
+  lowerBound: number,
+  upperBound: number,
   tolerance = 1e-6,
   maxIterations = 100,
-) {
+): number {
   let a = lowerBound;
   let b = upperBound;
   let fa = f(a);
@@ -195,7 +231,7 @@ export function brent(
 
   if (fa * fb > 0) {
     // Root is not bracketed.
-    throw new Error(`Root is not bracketed: [${fa}, ${fb}].`);
+    throw new RootNotBracketedError(`Root is not bracketed: [${fa}, ${fb}].`);
   }
 
   if (Math.abs(fa) < Math.abs(fb)) {

@@ -8,7 +8,7 @@ import {
   is_iso_7730,
   Standard,
 } from "../utilities/utilities.js";
-import { cooling_effect } from "./cooling_effect.js";
+import { cooling_effect } from "./cooling_effect.ts";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
 import type {
@@ -394,7 +394,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     // The inputs are SI by now, hence "SI" rather than units.
     ce =
       vr > 0.1
-        ? cooling_effect(
+        ? cooling_effect({
             tdb,
             tr,
             vr,
@@ -402,9 +402,9 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
             met,
             clo,
             wme,
-            "SI",
+            units: "SI",
             suppress_warnings,
-          ).ce
+          }).ce
         : 0;
   }
 

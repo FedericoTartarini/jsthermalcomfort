@@ -19,7 +19,7 @@ import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
 import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain } from "./solar_gain.js";
-import { cooling_effect } from "./cooling_effect.js";
+import { cooling_effect } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { a_pmv } from "./a_pmv.js";

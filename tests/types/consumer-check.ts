@@ -40,6 +40,7 @@ import {
   ADAPTIVE_ASHRAE_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
+  PMV_CATEGORY_BINS_ISO,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -337,6 +338,12 @@ pmv_ppd_ashrae({
 // @ts-expect-error PMV_COMPLIANCE_INTERVAL_ASHRAE is frozen, so its type is readonly.
 PMV_COMPLIANCE_INTERVAL_ASHRAE.max = 1;
 
+// pmv_ppd_iso returns ISO 7730's category, read against bins published once,
+// whose edges a front end finds by label.
+const isoCategory: string | number = pmvIso.category;
+const categoryBMax: number =
+  PMV_CATEGORY_BINS_ISO.edges[PMV_CATEGORY_BINS_ISO.labels.indexOf("B")];
+
 // Both wrappers return the applicability rows a call broke (issue #199), typed
 // through to the bound, so a front end can phrase "35 °C is above 30 °C"
 // without casting.
@@ -422,6 +429,8 @@ export {
   coolingEffect,
   ashraeCompliance,
   complianceMax,
+  isoCategory,
+  categoryBMax,
   notANumberEither,
   minTdb,
   isoStandards,

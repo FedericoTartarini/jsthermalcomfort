@@ -69,6 +69,7 @@ export interface PmvPpdParams {
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the returned pmv, so from the rounded one when `round_output` is true.
  * @property { boolean|number } [compliance] - ASHRAE 55 only: whether the unrounded pmv lies inside `PMV_COMPLIANCE_INTERVAL_ASHRAE`, or NaN when `limit_inputs` suppressed the pmv. Absent under ISO 7730.
+ * @property { string|number } [category] - ISO 7730 only: the category of thermal environment, the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO`, or NaN when `limit_inputs` suppressed the pmv. Absent under ASHRAE 55.
  * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  */
 export interface Pmv_ppdReturns {
@@ -76,6 +77,7 @@ export interface Pmv_ppdReturns {
   ppd: number;
   tsv: string | number;
   compliance?: boolean | number;
+  category?: string | number;
   readonly warnings: ApplicabilityWarning[];
 }
 
@@ -131,6 +133,37 @@ export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
   Object.freeze({ min: -0.5, max: 0.5 });
 
 /**
+ * These bins cut |pmv|, not pmv: pair them with the absolute PMV, never with
+ * the signed PMV axis as chart bands. pmv_ppd_iso classifies its `category`
+ * with them, from the unrounded PMV.
+ *
+ * ISO 7730:2005 Annex A Table A.1 defines the categories of thermal
+ * environment by open intervals: A is -0.2 < PMV < 0.2, B is -0.5 < PMV < 0.5,
+ * C is -0.7 < PMV < 0.7. Left-inclusive bins on |pmv| give exactly those open
+ * ends, so a PMV of exactly ±0.5 is category C, not B. Beyond C the label is
+ * "none"; the top edge, 10, is the thermal sensation vote bins' sentinel, so
+ * |pmv| above it is NaN, as the vote is.
+ *
+ * The table also lists PPD limits (6, 10 and 15 %). They are not exported:
+ * they are rounded readings of the PPD curve at 0.2, 0.5 and 0.7 (5.8, 10.2
+ * and 15.3 %), so a category read from the PPD disagrees with the one read
+ * from the PMV in a thin band at every edge.
+ *
+ * CEN/TR 16798-2 Table B.1 gives the same intervals for EN 16798-1 categories
+ * I to III.
+ *
+ * Upstream has no ISO 7730 category anywhere. The category and these bins are
+ * a consumer-needed addition (ADR 0001): the app draws categories A, B and C
+ * and prints the room's category from this one object, instead of keeping
+ * its own ±0.2, ±0.5 and ±0.7.
+ */
+export const PMV_CATEGORY_BINS_ISO: Readonly<ClassifierBins> = Object.freeze({
+  edges: [0.2, 0.5, 0.7, 10],
+  labels: ["A", "B", "C", "none"],
+  right: false,
+});
+
+/**
  * The standards PMV implements: pythermalcomfort's pmv_ppd_iso and
  * pmv_ppd_ashrae accept only these. Both the `standard` parameter's type and
  * the runtime schema come from this list, so any other Standard (ISO 7933, say)
@@ -158,9 +191,15 @@ export type PmvStandard = (typeof PMV_STANDARDS)[number];
  *   or null where the standard gates neither.
  * - `tsv_bins`: the thermal sensation vote bins, whose edge convention
  *   differs (pythermalcomfort#382).
+ * - `category_bins`: ISO 7730 only, the bins that classify |pmv| into the
+ *   result's `category`, as `compliance` is ASHRAE 55's.
  */
 type PmvStandardRules = (
-  | { ashrae55: false; limits: typeof ISO_7730_LIMITS }
+  | {
+      ashrae55: false;
+      limits: typeof ISO_7730_LIMITS;
+      category_bins: Readonly<ClassifierBins>;
+    }
   | { ashrae55: true }
 ) & {
   pa: Readonly<Bound> | null;
@@ -174,6 +213,7 @@ const ISO_7730_RULES: PmvStandardRules = {
   pa: ISO_7730_LIMITS.pa,
   pmv: ISO_7730_LIMITS.pmv,
   tsv_bins: PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  category_bins: PMV_CATEGORY_BINS_ISO,
 };
 
 /** The rules of every standard `pmv_ppd` implements, one entry each. */
@@ -408,11 +448,17 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   // ASHRAE 55 only, as upstream's pmv_ppd_ashrae computes it: from the
   // unrounded pmv, and NaN where limit_inputs finds an input out of bounds.
   // Upstream masks on the inputs alone, not on a NaN pmv, so neither does this.
-  const compliance =
-    limit_inputs && warnings.length > 0
+  const masked = limit_inputs && warnings.length > 0;
+  const compliance = masked
+    ? NaN
+    : pmv > PMV_COMPLIANCE_INTERVAL_ASHRAE.min &&
+      pmv < PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
+  // ISO 7730 only, and a deviation (ADR 0001; see PMV_CATEGORY_BINS_ISO):
+  // read like compliance, from the unrounded pmv and NaN where it is masked.
+  const category =
+    masked || !("category_bins" in rules)
       ? NaN
-      : pmv > PMV_COMPLIANCE_INTERVAL_ASHRAE.min &&
-        pmv < PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
+      : classifyFromBins(Math.abs(pmv), rules.category_bins);
 
   if (gated) {
     pmv = NaN;
@@ -431,7 +477,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
 
   return rules.ashrae55
     ? { pmv, ppd, tsv, compliance, warnings }
-    : { pmv, ppd, tsv, warnings };
+    : { pmv, ppd, tsv, category, warnings };
 }
 
 /**

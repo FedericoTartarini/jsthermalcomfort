@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { pmv_ppd_iso } from "../../src/models/index.js";
+import { pmv_ppd_iso, PMV_CATEGORY_BINS_ISO } from "../../src/models/index.js";
 import type { PmvPpdIsoParams } from "../../src/models/pmv_ppd_iso.ts";
 import { round, Standard } from "../../src/utilities/utilities.js";
 import { testDataUrls } from "./comftest.ts";
@@ -407,6 +407,146 @@ describe("pmv_ppd_iso (JS-only)", () => {
       });
       // Must be exactly "Slightly Warm", not one of three options
       expect(result.tsv).toBe("Slightly Warm");
+    });
+  });
+
+  // Upstream has no ISO category (ADR 0001, consumer-needed), so there is no
+  // test_pmv_ppd_iso.py counterpart to mirror.
+  describe("category (ISO 7730:2005 Annex A Table A.1)", () => {
+    test("the bins cut |pmv| at 0.2, 0.5 and 0.7, left-inclusive, frozen", () => {
+      expect(PMV_CATEGORY_BINS_ISO).toEqual({
+        edges: [0.2, 0.5, 0.7, 10],
+        labels: ["A", "B", "C", "none"],
+        right: false,
+      });
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO.edges)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO.labels)).toBe(true);
+    });
+
+    // No fixture row puts pmv on an edge, so the inputs are built around the
+    // model's own roots: at each met, the tdb whose pmv is exactly the edge,
+    // and the adjacent double one step toward pmv = 0. The pmv is asserted
+    // too, so each row proves where it lands.
+    const at = (met: number, t: number) =>
+      pmv_ppd_iso({
+        tdb: t,
+        tr: t,
+        vr: 0.1,
+        rh: 50,
+        met,
+        clo: 0.5,
+        round_output: false,
+        limit_inputs: false,
+      });
+
+    test.each([
+      { id: "0", met: 1.01, t: 26.014491696246818, pmv: 0, category: "A" },
+      {
+        id: "just below 0.2",
+        met: 1.25,
+        t: 25.080080304866186,
+        pmv: 0.1999999999999993,
+        category: "A",
+      },
+      {
+        id: "just above -0.2",
+        met: 1.23,
+        t: 23.82031658710553,
+        pmv: -0.1999999999999993,
+        category: "A",
+      },
+      { id: "0.2", met: 1.25, t: 25.08008030486619, pmv: 0.2, category: "B" },
+      {
+        id: "-0.2",
+        met: 1.23,
+        t: 23.820316587105527,
+        pmv: -0.2,
+        category: "B",
+      },
+      {
+        id: "just below 0.5",
+        met: 1.08,
+        t: 27.00538109763518,
+        pmv: 0.49999999999999917,
+        category: "B",
+      },
+      {
+        id: "just above -0.5",
+        met: 1.08,
+        t: 24.050806906501293,
+        pmv: -0.49999999999999917,
+        category: "B",
+      },
+      { id: "0.5", met: 1.08, t: 27.005381097635183, pmv: 0.5, category: "C" },
+      { id: "-0.5", met: 1.08, t: 24.05080690650129, pmv: -0.5, category: "C" },
+      {
+        id: "just below 0.7",
+        met: 1.02,
+        t: 27.861012559832268,
+        pmv: 0.699999999999999,
+        category: "C",
+      },
+      {
+        id: "just above -0.7",
+        met: 1.12,
+        t: 23.083997101537506,
+        pmv: -0.6999999999999837,
+        category: "C",
+      },
+      {
+        id: "0.7",
+        met: 1.02,
+        t: 27.86101255983227,
+        pmv: 0.7,
+        category: "none",
+      },
+      {
+        id: "-0.7",
+        met: 1.12,
+        t: 23.083997101537502,
+        pmv: -0.7,
+        category: "none",
+      },
+    ])("pmv $id is category $category", ({ met, t, pmv, category }) => {
+      const result = at(met, t);
+      expect(result.pmv).toBe(pmv);
+      expect(result.category).toBe(category);
+    });
+
+    test("is none well past 0.7, on both signs", () => {
+      const warm = at(1.2, 29);
+      expect(warm.pmv).toBeCloseTo(1.3, 2);
+      expect(warm.category).toBe("none");
+      const cool = at(1.2, 18);
+      expect(cool.pmv).toBeCloseTo(-2.06, 2);
+      expect(cool.category).toBe("none");
+    });
+
+    test("is NaN when the applicability gate fails", () => {
+      // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
+      // is otherwise category B.
+      const outOfRange = { ...neutral, tdb: 28, tr: 28, vr: 1.2 };
+      const result = pmv_ppd_iso(outOfRange);
+      expect(result.pmv).toBeNaN();
+      expect(result.category).toBeNaN();
+      // The same call with the gate off is classified.
+      expect(
+        pmv_ppd_iso({ ...outOfRange, limit_inputs: false }),
+      ).toHaveProperty("category", "B");
+    });
+
+    // Both pmvs print 0.5, so the rounded value cannot tell them apart; the
+    // category reads the unrounded one. pythermalcomfort 4.6.0 gives the same
+    // unrounded pmvs: 0.4983292256773187 and 0.5013467793369747.
+    test("is read from the unrounded pmv", () => {
+      const printed = (t: number) => pmv_ppd_iso({ ...neutral, tdb: t, tr: t });
+      const below = printed(26.38);
+      expect(below.pmv).toBe(0.5);
+      expect(below.category).toBe("B");
+      const above = printed(26.39);
+      expect(above.pmv).toBe(0.5);
+      expect(above.category).toBe("C");
     });
   });
 });

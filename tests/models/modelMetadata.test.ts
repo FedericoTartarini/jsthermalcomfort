@@ -4,6 +4,7 @@ import {
   ADAPTIVE_ASHRAE_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
+  PMV_CATEGORY_BINS_ISO,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
@@ -37,6 +38,7 @@ const expectedMetadataExports = [
   "classifyFromBins",
   "HEAT_INDEX_ROTHFUSZ_INFO",
   "HEAT_INDEX_STRESS_CATEGORY_BINS",
+  "PMV_CATEGORY_BINS_ISO",
   "PMV_COMPLIANCE_INTERVAL_ASHRAE",
   "PMV_PPD_ASHRAE_INFO",
   "PMV_PPD_ISO_INFO",
@@ -387,6 +389,12 @@ describe("Identity — bins exported separately are the same object as in INFO",
   test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO === PMV_PPD_ISO_INFO.outputs.tsv.classifier", () => {
     expect(PMV_THERMAL_SENSATION_VOTE_BINS_ISO).toBe(
       PMV_PPD_ISO_INFO.outputs.tsv.classifier,
+    );
+  });
+
+  test("PMV_CATEGORY_BINS_ISO === PMV_PPD_ISO_INFO.outputs.category.classifier", () => {
+    expect(PMV_CATEGORY_BINS_ISO).toBe(
+      PMV_PPD_ISO_INFO.outputs.category.classifier,
     );
   });
 

@@ -31,6 +31,7 @@ import { utci, UTCI_INFO, UTCI_STRESS_CATEGORY_BINS } from "./utci.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import {
+  PMV_CATEGORY_BINS_ISO,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
@@ -65,6 +66,7 @@ export {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
+  PMV_CATEGORY_BINS_ISO,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -106,6 +108,7 @@ export default {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
+  PMV_CATEGORY_BINS_ISO,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,

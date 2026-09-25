@@ -41,7 +41,7 @@ The published metadata for one model (`<MODEL>_INFO`): the name the model is exp
 _Avoid_: schema, metadata object, model docs
 
 **Classifier**:
-A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one exactly when upstream computes that output with `_mapping()`; a bound that moves with another input (adaptive acceptability) is not a classifier. The model info does not say which output the bins cut (`tsv`'s bins cut `pmv`): a consumer that bands a number states that pairing itself, as the app's dynamic-chart declaration does with `output` and `bands`.
+A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one when upstream computes that output with `_mapping()`, or when a consumer-needed labelled output can be written as one (ISO 7730's categories, cut on |pmv|); a bound that moves with another input (adaptive acceptability) is not a classifier. The model info does not say which output the bins cut (`tsv`'s bins cut `pmv`): a consumer that bands a number states that pairing itself, as the app's dynamic-chart declaration does with `output` and `bands`.
 _Avoid_: mapping, thresholds, category table
 
 **Warnings rows**:

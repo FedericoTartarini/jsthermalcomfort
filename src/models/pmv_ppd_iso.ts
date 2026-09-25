@@ -1,4 +1,8 @@
-import { pmv_ppd, PMV_THERMAL_SENSATION_VOTE_BINS_ISO } from "./pmv_ppd.ts";
+import {
+  pmv_ppd,
+  PMV_CATEGORY_BINS_ISO,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+} from "./pmv_ppd.ts";
 import type { PmvPpdParams } from "./pmv_ppd.ts";
 import {
   validateInputs,
@@ -17,6 +21,7 @@ import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
  * @property {number} pmv - Predicted Mean Vote on the ISO 7730 scale [-3, +3]
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses left-inclusive bins (pythermalcomfort#382).
+ * @property {string|number} category - ISO 7730 category of thermal environment ("A", "B", "C" or "none"): the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO`; NaN when `limit_inputs` returns NaN for the inputs.
  * @property {import("./modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
@@ -24,6 +29,7 @@ export type PmvPpdIsoResult = {
   pmv: number;
   ppd: number;
   tsv: string | number;
+  category: string | number;
   readonly warnings: ApplicabilityWarning[];
 };
 
@@ -66,6 +72,7 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
     pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
+    category: { unit: null, classifier: PMV_CATEGORY_BINS_ISO },
   },
   derived: {
     // Computed from tdb and rh, not supplied by the caller. Exposed so a
@@ -180,7 +187,8 @@ export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
     PMV_PPD_ISO_SCHEMA,
   );
   // The keys are named rather than spread, so an ASHRAE-only switch passed
-  // from untyped JavaScript never reaches the shared module.
+  // from untyped JavaScript never reaches the shared module. pmv_ppd returns
+  // category under ISO 7730, the only standards validated above.
   return pmv_ppd({
     tdb,
     tr,
@@ -193,5 +201,5 @@ export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
     units,
     limit_inputs,
     round_output,
-  });
+  }) as PmvPpdIsoResult;
 }

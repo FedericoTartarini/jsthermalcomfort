@@ -33,7 +33,7 @@ A documented difference from upstream, allowed only because JavaScript or TypeSc
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
-What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins.
+What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:

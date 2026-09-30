@@ -134,8 +134,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("v_relative");
   });
 
-  it("should have utilities.clo_dynamic", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic");
+  it("should have utilities.clo_dynamic_ashrae", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_ashrae");
+  });
+
+  it("should have utilities.clo_dynamic_iso", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_iso");
   });
 
   it("should have utilities.units_converter", () => {

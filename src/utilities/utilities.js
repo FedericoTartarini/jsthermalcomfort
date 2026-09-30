@@ -92,6 +92,7 @@ export const Standard = Object.freeze({
   ashrae_55_2023: "55-2023",
   iso_7730_2005: "7730-2005",
   iso_7730_2025: "7730-2025",
+  iso_9920_2007: "9920-2007",
   iso_7933_2004: "7933-2004",
   iso_7933_2023: "7933-2023",
 });
@@ -566,46 +567,7 @@ export function v_relative(v, met) {
  * @returns {number}
  */
 function _v_relative_single(v, met) {
-  return Math.round((v + 0.3 * (met - 1) + Number.EPSILON) * 1000) / 1000;
-}
-
-/**
- * Estimates the dynamic clothing insulation of a moving occupant. The activity as
- * well as the air speed modify the insulation characteristics of the clothing and the
- * adjacent air layer. Consequently, the ISO 7730 states that the clothing insulation
- * shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect
- * of the body movement for met equal or higher than 1.2 met using the equation
- * clo = Icl × (0.6 + 0.4/met)
- *
- * @public
- * @memberof utilities
- * @docname Dynamic clothing
- *
- * @param {number} clo - clothing insulation, [clo]
- * @param {number} met - metabolic rate, [met]
- * @param {("ASHRAE" | "ISO")} [standard="ASHRAE"] - If "ASHRAE", uses Equation provided in Section 5.2.2.2 of ASHRAE 55 2020
- * @returns {number} dunamic clothing insulation, [clo]
- */
-export function clo_dynamic(clo, met, standard = Standard.ashrae_55_2023) {
-  if (standard !== Standard.ashrae_55_2023 && !is_iso_7730(standard))
-    throw new Error(
-      "only the ISO 7730 and ASHRAE 55 2020 models have been implemented",
-    );
-  if (
-    (standard === Standard.ashrae_55_2023 && met <= 1.2) ||
-    (is_iso_7730(standard) && met <= 1)
-  )
-    return clo;
-  return _clo_dynamic_single(clo, met);
-}
-
-/**
- * @param {number} clo
- * @param {number} met
- * @returns {number}
- */
-function _clo_dynamic_single(clo, met) {
-  return Math.round((clo * (0.6 + 0.4 / met) + Number.EPSILON) * 1000) / 1000;
+  return round(v + 0.3 * (met - 1), 3);
 }
 
 /**

@@ -272,7 +272,8 @@ const PMV_STANDARD_RULES: Readonly<Record<PmvStandard, PmvStandardRules>> = {
  * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
- * can be calculated using the function `clo_dynamic` which is in .utilities.js.
+ * can be calculated using the function `clo_dynamic_ashrae` for ASHRAE 55 and
+ * `clo_dynamic_iso` for ISO 7730, which are in utilities.
  * @param { number } [params.wme=0] - external work
  * @param { PmvStandard } [params.standard="7730-2025"] - comfort standard used for calculation
  *
@@ -299,7 +300,7 @@ const PMV_STANDARD_RULES: Readonly<Record<PmvStandard, PmvStandardRules>> = {
  * // Calculate relative air speed
  * const v_r = v_relative(v, met);
  * // Calculate dynamic clothing
- * const clo_d = clo_dynamic(clo, met);
+ * const clo_d = clo_dynamic_ashrae(clo, met);
  * const results = pmv_ppd({ tdb, tr, vr: v_r, rh, met, clo: clo_d });
  * console.log(results); // Output: { pmv: 0.06, ppd: 5.1 }
  * console.log(results.pmv); // Output: -0.06

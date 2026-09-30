@@ -1,7 +1,6 @@
 import {
   body_surface_area,
   v_relative,
-  clo_dynamic,
   units_converter,
   running_mean_outdoor_temperature,
   f_svv,
@@ -13,6 +12,14 @@ import {
   LimitSet,
   Standard,
 } from "./utilities.js";
+import {
+  clo_area_factor,
+  clo_dynamic_ashrae,
+  clo_dynamic_iso,
+  clo_dynamic_iso_vr,
+  clo_insulation_air_layer,
+  clo_total_insulation,
+} from "./clothing.ts";
 
 /**
  * @public
@@ -22,7 +29,12 @@ import {
 export {
   body_surface_area,
   v_relative,
-  clo_dynamic,
+  clo_dynamic_ashrae,
+  clo_dynamic_iso,
+  clo_dynamic_iso_vr,
+  clo_area_factor,
+  clo_insulation_air_layer,
+  clo_total_insulation,
   units_converter,
   running_mean_outdoor_temperature,
   f_svv,
@@ -38,7 +50,12 @@ export {
 export default {
   body_surface_area,
   v_relative,
-  clo_dynamic,
+  clo_dynamic_ashrae,
+  clo_dynamic_iso,
+  clo_dynamic_iso_vr,
+  clo_area_factor,
+  clo_insulation_air_layer,
+  clo_total_insulation,
   units_converter,
   running_mean_outdoor_temperature,
   f_svv,

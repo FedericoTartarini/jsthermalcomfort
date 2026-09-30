@@ -152,7 +152,13 @@ const displayNameMap = {
   // Utilities
   body_surface_area: "Body Surface Area (BSA)",
   v_relative: "Relative Air Speed (v_relative)",
-  clo_dynamic: "Dynamic Clothing Insulation",
+  clo_dynamic_ashrae: "Dynamic Clothing Insulation (ASHRAE 55)",
+  clo_dynamic_iso: "Dynamic Clothing Insulation (ISO 7730)",
+  clo_dynamic_iso_vr:
+    "Dynamic Clothing Insulation (ISO 7730) from the Relative Air Speed",
+  clo_area_factor: "Clothing Area Factor (f_cl)",
+  clo_insulation_air_layer: "Boundary Air Layer Insulation",
+  clo_total_insulation: "Total Clothing Insulation",
   units_converter: "Units Converter",
   running_mean_outdoor_temperature: "Running Mean Outdoor Temperature",
   f_svv: "Sky Vault View Factor (f_svv)",

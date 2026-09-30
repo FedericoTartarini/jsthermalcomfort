@@ -128,7 +128,8 @@ const PMV_PPD_ISO_SCHEMA = {
  * @param {number} params.vr  - Relative air speed [m/s] (or [fps] if units = 'IP')
  * @param {number} params.rh  - Relative humidity [%]
  * @param {number} params.met - Metabolic rate [met]
- * @param {number} params.clo - Clothing insulation [clo]
+ * @param {number} params.clo - Clothing insulation [clo]. This is the dynamic clothing insulation,
+ *    which can be calculated using the function `clo_dynamic_iso`.
  * @param {number} [params.wme=0] - External work [met]
  * @param {"7730-2005"|"7730-2025"} [params.standard="7730-2025"] - which edition of ISO 7730
  *    the calculation is being performed against. Accepts `"7730-2005"` or

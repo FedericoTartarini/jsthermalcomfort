@@ -23,10 +23,10 @@ const PYTHERMALCOMFORT_MODELS = {
   iso_7933_2023: "7933-2023",
 };
 
-// jsthermalcomfort does not implement clothing insulation from ISO 9920, so it
-// has no reason to carry that identifier. Listed explicitly rather than left
-// as an unexplained absence.
-const NOT_IMPLEMENTED_IN_JS = ["iso_9920_2007"];
+// Identifiers pythermalcomfort has and jsthermalcomfort does not implement,
+// listed explicitly rather than left as an unexplained absence. Empty since
+// `clo_dynamic_iso` brought ISO 9920 in.
+const NOT_IMPLEMENTED_IN_JS = [];
 
 describe("Standard mirrors pythermalcomfort's Models enum", () => {
   test("every JS identifier exists in pythermalcomfort with the same value", () => {

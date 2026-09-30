@@ -62,8 +62,8 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * Note: The activity as well as the air speed modify the insulation characteristics of the clothing and the adjacent
  * air layer. Consequently, the ISO 7730 states that the clothing insulation shall be corrected [2]. The ASHRAE 55
  * Standard corrects for the effect of the body movement for met equal or higher than 1.2 met using the equation
- * clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo, can be calculated using the function 'clo_dynamic'
- * in utilities.
+ * clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo, can be calculated using the functions
+ * 'clo_dynamic_ashrae' and 'clo_dynamic_iso' in utilities.
  * @param {number} clo - clothing insulation
  * @param {number} [wme=0] - external work
  * @param {"ISO"|"ASHRAE"} [standard="ISO"] - comfort standard used for calculation
@@ -91,7 +91,7 @@ import { validateInputs, Standard } from "../utilities/utilities.js";
  * // calculate relative air speed
  * const v_r = v_relative(v, met);
  * // calculate dynamic clothing
- * const clo_d = clo_dynamic(clo, met);
+ * const clo_d = clo_dynamic_ashrae(clo, met);
  *
  * const results = pmv(tdb, tr, v_r, rh, met, clo_d);
  * console.log(results); // 0.06

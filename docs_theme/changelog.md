@@ -2,6 +2,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- **Breaking:** `clo_dynamic(clo, met, standard)` is removed, split in two as in `pythermalcomfort`: `clo_dynamic_ashrae(clo, met)`, ASHRAE 55's correction above 1.2 met, and `clo_dynamic_iso(clo, met, v, i_a = 0.7)`, ISO 7730 Annex C's correction by ISO 9920. Migration: `clo_dynamic(clo, met)` and `clo_dynamic(clo, met, "55-2023")` become `clo_dynamic_ashrae(clo, met)`, rounded as numpy's `around` rounds, which can move the third decimal by one from the old value. `clo_dynamic(clo, met, "7730-2025")` has no equivalent: it applied the ASHRAE formula above 1 met, which is not ISO 7730's correction; use `clo_dynamic_iso(clo, met, v)`, which also takes the air speed and returns different values. The helpers `clo_area_factor`, `clo_insulation_air_layer` and `clo_total_insulation` are exported with it, and `Standard` gains `iso_9920_2007` (`"9920-2007"`).
+- `clo_dynamic_iso_vr(clo, met, vr, i_a = 0.7)` is new and has no `pythermalcomfort` counterpart: ISO 7730's clothing correction for a caller that holds the relative air speed and not the air speed. `clo_dynamic_iso(clo, met, v)` is `clo_dynamic_iso_vr(clo, met, v_relative(v, met))`.
+- **Fix:** `v_relative()` rounds to three decimals as numpy's `around` does, matching `pythermalcomfort`. The old rounding added an epsilon before rounding half up, so a value at or just under a tie went up: `v_relative(0, 1.005)` returned 0.002 where `pythermalcomfort` returns 0.001. `clo_dynamic_iso()` derives its relative air speed with it.
 - **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
 
   | Before | After | Also available as |

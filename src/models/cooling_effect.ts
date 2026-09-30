@@ -67,7 +67,7 @@ export interface CoolingEffectParams {
  * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
  * for the effect of the body movement for met equal or higher than 1.2 met using
  * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
- * can be calculated using the function `clo_dynamic` which is in .utilities.js.
+ * can be calculated using the function `clo_dynamic_ashrae` which is in utilities.
  *
  * @param {number} [params.wme=0] - external work
  * @param {'SI'|'IP'} [params.units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.

@@ -2,7 +2,6 @@ import { describe, expect, it, test } from "@jest/globals";
 import {
   body_surface_area,
   v_relative,
-  clo_dynamic,
   units_converter,
   running_mean_outdoor_temperature,
   f_svv,
@@ -103,78 +102,18 @@ describe("v_relative", () => {
       expect(Math.abs(result - expected)).toBeLessThanOrEqual(0.0001);
     },
   );
-});
 
-describe("clo_dynamic", () => {
+  // JS-only: upstream rounds with `np.around(..., 3)`. Expected values are
+  // pythermalcomfort 4.6.0's for the same inputs.
   it.each([
-    {
-      clo: 1,
-      met: 1,
-      standard: Standard.ashrae_55_2023,
-      expected: 1,
-      tolerance: 4,
-    },
-    {
-      clo: 1,
-      met: 0.5,
-      standard: Standard.ashrae_55_2023,
-      expected: 1,
-      tolerance: 4,
-    },
-    {
-      clo: 2,
-      met: 0.5,
-      standard: Standard.ashrae_55_2023,
-      expected: 2,
-      tolerance: 4,
-    },
-    {
-      clo: 1,
-      met: 1,
-      standard: undefined,
-      expected: 1,
-      tolerance: 4,
-    },
-    {
-      clo: 1,
-      met: 1.2,
-      standard: undefined,
-      expected: 1,
-      tolerance: 4,
-    },
-    {
-      clo: 1,
-      met: 2.0,
-      standard: undefined,
-      expected: 0.8,
-      tolerance: 4,
-    },
-    {
-      clo: 1.0,
-      met: 1.0,
-      standard: Standard.iso_7730_2025,
-      expected: 1,
-      tolerance: 4,
-    },
-    {
-      clo: 1.0,
-      met: 2.0,
-      standard: Standard.iso_7730_2025,
-      expected: 0.8,
-      tolerance: 4,
-    },
+    { v: 0, met: 1.005, expected: 0.001 },
+    { v: 0.1, met: 1.015, expected: 0.104 },
   ])(
-    "returns $expected when clo is $clo, met is $met, and the standard is $standard",
-    ({ clo, met, standard, expected, tolerance }) => {
-      const result = clo_dynamic(clo, met, standard);
-      const absTol = Math.pow(10, -tolerance);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(absTol);
+    "rounds as numpy does: $expected when v is $v and met is $met",
+    ({ v, met, expected }) => {
+      expect(v_relative(v, met)).toBe(expected);
     },
   );
-
-  it("throws an error when standard is invalid", () => {
-    expect(() => clo_dynamic(1.0, 1.0, "invalid")).toThrow();
-  });
 });
 
 describe("units_converter", () => {

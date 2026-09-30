@@ -98,7 +98,8 @@ export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
  * @param {number} params.vr  - Relative air speed [m/s] (or [fps] if units = 'IP')
  * @param {number} params.rh  - Relative humidity [%]
  * @param {number} params.met - Metabolic rate [met]
- * @param {number} params.clo - Clothing insulation [clo]
+ * @param {number} params.clo - Clothing insulation [clo]. This is the dynamic clothing insulation,
+ *    which can be calculated using the function `clo_dynamic_ashrae`.
  * @param {number} [params.wme=0] - External work [met]
  * @param {'55-2023'} [params.standard='55-2023'] - Version of the ASHRAE 55 Standard; any other value throws
  * @param {'SI'|'IP'} [params.units='SI'] - Unit system

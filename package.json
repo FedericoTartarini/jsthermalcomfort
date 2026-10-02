@@ -19,8 +19,7 @@
     "check:format": "npx prettier . --check",
     "check:types": "./node_modules/.bin/tsc -p tests/types/tsconfig.json",
     "check:types:tests": "./node_modules/.bin/tsc -p tests/tsconfig.json",
-    "prepack": "npm run build",
-    "prepare": "husky"
+    "prepare": "husky && npm run build"
   },
   "publishConfig": {
     "access": "public"

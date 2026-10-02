@@ -13,6 +13,7 @@ import { two_nodes } from "./two_nodes.js";
 import { set_tmp } from "./set_tmp.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
+import { work_capacity_niosh } from "./work_capacity_niosh.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
 import { pmv_ppd } from "./pmv_ppd.js";
@@ -80,6 +81,7 @@ export {
   wbgt,
   wc,
   wind_chill_temperature,
+  work_capacity_niosh,
 };
 
 export default {
@@ -118,5 +120,6 @@ export default {
   wbgt,
   wc,
   wind_chill_temperature,
+  work_capacity_niosh,
   JOS3,
 };

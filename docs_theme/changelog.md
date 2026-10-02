@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - **Breaking change for snapshot tests**: return-type additions to `heat_index`, `pmv_ppd_iso`, `pmv_ppd_ashrae`, and `pmv_ppd` may break downstream deep-equality assertions in snapshot tests. Update test expectations to match the new shapes `{ hi, stress_category }` and `{ pmv, ppd, tsv }` as appropriate.
 - **Fix: `adaptive_ashrae` acceptability bug**: `acceptability_80` and `acceptability_90` were previously derived from the ROUNDED comfort temperature when `round_output=true`, so the formatting flag could flip an acceptability decision for operative temperatures near a bound. These booleans are now always computed from unrounded values and are unaffected by `round_output`.
 - **Behaviour change: `adaptive_ashrae` IP output rounding**: IP-mode numeric outputs (`tmp_cmf`, bounds) are now rounded to one decimal place AFTER unit conversion (°C→°F). Values that previously carried extra decimals from the conversion (e.g., 65.12°F) now return 65.1°F. This aligns `adaptive_ashrae` with the correct pattern in `adaptive_en`.
+- **New model: `work_capacity_niosh(wbgt, met)`**, based on Bröde et al. (2018). `met` is metabolic heat production in watts, not metabolic equivalents. Returns `{ capacity }` in %, clipped to 0–100 and not rounded. Throws `TypeError` for non-finite inputs and `RangeError` when `met` is outside 0–2500 W (inclusive). Inputs are scalar; use `Array.map()` for multiple readings.
 
 ## 1.4.0
 

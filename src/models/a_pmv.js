@@ -1,5 +1,5 @@
 import { validateInputs, round, Standard } from "../utilities/utilities.js";
-import { pmv } from "./pmv.js";
+import { pmv_ppd_iso } from "./pmv_ppd_iso.js";
 
 /**
  * @typedef {object} APmvResult
@@ -9,13 +9,12 @@ import { pmv } from "./pmv.js";
 
 /**
  * @typedef {Object} A_pmvKwargs
- * @property {'SI'|'IP'} units - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @property { boolean } limit_inputs - Default is True. By default, if the inputs are outside the standard applicability
- *    limits the function returns NaN. If false, returns pmv and ppd values even if input values are outside
- *    the applicability limits of the model.
+ * @property {'SI'|'IP'} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ *    Defaults to 'SI'.
+ * @property { boolean } [limit_inputs=true] - If true, returns NaN for inputs outside standard limits. Defaults to true.
  *
- *    The ISO 7730 2005 limits are 10 < tdb [°C] < 30, 10 < tr [°C] < 40,
- *    0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, and -2 < PMV < 2.
+ *    The ISO 7730 (2005 and 2025) limits are 10 < tdb [°C] < 30, 10 < tr [°C] < 40,
+ *    0 < vr [m/s] < 1, 0.8 < met [met] < 4, 0 < clo [clo] < 2, 0 < pa [Pa] < 2700, and -2 < PMV < 2.
  * @public
  */
 
@@ -52,8 +51,8 @@ import { pmv } from "./pmv.js";
  *   the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
  *   can be calculated using the function clo_dynamic in utilities.js.
  * @param {number} a_coefficient - Adaptive coefficient
- * @param {number} [wme=0] - External work
- * @param {A_pmvKwargs} kwargs - additional arguments
+ * @param {number} [wme=0] - External work, [met]
+ * @param {A_pmvKwargs} [kwargs] - additional arguments
  *
  * @returns {APmvResult} set containing results for the model
  *
@@ -67,7 +66,7 @@ import { pmv } from "./pmv.js";
  * const a_coefficient = 0.293,
  * const wme = undefined,
  *
- * const result = a_pmv(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
+ * const result = pmv_a(tdb, tr, vr, rh, met, clo, a_coefficient, wme);
  * console.log(result) //output { a_pmv: 0.48 }
  */
 const A_PMV_SCHEMA = {
@@ -83,7 +82,7 @@ const A_PMV_SCHEMA = {
   limit_inputs: { type: "boolean", required: false },
 };
 
-export function a_pmv(
+export function pmv_a(
   tdb,
   tr,
   vr,
@@ -117,7 +116,7 @@ export function a_pmv(
 
   kwargs = Object.assign(default_kwargs, kwargs);
 
-  let _pmv = pmv(
+  let _pmv = pmv_ppd_iso(
     tdb,
     tr,
     vr,
@@ -126,9 +125,35 @@ export function a_pmv(
     clo,
     wme,
     Standard.iso_7730_2025,
-    kwargs,
+    { units: kwargs.units, limit_inputs: kwargs.limit_inputs },
   ).pmv;
   _pmv = round(_pmv / (1 + a_coefficient * _pmv), 2);
 
   return { a_pmv: _pmv };
 }
+
+/**
+ * Backwards-compatible alias for {@link pmv_a}.
+ * This name is deprecated in favor of `pmv_a` for consistency with pythermalcomfort.
+ *
+ * @public
+ * @memberof models
+ * @deprecated Use {@link pmv_a} instead.
+ *
+ * @param {number} tdb - Dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {number} tr - Mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {number} vr - Relative air speed, default in [m/s] in [fps] if `units` = 'IP'
+ * @param {number} rh - Relative humidity, [%]
+ * @param {number} met - Metabolic rate, [met]
+ * @param {number} clo - Clothing insulation, [clo]
+ * @param {number} a_coefficient - Adaptive coefficient
+ * @param {number} [wme=0] - External work, [met]
+ * @param {A_pmvKwargs} [kwargs] - additional arguments
+ *
+ * @returns {APmvResult} set containing results for the model
+ *
+ * @example
+ * const result = a_pmv(24, 30, 0.22, 50, 1.4, 0.5, 0.293);
+ * console.log(result) //output { a_pmv: 0.48 }
+ */
+export const a_pmv = pmv_a;

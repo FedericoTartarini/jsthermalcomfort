@@ -23,7 +23,7 @@ import { solar_gain } from "./solar_gain.js";
 import { cooling_effect } from "./cooling_effect.js";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
-import { a_pmv } from "./a_pmv.js";
+import { pmv_a, a_pmv } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
@@ -48,6 +48,7 @@ export {
   adaptive_ashrae,
   adaptive_en,
   a_pmv,
+  pmv_a,
   athb,
   e_pmv,
   at,
@@ -86,6 +87,7 @@ export default {
   adaptive_ashrae,
   adaptive_en,
   a_pmv,
+  pmv_a,
   athb,
   e_pmv,
   at,

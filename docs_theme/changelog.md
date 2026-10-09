@@ -2,6 +2,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Added `esi(tdb, rh, sol_radiation_global, round_output = true)` to align with pythermalcomfort. Supports scalar and one-dimensional array inputs, validates humidity and solar radiation ranges, and returns `{ esi }`. Includes documentation and scalar/list examples.
+
 - **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
 
   | Before | After | Also available as |

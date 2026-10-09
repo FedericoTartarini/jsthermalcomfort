@@ -119,6 +119,7 @@ const displayNameMap = {
   humidex: "Humidex",
   net: "Normal Effective Temperature (NET)",
   wbgt: "Wet Bulb Globe Temperature (WBGT)",
+  esi: "Environmental Stress Index (ESI)",
   discomfort_index: "Discomfort Index (DI)",
   two_nodes: "Two-Node Model (Gagge)",
   set_tmp: "Standard Effective Temperature (SET)",

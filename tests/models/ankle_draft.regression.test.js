@@ -6,6 +6,24 @@ import { ankle_draft } from "../../src/models/ankle_draft.js";
 const defaults = [25, 25, 0.1, 50, 1.2, 0.5, 0.3];
 
 describe("ankle_draft regression coverage", () => {
+  test.each([
+    ["tdb", "25", 25, 0.1, 50, 1.2, 0.5, 0.1],
+    ["tr", 25, "25", 0.1, 50, 1.2, 0.5, 0.1],
+    ["vr", 25, 25, "0.1", 50, 1.2, 0.5, 0.1],
+    ["rh", 25, 25, 0.1, "50", 1.2, 0.5, 0.1],
+    ["met", 25, 25, 0.1, 50, "1.2", 0.5, 0.1],
+    ["clo", 25, 25, 0.1, 50, 1.2, "0.5", 0.1],
+    ["v_ankle", 25, 25, 0.1, 50, 1.2, 0.5, "0.1"],
+  ])("throws TypeError if %s is not a number", (_, ...args) => {
+    expect(() => ankle_draft(...args)).toThrow(TypeError);
+  });
+
+  test("throws Error if units is invalid", () => {
+    expect(() =>
+      ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, 0.1, "INVALID"),
+    ).toThrow(Error);
+  });
+
   // Reference values generated with pythermalcomfort 4.6.0. These expose the
   // PMV initial-clothing-temperature discrepancy missed by the shared table.
   test.each([

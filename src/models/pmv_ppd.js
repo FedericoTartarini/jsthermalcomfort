@@ -380,7 +380,10 @@ export function pmv_calculation(tdb, tr, vr, rh, met, clo, wme) {
 
   const taa = tdb + 273;
   const tra = tr + 273;
-  const t_cla = taa + (35.5 - tdb) / (3.5 * icl + 0.1);
+  // Initial clothing temperature from ISO 7730:2025 Annex D, matching
+  // pythermalcomfort's _pmv_ppd_optimized. The initial guess affects the
+  // finite-tolerance iteration and therefore rounded PMV-dependent models.
+  const t_cla = taa + (35.5 - tdb) / (3.5 * (6.45 * icl + 0.1));
 
   const p1 = icl * f_cl;
   const p2 = p1 * 3.96;

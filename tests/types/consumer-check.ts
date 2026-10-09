@@ -29,7 +29,30 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   classifyFromBins,
+  ankle_draft,
 } from "jsthermalcomfort";
+
+// Scalar and broadcast ankle-draft calls retain the documented lowercase keys.
+const ankleScalar = ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, 0.3);
+const ankleArray = ankle_draft(
+  [[25], [30]],
+  25,
+  0.1,
+  50,
+  1.2,
+  0.5,
+  [0.1, 0.3],
+  "SI",
+  false,
+);
+const anklePpd = ankleScalar.ppd_ad;
+const ankleAcceptability = ankleArray.acceptability;
+// @ts-expect-error The old uppercase documentation did not match the runtime keys.
+const oldAnkleKey = ankleScalar.PPD_ad;
+// @ts-expect-error Applicability checking is controlled by a boolean.
+ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, 0.3, "SI", "false");
+// @ts-expect-error Arrays must contain numeric inputs, not strings.
+ankle_draft(["25"], 25, 0.1, 50, 1.2, 0.5, 0.3);
 
 // The published metadata must satisfy the published type.
 const iso: ModelInfo = PMV_PPD_ISO_INFO;

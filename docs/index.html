@@ -2706,8 +2706,8 @@ The discomfort index is usuallly divided in 6 dicomfort categories and it only a
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes.js#L117-L200'>
-      <span>src/models/two_nodes.js</span>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes_gagge.js#L117-L200'>
+      <span>src/models/two_nodes_gagge.js</span>
       </a>
     
   </div>
@@ -2738,7 +2738,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
 <p><strong>Warning:</strong> Some tests are currently failing for this function. Please refer to the test
 suite or the project's issue tracker for more details.</p>
 
-  <div class='pre p1 fill-light mt0'>two_nodes(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atmospheric: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_position: (<code>"standing"</code> | <code>"sitting"</code>), max_skin_blood_flow: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#twonodeskwargs">TwoNodesKwargs</a>?): <a href="#twonodesreturntype">TwoNodesReturnType</a></div>
+  <div class='pre p1 fill-light mt0'>two_nodes_gagge(tdb: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, tr: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, rh: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, met: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, clo: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, wme: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_surface_area: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, p_atm: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, body_position: (<code>"standing"</code> | <code>"sitting"</code>), max_skin_blood_flow: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, kwargs: <a href="#twonodeskwargs">GaggeTwoNodesKwargs</a>?): <a href="#twonodesreturntype">GaggeTwoNodesReturnType</a></div>
   
   
 
@@ -2861,7 +2861,7 @@ suite or the project's issue tracker for more details.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#twonodeskwargs">TwoNodesKwargs</a>?
+            <span class='code bold'>kwargs</span> <code class='quiet'>(<a href="#twonodeskwargs">GaggeTwoNodesKwargs</a>?
             = <code>{}</code>)</code>
 	    
           </div>
@@ -2877,7 +2877,7 @@ suite or the project's issue tracker for more details.</p>
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="#twonodesreturntype">TwoNodesReturnType</a></code>:
-        object with results of two_nodes
+        object with results of two_nodes_gagge
 
       
     
@@ -2891,7 +2891,7 @@ suite or the project's issue tracker for more details.</p>
     <div class="clearfix small pointer">
       <div class="py1 contain">
         <span class="code strong strong levelIndex4">
-          TwoNodesKwargs
+          GaggeTwoNodesKwargs
         </span>
       </div>
     </div>
@@ -2902,8 +2902,8 @@ suite or the project's issue tracker for more details.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes.js#L27-L34'>
-      <span>src/models/two_nodes.js</span>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes_gagge.js#L27-L34'>
+      <span>src/models/two_nodes_gagge.js</span>
       </a>
     
   </div>
@@ -2933,7 +2933,7 @@ suite or the project's issue tracker for more details.</p>
     <div>
       
         <div class='space-bottom0'>
-          <span class='code bold'>round</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</code>
+          <span class='code bold'>round_output</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a>?)</code>
           : round the result of two nodes model
 
           
@@ -2989,7 +2989,7 @@ suite or the project's issue tracker for more details.</p>
     <div class="clearfix small pointer">
       <div class="py1 contain">
         <span class="code strong strong levelIndex4">
-          TwoNodesReturnType
+          GaggeTwoNodesReturnType
         </span>
       </div>
     </div>
@@ -3000,8 +3000,8 @@ suite or the project's issue tracker for more details.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes.js#L4-L25'>
-      <span>src/models/two_nodes.js</span>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes_gagge.js#L4-L25'>
+      <span>src/models/two_nodes_gagge.js</span>
       </a>
     
   </div>
@@ -3202,7 +3202,7 @@ suite or the project's issue tracker for more details.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">two_nodes</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> results = <span class="hljs-title function_">two_nodes_gagge</span>(<span class="hljs-number">25</span>, <span class="hljs-number">25</span>, <span class="hljs-number">0.3</span>, <span class="hljs-number">50</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">0.5</span>);
 <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(results); <span class="hljs-comment">// {</span>
 <span class="hljs-attr">e_skin</span>: <span class="hljs-number">16.2</span>,
 <span class="hljs-attr">e_rsw</span>: <span class="hljs-number">7</span>,
@@ -3253,8 +3253,8 @@ suite or the project's issue tracker for more details.</p>
   <div class='clearfix'>
     
     
-      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes.js#L323-L491'>
-      <span>src/models/two_nodes.js</span>
+      <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes_gagge.js#L323-L491'>
+      <span>src/models/two_nodes_gagge.js</span>
       </a>
     
   </div>
@@ -3443,7 +3443,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
     
     
       <a class='fr fill-darken0 round round pad1x quiet h5' href='https://github.com/FedericoTartarini/jsthermalcomfort/blob/42e2a83ab0a14162a2894a9429334e1ad73eadac/src/models/two_nodes.js#L213-L234'>
-      <span>src/models/two_nodes.js</span>
+      <span>src/models/two_nodes_gagge.js</span>
       </a>
     
   </div>
@@ -3631,7 +3631,7 @@ descriptions used for Fanger’s PMV apply <a href="#ref_10">[10]</a>.</li>
     <div class='py1 quiet mt1 prose-big'>Related</div>
     
       
-        <a href="#two_nodes">two_nodes</a>
+        <a href="#two_nodes">two_nodes_gagge</a>
  for a version that supports scalar arguments
 
       

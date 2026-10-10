@@ -50,8 +50,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });
 
-  it("should have models.two_nodes", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
+  it("should have models.two_nodes_gagge", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("two_nodes_gagge");
   });
 
   it("should have models.set_tmp", () => {

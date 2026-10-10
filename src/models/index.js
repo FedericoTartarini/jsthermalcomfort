@@ -9,7 +9,7 @@ import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
-import { two_nodes } from "./two_nodes.js";
+import { two_nodes_gagge } from "./two_nodes_gagge.js";
 import { set_tmp } from "./set_tmp.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
@@ -73,7 +73,7 @@ export {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
   set_tmp,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
@@ -111,7 +111,7 @@ export default {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
   set_tmp,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,

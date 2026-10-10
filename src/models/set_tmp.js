@@ -1,4 +1,4 @@
-import { two_nodes } from "../models/two_nodes.js";
+import { two_nodes } from "./two_nodes.js";
 import {
   check_standard_compliance,
   round,
@@ -20,11 +20,6 @@ import {
  * @public
  */
 
-/**
- * @typedef {Object} SetTmpKwargsRequired
- * @property {boolean} round
- * @property {boolean} calculate_ce
- */
 /**
  * Calculates the Standard Effective Temperature (SET). The SET is the
  * temperature of a hypothetical isothermal environment at 50% (rh),
@@ -49,7 +44,7 @@ import {
  * @param {number} [p_atm] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
  * @param {"SI" | "IP"} [units="SI"] Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [limit_inputs=true] By default, if the inputs are outsude the following limits the function returns nan. If False returns values regardless of the input values.
+ * @param {boolean} [limit_inputs=true] By default, if the inputs are outside the following limits the function returns nan. If False returns values regardless of the input values.
  * @param {SetTmpKwargs} [kwargs]
  * @returns {SetTmpResult} set containing results for the model
  *

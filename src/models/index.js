@@ -8,6 +8,7 @@ import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
+import { work_capacity_dunne } from "./work_capacity_dunne.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { two_nodes } from "./two_nodes.js";
 import { set_tmp } from "./set_tmp.js";
@@ -80,6 +81,7 @@ export {
   wbgt,
   wc,
   wind_chill_temperature,
+  work_capacity_dunne,
 };
 
 export default {
@@ -118,5 +120,6 @@ export default {
   wbgt,
   wc,
   wind_chill_temperature,
+  work_capacity_dunne,
   JOS3,
 };

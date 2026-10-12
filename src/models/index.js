@@ -17,7 +17,7 @@ import { at } from "./at.js";
 import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import { pmv_ppd_iso, PMV_PPD_ISO_INFO } from "./pmv_ppd_iso.ts";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
-import { solar_gain } from "./solar_gain.js";
+import { solar_gain, SOLAR_GAIN_INFO } from "./solar_gain.ts";
 import { cooling_effect } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
@@ -74,6 +74,7 @@ export {
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
+  SOLAR_GAIN_INFO,
   set_tmp,
   two_nodes,
   utci,
@@ -117,6 +118,7 @@ export default {
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
+  SOLAR_GAIN_INFO,
   set_tmp,
   two_nodes,
   utci,

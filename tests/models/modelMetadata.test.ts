@@ -10,6 +10,7 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+  SOLAR_GAIN_INFO,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
@@ -17,9 +18,11 @@ import {
   heat_index_rothfusz,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  solar_gain,
   utci,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
+import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import { UTCI_LIMITS } from "../../src/models/utci.ts";
 import {
   ASHRAE_55_LIMITS,
@@ -47,6 +50,7 @@ const expectedMetadataExports = [
   "PMV_PPD_ISO_INFO",
   "PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE",
   "PMV_THERMAL_SENSATION_VOTE_BINS_ISO",
+  "SOLAR_GAIN_INFO",
   "UTCI_INFO",
   "UTCI_STRESS_CATEGORY_BINS",
 ];
@@ -1048,5 +1052,116 @@ describe("CLO_TOUT_INFO — the clothing prediction's metadata", () => {
     expect(Object.isFrozen(CLO_TOUT_INFO.inputs.tout)).toBe(true);
     expect(Object.isFrozen(CLO_TOUT_INFO.outputs)).toBe(true);
     expect(Object.isFrozen(CLO_TOUT_INFO.outputs.clo_tout)).toBe(true);
+  });
+});
+
+describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
+  test("labels the function and lists no standard", () => {
+    expect(SOLAR_GAIN_INFO.name).toBe("solar_gain");
+    expect(typeof SOLAR_GAIN_INFO.label).toBe("string");
+    expect(SOLAR_GAIN_INFO.description).toMatch(
+      /ASHRAE 55 Normative Appendix C/,
+    );
+    expect(SOLAR_GAIN_INFO.standards).toEqual([]);
+  });
+
+  test("inputs are the eight numeric parameters with their units; posture is not one", () => {
+    expect(Object.keys(SOLAR_GAIN_INFO.inputs)).toEqual([
+      "sol_altitude",
+      "sharp",
+      "sol_radiation_dir",
+      "sol_transmittance",
+      "f_svv",
+      "f_bes",
+      "asw",
+      "floor_reflectance",
+    ]);
+    expect(SOLAR_GAIN_INFO.inputs).not.toHaveProperty("posture");
+    expect(SOLAR_GAIN_INFO.inputs.sol_altitude.unit).toBe("°");
+    expect(SOLAR_GAIN_INFO.inputs.sharp.unit).toBe("°");
+    expect(SOLAR_GAIN_INFO.inputs.sol_radiation_dir.unit).toBe("W/m²");
+    for (const key of [
+      "sol_transmittance",
+      "f_svv",
+      "f_bes",
+      "asw",
+      "floor_reflectance",
+    ]) {
+      expect(SOLAR_GAIN_INFO.inputs[key].unit).toBeNull();
+    }
+    expect(SOLAR_GAIN_INFO.derived).toBeUndefined();
+  });
+
+  test("bounds are the SOLAR_GAIN_LIMITS objects the function reads, not copies", () => {
+    // `toBe`, not `toEqual`: a rebuilt literal would satisfy equality and
+    // then be free to drift from what the runtime reports.
+    expect(SOLAR_GAIN_INFO.inputs.sol_altitude.applicability).toBe(
+      SOLAR_GAIN_LIMITS.sol_altitude,
+    );
+    expect(SOLAR_GAIN_INFO.inputs.sharp.applicability).toBe(
+      SOLAR_GAIN_LIMITS.sharp,
+    );
+    expect(SOLAR_GAIN_INFO.inputs.sol_radiation_dir.applicability).toBe(
+      SOLAR_GAIN_LIMITS.sol_radiation_dir,
+    );
+    expect(SOLAR_GAIN_INFO.inputs.asw.applicability).toBe(
+      SOLAR_GAIN_LIMITS.asw,
+    );
+    expect(SOLAR_GAIN_LIMITS).toEqual({
+      sol_altitude: { min: 0, max: 90 },
+      sharp: { min: 0, max: 180 },
+      sol_radiation_dir: { min: 200, max: 1000 },
+      asw: { min: 0.2, max: 0.9 },
+    });
+    // The fractions' 0 to 1 is definitional, and floor_reflectance is
+    // ASHRAE 55's fixed 0.6.
+    for (const key of [
+      "sol_transmittance",
+      "f_svv",
+      "f_bes",
+      "floor_reflectance",
+    ]) {
+      expect(SOLAR_GAIN_INFO.inputs[key].applicability).toBeUndefined();
+    }
+  });
+
+  test("every SOLAR_GAIN_LIMITS entry is frozen, not just the container", () => {
+    expect(Object.isFrozen(SOLAR_GAIN_LIMITS)).toBe(true);
+    for (const bound of Object.values(SOLAR_GAIN_LIMITS)) {
+      expect(Object.isFrozen(bound)).toBe(true);
+    }
+  });
+
+  test("outputs are erf in W/m² and delta_mrt in °C", () => {
+    expect(Object.keys(SOLAR_GAIN_INFO.outputs)).toEqual(["erf", "delta_mrt"]);
+    expect(SOLAR_GAIN_INFO.outputs.erf.unit).toBe("W/m²");
+    expect(SOLAR_GAIN_INFO.outputs.delta_mrt.unit).toBe("°C");
+  });
+
+  test("solar_gain output keys match SOLAR_GAIN_INFO.outputs", () => {
+    const result = solar_gain({
+      sol_altitude: 0,
+      sharp: 120,
+      sol_radiation_dir: 800,
+      sol_transmittance: 0.5,
+      f_svv: 0.5,
+      f_bes: 0.5,
+    });
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(Object.keys(SOLAR_GAIN_INFO.outputs).sort());
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(SOLAR_GAIN_INFO)).toBe(true);
+    expect(Object.isFrozen(SOLAR_GAIN_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(SOLAR_GAIN_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(SOLAR_GAIN_INFO.inputs.sol_altitude)).toBe(true);
+    expect(Object.isFrozen(SOLAR_GAIN_INFO.inputs.f_svv)).toBe(true);
+    expect(Object.isFrozen(SOLAR_GAIN_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(SOLAR_GAIN_INFO.outputs.erf)).toBe(true);
   });
 });

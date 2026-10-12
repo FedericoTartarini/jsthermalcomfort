@@ -34,6 +34,8 @@ import type {
   PmvPpdAshraeResult,
   PmvPpdIsoParams,
   PmvPpdIsoResult,
+  SolarGainParams,
+  SolarGainResult,
   UtciParams,
   UtciResult,
   VariableInfo,
@@ -48,6 +50,7 @@ import {
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  SOLAR_GAIN_INFO,
   Standard,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
@@ -59,6 +62,7 @@ import {
   heat_index_rothfusz,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  solar_gain,
   utci,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
@@ -70,6 +74,7 @@ const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
 const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
+const solarGainInfo: ModelInfo = SOLAR_GAIN_INFO;
 
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
@@ -425,6 +430,43 @@ cloToutResult.clo;
 // @ts-expect-error the clo_tout metadata is readonly.
 CLO_TOUT_INFO.inputs.tout = { unit: "°F" };
 
+// solar_gain takes one params object too (ADR 0002), with its params and
+// result types exported by name; the lines below are errors only while the
+// published signature is typed.
+const solarGainParams: SolarGainParams = {
+  sol_altitude: 0,
+  sharp: 120,
+  sol_radiation_dir: 800,
+  sol_transmittance: 0.5,
+  f_svv: 0.5,
+  f_bes: 0.5,
+  posture: "supine",
+  round_output: false,
+};
+const solarGainResult: SolarGainResult = solar_gain(solarGainParams);
+const deltaMrt: number = solarGainResult.delta_mrt;
+const solarGainWarnings: ApplicabilityWarning[] = solarGainResult.warnings;
+const solRadiationDirMax: number | undefined =
+  SOLAR_GAIN_INFO.inputs.sol_radiation_dir.applicability?.max;
+// @ts-expect-error `altitude` is not a param; the angle is `sol_altitude`.
+solar_gain({ ...solarGainParams, altitude: 30 });
+// @ts-expect-error f_bes is a required quantity.
+solar_gain({
+  sol_altitude: 0,
+  sharp: 120,
+  sol_radiation_dir: 800,
+  sol_transmittance: 0.5,
+  f_svv: 0.5,
+});
+// @ts-expect-error sharp must be a number.
+solar_gain({ ...solarGainParams, sharp: "120" });
+// @ts-expect-error posture is "sitting", "standing" or "supine".
+solar_gain({ ...solarGainParams, posture: "lying" });
+// @ts-expect-error round_output is a boolean.
+solar_gain({ ...solarGainParams, round_output: "false" });
+// @ts-expect-error the solar gain metadata is readonly.
+SOLAR_GAIN_INFO.inputs.asw = { unit: null };
+
 // The shared PMV module is not part of the package, as upstream has no public
 // pmv_ppd: a consumer calls pmv_ppd_iso or pmv_ppd_ashrae.
 // @ts-expect-error pmv_ppd is not exported.
@@ -451,6 +493,10 @@ export {
   utciLabel,
   cloToutInfo,
   cloTout,
+  solarGainInfo,
+  deltaMrt,
+  solarGainWarnings,
+  solRadiationDirMax,
   utciCategory,
   coolingEffect,
   ashraeCompliance,

@@ -26,7 +26,7 @@ import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
-import { clo_tout } from "./clo_tout.js";
+import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO, UTCI_STRESS_CATEGORY_BINS } from "./utci.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
@@ -54,6 +54,7 @@ export {
   ankle_draft,
   classifyFromBins,
   clo_tout,
+  CLO_TOUT_INFO,
   cooling_effect,
   discomfort_index,
   heat_index_rothfusz,
@@ -96,6 +97,7 @@ export default {
   ankle_draft,
   classifyFromBins,
   clo_tout,
+  CLO_TOUT_INFO,
   cooling_effect,
   discomfort_index,
   heat_index_rothfusz,

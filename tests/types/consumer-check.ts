@@ -23,6 +23,8 @@ import type {
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
+  CloToutParams,
+  CloToutResult,
   CoolingEffectParams,
   CoolingEffectResult,
   HeatIndexRothfuszParams,
@@ -38,6 +40,7 @@ import type {
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
+  CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   PMV_CATEGORY_BINS_ISO,
@@ -50,6 +53,7 @@ import {
   UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
   classifyFromBins,
+  clo_tout,
   clo_typical_ensembles,
   cooling_effect,
   heat_index_rothfusz,
@@ -65,6 +69,7 @@ const ashrae: ModelInfo = PMV_PPD_ASHRAE_INFO;
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
+const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
 
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
@@ -401,6 +406,25 @@ const heatIndexRowMax: number | undefined =
 const utciWarnings: ApplicabilityWarning[] = utciResult.warnings;
 const utciRowMax: number | undefined = utciResult.warnings[0].bound.max;
 
+// clo_tout takes one params object too (ADR 0002), with its params and
+// result types exported by name; the lines below are errors only while the
+// published signature is typed.
+const cloToutParams: CloToutParams = { tout: 68, units: "IP" };
+const cloToutResult: CloToutResult = clo_tout(cloToutParams);
+const cloTout: number = cloToutResult.clo_tout;
+// @ts-expect-error `t_out` is not a param; the temperature is `tout`.
+clo_tout({ t_out: 20 });
+// @ts-expect-error tout is a required quantity.
+clo_tout({ units: "SI" });
+// @ts-expect-error tout must be a number.
+clo_tout({ tout: "20" });
+// @ts-expect-error units is "SI" or "IP".
+clo_tout({ tout: 20, units: "metric" });
+// @ts-expect-error the result's key is `clo_tout`, not `clo`.
+cloToutResult.clo;
+// @ts-expect-error the clo_tout metadata is readonly.
+CLO_TOUT_INFO.inputs.tout = { unit: "°F" };
+
 // The shared PMV module is not part of the package, as upstream has no public
 // pmv_ppd: a consumer calls pmv_ppd_iso or pmv_ppd_ashrae.
 // @ts-expect-error pmv_ppd is not exported.
@@ -425,6 +449,8 @@ export {
   adaptiveResult,
   utciInfo,
   utciLabel,
+  cloToutInfo,
+  cloTout,
   utciCategory,
   coolingEffect,
   ashraeCompliance,

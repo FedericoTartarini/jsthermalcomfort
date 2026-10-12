@@ -25,6 +25,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/adaptive_ashrae.js").AdaptiveAshraeResult} AdaptiveAshraeResult
  */
 /**
+ * @typedef {import("./models/clo_tout.js").CloToutParams} CloToutParams
+ */
+/**
+ * @typedef {import("./models/clo_tout.js").CloToutResult} CloToutResult
+ */
+/**
  * @typedef {import("./models/cooling_effect.js").CoolingEffectParams} CoolingEffectParams
  */
 /**

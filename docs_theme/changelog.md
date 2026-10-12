@@ -2,6 +2,22 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Added `pmv_e` as the canonical name for adjusted PMV with expectancy factor,
+  matching pythermalcomfort. `e_pmv` and its existing module path remain
+  available as a deprecated alias. Both names return `{ e_pmv }`, use finite
+  scalar inputs and default to `wme=0`, `units="SI"`, and `limit_inputs=true`.
+  The optional settings remain in the JavaScript `kwargs` object. Batch
+  calculations use `Array.map()`.
+- `pmv_e` now calls `pmv_ppd_iso` directly for both stages with the
+  ISO 7730:2025 identifier. Final expectancy-factor rounding now uses
+  ties-to-even, including through `e_pmv`; halfway results can therefore change
+  by 0.01 compared with the former JavaScript `Math.round` behaviour. Both
+  intermediate PMV calls retain their default rounding. Only `units` and
+  `limit_inputs` are forwarded: the formerly undocumented `round_output`
+  passthrough is not supported, matching Python's `pmv_e` contract. The shared
+  PMV solver and its rounding are unchanged; the clothing-temperature
+  initialisation discrepancy noted in PR #228 remains a separate dependency.
+
 - **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
 
   | Before | After | Also available as |

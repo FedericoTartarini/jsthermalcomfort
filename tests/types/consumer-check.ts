@@ -29,7 +29,39 @@ import {
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   classifyFromBins,
+  pmv_e,
+  e_pmv,
 } from "jsthermalcomfort";
+
+// Both public names retain scalar inputs and a typed e_pmv result.
+const expectancyPmv: number = pmv_e(24, 30, 0.22, 50, 1.4, 0.5, 0.6).e_pmv;
+const legacyExpectancyPmv: number = e_pmv(
+  24,
+  30,
+  0.22,
+  50,
+  1.4,
+  0.5,
+  0.6,
+).e_pmv;
+pmv_e(75.2, 86, 0.72182, 50, 1.4, 0.5, 0.6, 0, {
+  units: "IP",
+  limit_inputs: false,
+});
+// @ts-expect-error Batch inputs use Array.map over the scalar API.
+pmv_e([24, 30], 30, 0.22, 50, 1.4, 0.5, 0.6);
+// @ts-expect-error The expectancy factor is required.
+pmv_e(24, 30, 0.22, 50, 1.4, 0.5);
+// @ts-expect-error e_pmv is numeric, not a string.
+const invalidExpectancyPmv: string = pmv_e(
+  24,
+  30,
+  0.22,
+  50,
+  1.4,
+  0.5,
+  0.6,
+).e_pmv;
 
 // The published metadata must satisfy the published type.
 const iso: ModelInfo = PMV_PPD_ISO_INFO;

@@ -33,7 +33,7 @@ A documented difference from upstream, allowed only because JavaScript or TypeSc
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
-What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins.
+What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
@@ -45,7 +45,7 @@ A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turn
 _Avoid_: mapping, thresholds, category table
 
 **Warnings rows**:
-The applicability bounds a call broke, as upstream checks them, returned as data instead of a Python `UserWarning`. Filled whatever `limit_inputs` is.
+The applicability bounds a call broke, as upstream checks them, returned as data instead of a Python `UserWarning`. Filled whatever `limit_inputs` is. A row can also report a bound the model info publishes and upstream does not check, `solar_gain`'s ASHRAE 55 Table C-2 ranges for `sol_radiation_dir` and `asw`: the row is reported and the value returned is still upstream's (a deviation, reason at `SOLAR_GAIN_LIMITS`).
 _Avoid_: console warnings, errors, validation messages
 
 **Mirrored test**:

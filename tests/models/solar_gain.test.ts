@@ -208,7 +208,8 @@ describe("solar_gain (JS-only)", () => {
     expect(() => solar_gain()).toThrow(TypeError);
   });
 
-  // ADR 0001: a non-finite number throws rather than propagating as NaN.
+  // ADR 0001: a non-finite number throws, where upstream returns NaN or
+  // ±Infinity.
   test("throws TypeError if a number is not finite", () => {
     for (const bad of [NaN, Infinity, -Infinity]) {
       expect(() => solar_gain({ ...base, sol_altitude: bad })).toThrow(

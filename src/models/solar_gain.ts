@@ -86,18 +86,21 @@ export interface SolarGainParams {
  * `sol_altitude` and `sharp` are the ranges upstream's code checks: outside
  * them the fp table has no span, and upstream returns NaN for both outputs.
  *
- * `sol_radiation_dir` and `asw` are ASHRAE 55-2023 Normative Appendix C
- * Table C-2's "Allowable Range of Inputs" (as set by Addendum d to 55-2020;
- * Table C2-1 in 55-2013 and 55-2017). Upstream's code does not check them:
- * its docstring says only that `sol_radiation_dir` "should typically" range
- * from 200 to 1000 W/m², and gives 0.57 to 0.84 as typical for `asw`. They
- * are the library's first published ranges that upstream does not enforce.
- * They are published because the standard states them as the procedure's
- * allowable range, and because the app treats applicability as a gate.
+ * `sol_radiation_dir` and `asw` are the "Range of Inputs, Min to Max" of
+ * ASHRAE 55-2020 Normative Appendix C Table C-2, as Addendum d to 55-2020
+ * prints it; Table C2-1 of Addendum g to 55-2013, which introduced the
+ * procedure, gives the same ranges. Upstream's code does not check them. Its
+ * docstring gives 200 to 1000 W/m² for `sol_radiation_dir` ("Ranges between
+ * 200 and 1000" under Parameters, "should typically range" under
+ * Applicability) and 0.57 to 0.84 as typical for `asw`. They are the
+ * library's first published ranges that upstream does not enforce. They are
+ * published because Table C-2 gives them as the procedure's range of inputs,
+ * and because the app treats applicability as a gate.
  * Outside them the result is still upstream's number, with a `warnings` row
  * (ADR 0001): there is no `limit_inputs` until upstream has one.
  *
- * The three fractions carry no limit: their 0 to 1 is definitional.
+ * The three fractions carry no limit: their 0 to 1 is definitional (Table
+ * C-2 also gives 0 to 1 for them).
  *
  * Same arrangement as `UTCI_LIMITS`: frozen, referenced by identity from
  * `SOLAR_GAIN_INFO` and read by `solar_gain`, so the metadata and the rows
@@ -151,6 +154,12 @@ export const SOLAR_GAIN_INFO: ModelInfo = deepFreeze({
   },
 });
 
+// Three @param entries depart from upstream's docstring, whose citations
+// do not hold against the standard's text: it cites Table C2-3 for the
+// sol_radiation_dir range (Table C2-3 is the cloudless-atmosphere data; the
+// range is in Table C-2), Table C2-2 and equation C-7 for f_bes (both are
+// f_svv's; f_bes is Figure C2-1), and lists two of Addendum g's three
+// sol_transmittance methods.
 /**
  * Calculates the solar gain to the human body using the Effective Radiant
  * Field ( ERF) {@link #ref_1|[1]}. The ERF is a measure of the net energy flux to or from
@@ -174,14 +183,17 @@ export const SOLAR_GAIN_INFO: ModelInfo = deepFreeze({
  * direct-beam radiation from the side, and 180 degrees rep- resent direct-beam
  * radiation from the back. SHARP is the angle between the sun and the person
  * only. Orientation relative to compass or to room is not included in SHARP.
- * @param {number} params.sol_radiation_dir - Direct-beam solar radiation, [W/m2]. Ranges between 200 and 1000. See Table C2-3 of ASHRAE 55 2020 {@link #ref_1|[1]}.
+ * @param {number} params.sol_radiation_dir - Direct-beam solar radiation, [W/m2]. Ranges between 200 and 1000 (Table C-2 of ASHRAE 55-2020 {@link #ref_1|[1]}). Values for a standard cloudless atmosphere are in Table C2-3 of Addendum g to ASHRAE 55-2013.
  * @param {number} params.sol_transmittance - Total solar transmittance, ranges from 0 to 1. The total solar
  * transmittance of window systems, including glazing unit, blinds, and other
  * façade treatments, shall be determined using one of the following methods:
- * - i) Provided by manufacturer or from the National Fenestration Rating Council approved Lawrence Berkeley National Lab International Glazing Database.
- * - ii) Glazing unit plus venetian blinds or other complex or unique shades shall be calculated using National Fenestration Rating Council approved software or Lawrence Berkeley National Lab Complex Glazing Database.
+ * - i) Glazing unit Tsol provided by manufacturer or from the National Fenestration Rating Council approved Lawrence Berkeley National Lab International Glazing Database.
+ * - ii) Glazing unit plus interior fabric shade shall be calculated as the product of glazing unit Tsol multiplied by the shade openness factor.
+ * - iii) Glazing unit plus venetian blinds or other complex or unique shades shall be calculated using National Fenestration Rating Council approved software or Lawrence Berkeley National Lab Complex Glazing Database.
+ *
+ * (Addendum g to ASHRAE 55-2013, Section C2(c).)
  * @param {number} params.f_svv - Fraction of sky-vault view fraction exposed to body, ranges from 0 to 1. It can be calculated using the function {@link #f_svv|f_svv} in utilities.
- * @param {number} params.f_bes - Fraction of the possible body surface exposed to sun, ranges from 0 to 1. See Table C2-2 and equation C-7 ASHRAE 55 2020 {@link #ref_1|[1]}.
+ * @param {number} params.f_bes - Fraction of the possible body surface exposed to sun, ranges from 0 to 1. See Figure C2-1 of Addendum g to ASHRAE 55-2013.
  * @param {number} [params.asw=0.7] - The average short-wave absorptivity of the occupant. It will range widely,
  * depending on the color of the occupant’s skin as well as the color and
  * amount of clothing covering the body.
@@ -197,12 +209,12 @@ export const SOLAR_GAIN_INFO: ModelInfo = deepFreeze({
  * @returns {SolarGainResult}
  *
  * @example
- * import {solar_gain} from "jsthermalcomfort/models";
+ * import { solar_gain } from "jsthermalcomfort";
  * const results = solar_gain({ sol_altitude: 0, sharp: 120, sol_radiation_dir: 800, sol_transmittance: 0.5, f_svv: 0.5, f_bes: 0.5, asw: 0.7, posture: "sitting" });
  * console.log(results); // {erf: 43.3, delta_mrt: 10.4, warnings: []}
  */
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three). round_output is not validated, as
+// A non-finite number throws a TypeError here (ADR 0001, reason three);
+// upstream returns NaN or ±Infinity for it. round_output is not validated, as
 // upstream's SolarGainInputs is not given it; posture is checked below with
 // upstream's message.
 const SOLAR_GAIN_SCHEMA = {

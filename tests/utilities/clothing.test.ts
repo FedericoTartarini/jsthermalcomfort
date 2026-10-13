@@ -7,7 +7,11 @@ import {
   clo_insulation_air_layer,
   clo_total_insulation,
 } from "../../src/utilities/clothing.ts";
-import { v_relative } from "../../src/utilities/utilities.js";
+import {
+  CLO_INDIVIDUAL_GARMENT_GROUPS,
+  clo_individual_garments,
+  v_relative,
+} from "../../src/utilities/utilities.js";
 import * as pkg from "../../src/index.js";
 
 // Upstream's `np.isclose(..., atol=...)` on a scalar.
@@ -280,6 +284,59 @@ describe("clo_dynamic_iso_vr", () => {
     ).toThrow(
       "PMV calculations can only be performed in compliance with ISO 9920-2007",
     );
+  });
+});
+
+// JS-only: upstream's `clo_individual_garments` carries no groups (ADR 0001).
+describe("CLO_INDIVIDUAL_GARMENT_GROUPS", () => {
+  test("lists ASHRAE 55-2023 Table 5-3's eight headings in order, then the chairs", () => {
+    expect(CLO_INDIVIDUAL_GARMENT_GROUPS.map(({ group }) => group)).toEqual([
+      "Underwear",
+      "Footwear",
+      "Shirts and Blouses",
+      "Trousers and Coveralls",
+      "Dress and Skirts",
+      "Sweaters",
+      "Suit Jackets and Vests",
+      "Sleepwear and Robes",
+      "Chairs",
+    ]);
+  });
+
+  const listed = CLO_INDIVIDUAL_GARMENT_GROUPS.flatMap(
+    ({ garments }) => garments,
+  );
+
+  test("places every key of clo_individual_garments in exactly one group", () => {
+    for (const key of Object.keys(clo_individual_garments)) {
+      expect([key, listed.filter((g) => g === key).length]).toEqual([key, 1]);
+    }
+  });
+
+  test("lists only keys of clo_individual_garments", () => {
+    for (const garment of listed) {
+      expect(Object.hasOwn(clo_individual_garments, garment)).toBe(true);
+    }
+  });
+
+  test("ends with the four chairs of Table 5-4", () => {
+    expect(CLO_INDIVIDUAL_GARMENT_GROUPS.at(-1)).toEqual({
+      group: "Chairs",
+      garments: [
+        "Metal chair",
+        "Wooden stool",
+        "Standard office chair",
+        "Executive chair",
+      ],
+    });
+  });
+
+  test("is frozen, each group and its garments too", () => {
+    expect(Object.isFrozen(CLO_INDIVIDUAL_GARMENT_GROUPS)).toBe(true);
+    for (const entry of CLO_INDIVIDUAL_GARMENT_GROUPS) {
+      expect(Object.isFrozen(entry)).toBe(true);
+      expect(Object.isFrozen(entry.garments)).toBe(true);
+    }
   });
 });
 

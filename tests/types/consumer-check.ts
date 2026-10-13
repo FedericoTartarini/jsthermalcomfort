@@ -42,6 +42,7 @@ import type {
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
+  CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
@@ -56,6 +57,7 @@ import {
   UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
   classifyFromBins,
+  clo_individual_garments,
   clo_tout,
   clo_typical_ensembles,
   cooling_effect,
@@ -482,6 +484,16 @@ clo_typical_ensembles["Sweet pants, short-sleeve shirt"];
 // @ts-expect-error the table is frozen, so its type is readonly.
 clo_typical_ensembles["Typical winter indoor clothing"] = 1.1;
 
+// A group's garments index clo_individual_garments and read it as numbers;
+// the groups are frozen, so a write to their garments is a type error. The
+// table is typed Record<string, number>, so its keys type as string: that each
+// garment is a real key is held by tests/utilities/clothing.test.ts.
+const garmentClo: number[] = CLO_INDIVIDUAL_GARMENT_GROUPS.flatMap(
+  ({ garments }) => garments.map((garment) => clo_individual_garments[garment]),
+);
+// @ts-expect-error a group's garments are readonly.
+CLO_INDIVIDUAL_GARMENT_GROUPS[0].garments.push("Bra");
+
 export {
   iso,
   ashrae,
@@ -528,4 +540,5 @@ export {
   utciWarnings,
   utciRowMax,
   winterClo,
+  garmentClo,
 };

@@ -170,6 +170,15 @@ describe("NPM Package", () => {
     );
   });
 
+  it("should have utilities.CLO_INDIVIDUAL_GARMENT_GROUPS", () => {
+    expect(jsthermalcomfort.utilities).toHaveProperty(
+      "CLO_INDIVIDUAL_GARMENT_GROUPS",
+    );
+    expect(namedExports.CLO_INDIVIDUAL_GARMENT_GROUPS).toBe(
+      jsthermalcomfort.utilities.CLO_INDIVIDUAL_GARMENT_GROUPS,
+    );
+  });
+
   it("should have utilities.check_standard_compliance", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty(
       "check_standard_compliance",

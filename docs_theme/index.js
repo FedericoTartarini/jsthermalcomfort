@@ -165,6 +165,7 @@ const displayNameMap = {
   // Clo
   clo_typical_ensembles: "Typical Ensembles (Clo)",
   clo_individual_garments: "Individual Garments (Clo)",
+  CLO_INDIVIDUAL_GARMENT_GROUPS: "Individual Garment Groups (Clo)",
   // Met
   met_typical_tasks: "Typical Tasks (Met)",
 };
@@ -475,7 +476,8 @@ export default async function (comments, config) {
     clo: allFlattened.filter(
       (c) =>
         c.memberof === "reference_values" &&
-        (c.name.includes("clo") || (c.docname && c.docname.includes("clo"))),
+        (c.name.toLowerCase().includes("clo") ||
+          (c.docname && c.docname.includes("clo"))),
     ),
     met: allFlattened.filter(
       (c) =>

@@ -894,6 +894,145 @@ export const clo_individual_garments = Object.freeze({
 });
 
 /**
+ * The keys of `clo_individual_garments` grouped under the eight headings of
+ * ASHRAE 55-2023 Table 5-3, in the standard's order, with the chairs of
+ * Table 5-4 as a last group. Each key is placed by its garment's row, and
+ * every key is in exactly one group, so the sum over the garments chosen from
+ * these groups is the sum over the same keys of `clo_individual_garments`.
+ *
+ * pythermalcomfort has no counterpart: its `clo_individual_garments` is a flat
+ * dict with no groups. This export is added for the CBE Thermal Comfort Tool,
+ * whose ensemble dialog lists the garments under the standard's headings
+ * (ADR 0001: a deviation may add an export). `clo_individual_garments` itself
+ * is not re-ordered, re-keyed or added to.
+ *
+ * Where upstream's dict merged two rows of Table 5-3 into one key, or named a
+ * row after another garment, the key goes with the group its value came from:
+ * - "Shoes or sandals" (0.02) is Footwear's "Shoes" and "Sandals/thongs".
+ * - "Sleeveless vest (thin)" (0.10) and "Sleeveless vest (thick)" (0.17) are
+ *   the Suit Jackets and Vests rows. The Sweaters' "Sleeveless vest" rows
+ *   (0.13 and 0.22) are not in the dict.
+ * - "Long sleeve shirt (thin)" (0.25) and "Long sleeve shirt (thick)" (0.36)
+ *   are the Sweaters' "Long-sleeve" rows.
+ * - "Sleeveless, scoop-neck shirt (thin)" (0.23) and "Sleeveless, scoop-neck
+ *   shirt (thick)" (0.27) are the Dress and Skirts rows; "Sleeveless
+ *   scoop-neck blouse" (0.12) is the Shirts and Blouses row.
+ * @public
+ * @memberof reference_values
+ * @docname Garment groups of ASHRAE 55 Table 5-3
+ * @constant
+ * @type {ReadonlyArray<Readonly<{ group: string, garments: ReadonlyArray<keyof typeof clo_individual_garments> }>>}
+ * @example
+ * import { CLO_INDIVIDUAL_GARMENT_GROUPS } from "jsthermalcomfort";
+ * console.log(CLO_INDIVIDUAL_GARMENT_GROUPS[8]);
+ * // output { group: "Chairs", garments: ["Metal chair", "Wooden stool", "Standard office chair", "Executive chair"] }
+ */
+export const CLO_INDIVIDUAL_GARMENT_GROUPS = Object.freeze(
+  [
+    {
+      group: "Underwear",
+      garments: [
+        "Bra",
+        "Women's underwear",
+        "Men's underwear",
+        "T-shirt",
+        "Half slip",
+        "Long underwear bottoms",
+        "Full slip",
+        "Long underwear top",
+      ],
+    },
+    {
+      group: "Footwear",
+      garments: [
+        "Ankle socks",
+        "Panty hose",
+        "Shoes or sandals",
+        "Slippers",
+        "Calf length socks",
+        "Knee socks (thick)",
+        "Boots",
+      ],
+    },
+    {
+      group: "Shirts and Blouses",
+      garments: [
+        "Sleeveless scoop-neck blouse",
+        "Short-sleeve knit shirt",
+        "Short-sleeve dress shirt",
+        "Long-sleeve dress shirt",
+        "Long-sleeve flannel shirt",
+        "Long-sleeve sweat shirt",
+      ],
+    },
+    {
+      group: "Trousers and Coveralls",
+      garments: [
+        "Short shorts",
+        "Walking shorts",
+        "Thin trousers",
+        "Thick trousers",
+        "Sweatpants",
+        "Overalls",
+        "Coveralls",
+      ],
+    },
+    {
+      group: "Dress and Skirts",
+      garments: [
+        "Thin skirt",
+        "Thick skirt",
+        "Sleeveless, scoop-neck shirt (thin)",
+        "Sleeveless, scoop-neck shirt (thick)",
+        "Short-sleeve shirt dress",
+        "Long-sleeve shirt dress (thin)",
+        "Long-sleeve shirt dress (thick)",
+      ],
+    },
+    {
+      group: "Sweaters",
+      garments: ["Long sleeve shirt (thin)", "Long sleeve shirt (thick)"],
+    },
+    {
+      group: "Suit Jackets and Vests",
+      garments: [
+        "Sleeveless vest (thin)",
+        "Sleeveless vest (thick)",
+        "Single-breasted coat (thin)",
+        "Single-breasted coat (thick)",
+        "Double-breasted coat (thin)",
+        "Double-breasted coat (thick)",
+      ],
+    },
+    {
+      group: "Sleepwear and Robes",
+      garments: [
+        "Sleeveless short gown (thin)",
+        "Sleeveless long gown (thin)",
+        "Short-sleeve hospital gown",
+        "Short-sleeve short robe (thin)",
+        "Short-sleeve pajamas",
+        "Long-sleeve long gown",
+        "Long-sleeve short wrap robe (thick)",
+        "Long-sleeve pajamas (thick)",
+        "Long-sleeve long wrap robe (thick)",
+      ],
+    },
+    {
+      group: "Chairs",
+      garments: [
+        "Metal chair",
+        "Wooden stool",
+        "Standard office chair",
+        "Executive chair",
+      ],
+    },
+  ].map(({ group, garments }) =>
+    Object.freeze({ group, garments: Object.freeze(garments) }),
+  ),
+);
+
+/**
  * Asserts that a value is a valid number (not NaN).
  * Throws a TypeError if the value is not a number or is NaN.
  *

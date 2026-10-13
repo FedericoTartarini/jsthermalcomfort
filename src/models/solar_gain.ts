@@ -87,13 +87,13 @@ export interface SolarGainParams {
  * them the fp table has no span, and upstream returns NaN for both outputs.
  *
  * `sol_radiation_dir` and `asw` are ASHRAE 55-2023 Normative Appendix C
- * Table C-2's "Allowable Range of Inputs". Upstream's code does not check
- * them: its docstring says only that `sol_radiation_dir` "should typically"
- * range from 200 to 1000 W/m², and gives 0.57 to 0.84 as typical for `asw`.
- * They are the library's first published ranges that upstream does not
- * enforce. They are published because the procedure's diffuse approximation
- * (0.2 × the direct beam) holds for the cloudless sky of Table C-4 and not
- * for an overcast one, and because the app treats applicability as a gate.
+ * Table C-2's "Allowable Range of Inputs" (as set by Addendum d to 55-2020;
+ * Table C2-1 in 55-2013 and 55-2017). Upstream's code does not check them:
+ * its docstring says only that `sol_radiation_dir` "should typically" range
+ * from 200 to 1000 W/m², and gives 0.57 to 0.84 as typical for `asw`. They
+ * are the library's first published ranges that upstream does not enforce.
+ * They are published because the standard states them as the procedure's
+ * allowable range, and because the app treats applicability as a gate.
  * Outside them the result is still upstream's number, with a `warnings` row
  * (ADR 0001): there is no `limit_inputs` until upstream has one.
  *

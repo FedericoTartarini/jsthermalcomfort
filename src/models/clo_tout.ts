@@ -47,7 +47,7 @@ export const CLO_TOUT_INFO: ModelInfo = deepFreeze({
   name: "clo_tout",
   label: "Clothing prediction",
   description:
-    "Representative clothing insulation predicted from the outdoor air temperature at 06:00 (ASHRAE 55 §5.2.2.2 (f), Schiavon and Lee 2013).",
+    "Representative clothing insulation predicted from the outdoor air temperature at 06:00 (Schiavon and Lee 2013).",
   standards: [],
   inputs: {
     tout: { unit: "°C" },
@@ -57,13 +57,18 @@ export const CLO_TOUT_INFO: ModelInfo = deepFreeze({
   },
 });
 
+// The Note departs from upstream's docstring, which says ASHRAE 55 2020
+// accepts "this equation in mechanically conditioned buildings": the item
+// Addendum f to 55-2020 prints names Figure 5-1 and says nothing about
+// mechanically conditioned buildings, and the figure itself was not seen.
 /**
  * Representative clothing insulation Icl as a function of outdoor air
  * temperature at 06:00 a.m {@link #ref_4|[4]}.
  *
- * Note: The ASHRAE 55 2020 states that it is acceptable to determine the
- * clothing insulation Icl using this equation in mechanically conditioned
- * buildings {@link #ref_1|[1]}.
+ * Note: ASHRAE 55-2020 {@link #ref_1|[1]}, as revised by its Addendum f (2021), permits using
+ * its Figure 5-1 to determine the clothing insulation Icl of a representative
+ * occupant for a day as a function of the outdoor air temperature at
+ * 06:00 a.m. (Section 5.2.2.2 (f)).
  *
  * @public
  * @memberof models
@@ -78,8 +83,9 @@ export const CLO_TOUT_INFO: ModelInfo = deepFreeze({
  *
  * @returns {CloToutResult} set containing results for the model
  */
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three).
+// A non-finite number throws a TypeError here (ADR 0001, reason three).
+// Upstream returns a number for it: 0.46 for NaN and +Infinity, 1 for
+// -Infinity, since NaN fails every comparison in its np.where chain.
 const CLO_TOUT_SCHEMA = {
   tout: { type: "number" },
   units: { enum: ["SI", "IP"] },

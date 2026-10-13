@@ -25,7 +25,8 @@ describe("clo_tout (JS-only)", () => {
     expect(() => clo_tout(params)).toThrow(TypeError);
   });
 
-  // ADR 0001: a non-finite number throws rather than propagating as NaN.
+  // ADR 0001: a non-finite number throws, where upstream returns 0.46 (NaN,
+  // +Infinity) or 1 (-Infinity).
   test("throws TypeError if tout is not finite", () => {
     for (const bad of [NaN, Infinity, -Infinity]) {
       expect(() => clo_tout({ tout: bad })).toThrow(TypeError);

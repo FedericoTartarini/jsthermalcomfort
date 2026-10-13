@@ -1017,7 +1017,6 @@ describe("CLO_TOUT_INFO — the clothing prediction's metadata", () => {
   test("labels the function and lists no standard", () => {
     expect(CLO_TOUT_INFO.name).toBe("clo_tout");
     expect(typeof CLO_TOUT_INFO.label).toBe("string");
-    expect(CLO_TOUT_INFO.description).toMatch(/ASHRAE 55 §5\.2\.2\.2 \(f\)/);
     expect(CLO_TOUT_INFO.description).toMatch(/Schiavon/);
     expect(CLO_TOUT_INFO.description).toMatch(/2013/);
     expect(CLO_TOUT_INFO.standards).toEqual([]);

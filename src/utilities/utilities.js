@@ -895,31 +895,38 @@ export const clo_individual_garments = Object.freeze({
 
 /**
  * The keys of `clo_individual_garments` grouped under the eight headings of
- * ASHRAE 55-2023 Table 5-3, in the standard's order, with the chairs of
- * Table 5-4 as a last group. Each key is placed by its garment's row, and
- * every key is in exactly one group, so the sum over the garments chosen from
- * these groups is the sum over the same keys of `clo_individual_garments`.
+ * ASHRAE 55's garment insulation table, in the table's order, with the chairs
+ * as a last group in the chair table's order. The headings and rows are those
+ * of Table 5.2.2.2B and Table 5.2.2.2C as printed in Addendum h to ASHRAE
+ * 55-2010 (2013); Addendum f to 55-2020 (2021) refers to these tables as
+ * Tables 5-3 and 5-4. Every key is in exactly one group, so the sum over the
+ * garments chosen from these groups is the sum over the same keys of
+ * `clo_individual_garments`.
  *
  * pythermalcomfort has no counterpart: its `clo_individual_garments` is a flat
  * dict with no groups. This export is added for the CBE Thermal Comfort Tool,
- * whose ensemble dialog lists the garments under the standard's headings
- * (ADR 0001: a deviation may add an export). `clo_individual_garments` itself
- * is not re-ordered, re-keyed or added to.
+ * whose ensemble dialog is designed to list the garments under the table's
+ * headings (ADR 0001: a deviation may add an export).
+ * `clo_individual_garments` itself is not re-ordered, re-keyed or added to.
  *
- * Where upstream's dict merged two rows of Table 5-3 into one key, or named a
- * row after another garment, the key goes with the group its value came from:
- * - "Shoes or sandals" (0.02) is Footwear's "Shoes" and "Sandals/thongs".
- * - "Sleeveless vest (thin)" (0.10) and "Sleeveless vest (thick)" (0.17) are
- *   the Suit Jackets and Vests rows. The Sweaters' "Sleeveless vest" rows
- *   (0.13 and 0.22) are not in the dict.
+ * Each key is placed with the row whose value it holds. Where the key's name
+ * differs from that row's:
+ * - "Shoes or sandals" (0.02) has the value of Footwear's "Shoes" and
+ *   "Sandals/thongs".
+ * - "Sleeveless vest (thin)" (0.10) and "Sleeveless vest (thick)" (0.17) have
+ *   the values of the Suit Jackets and Vests rows of those names. The
+ *   Sweaters rows of the same names (0.13 and 0.22) have no key.
  * - "Long sleeve shirt (thin)" (0.25) and "Long sleeve shirt (thick)" (0.36)
- *   are the Sweaters' "Long-sleeve" rows.
+ *   have the values of the Sweaters' "Long-sleeve" rows; Shirts and Blouses
+ *   has no row at 0.36.
  * - "Sleeveless, scoop-neck shirt (thin)" (0.23) and "Sleeveless, scoop-neck
- *   shirt (thick)" (0.27) are the Dress and Skirts rows; "Sleeveless
- *   scoop-neck blouse" (0.12) is the Shirts and Blouses row.
+ *   shirt (thick)" (0.27) have the values of the Dress and Skirts'
+ *   "Sleeveless, scoop neck" rows; Shirts and Blouses has no row at 0.23 or
+ *   0.27, and its "Sleeveless/scoop-neck blouse" (0.12) is the key
+ *   "Sleeveless scoop-neck blouse".
  * @public
  * @memberof reference_values
- * @docname Garment groups of ASHRAE 55 Table 5-3
+ * @docname Garment groups of the ASHRAE 55 garment table
  * @constant
  * @type {ReadonlyArray<Readonly<{ group: string, garments: ReadonlyArray<keyof typeof clo_individual_garments> }>>}
  * @example

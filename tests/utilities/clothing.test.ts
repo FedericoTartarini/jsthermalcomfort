@@ -289,7 +289,7 @@ describe("clo_dynamic_iso_vr", () => {
 
 // JS-only: upstream's `clo_individual_garments` carries no groups (ADR 0001).
 describe("CLO_INDIVIDUAL_GARMENT_GROUPS", () => {
-  test("lists ASHRAE 55-2023 Table 5-3's eight headings in order, then the chairs", () => {
+  test("lists the garment table's eight headings in order, then the chairs", () => {
     expect(CLO_INDIVIDUAL_GARMENT_GROUPS.map(({ group }) => group)).toEqual([
       "Underwear",
       "Footwear",
@@ -319,7 +319,7 @@ describe("CLO_INDIVIDUAL_GARMENT_GROUPS", () => {
     }
   });
 
-  test("ends with the four chairs of Table 5-4", () => {
+  test("ends with the four chairs, in the chair table's order", () => {
     expect(CLO_INDIVIDUAL_GARMENT_GROUPS.at(-1)).toEqual({
       group: "Chairs",
       garments: [

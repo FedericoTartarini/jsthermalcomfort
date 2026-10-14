@@ -3,7 +3,7 @@ import { round, validateInputs } from "../utilities/utilities.js";
 /**
  * @typedef {object} HumidexResult - a result set containing the humidex and
  * discomfort level.
- * @property {number} humidex - the humdidex given the provided dry bulb
+ * @property {number} humidex - the humidex given the provided dry bulb
  * air temperature and relative humidity.
  * @property {string} discomfort - a human description of how the weather
  * would be felt by the average person.
@@ -28,10 +28,14 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} rh - relative humidity, [%]
  * @param {object} [options] - configuration options for the function.
+ * @param {"rana" | "masterson"} [options.model="rana"] - Humidex model.
+ * "rana" uses the Rana et al. (2013) formula; "masterson" uses the
+ * Masterson and Richardson (1979) formula with dew point temperature.
  * @param {boolean} [options.round = true] - If true, rounds output value. If
  * false, it does not.
  *
- * @throws {RangeError} when `rh` is outside `[0, 100]`.
+ * @throws {RangeError} when `rh` is outside `[0, 100]` or `options.model`
+ * is neither `"rana"` nor `"masterson"`.
  *
  * @returns {HumidexResult} the result given the provided temperature and
  * relative humidity.
@@ -39,25 +43,53 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @example
  * const result = humidex(25, 50);
  * console.log(result); // -> { humidex: 28.2, discomfort: "Little or no discomfort" }
+ *
+ * @example
+ * const result = humidex(31, 55, { model: "masterson" });
+ * console.log(result); // -> { humidex: 39.3, discomfort: "Evident discomfort" }
  */
+
 const HUMIDEX_SCHEMA = {
   tdb: { type: "number" },
   rh: { type: "number" },
-  round: { type: "boolean", required: false },
+  round: { type: "boolean" },
 };
 
-export function humidex(tdb, rh, options = { round: true }) {
-  validateInputs({ tdb, rh, round: options.round }, HUMIDEX_SCHEMA);
+export function humidex(tdb, rh, options = {}) {
+  const { model = "rana", round: roundOutput = true } = options;
+
+  validateInputs({ tdb, rh, round: roundOutput }, HUMIDEX_SCHEMA);
 
   if (rh < 0 || rh > 100) {
     throw new RangeError("Relative humidity must be between 0 and 100%");
   }
 
-  let hi =
-    tdb +
-    (5 / 9) * ((6.112 * 10 ** ((7.5 * tdb) / (237.7 + tdb)) * rh) / 100 - 10);
+  if (model !== "rana" && model !== "masterson") {
+    throw new RangeError(
+      "Invalid model. The model must be either 'rana' or 'masterson'",
+    );
+  }
 
-  if (options.round) {
+  let hi;
+
+  if (model === "masterson") {
+    const saturationPressure = 6.112 * Math.exp((17.62 * tdb) / (243.12 + tdb));
+    const vaporPressure = (rh / 100) * saturationPressure;
+    const logPressureRatio = Math.log(vaporPressure / 6.112);
+    const dewPoint = (243.12 * logPressureRatio) / (17.62 - logPressureRatio);
+
+    hi =
+      tdb +
+      (5 / 9) *
+        (6.11 * Math.exp(5417.753 * (1 / 273.15 - 1 / (dewPoint + 273.15))) -
+          10);
+  } else {
+    hi =
+      tdb +
+      (5 / 9) * ((6.112 * 10 ** ((7.5 * tdb) / (237.7 + tdb)) * rh) / 100 - 10);
+  }
+
+  if (roundOutput) {
     hi = round(hi, 1);
   }
 

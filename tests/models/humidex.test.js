@@ -62,3 +62,61 @@ describe("humidex out-of-range relative humidity", () => {
     expect(typeof result.discomfort).toBe("string");
   });
 });
+
+// Reference values from pythermalcomfort 3.9.3 tests/test_humidex.py.
+describe("humidex masterson model", () => {
+  test.each([
+    [21, 100, 29.3, "Little or no discomfort", 0.1],
+    [34, 100, 58.9, "Heat stroke probable", 0.01],
+    [43, 20, 47.1, "Dangerous discomfort", 0.01],
+    [30, 30, 31.5, "Noticeable discomfort", 0.01],
+    [31, 55, 39.3, "Evident discomfort", 0.01],
+  ])(
+    "returns the reference result for tdb=%s, rh=%s",
+    (tdb, rh, expectedHumidex, expectedDiscomfort, tolerance) => {
+      const result = humidex(tdb, rh, { model: "masterson" });
+
+      expect(Math.abs(result.humidex - expectedHumidex)).toBeLessThanOrEqual(
+        tolerance,
+      );
+      expect(result.discomfort).toBe(expectedDiscomfort);
+    },
+  );
+});
+
+describe("humidex model options", () => {
+  test("uses rana by default", () => {
+    expect(humidex(25, 50)).toEqual(humidex(25, 50, { model: "rana" }));
+  });
+
+  test("keeps default rounding when options is empty", () => {
+    expect(humidex(25, 50, {})).toEqual({
+      humidex: 28.2,
+      discomfort: "Little or no discomfort",
+    });
+  });
+
+  test.each([
+    ["rana", 25, 50, 28.2],
+    ["masterson", 31, 55, 39.3],
+  ])(
+    "supports disabling rounding for %s",
+    (model, tdb, rh, expectedRounded) => {
+      const result = humidex(tdb, rh, { model, round: false });
+
+      expect(result.humidex).toBeCloseTo(expectedRounded, 1);
+      expect(result.humidex).not.toBe(expectedRounded);
+    },
+  );
+
+  test.each(["invalid", "RANA", "", 123, null])(
+    "rejects an invalid model: %s",
+    (model) => {
+      expect(() => humidex(25, 50, { model })).toThrow(RangeError);
+    },
+  );
+
+  test.each([-0.1, 100.1])("rejects out-of-range rh=%s for masterson", (rh) => {
+    expect(() => humidex(25, rh, { model: "masterson" })).toThrow(RangeError);
+  });
+});

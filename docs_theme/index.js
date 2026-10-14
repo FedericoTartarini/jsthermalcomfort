@@ -115,6 +115,7 @@ function getSlug(str) {
 const displayNameMap = {
   // Models
   heat_index: "Heat Index (HI)",
+  heat_index_schoen: "Heat Index (Schoen)",
   phs: "Predicted Heat Strain (PHS)",
   humidex: "Humidex",
   net: "Normal Effective Temperature (NET)",

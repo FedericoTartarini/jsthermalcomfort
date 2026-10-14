@@ -1,0 +1,239 @@
+{
+  "reference": "pythermalcomfort f0fa940d9a944c391f20b3223b478a40fe52659d",
+  "cases": [
+    {
+      "tdb": 29,
+      "rh": 50,
+      "round_output": true,
+      "hi": 30.0,
+      "stress_category": "caution"
+    },
+    {
+      "tdb": 29,
+      "rh": 50,
+      "round_output": false,
+      "hi": 30.04629295772395,
+      "stress_category": "caution"
+    },
+    {
+      "tdb": 10,
+      "rh": 50,
+      "round_output": true,
+      "hi": 8.9,
+      "stress_category": "no risk"
+    },
+    {
+      "tdb": 10,
+      "rh": 50,
+      "round_output": false,
+      "hi": 8.941855034981682,
+      "stress_category": "no risk"
+    },
+    {
+      "tdb": [29, 35, 45, 55],
+      "rh": [50, 60, 70, 80],
+      "round_output": true,
+      "hi": [30.0, 41.6, 80.0, 204.2],
+      "stress_category": [
+        "caution",
+        "danger",
+        "extreme danger",
+        "extreme danger"
+      ]
+    },
+    {
+      "tdb": [29, 35, 45, 55],
+      "rh": [50, 60, 70, 80],
+      "round_output": false,
+      "hi": [
+        30.04629295772395, 41.551584343965835, 79.96403779495269,
+        204.24035693025078
+      ],
+      "stress_category": [
+        "caution",
+        "danger",
+        "extreme danger",
+        "extreme danger"
+      ]
+    },
+    {
+      "tdb": [26.689952, 30.436055, 35.979625, 41.740423],
+      "rh": 50,
+      "round_output": true,
+      "hi": [27.0, 32.0, 41.0, 54.0],
+      "stress_category": [
+        "caution",
+        "extreme caution",
+        "danger",
+        "extreme danger"
+      ]
+    },
+    {
+      "tdb": [26.689952, 30.436055, 35.979625, 41.740423],
+      "rh": 50,
+      "round_output": false,
+      "hi": [
+        27.03999943018428, 32.03999953586386, 41.04000048613685,
+        54.039999584034476
+      ],
+      "stress_category": [
+        "caution",
+        "extreme caution",
+        "danger",
+        "extreme danger"
+      ]
+    },
+    {
+      "tdb": [[20], [30]],
+      "rh": [40, 60, 80],
+      "round_output": true,
+      "hi": [
+        [18.9, 19.7, 20.5],
+        [30.3, 32.7, 35.5]
+      ],
+      "stress_category": [
+        ["no risk", "no risk", "no risk"],
+        ["caution", "extreme caution", "extreme caution"]
+      ]
+    },
+    {
+      "tdb": [[20], [30]],
+      "rh": [40, 60, 80],
+      "round_output": false,
+      "hi": [
+        [18.915384635851265, 19.660540769550316, 20.494502088226096],
+        [30.256215532860015, 32.687797186522175, 35.49813304336851]
+      ],
+      "stress_category": [
+        ["no risk", "no risk", "no risk"],
+        ["caution", "extreme caution", "extreme caution"]
+      ]
+    },
+    {
+      "tdb": [],
+      "rh": 50,
+      "round_output": true,
+      "hi": [],
+      "stress_category": []
+    },
+    {
+      "tdb": [],
+      "rh": 50,
+      "round_output": false,
+      "hi": [],
+      "stress_category": []
+    },
+    {
+      "tdb": 29,
+      "rh": [50],
+      "round_output": true,
+      "hi": [30.0],
+      "stress_category": ["caution"]
+    },
+    {
+      "tdb": 29,
+      "rh": [50],
+      "round_output": false,
+      "hi": [30.04629295772395],
+      "stress_category": ["caution"]
+    },
+    {
+      "tdb": true,
+      "rh": false,
+      "round_output": true,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": true,
+      "rh": false,
+      "round_output": false,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": 29,
+      "rh": 0,
+      "round_output": true,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": 29,
+      "rh": 0,
+      "round_output": false,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": 29,
+      "rh": 100,
+      "round_output": true,
+      "hi": 36.5,
+      "stress_category": "extreme caution"
+    },
+    {
+      "tdb": 29,
+      "rh": 100,
+      "round_output": false,
+      "hi": 36.460197230714286,
+      "stress_category": "extreme caution"
+    },
+    {
+      "tdb": -243.12,
+      "rh": 50,
+      "round_output": true,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": -243.12,
+      "rh": 50,
+      "round_output": false,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": "nan",
+      "rh": 50,
+      "round_output": true,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": "nan",
+      "rh": 50,
+      "round_output": false,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": "inf",
+      "rh": 50,
+      "round_output": true,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": "inf",
+      "rh": 50,
+      "round_output": false,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": 29,
+      "rh": "nan",
+      "round_output": true,
+      "hi": "nan",
+      "stress_category": "nan"
+    },
+    {
+      "tdb": 29,
+      "rh": "nan",
+      "round_output": false,
+      "hi": "nan",
+      "stress_category": "nan"
+    }
+  ]
+}

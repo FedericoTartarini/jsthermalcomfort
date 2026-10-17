@@ -29,7 +29,26 @@ test("test_ankle_draft", () => {
       limit_inputs,
     );
 
-    validateResult(modelResult, expectedOutput, tolerances, inputs);
+    // The shared table encodes acceptability as JSON booleans. Python compares
+    // these equal to 0/1, but its default np.where mask promotes them to numbers.
+    // Express that expected runtime type explicitly for JS's strict comparator.
+    const acceptability = (value) =>
+      Array.isArray(value)
+        ? value.map(acceptability)
+        : typeof value === "boolean" && limit_inputs !== false
+          ? Number(value)
+          : value;
+    validateResult(
+      modelResult,
+      {
+        ...expectedOutput,
+        ...("acceptability" in expectedOutput
+          ? { acceptability: acceptability(expectedOutput.acceptability) }
+          : {}),
+      },
+      tolerances,
+      inputs,
+    );
   }
 });
 

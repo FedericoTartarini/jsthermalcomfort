@@ -24,7 +24,7 @@ const APPLICABILITY = [[10, 40], [10, 40], [0, 2], null, [1, 4], [0, 1.5]];
 /**
  * @typedef {Object} AnkleDraftRet
  * @property {AnkleDraftValue} ppd_ad - Predicted percentage dissatisfied with ankle draft [%], or NaN outside applicability limits.
- * @property {AnkleDraftAcceptability} acceptability - Whether rounded ppd_ad is at most 20%, or NaN outside applicability limits.
+ * @property {AnkleDraftAcceptability} acceptability - With limit_inputs=true, 1 or 0 indicates whether rounded ppd_ad is at most 20%, and NaN marks inputs outside applicability limits. With limit_inputs=false, returns true or false. Arrays preserve the input broadcast shape.
  * @public
  */
 
@@ -38,6 +38,8 @@ const APPLICABILITY = [[10, 40], [10, 40], [0, 2], null, [1, 4], [0, 1.5]];
  * emit a warning and return NaN for both outputs. As in Python, the separate ankle-draft airspeed
  * check throws only when every supplied vr is outside 0–0.2 m/s; mixed arrays
  * still use the general 0–2 m/s bound for element-wise masking.
+ * acceptability follows Python's runtime type promotion: numbers (1/0/NaN)
+ * when limit_inputs=true, booleans when limit_inputs=false.
  *
  * @public
  * @memberof models
@@ -54,6 +56,9 @@ const APPLICABILITY = [[10, 40], [10, 40], [0, 2], null, [1, 4], [0, 1.5]];
  * @returns {AnkleDraftRet} Ankle draft dissatisfaction and acceptability.
  * @example
  * ankle_draft(25, 25, 0.2, 50, 1.2, 0.5, 0.3);
+ * // { ppd_ad: 18.5, acceptability: 1 }
+ * @example
+ * ankle_draft(25, 25, 0.2, 50, 1.2, 0.5, 0.3, "SI", false);
  * // { ppd_ad: 18.5, acceptability: true }
  */
 export function ankle_draft(
@@ -224,7 +229,11 @@ function calculate([tdb, tr, vr, rh, met, clo, v_ankle], units, limit_inputs) {
   const tsv = round_even(rawPmv, 100);
   const exponent = Math.exp(-2.58 + 3.05 * v_ankle - 1.06 * tsv);
   const ppd_ad = round_even((exponent / (1 + exponent)) * 100, 10);
-  return { ppd_ad, acceptability: ppd_ad <= 20 };
+  const acceptable = ppd_ad <= 20;
+  return {
+    ppd_ad,
+    acceptability: limit_inputs ? Number(acceptable) : acceptable,
+  };
 }
 
 /** @param {number} value @param {number} factor @returns {number} */

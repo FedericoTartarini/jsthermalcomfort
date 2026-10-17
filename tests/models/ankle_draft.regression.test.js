@@ -42,12 +42,38 @@ describe("ankle_draft regression coverage", () => {
     }
   });
 
-  test("matches the published Python example and public return keys", () => {
+  test("matches Python runtime output for the documented example", () => {
     expect(ankle_draft(25, 25, 0.2, 50, 1.2, 0.5, 0.3)).toEqual({
       ppd_ad: 18.5,
-      acceptability: true,
+      acceptability: 1,
     });
   });
+
+  test.each([undefined, true, false])(
+    "matches Python acceptability types with limit_inputs=%s",
+    (limit) => {
+      const result = ankle_draft(
+        25,
+        25,
+        0.1,
+        50,
+        1.2,
+        0.5,
+        [0.1, 1],
+        "SI",
+        limit,
+      );
+      expect(result.acceptability).toEqual(
+        limit === false ? [true, false] : [1, 0],
+      );
+      for (const [i, speed] of [0.1, 1].entries()) {
+        expect(
+          ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, speed, "SI", limit)
+            .acceptability,
+        ).toBe(result.acceptability[i]);
+      }
+    },
+  );
 
   test("converts both air speeds and temperatures in IP", () => {
     const si = ankle_draft(...defaults);
@@ -128,7 +154,7 @@ describe("ankle_draft regression coverage", () => {
   test("broadcasts scalars and singleton arrays without dropping invalid elements", () => {
     expect(ankle_draft([25, 41], [25], 0.1, 50, 1.2, 0.5, 0.3)).toEqual({
       ppd_ad: [14.8, NaN],
-      acceptability: [true, NaN],
+      acceptability: [1, NaN],
     });
   });
 
@@ -170,7 +196,7 @@ describe("ankle_draft regression coverage", () => {
     );
     expect(ankle_draft([25], 25, 0.1, 50, 1.2, 0.5, 0.3)).toEqual({
       ppd_ad: [14.8],
-      acceptability: [true],
+      acceptability: [1],
     });
     expect(() => ankle_draft(25, 25, [], 50, 1.2, 0.5, 0.3)).toThrow(
       RangeError,
@@ -187,7 +213,7 @@ describe("ankle_draft regression coverage", () => {
   test("propagates missing humidity without treating it as an applicability mask", () => {
     expect(ankle_draft(25, 25, 0.1, NaN, 1.2, 0.5, 0.3)).toEqual({
       ppd_ad: NaN,
-      acceptability: false,
+      acceptability: 0,
     });
   });
 
@@ -212,11 +238,11 @@ describe("ankle_draft regression coverage", () => {
       (Math.log(ppd / (100 - ppd)) + 2.58 + 1.06 * 0.08) / 3.05;
     expect(ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, speed(20.04))).toEqual({
       ppd_ad: 20,
-      acceptability: true,
+      acceptability: 1,
     });
     expect(ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, speed(20.06))).toEqual({
       ppd_ad: 20.1,
-      acceptability: false,
+      acceptability: 0,
     });
   });
 

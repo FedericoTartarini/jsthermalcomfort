@@ -20,6 +20,8 @@ const INTERCEPT = 17.8;
 // upstream writes inline (adaptive_ashrae.py:150-153).
 const ACCEPTABILITY_80_OFFSET = 3.5;
 const ACCEPTABILITY_90_OFFSET = 2.5;
+// A band's base upper limit from which the cooling effect raises it.
+const COOLING_EFFECT_BASE_UPPER_MIN = 25;
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not.
@@ -254,8 +256,27 @@ export function adaptive_ashrae(
 
   let tmp_cmf_80_low = t_cmf - ACCEPTABILITY_80_OFFSET;
   let tmp_cmf_90_low = t_cmf - ACCEPTABILITY_90_OFFSET;
-  let tmp_cmf_80_up = t_cmf + ACCEPTABILITY_80_OFFSET + ce;
-  let tmp_cmf_90_up = t_cmf + ACCEPTABILITY_90_OFFSET + ce;
+  // The cooling effect raises a band's upper limit only where that band's base
+  // upper limit, built from t_cmf as rounded above, is 25 °C or more, so each
+  // band steps where its base reaches 25 °C (unrounded, 80 % at a running
+  // mean of 3.7 / 0.31 °C, 90 % at 4.7 / 0.31 °C); the room gate inside
+  // adaptive_cooling_effect stays. Upstream gates on the room alone
+  // (_internal/adaptive_cooling_effect.py:35), while its AdaptivePlot and the
+  // deployed CBE tool draw this step (comfort_tool #89, PR #90; pythermalcomfort
+  // PR #321). A correction of what upstream returns, under ADR 0004; ASHRAE
+  // 55-2023 §5.4.2.4. The inclusive >= at 25 °C, here and in the room gate,
+  // differs from that clause and is left, as the consumer's decision 79 leaves
+  // it. adaptive_en shares the helper and does not step.
+  const tmp_cmf_80_up_base = t_cmf + ACCEPTABILITY_80_OFFSET;
+  const tmp_cmf_90_up_base = t_cmf + ACCEPTABILITY_90_OFFSET;
+  let tmp_cmf_80_up =
+    tmp_cmf_80_up_base >= COOLING_EFFECT_BASE_UPPER_MIN
+      ? tmp_cmf_80_up_base + ce
+      : tmp_cmf_80_up_base;
+  let tmp_cmf_90_up =
+    tmp_cmf_90_up_base >= COOLING_EFFECT_BASE_UPPER_MIN
+      ? tmp_cmf_90_up_base + ce
+      : tmp_cmf_90_up_base;
 
   const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
   const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;

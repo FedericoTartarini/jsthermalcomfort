@@ -161,6 +161,32 @@ export async function loadTestData(
 }
 
 /**
+ * A scalar case of the pmv_ppd fixture as ADR 0004's correction of the
+ * ASHRAE 55 air-speed rule leaves it. The fixture's one row without local
+ * control (`airspeed_control: false`) predates the average air speed `v`,
+ * which such a call now requires: each of its cases gains `v` at the case's
+ * `vr`, the speed upstream checks. At exactly 1.3 met and 0.7 clo, which
+ * upstream exempts, the limits now apply and every speed of that row breaks
+ * one, so the expected pmv and ppd become NaN where the fixture has -0.14,
+ * -0.43 and -0.57. Every other case is returned as it is. The fixture is
+ * pinned in comftest.ts, so a new no-control row arrives only with a bump of
+ * that pin, which should recheck this.
+ *
+ * @param {FixtureRow} row - one scalar case, after expandArrayRows
+ * @returns {FixtureRow} the case to run
+ */
+export function correctNoControlFixtureCase(row: FixtureRow): FixtureRow {
+  const { inputs, outputs } = row;
+  if (inputs.airspeed_control !== false) return row;
+  const limited = inputs.met === 1.3 && inputs.clo === 0.7;
+  return {
+    ...row,
+    inputs: { ...inputs, v: inputs.vr },
+    outputs: limited ? { ...outputs, pmv: null, ppd: null } : outputs,
+  };
+}
+
+/**
  * Validates the model's output against the expected outputs using specified tolerances.
  *
  * @param {*} modelResult - The output from the model function, which can be either a primitive value or an object.

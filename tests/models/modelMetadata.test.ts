@@ -668,13 +668,19 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
 
   test("inputs are the physical quantities pmv_ppd_ashrae takes, with the ISO wrapper's units", () => {
     expect(Object.keys(PMV_PPD_ASHRAE_INFO.inputs).sort()).toEqual(
-      Object.keys(PMV_PPD_ISO_INFO.inputs).sort(),
+      [...Object.keys(PMV_PPD_ISO_INFO.inputs), "v"].sort(),
     );
-    for (const key of Object.keys(PMV_PPD_ASHRAE_INFO.inputs)) {
+    for (const key of Object.keys(PMV_PPD_ISO_INFO.inputs)) {
       expect(PMV_PPD_ASHRAE_INFO.inputs[key].unit).toBe(
         PMV_PPD_ISO_INFO.inputs[key].unit,
       );
     }
+  });
+
+  // ADR 0004: the average air speed's limits move with the call and arrive
+  // as rows, so v has no applicability.
+  test("v, the average air speed, is in m/s with no applicability", () => {
+    expect(PMV_PPD_ASHRAE_INFO.inputs.v).toEqual({ unit: "m/s" });
   });
 
   test("input bounds are the ASHRAE_55_LIMITS objects, not copies", () => {

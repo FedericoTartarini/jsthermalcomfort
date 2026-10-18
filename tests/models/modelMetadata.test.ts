@@ -5,7 +5,7 @@ import {
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
-  PMV_CATEGORY_BINS_ISO,
+  PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
@@ -44,7 +44,8 @@ const expectedMetadataExports = [
   "CLO_TOUT_INFO",
   "HEAT_INDEX_ROTHFUSZ_INFO",
   "HEAT_INDEX_STRESS_CATEGORY_BINS",
-  "PMV_CATEGORY_BINS_ISO",
+  "PMV_CATEGORY_BINS_ISO_7730_2005",
+  "PMV_CATEGORY_BINS_ISO_7730_2025",
   "PMV_COMPLIANCE_INTERVAL_ASHRAE",
   "PMV_PPD_ASHRAE_INFO",
   "PMV_PPD_ISO_INFO",
@@ -64,6 +65,12 @@ describe("Model Metadata Exports — enumeration test", () => {
       expect(packageExports).toContain(name);
       expect((pkg as Record<string, unknown>)[name]).toBeDefined();
     });
+  });
+
+  // Replaced by one export per ISO 7730 edition, so a consumer that read the
+  // one set of bins for both fails to import instead of reading other bins.
+  test("PMV_CATEGORY_BINS_ISO is gone from the package root", () => {
+    expect(Object.keys(pkg)).not.toContain("PMV_CATEGORY_BINS_ISO");
   });
 });
 
@@ -399,8 +406,8 @@ describe("Identity — bins exported separately are the same object as in INFO",
     );
   });
 
-  test("PMV_CATEGORY_BINS_ISO === PMV_PPD_ISO_INFO.outputs.category.classifier", () => {
-    expect(PMV_CATEGORY_BINS_ISO).toBe(
+  test("PMV_CATEGORY_BINS_ISO_7730_2025 === PMV_PPD_ISO_INFO.outputs.category.classifier", () => {
+    expect(PMV_CATEGORY_BINS_ISO_7730_2025).toBe(
       PMV_PPD_ISO_INFO.outputs.category.classifier,
     );
   });

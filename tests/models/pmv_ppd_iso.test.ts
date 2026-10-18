@@ -1,6 +1,13 @@
 import { describe, expect, test } from "@jest/globals";
-import { pmv_ppd_iso, PMV_CATEGORY_BINS_ISO } from "../../src/models/index.js";
-import type { PmvPpdIsoParams } from "../../src/models/pmv_ppd_iso.ts";
+import {
+  pmv_ppd_iso,
+  PMV_CATEGORY_BINS_ISO_7730_2005,
+  PMV_CATEGORY_BINS_ISO_7730_2025,
+} from "../../src/models/index.js";
+import type {
+  PmvPpdIsoParams,
+  PmvPpdIsoResult,
+} from "../../src/models/pmv_ppd_iso.ts";
 import { round, Standard } from "../../src/utilities/utilities.js";
 import { testDataUrls } from "./comftest.ts";
 import {
@@ -173,7 +180,11 @@ describe("test_pmv_ppd_iso", () => {
       });
       const result_default = pmv_ppd_iso(params);
 
-      expect(result_2005).toEqual(result_2025);
+      // Upstream's result has no category, an addition here (ADR 0001) that
+      // each edition classifies by its own bins (see the category blocks
+      // below), so the editions are compared on the fields upstream returns.
+      const upstreamFields = ({ category, ...rest }: PmvPpdIsoResult) => rest;
+      expect(upstreamFields(result_2005)).toEqual(upstreamFields(result_2025));
       expect(result_2025).toEqual(result_default);
     });
 
@@ -412,16 +423,20 @@ describe("pmv_ppd_iso (JS-only)", () => {
 
   // Upstream has no ISO category (ADR 0001, consumer-needed), so there is no
   // test_pmv_ppd_iso.py counterpart to mirror.
-  describe("category (ISO 7730:2005 Annex A Table A.1)", () => {
+  describe("category under ISO 7730:2005 (Annex A Table A.1)", () => {
+    const iso2005 = { standard: Standard.iso_7730_2005 } as const;
+
     test("the bins cut |pmv| at 0.2, 0.5 and 0.7, left-inclusive, frozen", () => {
-      expect(PMV_CATEGORY_BINS_ISO).toEqual({
+      expect(PMV_CATEGORY_BINS_ISO_7730_2005).toEqual({
         edges: [0.2, 0.5, 0.7, 10],
         labels: ["A", "B", "C", "none"],
         right: false,
       });
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO)).toBe(true);
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO.edges)).toBe(true);
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO.labels)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2005)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2005.edges)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2005.labels)).toBe(
+        true,
+      );
     });
 
     // No fixture row puts pmv on an edge, so the inputs are built around the
@@ -438,6 +453,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         clo: 0.5,
         round_output: false,
         limit_inputs: false,
+        ...iso2005,
       });
 
     test.each([
@@ -526,7 +542,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     test("is NaN when the applicability gate fails", () => {
       // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
       // is otherwise category B.
-      const outOfRange = { ...neutral, tdb: 28, tr: 28, vr: 1.2 };
+      const outOfRange = { ...neutral, tdb: 28, tr: 28, vr: 1.2, ...iso2005 };
       const result = pmv_ppd_iso(outOfRange);
       expect(result.pmv).toBeNaN();
       expect(result.category).toBeNaN();
@@ -540,13 +556,196 @@ describe("pmv_ppd_iso (JS-only)", () => {
     // category reads the unrounded one. pythermalcomfort 4.6.0 gives the same
     // unrounded pmvs: 0.4983292256773187 and 0.5013467793369747.
     test("is read from the unrounded pmv", () => {
-      const printed = (t: number) => pmv_ppd_iso({ ...neutral, tdb: t, tr: t });
+      const printed = (t: number) =>
+        pmv_ppd_iso({ ...neutral, tdb: t, tr: t, ...iso2005 });
       const below = printed(26.38);
       expect(below.pmv).toBe(0.5);
       expect(below.category).toBe("B");
       const above = printed(26.39);
       expect(above.pmv).toBe(0.5);
       expect(above.category).toBe("C");
+    });
+  });
+
+  describe("category under ISO 7730:2025 (Annex A Table A.1)", () => {
+    const iso2025 = { standard: Standard.iso_7730_2025 } as const;
+
+    test("the bins cut |pmv| at 0.2, 0.5, 0.7 and 1.0, left-inclusive, frozen", () => {
+      expect(PMV_CATEGORY_BINS_ISO_7730_2025).toEqual({
+        edges: [0.2, 0.5, 0.7, 1.0, 10],
+        labels: ["I", "II", "III", "IV", "none"],
+        right: false,
+      });
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2025)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2025.edges)).toBe(true);
+      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2025.labels)).toBe(
+        true,
+      );
+    });
+
+    // The roots of the 2005 block, whose pmv the edition does not change,
+    // and at ±1.0 the same construction: the tdb whose pmv is exactly the
+    // edge, and the adjacent double one step toward pmv = 0.
+    const at = (met: number, t: number) =>
+      pmv_ppd_iso({
+        tdb: t,
+        tr: t,
+        vr: 0.1,
+        rh: 50,
+        met,
+        clo: 0.5,
+        round_output: false,
+        limit_inputs: false,
+        ...iso2025,
+      });
+
+    test.each([
+      { id: "0", met: 1.01, t: 26.014491696246818, pmv: 0, category: "I" },
+      {
+        id: "just below 0.2",
+        met: 1.25,
+        t: 25.080080304866186,
+        pmv: 0.1999999999999993,
+        category: "I",
+      },
+      {
+        id: "just above -0.2",
+        met: 1.23,
+        t: 23.82031658710553,
+        pmv: -0.1999999999999993,
+        category: "I",
+      },
+      { id: "0.2", met: 1.25, t: 25.08008030486619, pmv: 0.2, category: "II" },
+      {
+        id: "-0.2",
+        met: 1.23,
+        t: 23.820316587105527,
+        pmv: -0.2,
+        category: "II",
+      },
+      {
+        id: "just below 0.5",
+        met: 1.08,
+        t: 27.00538109763518,
+        pmv: 0.49999999999999917,
+        category: "II",
+      },
+      {
+        id: "just above -0.5",
+        met: 1.08,
+        t: 24.050806906501293,
+        pmv: -0.49999999999999917,
+        category: "II",
+      },
+      {
+        id: "0.5",
+        met: 1.08,
+        t: 27.005381097635183,
+        pmv: 0.5,
+        category: "III",
+      },
+      {
+        id: "-0.5",
+        met: 1.08,
+        t: 24.05080690650129,
+        pmv: -0.5,
+        category: "III",
+      },
+      {
+        id: "just below 0.7",
+        met: 1.02,
+        t: 27.861012559832268,
+        pmv: 0.699999999999999,
+        category: "III",
+      },
+      {
+        id: "just above -0.7",
+        met: 1.12,
+        t: 23.083997101537506,
+        pmv: -0.6999999999999837,
+        category: "III",
+      },
+      { id: "0.7", met: 1.02, t: 27.86101255983227, pmv: 0.7, category: "IV" },
+      {
+        id: "-0.7",
+        met: 1.12,
+        t: 23.083997101537502,
+        pmv: -0.7,
+        category: "IV",
+      },
+      {
+        id: "just below 1.0",
+        met: 1.01,
+        t: 28.709120106514213,
+        pmv: 0.999999999999999,
+        category: "IV",
+      },
+      {
+        id: "just above -1.0",
+        met: 1.04,
+        t: 22.957876105377597,
+        pmv: -0.999999999999999,
+        category: "IV",
+      },
+      {
+        id: "1.0",
+        met: 1.01,
+        t: 28.709120106514217,
+        pmv: 1,
+        category: "none",
+      },
+      {
+        id: "-1.0",
+        met: 1.04,
+        t: 22.957876105377593,
+        pmv: -1,
+        category: "none",
+      },
+    ])("pmv $id is category $category", ({ met, t, pmv, category }) => {
+      const result = at(met, t);
+      expect(result.pmv).toBe(pmv);
+      expect(result.category).toBe(category);
+    });
+
+    test("is none well past 1.0, on both signs", () => {
+      const warm = at(1.2, 29);
+      expect(warm.pmv).toBeCloseTo(1.3, 2);
+      expect(warm.category).toBe("none");
+      const cool = at(1.2, 18);
+      expect(cool.pmv).toBeCloseTo(-2.06, 2);
+      expect(cool.category).toBe("none");
+    });
+
+    test("is read by the 2025 bins in a call without a standard", () => {
+      // pmv ≈ 0.26: category II under 2025, B under 2005.
+      const warm = {
+        ...neutral,
+        tdb: 28,
+        tr: 28,
+        vr: 1.2,
+        limit_inputs: false,
+      };
+      expect(pmv_ppd_iso(warm).pmv).toBeCloseTo(0.26, 2);
+      expect(pmv_ppd_iso(warm)).toHaveProperty("category", "II");
+    });
+
+    test("is NaN when the applicability gate fails", () => {
+      // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
+      // is otherwise category II.
+      const outOfRange = {
+        ...neutral,
+        tdb: 28,
+        tr: 28,
+        vr: 1.2,
+        ...iso2025,
+      };
+      const result = pmv_ppd_iso(outOfRange);
+      expect(result.pmv).toBeNaN();
+      expect(result.category).toBeNaN();
+      // The same call with the gate off is classified.
+      expect(
+        pmv_ppd_iso({ ...outOfRange, limit_inputs: false }),
+      ).toHaveProperty("category", "II");
     });
   });
 });

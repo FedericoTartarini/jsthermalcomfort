@@ -46,7 +46,8 @@ import {
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
-  PMV_CATEGORY_BINS_ISO,
+  PMV_CATEGORY_BINS_ISO_7730_2005,
+  PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -68,6 +69,12 @@ import {
   utci,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
+// One set of category bins per ISO 7730 edition replaced the one for both, so
+// a consumer that still reads it fails to compile instead of reading other
+// bins. If this stops being an error, tsc fails with "Unused
+// '@ts-expect-error' directive".
+// @ts-expect-error PMV_CATEGORY_BINS_ISO is no longer exported.
+import { PMV_CATEGORY_BINS_ISO } from "jsthermalcomfort";
 
 // The published metadata must satisfy the published type.
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
@@ -350,11 +357,17 @@ pmv_ppd_ashrae({
 // @ts-expect-error PMV_COMPLIANCE_INTERVAL_ASHRAE is frozen, so its type is readonly.
 PMV_COMPLIANCE_INTERVAL_ASHRAE.max = 1;
 
-// pmv_ppd_iso returns ISO 7730's category, read against bins published once,
-// whose edges a front end finds by label.
+// pmv_ppd_iso returns ISO 7730's category, read against bins published once
+// per edition, whose edges a front end finds by label.
 const isoCategory: string | number = pmvIso.category;
+const categoryIIMax: number =
+  PMV_CATEGORY_BINS_ISO_7730_2025.edges[
+    PMV_CATEGORY_BINS_ISO_7730_2025.labels.indexOf("II")
+  ];
 const categoryBMax: number =
-  PMV_CATEGORY_BINS_ISO.edges[PMV_CATEGORY_BINS_ISO.labels.indexOf("B")];
+  PMV_CATEGORY_BINS_ISO_7730_2005.edges[
+    PMV_CATEGORY_BINS_ISO_7730_2005.labels.indexOf("B")
+  ];
 
 // Both wrappers return the applicability rows a call broke (issue #199), typed
 // through to the bound, so a front end can phrase "35 °C is above 30 °C"

@@ -9,6 +9,7 @@ import { cooling_effect } from "./cooling_effect.ts";
 import { classifyFromBins } from "./classifierBins.ts";
 import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
 import { _valid_range } from "../_internal/validation.ts";
+import { deepFreeze } from "./modelDocs.ts";
 import type {
   ApplicabilityWarning,
   Bound,
@@ -69,7 +70,7 @@ export interface PmvPpdParams {
  * @property { number } ppd - Predicted Percentage of Dissatisfied occupants, [%]
  * @property { string|number } tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Classified from the returned pmv, so from the rounded one when `round_output` is true.
  * @property { boolean|number } [compliance] - ASHRAE 55 only: whether the unrounded pmv lies inside `PMV_COMPLIANCE_INTERVAL_ASHRAE`, or NaN when `limit_inputs` suppressed the pmv. Absent under ISO 7730.
- * @property { string|number } [category] - ISO 7730 only: the category of thermal environment, the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO`, or NaN when `limit_inputs` suppressed the pmv. Absent under ASHRAE 55.
+ * @property { string|number } [category] - ISO 7730 only: the category of thermal environment, the unrounded |pmv| classified by the edition's bins, `PMV_CATEGORY_BINS_ISO_7730_2025` or `PMV_CATEGORY_BINS_ISO_7730_2005`, or NaN when `limit_inputs` suppressed the pmv. Absent under ASHRAE 55.
  * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  */
 export interface Pmv_ppdReturns {
@@ -133,9 +134,34 @@ export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
   Object.freeze({ min: -0.5, max: 0.5 });
 
 /**
- * These bins cut |pmv|, not pmv: pair them with the absolute PMV, never with
- * the signed PMV axis as chart bands. pmv_ppd_iso classifies its `category`
- * with them, from the unrounded PMV.
+ * The categories of thermal environment of ISO 7730:2025, the edition
+ * pmv_ppd_iso defaults to, which classifies its `category` with them under
+ * that edition. Like `PMV_CATEGORY_BINS_ISO_7730_2005` they cut |pmv|, not
+ * pmv, and are read from the unrounded PMV.
+ *
+ * ISO 7730:2025 Annex A Table A.1 names four categories, I to IV, at |PMV|
+ * 0.2, 0.5, 0.7 and 1.0. Left-inclusive bins on |pmv| make each strict at
+ * both ends, as the 2005 bins are: a PMV of exactly ±0.2 is category II, not
+ * I, and a PMV of exactly ±1.0 is "none". The top edge, 10, is the thermal
+ * sensation vote bins' sentinel, as in the 2005 bins.
+ *
+ * Upstream has no ISO 7730 category anywhere. The category and these bins are
+ * a consumer-needed addition (ADR 0001): the app draws a model's categories
+ * and prints the room's category from the bins of the edition it runs,
+ * instead of keeping its own edges.
+ */
+export const PMV_CATEGORY_BINS_ISO_7730_2025: Readonly<ClassifierBins> =
+  deepFreeze({
+    edges: [0.2, 0.5, 0.7, 1.0, 10],
+    labels: ["I", "II", "III", "IV", "none"],
+    right: false,
+  });
+
+/**
+ * The categories of thermal environment of ISO 7730:2005, which pmv_ppd_iso
+ * classifies its `category` with under that edition. These bins cut |pmv|,
+ * not pmv: pair them with the absolute PMV, never with the signed PMV axis as
+ * chart bands. pmv_ppd_iso reads them from the unrounded PMV.
  *
  * ISO 7730:2005 Annex A Table A.1 defines the categories of thermal
  * environment by open intervals: A is -0.2 < PMV < 0.2, B is -0.5 < PMV < 0.5,
@@ -152,16 +178,18 @@ export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
  * CEN/TR 16798-2 Table B.1 gives the same intervals for EN 16798-1 categories
  * I to III.
  *
- * Upstream has no ISO 7730 category anywhere. The category and these bins are
- * a consumer-needed addition (ADR 0001): the app draws categories A, B and C
- * and prints the room's category from this one object, instead of keeping
- * its own ±0.2, ±0.5 and ±0.7.
+ * Upstream has no ISO 7730 category anywhere: these bins are a consumer-needed
+ * addition (ADR 0001), as `PMV_CATEGORY_BINS_ISO_7730_2025` is.
+ *
+ * Frozen deep, not with Object.freeze as the vote bins are: no model info
+ * holds these bins, so no info's deepFreeze reaches their arrays.
  */
-export const PMV_CATEGORY_BINS_ISO: Readonly<ClassifierBins> = Object.freeze({
-  edges: [0.2, 0.5, 0.7, 10],
-  labels: ["A", "B", "C", "none"],
-  right: false,
-});
+export const PMV_CATEGORY_BINS_ISO_7730_2005: Readonly<ClassifierBins> =
+  deepFreeze({
+    edges: [0.2, 0.5, 0.7, 10],
+    labels: ["A", "B", "C", "none"],
+    right: false,
+  });
 
 /**
  * The standards PMV implements: pythermalcomfort's pmv_ppd_iso and
@@ -191,8 +219,8 @@ export type PmvStandard = (typeof PMV_STANDARDS)[number];
  *   or null where the standard gates neither.
  * - `tsv_bins`: the thermal sensation vote bins, whose edge convention
  *   differs (pythermalcomfort#382).
- * - `category_bins`: ISO 7730 only, the bins that classify |pmv| into the
- *   result's `category`, as `compliance` is ASHRAE 55's.
+ * - `category_bins`: ISO 7730 only, the edition's bins that classify |pmv|
+ *   into the result's `category`, as `compliance` is ASHRAE 55's.
  */
 type PmvStandardRules = (
   | {
@@ -207,19 +235,25 @@ type PmvStandardRules = (
   tsv_bins: Readonly<ClassifierBins>;
 };
 
-const ISO_7730_RULES: PmvStandardRules = {
-  ashrae55: false,
+/** The rules both ISO 7730 editions share: they differ in `category_bins`. */
+const ISO_7730_SHARED_RULES = {
+  ashrae55: false as const,
   limits: ISO_7730_LIMITS,
   pa: ISO_7730_LIMITS.pa,
   pmv: ISO_7730_LIMITS.pmv,
   tsv_bins: PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
-  category_bins: PMV_CATEGORY_BINS_ISO,
 };
 
 /** The rules of every standard `pmv_ppd` implements, one entry each. */
 const PMV_STANDARD_RULES: Readonly<Record<PmvStandard, PmvStandardRules>> = {
-  [Standard.iso_7730_2005]: ISO_7730_RULES,
-  [Standard.iso_7730_2025]: ISO_7730_RULES,
+  [Standard.iso_7730_2005]: {
+    ...ISO_7730_SHARED_RULES,
+    category_bins: PMV_CATEGORY_BINS_ISO_7730_2005,
+  },
+  [Standard.iso_7730_2025]: {
+    ...ISO_7730_SHARED_RULES,
+    category_bins: PMV_CATEGORY_BINS_ISO_7730_2025,
+  },
   [Standard.ashrae_55_2023]: {
     ashrae55: true,
     pa: null,
@@ -454,7 +488,8 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     ? NaN
     : pmv > PMV_COMPLIANCE_INTERVAL_ASHRAE.min &&
       pmv < PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
-  // ISO 7730 only, and a deviation (ADR 0001; see PMV_CATEGORY_BINS_ISO):
+  // ISO 7730 only, and a deviation (ADR 0001; see
+  // PMV_CATEGORY_BINS_ISO_7730_2025 and PMV_CATEGORY_BINS_ISO_7730_2005):
   // read like compliance, from the unrounded pmv and NaN where it is masked.
   const category =
     masked || !("category_bins" in rules)

@@ -1,6 +1,6 @@
 import {
   pmv_ppd,
-  PMV_CATEGORY_BINS_ISO,
+  PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
 } from "./pmv_ppd.ts";
 import type { PmvPpdParams } from "./pmv_ppd.ts";
@@ -21,7 +21,7 @@ import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
  * @property {number} pmv - Predicted Mean Vote on the ISO 7730 scale [-3, +3]
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses left-inclusive bins (pythermalcomfort#382).
- * @property {string|number} category - ISO 7730 category of thermal environment ("A", "B", "C" or "none"): the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO`; NaN when `limit_inputs` returns NaN for the inputs.
+ * @property {string|number} category - ISO 7730 category of thermal environment: under 7730-2025 "I", "II", "III", "IV" or "none", the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO_7730_2025`; under 7730-2005 "A", "B", "C" or "none", by `PMV_CATEGORY_BINS_ISO_7730_2005`; NaN when `limit_inputs` returns NaN for the inputs.
  * @property {import("./modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
@@ -50,6 +50,10 @@ export interface PmvPpdIsoParams extends Omit<
 /**
  * Model metadata for PMV / PPD (ISO 7730).
  *
+ * The `category` classifier is `PMV_CATEGORY_BINS_ISO_7730_2025`, the bins of
+ * the default and first edition. A call under 7730-2005 classifies `category`
+ * by `PMV_CATEGORY_BINS_ISO_7730_2005` instead.
+ *
  * Experimental — the shape of `ModelInfo` may change before release.
  *
  * @public
@@ -72,7 +76,7 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
     pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
-    category: { unit: null, classifier: PMV_CATEGORY_BINS_ISO },
+    category: { unit: null, classifier: PMV_CATEGORY_BINS_ISO_7730_2025 },
   },
   derived: {
     // Computed from tdb and rh, not supplied by the caller. Exposed so a
@@ -136,11 +140,11 @@ const PMV_PPD_ISO_SCHEMA = {
  *    `"7730-2025"`.
  *
  *    **The two editions specify identical equations and applicability limits**,
- *    so this argument does not change the result. It exists so a caller can
- *    record which edition they are working to, and so the library can confirm
- *    it implements it — passing an unsupported edition throws rather than
- *    silently computing something else. It also gives a future divergence
- *    somewhere to live.
+ *    so this argument changes only `category`, which each edition's Annex A
+ *    Table A.1 bounds and names differently. It also lets a caller record which edition
+ *    they are working to, and the library confirm it implements it — passing
+ *    an unsupported edition throws rather than silently computing something
+ *    else.
  *
  *    Mirrors the `model` argument on `pythermalcomfort`'s `pmv_ppd_iso`,
  *    including the default.

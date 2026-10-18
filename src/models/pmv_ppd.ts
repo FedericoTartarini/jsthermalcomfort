@@ -434,11 +434,11 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     _check_ashrae55_compliance(warnings, {
       tdb,
       tr,
-      v: vr,
+      v_range: { value: vr, key: "vr" },
+      v_no_control: { value: vr, key: "vr" },
       met,
       clo,
       airspeed_control,
-      v_param_name: "vr",
     });
   }
   if (rules.pa) _valid_range(warnings, "pa", "derived", pa, rules.pa);

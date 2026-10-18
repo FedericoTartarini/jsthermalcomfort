@@ -239,7 +239,12 @@ export function adaptive_ashrae(
   // say what the numbers were computed despite. The gate reads the rows.
   // Upstream passes no airspeed_control, so the no-control rules never apply.
   const warnings: ApplicabilityWarning[] = [];
-  _check_ashrae55_compliance(warnings, { tdb, tr, v });
+  _check_ashrae55_compliance(warnings, {
+    tdb,
+    tr,
+    v_range: { value: v, key: "v" },
+    v_no_control: { value: v, key: "v" },
+  });
   _valid_range(
     warnings,
     "t_running_mean",

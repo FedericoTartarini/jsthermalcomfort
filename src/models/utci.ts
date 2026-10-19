@@ -234,7 +234,8 @@ export function utci(params: UtciParams): UtciResult {
   // (ADR 0011). Multiplying by 1000 keeps upstream's outcome at its three
   // test values (`tests/test_utci.py:65-77` at v4.6.2): 4.999999999992615,
   // 5 and 5.000000000007386 kPa become 4999.999999992615, 5000 and
-  // 5000.000000007386 Pa.
+  // 5000.000000007386 Pa. The pa itself can differ from upstream's at the
+  // gate, from Math.exp (see exponential below).
   _valid_range(warnings, "pa", "derived", pa * 1000, UTCI_LIMITS.pa);
   _valid_range(warnings, "rh", "input", rh, UTCI_LIMITS.rh);
   if (limit_inputs && warnings.length > 0) utci_approx = NaN;
@@ -263,10 +264,17 @@ export function utci(params: UtciParams): UtciResult {
 // 50 °C, where Math.pow(tk, -1) can be one ulp off it (at 27 °C,
 // 0.0033316674995835416 against 0.003331667499583542), so the exponent -1
 // term is 1 / tk. Math.log and Math.exp are kept, though they can be one ulp
-// off numpy's np.log and np.exp: inside the applicability limits the
-// unrounded utci then differs from pythermalcomfort's by up to 1.7e-12, so a
-// value that close to a 0.1 rounding tie or to a stress-category edge can
-// round or classify one step apart.
+// off numpy's np.log and np.exp. The unrounded utci then differs from
+// pythermalcomfort's in the last digits (at tdb = tr = 48.8786673326411 °C,
+// v 1 m/s, rh 42.802598884309255 %, inside every limit: 57.599922428394876
+// against 57.59992242839233), so a value that close to a 0.1 rounding tie or
+// to a stress-category edge can round or classify one step apart. The
+// vapour pressure can also land on the other side of the 5 kPa gate: at
+// tdb = tr = 49.40801894930123 °C, v 1 m/s, rh 41.686247926690356 %, both
+// sides take exp of 9.392192088921599, Math.exp gives an es of
+// 119.94363246107027 and np.exp 119.94363246107025, so pa is
+// 5.000000000000001 kPa here and 5.0 upstream, and utci is NaN here where
+// upstream returns 57.94535750237951.
 /**
  * @param {number} t_db
  * @returns {number}

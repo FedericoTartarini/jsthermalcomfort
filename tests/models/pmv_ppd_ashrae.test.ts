@@ -690,8 +690,8 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
   });
 
   // Expected values from pythermalcomfort 4.6.2. The hand-written Brent v2 had
-  // before reached another cooling-effect root here and gave pmv 1.36, ppd
-  // 43.3, "Slightly Warm".
+  // before stopped at another sign change of the cooling-effect equation here
+  // and gave pmv 1.36, ppd 43.3, "Slightly Warm".
   test("elevated air speed gives upstream's PMV through the cooling effect", () => {
     const result = pmv_ppd_ashrae({
       tdb: 26.797928398725393,

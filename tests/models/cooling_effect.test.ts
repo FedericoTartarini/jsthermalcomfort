@@ -53,7 +53,8 @@ describe("cooling_effect (JS-only)", () => {
 
   // Expected values from pythermalcomfort 4.6.2. On these inputs the
   // hand-written Brent that v2 had before returned 7.14, 6.83, 1.3 and 12.54:
-  // it reached another root of SET(still air) - SET(vr) than scipy's brentq.
+  // it stopped at another sign change of SET(still air) - SET(vr) than
+  // scipy's brentq.
   test.each([
     [
       {

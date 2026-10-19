@@ -604,6 +604,19 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(() => pmv_ppd_ashrae()).toThrow(TypeError);
     });
 
+    // ADR 0008: an unknown key throws, as an unexpected keyword argument does
+    // in Python. suppress_warnings, declared beyond upstream's keys, is
+    // accepted (see "suppress_warnings passes through to the cooling effect").
+    test("throws TypeError naming an unknown key", () => {
+      // Cast: deliberately passing a misspelt key to test the TypeError.
+      const params = {
+        ...neutral,
+        unit: "IP",
+      } as unknown as PmvPpdAshraeParams;
+      expect(() => pmv_ppd_ashrae(params)).toThrow(TypeError);
+      expect(() => pmv_ppd_ashrae(params)).toThrow("unexpected key: 'unit'");
+    });
+
     // The shared PMV module accepts the ISO 7730 standards too; this wrapper
     // must not hand one through and compute the ISO equation under its name.
     test("throws Error if standard is an ISO 7730 standard", () => {
@@ -626,6 +639,14 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
           units: "INVALID",
         }),
       ).toThrow(Error);
+    });
+
+    // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+    // fails that check with a ValueError (ADR 0012: Error).
+    test("throws Error if units is not a string", () => {
+      // Cast: deliberately passing a number to test the runtime Error.
+      const params = { ...neutral, units: 5 } as unknown as PmvPpdAshraeParams;
+      expect(() => pmv_ppd_ashrae(params)).toThrow('"units" must be one of');
     });
 
     test.each([

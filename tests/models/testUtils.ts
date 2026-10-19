@@ -26,8 +26,12 @@
  * - A fixture test runs every row its upstream counterpart means to run, even
  *   where upstream's filter misses rows (the PMV tests match lowercase
  *   `"iso"`/`"ashrae"` against the fixture's uppercase labels).
- * - Error classes: `ValueError` → `Error`, `TypeError` → `TypeError`. Assert
- *   the message too where upstream matches one (`pytest.raises(match=...)`).
+ * - Error classes (ADR 0012): `TypeError` → `TypeError`; a `ValueError` for a
+ *   value out of range, and a `ZeroDivisionError` → `RangeError`; any other
+ *   `ValueError` → `Error`. An unexpected keyword argument is a `TypeError`,
+ *   as an unknown params key is (ADR 0008). A `RangeError` is an `Error`, so
+ *   `toThrow(Error)` passes either way. Assert the message too where upstream
+ *   matches one (`pytest.raises(match=...)`).
  * - A `UserWarning` assertion becomes an assertion on the `warnings` rows
  *   where the model returns them (every v1 model). Otherwise, and for any upstream test
  *   that cannot be ported, write `test.todo("<upstream name>: <reason>")`

@@ -6,6 +6,7 @@ import {
   Standard,
 } from "../utilities/utilities.js";
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
+import { _upper_units } from "../_internal/validation.ts";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -96,7 +97,7 @@ export function adaptive_en(
       tr,
       t_running_mean,
       v,
-      units: units.toUpperCase(),
+      units: _upper_units(units),
       limit_inputs,
       round_output,
     },

@@ -9,7 +9,11 @@ import {
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
 import { deepFreeze } from "./modelDocs.ts";
 import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
-import { _check_params_object, _valid_range } from "../_internal/validation.ts";
+import {
+  _check_params_object,
+  _upper_units,
+  _valid_range,
+} from "../_internal/validation.ts";
 import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // Comfort temperature as a linear function of the running mean outdoor
@@ -181,14 +185,15 @@ export const ADAPTIVE_ASHRAE_INFO: ModelInfo = deepFreeze({
  * // if the running mean temperature is higher than 10°C
  */
 // A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three). limit_inputs is not validated, as
-// upstream's ASHRAEInputs is not given it.
+// propagate (ADR 0001, reason three). limit_inputs is declared but not
+// validated, as upstream's ASHRAEInputs is not given it.
 const ADAPTIVE_ASHRAE_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
   t_running_mean: { type: "number" },
   v: { type: "number" },
   units: { enum: ["SI", "IP"] },
+  limit_inputs: {},
   round_output: { type: "boolean" },
 };
 
@@ -196,8 +201,9 @@ export function adaptive_ashrae(
   params: AdaptiveAshraeParams,
 ): AdaptiveAshraeResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "adaptive_ashrae");
+  // that way fails here, naming the shape it should have. So does an unknown
+  // key (ADR 0008).
+  _check_params_object(params, "adaptive_ashrae", ADAPTIVE_ASHRAE_SCHEMA);
   let { tdb, tr, t_running_mean, v } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   const { units = "SI", limit_inputs = true, round_output = true } = params;
@@ -207,7 +213,7 @@ export function adaptive_ashrae(
       tr,
       t_running_mean,
       v,
-      units: units.toUpperCase(),
+      units: _upper_units(units),
       round_output,
     },
     ADAPTIVE_ASHRAE_SCHEMA,

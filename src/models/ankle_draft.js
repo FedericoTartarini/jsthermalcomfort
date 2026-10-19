@@ -6,6 +6,7 @@ import {
   Standard,
 } from "../utilities/utilities.js";
 import { pmv } from "./pmv.js";
+import { _upper_units } from "../_internal/validation.ts";
 
 /**
  * @public
@@ -69,7 +70,7 @@ const ANKLE_DRAFT_SCHEMA = {
 
 export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
   validateInputs(
-    { tdb, tr, vr, rh, met, clo, v_ankle, units: units.toUpperCase() },
+    { tdb, tr, vr, rh, met, clo, v_ankle, units: _upper_units(units) },
     ANKLE_DRAFT_SCHEMA,
   );
 

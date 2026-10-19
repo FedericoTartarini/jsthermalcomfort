@@ -38,15 +38,54 @@ export function _valid_range(
  * still written positionally fails here, naming the shape it should have.
  * Upstream has no counterpart, as Python's keyword arguments need none.
  *
+ * Also throws a `TypeError` naming every key `schema` does not declare, as
+ * Python raises for an unexpected keyword argument (ADR 0008). A schema entry
+ * declares its key even when its rules are empty, which is how a model
+ * declares a switch it does not validate.
+ *
  * Private: not exported from the package root.
  *
  * @param {unknown} params - what the model was called with
  * @param {string} name - the model's function name, for the message
+ * @param {object} schema - the model's `validateInputs` schema
  */
-export function _check_params_object(params: unknown, name: string): void {
+export function _check_params_object(
+  params: unknown,
+  name: string,
+  schema: object,
+): void {
   if (typeof params !== "object" || params === null) {
     throw new TypeError(
       `${name} takes one params object, got ${String(params)}`,
     );
   }
+  // hasOwnProperty, not `in`: "toString" is in every object literal.
+  const unknown_keys = Object.keys(params).filter(
+    (key) => !Object.prototype.hasOwnProperty.call(schema, key),
+  );
+  if (unknown_keys.length > 0) {
+    const keys = unknown_keys.map((key) => `'${key}'`).join(", ");
+    throw new TypeError(
+      unknown_keys.length === 1
+        ? `${name} got an unexpected key: ${keys}`
+        : `${name} got unexpected keys: ${keys}`,
+    );
+  }
+}
+
+/**
+ * Upper-cases `units` the way upstream's `BaseInputs.__post_init__` does
+ * before checking it against "SI" and "IP"
+ * (`pythermalcomfort/classes_input.py:115-120` at v4.6.2). There a non-string
+ * fails that check with a `ValueError`; here it is returned as it is, for the
+ * schema's `units` enum to reject with an `Error` (ADR 0012) rather than
+ * crashing in `toUpperCase`.
+ *
+ * Private: not exported from the package root.
+ *
+ * @param {unknown} units - the caller's `units`
+ * @returns {unknown} `units` upper-cased if it is a string, otherwise as given
+ */
+export function _upper_units(units: unknown): unknown {
+  return typeof units === "string" ? units.toUpperCase() : units;
 }

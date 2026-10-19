@@ -5,7 +5,11 @@ import {
 } from "../utilities/utilities.js";
 import { classifyFromBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object, _valid_range } from "../_internal/validation.ts";
+import {
+  _check_params_object,
+  _upper_units,
+  _valid_range,
+} from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   ClassifierBins,
@@ -158,8 +162,8 @@ export const UTCI_INFO: ModelInfo = deepFreeze({
  * console.log(utci({ tdb: 77, tr: 77, v: 3.28, rh: 50, units: "IP" }).utci) // will print 76.3
  */
 // A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three). round_output is not validated, as
-// upstream's UTCIInputs is not given it.
+// propagate (ADR 0001, reason three). round_output is declared but not
+// validated, as upstream's UTCIInputs is not given it.
 const UTCI_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
@@ -167,12 +171,14 @@ const UTCI_SCHEMA = {
   rh: { type: "number" },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
+  round_output: {},
 };
 
 export function utci(params: UtciParams): UtciResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "utci");
+  // that way fails here, naming the shape it should have. So does an unknown
+  // key (ADR 0008).
+  _check_params_object(params, "utci", UTCI_SCHEMA);
   let { tdb, tr, v } = params;
   const { rh } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
@@ -183,7 +189,7 @@ export function utci(params: UtciParams): UtciResult {
       tr,
       v,
       rh,
-      units: units.toUpperCase(),
+      units: _upper_units(units),
       limit_inputs,
     },
     UTCI_SCHEMA,

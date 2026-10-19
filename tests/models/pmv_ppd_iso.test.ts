@@ -315,6 +315,20 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(() => pmv_ppd_iso()).toThrow(TypeError);
     });
 
+    // ADR 0008: an unknown key throws, as an unexpected keyword argument does
+    // in Python. airspeed_control is pmv_ppd_ashrae's, not this model's.
+    test("throws TypeError naming an unknown key", () => {
+      // Cast: deliberately passing another model's key to test the TypeError.
+      const params = {
+        ...neutral,
+        airspeed_control: false,
+      } as unknown as PmvPpdIsoParams;
+      expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
+      expect(() => pmv_ppd_iso(params)).toThrow(
+        "unexpected key: 'airspeed_control'",
+      );
+    });
+
     // The shared PMV module accepts ASHRAE 55 too; this wrapper must not hand
     // it through and compute the ASHRAE equation under its name.
     test("throws Error if standard is the ASHRAE 55 standard", () => {
@@ -335,6 +349,14 @@ describe("pmv_ppd_iso (JS-only)", () => {
           units: "INVALID",
         }),
       ).toThrow(Error);
+    });
+
+    // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+    // fails that check with a ValueError (ADR 0012: Error).
+    test("throws Error if units is not a string", () => {
+      // Cast: deliberately passing a number to test the runtime Error.
+      const params = { ...neutral, units: 5 } as unknown as PmvPpdIsoParams;
+      expect(() => pmv_ppd_iso(params)).toThrow('"units" must be one of');
     });
 
     test.each(["limit_inputs", "round_output"] as const)(

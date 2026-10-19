@@ -750,6 +750,19 @@ export function valid_range(range, [min, max]) {
 }
 
 /**
+ * The metabolic rate of one met, [W/m2]. pythermalcomfort's
+ * `utilities.met_to_w_m2`, under the same name.
+ * @public
+ * @memberof utilities
+ * @docname Met to W/m2
+ * @constant
+ * @example
+ * import { met_to_w_m2 } from "jsthermalcomfort";
+ * console.log(1.2 * met_to_w_m2); // 69.78
+ */
+export const met_to_w_m2 = 58.15;
+
+/**
  * Met values of typical tasks. Keyed the same way pythermalcomfort keys
  * `met_typical_tasks` in `utilities.py`.
  * @public
@@ -1056,13 +1069,21 @@ export const assertNumber = (value, name) => {
 /**
  * Validates model input parameters against a schema.
  *
+ * The error classes follow ADR 0012's mapping of upstream's exceptions:
+ * a `TypeError` for a `TypeError`, a `RangeError` for a `ValueError` on a
+ * value out of range (and for a `ZeroDivisionError`), and an `Error` for any
+ * other `ValueError`.
+ *
  * @param {object} params - The input parameters as key-value pairs
  * @param {object} schema - Validation rules per parameter:
  *   - `type: "number"`  — calls assertNumber (throws TypeError if invalid)
  *   - `type: "boolean"` — throws TypeError if value is not a boolean
  *   - `enum: [...]`     — throws Error if value not in the list
+ *   - `min`, `max`, `exclusiveMin` — throws RangeError if value is outside
  *   - `required: false` — skips validation when value is undefined
+ *   - `{}`              — no rules: the key is declared, and not validated
  * @throws {TypeError} if a numeric or boolean parameter has an invalid type
+ * @throws {RangeError} if a numeric parameter is outside its bounds
  * @throws {Error} if an enum parameter has an invalid value
  *
  * @example

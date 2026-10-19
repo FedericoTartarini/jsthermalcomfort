@@ -10,7 +10,7 @@ import {
   Standard,
 } from "../utilities/utilities.js";
 import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object } from "../_internal/validation.ts";
+import { _check_params_object, _upper_units } from "../_internal/validation.ts";
 import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
@@ -166,7 +166,9 @@ const PMV_PPD_ISO_SCHEMA = {
 export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
   // The quantities and the standard were positional before v2 (ADR 0002); a
   // call still written that way fails here, naming the shape it should have.
-  _check_params_object(params, "pmv_ppd_iso");
+  // So does an unknown key, such as pmv_ppd_ashrae's airspeed_control
+  // (ADR 0008).
+  _check_params_object(params, "pmv_ppd_iso", PMV_PPD_ISO_SCHEMA);
   const { tdb, tr, vr, rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   const {
@@ -186,15 +188,15 @@ export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
       clo,
       wme,
       standard,
-      units: units.toUpperCase(),
+      units: _upper_units(units),
       limit_inputs,
       round_output,
     },
     PMV_PPD_ISO_SCHEMA,
   );
-  // The keys are named rather than spread, so an ASHRAE-only switch passed
-  // from untyped JavaScript never reaches the shared module. pmv_ppd returns
-  // category under ISO 7730, the only standards validated above.
+  // The keys are named rather than spread, so only the keys validated above
+  // reach the shared module. pmv_ppd returns category under ISO 7730, the
+  // only standards validated above.
   return pmv_ppd({
     tdb,
     tr,

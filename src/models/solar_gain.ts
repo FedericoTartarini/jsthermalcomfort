@@ -214,9 +214,9 @@ export const SOLAR_GAIN_INFO: ModelInfo = deepFreeze({
  * console.log(results); // {erf: 43.3, delta_mrt: 10.4, warnings: []}
  */
 // A non-finite number throws a TypeError here (ADR 0001, reason three);
-// upstream returns NaN or ±Infinity for it. round_output is not validated, as
-// upstream's SolarGainInputs is not given it; posture is checked below with
-// upstream's message.
+// upstream returns NaN or ±Infinity for it. round_output is declared but not
+// validated, as upstream's SolarGainInputs is not given it; posture is
+// declared here and checked below with upstream's message.
 const SOLAR_GAIN_SCHEMA = {
   sol_altitude: { type: "number" },
   sharp: { type: "number" },
@@ -225,15 +225,18 @@ const SOLAR_GAIN_SCHEMA = {
   f_svv: { type: "number" },
   f_bes: { type: "number" },
   asw: { type: "number" },
+  posture: {},
   floor_reflectance: { type: "number" },
+  round_output: {},
 };
 
 const _POSTURES = ["standing", "supine", "sitting"];
 
 export function solar_gain(params: SolarGainParams): SolarGainResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "solar_gain");
+  // that way fails here, naming the shape it should have. So does an unknown
+  // key (ADR 0008).
+  _check_params_object(params, "solar_gain", SOLAR_GAIN_SCHEMA);
   let { sol_altitude, sharp } = params;
   const { sol_radiation_dir, sol_transmittance, f_svv, f_bes } = params;
   // Destructuring defaults also apply to a default passed as undefined.

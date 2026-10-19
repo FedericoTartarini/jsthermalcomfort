@@ -230,6 +230,25 @@ describe("heat_index_rothfusz (JS-only)", () => {
       expect(() => heat_index_rothfusz()).toThrow(TypeError);
     });
 
+    // ADR 0008: an unknown key throws, as an unexpected keyword argument does
+    // in Python. Without the check, this IP call returned 441.3 °C.
+    test("throws TypeError naming an unknown key", () => {
+      // Cast: deliberately passing a removed option to test the TypeError.
+      const params = {
+        tdb: 90,
+        rh: 50,
+        units: "IP",
+      } as unknown as HeatIndexRothfuszParams;
+      expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
+      expect(() => heat_index_rothfusz(params)).toThrow(
+        "heat_index_rothfusz got an unexpected key: 'units'",
+      );
+      const two = { ...params, round: false } as HeatIndexRothfuszParams;
+      expect(() => heat_index_rothfusz(two)).toThrow(
+        "heat_index_rothfusz got unexpected keys: 'units', 'round'",
+      );
+    });
+
     test.each(["round_output", "limit_inputs"] as const)(
       "throws TypeError if %s is not a boolean",
       (key) => {

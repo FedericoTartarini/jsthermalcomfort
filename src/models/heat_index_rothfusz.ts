@@ -140,8 +140,9 @@ export function heat_index_rothfusz(
   params: HeatIndexRothfuszParams,
 ): HeatIndexRothfuszResult {
   // tdb and rh were positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "heat_index_rothfusz");
+  // that way fails here, naming the shape it should have. So does an unknown
+  // key, such as the removed units (ADR 0008).
+  _check_params_object(params, "heat_index_rothfusz", HEAT_INDEX_SCHEMA);
   const { tdb, rh } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   const { round_output = true, limit_inputs = true } = params;

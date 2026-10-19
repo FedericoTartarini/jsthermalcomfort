@@ -4,7 +4,7 @@ import {
   validateInputs,
 } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
-import { _check_params_object } from "../_internal/validation.ts";
+import { _check_params_object, _upper_units } from "../_internal/validation.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not.
@@ -100,8 +100,9 @@ export function cooling_effect(
   params: CoolingEffectParams,
 ): CoolingEffectResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "cooling_effect");
+  // that way fails here, naming the shape it should have. So does an unknown
+  // key (ADR 0008).
+  _check_params_object(params, "cooling_effect", COOLING_EFFECT_SCHEMA);
   let { tdb, tr, vr } = params;
   const { rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
@@ -115,7 +116,7 @@ export function cooling_effect(
       met,
       clo,
       wme,
-      units: units.toUpperCase(),
+      units: _upper_units(units),
       suppress_warnings,
     },
     COOLING_EFFECT_SCHEMA,

@@ -127,6 +127,23 @@ describe("cooling_effect (JS-only)", () => {
       expect(() => cooling_effect()).toThrow(TypeError);
     });
 
+    // ADR 0008: an unknown key throws, as an unexpected keyword argument does
+    // in Python.
+    test("throws TypeError naming an unknown key", () => {
+      // Cast: deliberately passing a misspelt key to test the TypeError.
+      const params = { ...still, unit: "IP" } as unknown as CoolingEffectParams;
+      expect(() => cooling_effect(params)).toThrow(TypeError);
+      expect(() => cooling_effect(params)).toThrow("unexpected key: 'unit'");
+    });
+
+    // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+    // fails that check with a ValueError (ADR 0012: Error).
+    test("throws Error if units is not a string", () => {
+      // Cast: deliberately passing a number to test the runtime Error.
+      const params = { ...still, units: 5 } as unknown as CoolingEffectParams;
+      expect(() => cooling_effect(params)).toThrow('"units" must be one of');
+    });
+
     test("throws Error if units is not a valid enum", () => {
       expect(() =>
         cooling_effect({

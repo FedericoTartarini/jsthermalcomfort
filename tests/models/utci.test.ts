@@ -181,10 +181,27 @@ describe("utci (JS-only)", () => {
       expect(() => utci()).toThrow(TypeError);
     });
 
+    // ADR 0008: an unknown key throws, as an unexpected keyword argument does
+    // in Python.
+    test("throws TypeError naming an unknown key", () => {
+      // Cast: deliberately passing a misspelt key to test the TypeError.
+      const params = { ...mild, unit: "IP" } as unknown as UtciParams;
+      expect(() => utci(params)).toThrow(TypeError);
+      expect(() => utci(params)).toThrow("unexpected key: 'unit'");
+    });
+
     test("throws Error if units is not a valid enum", () => {
       // Cast: deliberately passing an unknown system to test the runtime Error.
       const params = { ...mild, units: "INVALID" } as unknown as UtciParams;
       expect(() => utci(params)).toThrow(Error);
+    });
+
+    // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+    // fails that check with a ValueError (ADR 0012: Error).
+    test("throws Error if units is not a string", () => {
+      // Cast: deliberately passing a number to test the runtime Error.
+      const params = { ...mild, units: 5 } as unknown as UtciParams;
+      expect(() => utci(params)).toThrow('"units" must be one of');
     });
 
     // Only the switches upstream's UTCIInputs validates; round_output is not

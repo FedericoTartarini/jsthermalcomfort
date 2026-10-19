@@ -44,6 +44,14 @@ describe("e_pmv input validation", () => {
     ).toThrow(Error);
   });
 
+  // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+  // fails that check with a ValueError (ADR 0012: Error).
+  test.each([5, null])("throws Error if kwargs.units is %p", (units) => {
+    expect(() => e_pmv(25, 25, 0.1, 50, 1.4, 0.5, 0.6, 0, { units })).toThrow(
+      '"units" must be one of',
+    );
+  });
+
   test("throws TypeError if kwargs.limit_inputs is not a boolean", () => {
     expect(() =>
       e_pmv(25, 25, 0.1, 50, 1.4, 0.5, 0.6, 0, { limit_inputs: "true" }),

@@ -1,4 +1,5 @@
 import { validateInputs, round, Standard } from "../utilities/utilities.js";
+import { _upper_units } from "../_internal/validation.ts";
 import { pmv } from "./pmv.js";
 
 /**
@@ -104,7 +105,9 @@ export function a_pmv(
       clo,
       a_coefficient,
       wme,
-      units: (kwargs.units ?? "SI").toUpperCase(),
+      // Only undefined takes the default: a null units fails the check, as
+      // upstream's None does.
+      units: _upper_units(kwargs.units === undefined ? "SI" : kwargs.units),
       limit_inputs: kwargs.limit_inputs,
     },
     A_PMV_SCHEMA,

@@ -4,7 +4,7 @@ import {
   validateInputs,
 } from "../utilities/utilities.js";
 import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object } from "../_internal/validation.ts";
+import { _check_params_object, _upper_units } from "../_internal/validation.ts";
 import type { ModelInfo } from "./modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so documentation.js
@@ -93,11 +93,12 @@ const CLO_TOUT_SCHEMA = {
 
 export function clo_tout(params: CloToutParams): CloToutResult {
   // tout and units were positional before v2 (ADR 0002); a call still
-  // written that way fails here, naming the shape it should have.
-  _check_params_object(params, "clo_tout");
+  // written that way fails here, naming the shape it should have. So does an
+  // unknown key (ADR 0008).
+  _check_params_object(params, "clo_tout", CLO_TOUT_SCHEMA);
   // Destructuring defaults also apply to a units passed as undefined.
   const { tout, units = "SI" } = params;
-  validateInputs({ tout, units: units.toUpperCase() }, CLO_TOUT_SCHEMA);
+  validateInputs({ tout, units: _upper_units(units) }, CLO_TOUT_SCHEMA);
   const ip = units.toUpperCase() === "IP";
   const t = ip ? units_converter({ tmp: tout }).tmp : tout;
 

@@ -6,7 +6,7 @@ import {
   Standard,
 } from "../utilities/utilities.js";
 import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object } from "../_internal/validation.ts";
+import { _check_params_object, _upper_units } from "../_internal/validation.ts";
 import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
@@ -151,8 +151,9 @@ const PMV_PPD_ASHRAE_SCHEMA = {
 
 export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
   // The quantities were positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "pmv_ppd_ashrae");
+  // that way fails here, naming the shape it should have. So does an unknown
+  // key (ADR 0008).
+  _check_params_object(params, "pmv_ppd_ashrae", PMV_PPD_ASHRAE_SCHEMA);
   const { tdb, tr, vr, v, rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   // suppress_warnings has no pythermalcomfort counterpart: it stands in for
@@ -177,7 +178,7 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
       clo,
       wme,
       standard,
-      units: units.toUpperCase(),
+      units: _upper_units(units),
       limit_inputs,
       airspeed_control,
       round_output,

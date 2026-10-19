@@ -185,6 +185,12 @@ describe("NPM Package", () => {
     );
   });
 
+  // pythermalcomfort.utilities.met_to_w_m2, under upstream's name.
+  it("should have utilities.met_to_w_m2", () => {
+    expect(jsthermalcomfort.utilities.met_to_w_m2).toBe(58.15);
+    expect(namedExports.met_to_w_m2).toBe(58.15);
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });

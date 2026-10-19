@@ -42,4 +42,12 @@ describe("ankle_draft input validation", () => {
       ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, 0.1, "INVALID"),
     ).toThrow(Error);
   });
+
+  // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+  // fails that check with a ValueError (ADR 0012: Error).
+  test("throws Error if units is not a string", () => {
+    expect(() => ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, 0.1, 5)).toThrow(
+      '"units" must be one of',
+    );
+  });
 });

@@ -208,6 +208,15 @@ describe("solar_gain (JS-only)", () => {
     expect(() => solar_gain()).toThrow(TypeError);
   });
 
+  // ADR 0008: an unknown key throws, as an unexpected keyword argument does
+  // in Python. solar_gain has no units option on either side.
+  test("throws TypeError naming an unknown key", () => {
+    // Cast: deliberately passing an undeclared option to test the TypeError.
+    const params = { ...base, units: "IP" } as unknown as SolarGainParams;
+    expect(() => solar_gain(params)).toThrow(TypeError);
+    expect(() => solar_gain(params)).toThrow("unexpected key: 'units'");
+  });
+
   // ADR 0001: a non-finite number throws, where upstream returns NaN or
   // ±Infinity.
   test("throws TypeError if a number is not finite", () => {

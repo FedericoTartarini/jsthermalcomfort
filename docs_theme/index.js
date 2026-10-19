@@ -76,6 +76,9 @@ async function copyDir(sorce, dest) {
  */
 function isType(section) {
   if (section.kind === "interface") return true;
+  // documentation.js infers `number` for a constant set to a numeric literal
+  // (met_to_w_m2); that is the value's type, not a type definition.
+  if (section.kind === "constant") return false;
   if (section.type === undefined) return false;
   return section.type.type === "NameExpression";
 }
@@ -162,6 +165,7 @@ const displayNameMap = {
   units_converter: "Units Converter",
   running_mean_outdoor_temperature: "Running Mean Outdoor Temperature",
   f_svv: "Sky Vault View Factor (f_svv)",
+  met_to_w_m2: "Met to W/m2",
   // Clo
   clo_typical_ensembles: "Typical Ensembles (Clo)",
   clo_individual_garments: "Individual Garments (Clo)",

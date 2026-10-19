@@ -142,6 +142,14 @@ describe("adaptive_en input validation", () => {
     expect(() => adaptive_en(25, 25, 20, 0.1, "INVALID")).toThrow(Error);
   });
 
+  // Upstream upper-cases str(units) before its SI/IP check, so a non-string
+  // fails that check with a ValueError (ADR 0012: Error).
+  test("throws Error if units is not a string", () => {
+    expect(() => adaptive_en(25, 25, 20, 0.1, 5)).toThrow(
+      '"units" must be one of',
+    );
+  });
+
   test("throws TypeError if limit_inputs is not a boolean", () => {
     expect(() => adaptive_en(25, 25, 20, 0.1, "SI", "true")).toThrow(TypeError);
   });

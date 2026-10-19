@@ -71,6 +71,12 @@ export const UTCI_LIMITS = Object.freeze({
   tdb: Object.freeze({ min: -50, max: 50 }),
   v: Object.freeze({ min: 0.5, max: 17 }),
   tr_minus_tdb: Object.freeze({ min: -30, max: 70 }),
+  // The water vapour pressure, in Pa, 0 to 5000, where upstream checks 0 to
+  // 5 kPa (`pythermalcomfort/models/utci.py:140` at v4.6.2): the key `pa` is
+  // already in Pa in `PMV_PPD_ISO_INFO`, and a consumer looks a quantity's
+  // unit up by its key (ADR 0011).
+  pa: Object.freeze({ min: 0, max: 5000 }),
+  rh: Object.freeze({ min: 0, max: 100 }),
 });
 
 /**
@@ -117,7 +123,7 @@ export const UTCI_INFO: ModelInfo = deepFreeze({
     tdb: { unit: "°C", applicability: UTCI_LIMITS.tdb },
     tr: { unit: "°C" },
     v: { unit: "m/s", applicability: UTCI_LIMITS.v },
-    rh: { unit: "%" },
+    rh: { unit: "%", applicability: UTCI_LIMITS.rh },
   },
   outputs: {
     utci: { unit: "°C" },
@@ -125,6 +131,7 @@ export const UTCI_INFO: ModelInfo = deepFreeze({
   },
   derived: {
     tr_minus_tdb: { unit: "°C", applicability: UTCI_LIMITS.tr_minus_tdb },
+    pa: { unit: "Pa", applicability: UTCI_LIMITS.pa },
   },
 });
 
@@ -154,7 +161,9 @@ export const UTCI_INFO: ModelInfo = deepFreeze({
  * @param {boolean} [params.limit_inputs=true] - default True. By default, if the inputs are outsude the standard applicability limits the
         function returns nan. If False returns UTCI values even if input values are
         outside the applicability limits of the model. The valid input ranges are
-        -50 < tdb [°C] < 50, tdb - 30 < tr [°C] < tdb + 70, and for 0.5 < v [m/s] < 17.0.
+        -50 <= tdb [°C] <= 50, -30 <= tr - tdb [°C] <= 70,
+        0.5 <= v [m/s] <= 17.0, 0 <= rh [%] <= 100, and water vapour pressure
+        between 0 and 5 kPa (inclusive).
  * @param {boolean} [params.round_output=true] - If True, rounds output value. If False, it does not round it. The stress category is classified from the SI value, rounded when this is True.
  * @example
  * console.log(utci({ tdb: 25, tr: 25, v: 1.0, rh: 50 }))
@@ -221,6 +230,14 @@ export function utci(params: UtciParams): UtciResult {
     UTCI_LIMITS.tr_minus_tdb,
   );
   _valid_range(warnings, "v", "input", v, UTCI_LIMITS.v);
+  // pa is in kPa, as upstream computes it; the row and its bound are in Pa
+  // (ADR 0011). Multiplying by 1000 keeps upstream's outcome at its three
+  // test values (`tests/test_utci.py:65-77` at v4.6.2): 4.999999999992615,
+  // 5 and 5.000000000007386 kPa become 4999.999999992615, 5000 and
+  // 5000.000000007386 Pa. The pa itself can differ from upstream's at the
+  // gate, from Math.exp (see exponential below).
+  _valid_range(warnings, "pa", "derived", pa * 1000, UTCI_LIMITS.pa);
+  _valid_range(warnings, "rh", "input", rh, UTCI_LIMITS.rh);
   if (limit_inputs && warnings.length > 0) utci_approx = NaN;
 
   // Stress-category thresholds are in °C; keep the SI value before IP conversion.
@@ -242,6 +259,22 @@ export function utci(params: UtciParams): UtciResult {
   };
 }
 
+// The arithmetic follows what upstream executes (ADR 0009). Upstream's
+// np.power(tk, -1) gave 1 / tk at each of 30,001 temperatures from -50 to
+// 50 °C, where Math.pow(tk, -1) can be one ulp off it (at 27 °C,
+// 0.0033316674995835416 against 0.003331667499583542), so the exponent -1
+// term is 1 / tk. Math.log and Math.exp are kept, though they can be one ulp
+// off numpy's np.log and np.exp. The unrounded utci then differs from
+// pythermalcomfort's in the last digits (at tdb = tr = 48.8786673326411 °C,
+// v 1 m/s, rh 42.802598884309255 %, inside every limit: 57.599922428394876
+// against 57.59992242839233), so a value that close to a 0.1 rounding tie or
+// to a stress-category edge can round or classify one step apart. The
+// vapour pressure can also land on the other side of the 5 kPa gate: at
+// tdb = tr = 49.40801894930123 °C, v 1 m/s, rh 41.686247926690356 %, both
+// sides take exp of 9.392192088921599, Math.exp gives an es of
+// 119.94363246107027 and np.exp 119.94363246107025, so pa is
+// 5.000000000000001 kPa here and 5.0 upstream, and utci is NaN here where
+// upstream returns 57.94535750237951.
 /**
  * @param {number} t_db
  * @returns {number}
@@ -250,7 +283,7 @@ function exponential(t_db: number): number {
   const tk = t_db + 273.15; // air temp in K
   let es = 2.7150305 * Math.log(tk);
   for (let i = 0; i < g.length; i++) {
-    es = es + g[i] * Math.pow(tk, i - 2);
+    es = es + g[i] * (i === 1 ? 1 / tk : Math.pow(tk, i - 2));
   }
   es = Math.exp(es) * 0.01; // convert Pa to hPa
   return es;

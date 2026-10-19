@@ -8,8 +8,8 @@ const RH = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const grid = TDB.flatMap((tdb) => RH.map((rh) => ({ tdb, rh })));
 
 describe("rh_from_vapour_pressure", () => {
-  // The same rounded p_sat(tdb) sits on both sides of the round trip and
-  // cancels, so the inverse is exact to floating point.
+  // The same p_sat(tdb) sits on both sides of the round trip and cancels, so
+  // the inverse is exact to floating point.
   it.each(grid)(
     "round-trips psy_ta_rh's p_vap when tdb is $tdb, rh is $rh",
     ({ tdb, rh }) => {
@@ -21,7 +21,8 @@ describe("rh_from_vapour_pressure", () => {
   );
 
   it.each([
-    { p_vap: 1393.112, tdb: 21, expected: 56 },
+    // psy_ta_rh(21, 56).p_vap in pythermalcomfort v4.6.2.
+    { p_vap: 1393.0935831404106, tdb: 21, expected: 56 },
     { p_vap: 0, tdb: 25, expected: 0 },
     { p_vap: p_sat(25), tdb: 25, expected: 100 },
     { p_vap: 2 * p_sat(25), tdb: 25, expected: 200 },

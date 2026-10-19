@@ -16,7 +16,7 @@ import { p_sat } from "./p_sat.js";
  *
  * @example
  * import { rh_from_vapour_pressure } from "jsthermalcomfort";
- * const rh = rh_from_vapour_pressure(1393.112, 21);
+ * const rh = rh_from_vapour_pressure(1393.0935831404108, 21);
  * console.log(rh); // 56
  */
 export function rh_from_vapour_pressure(p_vap: number, tdb: number): number {

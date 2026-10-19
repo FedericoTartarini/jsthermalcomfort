@@ -29,7 +29,7 @@ import { enthalpy } from "./enthalpy.js";
  * @example
  * import { psy_ta_rh } from "jsthermalcomfort";
  * const results = psy_ta_rh(21, 56);
- * console.log(results); // { p_sat: 2487.7, p_vap: 1393.112, hr: -2.2041754048718936, t_wb: 15.4, t_dp: 11.9, h: -5575107.96 }
+ * console.log(results); // { p_sat: 2487.6671127507334, p_vap: 1393.0935831404108, hr: -2.204249532438112, t_wb: 15.4, t_dp: 11.9, h: -5575296.16 }
  */
 export function psy_ta_rh(tdb, rh, p_atm = 101325) {
   const p_saturation = p_sat(tdb);

@@ -1,4 +1,4 @@
-import { two_nodes } from "../models/two_nodes.js";
+import { two_nodes_gagge } from "./two_nodes_gagge.ts";
 import {
   check_standard_compliance,
   round,
@@ -138,7 +138,7 @@ export function set_tmp(
     p_atm = unit_convert.pressure;
   }
 
-  let set_tmp = two_nodes(
+  let set_tmp = two_nodes_gagge({
     tdb,
     tr,
     v,
@@ -148,10 +148,10 @@ export function set_tmp(
     wme,
     body_surface_area,
     p_atm,
-    body_position,
-    undefined,
-    { round: false, calculate_ce: joint_kwargs.calculate_ce },
-  ).set;
+    position: body_position,
+    round_output: false,
+    calculate_ce: joint_kwargs.calculate_ce,
+  }).set;
 
   if (units === "IP") {
     ({ tmp: set_tmp } = units_converter({ tmp: set_tmp }, "SI"));

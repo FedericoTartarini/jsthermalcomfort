@@ -50,8 +50,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("discomfort_index");
   });
 
-  it("should have models.two_nodes", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("two_nodes");
+  // Renamed as upstream renamed it, with no alias (ADR 0010).
+  it("should have models.two_nodes_gagge and not models.two_nodes", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("two_nodes_gagge");
+    expect(namedExports).toHaveProperty("two_nodes_gagge");
+    expect(jsthermalcomfort.models).not.toHaveProperty("two_nodes");
+    expect(namedExports).not.toHaveProperty("two_nodes");
   });
 
   it("should have models.set_tmp", () => {

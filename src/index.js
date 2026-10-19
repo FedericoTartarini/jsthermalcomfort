@@ -61,6 +61,15 @@ export * from "./models/index.js";
  * @typedef {import("./models/solar_gain.js").SolarGainResult} SolarGainResult
  */
 /**
+ * @typedef {import("./models/two_nodes_gagge.js").TwoNodesGaggeParams} TwoNodesGaggeParams
+ */
+/**
+ * @typedef {import("./models/two_nodes_gagge.js").TwoNodesGaggeResult} TwoNodesGaggeResult
+ */
+/**
+ * @typedef {import("./models/two_nodes_gagge.js").TwoNodesGaggeSetResult} TwoNodesGaggeSetResult
+ */
+/**
  * @typedef {import("./models/utci.js").UtciParams} UtciParams
  */
 /**

@@ -12,7 +12,7 @@ import { loadTestData, validateResult } from "./testUtils.ts";
 
 let { testData, tolerances } = await loadTestData(testDataUrls.heatIndex);
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_heat_index_rothfusz.py.
+// Mirrors pythermalcomfort v4.6.2 tests/test_heat_index_rothfusz.py.
 describe("test_heat_index_rothfusz", () => {
   test.each(testData.data)("test_heat_index: fixture case %#", (row) => {
     const { inputs, outputs } = row;

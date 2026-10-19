@@ -6,7 +6,7 @@ import { loadTestData, validateResult } from "./testUtils.ts";
 
 let { testData, tolerances } = await loadTestData(testDataUrls.solarGain);
 
-// Mirrors pythermalcomfort v4.6.1 tests/test_solar_gain.py.
+// Mirrors pythermalcomfort v4.6.2 tests/test_solar_gain.py.
 describe("test_solar_gain", () => {
   test.each(testData.data)("test_solar_gain: fixture case %#", (row) => {
     const { inputs, outputs } = row;
@@ -88,9 +88,35 @@ describe("test_solar_gain", () => {
     expect(invalid.erf).toBeNaN();
   });
 
-  test.todo(
-    "test_solar_gain_array: upstream's np.allclose is never asserted, and its expected erf [46.4, 52.8] is not what solar_gain returns for those inputs (43.3 and 53.9; upstream's own regression test pins 43.2839 for the first), so a mirror with the same values would fail",
-  );
+  // Upstream's arrays, element-wise (ADR 0005): the two sitting rows of
+  // test_solar_gain_regression_values.
+  test("test_solar_gain_array", () => {
+    const rows = [
+      [0, 120, 800, 0.5, 0.5, 0.5],
+      [90, 0, 1000, 1.0, 1.0, 1.0],
+    ];
+    const results = rows.map(([alt, sharp, rad, trans, svv, bes]) =>
+      solar_gain({
+        sol_altitude: alt,
+        sharp,
+        sol_radiation_dir: rad,
+        sol_transmittance: trans,
+        f_svv: svv,
+        f_bes: bes,
+        posture: "sitting",
+        round_output: false,
+      }),
+    );
+    const exp_erf = [43.2839, 326.6804];
+    const exp_d_mrt = [10.3649, 78.2281];
+    // np.allclose(..., atol=1e-3)
+    results.forEach((result, i) => {
+      expect(Math.abs(result.erf - exp_erf[i])).toBeLessThanOrEqual(1e-3);
+      expect(Math.abs(result.delta_mrt - exp_d_mrt[i])).toBeLessThanOrEqual(
+        1e-3,
+      );
+    });
+  });
 });
 
 describe("solar_gain (JS-only)", () => {
@@ -235,6 +261,21 @@ describe("solar_gain (JS-only)", () => {
       // @ts-expect-error posture is "sitting", "standing" or "supine"
       solar_gain({ ...base, posture: "lying" }),
     ).toThrow("Posture has to be either 'standing', 'supine' or 'sitting'.");
+  });
+
+  // Upstream calls posture.lower() on what it is given
+  // (pythermalcomfort/models/solar_gain.py:207 at v4.6.2), so None or a
+  // number raises AttributeError, a wrong type, which throws a TypeError as
+  // ADR 0012 maps Python's TypeError. Only undefined takes the default.
+  test("throws TypeError if posture is null or not a string", () => {
+    for (const bad of [null, 5]) {
+      // Cast: deliberately passing a non-string posture to test the TypeError.
+      const params = { ...base, posture: bad } as unknown as SolarGainParams;
+      expect(() => solar_gain(params)).toThrow(TypeError);
+      expect(() => solar_gain(params)).toThrow(
+        'Parameter "posture" must be a string',
+      );
+    }
   });
 
   test("posture is case-insensitive, as upstream", () => {

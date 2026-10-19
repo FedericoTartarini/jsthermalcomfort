@@ -6,7 +6,7 @@ import { loadTestData, validateResult } from "./testUtils.ts";
 
 let { testData, tolerances } = await loadTestData(testDataUrls.coolingEffect);
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_cooling_effect.py.
+// Mirrors pythermalcomfort v4.6.2 tests/test_cooling_effect.py.
 describe("test_cooling_effect", () => {
   test("test_cooling_effect_regression_values", () => {
     const cases: [number, number, number, number, number, number, number][] = [
@@ -35,7 +35,7 @@ describe("test_cooling_effect", () => {
 describe("cooling_effect (JS-only)", () => {
   const still = { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 };
   // At 45 °C and 90 % RH the still-air SET root is not bracketed; upstream
-  // 4.6.0 returns 0 and warns.
+  // 4.6.2 returns 0 and warns.
   const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
 
   afterEach(() => {
@@ -46,10 +46,60 @@ describe("cooling_effect (JS-only)", () => {
   const silenceConsoleWarn = () =>
     jest.spyOn(console, "warn").mockImplementation(() => {});
 
-  // Expected value from pythermalcomfort 4.6.0, cooling_effect(..., wme=0.1).
+  // Expected value from pythermalcomfort 4.6.2, cooling_effect(..., wme=0.1).
   test("wme reaches the SET calculation", () => {
     expect(cooling_effect({ ...still, wme: 0.1 }).ce).toBe(1.47);
   });
+
+  // Expected values from pythermalcomfort 4.6.2. On these inputs the
+  // hand-written Brent that v2 had before returned 7.14, 6.83, 1.3 and 12.54:
+  // it reached another root of SET(still air) - SET(vr) than scipy's brentq.
+  test.each([
+    [
+      {
+        tdb: 23.310609482487934,
+        tr: 19.073713056862758,
+        vr: 1.5315371207800863,
+        rh: 59.43669613886923,
+        met: 2.4782527208511347,
+        clo: 1.4557849826535576,
+      },
+      5.98,
+    ],
+    [
+      {
+        tdb: 29.764193943955412,
+        tr: 37.507804582253726,
+        vr: 0.4370804433771812,
+        rh: 20.711678391940836,
+        met: 3.3688160013863997,
+        clo: 0.5062650825939594,
+      },
+      6.88,
+    ],
+    [
+      { tdb: 26.56, tr: 28.56, vr: 0.128, rh: 37.7, met: 2.79, clo: 0.59 },
+      0.02,
+    ],
+    [
+      {
+        tdb: 78.6646357322912,
+        tr: 90.16431035454401,
+        vr: 2.208904841141366,
+        rh: 37.23799757318771,
+        met: 2.4680849254686654,
+        clo: 1.4901795093466434,
+        wme: 0.33402707731742964,
+        units: "IP",
+      },
+      11.44,
+    ],
+  ] as [CoolingEffectParams, number][])(
+    "finds the root upstream's brentq finds, case %#",
+    (params, expected) => {
+      expect(cooling_effect(params).ce).toBe(expected);
+    },
+  );
 
   describe("solver fallback", () => {
     test("an unbracketed root returns 0 with upstream's warning", () => {

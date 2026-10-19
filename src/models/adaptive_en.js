@@ -5,7 +5,7 @@ import {
   validateInputs,
   Standard,
 } from "../utilities/utilities.js";
-import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
+import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
 import { _upper_units } from "../_internal/validation.ts";
 
 /**

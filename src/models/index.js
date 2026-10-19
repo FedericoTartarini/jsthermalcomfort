@@ -15,6 +15,7 @@ import { set_tmp } from "./set_tmp.js";
 import { wci } from "./wci.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
+import { work_capacity_hothaps } from "./work_capacity_hothaps.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
 import { pmv_ppd } from "./pmv_ppd.js";
@@ -84,6 +85,7 @@ export {
   wc,
   wci,
   wind_chill_temperature,
+  work_capacity_hothaps,
 };
 
 export default {
@@ -124,5 +126,6 @@ export default {
   wc,
   wci,
   wind_chill_temperature,
+  work_capacity_hothaps,
   JOS3,
 };

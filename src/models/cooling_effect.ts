@@ -5,6 +5,7 @@ import {
 } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
 import { _check_params_object, _upper_units } from "../_internal/validation.ts";
+import { brentq, RootNotBracketedError } from "../_internal/brentq.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not.
@@ -161,8 +162,9 @@ export function cooling_effect(
 
   let ce;
   try {
-    // Find a root of a function in a bracketing interval
-    ce = brent(func, 0, 40);
+    // Upstream calls optimize.brentq(function, 0.0, 40) (cooling_effect.py:209
+    // at v4.6.2).
+    ce = brentq(func, 0, 40);
   } catch (error) {
     // Only the not-bracketed failure falls back to 0, as upstream catches only
     // the ValueError brentq raises for it; anything else propagates.
@@ -177,6 +179,10 @@ export function cooling_effect(
     console.warn("Cooling effect could not be calculated. Returning 0.");
   }
 
+  // Upstream's factor (cooling_effect.py:154-155 at v4.6.2), kept as it is
+  // (ADR 0004 as amended), though pythermalcomfort #473 reports it: a
+  // temperature difference converts from °C to °F with * 1.8
+  // (https://github.com/pythermalcomfort/pythermalcomfort/issues/473).
   if (units.toUpperCase() === "IP") {
     ce = (ce / 1.8) * 3.28;
   }
@@ -218,101 +224,4 @@ function _set_for_cooling_effect(
       calculate_ce: true,
     },
   ).set;
-}
-
-// Brent's one recoverable failure, a class of its own so that cooling_effect
-// can catch it and nothing else, as upstream catches brentq's ValueError.
-class RootNotBracketedError extends Error {
-  name = "RootNotBracketedError";
-}
-
-// https://gist.github.com/ryanspradlin/18c1010b7dd2d875284933d018c5c908
-// Derived from: https://en.wikipedia.org/wiki/Brent%27s_method#Algorithm
-// Brent's method is a hybrid root-finding algorithm that combines the
-// faster/less-reliable inverse quadradic interpolation and secant methods with
-// the slower/more-reliable bisection method.
-export function brent(
-  f: (x: number) => number,
-  lowerBound: number,
-  upperBound: number,
-  tolerance = 1e-6,
-  maxIterations = 100,
-): number {
-  let a = lowerBound;
-  let b = upperBound;
-  let fa = f(a);
-  let fb = f(b);
-
-  if (fa * fb > 0) {
-    // Root is not bracketed.
-    throw new RootNotBracketedError(`Root is not bracketed: [${fa}, ${fb}].`);
-  }
-
-  if (Math.abs(fa) < Math.abs(fb)) {
-    [a, b] = [b, a];
-    [fa, fb] = [fb, fa];
-  }
-
-  let c = a;
-  let fc = fa;
-  let s = 0;
-  let d = 0;
-  let mflag = true;
-  for (let i = 0; i < maxIterations; i++) {
-    // Check if we have succeeded...
-    if (fb === 0 || Math.abs(b - a) <= tolerance) {
-      // Root found!
-      return b;
-    }
-
-    // Try to use fast/less-reliable methods first...
-    if (fa !== fc && fb !== fc) {
-      // Inverse quadratic interpolation.
-      s =
-        (a * fb * fc) / ((fa - fb) * (fa - fc)) +
-        (b * fa * fc) / ((fb - fa) * (fb - fc)) +
-        (c * fa * fb) / ((fc - fa) * (fc - fb));
-    } else {
-      // Secant method.
-      s = b - fb * ((b - a) / (fb - fa));
-    }
-
-    // If necessary, fallback to slow/more-reliable method...
-    if (
-      (s - (3 * a + b) / 4) * (s - b) >= 0 ||
-      (mflag && Math.abs(s - b) >= Math.abs(b - c) / 2) ||
-      (!mflag && Math.abs(s - b) >= Math.abs(c - d) / 2) ||
-      (mflag && Math.abs(b - c) < Math.abs(tolerance)) ||
-      (!mflag && Math.abs(c - d) < Math.abs(tolerance))
-    ) {
-      // Bisection method.
-      s = (a + b) / 2;
-      mflag = true;
-    } else {
-      mflag = false;
-    }
-
-    d = c;
-    c = b;
-    fc = fb;
-
-    const fs = f(s);
-    if (fa * fs < 0) {
-      b = s;
-      fb = fs;
-    } else {
-      a = s;
-      fa = fs;
-    }
-
-    if (Math.abs(fa) < Math.abs(fb)) {
-      [a, b] = [b, a];
-      [fa, fb] = [fb, fa];
-    }
-  }
-
-  // Could not achieve required tolerance within iteration limit.
-  throw new Error(
-    "Could not achieve required tolerance within iteration limit.",
-  );
 }

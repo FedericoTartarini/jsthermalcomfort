@@ -729,6 +729,21 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
+  // Expected values from pythermalcomfort 4.6.2. The hand-written Brent v2 had
+  // before stopped at another sign change of the cooling-effect equation here
+  // and gave pmv 1.36, ppd 43.3, "Slightly Warm".
+  test("elevated air speed gives upstream's PMV through the cooling effect", () => {
+    const result = pmv_ppd_ashrae({
+      tdb: 26.797928398725393,
+      tr: 34.14962670449309,
+      vr: 1.725343680434195,
+      rh: 74.84087312235033,
+      met: 3.259861609728725,
+      clo: 0.6269445718389801,
+    });
+    expect(result).toMatchObject({ pmv: 1.54, ppd: 53.3, tsv: "Warm" });
+  });
+
   describe("tsv classification (right-inclusive)", () => {
     // ASHRAE has more lenient range than ISO, so try an extreme case
     test("tsv is NaN when pmv is NaN (out of range)", () => {

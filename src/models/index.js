@@ -7,6 +7,7 @@ import {
 } from "./heat_index.js";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
+import { esi } from "./esi.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { thi } from "./thi.js";
@@ -63,6 +64,7 @@ export {
   clo_tout,
   cooling_effect,
   discomfort_index,
+  esi,
   heat_index,
   heat_index_rothfusz,
   heat_index_schoen,
@@ -108,6 +110,7 @@ export default {
   clo_tout,
   cooling_effect,
   discomfort_index,
+  esi,
   heat_index,
   heat_index_rothfusz,
   heat_index_schoen,

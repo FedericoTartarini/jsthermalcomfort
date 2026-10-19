@@ -7,7 +7,7 @@ import {
 } from "../utilities/utilities.js";
 
 /**
- * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
+ * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adaptive_en|adaptive_en}
  * @property {number} tmp_cmf - Comfort temperature at that specific running mean temperature, default in [°C] or in [°F]
  * @property {boolean} acceptability_cat_i - If the indoor conditions comply with comfort category I
  * @property {boolean} acceptability_cat_ii - If the indoor conditions comply with comfort category II
@@ -24,20 +24,20 @@ import {
 /**
  * Determines the adaptive thermal comfort based on EN 16798-1 2019 {@link #ref_3|[3]}
  *
- * Note: You can use this function to calculate if your conditions are within the EN
- * adaptive thermal comfort region. Calculations with comply with the EN 16798-1 2019 {@link #ref_3|[3]}.
+ * Use this function to determine whether indoor conditions comply with the
+ * EN 16798-1:2019 adaptive thermal comfort region.
  *
  *
  * @public
  * @memberof models
  * @docname Adaptive EN
  *
- * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} t_running_mean - running mean temperature, default in [°C] in [°C] in [°F] if `units` = 'IP'
+ * @param {number} tdb - dry bulb air temperature, default in [°C] or [°F] if `units` = 'IP'
+ * @param {number} tr - mean radiant temperature, default in [°C] or [°F] if `units` = 'IP'
+ * @param {number} t_running_mean - running mean temperature, default in [°C] or [°F] if `units` = 'IP'
  * The running mean temperature can be calculated using the function {@link #running_mean_outdoor_temperature|running_mean_outdoor_temperature}
  *
- * @param {number} v - air speed, default in [m/s] in [fps] if `units` = 'IP'
+ * @param {number} v - air speed, default in [m/s] or [fps] if `units` = 'IP'
  *
  * Note: Indoor operative temperature correction is applicable for buildings equipped
  * with fans or personal systems providing building occupants with personal
@@ -46,9 +46,7 @@ import {
  * increased by 1.2 °C (0.6 < v < 0.9 m/s), 1.8 °C (0.9 < v < 1.2 m/s), 2.2 °C (v > 1.2 m/s)
  *
  * @param {"IP" | "SI"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [limit_inputs=true] - By default, if the inputs are outsude the standard applicability limits the
- * function returns nan. If False returns pmv and ppd values even if input values are
- * outside the applicability limits of the model.
+ * @param {boolean} [limit_inputs=true] - if true, returns `NaN` for inputs outside the standard applicability limits.
  * @param {boolean} [round_output=true] - if true, rounds the returned comfort temperature and bounds to one decimal place in the output unit (rounding is applied after any IP unit conversion); if false, returns the unrounded values.
  *
  * @returns {AdaptiveEnResult} result set
@@ -66,7 +64,7 @@ import {
  *
  * @example
  * const results = adaptive_en(25, 25, 9, 0.1);
- * console.log(results); // {tmp_cmf: NaN, acceptability_cat_i: true, acceptability_cat_ii: true, ... }
+ * console.log(results); // {tmp_cmf: NaN, acceptability_cat_i: false, acceptability_cat_ii: false, ... }
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is between 10 °C and 30 °C
  */

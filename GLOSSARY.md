@@ -16,6 +16,10 @@ _Avoid_: core, engine, optimized function
 A public model that binds a kernel to one standard's limits and conventions (`pmv_ppd_iso`, `pmv_ppd_ashrae`).
 _Avoid_: variant, model function, facade
 
+**Main model**:
+A model a user selects and reads in the deployed CBE Thermal Comfort Tool's UI or in its prototype (`refactor-draft`): a method, a page, a dialog or a registered model. Today `pmv_ppd_ashrae`, `pmv_ppd_iso`, `adaptive_ashrae`, `adaptive_en`, `phs`, `use_fans_heatwaves`, `vertical_tmp_grad_ppd`, `ankle_draft`, `utci`, `heat_index_rothfusz`, `humidex` and `wci`. A function that computes part of a main model's result or is shown beside it (`cooling_effect`, `set_tmp` and `two_nodes_gagge` under PMV; `wind_chill_temperature` beside `wci`) is not one, and neither is an input calculator.
+_Avoid_: core model, primary model, app model
+
 **Switch**:
 A boolean option a model takes, named as upstream names it (`limit_inputs`, `round_output`, `airspeed_control`).
 _Avoid_: flag, toggle, kwarg
@@ -33,7 +37,7 @@ A documented difference from upstream, allowed only because JavaScript or TypeSc
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
-What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
+What every main model exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
@@ -49,5 +53,5 @@ The applicability bounds a call broke, as upstream checks them, returned as data
 _Avoid_: console warnings, errors, validation messages
 
 **Mirrored test**:
-A test that carries an upstream test's name, inputs and expected values into Jest, one upstream test file per `describe`. A test whose expected value an ADR 0004 correction changed keeps its upstream name and inputs, adding only an input the correction introduces, and says at the site that ADR 0004 changed it.
+A test that carries an upstream test's name, inputs and expected values into Jest, one upstream test file per `describe`. A test whose expected value an ADR 0004 correction changed keeps its upstream name and inputs, adding only an input the correction introduces, and says at the site that ADR 0004 changed it. Where an upstream test expects a value upstream's own code does not return, the mirror asserts what the code returns, and the upstream expectation is a `test.todo` that gives the reason.
 _Avoid_: ported test, parity test, copied test

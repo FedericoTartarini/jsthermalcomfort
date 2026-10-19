@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
   passthrough is not supported, matching Python's `pmv_e` contract. The shared
   PMV solver and its rounding are unchanged; the clothing-temperature
   initialisation discrepancy noted in PR #228 remains a separate dependency.
+- Aligned `vertical_tmp_grad_ppd` with pythermalcomfort: the last two arguments are now `round_output = true` and `limit_inputs = true`. **Breaking:** the old `units` argument is removed; convert imperial inputs to SI before calling. Added scalar/list broadcasting and NaN masking with warnings outside the inclusive applicability bounds. Negative PPD is clamped to zero and acceptability is evaluated before rounding. PMV is calculated through `pmv_ppd_ashrae` with its input limits disabled, matching Python.
 
 - **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
 

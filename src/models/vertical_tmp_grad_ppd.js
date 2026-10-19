@@ -1,66 +1,42 @@
-import { pmv } from "../models/pmv.js";
-import {
-  check_standard_compliance,
-  round,
-  units_converter,
-  validateInputs,
-  Standard,
-} from "../utilities/utilities.js";
+import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.js";
 
 /**
- * @typedef {Object} VerTmpGradReturnType - a result set containing the predicted precentage of dissatisfied and the acceptability
- * @property {number} ppd_vg Predicted Percentage of Dissatisfied occupants with vertical temperature gradient, [%]
- * @property {boolean} acceptability The ASHRAE 55 2020 standard defines that the value of air speed at the ankle level
- * is acceptable if PPD_ad is lower or equal than 5 %
+ * @typedef {Object} VerTmpGradReturnType
+ * @property {number|number[]} ppd_vg - Predicted percentage dissatisfied, [%].
+ * @property {boolean|number|Array<boolean|number>} acceptability - Whether unrounded ppd_vg is at most 5%; NaN outside applicability limits.
  * @public
  */
 
 /**
- * Calculates the percentage of thermally dissatisfied people with a vertical temperature gradient between feet and head {@link #ref_1|[1]} .
- * This equation is only applicable for vr < 0.2 m/s (40 fps).
+ * Calculate dissatisfaction due to the vertical temperature gradient between
+ * feet and head, following ASHRAE 55-2023 and pythermalcomfort.
+ * The logistic model subtracts a 34.5% baseline; negative results become zero.
+ *
+ * Scalars and one-element arrays broadcast over one-dimensional numeric arrays.
+ * Other unequal array lengths raise RangeError. Inputs use SI units only.
+ * Applicability bounds are inclusive, matching Python's implementation:
+ * tdb/tr 10–40 °C, vr 0–0.2 m/s, met 1–4, clo 0–1.5.
  *
  * @public
  * @memberof models
  * @docname Vertical air temperature gradient
- *
- * @param {number} tdb dry bulb air temperature, default in [°C] in [°F] if "units" = 'IP'.
- *
- * Note: The air temperature is the average value over two heights: 0.6 m (24 in.) and 1.1 m (43 in.) for seated occupants and 1.1 m
- * (43 in.) and 1.7 m (67 in.) for standing occupants.
- * @param {number} tr mean radiant temperature, default in [°C] in [°F] if "units" = 'IP'.
- * @param {number} vr relative air speed, default in [m/s] in [fps] if "units" = "IP"
- *
- * Note: vr is the relative air speed caused by body movement and not the air speed measured by the air speed sensor.
- * The relative air speed is the sum of the average air speed measured by the sensor plus the activity-generated air speed (Vag).
- * Where Vag is the activity-generated air speed caused by motion of individual body parts. vr can be calculated using the function
- * pythermalcomfort.utilities.v_relative().
- * @param {number} rh relative humidity, [%].
- * @param {number} met metabolic rate, [met]
- * @param {number} clo clothing insulation, [clo]
- *
- * Note: The activity as well as the air speed modify the insulation characteristics of the clothing and the adjacent air layer.
- * Consequently the ISO 7730 states that the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects for the effect of
- * the body movement for met equal or higher than 1.2 met using the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation,
- * clo, can be calculated using the function pythermalcomfort.utilities.clo_dynamic().
- * @param {number} vertical_tmp_grad vertical temperature gradient between the feet and the head, default in [°C/m] in [°F/ft] if units = ‘IP’
- * @param {"SI" | "IP"} [units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- *
- * @returns {VerTmpGradReturnType} Object with results of the PPD with vertical temprature gradient.
- *
+ * @param {number|number[]} tdb - Dry bulb air temperature, [°C]; average at 0.6 and 1.1 m for seated occupants, or 1.1 and 1.7 m for standing occupants.
+ * @param {number|number[]} tr - Mean radiant temperature, [°C].
+ * @param {number|number[]} vr - Relative air speed including body movement, [m/s].
+ * @param {number|number[]} rh - Relative humidity, [%].
+ * @param {number|number[]} met - Metabolic rate, [met].
+ * @param {number|number[]} clo - Intrinsic clothing insulation, [clo].
+ * @param {number|number[]} vertical_tmp_grad - Vertical temperature gradient, [°C/m].
+ * @param {boolean} [round_output=true] - Round ppd_vg to one decimal using NumPy's ties-to-even rule; acceptability always uses the unrounded value.
+ * @param {boolean} [limit_inputs=true] - Warn and return NaN for both fields outside applicability bounds. False bypasses this range check and mask.
+ * @returns {VerTmpGradReturnType} Dissatisfaction and acceptability.
  * @example
- * const result = vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7); // returns {'ppd_vg': 12.6, 'acceptability': false}
+ * vertical_tmp_grad_ppd(25, 25, 0.1, 50, 1.2, 0.5, 7);
+ * // { ppd_vg: 12.6, acceptability: false }
+ * @example
+ * vertical_tmp_grad_ppd([24, 24, 25], [24, 24, 25], 0.1, 50, 1.2, 0.5, [1, 0, 7]);
+ * // { ppd_vg: [0, 0, 12.6], acceptability: [true, true, false] }
  */
-const VERTICAL_TMP_GRAD_PPD_SCHEMA = {
-  tdb: { type: "number" },
-  tr: { type: "number" },
-  vr: { type: "number" },
-  rh: { type: "number" },
-  met: { type: "number" },
-  clo: { type: "number" },
-  vertical_tmp_grad: { type: "number" },
-  units: { enum: ["SI", "IP"] },
-};
-
 export function vertical_tmp_grad_ppd(
   tdb,
   tr,
@@ -69,64 +45,83 @@ export function vertical_tmp_grad_ppd(
   met,
   clo,
   vertical_tmp_grad,
-  units = "SI",
+  round_output = true,
+  limit_inputs = true,
 ) {
-  units = units.toUpperCase();
-  validateInputs(
-    { tdb, tr, vr, rh, met, clo, vertical_tmp_grad, units },
-    VERTICAL_TMP_GRAD_PPD_SCHEMA,
-  );
-
-  if (units === "IP") {
-    ({
-      tdb: tdb,
-      tr: tr,
-      vr: vr,
-    } = units_converter({ tdb: tdb, tr: tr, vr: vr }, "IP"));
-
-    vertical_tmp_grad = (vertical_tmp_grad / 1.8) * 3.28;
+  const inputs = { tdb, tr, vr, rh, met, clo, vertical_tmp_grad };
+  for (const [name, input] of Object.entries(inputs)) {
+    for (const value of Array.isArray(input) ? input : [input]) {
+      if (typeof value !== "number") {
+        throw new TypeError(
+          `Parameter "${name}" must be a number or an array of numbers`,
+        );
+      }
+    }
   }
-  const warnings = check_standard_compliance(Standard.ashrae_55_2023, {
-    tdb: tdb,
-    tr: tr,
-    v_limited: vr,
-    rh: rh,
-    met: met,
-    clo: clo,
-  });
-  warnings.forEach((warning) => console.warn(warning));
-
-  const tsv = pmv(tdb, tr, vr, rh, met, clo, 0, Standard.ashrae_55_2023).pmv;
-  const ppd_vg = calculate_ppd_vg(tsv, vertical_tmp_grad);
-  const acceptability = check_acceptability(ppd_vg);
-
-  return {
-    ppd_vg: ppd_vg,
-    acceptability: acceptability,
-  };
-}
-
-/**
- * Calculate Predicted Percentage of Dissatisfied (PPD) based on tsv and vertical temperature gradient.
- *
- * @param {number} tsv - PMV in ashrae standard
- * @param {number} vertical_tmp_grad - Vertical temperature gradient between the feet and the head
- * @returns {number} Predicted Percentage of Dissatisfied occupants with vertical temperature gradient
- */
-function calculate_ppd_vg(tsv, vertical_tmp_grad) {
-  const numerator = Math.exp(
-    0.13 * (tsv - 1.91) ** 2 + 0.15 * vertical_tmp_grad - 1.6,
+  for (const [name, value] of Object.entries({ round_output, limit_inputs })) {
+    if (typeof value !== "boolean")
+      throw new TypeError(`Parameter "${name}" must be a boolean`);
+  }
+  const values = Object.values(inputs);
+  const arrayOutput = values.some(Array.isArray);
+  const arrays = values.map((value) =>
+    Array.isArray(value) ? value : [value],
   );
-  const ppd_vg = round((numerator / (1 + numerator) - 0.345) * 100, 1);
-  return ppd_vg;
-}
-
-/**
- * Check the acceptability based on ppd_vg
- *
- * @param {number} ppd_vg - PPD based on Vertical temperature gradient
- * @returns {boolean} Acceptability
- */
-function check_acceptability(ppd_vg) {
-  return ppd_vg <= 5;
+  const lengths = new Set(arrays.map((a) => a.length).filter((n) => n !== 1));
+  if (lengths.size > 1)
+    throw new RangeError("Input arrays must have compatible lengths");
+  const length = lengths.size ? lengths.values().next().value : 1;
+  const results = Array.from({ length }, (_, i) => {
+    const [ta, radiant, speed, humidity, activity, clothing, gradient] =
+      arrays.map((a) => a[a.length === 1 ? 0 : i]);
+    const ranges = [
+      ["tdb", ta, 10, 40],
+      ["tr", radiant, 10, 40],
+      ["vr", speed, 0, 0.2],
+      ["met", activity, 1, 4],
+      ["clo", clothing, 0, 1.5],
+    ];
+    let valid = true;
+    if (limit_inputs) {
+      for (const [name, value, min, max] of ranges) {
+        if (value < min || value > max) {
+          console.warn(
+            `${name} is outside the applicability limits [${min}, ${max}] and will be set to NaN.`,
+          );
+          valid = false;
+        }
+        if (Number.isNaN(value)) valid = false;
+      }
+    }
+    if (!valid) return { ppd_vg: NaN, acceptability: NaN };
+    // The underlying scalar JS PMV API rejects NaN, whereas Python propagates it.
+    const pmvInputs = [ta, radiant, speed, humidity, activity, clothing];
+    const tsv = pmvInputs.some(Number.isNaN)
+      ? NaN
+      : pmv_ppd_ashrae(ta, radiant, speed, humidity, activity, clothing, 0, {
+          limit_inputs: false,
+        }).pmv;
+    const numerator = Math.exp(
+      0.13 * (tsv - 1.91) ** 2 + 0.15 * gradient - 1.6,
+    );
+    let ppd_vg = Math.max((numerator / (1 + numerator) - 0.345) * 100, 0);
+    const acceptability = ppd_vg <= 5;
+    if (round_output) {
+      const scaled = ppd_vg * 10;
+      const lower = Math.floor(scaled);
+      ppd_vg =
+        (scaled - lower === 0.5
+          ? lower % 2 === 0
+            ? lower
+            : lower + 1
+          : Math.round(scaled)) / 10;
+    }
+    return { ppd_vg, acceptability };
+  });
+  return arrayOutput
+    ? {
+        ppd_vg: results.map((r) => r.ppd_vg),
+        acceptability: results.map((r) => r.acceptability),
+      }
+    : results[0];
 }

@@ -101,19 +101,19 @@ export function _check_ashrae55_compliance(
     // call, so they are pushed as broken rather than through _valid_range.
     const pushAirspeedRow = (bound: Readonly<{ max: number }>) =>
       warnings.push({ key, role: "input", value: v, bound });
-    // A correction of what upstream returns, under ADR 0004, in three
-    // sub-rules: the limits apply at exactly 0.7 clo and 1.3 met, exempt only
-    // above either (ASHRAE 55-2023 §5.3.4.2); they read the speed the caller
-    // passes as v_no_control, which pmv_ppd_ashrae fills with the average air
-    // speed v (§3); and the operative temperature that chooses between them
-    // weighs tdb and tr by that speed as ASHRAE 55 does (Appendix A), not by
-    // ISO 7726. The deployed CBE tool checks its air speed input `d.vel`
-    // (d47d22e) and exempts only above 0.7 clo or 1.3 met (be91523); upstream
-    // exempts at both values, passes vr and weighs by ISO 7726 since
-    // d6786f3, which closed its #32. Two sub-rules differ from §5.3.4.2 and
-    // are left, as the consumer's decision 79 leaves them: the exemption
-    // covers all three limits, and the 0.8 m/s limit caps the curve where the
-    // curve exceeds it.
+    // A correction of what upstream returns, under ADR 0004, raised upstream as
+    // pythermalcomfort #487, in three sub-rules: the limits apply at exactly
+    // 0.7 clo and 1.3 met, exempt only above either (ASHRAE 55-2023 §5.3.4.2);
+    // they read the speed the caller passes as v_no_control, which
+    // pmv_ppd_ashrae fills with the average air speed v (§3); and the operative
+    // temperature that chooses between them weighs tdb and tr by that speed as
+    // ASHRAE 55 does (Appendix A), not by ISO 7726. The deployed CBE tool
+    // checks its air speed input `d.vel` (d47d22e) and exempts only above 0.7
+    // clo or 1.3 met (be91523); upstream exempts at both values, passes vr and
+    // weighs by ISO 7726 since d6786f3, which closed its #32. Two sub-rules
+    // differ from §5.3.4.2 and are left, as the consumer's decision 79 leaves
+    // them: the exemption covers all three limits, and the 0.8 m/s limit caps
+    // the curve where the curve exceeds it.
     const to = t_o(tdb, tr, v, Standard.ashrae_55_2023);
     const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
     if (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max)

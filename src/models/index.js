@@ -17,6 +17,7 @@ import { wci } from "./wci.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { work_capacity_hothaps } from "./work_capacity_hothaps.js";
+import { work_capacity_iso } from "./work_capacity_iso.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
 import { pmv_ppd } from "./pmv_ppd.js";
@@ -89,6 +90,7 @@ export {
   wci,
   wind_chill_temperature,
   work_capacity_hothaps,
+  work_capacity_iso,
 };
 
 export default {
@@ -132,5 +134,6 @@ export default {
   wci,
   wind_chill_temperature,
   work_capacity_hothaps,
+  work_capacity_iso,
   JOS3,
 };

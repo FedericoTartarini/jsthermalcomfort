@@ -936,19 +936,24 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
     // then be free to drift from what the runtime enforces.
     expect(UTCI_INFO.inputs.tdb.applicability).toBe(UTCI_LIMITS.tdb);
     expect(UTCI_INFO.inputs.v.applicability).toBe(UTCI_LIMITS.v);
+    expect(UTCI_INFO.inputs.rh.applicability).toBe(UTCI_LIMITS.rh);
     expect(UTCI_INFO.derived!.tr_minus_tdb.applicability).toBe(
       UTCI_LIMITS.tr_minus_tdb,
     );
+    expect(UTCI_INFO.derived!.pa.applicability).toBe(UTCI_LIMITS.pa);
+    // Upstream checks pa in kPa, 0 to 5; the key pa is in Pa (ADR 0011).
     expect(UTCI_LIMITS).toEqual({
       tdb: { min: -50, max: 50 },
       v: { min: 0.5, max: 17 },
       tr_minus_tdb: { min: -30, max: 70 },
+      pa: { min: 0, max: 5000 },
+      rh: { min: 0, max: 100 },
     });
-    // tr is bounded only through its difference from tdb, and rh not at all.
+    // tr is bounded only through its difference from tdb.
     expect(UTCI_INFO.inputs.tr.applicability).toBeUndefined();
-    expect(UTCI_INFO.inputs.rh.applicability).toBeUndefined();
-    expect(Object.keys(UTCI_INFO.derived!)).toEqual(["tr_minus_tdb"]);
+    expect(Object.keys(UTCI_INFO.derived!)).toEqual(["tr_minus_tdb", "pa"]);
     expect(UTCI_INFO.derived!.tr_minus_tdb.unit).toBe("°C");
+    expect(UTCI_INFO.derived!.pa.unit).toBe("Pa");
   });
 
   test("every UTCI_LIMITS entry is frozen, not just the container", () => {
@@ -959,8 +964,8 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
   });
 
   test("the published bounds are the ones utci gates on, inclusive at both ends", () => {
-    const value = (tdb: number, tr: number, v: number) =>
-      utci({ tdb, tr, v, rh: 50 }).utci;
+    const value = (tdb: number, tr: number, v: number, rh = 50) =>
+      utci({ tdb, tr, v, rh }).utci;
     const { tdb, v } = UTCI_INFO.inputs;
     const { min: tdbMin, max: tdbMax } = tdb.applicability as {
       min: number;
@@ -972,8 +977,9 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
     };
     const { min: diffMin, max: diffMax } = UTCI_INFO.derived!.tr_minus_tdb
       .applicability as { min: number; max: number };
-    expect(Number.isFinite(value(tdbMax, tdbMax, 1))).toBe(true);
-    expect(value(tdbMax + 0.01, tdbMax, 1)).toBeNaN();
+    // Dry at the tdb maximum: 50 % RH at 50 °C is above the pa bound.
+    expect(Number.isFinite(value(tdbMax, tdbMax, 1, 0))).toBe(true);
+    expect(value(tdbMax + 0.01, tdbMax, 1, 0)).toBeNaN();
     expect(Number.isFinite(value(tdbMin, tdbMin, 1))).toBe(true);
     expect(value(tdbMin - 0.01, tdbMin, 1)).toBeNaN();
     expect(Number.isFinite(value(20, 20, vMin))).toBe(true);
@@ -984,6 +990,19 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
     expect(value(20, 20 + diffMax + 0.01, 1)).toBeNaN();
     expect(Number.isFinite(value(20, 20 + diffMin, 1))).toBe(true);
     expect(value(20, 20 + diffMin - 0.01, 1)).toBeNaN();
+    const { min: rhMin, max: rhMax } = UTCI_INFO.inputs.rh.applicability as {
+      min: number;
+      max: number;
+    };
+    expect(Number.isFinite(value(20, 20, 1, rhMin))).toBe(true);
+    expect(value(20, 20, 1, rhMin - 0.01)).toBeNaN();
+    expect(Number.isFinite(value(20, 20, 1, rhMax))).toBe(true);
+    expect(value(20, 20, 1, rhMax + 0.01)).toBeNaN();
+    // Upstream's inclusive-edge inputs (tests/test_utci.py:65-77 at v4.6.2):
+    // at 40 °C this rh gives exactly 5 kPa, so 5000 Pa, UTCI_INFO's pa max.
+    expect(UTCI_INFO.derived!.pa.applicability!.max).toBe(5000);
+    expect(Number.isFinite(value(40, 40, 1, 67.70206528209202))).toBe(true);
+    expect(value(40, 40, 1, 67.70206528209202 + 1e-10)).toBeNaN();
   });
 
   test("stress_category is dimensionless and classified by UTCI_STRESS_CATEGORY_BINS", () => {

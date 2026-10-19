@@ -81,6 +81,23 @@ Results are returned in a `thi` field; rounding uses ties-to-even to one
 decimal place. Inputs must be finite scalar numbers; arrays, `NaN` and
 `Infinity` are rejected. Use `Array.map()` for multiple readings, as shown above.
 
+## Work Capacity (Dunne)
+
+In a checkout containing this model, run `npm run build`, then:
+
+```javascript
+import { work_capacity_dunne } from "./lib/esm/index.js";
+
+work_capacity_dunne(25); // { capacity: 100 }
+work_capacity_dunne(30, "moderate").capacity; // approximately 53.7991
+[20, 25, 35].map((t) => work_capacity_dunne(t).capacity); // [100, 100, 0]
+```
+
+`wbgt` is a finite scalar temperature in Celsius. `work_intensity` defaults to
+`"heavy"` and also accepts `"moderate"` or `"light"`, case-insensitively. The
+unrounded `capacity` is a percentage limited to 0-100. Use `Array.map()` for
+multiple readings; arrays and non-finite numeric inputs are rejected.
+
 ## More Examples
 
 We developed a few [examples](https://github.com/FedericoTartarini/jsthermalcomfort/tree/main/docs/examples) files on how to use some of the functions.

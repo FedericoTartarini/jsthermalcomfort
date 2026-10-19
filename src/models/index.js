@@ -11,6 +11,7 @@ import { esi } from "./esi.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { thi } from "./thi.js";
+import { work_capacity_dunne } from "./work_capacity_dunne.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { two_nodes } from "./two_nodes.js";
 import { set_tmp } from "./set_tmp.js";
@@ -95,6 +96,7 @@ export {
   work_capacity_hothaps,
   work_capacity_iso,
   work_capacity_niosh,
+  work_capacity_dunne,
 };
 
 export default {
@@ -141,5 +143,6 @@ export default {
   work_capacity_hothaps,
   work_capacity_iso,
   work_capacity_niosh,
+  work_capacity_dunne,
   JOS3,
 };

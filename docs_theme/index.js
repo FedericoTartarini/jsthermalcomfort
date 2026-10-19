@@ -124,6 +124,7 @@ const displayNameMap = {
   work_capacity_iso: "Work capacity (ISO)",
   work_capacity_niosh: "Work capacity (NIOSH)",
   esi: "Environmental Stress Index (ESI)",
+  work_capacity_dunne: "Work Capacity (Dunne)",
   discomfort_index: "Discomfort Index (DI)",
   two_nodes: "Two-Node Model (Gagge)",
   set_tmp: "Standard Effective Temperature (SET)",

@@ -216,7 +216,8 @@ export const SOLAR_GAIN_INFO: ModelInfo = deepFreeze({
 // A non-finite number throws a TypeError here (ADR 0001, reason three);
 // upstream returns NaN or ±Infinity for it. round_output is declared but not
 // validated, as upstream's SolarGainInputs is not given it; posture is
-// declared here and checked below with upstream's message.
+// declared here and checked below: a non-string throws a TypeError, and a
+// string upstream rejects throws with upstream's message.
 const SOLAR_GAIN_SCHEMA = {
   sol_altitude: { type: "number" },
   sharp: { type: "number" },
@@ -283,7 +284,15 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   );
   _valid_range(warnings, "asw", "input", asw, SOLAR_GAIN_LIMITS.asw);
 
-  const posture = (params.posture ?? "sitting").toLowerCase();
+  // Upstream calls posture.lower() on what it is given (solar_gain.py:207 at
+  // v4.6.2), so None or a number raises AttributeError. ADR 0012's table does
+  // not list AttributeError; it is a wrong type, which throws a TypeError, as
+  // ADR 0012 maps Python's TypeError. Only undefined takes the default.
+  const { posture: posture_given = "sitting" } = params;
+  if (typeof posture_given !== "string") {
+    throw new TypeError('Parameter "posture" must be a string');
+  }
+  const posture = posture_given.toLowerCase();
   if (!_POSTURES.includes(posture)) {
     throw new Error(
       "Posture has to be either 'standing', 'supine' or 'sitting'.",

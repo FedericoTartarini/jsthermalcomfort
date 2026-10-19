@@ -5,7 +5,7 @@ import {
   validateInputs,
   LimitSet,
 } from "../utilities/utilities.js";
-import { two_nodes } from "../models/two_nodes.js";
+import { two_nodes_gagge } from "./two_nodes_gagge.js";
 
 /**
  * @typedef {Object} HeatwaveReturnType
@@ -186,7 +186,7 @@ export function use_fans_heatwaves(
     p_atm = unit_convert.pressure;
   }
 
-  let output = two_nodes(
+  let output = two_nodes_gagge(
     tdb,
     tr,
     v,
@@ -198,7 +198,7 @@ export function use_fans_heatwaves(
     p_atm,
     body_position,
     max_skin_blood_flow,
-    { round: false, max_sweating: joint_kwargs.max_sweating },
+    { round_output: false, max_sweating: joint_kwargs.max_sweating },
   );
 
   let heatwave_output = cal_heatwave(output, joint_kwargs, max_skin_blood_flow);

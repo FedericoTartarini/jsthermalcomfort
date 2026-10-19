@@ -250,7 +250,7 @@ describe("assertNonEmptyRows", () => {
 
   test("throws when the array is empty (post-filter silent-skip guard)", () => {
     expect.hasAssertions();
-    // This is the path callers like pmv_ppd_ashrae.test.js / two_nodes.test.js
+    // This is the path callers like pmv_ppd_ashrae.test.js / two_nodes_gagge.test.js
     // depend on: a fixture-drift filter that yields zero rows would otherwise
     // hand `test.each([])` an empty list and report green.
     expect(() => assertNonEmptyRows([], "pmv_ppd_ashrae rows")).toThrow(

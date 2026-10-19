@@ -1,8 +1,8 @@
-import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
+import { p_sat_torr } from "../psychrometrics/index.js";
 import { round, validateInputs } from "../utilities/utilities.js";
 
 /**
- * @typedef {Object} TwoNodesReturnType
+ * @typedef {Object} GaggeTwoNodesReturnType
  * @property {number} e_skin – Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff
  * @property {number} e_rsw  – Rate of evaporative heat loss from sweat evaporation, [W/m2]
  * @property {number} e_max  – Maximum rate of evaporative heat loss from skin, [W/m2]
@@ -25,20 +25,12 @@ import { round, validateInputs } from "../utilities/utilities.js";
  */
 
 /**
- * @typedef {Object} TwoNodesKwargs - a keywords argument set containing the additional arguments for Two nodes model calculation
- * @property {boolean} [round=true] - round the result of two nodes model
+ * @typedef {Object} GaggeTwoNodesKwargs - a keywords argument set containing the additional arguments for Two nodes model calculation
+ * @property {boolean} [round_output=true] - round the result of two nodes model
  * @property {boolean} [calculate_ce=false] - select if SET is used to calculate Cooling Effect
- * @property {number} [max_sweating] - maximum rate at which regulatory sweat is generated, [kg/h/m2]
- * @property {number} [w_max]  – maximum skin wettedness (w) adimensional. Ranges from 0 and 1
+ * @property {number} [max_sweating] - maximum rate at which regulatory sweat is generated, [kg/h/m2]. Defaults to 500.
+ * @property {number} [w_max]  – maximum skin wettedness (w) adimensional. Ranges from 0 and 1. Defaults to False.
  * @public
- */
-
-/**
- * @typedef {Object} TwoNodesKwargsRequired
- * @property {boolean} round
- * @property {boolean} calculate_ce
- * @property {number} max_sweating
- * @property {number} w_max
  */
 
 /**
@@ -64,7 +56,7 @@ import { round, validateInputs } from "../utilities/utilities.js";
  *  - The New Effective Temperature (ET)
  *  - The Predicted Thermal Sensation (TSENS)
  *  - The Predicted Percent Dissatisfied Due to Draft (PD)
- *  - Predicted Percent Satisfied With the Level of Air Movement” (PS)
+ *  - Predicted Percent Satisfied With the Level of Air Movement (PS)
  * 
  * @public
  * @memberof models
@@ -75,19 +67,19 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * @param {number} tr Mean radiant temperature, default in [°C]
  * @param {number} v Air speed, default in [m/s]
  * @param {number} rh Relative humidity, [%].
- * @param {number} met Metabolic rate, [W/(m2)]
- * @param {number} clo Clothing insulation, [clo]
- * @param {number} [wme=0] External work, [W/(m2)] default 0
- * @param {number} [body_surface_area=1.8258] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’
- * @param {number} [p_atmospheric=101325] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”
- * @param {number} [max_skin_blood_flow=90] Maximum blood flow from the core to the skin, [kg/h/m2] default 90
- * @param {TwoNodesKwargs} [kwargs]
+ * @param {number} met Metabolic rate, [met].
+ * @param {number} clo Clothing insulation, [clo].
+ * @param {number} [wme=0] External work, [met]. Defaults to 0.
+ * @param {number} [body_surface_area=1.8258] Body surface area, default value 1.8258 [m2] in [ft2] if units = ‘IP’.
+ * @param {number} [p_atm=101325] Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’.
+ * @param {"standing" | "sitting"} [body_position="standing"] Select either “sitting” or “standing”. Defaults to "standing".
+ * @param {number} [max_skin_blood_flow=90] Maximum blood flow from the core to the skin, [kg/h/m2] default 90.
+ * @param {GaggeTwoNodesKwargs} [kwargs]
  *
- * @returns {TwoNodesReturnType} object with results of two_nodes
+ * @returns {GaggeTwoNodesReturnType} object with results of two_nodes_gagge
  *
  * @example
- * const results = two_nodes(25, 25, 0.3, 50, 1.2, 0.5);
+ * const results = two_nodes_gagge(25, 25, 0.3, 50, 1.2, 0.5);
  * console.log(results); // {
   e_skin: 16.2,
   e_rsw: 7,
@@ -110,25 +102,25 @@ import { round, validateInputs } from "../utilities/utilities.js";
 }
  *
  */
-const TWO_NODES_SCHEMA = {
+const GAGGE_TWO_NODES_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
   v: { type: "number" },
   rh: { type: "number" },
   met: { type: "number" },
   clo: { type: "number" },
-  wme: { type: "number" },
-  body_surface_area: { type: "number" },
-  p_atmospheric: { type: "number" },
-  body_position: { enum: ["sitting", "standing"] },
-  max_skin_blood_flow: { type: "number" },
+  wme: { type: "number", required: false },
+  body_surface_area: { type: "number", required: false },
+  p_atm: { type: "number", required: false },
+  position: { enum: ["sitting", "standing"], required: false },
+  max_skin_blood_flow: { type: "number", required: false },
   calculate_ce: { type: "boolean", required: false },
-  round: { type: "boolean", required: false },
+  round_output: { type: "boolean", required: false },
   max_sweating: { type: "number", required: false },
   w_max: { type: "number", required: false },
 };
 
-export function two_nodes(
+export function two_nodes_gagge(
   tdb,
   tr,
   v,
@@ -137,14 +129,14 @@ export function two_nodes(
   clo,
   wme = 0,
   body_surface_area = 1.8258,
-  p_atmospheric = 101325,
-  body_position = "standing",
+  p_atm = 101325,
+  position = "standing",
   max_skin_blood_flow = 90,
   kwargs = {},
 ) {
   const defaults_kwargs = {
     calculate_ce: false,
-    round: true,
+    round_output: true,
     max_sweating: 500,
   };
 
@@ -162,21 +154,21 @@ export function two_nodes(
       clo,
       wme,
       body_surface_area,
-      p_atmospheric,
-      body_position,
+      p_atm,
+      position,
       max_skin_blood_flow,
       calculate_ce: joint_kwargs.calculate_ce,
-      round: joint_kwargs.round,
+      round_output: joint_kwargs.round_output,
       max_sweating: joint_kwargs.max_sweating,
       w_max: joint_kwargs.w_max,
     },
-    TWO_NODES_SCHEMA,
+    GAGGE_TWO_NODES_SCHEMA,
   );
 
   const vapor_pressure = cal_vapor_pressure(tdb, rh);
 
   if (joint_kwargs.calculate_ce) {
-    const ce_set_result = calculate_two_nodes(
+    const ce_set_result = calculate_gagge_two_nodes(
       tdb,
       tr,
       v,
@@ -185,8 +177,8 @@ export function two_nodes(
       vapor_pressure,
       wme,
       body_surface_area,
-      p_atmospheric,
-      body_position,
+      p_atm,
+      position,
       max_skin_blood_flow,
       { calculate_ce: true },
     );
@@ -195,7 +187,7 @@ export function two_nodes(
     };
   }
 
-  const result = calculate_two_nodes(
+  const result = calculate_gagge_two_nodes(
     tdb,
     tr,
     v,
@@ -204,32 +196,32 @@ export function two_nodes(
     vapor_pressure,
     wme,
     body_surface_area,
-    p_atmospheric,
-    body_position,
+    p_atm,
+    position,
     max_skin_blood_flow,
     joint_kwargs,
   );
 
-  if (joint_kwargs.round) {
+  if (joint_kwargs.round_output) {
     return {
-      e_skin: round(result.eSkin, 1),
-      e_rsw: round(result.eRsw, 1),
-      e_max: round(result.eMax, 1),
-      q_sensible: round(result.qSensible, 1),
-      q_skin: round(result.qSkin, 1),
-      q_res: round(result.qRes, 1),
-      t_core: round(result.tCore, 1),
-      t_skin: round(result.tSkin, 1),
-      m_bl: round(result.mBl, 1),
-      m_rsw: round(result.mRsw, 1),
-      w: round(result.w, 1),
-      w_max: round(result.wMax, 1),
-      set: round(result.set, 1),
-      et: round(result.et, 1),
-      pmv_gagge: round(result.pmvGagge, 1),
-      pmv_set: round(result.pmvSet, 1),
-      disc: round(result.disc, 1),
-      t_sens: round(result.tSens, 1),
+      e_skin: round(result.eSkin, 2),
+      e_rsw: round(result.eRsw, 2),
+      e_max: round(result.eMax, 2),
+      q_sensible: round(result.qSensible, 2),
+      q_skin: round(result.qSkin, 2),
+      q_res: round(result.qRes, 2),
+      t_core: round(result.tCore, 2),
+      t_skin: round(result.tSkin, 2),
+      m_bl: round(result.mBl, 2),
+      m_rsw: round(result.mRsw, 2),
+      w: round(result.w, 2),
+      w_max: round(result.wMax, 2),
+      set: round(result.set, 2),
+      et: round(result.et, 2),
+      pmv_gagge: round(result.pmvGagge, 2),
+      pmv_set: round(result.pmvSet, 2),
+      disc: round(result.disc, 2),
+      t_sens: round(result.tSens, 2),
     };
   }
   return result;
@@ -247,20 +239,6 @@ const tempCoreNeutral = 36.8;
 const skinBloodFlowNeutral = 6.3;
 
 /**
- * Round all elments in a given array to the given precision.
- *
- * @param {number[]} array - the array to round
- * @param {number} precision - the number of decimal places to round to
- * @returns the rounded result
- */
-export function roundArray(array, precision) {
-  for (let index = 0; index < array.length; ++index) {
-    array[index] = round(array[index], precision);
-  }
-  return array;
-}
-
-/**
  * Calculate vapor pressure based on air temperature and relative humidity.
  *
  * @param {number} tdb - air temperature [C]
@@ -272,9 +250,9 @@ function cal_vapor_pressure(tdb, rh) {
 }
 
 /**
- * Calculate metabolic rate based on metabolic [W/(m2)] and external work.
+ * Calculate metabolic rate based on metabolic [met] and external work.
  *
- * @param {number} met - Metabolic rate, [W/(m2)]
+ * @param {number} met - Metabolic rate, [met]
  * @param {number} wme - External work, default 0
  * @returns {number} metabolic rate
  */
@@ -287,7 +265,7 @@ function calculate_metabolic_rate(met, wme) {
  *
  * @param {number} airSpeed Airspeed
  * @param {number} clo Clothing insulation, [clo]
- * @param {TwoNodesKwargs} [kwargs]
+ * @param {GaggeTwoNodesKwargs} [kwargs]
  * @returns {number} wettedness practical upper limit
  */
 function calculate_w_max(airSpeed, clo, kwargs) {
@@ -324,14 +302,14 @@ function calculate_thermal_sansation(tBody, rm, wMax) {
  * @param {number} qSkin total heat loss from skin
  * @param {number} hDS
  * @param {number} pSSk saturation vapour pressure of water of the skin
- * @param {number} w skin wettness
+ * @param {number} w skin wetness
  * @param {number} hES
  * @returns {number} SET
  */
 function calculate_set(tSkin, qSkin, hDS, pSSk, w, hES) {
   let delta = 0.0001;
   let dx = 100.0;
-  let setOld = tSkin - qSkin / hDS;
+  let setOld = round(tSkin - qSkin / hDS, 2);
   let set = 0;
 
   while (Math.abs(dx) > 0.01) {
@@ -360,7 +338,7 @@ function calculate_set(tSkin, qSkin, hDS, pSSk, w, hES) {
  * @param {number} tSkin skin temperature
  * @param {number} qSkin total heat loss from skin
  * @param {number} pSSk saturation vapour pressure of water of the skin
- * @param {number} w skin wettness
+ * @param {number} w skin wetness
  * @param {number} rA
  * @param {number} rA
  * @param {number} rEa
@@ -401,7 +379,7 @@ function calculate_et(tSkin, qSkin, pSSk, w, rA, rClo, rEa, rEcl) {
  * @param {number} eRsw rate of evaporative heat loss from sweat evaporation
  * @param {number} eComfort evaporative heat loss during comfort
  * @param {number} eMax maximum rate of evaporative heat loss from skin
- * @param {number} wMax maximum skin wettness
+ * @param {number} wMax maximum skin wetness
  * @param {number} eDiff rate of evaporative heat loss from moisture diffused through the skin
  * @param {number} tSens thermal sansation
  * @returns {number} Thermal discomfort
@@ -490,10 +468,10 @@ function calculate_percent_satisfied(tOp, v) {
  * @param {number} pAtmospheric Atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
  * @param {"standing" | "sitting"} bodyPosition Select either “sitting” or “standing”
  * @param {number} maxSkinBloodFlow Maximum blood flow from the core to the skin, [kg/h/m2] default 90
- * @param {TwoNodesKwargs} [kwargs]
+ * @param {GaggeTwoNodesKwargs} [kwargs]
  *
  */
-function calculate_two_nodes(
+function calculate_gagge_two_nodes(
   tdb,
   tr,
   v,
@@ -702,7 +680,7 @@ function calculate_two_nodes(
     cRes,
     qRes,
   );
-  const ps = calculate_percent_satisfied(tOp, v);
+  // const ps = calculate_percent_satisfied(tOp, v);
 
   return {
     set,

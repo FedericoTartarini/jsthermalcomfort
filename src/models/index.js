@@ -13,7 +13,7 @@ import { wbgt } from "./wbgt.js";
 import { thi } from "./thi.js";
 import { work_capacity_dunne } from "./work_capacity_dunne.js";
 import { discomfort_index } from "./discomfort_index.js";
-import { two_nodes } from "./two_nodes.js";
+import { two_nodes_gagge } from "./two_nodes_gagge.js";
 import { set_tmp } from "./set_tmp.js";
 import { wci } from "./wci.js";
 import { wc } from "./wc.js";
@@ -85,7 +85,7 @@ export {
   solar_gain,
   set_tmp,
   thi,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
@@ -132,7 +132,7 @@ export default {
   solar_gain,
   set_tmp,
   thi,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,

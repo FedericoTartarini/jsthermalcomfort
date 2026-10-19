@@ -12,7 +12,7 @@ let { testData, tolerances } = await loadTestData(testDataUrls.adaptiveAshrae);
 const close = (actual: number, expected: number) =>
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(1e-6);
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_adaptive_ashrae.py.
+// Mirrors pythermalcomfort v4.6.2 tests/test_adaptive_ashrae.py.
 //
 // The ASHRAE 55 compliance tests in tests/test_internal.py
 // (TestCheckAshrae55Compliance) are mirrored with pmv_ppd_ashrae, not here:
@@ -178,7 +178,7 @@ describe("test_adaptive_ashrae", () => {
   });
 });
 
-// The mirror of test_t_o (pythermalcomfort v4.6.0 tests/test_environment.py)
+// The mirror of test_t_o (pythermalcomfort v4.6.2 tests/test_environment.py)
 // is in tests/psychrometrics/t_o.test.js, next to the other t_o tests.
 
 describe("adaptive_ashrae (JS-only)", () => {
@@ -363,6 +363,59 @@ describe("adaptive_ashrae (JS-only)", () => {
     const narrow = adaptive_ashrae({ ...at28, v: 0.1 });
     expect(wide.acceptability_90).toBe(true);
     expect(narrow.acceptability_90).toBe(false);
+  });
+
+  // The operative temperature takes a negative v, as upstream's does
+  // (pythermalcomfort/environment/operative_tmp.py:35-43 at v4.6.2). Expected
+  // values from adaptive_ashrae in pythermalcomfort 4.6.2.
+  describe("a negative v", () => {
+    const negative = { tdb: 25, tr: 25, t_running_mean: 20, v: -1e-9 };
+
+    test("returns NaN and unacceptable under limit_inputs, as upstream", () => {
+      for (const round_output of [true, false]) {
+        const result = adaptive_ashrae({ ...negative, round_output });
+        expect(result.tmp_cmf).toBeNaN();
+        expect(result.tmp_cmf_80_low).toBeNaN();
+        expect(result.tmp_cmf_80_up).toBeNaN();
+        expect(result.tmp_cmf_90_low).toBeNaN();
+        expect(result.tmp_cmf_90_up).toBeNaN();
+        expect(result.acceptability_80).toBe(false);
+        expect(result.acceptability_90).toBe(false);
+        expect(result.warnings.map((row) => row.key)).toEqual(["v"]);
+      }
+    });
+
+    test("returns the ordinary result without limit_inputs, as upstream", () => {
+      for (const round_output of [true, false]) {
+        const result = adaptive_ashrae({
+          ...negative,
+          limit_inputs: false,
+          round_output,
+        });
+        expect(result.tmp_cmf).toBe(24);
+        expect(result.tmp_cmf_80_low).toBe(20.5);
+        expect(result.tmp_cmf_80_up).toBe(27.5);
+        expect(result.tmp_cmf_90_low).toBe(21.5);
+        expect(result.tmp_cmf_90_up).toBe(26.5);
+        expect(result.acceptability_80).toBe(true);
+        expect(result.acceptability_90).toBe(true);
+        expect(result.warnings.map((row) => row.key)).toEqual(["v"]);
+      }
+      const warm = adaptive_ashrae({
+        tdb: 28,
+        tr: 28,
+        t_running_mean: 25,
+        v: -0.3,
+        limit_inputs: false,
+      });
+      expect(warm.tmp_cmf).toBe(25.6);
+      expect(warm.tmp_cmf_80_low).toBe(22.1);
+      expect(warm.tmp_cmf_80_up).toBe(29.1);
+      expect(warm.tmp_cmf_90_low).toBe(23.1);
+      expect(warm.tmp_cmf_90_up).toBe(28.1);
+      expect(warm.acceptability_80).toBe(true);
+      expect(warm.acceptability_90).toBe(true);
+    });
   });
 
   // A band's upper limit is raised by the cooling effect only where its base

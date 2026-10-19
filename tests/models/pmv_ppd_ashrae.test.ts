@@ -552,6 +552,33 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         pmv_ppd_ashrae(controlled),
       );
     });
+
+    // The operative temperature takes a negative v, as upstream's does
+    // (pythermalcomfort/environment/operative_tmp.py:35-43 at v4.6.2). Expected
+    // values from pmv_ppd_ashrae(tdb=25, tr=25, vr=-1e-9, rh=50, met=1.2,
+    // clo=0.5, airspeed_control=False) in pythermalcomfort 4.6.2, whose rule
+    // reads vr where this one reads v.
+    test("a negative v breaks no airspeed limit and computes as upstream", () => {
+      const negative = {
+        ...noControl,
+        tdb: 25,
+        tr: 25,
+        vr: -1e-9,
+        v: -1e-9,
+        met: 1.2,
+      };
+      const masked = pmv_ppd_ashrae(negative);
+      expect(masked.pmv).toBeNaN();
+      expect(masked.ppd).toBeNaN();
+      expect(masked.compliance).toBeNaN();
+      expect(masked.warnings.map((row) => row.key)).toEqual(["vr"]);
+      const computed = pmv_ppd_ashrae({ ...negative, limit_inputs: false });
+      expect(computed.pmv).toBe(0.12);
+      expect(computed.ppd).toBe(5.3);
+      expect(computed.tsv).toBe("Neutral");
+      expect(computed.compliance).toBe(true);
+      expect(computed.warnings.map((row) => row.key)).toEqual(["vr"]);
+    });
   });
 
   describe("input validation", () => {

@@ -1,3 +1,4 @@
+import { heat_index_schoen } from "./heat_index_schoen.js";
 import {
   heat_index_rothfusz,
   heat_index,
@@ -62,6 +63,7 @@ export {
   discomfort_index,
   heat_index,
   heat_index_rothfusz,
+  heat_index_schoen,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   humidex,
@@ -104,6 +106,7 @@ export default {
   discomfort_index,
   heat_index,
   heat_index_rothfusz,
+  heat_index_schoen,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   humidex,

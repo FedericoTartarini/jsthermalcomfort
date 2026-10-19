@@ -106,6 +106,25 @@ Here is a list of examples running in the browser:
 
 - [PHS](/docs/examples/phs.html)
 
+## Adjusted PMV with expectancy factor
+
+The canonical name is `pmv_e`, matching pythermalcomfort. The legacy `e_pmv`
+name remains available. Inputs are finite scalar numbers; use `Array.map()`
+for batches. Optional `units` and `limit_inputs` settings use the JavaScript
+options object after `wme`, whose default is zero.
+
+```javascript
+import { pmv_e } from "jsthermalcomfort";
+
+const result = pmv_e(24, 30, 0.22, 50, 1.4, 0.5, 0.6);
+console.log(result.e_pmv); // 0.29
+
+const batch = [24, 30].map(
+  (tdb) => pmv_e(tdb, 30, 0.22, 50, 1.4, 0.5, 0.6).e_pmv,
+);
+console.log(batch); // [0.29, 0.91]
+```
+
 # Contributing
 
 Contributions are welcome.

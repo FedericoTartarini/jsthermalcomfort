@@ -34,6 +34,7 @@ import { pmv } from "./pmv.js";
 import { pmv_a, a_pmv } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv } from "./e_pmv.js";
+import { pmv_e } from "./pmv_e.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout } from "./clo_tout.js";
@@ -60,6 +61,7 @@ export {
   athb,
   pmv_athb,
   e_pmv,
+  pmv_e,
   at,
   ankle_draft,
   classifyFromBins,
@@ -108,6 +110,7 @@ export default {
   athb,
   pmv_athb,
   e_pmv,
+  pmv_e,
   at,
   ankle_draft,
   classifyFromBins,

@@ -60,3 +60,34 @@ The JS API is scalar-only: use `Array.map()` instead of NumPy broadcasting.
 Arrays and non-finite WBGT inputs raise `TypeError`, as do non-string intensity
 inputs. Unsupported intensity strings raise `RangeError`, corresponding to
 Python's invalid-choice `ValueError`.
+
+## Adjusted PMV with expectancy factor
+
+Use `pmv_e` for the Python-aligned name; `e_pmv` remains available for existing
+callers. The result field is still `e_pmv`. Pass relative air speed and intrinsic
+clothing insulation appropriate to the calculation conditions.
+
+```javascript
+import { pmv_e } from "jsthermalcomfort";
+
+const result = pmv_e(24, 30, 0.22, 50, 1.4, 0.5, 0.6);
+console.log(result.e_pmv); // 0.29
+
+// Same conditions in IP units. wme defaults to zero; units defaults to SI.
+const imperial = pmv_e(75.2, 86, 0.72182, 50, 1.4, 0.5, 0.6, 0, {
+  units: "IP",
+});
+console.log(imperial.e_pmv); // 0.29
+
+// Batch calculations use the scalar function, not NumPy broadcasting.
+const batch = [24, 30].map(
+  (tdb) => pmv_e(tdb, 30, 0.22, 50, 1.4, 0.5, 0.6).e_pmv,
+);
+console.log(batch); // [0.29, 0.91]
+```
+
+`limit_inputs` defaults to `true`: an input combination outside ISO 7730
+applicability returns `{ e_pmv: NaN }`. Pass `{ limit_inputs: false }` to
+calculate outside that range. Invalid input types, arrays and non-finite input
+numbers are rejected. The final result always uses two-decimal ties-to-even
+rounding, following Python; there is no model-level `round_output` option.

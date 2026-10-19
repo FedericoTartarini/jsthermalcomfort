@@ -19,19 +19,20 @@ import {
   validateResult,
 } from "./testUtils.ts";
 
+// ts_pmv_ppd.json at validation-data v1.0.0, the tag pythermalcomfort v4.6.2
+// pins (tests/conftest.py:21); see comftest.ts.
 // Array rows run element-wise.
 let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd);
 
-// Upstream keeps the rows labelled "ashrae", which matches none of the
-// fixture's uppercase "ASHRAE" labels, so its fixture test runs no row. This
-// runs what it means to run: every ASHRAE row, SI and IP, arrays included.
+// As upstream, which compares the label lowercased: every "ASHRAE" row, SI
+// and IP, arrays included.
 // ADR 0004 changed the no-control row: see correctNoControlFixtureCase.
 const ashraeRows = assertNonEmptyRows(
   testData.data.filter(({ inputs }) => inputs.standard === "ASHRAE"),
   "pmv_ppd_ashrae ASHRAE rows",
 ).map(correctNoControlFixtureCase);
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_pmv_ppd_ashrae.py.
+// Mirrors pythermalcomfort v4.6.2 tests/test_pmv_ppd_ashrae.py.
 describe("test_pmv_ppd_ashrae", () => {
   test.each(ashraeRows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
@@ -297,7 +298,7 @@ describe("test_pmv_ppd_ashrae", () => {
   });
 });
 
-// Mirrors TestCheckAshrae55Compliance in pythermalcomfort v4.6.0
+// Mirrors TestCheckAshrae55Compliance in pythermalcomfort v4.6.2
 // tests/test_internal.py. Upstream calls the private helper
 // _check_ashrae55_compliance directly. Its JS counterpart
 // (src/_internal/ashrae55.ts) pushes rows instead of warning, and
@@ -367,7 +368,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
 
     // Both pmvs round to 0.5, so the rounded value cannot tell them apart;
     // upstream reads the unrounded one. Expected values from pythermalcomfort
-    // 4.6.0: 0.49960946928969807 and 0.5033653770344304.
+    // 4.6.2: 0.49960946928969807 and 0.5033653770344304.
     test("is read from the unrounded pmv", () => {
       const at = (t: number) =>
         pmv_ppd_ashrae({ tdb: t, tr: t, vr: 0.1, rh: 50, met: 1.0, clo: 0.5 });
@@ -383,7 +384,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result.compliance).toBeNaN();
     });
 
-    // Upstream 4.6.0 returns False here: the gate is off, so the pmv of 6.6
+    // Upstream 4.6.2 returns False here: the gate is off, so the pmv of 6.6
     // is judged like any other.
     test("is a boolean with limit_inputs off, even out of range", () => {
       const result = pmv_ppd_ashrae({
@@ -396,7 +397,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result.compliance).toBe(false);
     });
 
-    // Expected values from pythermalcomfort 4.6.0 with round_output=False.
+    // Expected values from pythermalcomfort 4.6.2 with round_output=False.
     test("is the same whether round_output is on or off", () => {
       const at = (round_output: boolean) =>
         pmv_ppd_ashrae({
@@ -413,6 +414,45 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       ).toBeLessThanOrEqual(1e-6);
       expect(at(false).compliance).toBe(true);
       expect(at(true).compliance).toBe(true);
+    });
+  });
+
+  // ADR 0009: the kernel computes x⁴ as numba's compiled kernel does. At
+  // these inputs the unrounded pmv sits on a rounding edge, and
+  // Math.pow(x, 4) moved it across. vr is 0.1, so no cooling effect applies.
+  // Expected values from pythermalcomfort 4.6.2's pmv_ppd_ashrae at these
+  // inputs.
+  describe("at a rounding edge, as upstream", () => {
+    test("pmv -1.4949999999999999 rounds to -1.5, Cool", () => {
+      const tie = {
+        ...neutral,
+        tdb: 19.803706605514613,
+        tr: 19.803706605514613,
+      };
+      const rounded = pmv_ppd_ashrae(tie);
+      expect(rounded.pmv).toBe(-1.5);
+      expect(rounded.ppd).toBe(50.6);
+      expect(rounded.tsv).toBe("Cool");
+      expect(rounded.compliance).toBe(false);
+      const unrounded = pmv_ppd_ashrae({ ...tie, round_output: false });
+      expect(unrounded.pmv).toBe(-1.4949999999999999);
+      expect(unrounded.tsv).toBe("Slightly Cool");
+    });
+
+    test("pmv -1.5049999999999997 rounds to -1.5", () => {
+      const tie = {
+        ...neutral,
+        tdb: 19.771554910172007,
+        tr: 19.771554910172007,
+        limit_inputs: false,
+      };
+      const rounded = pmv_ppd_ashrae(tie);
+      expect(rounded.pmv).toBe(-1.5);
+      expect(rounded.ppd).toBe(51.2);
+      expect(rounded.tsv).toBe("Cool");
+      expect(pmv_ppd_ashrae({ ...tie, round_output: false }).pmv).toBe(
+        -1.5049999999999997,
+      );
     });
   });
 
@@ -707,8 +747,8 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
 
     // This test used to assert the opposite: tsv from the unrounded pmv whatever
     // round_output was. Upstream classifies the pmv it returns, after rounding
-    // (pmv_ppd_ashrae.py in 4.6.0), so the label never disagrees with the number
-    // shown. Expected values from pythermalcomfort 4.6.0 at these inputs.
+    // (pmv_ppd_ashrae.py in 4.6.2), so the label never disagrees with the number
+    // shown. Expected values from pythermalcomfort 4.6.2 at these inputs.
     test("tsv is classified from the pmv returned, rounded or not", () => {
       // pmv ≈ 0.5044, just above the 0.5 edge. ASHRAE is right-inclusive, so
       // the rounded 0.5 closes (-0.5, 0.5] = "Neutral", while the unrounded

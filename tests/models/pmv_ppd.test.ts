@@ -45,6 +45,8 @@ const fixtureParams = (inputs: Record<string, unknown>): PmvPpdParams => {
   } as PmvPpdParams;
 };
 
+// ts_pmv_ppd.json at validation-data v1.0.0, the tag pythermalcomfort v4.6.2
+// pins (tests/conftest.py:21); see comftest.ts.
 let { testData, tolerances } = await loadTestData(
   testDataUrls.pmvPpd,
   returnArray,
@@ -52,6 +54,7 @@ let { testData, tolerances } = await loadTestData(
 // ADR 0004 changed the no-control row: see correctNoControlFixtureCase.
 testData.data = testData.data.map(correctNoControlFixtureCase);
 
+// Mirrors pythermalcomfort v4.6.2 tests/test_pmv_ppd_optimised.py.
 describe("test_pmv_ppd_optimised", () => {
   describe("TestPmvPpdOptimized", () => {
     test("test_pmv_ppd_optimized", () => {
@@ -93,7 +96,7 @@ describe("_pmv_ppd_optimized", () => {
   test("starts from the ISO 7730:2025 Annex D clothing-temperature guess", () => {
     // The solver stops at a tolerance, so its starting point shows in the
     // result: here the 2005 guess gave -0.124249 (rounded, -0.12). Expected
-    // value from pythermalcomfort 4.6.0's _pmv_ppd_optimized at these inputs.
+    // value from pythermalcomfort 4.6.2's _pmv_ppd_optimized at these inputs.
     expect(
       Math.abs(_pmv_ppd_optimized(20, 20, 0.1, 50, 1, 1.5, 0) - -0.126788),
     ).toBeLessThanOrEqual(1e-6);

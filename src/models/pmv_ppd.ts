@@ -371,6 +371,13 @@ const PMV_PPD_SCHEMA = {
  * @returns {number} partial water vapour pressure, [Pa]
  */
 function partial_vapour_pressure(tdb: number, rh: number): number {
+  // V8's Math.exp, where upstream's kernel calls np.exp under numba
+  // (pythermalcomfort/models/_pmv_ppd_optimized.py:22 at v4.6.2) and its ISO
+  // gate np.exp under numpy (pmv_ppd_iso.py:183). Against numba's, Math.exp
+  // differs by one ulp on 5,377 of 50,000 exponents for tdb in [10, 40] °C
+  // (macOS arm64, node 26.8.2), e.g. exp(1.0672543764139863) is
+  // 2.9073859439292735 in numba and 2.907385943929273 in V8. Accepted
+  // (ADR 0009).
   return rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
 }
 
@@ -489,6 +496,18 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   vr = ce > 0 ? 0.1 : vr;
 
   let pmv = _pmv_ppd_optimized(tdb, tr, vr, rh, met, clo, wme);
+  // Upstream computes this line with numpy, not numba
+  // (pythermalcomfort/models/pmv_ppd_iso.py:176-178 and
+  // pmv_ppd_ashrae.py:186-188 at v4.6.2), so pmv**4.0 is numpy's power, not
+  // numba's (x*x)*(x*x), and Math.pow matches it: on 80,000 pmv in [-3, 3],
+  // Math.pow(pmv, 4.0) equalled numpy's on all, (x*x)*(x*x) on 40,051
+  // (ADR 0009). Two one-ulp differences remain, accepted (ADR 0009), measured
+  // on macOS arm64 and node 26.8.2: Math.pow(pmv, 2.0) differs from numpy's
+  // pmv**2.0 on 112 of those 80,000 (pmv -2.3207642120811336 gives
+  // 5.385946528076564 in numpy, 5.385946528076565 in V8), and Math.exp from
+  // np.exp on 4,316 of 50,000 arguments from pmv in [-3, 3]
+  // (exp(-0.21202142161593587) is 0.8089473684210527 in numpy,
+  // 0.8089473684210526 in V8).
   let ppd =
     100.0 -
     95.0 *
@@ -583,7 +602,14 @@ export function _pmv_ppd_optimized(
   const p2 = p1 * 3.96;
   const p3 = p1 * 100;
   const p4 = p1 * taa;
-  const p5 = 308.7 - 0.028 * mw + p2 * Math.pow(tra / 100.0, 4);
+  // x⁴ as (x*x)*(x*x), not Math.pow (ADR 0009): upstream's `(tra / 100.0) ** 4`
+  // runs under numba, whose static_power_impl lowers a float raised to an
+  // integer literal to two multiplications (numba/cpython/numbers.py:253-288,
+  // numba 0.68.0). V8's Math.pow(x, 4) differs from it in the last bit on 41 %
+  // of 200,000 random x in [2.5, 3.6] (node 26.8.2). Here and at the two sites
+  // below.
+  const tra100 = tra / 100.0;
+  const p5 = 308.7 - 0.028 * mw + p2 * (tra100 * tra100 * (tra100 * tra100));
   let xn = t_cla / 100;
   let xf = t_cla / 50;
   const eps = 0.00015;
@@ -598,7 +624,8 @@ export function _pmv_ppd_optimized(
     } else {
       hc = hcn;
     }
-    xn = (p5 + p4 * hc - p2 * Math.pow(xf, 4)) / (100 + p3 * hc);
+    // xf**4 under numba: (x*x)*(x*x), as at p5.
+    xn = (p5 + p4 * hc - p2 * (xf * xf * (xf * xf))) / (100 + p3 * hc);
     n += 1;
     if (n > 150) {
       throw new Error("Max iterations exceeded");
@@ -620,10 +647,17 @@ export function _pmv_ppd_optimized(
   //dry respiration heat loss
   const hl4 = 0.0014 * m * (34 - tdb);
   //heat loss by radiation
-  const hl5 = 3.96 * f_cl * (Math.pow(xn, 4) - Math.pow(tra / 100.0, 4));
+  // xn**4 and (tra / 100.0)**4 under numba: (x*x)*(x*x), as at p5.
+  const hl5 =
+    3.96 * f_cl * (xn * xn * (xn * xn) - tra100 * tra100 * (tra100 * tra100));
   //heat loss by convection
   const hl6 = f_cl * hc * (tcl - tdb);
 
+  // V8's Math.exp, where upstream calls np.exp under numba
+  // (pythermalcomfort/models/_pmv_ppd_optimized.py:75 at v4.6.2): it differs by
+  // one ulp on 4,897 of 50,000 arguments for met in [0.8, 4] (macOS arm64, node
+  // 26.8.2), e.g. exp(-7.136106046366306) is 0.0007958450543823036 in numba and
+  // 0.0007958450543823037 in V8. Accepted (ADR 0009).
   const ts = 0.303 * Math.exp(-0.036 * m) + 0.028;
 
   return ts * (mw - hl1 - hl2 - hl3 - hl4 - hl5 - hl6);

@@ -16,19 +16,19 @@ import {
   validateResult,
 } from "./testUtils.ts";
 
+// ts_pmv_ppd.json at validation-data v1.0.0, the tag pythermalcomfort v4.6.2
+// pins (tests/conftest.py:21); see comftest.ts.
 // Array rows run element-wise.
 let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd);
 
-// Upstream keeps the rows without a standard and those labelled "iso", which
-// matches none of the fixture's uppercase "ISO" labels, so its fixture test
-// runs only the two rows without one. This runs what it means to run: those
-// two and every ISO row, SI and IP, arrays included.
+// As upstream, which compares the label lowercased: the rows without a
+// standard and every "ISO" row, SI and IP, arrays included.
 const isoRows = assertNonEmptyRows(
   testData.data.filter(({ inputs }) => (inputs.standard ?? "ISO") === "ISO"),
   "pmv_ppd_iso ISO rows",
 );
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_pmv_ppd_iso.py.
+// Mirrors pythermalcomfort v4.6.2 tests/test_pmv_ppd_iso.py.
 describe("test_pmv_ppd_iso", () => {
   test.each(isoRows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
@@ -204,7 +204,7 @@ describe("test_pmv_ppd_iso", () => {
 
     // Upstream calls np.isclose without asserting its result, so its test
     // cannot fail; this one asserts it, at upstream's atol. pythermalcomfort
-    // 4.6.0 gives -0.13214292024284827.
+    // 4.6.2 gives -0.13214292024284827.
     test("test_no_rounding", () => {
       const result = pmv_ppd_iso({
         tdb: 25,
@@ -407,9 +407,9 @@ describe("pmv_ppd_iso (JS-only)", () => {
     // This test used to assert the opposite: tsv from the unrounded pmv whatever
     // round_output was (at tdb=26.4, whose pmv ≈ 0.5044 gives "Slightly Warm"
     // either way, so it could not tell the two rules apart). Upstream classifies
-    // the pmv it returns, after rounding (pmv_ppd_iso.py in 4.6.0), so the label
+    // the pmv it returns, after rounding (pmv_ppd_iso.py in 4.6.2), so the label
     // never disagrees with the number shown. Expected values from
-    // pythermalcomfort 4.6.0 at these inputs.
+    // pythermalcomfort 4.6.2 at these inputs.
     test("tsv is classified from the pmv returned, rounded or not", () => {
       // pmv ≈ 0.4983, just below the 0.5 edge. ISO is left-inclusive, so the
       // rounded 0.5 opens [0.5, 1.5) = "Slightly Warm", while the unrounded
@@ -443,6 +443,38 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
   });
 
+  // ADR 0009: the kernel computes x⁴ as numba's compiled kernel does. At
+  // these inputs the unrounded pmv sits on a rounding or tsv edge, and
+  // Math.pow(x, 4) moved it across. Expected values from pythermalcomfort
+  // 4.6.2's pmv_ppd_iso at these inputs.
+  describe("at a rounding edge, as upstream", () => {
+    test("pmv -1.4949999999999999 rounds to -1.5", () => {
+      const tie = {
+        ...neutral,
+        tdb: 19.803706605514613,
+        tr: 19.803706605514613,
+      };
+      const rounded = pmv_ppd_iso(tie);
+      expect(rounded.pmv).toBe(-1.5);
+      expect(rounded.ppd).toBe(50.6);
+      expect(rounded.tsv).toBe("Slightly Cool");
+      expect(pmv_ppd_iso({ ...tie, round_output: false }).pmv).toBe(
+        -1.4949999999999999,
+      );
+    });
+
+    test("pmv 0.49500000000000066 rounds to 0.5, Slightly Warm", () => {
+      const tie = { ...neutral, tdb: 27.607461568352605, tr: 25 };
+      const rounded = pmv_ppd_iso(tie);
+      expect(rounded.pmv).toBe(0.5);
+      expect(rounded.ppd).toBe(10.1);
+      expect(rounded.tsv).toBe("Slightly Warm");
+      const unrounded = pmv_ppd_iso({ ...tie, round_output: false });
+      expect(unrounded.pmv).toBe(0.49500000000000066);
+      expect(unrounded.tsv).toBe("Neutral");
+    });
+  });
+
   // Upstream has no ISO category (ADR 0001, consumer-needed), so there is no
   // test_pmv_ppd_iso.py counterpart to mirror.
   describe("category under ISO 7730:2005 (Annex A Table A.1)", () => {
@@ -461,10 +493,13 @@ describe("pmv_ppd_iso (JS-only)", () => {
       );
     });
 
-    // No fixture row puts pmv on an edge, so the inputs are built around the
-    // model's own roots: at each met, the tdb whose pmv is exactly the edge,
-    // and the adjacent double one step toward pmv = 0. The pmv is asserted
-    // too, so each row proves where it lands.
+    // No fixture row puts pmv on an edge, so the inputs are built around
+    // upstream's roots: at each met, the tdb whose pmv in pythermalcomfort
+    // 4.6.2 is exactly the edge, and the adjacent double one step toward
+    // pmv = 0. Each pmv is upstream's, bit for bit; it is asserted too, so each
+    // row proves where it lands. At -0.5 the root at met 1.1 was passed over:
+    // V8's Math.exp moves the pmv there (-0.5000000000000004 against
+    // upstream's -0.5).
     const at = (met: number, t: number) =>
       pmv_ppd_iso({
         tdb: t,
@@ -479,12 +514,12 @@ describe("pmv_ppd_iso (JS-only)", () => {
       });
 
     test.each([
-      { id: "0", met: 1.01, t: 26.014491696246818, pmv: 0, category: "A" },
+      { id: "0", met: 1.01, t: 26.014491696246804, pmv: 0, category: "A" },
       {
         id: "just below 0.2",
-        met: 1.25,
-        t: 25.080080304866186,
-        pmv: 0.1999999999999993,
+        met: 1.286,
+        t: 24.858692235205293,
+        pmv: 0.19999999999999932,
         category: "A",
       },
       {
@@ -494,7 +529,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         pmv: -0.1999999999999993,
         category: "A",
       },
-      { id: "0.2", met: 1.25, t: 25.08008030486619, pmv: 0.2, category: "B" },
+      { id: "0.2", met: 1.286, t: 24.858692235205297, pmv: 0.2, category: "B" },
       {
         id: "-0.2",
         met: 1.23,
@@ -511,38 +546,38 @@ describe("pmv_ppd_iso (JS-only)", () => {
       },
       {
         id: "just above -0.5",
-        met: 1.08,
-        t: 24.050806906501293,
-        pmv: -0.49999999999999917,
+        met: 1.27,
+        t: 22.434637579856535,
+        pmv: -0.49999999999999933,
         category: "B",
       },
       { id: "0.5", met: 1.08, t: 27.005381097635183, pmv: 0.5, category: "C" },
-      { id: "-0.5", met: 1.08, t: 24.05080690650129, pmv: -0.5, category: "C" },
+      { id: "-0.5", met: 1.27, t: 22.43463757985653, pmv: -0.5, category: "C" },
       {
         id: "just below 0.7",
-        met: 1.02,
-        t: 27.861012559832268,
+        met: 1.05,
+        t: 27.72440262767248,
         pmv: 0.699999999999999,
         category: "C",
       },
       {
         id: "just above -0.7",
-        met: 1.12,
-        t: 23.083997101537506,
-        pmv: -0.6999999999999837,
+        met: 1.17,
+        t: 22.623997200319987,
+        pmv: -0.6999999999999992,
         category: "C",
       },
       {
         id: "0.7",
-        met: 1.02,
-        t: 27.86101255983227,
+        met: 1.05,
+        t: 27.724402627672482,
         pmv: 0.7,
         category: "none",
       },
       {
         id: "-0.7",
-        met: 1.12,
-        t: 23.083997101537502,
+        met: 1.17,
+        t: 22.623997200319984,
         pmv: -0.7,
         category: "none",
       },
@@ -575,7 +610,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
 
     // Both pmvs print 0.5, so the rounded value cannot tell them apart; the
-    // category reads the unrounded one. pythermalcomfort 4.6.0 gives the same
+    // category reads the unrounded one. pythermalcomfort 4.6.2 gives the same
     // unrounded pmvs: 0.4983292256773187 and 0.5013467793369747.
     test("is read from the unrounded pmv", () => {
       const printed = (t: number) =>
@@ -606,8 +641,9 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
 
     // The roots of the 2005 block, whose pmv the edition does not change,
-    // and at ±1.0 the same construction: the tdb whose pmv is exactly the
-    // edge, and the adjacent double one step toward pmv = 0.
+    // and at ±1.0 the same construction on pythermalcomfort 4.6.2: the tdb
+    // whose pmv is exactly the edge, and the adjacent double one step toward
+    // pmv = 0.
     const at = (met: number, t: number) =>
       pmv_ppd_iso({
         tdb: t,
@@ -622,12 +658,12 @@ describe("pmv_ppd_iso (JS-only)", () => {
       });
 
     test.each([
-      { id: "0", met: 1.01, t: 26.014491696246818, pmv: 0, category: "I" },
+      { id: "0", met: 1.01, t: 26.014491696246804, pmv: 0, category: "I" },
       {
         id: "just below 0.2",
-        met: 1.25,
-        t: 25.080080304866186,
-        pmv: 0.1999999999999993,
+        met: 1.286,
+        t: 24.858692235205293,
+        pmv: 0.19999999999999932,
         category: "I",
       },
       {
@@ -637,7 +673,13 @@ describe("pmv_ppd_iso (JS-only)", () => {
         pmv: -0.1999999999999993,
         category: "I",
       },
-      { id: "0.2", met: 1.25, t: 25.08008030486619, pmv: 0.2, category: "II" },
+      {
+        id: "0.2",
+        met: 1.286,
+        t: 24.858692235205297,
+        pmv: 0.2,
+        category: "II",
+      },
       {
         id: "-0.2",
         met: 1.23,
@@ -654,9 +696,9 @@ describe("pmv_ppd_iso (JS-only)", () => {
       },
       {
         id: "just above -0.5",
-        met: 1.08,
-        t: 24.050806906501293,
-        pmv: -0.49999999999999917,
+        met: 1.27,
+        t: 22.434637579856535,
+        pmv: -0.49999999999999933,
         category: "II",
       },
       {
@@ -668,58 +710,52 @@ describe("pmv_ppd_iso (JS-only)", () => {
       },
       {
         id: "-0.5",
-        met: 1.08,
-        t: 24.05080690650129,
+        met: 1.27,
+        t: 22.43463757985653,
         pmv: -0.5,
         category: "III",
       },
       {
         id: "just below 0.7",
-        met: 1.02,
-        t: 27.861012559832268,
+        met: 1.05,
+        t: 27.72440262767248,
         pmv: 0.699999999999999,
         category: "III",
       },
       {
         id: "just above -0.7",
-        met: 1.12,
-        t: 23.083997101537506,
-        pmv: -0.6999999999999837,
+        met: 1.17,
+        t: 22.623997200319987,
+        pmv: -0.6999999999999992,
         category: "III",
       },
-      { id: "0.7", met: 1.02, t: 27.86101255983227, pmv: 0.7, category: "IV" },
+      { id: "0.7", met: 1.05, t: 27.724402627672482, pmv: 0.7, category: "IV" },
       {
         id: "-0.7",
-        met: 1.12,
-        t: 23.083997101537502,
+        met: 1.17,
+        t: 22.623997200319984,
         pmv: -0.7,
         category: "IV",
       },
       {
         id: "just below 1.0",
-        met: 1.01,
-        t: 28.709120106514213,
+        met: 1.04,
+        t: 28.60089392706653,
         pmv: 0.999999999999999,
         category: "IV",
       },
       {
         id: "just above -1.0",
-        met: 1.04,
-        t: 22.957876105377597,
-        pmv: -0.999999999999999,
+        met: 1.05,
+        t: 22.85587493474414,
+        pmv: -0.9999999999999992,
         category: "IV",
       },
-      {
-        id: "1.0",
-        met: 1.01,
-        t: 28.709120106514217,
-        pmv: 1,
-        category: "none",
-      },
+      { id: "1.0", met: 1.04, t: 28.600893927066533, pmv: 1, category: "none" },
       {
         id: "-1.0",
-        met: 1.04,
-        t: 22.957876105377593,
+        met: 1.05,
+        t: 22.855874934744136,
         pmv: -1,
         category: "none",
       },

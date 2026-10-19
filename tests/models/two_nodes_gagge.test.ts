@@ -242,8 +242,9 @@ describe("two_nodes_gagge beyond upstream's tests", () => {
       expect(() => call(25, 25, 0.3, 50, 1.2, 0.5)).toThrow(TypeError);
     });
 
-    // ADR 0001: upstream raises StopIteration for NaN; a public model throws
-    // a TypeError for a non-finite number.
+    // ADR 0001: a public model throws a TypeError for a non-finite number.
+    // Upstream raises StopIteration for a NaN tdb, tr, rh, met, clo or wme,
+    // and returns numbers for a NaN v or max_sweating.
     test.each(["tdb", "tr", "v", "rh", "met", "clo", "wme", "max_sweating"])(
       "a non-finite %s throws a TypeError",
       (key) => {

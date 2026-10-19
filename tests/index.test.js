@@ -82,6 +82,14 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("adaptive_ashrae");
   });
 
+  // Upstream keeps it private, in pythermalcomfort/_internal/.
+  it("should not have the adaptive cooling-effect helper", () => {
+    expect(jsthermalcomfort.models).not.toHaveProperty(
+      "adaptive_cooling_effect",
+    );
+    expect(namedExports).not.toHaveProperty("adaptive_cooling_effect");
+  });
+
   it("should have models.cooling_effect", () => {
     expect(jsthermalcomfort.models).toHaveProperty("cooling_effect");
   });

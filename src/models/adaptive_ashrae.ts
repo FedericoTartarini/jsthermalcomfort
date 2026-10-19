@@ -6,7 +6,7 @@ import {
   ASHRAE_55_LIMITS,
   Standard,
 } from "../utilities/utilities.js";
-import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
+import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
 import { deepFreeze } from "./modelDocs.ts";
 import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
 import {

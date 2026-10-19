@@ -22,10 +22,11 @@ import { is_iso_7730, Standard } from "../utilities/utilities.js";
  * @returns {number} operative temperature [C]
  */
 export function t_o(tdb, tr, v, standard = Standard.iso_7730_2025) {
-  if (v < 0) {
-    throw new Error("v cannot be negative");
-  }
-
+  // No sign check on v, as upstream's operative_tmp has none
+  // (pythermalcomfort/environment/operative_tmp.py:35-43 at v4.6.2): a
+  // negative v gives NaN from the square root under ISO 7726 and is weighed
+  // as below 0.2 m/s under ASHRAE 55. The rejection this replaced was a
+  // past deviation that ADR 0001 reverts.
   if (is_iso_7730(standard)) return _t_o_calculation_iso(tdb, tr, v);
   if (standard === Standard.ashrae_55_2023)
     return _t_o_calculation_ashrae(tdb, tr, v);

@@ -2,7 +2,7 @@ import { expect, describe, it, test } from "@jest/globals";
 import { t_o } from "../../src/psychrometrics/t_o";
 import { LimitSet, Standard } from "../../src/utilities/utilities.js";
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_environment.py. Upstream's
+// Mirrors pythermalcomfort v4.6.2 tests/test_environment.py. Upstream's
 // operative_tmp takes "ISO" (the default) or "ASHRAE"; t_o takes the Standard
 // identifiers, so "ASHRAE" is Standard.ashrae_55_2023 here.
 describe("test_environment", () => {
@@ -111,10 +111,19 @@ describe("t_o", () => {
     },
   );
 
-  it("throws an error if the airSpeed is negative", () => {
-    expect(() => t_o(0, 0, -1, Standard.iso_7730_2025)).toThrow(
-      "v cannot be negative",
-    );
+  // Upstream's operative_tmp has no sign check on v
+  // (pythermalcomfort/environment/operative_tmp.py:35-43 at v4.6.2). Expected
+  // values from operative_tmp(20, 30, v, standard=...) in pythermalcomfort
+  // 4.6.2.
+  it("weighs a negative v under ASHRAE 55 as an air speed below 0.2 m/s, as upstream", () => {
+    for (const v of [-1e-9, -0.1, -1]) {
+      expect(t_o(20, 30, v, Standard.ashrae_55_2023)).toBe(25);
+    }
+  });
+
+  it("returns NaN for a negative v under ISO 7726, from the square root, as upstream", () => {
+    expect(t_o(20, 30, -0.1, Standard.iso_7730_2025)).toBeNaN();
+    expect(t_o(25, 25, -1e-9, Standard.iso_7730_2025)).toBeNaN();
   });
 
   it("throws an error if standard is not valid", () => {

@@ -13,6 +13,7 @@ import { round, validateInputs } from "../utilities/utilities.js";
  * increases. Nonetheless, this score reliably represents the combined effects of temperature and wind on subjective discomfort
  * for velocities below 80 km/h {@link #ref_18|[18]}.
  *
+ * @deprecated Use wci(tdb, v, round_output) instead.
  * @public
  * @memberof models
  * @docname Wind chill index

@@ -12,6 +12,7 @@ import { thi } from "./thi.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { two_nodes } from "./two_nodes.js";
 import { set_tmp } from "./set_tmp.js";
+import { wci } from "./wci.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en } from "./adaptive_en.js";
@@ -81,6 +82,7 @@ export {
   vertical_tmp_grad_ppd,
   wbgt,
   wc,
+  wci,
   wind_chill_temperature,
 };
 
@@ -120,6 +122,7 @@ export default {
   vertical_tmp_grad_ppd,
   wbgt,
   wc,
+  wci,
   wind_chill_temperature,
   JOS3,
 };

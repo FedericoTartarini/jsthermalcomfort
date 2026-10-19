@@ -2,6 +2,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### WCI alignment
+
+- Added `wci(tdb, v, round_output = true)` to match pythermalcomfort, including scalar and one-dimensional array inputs and `{ wci }` results in W/m². Wind speed is in m/s.
+- Use `wci(tdb, v, false)` instead of `wc(tdb, v, { round: false })`. The deprecated `wc` API remains available for compatibility.
+- The WCI equation is unchanged. The new API uses NumPy-compatible ties-to-even rounding; the legacy API retains its existing rounding behavior.
+
 - **Breaking:** the unversioned `"ISO"` and `"ASHRAE"` standard identifiers have been removed, along with `"ANKLE_DRAFT"` and `"FAN_HEATWAVES"`. Identifiers are now versioned and mirror `pythermalcomfort.utilities.Models` exactly, so the two libraries no longer name the same standard differently. Migration:
 
   | Before | After | Also available as |

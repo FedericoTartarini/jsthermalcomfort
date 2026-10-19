@@ -8,7 +8,7 @@ import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
-import { two_nodes } from "./two_nodes.js";
+import { two_nodes_gagge } from "./two_nodes_gagge.ts";
 import { set_tmp } from "./set_tmp.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
@@ -78,7 +78,7 @@ export {
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
@@ -123,7 +123,7 @@ export default {
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,

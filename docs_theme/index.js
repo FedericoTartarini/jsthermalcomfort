@@ -124,7 +124,7 @@ const displayNameMap = {
   net: "Normal Effective Temperature (NET)",
   wbgt: "Wet Bulb Globe Temperature (WBGT)",
   discomfort_index: "Discomfort Index (DI)",
-  two_nodes: "Two-Node Model (Gagge)",
+  two_nodes_gagge: "Two-Node Model (Gagge)",
   set_tmp: "Standard Effective Temperature (SET)",
   wc: "Wind Chill Index (WCI)",
   adaptive_en: "Adaptive EN-16798",

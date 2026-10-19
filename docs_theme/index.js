@@ -122,6 +122,7 @@ const displayNameMap = {
   wbgt: "Wet Bulb Globe Temperature (WBGT)",
   thi: "Temperature-Humidity Index (THI)",
   work_capacity_iso: "Work capacity (ISO)",
+  work_capacity_niosh: "Work capacity (NIOSH)",
   discomfort_index: "Discomfort Index (DI)",
   two_nodes: "Two-Node Model (Gagge)",
   set_tmp: "Standard Effective Temperature (SET)",

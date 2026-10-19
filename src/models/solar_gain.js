@@ -4,7 +4,7 @@ import {
   validateInputs,
 } from "../utilities/utilities.js";
 
-// avoid reallocating these arrays accross function calls
+// avoid reallocating these arrays across function calls
 const _alt_range = [0, 15, 30, 45, 60, 75, 90];
 const _az_range = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180];
 
@@ -25,7 +25,7 @@ const _fp_table_sitting = [
   [0.3, 0.24, 0.168, 0.152, 0.152, 0.164, 0.177],
 ];
 
-const _fp_table = [
+const _fp_table_standing = [
   [0.35, 0.35, 0.314, 0.258, 0.206, 0.144, 0.082],
   [0.342, 0.342, 0.31, 0.252, 0.2, 0.14, 0.082],
   [0.33, 0.33, 0.3, 0.244, 0.19, 0.132, 0.082],
@@ -68,7 +68,7 @@ const _fp_table = [
  * @param {number} sharp - Solar horizontal angle relative to the front of the person (SHARP) [deg].
  * Ranges between 0 and 180 and is symmetrical on either side. Zero (0) degrees
  * represents direct-beam radiation from the front, 90 degrees represents
- * direct-beam radiation from the side, and 180 degrees rep- resent direct-beam
+ * direct-beam radiation from the side, and 180 degrees represents direct-beam
  * radiation from the back. SHARP is the angle between the sun and the person
  * only. Orientation relative to compass or to room is not included in SHARP.
  * @param {number} sol_radiation_dir - Direct-beam solar radiation, [W/m2]. Ranges between 200 and 1000. See Table C2-3 of ASHRAE 55 2020 {@link #ref_1|[1]}.
@@ -88,7 +88,8 @@ const _fp_table = [
  * Note: Short-wave absorptivity typically ranges from 0.57 to 0.84, depending
  * on skin and clothing color. More information is available in Blum (1945).
  * @param {"standing" | "supine" | "sitting"} [posture="sitting"] - Default 'sitting' list of available options 'standing', 'supine' or 'sitting'
- * @param {number} [floor_reflectance=0.7] - Floor refectance. It is assumed to be constant and equal to 0.6.
+ * @param {number} [floor_reflectance=0.6] - Floor reflectance. It is assumed to be constant and equal to 0.6. Defaults to 0.6.
+ * @param {boolean} [round_output=true] - If True, rounds output value. If False, it does not round it. Defaults to True.
  *
  * @returns {SolarGainReturnType}
  *
@@ -96,6 +97,19 @@ const _fp_table = [
  * import {solar_gain} from "jsthermalcomfort/models";
  * const results = solar_gain(0, 120, 800, 0.5, 0.7, "sitting");
  * console.log(results); // {erf: 42.9, delta_mrt: 10.3}
+ *
+ * @description
+ * ## Applicability
+ * This model is applicable under the following conditions:
+ * - Solar altitude (solAltitude) must be between 0° and 90°.
+ * - Solar horizontal angle (sharp) must be between 0° and 180°.
+ * - Direct-beam solar radiation (solRadiationDir) should typically range from 200 to 1000 W/m², as per ASHRAE 55 Table C2-3.
+ * - Solar transmittance (solTransmittance) must be between 0 and 1.
+ * - Sky-vault view fraction (fSvv) and body surface exposure fraction (fBes) must be between 0 and 1.
+ * - Average short-wave absorptivity (asw) typically ranges from 0.57 to 0.84, depending on skin and clothing color.
+ * - Posture must be one of 'standing', 'supine', or 'sitting'.
+ * - Floor reflectance (floorReflectance) is assumed constant at 0.6, but can vary.
+ * - All inputs are in SI units (e.g., angles in degrees, radiation in W/m²).
  */
 const SOLAR_GAIN_SCHEMA = {
   sol_altitude: { type: "number" },
@@ -119,6 +133,7 @@ export function solar_gain(
   asw = 0.7,
   posture = "sitting",
   floor_reflectance = 0.6,
+  round_output = true,
 ) {
   posture = posture.toLowerCase();
   validateInputs(
@@ -141,7 +156,8 @@ export function solar_gain(
   const i_diff = 0.2 * sol_radiation_dir;
 
   // fp is the projected area factor
-  const fp_table = posture === "sitting" ? _fp_table_sitting : _fp_table;
+  const fp_table =
+    posture === "sitting" ? _fp_table_sitting : _fp_table_standing;
 
   if (posture === "supine") {
     [sharp, sol_altitude] = transpose_sharp_altitude(sharp, sol_altitude);
@@ -182,7 +198,10 @@ export function solar_gain(
   const erf = e_solar * (sw_abs / lw_abs);
   const d_mrt = erf / (hr * f_eff);
 
-  return { erf: round(erf, 1), delta_mrt: round(d_mrt, 1) };
+  return {
+    erf: round_output ? round(erf, 1) : erf,
+    delta_mrt: round_output ? round(d_mrt, 1) : d_mrt,
+  };
 }
 
 /**

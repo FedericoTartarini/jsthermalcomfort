@@ -8,8 +8,9 @@ import type {
   ModelInfo,
 } from "./modelDocs.ts";
 
-// Renamed from HeatIndexResult to <Model>Result, the name every converted
-// model's result has.
+// Renamed from HeatIndexResult to <Model>Result, the name a converted model's
+// result has, except where a Resolution shares upstream's return class
+// (WorkCapacity, for the four work-capacity models).
 /**
  * @property {number} hi - Heat Index, [°C].
  * @property {string|number} stress_category - Thermal stress category, or NaN if hi is NaN. Classified from the unrounded value.

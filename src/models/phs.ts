@@ -397,6 +397,12 @@ export function phs(params: PhsParams): PhsResult {
     { round_output, tdb, tr, v, rh, met, clo, wme },
     _PHS_INPUTS_SCHEMA,
   );
+  // posture is required upstream (models/phs.py:15-23): a call without it
+  // raises TypeError "phs() missing 1 required positional argument:
+  // 'posture'" (ADR 0012).
+  if (posture === undefined) {
+    throw new TypeError('Parameter "posture" must be a string');
+  }
   // ADR 0005 as amended: posture takes one string. Upstream broadcasts a list
   // (posture=["standing"] returns a length-1 array in 4.6.2).
   if (Array.isArray(posture)) {

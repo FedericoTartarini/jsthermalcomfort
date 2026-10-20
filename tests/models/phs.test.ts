@@ -1557,6 +1557,18 @@ describe("phs beyond upstream's tests", () => {
       },
     );
 
+    // posture is a required argument upstream (models/phs.py:15-23), so a
+    // call without it raises TypeError "phs() missing 1 required positional
+    // argument: 'posture'" (pythermalcomfort 4.6.2).
+    test.each([
+      ["missing", (({ posture: _, ...rest }) => rest)(base)],
+      ["undefined", { ...base, posture: undefined }],
+    ])("posture %s throws a TypeError", (_, params) => {
+      expect(() => phs(params as unknown as PhsParams)).toThrow(
+        new TypeError('Parameter "posture" must be a string'),
+      );
+    });
+
     // ADR 0005 as amended: posture takes one string, where upstream broadcasts
     // the list.
     test("posture ['standing'] throws a TypeError", () => {

@@ -17,7 +17,7 @@ export type EvaporationResult = [
   e_sweat: number[],
 ];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:675 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:675 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 // The sweat is distributed element by element, as upstream's
 // `skin_sweat * sig_sweat * sd_sweat * 2 ** (err_sk / 10)`

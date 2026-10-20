@@ -247,7 +247,7 @@ export function local_arr(
 /** Artery and vein blood flow rate [l/h]. */
 export type VesselBloodFlowResult = [bf_art: number[], bf_vein: number[]];
 
-// jos3 D8: upstream returns a plain tuple (matrix.py:246 at v4.6.2), an
+// wave 2 D8: upstream returns a plain tuple (matrix.py:246 at v4.6.2), an
 // array here, in upstream's order, typed as a labelled tuple.
 
 /**

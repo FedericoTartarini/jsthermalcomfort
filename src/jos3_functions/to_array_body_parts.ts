@@ -44,7 +44,7 @@ export function to_array_body_parts(inp: JOS3BodyPartsInput): number[] {
       `The input list or ndarray is not of length ${Default.num_body_parts}`,
     );
   }
-  // jos3 D7 (b): an object keyed by the body parts is upstream's dict. A
+  // wave 2 D7 (b): an object keyed by the body parts is upstream's dict. A
   // JOS3BodyParts is accepted too, where upstream raises a ValueError
   // ("Unsupported input type", construction.py:94-95 at v4.6.2): upstream's
   // JOS3BodyParts dataclass is a plain object here, as every upstream result

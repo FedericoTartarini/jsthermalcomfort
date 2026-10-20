@@ -97,7 +97,7 @@ export function shivering(
 
   // Upstream's options[...] raises a KeyError for a missing key
   // (thermoregulation.py:1207, :1224 at v4.6.2), a TypeError here (ADR 0012
-  // as amended; jos3 D6). Both options are read for JavaScript's truth value
+  // as amended; wave 2 D6). Both options are read for JavaScript's truth value
   // (ADR 0001 as amended): NaN is true in Python and false here, and an
   // empty array or object false in Python and true here.
   if (has_options) {
@@ -122,7 +122,7 @@ export function shivering(
 
     const limit = dict_get(options, "limit_dshiv/dt");
     if (limit) {
-      // jos3 D7 (c): a truthy limit that is neither true nor a number throws
+      // wave 2 D7 (c): a truthy limit that is neither true nor a number throws
       // a TypeError. Upstream computes `limit * dtime` and compares it, which
       // raises a TypeError (numpy's UFuncTypeError for a string and an int
       // dtime), or numpy's ValueError for a one-element list and an int

@@ -7,7 +7,7 @@ export type ErrorSignalsResult = [
   cold_signal_sum: number,
 ];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:536 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:536 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**

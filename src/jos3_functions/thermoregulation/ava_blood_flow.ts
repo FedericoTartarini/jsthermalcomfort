@@ -6,7 +6,7 @@ import type { NumOrArray } from "../../_internal/numpy.ts";
 /** AVA blood flow rate at hand and at foot [L/h]. */
 export type AvaBloodFlowResult = [bf_ava_hand: number, bf_ava_foot: number];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:890 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:890 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**

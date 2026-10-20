@@ -9,7 +9,7 @@ export type CrMsFatBloodFlowResult = [
   bf_fat: number[],
 ];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1520 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:1520 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**

@@ -1,7 +1,7 @@
 /** Sensible and latent heat loss by respiration [W]. */
 export type RespHeatLossResult = [res_sh: number, res_lh: number];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1578 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:1578 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**

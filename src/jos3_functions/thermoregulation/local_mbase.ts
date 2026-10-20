@@ -10,7 +10,7 @@ export type LocalMbaseResult = [
   mbase_sk: number[],
 ];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1081 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:1081 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 /**
  * Calculate local basal metabolic rate [W]

@@ -709,7 +709,7 @@ export class JOS3 {
    * broadcasting raises a ValueError.
    */
   simulate(times: number, dtime: number = 60, output: boolean = true): void {
-    // jos3 D7 (a): a whole number such as 2.0 runs, where Python's range
+    // wave 2 D7 (a): a whole number such as 2.0 runs, where Python's range
     // raises a TypeError for the float 2.0 ("'float' object cannot be
     // interpreted as an integer"): a JavaScript number has no int/float
     // distinction (ADR 0001's first reason, as amended).
@@ -838,7 +838,7 @@ export class JOS3 {
     );
     // Upstream reads options["ava_zero"] whatever passive is (jos3.py:849
     // at v4.6.2), so a missing key raises its KeyError here, a TypeError
-    // (ADR 0012 as amended; jos3 D6). The option is read for JavaScript's
+    // (ADR 0012 as amended; wave 2 D6). The option is read for JavaScript's
     // truth value (ADR 0001 as amended): NaN is true in Python and false
     // here, and an empty array or object false in Python and true here.
     const ava_zero = dict_get(this.options, "ava_zero");
@@ -867,7 +867,7 @@ export class JOS3 {
     // nonshivering_thermogenesis, then cold_acclimated and bat_positive only
     // when it is true (jos3.py:870, :877-878 at v4.6.2): a missing key
     // raises its KeyError there, a TypeError here (ADR 0012 as amended;
-    // jos3 D6). Each is read for JavaScript's truth value (ADR 0001 as
+    // wave 2 D6). Each is read for JavaScript's truth value (ADR 0001 as
     // amended): NaN is true in Python and false here, and an empty array or
     // object false in Python and true here.
     const q_nst = dict_get(this.options, "nonshivering_thermogenesis")

@@ -37,7 +37,7 @@ function dense(x: unknown): unknown {
 }
 
 // Each function's result, compared with upstream's as it is: a tuple
-// upstream returns is an array here (jos3 D8).
+// upstream returns is an array here (wave 2 D8).
 const run: Record<string, (a: any[]) => unknown> = {
   bsa_rate: (a) => C.bsa_rate(a[0], a[1], a[2]),
   local_bsa: (a) => C.local_bsa(a[0], a[1], a[2]),

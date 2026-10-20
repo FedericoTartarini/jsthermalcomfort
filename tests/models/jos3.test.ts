@@ -1641,7 +1641,7 @@ describe("jos3 beyond upstream's tests", () => {
 
     // Upstream raises a TypeError (numpy's UFuncTypeError for a string and
     // an int dtime) or, for [0.01] with an int dtime, numpy's ValueError
-    // (up_errors.py); jos3 D7 (c) throws a TypeError for every truthy value
+    // (up_errors.py); wave 2 D7 (c) throws a TypeError for every truthy value
     // that is neither true nor a number, with Python's message for a float
     // dtime, which upstream gives for dtime 60.5. An empty array or object is
     // truthy in JavaScript (ADR 0001 as amended); upstream reads [] and {} as
@@ -1653,7 +1653,7 @@ describe("jos3 beyond upstream's tests", () => {
       [[], "can't multiply sequence by non-int of type 'float'"],
       [{}, "unsupported operand type(s) for *: 'dict' and 'float'"],
     ])(
-      'options["limit_dshiv/dt"] %j throws a TypeError (jos3 D7 (c))',
+      'options["limit_dshiv/dt"] %j throws a TypeError (wave 2 D7 (c))',
       (value, message) => {
         const model = new JOS3();
         model.tdb = 10;

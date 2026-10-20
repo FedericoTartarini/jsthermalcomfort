@@ -9,7 +9,7 @@ export type SumMResult = [
   q_thermogenesis_skin: number[],
 ];
 
-// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1397-1402 at
+// wave 2 D8: upstream returns a plain tuple (thermoregulation.py:1397-1402 at
 // v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**

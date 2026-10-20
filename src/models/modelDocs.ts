@@ -104,8 +104,9 @@ export interface VariableInfo {
  * supplied by the caller — vapour pressure in `pmv_ppd_iso`, for instance,
  * which has an applicability bound of its own.
  *
- * `standards` lists the editions this function accepts, default first; empty
- * for a model with no standard. Every entry is a `Standard` value.
+ * `standards` lists the standard editions the model implements, default
+ * first: for a function that takes `standard`, exactly the ones it accepts;
+ * empty for a model with no standard. Every entry is a `Standard` value.
  *
  * @public
  */

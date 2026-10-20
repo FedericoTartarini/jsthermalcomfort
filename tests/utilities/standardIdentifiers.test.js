@@ -8,7 +8,8 @@ import {
 import * as pkg from "../../src/index.js";
 
 // These identifiers are shared with pythermalcomfort, which is the reference
-// implementation. Its `pythermalcomfort.utilities.Models` enum is the source:
+// implementation, apart from the JS-only ones below. Its
+// `pythermalcomfort.utilities.Models` enum is the source:
 // the member NAME is the canonical key (also the key used by the limits file
 // in #182), and the VALUE is the string a caller passes.
 //
@@ -31,8 +32,8 @@ const NOT_IMPLEMENTED_IN_JS = [];
 
 // Identifiers jsthermalcomfort has and pythermalcomfort does not (ADR 0003 as
 // amended): EN 16798-1, which adaptive_en implements and ADAPTIVE_EN_INFO
-// names. If pythermalcomfort adds one, the test below fails until the two are
-// reconciled.
+// names. Once PYTHERMALCOMFORT_MODELS is updated with an upstream member of
+// the same name or value, the test below fails until the two are reconciled.
 const JS_ONLY = { en_16798_1_2019: "16798-1-2019" };
 
 describe("Standard mirrors pythermalcomfort's Models enum", () => {
@@ -64,8 +65,10 @@ describe("Standard mirrors pythermalcomfort's Models enum", () => {
       // Canonical: <body>_<number>_<year>, lowercase; a part number stays in
       // the number (en_16798_1_2019).
       expect(name).toMatch(/^(iso|ashrae|en)_\d+(_\d+)?_\d{4}$/);
-      // API string: the short form pythermalcomfort accepts.
+      // API string: the key without its body, "_" written "-", as
+      // pythermalcomfort's values are (a JS-only value has the same form).
       expect(value).toMatch(/^\d+(-\d+)?-\d{4}$/);
+      expect(value).toBe(name.replace(/^[a-z]+_/, "").replaceAll("_", "-"));
       expect(name).not.toBe(value);
     }
   });

@@ -81,16 +81,19 @@ export function transpose_sharp_altitude(sharp, altitude) {
  * Canonical identifiers for the comfort standards this library implements.
  *
  * Mirrors `pythermalcomfort.utilities.Models`: the **property name** is the
- * canonical key, shared across both libraries and used to key the limits file
- * in #182; the **value** is the string a caller passes. Keeping both forms
- * means neither library has to translate, and a binding test asserts that the
- * two key sets are identical apart from the members upstream lacks.
+ * canonical key, shared with pythermalcomfort for every member it has and used
+ * to key the limits file in #182; the **value** is the string a caller passes.
+ * Keeping both forms means neither library has to translate, and a binding
+ * test asserts that the two key sets are identical apart from the members
+ * upstream lacks.
  *
  * Upstream lacks one member: `en_16798_1_2019`, EN 16798-1:2019, which
  * `adaptive_en` implements and `ADAPTIVE_EN_INFO.standards` names (ADR 0003 as
- * amended). Its key and value follow upstream's `<body>_<number>_<year>` and
- * `<number>-<year>`, with the part number kept in the number. No function
- * accepts it as a `standard` argument.
+ * amended). Its key and value take the form of upstream's members
+ * (`ashrae_55_2023 = "55-2023"`, `pythermalcomfort/utilities.py:26-31` at
+ * v4.6.2), with the part number kept in the number. No function computes with
+ * it: `pmv`'s schema lets it through, as it does every `Standard` value, and
+ * the PMV module's own `standard` check rejects it.
  *
  * @public
  */

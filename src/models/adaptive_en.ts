@@ -127,8 +127,8 @@ export const ADAPTIVE_EN_INFO: ModelInfo = deepFreeze({
 // t_running_mean, or an infinite one under limit_inputs; ±inf ones for an
 // infinite t_running_mean without limit_inputs; and for a non-finite tdb, tr
 // or v the comfort temperatures with nothing acceptable. A boolean quantity,
-// which upstream reads as 0 or 1, and a null tdb, tr or v, which it reads as
-// NaN in SI and raises a TypeError for in IP, throw a TypeError too:
+// which upstream reads as 0 or 1, and a null tdb, tr or v, which upstream
+// reads as NaN in SI (in IP it raises a TypeError), throw a TypeError too:
 // quantities are numbers (ADR 0005). round_output is
 // validated, as upstream gives it to ENInputs (adaptive_en.py:92-99), whose
 // base class requires a bool (classes_input.py:79, :123-129). limit_inputs

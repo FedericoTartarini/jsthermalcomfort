@@ -274,7 +274,7 @@ describe("PMV_PPD_ISO_INFO structure", () => {
   });
 });
 
-describe("standards — the editions each model accepts", () => {
+describe("standards — the editions each model implements", () => {
   const infos = Object.entries(pkg as Record<string, unknown>)
     .filter(([name]) => name.endsWith("_INFO"))
     .map(([, info]) => info as ModelInfo);

@@ -15,6 +15,7 @@ import {
   SOLAR_GAIN_INFO,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
+  USE_FANS_HEATWAVES_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -23,6 +24,7 @@ import {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
+  use_fans_heatwaves,
   utci,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
@@ -30,6 +32,7 @@ import { ADAPTIVE_EN_LIMITS } from "../../src/models/adaptive_en.ts";
 import { ASHRAE_55_V_LIMITED } from "../../src/_internal/ashrae55.ts";
 import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import { UTCI_LIMITS } from "../../src/models/utci.ts";
+import { USE_FANS_HEATWAVES_LIMITS } from "../../src/models/use_fans_heatwaves.ts";
 import {
   ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
@@ -62,6 +65,7 @@ const expectedMetadataExports = [
   "SOLAR_GAIN_INFO",
   "UTCI_INFO",
   "UTCI_STRESS_CATEGORY_BINS",
+  "USE_FANS_HEATWAVES_INFO",
 ];
 
 describe("Model Metadata Exports — enumeration test", () => {
@@ -1163,6 +1167,158 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
   });
 });
 
+describe("USE_FANS_HEATWAVES_INFO — the fan-use model's metadata", () => {
+  const base = { tdb: 35, tr: 35, v: 1.0, rh: 50, met: 1.2, clo: 0.5 };
+
+  test("labels the model and lists no standard", () => {
+    expect(USE_FANS_HEATWAVES_INFO.name).toBe("use_fans_heatwaves");
+    expect(USE_FANS_HEATWAVES_INFO.label).toBe("Use of fans during heatwaves");
+    expect(typeof USE_FANS_HEATWAVES_INFO.description).toBe("string");
+    expect(USE_FANS_HEATWAVES_INFO.standards).toEqual([]);
+  });
+
+  test("inputs are the model's seven quantities, in the units other models give them", () => {
+    expect(Object.keys(USE_FANS_HEATWAVES_INFO.inputs)).toEqual([
+      "tdb",
+      "tr",
+      "v",
+      "rh",
+      "met",
+      "clo",
+      "wme",
+    ]);
+    // The same quantity has the same unit in every model (ADR 0011).
+    for (const key of ["tdb", "tr", "rh", "met", "clo", "wme"]) {
+      expect(USE_FANS_HEATWAVES_INFO.inputs[key].unit).toBe(
+        PMV_PPD_ISO_INFO.inputs[key].unit,
+      );
+    }
+    expect(USE_FANS_HEATWAVES_INFO.inputs.v.unit).toBe(
+      ADAPTIVE_ASHRAE_INFO.inputs.v.unit,
+    );
+  });
+
+  // Upstream checks tdb, tr, v, rh, met and clo, and masks for all but rh
+  // (use_fans_heatwaves.py:180-194 at v4.6.2).
+  test("input bounds are the USE_FANS_HEATWAVES_LIMITS objects; wme has none", () => {
+    for (const key of ["tdb", "tr", "v", "rh", "met", "clo"] as const) {
+      expect(USE_FANS_HEATWAVES_INFO.inputs[key].applicability).toBe(
+        USE_FANS_HEATWAVES_LIMITS[key],
+      );
+    }
+    expect(USE_FANS_HEATWAVES_INFO.inputs.wme.applicability).toBeUndefined();
+    expect(USE_FANS_HEATWAVES_INFO.derived).toBeUndefined();
+  });
+
+  test("use_fans_heatwaves' warnings rows carry the bounds INFO references, keyed as INFO keys them", () => {
+    const { warnings } = use_fans_heatwaves({
+      tdb: 60,
+      tr: 10,
+      v: 5,
+      rh: 110,
+      met: 3,
+      clo: 1.5,
+      limit_inputs: false,
+      round_output: false,
+    });
+    const expected = [
+      ["tdb", USE_FANS_HEATWAVES_INFO.inputs.tdb.applicability],
+      ["tr", USE_FANS_HEATWAVES_INFO.inputs.tr.applicability],
+      ["v", USE_FANS_HEATWAVES_INFO.inputs.v.applicability],
+      ["rh", USE_FANS_HEATWAVES_INFO.inputs.rh.applicability],
+      ["met", USE_FANS_HEATWAVES_INFO.inputs.met.applicability],
+      ["clo", USE_FANS_HEATWAVES_INFO.inputs.clo.applicability],
+    ];
+    expect(warnings).toHaveLength(expected.length);
+    warnings.forEach((w, i) => {
+      expect(w.key).toBe(expected[i][0]);
+      expect(w.bound).toBe(expected[i][1]);
+    });
+  });
+
+  test("the published bounds are the ones use_fans_heatwaves gates on, inclusive at both ends", () => {
+    // limit_inputs false needs round_output false, as upstream raises
+    // otherwise (use_fans_heatwaves.py:197-198).
+    const e_skin = (input: Partial<typeof base>, limit_inputs = true) =>
+      use_fans_heatwaves({
+        ...base,
+        ...input,
+        limit_inputs,
+        round_output: limit_inputs,
+      }).e_skin;
+    for (const key of ["tdb", "tr", "v", "met", "clo"] as const) {
+      const { min, max } = USE_FANS_HEATWAVES_INFO.inputs[key]
+        .applicability as { min: number; max: number };
+      expect(Number.isFinite(e_skin({ [key]: min }))).toBe(true);
+      expect(e_skin({ [key]: min - 0.01 })).toBeNaN();
+      expect(Number.isFinite(e_skin({ [key]: max }))).toBe(true);
+      expect(e_skin({ [key]: max + 0.01 })).toBeNaN();
+      // With limit_inputs off the same values compute, so the NaN above came
+      // from the bound and not from the arithmetic.
+      expect(Number.isFinite(e_skin({ [key]: min - 0.01 }, false))).toBe(true);
+      expect(Number.isFinite(e_skin({ [key]: max + 0.01 }, false))).toBe(true);
+    }
+    // rh's bound adds a row and masks nothing (use_fans_heatwaves.py:183-185).
+    const { min, max } = USE_FANS_HEATWAVES_INFO.inputs.rh.applicability as {
+      min: number;
+      max: number;
+    };
+    expect(Number.isFinite(e_skin({ rh: min - 0.01 }))).toBe(true);
+    expect(Number.isFinite(e_skin({ rh: max + 0.01 }))).toBe(true);
+  });
+
+  test("use_fans_heatwaves output keys match USE_FANS_HEATWAVES_INFO.outputs", () => {
+    const result = use_fans_heatwaves(base);
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(
+      Object.keys(USE_FANS_HEATWAVES_INFO.outputs).sort(),
+    );
+  });
+
+  test("boolean outputs are unitless and unclassified; numeric ones carry upstream's units", () => {
+    const result = use_fans_heatwaves(base) as Record<string, unknown>;
+    // As upstream's UseFansHeatwaves documents them (classes_return.py:637-660
+    // at v4.6.2); w and w_max are adimensional.
+    const units: Record<string, string | null> = {
+      e_skin: "W/m²",
+      e_rsw: "W/m²",
+      e_max: "W/m²",
+      q_sensible: "W/m²",
+      q_skin: "W/m²",
+      q_res: "W/m²",
+      t_core: "°C",
+      t_skin: "°C",
+      m_bl: "kg/h/m²",
+      m_rsw: "mL/h/m²",
+      w: null,
+      w_max: null,
+    };
+    for (const [key, info] of Object.entries(USE_FANS_HEATWAVES_INFO.outputs)) {
+      if (typeof result[key] === "boolean") {
+        expect(info).toEqual({ unit: null });
+      } else {
+        expect(typeof result[key]).toBe("number");
+        expect(info).toEqual({ unit: units[key] });
+      }
+    }
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO)).toBe(true);
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.inputs.tdb)).toBe(true);
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.inputs.rh)).toBe(true);
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.outputs.heat_strain)).toBe(
+      true,
+    );
+  });
+});
 describe("UTCI_INFO — the UTCI model's metadata", () => {
   test("labels the model and lists no standard", () => {
     expect(UTCI_INFO.name).toBe("utci");

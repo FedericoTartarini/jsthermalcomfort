@@ -88,6 +88,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/two_nodes_gagge.js").TwoNodesGaggeSetResult} TwoNodesGaggeSetResult
  */
 /**
+ * @typedef {import("./models/use_fans_heatwaves.js").UseFansHeatwavesParams} UseFansHeatwavesParams
+ */
+/**
+ * @typedef {import("./models/use_fans_heatwaves.js").UseFansHeatwavesResult} UseFansHeatwavesResult
+ */
+/**
  * @typedef {import("./models/utci.js").UtciParams} UtciParams
  */
 /**

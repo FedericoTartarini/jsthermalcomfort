@@ -69,7 +69,9 @@ export type { ClassifierBins };
  * `applicability` is the range over which the model is applicable. It is an
  * **applicability gate, not a clamp**. Outside it, and only when `limit_inputs`
  * is enabled, the model returns NaN — it does not constrain the value to the
- * bound. On an output such as `pmv_ppd_iso`'s `pmv`, read it as "results
+ * bound. Where upstream only warns about a bound, the result is not masked
+ * for it and the bound is reported in `warnings` (`use_fans_heatwaves`' `rh`).
+ * On an output such as `pmv_ppd_iso`'s `pmv`, read it as "results
  * outside this band are suppressed", not "the output is guaranteed to fall
  * inside it". A front end should surface it as a condition on the answer rather
  * than as a slider limit.

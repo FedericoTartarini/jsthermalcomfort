@@ -23,9 +23,9 @@ export type JOS3BodyPartsInput =
  * @returns {number[]} An array of 17 values, a copy of an array given.
  *
  * @throws {Error} If the input type is not supported or if the input array
- * is not of length 17, as upstream raises a ValueError; and for an object
- * that lacks a body part, as upstream raises a KeyError (its class is the
- * open question in ticket 25's Comments).
+ * is not of length 17, as upstream raises a ValueError.
+ * @throws {TypeError} For an object that lacks a body part, as upstream
+ * raises a KeyError (ADR 0012 as amended).
  */
 export function to_array_body_parts(inp: JOS3BodyPartsInput): number[] {
   // isinstance(inp, int | float): a bool is an int in Python

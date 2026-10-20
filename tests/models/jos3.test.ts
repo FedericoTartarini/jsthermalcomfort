@@ -70,6 +70,23 @@ const allclose = (
   expect(xs.length).toBe(ys.length);
   xs.forEach((x, i) => expect(isclose(x, ys[i])).toBe(true));
 };
+// The error a call throws, checked for its exact class and message: upstream's
+// exception mapped as ADR 0012 maps it, with upstream's message.
+const expect_throw = (
+  f: () => unknown,
+  cls: new (message?: string) => Error,
+  message: string,
+) => {
+  let error: unknown = undefined;
+  try {
+    f();
+  } catch (e) {
+    error = e;
+  }
+  expect(error).toBeInstanceOf(Error);
+  expect((error as Error).constructor).toBe(cls);
+  expect((error as Error).message).toBe(message);
+};
 // pytest.approx(expected, rel)
 const approx = (actual: number, expected: number, rel = 1e-6) =>
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(
@@ -389,15 +406,13 @@ describe("test_jos3", () => {
         expect(index).toBeLessThan(BODY_NAMES.length);
       }
     }
-    // Upstream raises a KeyError; the library throws, and which class it
-    // throws is the open question in ticket 25's Comments.
-    expect(() =>
-      valid_index_by_layer("non_existent_layer" as "core"),
-    ).toThrow();
+    // Upstream raises a KeyError, a TypeError here (ADR 0012 as amended).
+    expect_throw(
+      () => valid_index_by_layer("non_existent_layer" as "core"),
+      TypeError,
+      "'non_existent_layer'",
+    );
   });
-  test.todo(
-    "test_valid_index_by_layer: the KeyError's class, an open question in ticket 25's Comments (ADR 0012 maps no KeyError)",
-  );
 
   // rng = np.random.default_rng(1337), drawn in upstream's order and pinned
   // in jos3_v4.6.2.json.
@@ -1334,25 +1349,32 @@ describe("jos3 beyond upstream's tests", () => {
     },
   );
 
-  test("shivering throws for options that lack a key upstream reads", () => {
-    // Upstream raises a KeyError; its class is the open question in
-    // ticket 25's Comments.
-    expect(() =>
-      shivering(
-        ones(17, -1),
-        ones(17, -2),
-        ones(17, 36),
-        ones(17, 32),
-        1.72,
-        74.43,
-        "dubois",
-        20,
-        "male",
-        60,
-        { shivering_threshold: false },
-      ),
-    ).toThrow("'limit_dshiv/dt'");
-  });
+  test.each([
+    [{ shivering_threshold: false }, "'limit_dshiv/dt'"],
+    [{ "limit_dshiv/dt": true }, "'shivering_threshold'"],
+  ])(
+    "shivering throws a TypeError for options %j, which lack a key upstream reads (upstream KeyError %s)",
+    (options, message) => {
+      expect_throw(
+        () =>
+          shivering(
+            ones(17, -1),
+            ones(17, -2),
+            ones(17, 36),
+            ones(17, 32),
+            1.72,
+            74.43,
+            "dubois",
+            20,
+            "male",
+            60,
+            options,
+          ),
+        TypeError,
+        message,
+      );
+    },
+  );
 
   test("simulation_time is upstream's elapsed timedelta in seconds, whole microseconds", () => {
     let model = new JOS3();
@@ -1512,6 +1534,172 @@ describe("jos3 beyond upstream's tests", () => {
       const model = new JOS3();
       expect(() => model.simulate(2.5)).toThrow(TypeError);
       expect(() => model.simulate(1, NaN)).toThrow(TypeError);
+    });
+
+    // pythermalcomfort 4.6.2 raises a KeyError for each missing key at the
+    // point it reads it (up_errors.py in the ticket 25 batch-1 scratchpad),
+    // a TypeError here (ADR 0012 as amended); "shivering" is not read.
+    test.each<[string, boolean, string | null]>([
+      ["ava_zero", true, "'ava_zero'"],
+      ["shivering_threshold", true, "'shivering_threshold'"],
+      ["limit_dshiv/dt", true, "'limit_dshiv/dt'"],
+      ["nonshivering_thermogenesis", true, "'nonshivering_thermogenesis'"],
+      ["cold_acclimated", true, "'cold_acclimated'"],
+      ["bat_positive", true, "'bat_positive'"],
+      ["ava_zero", false, "'ava_zero'"],
+      ["shivering_threshold", false, "'shivering_threshold'"],
+      ["limit_dshiv/dt", false, "'limit_dshiv/dt'"],
+      ["cold_acclimated", false, null],
+      ["bat_positive", false, null],
+      ["shivering", true, null],
+      ["shivering", false, null],
+    ])(
+      "options without %s (nonshivering_thermogenesis %s): upstream's KeyError %s as a TypeError, or a run",
+      (key, nst, message) => {
+        const model = new JOS3();
+        model.tdb = 10;
+        const options = model.options as Record<string, unknown>;
+        options.nonshivering_thermogenesis = nst;
+        delete options[key];
+        if (message === null) {
+          model.simulate(1);
+          expect(model.results().simulation_time).toEqual([0, 60]);
+        } else {
+          expect_throw(() => model.simulate(1), TypeError, message);
+        }
+      },
+    );
+
+    test("options emptied: the first key upstream reads, ava_zero, throws", () => {
+      const model = new JOS3();
+      for (const key of Object.keys(model.options)) {
+        delete (model.options as Record<string, unknown>)[key];
+      }
+      expect_throw(() => model.simulate(1), TypeError, "'ava_zero'");
+    });
+
+    // Upstream raises a TypeError (numpy's UFuncTypeError for a string and
+    // an int dtime) or, for [0.01] with an int dtime, numpy's ValueError
+    // (up_errors.py); jos3 D7 (c) throws a TypeError for every truthy value
+    // that is neither true nor a number, with Python's message for a float
+    // dtime, which upstream gives for dtime 60.5. An empty array or object is
+    // truthy in JavaScript (ADR 0001 as amended); upstream reads [] and {} as
+    // false and returns.
+    test.each([
+      ["0.01", "can't multiply sequence by non-int of type 'float'"],
+      [{ a: 1 }, "unsupported operand type(s) for *: 'dict' and 'float'"],
+      [[0.01], "can't multiply sequence by non-int of type 'float'"],
+      [[], "can't multiply sequence by non-int of type 'float'"],
+      [{}, "unsupported operand type(s) for *: 'dict' and 'float'"],
+    ])(
+      'options["limit_dshiv/dt"] %j throws a TypeError (jos3 D7 (c))',
+      (value, message) => {
+        const model = new JOS3();
+        model.tdb = 10;
+        (model.options as Record<string, unknown>)["limit_dshiv/dt"] = value;
+        expect_throw(() => model.simulate(2, 60.5), TypeError, message);
+      },
+    );
+
+    test.each([[NaN], [0], [0.01], [true], [false]])(
+      'options["limit_dshiv/dt"] %p runs, as upstream returns',
+      (value) => {
+        const model = new JOS3();
+        model.tdb = 10;
+        (model.options as Record<string, unknown>)["limit_dshiv/dt"] = value;
+        model.simulate(2);
+        expect(model.results().simulation_time).toEqual([0, 60, 120]);
+      },
+    );
+
+    // numpy's IndexError for an index past the end, a RangeError here
+    // (ADR 0012 as amended), with numpy's message; an array longer than 85
+    // fails numpy's broadcasting with a ValueError, an Error here
+    // (up_errors.py).
+    type BodyGetter =
+      | "t_skin"
+      | "t_core"
+      | "t_cb"
+      | "t_artery"
+      | "t_vein"
+      | "t_superficial_vein"
+      | "t_muscle"
+      | "t_fat";
+    test.each<[number, BodyGetter, string]>([
+      [0, "t_skin", "index 6 is out of bounds for axis 0 with size 0"],
+      [0, "t_core", "index 3 is out of bounds for axis 0 with size 0"],
+      [0, "t_cb", "index 0 is out of bounds for axis 0 with size 0"],
+      [0, "t_artery", "index 1 is out of bounds for axis 0 with size 0"],
+      [0, "t_vein", "index 2 is out of bounds for axis 0 with size 0"],
+      [
+        0,
+        "t_superficial_vein",
+        "index 27 is out of bounds for axis 0 with size 0",
+      ],
+      [0, "t_muscle", "index 4 is out of bounds for axis 0 with size 0"],
+      [0, "t_fat", "index 5 is out of bounds for axis 0 with size 0"],
+      [1, "t_skin", "index 6 is out of bounds for axis 0 with size 1"],
+      [1, "t_core", "index 3 is out of bounds for axis 0 with size 1"],
+      [1, "t_artery", "index 1 is out of bounds for axis 0 with size 1"],
+      [84, "t_skin", "index 84 is out of bounds for axis 0 with size 84"],
+    ])(
+      "t_body of %i values: the %s getter throws upstream's IndexError as a RangeError",
+      (n, getter, message) => {
+        const model = new JOS3();
+        model.t_body = new Array<number>(n).fill(36);
+        expect_throw(() => model[getter], RangeError, message);
+      },
+    );
+
+    test.each<[number, new (message?: string) => Error, string]>([
+      [0, RangeError, "index 3 is out of bounds for axis 0 with size 0"],
+      [1, RangeError, "index 3 is out of bounds for axis 0 with size 1"],
+      [84, RangeError, "index 84 is out of bounds for axis 0 with size 84"],
+      [
+        86,
+        Error,
+        "operands could not be broadcast together with shapes (86,) (85,) ",
+      ],
+    ])(
+      "t_body of %i values: simulate throws upstream's exception as a %p",
+      (n, cls, message) => {
+        const model = new JOS3();
+        model.t_body = new Array<number>(n).fill(36);
+        expect_throw(() => model.simulate(1), cls, message);
+      },
+    );
+
+    test("t_body of 1, 84 or 86 values: the getters upstream can index return", () => {
+      const model = new JOS3();
+      model.t_body = [36.5];
+      expect(model.t_cb).toBe(36.5);
+      model.t_body = new Array<number>(84).fill(36);
+      expect(model.t_fat).toEqual([36, 36]);
+      model.t_body = new Array<number>(86).fill(36);
+      expect(model.t_skin).toHaveLength(17);
+    });
+
+    test("a setter given an object that lacks a body part throws upstream's KeyError as a TypeError", () => {
+      const model = new JOS3();
+      const parts = Object.fromEntries(
+        BODY_NAMES.slice(0, 16).map((name) => [name, 25]),
+      );
+      expect_throw(
+        () => {
+          model.tdb = parts as never;
+        },
+        TypeError,
+        "'right_foot'",
+      );
+    });
+
+    test("_set_ex_q throws upstream's KeyError for a tissue that is not a layer as a TypeError", () => {
+      const model = new JOS3();
+      expect_throw(
+        () => model._set_ex_q("bone" as "core", 1),
+        TypeError,
+        "'bone'",
+      );
     });
   });
 });

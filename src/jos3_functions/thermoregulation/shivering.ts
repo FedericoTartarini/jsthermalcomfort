@@ -1,7 +1,13 @@
 import { Default } from "../Default.ts";
 import { error_signals } from "./error_signals.ts";
 import { bsa_rate } from "../bsa_rate.ts";
-import { full, key_error, np_average, py_max } from "../../_internal/numpy.ts";
+import {
+  dict_get,
+  full,
+  np_average,
+  py_max,
+  py_type_name,
+} from "../../_internal/numpy.ts";
 import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
@@ -89,17 +95,13 @@ export function shivering(
     options !== undefined &&
     Object.keys(options).length > 0;
 
-  // Upstream's options[...] raises a KeyError for a missing key; its class
-  // is the open question in ticket 25's Comments.
-  const option = (key: string) => {
-    if (!Object.prototype.hasOwnProperty.call(options, key)) {
-      throw key_error(key);
-    }
-    return (options as ShiveringOptions)[key];
-  };
-
+  // Upstream's options[...] raises a KeyError for a missing key
+  // (thermoregulation.py:1207, :1224 at v4.6.2), a TypeError here (ADR 0012
+  // as amended; jos3 D6). Both options are read for JavaScript's truth value
+  // (ADR 0001 as amended): NaN is true in Python and false here, and an
+  // empty array or object false in Python and true here.
   if (has_options) {
-    if (option("shivering_threshold")) {
+    if (dict_get(options, "shivering_threshold")) {
       // Asaka, 2016
       // Threshold of starting shivering
       const tskm = np_average(t_skin, Default.local_bsa); // Mean skin temp.
@@ -118,13 +120,28 @@ export function shivering(
       }
     }
 
-    const limit = option("limit_dshiv/dt");
+    const limit = dict_get(options, "limit_dshiv/dt");
     if (limit) {
+      // jos3 D7 (c): a truthy limit that is neither true nor a number throws
+      // a TypeError. Upstream computes `limit * dtime` and compares it, which
+      // raises a TypeError (numpy's UFuncTypeError for a string and an int
+      // dtime), or numpy's ValueError for a one-element list and an int
+      // dtime, whose product is a longer list (pythermalcomfort 4.6.2,
+      // `.scratch/v2-models/wave-2/research/jos3/probe_limit.py`); a JS
+      // number has no int/float distinction to choose between them. The
+      // message is Python's for `limit * dtime` with a float dtime.
+      if (limit !== true && typeof limit !== "number") {
+        throw new TypeError(
+          typeof limit === "string" || Array.isArray(limit)
+            ? "can't multiply sequence by non-int of type 'float'"
+            : `unsupported operand type(s) for *: '${py_type_name(limit)}' and 'float'`,
+        );
+      }
       const dshiv = sig_shiv - PRE_SHIV; // Asaka, 2016 dshiv < 0.0077 [W/s]
       const limit_dshiv =
         limit === true
           ? 0.0077 * dtime // default is 0.0077 [W/s]
-          : (limit as number) * dtime;
+          : limit * dtime;
       if (dshiv > limit_dshiv) {
         sig_shiv = limit_dshiv + PRE_SHIV;
       } else if (dshiv < -limit_dshiv) {

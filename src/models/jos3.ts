@@ -24,11 +24,14 @@ import type {
   JOS3BodyParts,
 } from "../jos3_functions/_body_parts.ts";
 import {
+  dict_get,
+  ewa,
   full,
   key_error,
   np_average,
   np_sum,
   py_type_name,
+  take,
 } from "../_internal/numpy.ts";
 import { fixed_hc } from "../jos3_functions/thermoregulation/fixed_hc.ts";
 import { conv_coef } from "../jos3_functions/thermoregulation/conv_coef.ts";
@@ -641,7 +644,13 @@ export class JOS3 {
    *
    * @throws {TypeError} If times is not an integer, as Python's range raises
    * (a boolean too, which range reads as 0 or 1: ADR 0005), or dtime is not
-   * a finite number (ADR 0001).
+   * a finite number (ADR 0001); if `options` lacks a key the step reads, as
+   * upstream raises a KeyError (ADR 0012 as amended), or its
+   * `limit_dshiv/dt` is truthy and neither true nor a number.
+   * @throws {RangeError} If t_body has fewer than NUM_NODES values, as numpy
+   * raises an IndexError (ADR 0012 as amended).
+   * @throws {Error} If t_body has more than NUM_NODES values, as numpy's
+   * broadcasting raises a ValueError.
    */
   simulate(times: number, dtime: number = 60, output: boolean = true): void {
     if (typeof times !== "number" || !Number.isInteger(times)) {
@@ -765,7 +774,13 @@ export class JOS3 {
       this._age,
       this._ci,
     );
-    if (this.options.ava_zero && passive) {
+    // Upstream reads options["ava_zero"] whatever passive is (jos3.py:849
+    // at v4.6.2), so a missing key raises its KeyError here, a TypeError
+    // (ADR 0012 as amended; jos3 D6). The option is read for JavaScript's
+    // truth value (ADR 0001 as amended): NaN is true in Python and false
+    // here, and an empty array or object false in Python and true here.
+    const ava_zero = dict_get(this.options, "ava_zero");
+    if (ava_zero && passive) {
       bf_ava_hand = 0;
       bf_ava_foot = 0;
     }
@@ -786,16 +801,22 @@ export class JOS3 {
       this.options,
     );
 
-    // Calculate non-shivering thermogenesis (NST) [W]
-    const q_nst = this.options.nonshivering_thermogenesis
+    // Calculate non-shivering thermogenesis (NST) [W]. Upstream reads
+    // nonshivering_thermogenesis, then cold_acclimated and bat_positive only
+    // when it is true (jos3.py:870, :877-878 at v4.6.2): a missing key
+    // raises its KeyError there, a TypeError here (ADR 0012 as amended;
+    // jos3 D6). Each is read for JavaScript's truth value (ADR 0001 as
+    // amended): NaN is true in Python and false here, and an empty array or
+    // object false in Python and true here.
+    const q_nst = dict_get(this.options, "nonshivering_thermogenesis")
       ? nonshivering(
           err_sk,
           this._height,
           this._weight,
           this._bsa_equation,
           this._age,
-          this.options.cold_acclimated,
-          this.options.bat_positive,
+          dict_get(this.options, "cold_acclimated") as boolean,
+          dict_get(this.options, "bat_positive") as boolean,
         )
       : full(Default.num_body_parts, 0); // not consider NST
 
@@ -965,7 +986,13 @@ export class JOS3 {
 
     // Combines the current body temperature, the boundary matrix, and the heat generation matrix
     // to calculate the new body temperature distribution (arr).
-    const arr = this._t_body.map((t, i) => t + arr_b[i] * arr_to[i] + arr_q[i]);
+    // A t_body of more than NUM_NODES values fails numpy's broadcasting, a
+    // ValueError upstream (jos3.py:1061 at v4.6.2), an Error here (ADR 0012).
+    const arr = ewa(
+      (t, bt) => t + bt,
+      this._t_body,
+      arr_b.map((b, i) => b * arr_to[i]),
+    ).map((x, i) => x + arr_q[i]);
 
     // ------------------------------------------------------------------
     // New body temp. [°C]
@@ -1164,6 +1191,9 @@ export class JOS3 {
    * @param {number | number[]} value - Heat gain [W]
    *
    * @return {number[]} Extra heat gain of model.
+   *
+   * @throws {TypeError} For a name that is not a layer, as upstream raises a
+   * KeyError (ADR 0012 as amended).
    */
   _set_ex_q(
     tissue: JOS3LayerName,
@@ -1324,7 +1354,9 @@ export class JOS3 {
   // Renamed from body_temp, with no alias (jos3 D2, ADR 0010).
   /**
    * All segment temperatures of JOS-3 [°C], NUM_NODES values. The setter
-   * copies the array.
+   * copies the array, of any length, as upstream's; a getter that indexes
+   * past the end of a shorter one throws a RangeError, as numpy raises an
+   * IndexError (ADR 0012 as amended).
    *
    * @return {number[]}
    */
@@ -1432,11 +1464,12 @@ export class JOS3 {
    * @returns {number[]}
    */
   get t_skin(): number[] {
-    return INDEX.skin.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.skin);
   }
 
   set t_skin(inp: JOS3BodyPartsInput) {
     const values = to_17_finite(inp, "t_skin");
+    take(this._t_body, INDEX.skin); // numpy's IndexError for a short t_body
     INDEX.skin.forEach((node, k) => (this._t_body[node] = values[k]));
   }
 
@@ -1446,7 +1479,7 @@ export class JOS3 {
    * @returns {number[]}
    */
   get t_core(): number[] {
-    return INDEX.core.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.core);
   }
 
   /**
@@ -1455,7 +1488,7 @@ export class JOS3 {
    * @return {number}
    */
   get t_cb(): number {
-    return this._t_body[0];
+    return take(this._t_body, [0])[0];
   }
 
   /**
@@ -1464,7 +1497,7 @@ export class JOS3 {
    * @return {number[]}
    */
   get t_artery(): number[] {
-    return INDEX.artery.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.artery);
   }
 
   /**
@@ -1473,7 +1506,7 @@ export class JOS3 {
    * @return {number[]}
    */
   get t_vein(): number[] {
-    return INDEX.vein.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.vein);
   }
 
   /**
@@ -1482,7 +1515,7 @@ export class JOS3 {
    * @return {number[]}
    */
   get t_superficial_vein(): number[] {
-    return INDEX.sfvein.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.sfvein);
   }
 
   /**
@@ -1491,7 +1524,7 @@ export class JOS3 {
    * @return {number[]}
    */
   get t_muscle(): number[] {
-    return INDEX.muscle.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.muscle);
   }
 
   /**
@@ -1500,7 +1533,7 @@ export class JOS3 {
    * @return {number[]}
    */
   get t_fat(): number[] {
-    return INDEX.fat.map((i) => this._t_body[i]);
+    return take(this._t_body, INDEX.fat);
   }
 
   /**

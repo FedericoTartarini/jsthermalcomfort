@@ -209,17 +209,52 @@ export function py_div(a: number, b: number): number {
 }
 
 /**
- * Python's `KeyError` (and `IndexError`, its fellow `LookupError`): a key or
- * an index upstream looks up and does not find. Which JavaScript class it
- * maps to is not decided (ADR 0012 maps TypeError, ValueError,
- * ZeroDivisionError and AttributeError only); it is the open question in
- * ticket 25's Comments. Until it is decided this throws a plain `Error`,
- * the class every other one extends, with Python's `str()` of the
- * exception, the key in quotes.
+ * Python's `KeyError`: a key upstream looks up and does not find. A
+ * `TypeError` here (ADR 0012 as amended 2026-10-21: a missing key is a
+ * missing member), with Python's `str()` of the exception, the key in
+ * quotes.
  *
  * @param {string} key - the key that was not found
- * @returns {Error} the error to throw
+ * @returns {TypeError} the error to throw
  */
-export function key_error(key: string): Error {
-  return new Error(`'${key}'`);
+export function key_error(key: string): TypeError {
+  return new TypeError(`'${key}'`);
+}
+
+/**
+ * `d[key]` on a Python dict: the value of an own key, or Python's `KeyError`
+ * (`key_error`) when `d` has no such key.
+ *
+ * @param {object} d - the object read as a dict
+ * @param {string} key - the key
+ * @returns {unknown} its value
+ */
+export function dict_get(d: object, key: string): unknown {
+  if (!Object.prototype.hasOwnProperty.call(d, key)) throw key_error(key);
+  return (d as Record<string, unknown>)[key];
+}
+
+/**
+ * `a[indices]`, numpy's indexing of a 1-D array by non-negative integers.
+ * An index past the end raises numpy's `IndexError`, a `RangeError` here
+ * (ADR 0012 as amended 2026-10-21), with numpy's message, naming the first
+ * such index in `indices`' order (pythermalcomfort 4.6.2's getters of a
+ * short `t_body` name 6 for `t_skin` with 0 values and 84 with 84 values).
+ *
+ * @param {readonly number[]} a - the array
+ * @param {readonly number[]} indices - the indices, each 0 or more
+ * @returns {number[]} the values at the indices
+ */
+export function take(
+  a: readonly number[],
+  indices: readonly number[],
+): number[] {
+  for (const i of indices) {
+    if (i >= a.length) {
+      throw new RangeError(
+        `index ${i} is out of bounds for axis 0 with size ${a.length}`,
+      );
+    }
+  }
+  return indices.map((i) => a[i]);
 }

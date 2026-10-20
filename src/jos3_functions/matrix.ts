@@ -149,13 +149,12 @@ export function index_by_layer(layer: string): number[] {
  * @returns {number[]} the indices, in body part order, of the body parts
  * that have the layer
  *
- * @throws {Error} For a name that is not a layer, as upstream raises a
- * KeyError (its class is the open question in ticket 25's Comments).
+ * @throws {TypeError} For a name that is not a layer, as upstream raises a
+ * KeyError (ADR 0012 as amended).
  */
 export function valid_index_by_layer(layer: JOS3LayerName): number[] {
   // Upstream's IDICT[bn][layer] raises a KeyError for a name that is not a
-  // layer (matrix.py:109); its class is the open question in ticket 25's
-  // Comments.
+  // layer (matrix.py:109), a TypeError here (ADR 0012 as amended).
   if (!LAYER_NAMES.includes(layer)) throw key_error(String(layer));
   // Gets valid indices of the layer name
   const out_index: number[] = [];

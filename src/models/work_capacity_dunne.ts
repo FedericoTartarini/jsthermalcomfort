@@ -18,12 +18,12 @@ export interface WorkCapacityDunneParams {
 // upstream, given a work_intensity string it accepts, returns NaN for NaN, 0
 // for +inf and 100 for -inf. A boolean, null or array wbgt throws a
 // TypeError too (ADR 0005), where upstream, given such a string, returns 100
-// for True and False and a numpy array for a list, and raises a TypeError
-// for None. Given any other work_intensity, upstream raises for
-// work_intensity instead (its ValueError for a value outside the three, its
-// AttributeError for None or a list with no item outside the three), where
-// this function checks wbgt first. work_intensity is declared here and checked
-// below, as upstream's WorkCapacityHothapsInputs checks it.
+// for True and False and a numpy array for a list of numbers or booleans,
+// and raises a TypeError for None. Given any other work_intensity, upstream
+// raises for work_intensity instead (its ValueError for a value outside the
+// three, its AttributeError for None or a list with no item outside the
+// three), where this function checks wbgt first. work_intensity is declared
+// here and checked below, as upstream's WorkCapacityHothapsInputs checks it.
 const WORK_CAPACITY_DUNNE_SCHEMA = {
   wbgt: { type: "number" },
   work_intensity: {},

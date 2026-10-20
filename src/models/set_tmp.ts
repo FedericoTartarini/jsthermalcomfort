@@ -88,9 +88,10 @@ export interface SetTmpParams {
  * @example
  * const set = set_tmp({ tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 }); // returns {set: 24.3, warnings: []}
  */
-// A non-finite number throws a TypeError here, where upstream raises
-// StopIteration for most and returns NaN for a NaN v (ADR 0001, reason
-// three). position is declared here and checked by two_nodes_gagge, with
+// A non-finite number throws a TypeError here (ADR 0001, reason three), where
+// upstream raises StopIteration for most; for a NaN or -inf v it returns NaN
+// under limit_inputs and a number without (24.3 with the docstring example's
+// other inputs), and for an inf v it raises StopIteration. position is declared here and checked by two_nodes_gagge, with
 // upstream's message, as upstream checks it in both SETInputs and
 // GaggeTwoNodesInputs. round_output and calculate_ce are declared but not
 // validated: upstream does not give them to SETInputs (set_tmp.py:101-113)

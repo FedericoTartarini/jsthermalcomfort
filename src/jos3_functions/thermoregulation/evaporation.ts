@@ -7,8 +7,8 @@ import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * Local skin wettedness [-], the evaporative heat loss at the skin by
- * sweating and diffusion [W], the maximum evaporative heat loss at the skin
- * [W] and the evaporative heat loss at the skin by sweating only [W].
+ * sweating and diffuse [W], the maximum evaporative heat loss at the skin
+ * [W] and the evaporative heat loss at the skin by only sweating [W].
  */
 export type EvaporationResult = [
   wet: number[],
@@ -41,8 +41,8 @@ export type EvaporationResult = [
  *
  * @returns {[number[], number[], number[], number[]]} wet, e_sk, e_max,
  * e_sweat: local skin wettedness [-], evaporative heat loss at the skin by
- * sweating and diffusion [W], maximum evaporative heat loss at the skin [W],
- * and evaporative heat loss at the skin by sweating only [W].
+ * sweating and diffuse [W], maximum evaporative heat loss at the skin [W],
+ * and evaporative heat loss at the skin by only sweating [W].
  */
 export function evaporation(
   err_cr: readonly number[],

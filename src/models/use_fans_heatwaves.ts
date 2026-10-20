@@ -147,8 +147,10 @@ export const USE_FANS_HEATWAVES_INFO: ModelInfo = deepFreeze({
   },
 });
 
-// A non-finite number throws a TypeError here (ADR 0001, reason three), where
-// upstream raises StopIteration from two_nodes_gagge. A boolean quantity,
+// A non-finite number throws a TypeError here (ADR 0001, reason three).
+// Upstream raises StopIteration from two_nodes_gagge for most, but returns a
+// result for a NaN or -inf v (NaN under limit_inputs), a non-finite
+// max_skin_blood_flow, and a NaN or +inf max_sweating. A boolean quantity,
 // which upstream reads as 0 or 1, and a null one throw a TypeError too:
 // quantities are numbers (ADR 0005). limit_inputs is validated, as upstream
 // gives it to UseFansHeatwavesInputs (use_fans_heatwaves.py:95-108). position

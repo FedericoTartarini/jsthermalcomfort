@@ -675,8 +675,9 @@ describe("use_fans_heatwaves beyond upstream's tests", () => {
       expect(() => use_fans_heatwaves(params)).toThrow(TypeError);
     });
 
-    // ADR 0001: a public model throws a TypeError for a non-finite number,
-    // where upstream raises StopIteration.
+    // ADR 0001: a public model throws a TypeError for a non-finite number.
+    // Upstream raises StopIteration for these, except for a NaN or -inf v,
+    // which it masks to NaN.
     test.each(
       quantities.flatMap((key) =>
         [NaN, Infinity, -Infinity].map((value) => [key, value] as const),

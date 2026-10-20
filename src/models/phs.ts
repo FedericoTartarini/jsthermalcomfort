@@ -616,6 +616,23 @@ interface _PhsKernelInputs {
   is_2023: boolean;
 }
 
+// Upstream's kernel is compiled by numba, whose float division raises
+// ZeroDivisionError("division by zero") for a zero divisor, as Python's does.
+// phs runs it inside a parallel prange loop that drops the exception and
+// returns whatever its np.empty_like outputs held (models/phs.py:862-876 at
+// v4.6.2; 0.0 on the runs the reviewers made, -inf and -1.77e+307 at 4096
+// elements, .scratch/v2-models/wave-2/research/phs/d3_*.py). The library
+// throws the class the raise maps to, at each divisor upstream's kernel
+// computes from the inputs (ADR 0012 as amended,
+// .scratch/v2-models/wave-2/decisions.md D3 (ii)); x === 0 is true for -0
+// too, as Python's 0.0 == -0.0 is.
+function _divisor(x: number): number {
+  if (x === 0) {
+    throw new RangeError("division by zero");
+  }
+  return x;
+}
+
 // Upstream's _phs_optimized_scalar (models/phs.py:528-829 at v4.6.2), line for
 // line; met and wme in W/m2. Under numba its integer powers are
 // multiplications (ADR 0009): `(x + 273) ** 4` is (y*y)*(y*y) and `x**2` is
@@ -662,7 +679,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
   // DuBois body surface area [m2]
   const a_dubois = 0.202 * Math.pow(weight, 0.425) * Math.pow(height, 0.725);
   // specific heat of the body [J/kg/C/min]
-  const sp_heat = (met_to_w_m2 * weight) / a_dubois;
+  const sp_heat = (met_to_w_m2 * weight) / _divisor(a_dubois);
 
   let d_lim_t_re = 0; // maximum allowable exposure time for heat storage [min]
   // maximum allowable exposure time for sweat rate grams, mean subject [min]
@@ -724,8 +741,9 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
   // Static boundary layer thermal insulation in quiet air
   const i_a_st = 0.111;
 
-  // Total static insulation
-  const i_tot_st = i_cl_st + i_a_st / fcl;
+  // Total static insulation. fcl is 0 at clo -1 / 0.28 under 2023 and
+  // -1 / 0.3 under 2004; it is checked here, at its first division (:614).
+  const i_tot_st = i_cl_st + i_a_st / _divisor(fcl);
   let v_r;
   if (def_speed > 0) {
     if (def_dir === 1) {
@@ -774,7 +792,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
   const corr_e = (2.6 * corr_tot - 6.5) * corr_tot + 4.9;
   let im_dyn = i_mst * corr_e;
   im_dyn = Math.min(im_dyn, 0.9);
-  const r_t_dyn = i_tot_dyn / im_dyn / 16.7;
+  const r_t_dyn = i_tot_dyn / _divisor(im_dyn) / 16.7;
   const t_exp = 28.56 + 0.115 * tdb + 0.641 * p_a; // expired air temperature
   // respiratory convective heat flow [W/m2]
   const c_res = 0.001516 * met * (t_exp - tdb);
@@ -857,7 +875,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
       t_sk = t_sk_eq;
     }
     // Saturated water vapour pressure at the surface of the skin
-    const p_sk = 0.6105 * Math.exp((17.27 * t_sk) / (t_sk + 237.3));
+    const p_sk = 0.6105 * Math.exp((17.27 * t_sk) / _divisor(t_sk + 237.3));
     let t_cl = tr + 0.1; // clothing surface temperature
     let h_r;
     while (true) {
@@ -865,10 +883,10 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
       const t_cl_k = t_cl + 273;
       h_r =
         (f_cl_r * aux_r * (t_cl_k * t_cl_k * (t_cl_k * t_cl_k) - tr_k4)) /
-        (t_cl - tr);
+        _divisor(t_cl - tr);
       const t_cl_new =
-        (fcl * (hc_dyn * tdb + h_r * tr) + t_sk / i_cl_dyn) /
-        (fcl * (hc_dyn + h_r) + 1 / i_cl_dyn);
+        (fcl * (hc_dyn * tdb + h_r * tr) + t_sk / _divisor(i_cl_dyn)) /
+        _divisor(fcl * (hc_dyn + h_r) + 1 / i_cl_dyn);
       if (Math.abs(t_cl - t_cl_new) <= 0.001) {
         break;
       }
@@ -878,7 +896,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
     const convection = fcl * hc_dyn * (t_cl - tdb);
     const radiation = fcl * h_r * (t_cl - tr);
     // maximum evaporative heat flow at the skin surface [W/m2]
-    let e_max = (p_sk - p_a) / r_t_dyn;
+    let e_max = (p_sk - p_a) / _divisor(r_t_dyn);
     if (e_max === 0) {
       // added this otherwise e_req / e_max cannot be calculated
       e_max = 0.001;
@@ -934,7 +952,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
       t_sk_t_cr_wg = Math.min(t_sk_t_cr_wg, 0.3);
       t_sk_t_cr_wg = Math.max(t_sk_t_cr_wg, 0.1);
       t_cr =
-        d_storage / sp_heat +
+        d_storage / _divisor(sp_heat) +
         (t_sk0 * t_sk_t_cr_wg0) / 2 -
         (t_sk * t_sk_t_cr_wg) / 2;
       t_cr = (t_cr + t_cr0 * (1 - t_sk_t_cr_wg0 / 2)) / (1 - t_sk_t_cr_wg / 2);

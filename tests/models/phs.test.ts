@@ -1483,6 +1483,46 @@ describe("phs beyond upstream's tests", () => {
       );
     });
 
+    // Upstream's scalar kernel raises ZeroDivisionError("division by zero")
+    // at a zero divisor (pythermalcomfort 4.6.2 with numba's prange made a
+    // range, so the kernel's exception is not dropped); phs then returns
+    // whatever np.empty_like held (models/phs.py:862-876). The library throws
+    // the class the raise maps to (ADR 0012 as amended,
+    // .scratch/v2-models/wave-2/decisions.md D3 (ii)).
+    test.each<[string, Partial<PhsParams>]>([
+      ["i_mst 0 (im_dyn, :654)", { i_mst: 0 }],
+      ["height 0 (a_dubois, :560)", { height: 0 }],
+      ["height 0 under 7933-2004", { height: 0, standard: "7933-2004" }],
+      [
+        "clo 0 with limit_inputs false (i_cl_dyn, :727)",
+        { clo: 0, limit_inputs: false },
+      ],
+      [
+        "clo 0 with limit_inputs false under 7933-2004",
+        { clo: 0, limit_inputs: false, standard: "7933-2004" },
+      ],
+      [
+        "clo -1 / 0.28 with limit_inputs false (fcl, :614)",
+        { clo: -3.571428571428571, limit_inputs: false },
+      ],
+      [
+        "clo -1 / 0.3 with limit_inputs false under 7933-2004",
+        {
+          clo: -3.3333333333333335,
+          limit_inputs: false,
+          standard: "7933-2004",
+        },
+      ],
+      [
+        "tr 1e17 with limit_inputs false (t_cl - tr, :726)",
+        { tr: 1e17, limit_inputs: false },
+      ],
+    ])("%s throws RangeError('division by zero')", (_, extra) => {
+      const call = () => phs({ ...base, duration: 30, ...extra } as PhsParams);
+      expect(call).toThrow(RangeError);
+      expect(call).toThrow(new RangeError("division by zero"));
+    });
+
     // PHSInputs checks posture in any case (classes_input.py:180-183), and
     // _posture_to_code then compares the exact string (models/phs.py:500-510).
     test.each(["Standing", "STANDING", null])(

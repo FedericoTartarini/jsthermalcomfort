@@ -187,14 +187,17 @@ export function humidex(params: HumidexParams): HumidexResult {
     tdb +
     (5 / 9) * ((6.112 * 10 ** ((7.5 * tdb) / (237.7 + tdb)) * rh) / 100 - 10);
   if (model === "masterson") {
-    // D1 (ADR 0004 as amended): at rh 0 the dew point is NaN, and so is the
-    // humidex, which upstream classifies as "Heat stroke probable" below.
+    // ADR 0004 names the humidex at rh 0 among the disputed values that
+    // follow upstream: the dew point there is NaN, and so is the humidex,
+    // which upstream classifies as "Heat stroke probable" below.
     // ADR 0009: Math.exp and Math.log here and in dew_point_tmp differ from
-    // numpy's by an ulp on some arguments. Against upstream 4.6.2, 316 of
-    // 11,854 unrounded Masterson results were not bit-identical, by at most
-    // 4.0e-13 (tdb 78.84987885033297, rh 67.42745516229786); rounded, 7 of
-    // 393 inputs where upstream's humidex is an exact rounding tie rounded
-    // the other way, and no category differed.
+    // numpy's by an ulp on some arguments. In a 54,642-case sweep against
+    // upstream 4.6.2, 316 of 11,854 unrounded Masterson results were not
+    // bit-identical, by at most 4.0e-13 (tdb 78.84987885033297,
+    // rh 67.42745516229786). Near a 0.05 tie such a difference can move the
+    // rounded humidex by 0.1, and at a category edge the category with it:
+    // at tdb 30.716639528095126, rh 40, upstream returns 35.1, "Evident
+    // discomfort", and this returns 35.0, "Noticeable discomfort".
     hi =
       tdb +
       (5 / 9) *

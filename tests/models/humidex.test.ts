@@ -109,8 +109,9 @@ describe("humidex beyond upstream's tests", () => {
     });
   });
 
-  // Decision D1 (ADR 0004 as amended): the dew point at rh 0 is NaN, and
-  // upstream returns a NaN humidex classified "Heat stroke probable".
+  // ADR 0004 names the humidex at rh 0 among the disputed values that follow
+  // upstream: the dew point at rh 0 is NaN, and upstream returns a NaN
+  // humidex classified "Heat stroke probable".
   describe("rh 0", () => {
     test.each([
       [30, true],
@@ -204,9 +205,12 @@ describe("humidex beyond upstream's tests", () => {
       });
     });
 
-    // Below -237.7 °C the rana exponent's denominator is negative, so 10 to
-    // it overflows; times rh 0 it is NaN. Either way upstream returns
-    // "Heat stroke probable".
+    // Just below -237.7 °C the rana exponent's denominator is a small
+    // negative number, so the exponent is large and 10 to it overflows to
+    // Infinity (upstream too, at -237.70000001, -238 and -240); times rh 0 it
+    // is NaN. Farther below the power is finite again: at -250 °C upstream
+    // and this both return 4.665575643047245e+152. Upstream classifies an
+    // infinite and a NaN humidex "Heat stroke probable".
     test("an infinite or NaN humidex is heat stroke probable", () => {
       expect(humidex({ tdb: -237.70000001, rh: 50 })).toEqual({
         humidex: Infinity,
@@ -339,7 +343,7 @@ describe("humidex beyond upstream's tests", () => {
     );
 
     test.each(["true", 1, null])(
-      "round_output %p throws upstream's TypeError",
+      "round_output %p throws a TypeError, as upstream raises one",
       (round_output) => {
         expect(call({ ...base, round_output })).toThrow(TypeError);
       },

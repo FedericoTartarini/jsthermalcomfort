@@ -88,7 +88,13 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
 });
 
 // A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three).
+// propagate (ADR 0001, reason three). round_output is declared but not
+// validated: upstream does not give it to PMVPPDInputs
+// (pythermalcomfort/classes_input.py:593-620 at v4.6.2) and reads it with
+// `if round_output:` (pmv_ppd_iso.py:205), so the shared module reads it with
+// JavaScript's truth value. Python's differs on three values (ADR 0001): NaN
+// is true in Python and false here, and an empty array or object is false in
+// Python and true here.
 const PMV_PPD_ISO_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
@@ -103,7 +109,7 @@ const PMV_PPD_ISO_SCHEMA = {
   standard: { enum: [Standard.iso_7730_2005, Standard.iso_7730_2025] },
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
-  round_output: { type: "boolean" },
+  round_output: {},
 };
 
 /**
@@ -190,7 +196,6 @@ export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
       standard,
       units: _upper_units(units),
       limit_inputs,
-      round_output,
     },
     PMV_PPD_ISO_SCHEMA,
   );

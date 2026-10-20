@@ -508,7 +508,13 @@ describe("vertical_tmp_grad_ppd beyond upstream's tests", () => {
       for (const limit_inputs of [true, false]) {
         let thrown: unknown;
         try {
-          vertical_tmp_grad_ppd({ ...inputs, limit_inputs });
+          vertical_tmp_grad_ppd({
+            ...inputs,
+            limit_inputs,
+            // The cooling effect cannot be calculated here; its console
+            // message is not what this test checks.
+            suppress_warnings: true,
+          });
         } catch (error) {
           thrown = error;
         }

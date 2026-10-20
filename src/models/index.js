@@ -36,6 +36,8 @@ import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO, UTCI_STRESS_CATEGORY_BINS } from "./utci.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./jos3.ts";
+import { work_capacity_dunne } from "./work_capacity_dunne.ts";
+import { WorkIntensity } from "./work_capacity.ts";
 import {
   PMV_CATEGORY_BINS_ISO_7730_2005,
   PMV_CATEGORY_BINS_ISO_7730_2025,
@@ -102,6 +104,8 @@ export {
   wci,
   WCI_INFO,
   wind_chill_temperature,
+  work_capacity_dunne,
+  WorkIntensity,
 };
 
 export default {
@@ -155,5 +159,7 @@ export default {
   wci,
   WCI_INFO,
   wind_chill_temperature,
+  work_capacity_dunne,
+  WorkIntensity,
   JOS3,
 };

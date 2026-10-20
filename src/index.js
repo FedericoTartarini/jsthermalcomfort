@@ -148,6 +148,12 @@ export { default as jos3_functions } from "./jos3_functions/index.ts";
 /**
  * @typedef {import("./models/wci.js").WciResult} WciResult
  */
+/**
+ * @typedef {import("./models/work_capacity.js").WorkCapacity} WorkCapacity
+ */
+/**
+ * @typedef {import("./models/work_capacity_dunne.js").WorkCapacityDunneParams} WorkCapacityDunneParams
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

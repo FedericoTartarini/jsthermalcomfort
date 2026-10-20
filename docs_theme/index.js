@@ -144,6 +144,7 @@ const displayNameMap = {
   utci: "Universal Thermal Climate Index (UTCI)",
   pet_steady: "Physiological Equivalent Temperature (PET)",
   JOS3: "JOS-3 Thermoregulation Model",
+  work_capacity_dunne: "Work Capacity (Dunne et al.)",
   // Psychrometrics
   p_sat: "Saturation Vapor Pressure (p_sat)",
   p_sat_torr: "Saturation Vapor Pressure in Torr",

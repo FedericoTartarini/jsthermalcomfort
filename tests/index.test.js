@@ -147,6 +147,17 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("use_fans_heatwaves");
   });
 
+  it("should have models.work_capacity_dunne", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("work_capacity_dunne");
+    expect(namedExports).toHaveProperty("work_capacity_dunne");
+  });
+
+  // Upstream's enum (pythermalcomfort/classes_input.py:41-46 at v4.6.2).
+  it("should have models.WorkIntensity", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("WorkIntensity");
+    expect(namedExports).toHaveProperty("WorkIntensity");
+  });
+
   // pythermalcomfort.models exports JOS3; it was only in the default export.
   it("should have models.JOS3, also as a named export", () => {
     expect(jsthermalcomfort.models).toHaveProperty("JOS3");

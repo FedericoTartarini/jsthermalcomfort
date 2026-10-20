@@ -3,7 +3,7 @@ import {
   units_converter,
   validateInputs,
 } from "../utilities/utilities.js";
-import { set_tmp } from "./set_tmp.js";
+import { set_tmp } from "./set_tmp.ts";
 import { _check_params_object, _upper_units } from "../_internal/validation.ts";
 import { brentq, RootNotBracketedError } from "../_internal/brentq.ts";
 
@@ -206,7 +206,7 @@ function _set_for_cooling_effect(
   clo: number,
   wme: number,
 ): number {
-  return set_tmp(
+  return set_tmp({
     tdb,
     tr,
     v,
@@ -214,14 +214,8 @@ function _set_for_cooling_effect(
     met,
     clo,
     wme,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    false,
-    {
-      round: false,
-      calculate_ce: true,
-    },
-  ).set;
+    limit_inputs: false,
+    round_output: false,
+    calculate_ce: true,
+  }).set;
 }

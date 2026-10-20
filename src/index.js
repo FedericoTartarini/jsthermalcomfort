@@ -55,6 +55,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/pmv_ppd_iso.js").PmvPpdIsoResult} PmvPpdIsoResult
  */
 /**
+ * @typedef {import("./models/set_tmp.js").SetTmpParams} SetTmpParams
+ */
+/**
+ * @typedef {import("./models/set_tmp.js").SetTmpResult} SetTmpResult
+ */
+/**
  * @typedef {import("./models/solar_gain.js").SolarGainParams} SolarGainParams
  */
 /**

@@ -2,6 +2,7 @@ import { describe, expect, test } from "@jest/globals";
 import * as pkg from "../../src/index.js";
 import {
   ADAPTIVE_ASHRAE_INFO,
+  ADAPTIVE_EN_INFO,
   ANKLE_DRAFT_INFO,
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
@@ -15,6 +16,7 @@ import {
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
+  adaptive_en,
   ankle_draft,
   clo_tout,
   heat_index_rothfusz,
@@ -24,6 +26,7 @@ import {
   utci,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
+import { ADAPTIVE_EN_LIMITS } from "../../src/models/adaptive_en.ts";
 import { ASHRAE_55_V_LIMITED } from "../../src/_internal/ashrae55.ts";
 import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import { UTCI_LIMITS } from "../../src/models/utci.ts";
@@ -43,6 +46,7 @@ import type { ModelInfo } from "../../src/models/modelDocs.ts";
 // manually updated whenever a new *_INFO or *_BINS export is published.
 const expectedMetadataExports = [
   "ADAPTIVE_ASHRAE_INFO",
+  "ADAPTIVE_EN_INFO",
   "ANKLE_DRAFT_INFO",
   "classifyFromBins",
   "CLO_TOUT_INFO",
@@ -914,6 +918,110 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
     );
     expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.outputs)).toBe(true);
     expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80)).toBe(
+      true,
+    );
+  });
+});
+
+describe("ADAPTIVE_EN_INFO — the EN 16798-1 adaptive model's metadata", () => {
+  const base = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
+
+  // Upstream's Models enum has no EN 16798-1 member, so neither has Standard.
+  test("labels the model and lists no standard", () => {
+    expect(ADAPTIVE_EN_INFO.name).toBe("adaptive_en");
+    expect(ADAPTIVE_EN_INFO.label).toBe("Adaptive (EN 16798-1)");
+    expect(typeof ADAPTIVE_EN_INFO.description).toBe("string");
+    expect(ADAPTIVE_EN_INFO.standards).toEqual([]);
+  });
+
+  test("inputs are adaptive_en's four quantities, with adaptive_ashrae's units", () => {
+    expect(Object.keys(ADAPTIVE_EN_INFO.inputs)).toEqual([
+      "tdb",
+      "tr",
+      "t_running_mean",
+      "v",
+    ]);
+    // The same quantity has the same unit in every model (ADR 0011).
+    for (const key of ["tdb", "tr", "t_running_mean", "v"]) {
+      expect(ADAPTIVE_EN_INFO.inputs[key].unit).toBe(
+        ADAPTIVE_ASHRAE_INFO.inputs[key].unit,
+      );
+    }
+  });
+
+  // Upstream bounds t_running_mean only (adaptive_en.py:122 at v4.6.2).
+  test("t_running_mean's bound is the ADAPTIVE_EN_LIMITS object; tdb, tr and v have none", () => {
+    expect(ADAPTIVE_EN_INFO.inputs.t_running_mean.applicability).toBe(
+      ADAPTIVE_EN_LIMITS.t_running_mean,
+    );
+    expect(ADAPTIVE_EN_LIMITS.t_running_mean).not.toBe(
+      ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
+    );
+    for (const key of ["tdb", "tr", "v"]) {
+      expect(ADAPTIVE_EN_INFO.inputs[key].applicability).toBeUndefined();
+    }
+    expect(ADAPTIVE_EN_INFO.derived).toBeUndefined();
+  });
+
+  test("adaptive_en's warnings row carries the bound INFO references, keyed as INFO keys it", () => {
+    const { warnings } = adaptive_en({
+      ...base,
+      t_running_mean: 40,
+      limit_inputs: false,
+    });
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].key).toBe("t_running_mean");
+    expect(warnings[0].bound).toBe(
+      ADAPTIVE_EN_INFO.inputs.t_running_mean.applicability,
+    );
+  });
+
+  test("the t_running_mean bound is the one adaptive_en gates on, inclusive at both ends", () => {
+    const { min, max } = ADAPTIVE_EN_INFO.inputs.t_running_mean
+      .applicability as { min: number; max: number };
+    const tmp_cmf = (trm: number, limit_inputs = true) =>
+      adaptive_en({ ...base, t_running_mean: trm, limit_inputs }).tmp_cmf;
+    expect(tmp_cmf(min - 0.01)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(min))).toBe(true);
+    expect(Number.isFinite(tmp_cmf(max))).toBe(true);
+    expect(tmp_cmf(max + 0.01)).toBeNaN();
+    // With limit_inputs off the same values compute, so the NaN above came
+    // from the bound and not from the arithmetic.
+    expect(Number.isFinite(tmp_cmf(min - 0.01, false))).toBe(true);
+    expect(Number.isFinite(tmp_cmf(max + 0.01, false))).toBe(true);
+  });
+
+  test("adaptive_en output keys match ADAPTIVE_EN_INFO.outputs", () => {
+    const result = adaptive_en(base);
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(Object.keys(ADAPTIVE_EN_INFO.outputs).sort());
+  });
+
+  test("temperature outputs are in °C, boolean outputs are unitless and unclassified", () => {
+    const result = adaptive_en(base) as Record<string, unknown>;
+    for (const [key, info] of Object.entries(ADAPTIVE_EN_INFO.outputs)) {
+      if (typeof result[key] === "boolean") {
+        expect(info.unit).toBeNull();
+        expect(info.classifier).toBeUndefined();
+      } else {
+        expect(typeof result[key]).toBe("number");
+        expect(info.unit).toBe("°C");
+      }
+    }
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO.inputs.t_running_mean)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO.inputs.v)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(ADAPTIVE_EN_INFO.outputs.acceptability_cat_i)).toBe(
       true,
     );
   });

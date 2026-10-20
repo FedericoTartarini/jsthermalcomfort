@@ -196,7 +196,7 @@ describe("units_converter", () => {
 
   // Upstream calls from_units.upper() on what it is given
   // (pythermalcomfort/utilities.py:133 at v4.6.2), so
-  // units_converter(from_units=None, tdb=77), 5, 1.5, True, ["iso"] and
+  // units_converter(from_units=None, tdb=77), 5, 1.5, True, ["IP"] and
   // {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
   // maps to a TypeError when a wrong type raises it.
   it.each([null, 5, 1.5, true, ["IP"], { a: 1 }])(
@@ -275,7 +275,7 @@ describe("running_mean_outdoor_temperature", () => {
   // Upstream calls units.upper() on what it is given
   // (pythermalcomfort/environment/running_mean_outdoor_temperature.py:121 at
   // v4.6.2), so running_mean_outdoor_temperature([20] * 7, units=None), 5,
-  // 1.5, True, ["iso"] and {"a": 1} raise AttributeError in pythermalcomfort
+  // 1.5, True, ["SI"] and {"a": 1} raise AttributeError in pythermalcomfort
   // 4.6.2, which ADR 0012 maps to a TypeError when a wrong type raises it.
   it.each([null, 5, 1.5, true, ["SI"], { a: 1 }])(
     "throws TypeError if units is %p, not a string",

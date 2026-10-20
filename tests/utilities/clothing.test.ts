@@ -193,8 +193,8 @@ describe("clo_dynamic_ashrae", () => {
 
   // Upstream calls model.lower() on what it is given
   // (pythermalcomfort/clothing/clo_dynamic_ashrae.py:43 at v4.6.2), so
-  // clo_dynamic_ashrae(clo=1, met=1.5, model=None), 5, 1.5, True, ["iso"] and
-  // {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
+  // clo_dynamic_ashrae(clo=1, met=1.5, model=None), 5, 1.5, True, ["55-2023"]
+  // and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
   // maps to a TypeError when a wrong type raises it.
   test.each([null, 5, 1.5, true, ["55-2023"], { a: 1 }])(
     "throws TypeError if standard is %p, not a string",
@@ -263,7 +263,7 @@ describe("clo_dynamic_iso", () => {
   // Upstream calls model.lower() on what it is given
   // (pythermalcomfort/clothing/clo_dynamic_iso.py:57 at v4.6.2), so
   // clo_dynamic_iso(clo=1, met=1.5, v=0.1, model=None), 5, 1.5, True,
-  // ["iso"] and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2,
+  // ["9920-2007"] and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2,
   // which ADR 0012 maps to a TypeError when a wrong type raises it.
   test.each([null, 5, 1.5, true, ["9920-2007"], { a: 1 }])(
     "throws TypeError if standard is %p, not a string",

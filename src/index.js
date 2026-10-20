@@ -117,6 +117,12 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/vertical_tmp_grad_ppd.js").VerticalTmpGradPpdResult} VerticalTmpGradPpdResult
  */
+/**
+ * @typedef {import("./models/wci.js").WciParams} WciParams
+ */
+/**
+ * @typedef {import("./models/wci.js").WciResult} WciResult
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

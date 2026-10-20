@@ -19,6 +19,7 @@ import {
   UTCI_STRESS_CATEGORY_BINS,
   USE_FANS_HEATWAVES_INFO,
   VERTICAL_TMP_GRAD_PPD_INFO,
+  WCI_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -31,6 +32,7 @@ import {
   use_fans_heatwaves,
   utci,
   vertical_tmp_grad_ppd,
+  wci,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
 import { ADAPTIVE_EN_LIMITS } from "../../src/models/adaptive_en.ts";
@@ -74,6 +76,7 @@ const expectedMetadataExports = [
   "UTCI_STRESS_CATEGORY_BINS",
   "USE_FANS_HEATWAVES_INFO",
   "VERTICAL_TMP_GRAD_PPD_INFO",
+  "WCI_INFO",
 ];
 
 describe("Model Metadata Exports — enumeration test", () => {
@@ -1534,6 +1537,51 @@ describe("HUMIDEX_INFO — the humidex's metadata", () => {
     expect(Object.isFrozen(HUMIDEX_DISCOMFORT_BINS)).toBe(true);
     expect(Object.isFrozen(HUMIDEX_DISCOMFORT_BINS.edges)).toBe(true);
     expect(Object.isFrozen(HUMIDEX_DISCOMFORT_BINS.labels)).toBe(true);
+  });
+});
+
+describe("WCI_INFO — the wind chill index's metadata", () => {
+  test("labels the model and lists no standard", () => {
+    expect(WCI_INFO.name).toBe("wci");
+    expect(WCI_INFO.label).toBe("Wind Chill Index (WCI)");
+    expect(typeof WCI_INFO.description).toBe("string");
+    // Upstream follows the ASHRAE 2017 Handbook Fundamentals, chapter 9
+    // (wci.py:14 at v4.6.2), which no Standard member names.
+    expect(WCI_INFO.standards).toEqual([]);
+  });
+
+  test("inputs are tdb and v, in the units other models give them, with no applicability", () => {
+    expect(Object.keys(WCI_INFO.inputs)).toEqual(["tdb", "v"]);
+    // The same quantity has the same unit in every model (ADR 0011).
+    expect(WCI_INFO.inputs.tdb.unit).toBe(PMV_PPD_ISO_INFO.inputs.tdb.unit);
+    expect(WCI_INFO.inputs.v.unit).toBe(UTCI_INFO.inputs.v.unit);
+    // Upstream bounds nothing (wci.py:59-76), so there is no gate to publish.
+    expect(WCI_INFO.inputs.tdb.applicability).toBeUndefined();
+    expect(WCI_INFO.inputs.v.applicability).toBeUndefined();
+    expect(WCI_INFO.derived).toBeUndefined();
+  });
+
+  test("wci is the one output, in W/m²", () => {
+    // Upstream's WCI documents wci in [W/m^2] (classes_return.py:741-742).
+    expect(WCI_INFO.outputs).toEqual({ wci: { unit: "W/m²" } });
+  });
+
+  test("wci output keys match WCI_INFO.outputs", () => {
+    const result = wci({ tdb: -5, v: 5.5 });
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result).filter((key) => key !== "warnings");
+    expect(resultKeys).toEqual(Object.keys(WCI_INFO.outputs));
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(WCI_INFO)).toBe(true);
+    expect(Object.isFrozen(WCI_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(WCI_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(WCI_INFO.inputs.tdb)).toBe(true);
+    expect(Object.isFrozen(WCI_INFO.inputs.v)).toBe(true);
+    expect(Object.isFrozen(WCI_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(WCI_INFO.outputs.wci)).toBe(true);
   });
 });
 

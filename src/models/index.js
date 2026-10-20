@@ -10,7 +10,7 @@ import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { two_nodes_gagge } from "./two_nodes_gagge.ts";
 import { set_tmp } from "./set_tmp.ts";
-import { wc } from "./wc.js";
+import { wci, WCI_INFO } from "./wci.ts";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en, ADAPTIVE_EN_INFO } from "./adaptive_en.ts";
 import { at } from "./at.js";
@@ -97,7 +97,8 @@ export {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
-  wc,
+  wci,
+  WCI_INFO,
   wind_chill_temperature,
 };
 
@@ -148,7 +149,8 @@ export default {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
-  wc,
+  wci,
+  WCI_INFO,
   wind_chill_temperature,
   JOS3,
 };

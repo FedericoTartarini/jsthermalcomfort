@@ -126,7 +126,7 @@ const displayNameMap = {
   discomfort_index: "Discomfort Index (DI)",
   two_nodes_gagge: "Two-Node Model (Gagge)",
   set_tmp: "Standard Effective Temperature (SET)",
-  wc: "Wind Chill Index (WCI)",
+  wci: "Wind Chill Index (WCI)",
   adaptive_en: "Adaptive EN-16798",
   at: "Apparent Temperature (AT)",
   pmv_ppd: "PMV-PPD Model",

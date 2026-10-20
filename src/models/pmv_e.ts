@@ -110,7 +110,7 @@ const PMV_E_SCHEMA = {
  *   function returns nan. If False, returns `e_pmv` even if input values are
  *   outside the applicability limits of the model. Defaults to True.
  *
- *   Note: The ISO 7730-2005 {@link #ref_2|[2]} and ISO 7730-2025 {@link #ref_28|[28]} limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
+ *   Note: The ISO 7730-2005 {@link #ref_2|[2]} and ISO 7730-2025 limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
  *   0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, and -2 <= PMV <= 2.
  *
  * @returns {PmvEResult} the Adjusted Predicted Mean Votes with Expectancy Factor, in `e_pmv`, and the applicability bounds the call broke.

@@ -3,7 +3,7 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
 } from "./heat_index_rothfusz.ts";
-import { phs } from "./phs.js";
+import { phs, PHS_INFO } from "./phs.ts";
 import { humidex, HUMIDEX_DISCOMFORT_BINS, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
@@ -74,6 +74,7 @@ export {
   HUMIDEX_INFO,
   net,
   phs,
+  PHS_INFO,
   pet_steady,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
@@ -126,6 +127,7 @@ export default {
   HUMIDEX_INFO,
   net,
   phs,
+  PHS_INFO,
   pet_steady,
   pmv_ppd_ashrae,
   pmv_ppd_iso,

@@ -61,6 +61,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/humidex.js").HumidexResult} HumidexResult
  */
 /**
+ * @typedef {import("./models/phs.js").PhsParams} PhsParams
+ */
+/**
+ * @typedef {import("./models/phs.js").PhsResult} PhsResult
+ */
+/**
  * @typedef {import("./models/pmv_a.js").PmvAParams} PmvAParams
  */
 /**

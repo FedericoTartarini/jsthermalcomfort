@@ -9,6 +9,7 @@ import {
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   HUMIDEX_DISCOMFORT_BINS,
   HUMIDEX_INFO,
+  PHS_INFO,
   PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -26,6 +27,7 @@ import {
   clo_tout,
   heat_index_rothfusz,
   humidex,
+  phs,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
@@ -37,6 +39,7 @@ import {
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
 import { ADAPTIVE_EN_LIMITS } from "../../src/models/adaptive_en.ts";
 import { ASHRAE_55_V_LIMITED } from "../../src/_internal/ashrae55.ts";
+import { PHS_LIMITS } from "../../src/models/phs.ts";
 import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import { UTCI_LIMITS } from "../../src/models/utci.ts";
 import { USE_FANS_HEATWAVES_LIMITS } from "../../src/models/use_fans_heatwaves.ts";
@@ -64,6 +67,7 @@ const expectedMetadataExports = [
   "HEAT_INDEX_STRESS_CATEGORY_BINS",
   "HUMIDEX_DISCOMFORT_BINS",
   "HUMIDEX_INFO",
+  "PHS_INFO",
   "PMV_CATEGORY_BINS_ISO_7730_2005",
   "PMV_CATEGORY_BINS_ISO_7730_2025",
   "PMV_COMPLIANCE_INTERVAL_ASHRAE",
@@ -1864,5 +1868,185 @@ describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
     expect(Object.isFrozen(SOLAR_GAIN_INFO.inputs.f_svv)).toBe(true);
     expect(Object.isFrozen(SOLAR_GAIN_INFO.outputs)).toBe(true);
     expect(Object.isFrozen(SOLAR_GAIN_INFO.outputs.erf)).toBe(true);
+  });
+});
+
+describe("PHS_INFO — the Predicted Heat Strain model's metadata", () => {
+  // Upstream's docstring example (models/phs.py:136-147 at v4.6.2).
+  const base = {
+    tdb: 40,
+    tr: 40,
+    rh: 33.85,
+    v: 0.3,
+    met: 2.5,
+    clo: 0.5,
+    posture: "standing",
+  } as const;
+
+  test("labels the model and lists both ISO 7933 editions, the default first", () => {
+    expect(PHS_INFO.name).toBe("phs");
+    expect(PHS_INFO.label).toBe("Predicted Heat Strain (PHS)");
+    expect(typeof PHS_INFO.description).toBe("string");
+    expect(PHS_INFO.standards).toEqual([
+      Standard.iso_7933_2023,
+      Standard.iso_7933_2004,
+    ]);
+  });
+
+  test("PHS_INFO.standards is the set phs's standard validation accepts", () => {
+    const accepted = Object.values(Standard).filter((standard) => {
+      try {
+        phs({ ...base, standard: standard as never });
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    expect([...PHS_INFO.standards].sort()).toEqual(accepted.sort());
+  });
+
+  test("inputs are the model's seven quantities, in the units other models give them", () => {
+    expect(Object.keys(PHS_INFO.inputs)).toEqual([
+      "tdb",
+      "tr",
+      "v",
+      "rh",
+      "met",
+      "clo",
+      "wme",
+    ]);
+    // The same quantity has the same unit in every model (ADR 0011).
+    for (const key of ["tdb", "tr", "v", "rh", "met", "clo", "wme"]) {
+      expect(PHS_INFO.inputs[key].unit).toBe(
+        USE_FANS_HEATWAVES_INFO.inputs[key].unit,
+      );
+    }
+  });
+
+  // ADR 0011 as amended (D1, D2): tr is checked as tr - tdb, p_a in Pa and
+  // met in W/m2, each a derived row; the bounds are 7933-2023's.
+  test("bounds are the PHS_LIMITS 7933-2023 objects; tr, rh, met and wme have none", () => {
+    const limits = PHS_LIMITS[Standard.iso_7933_2023];
+    for (const key of ["tdb", "v", "clo"] as const) {
+      expect(PHS_INFO.inputs[key].applicability).toBe(limits[key]);
+    }
+    for (const key of ["tr", "rh", "met", "wme"]) {
+      expect(PHS_INFO.inputs[key].applicability).toBeUndefined();
+    }
+    expect(Object.keys(PHS_INFO.derived!)).toEqual([
+      "tr_minus_tdb",
+      "pa",
+      "met_w_m2",
+    ]);
+    expect(PHS_INFO.derived!.tr_minus_tdb).toEqual({
+      unit: "°C",
+      applicability: limits.tr_minus_tdb,
+    });
+    expect(PHS_INFO.derived!.tr_minus_tdb.applicability).toBe(
+      limits.tr_minus_tdb,
+    );
+    // pa is in Pa, as in PMV_PPD_ISO_INFO and UTCI_INFO (ADR 0011).
+    expect(PHS_INFO.derived!.pa.unit).toBe(PMV_PPD_ISO_INFO.derived!.pa.unit);
+    expect(PHS_INFO.derived!.pa.applicability).toBe(limits.pa);
+    expect(PHS_INFO.derived!.met_w_m2.unit).toBe("W/m²");
+    expect(PHS_INFO.derived!.met_w_m2.applicability).toBe(limits.met_w_m2);
+  });
+
+  test.each([Standard.iso_7933_2023, Standard.iso_7933_2004] as const)(
+    "phs's warnings rows under %s carry that edition's PHS_LIMITS bounds, keyed as INFO keys them",
+    (standard) => {
+      const { warnings } = phs({
+        tdb: 55,
+        tr: 120,
+        v: 3.5,
+        rh: 60,
+        met: 8,
+        clo: 1.2,
+        posture: "standing",
+        standard,
+        limit_inputs: false,
+        round_output: false,
+      });
+      const limits = PHS_LIMITS[standard];
+      const expected = [
+        ["tdb", "input", limits.tdb],
+        ["tr_minus_tdb", "derived", limits.tr_minus_tdb],
+        ["v", "input", limits.v],
+        ["pa", "derived", limits.pa],
+        ["met_w_m2", "derived", limits.met_w_m2],
+        ["clo", "input", limits.clo],
+      ] as const;
+      expect(warnings).toHaveLength(expected.length);
+      warnings.forEach((w, i) => {
+        expect(w.key).toBe(expected[i][0]);
+        expect(w.role).toBe(expected[i][1]);
+        expect(w.bound).toBe(expected[i][2]);
+        const info = w.role === "input" ? PHS_INFO.inputs : PHS_INFO.derived!;
+        expect(Object.keys(info)).toContain(w.key);
+      });
+    },
+  );
+
+  test("the published input bounds are the ones phs gates on, inclusive at both ends", () => {
+    const t_re = (input: Record<string, number>, limit_inputs = true) =>
+      phs({ ...base, ...input, limit_inputs, round_output: false }).t_re;
+    // tr follows tdb, so tr - tdb stays 0.
+    const cases = {
+      tdb: (x: number) => ({ tdb: x, tr: x }),
+      v: (x: number) => ({ v: x }),
+      clo: (x: number) => ({ clo: x }),
+    };
+    for (const [key, input] of Object.entries(cases)) {
+      const { min, max } = PHS_INFO.inputs[key].applicability as {
+        min: number;
+        max: number;
+      };
+      expect(Number.isFinite(t_re(input(min)))).toBe(true);
+      expect(t_re(input(min - 0.01))).toBeNaN();
+      expect(Number.isFinite(t_re(input(max)))).toBe(true);
+      expect(t_re(input(max + 0.01))).toBeNaN();
+      // With limit_inputs off the same values compute, so the NaN above came
+      // from the bound and not from the arithmetic.
+      expect(Number.isFinite(t_re(input(min - 0.01), false))).toBe(true);
+      expect(Number.isFinite(t_re(input(max + 0.01), false))).toBe(true);
+    }
+  });
+
+  test("phs output keys match PHS_INFO.outputs, in upstream's units", () => {
+    const result = phs(base);
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result).filter((key) => key !== "warnings");
+    expect(resultKeys).toEqual(Object.keys(PHS_INFO.outputs));
+    // As upstream's PHS documents them (classes_return.py:357-385 at v4.6.2);
+    // t_sk_t_cr_wg is a fraction.
+    expect(
+      Object.fromEntries(
+        Object.entries(PHS_INFO.outputs).map(([key, info]) => [key, info.unit]),
+      ),
+    ).toEqual({
+      t_re: "°C",
+      t_sk: "°C",
+      t_cr: "°C",
+      t_cr_eq: "°C",
+      t_sk_t_cr_wg: null,
+      d_lim_loss_50: "min",
+      d_lim_loss_95: "min",
+      d_lim_t_re: "min",
+      sweat_loss_g: "g",
+      sweat_rate_watt: "W/m²",
+      evap_load_wm2_min: "W·min/m²",
+    });
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(PHS_INFO)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.inputs.tdb)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.derived)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.derived!.pa)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(PHS_INFO.outputs.t_re)).toBe(true);
   });
 });

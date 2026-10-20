@@ -2,6 +2,7 @@ import { round, validateInputs } from "../utilities/utilities.js";
 import { dew_point_tmp } from "../_internal/dew_point_tmp.ts";
 import { deepFreeze } from "./modelDocs.ts";
 import { _check_params_object } from "../_internal/validation.ts";
+import type { ClassifierBins } from "./classifierBins.ts";
 import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
@@ -37,6 +38,37 @@ export interface HumidexParams {
 }
 
 /**
+ * Discomfort bins for the humidex (right-inclusive), in °C: upstream's edges
+ * and labels (humidex.py:91-96 at v4.6.2). A value on an edge belongs to the
+ * lower category:
+ * - humidex <= 30: "Little or no discomfort"
+ * - 30 < humidex <= 35: "Noticeable discomfort"
+ * - 35 < humidex <= 40: "Evident discomfort"
+ * - 40 < humidex <= 45: "Intense discomfort; avoid exertion"
+ * - 45 < humidex <= 54: "Dangerous discomfort"
+ * - humidex > 54: "Heat stroke probable"
+ *
+ * Upstream sets the category with masks, not bins, and `humidex` keeps them.
+ * The top edge is Infinity, not a finite value as in
+ * `HEAT_INDEX_STRESS_CATEGORY_BINS`, because upstream gives every humidex
+ * above 54 "Heat stroke probable". The bins give NaN for a NaN or +Infinity
+ * humidex, as `classifyFromBins` does for any bins, where `humidex` returns
+ * "Heat stroke probable" (upstream's default, humidex.py:91).
+ */
+export const HUMIDEX_DISCOMFORT_BINS: Readonly<ClassifierBins> = Object.freeze({
+  edges: [30, 35, 40, 45, 54, Infinity],
+  labels: [
+    "Little or no discomfort",
+    "Noticeable discomfort",
+    "Evident discomfort",
+    "Intense discomfort; avoid exertion",
+    "Dangerous discomfort",
+    "Heat stroke probable",
+  ],
+  right: true,
+});
+
+/**
  * Model metadata for the humidex.
  *
  * Experimental — the shape of `ModelInfo` may change before release.
@@ -44,10 +76,9 @@ export interface HumidexParams {
  * `standards` is empty: upstream names no standard. No quantity has an
  * applicability bound, since upstream checks none and only raises for an
  * rh outside 0 to 100 % (humidex.py:70-71 at v4.6.2), so there is no
- * `HUMIDEX_LIMITS`. `discomfort` carries no classifier: upstream sets the
- * category with masks, not `_mapping()` (:91-96), and gives a NaN humidex
- * "Heat stroke probable", which bins cannot express, as `classifyFromBins`
- * returns NaN for NaN.
+ * `HUMIDEX_LIMITS`. `discomfort` is classified by
+ * `HUMIDEX_DISCOMFORT_BINS`, which give every finite humidex the category
+ * the model gives it.
  *
  * @public
  */
@@ -63,7 +94,7 @@ export const HUMIDEX_INFO: ModelInfo = deepFreeze({
   },
   outputs: {
     humidex: { unit: "°C" },
-    discomfort: { unit: null },
+    discomfort: { unit: null, classifier: HUMIDEX_DISCOMFORT_BINS },
   },
 });
 

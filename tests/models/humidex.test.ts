@@ -1,6 +1,11 @@
 import { describe, expect, test } from "@jest/globals";
 import { humidex } from "../../src/models/index.js";
+import {
+  HUMIDEX_DISCOMFORT_BINS,
+  HUMIDEX_INFO,
+} from "../../src/models/humidex.ts";
 import type { HumidexParams } from "../../src/models/humidex.ts";
+import { classifyFromBins } from "../../src/models/classifierBins.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
@@ -219,6 +224,68 @@ describe("humidex beyond upstream's tests", () => {
         discomfort: "Little or no discomfort",
         warnings: [],
       });
+    });
+  });
+
+  // The model keeps upstream's masks (humidex.py:91-96); the bins give a
+  // consumer the same categories as a classifier.
+  describe("HUMIDEX_DISCOMFORT_BINS", () => {
+    test("are upstream's five right-inclusive edges, a top edge of Infinity, and its six labels", () => {
+      expect(HUMIDEX_DISCOMFORT_BINS).toEqual({
+        edges: [30, 35, 40, 45, 54, Infinity],
+        labels: [
+          "Little or no discomfort",
+          "Noticeable discomfort",
+          "Evident discomfort",
+          "Intense discomfort; avoid exertion",
+          "Dangerous discomfort",
+          "Heat stroke probable",
+        ],
+        right: true,
+      });
+    });
+
+    test("HUMIDEX_INFO classifies discomfort with them", () => {
+      expect(HUMIDEX_INFO.outputs.discomfort.classifier).toBe(
+        HUMIDEX_DISCOMFORT_BINS,
+      );
+    });
+
+    // Each rounded humidex at rh 50 lands on a category edge or 0.1 above
+    // it; the discomfort is upstream's for the same call.
+    test.each([
+      [26.15898951357993, 30, "Little or no discomfort"],
+      [26.22327611127268, 30.1, "Noticeable discomfort"],
+      [29.28170994652131, 35, "Noticeable discomfort"],
+      [29.34228599031696, 35.1, "Evident discomfort"],
+      [32.22334206934383, 40, "Evident discomfort"],
+      [32.280394784860306, 40.1, "Intense discomfort; avoid exertion"],
+      [34.993975620226195, 45, "Intense discomfort; avoid exertion"],
+      [35.047719144623464, 45.1, "Dangerous discomfort"],
+      [39.585719074318774, 54, "Dangerous discomfort"],
+      [39.6340774621599, 54.1, "Heat stroke probable"],
+      [-237.7, -243.3, "Little or no discomfort"],
+    ])(
+      "tdb %p, rh 50: %p is %p, by the model and by the bins",
+      (tdb, value, discomfort) => {
+        const result = humidex({ tdb, rh: 50 });
+        expect(result.humidex).toBe(value);
+        expect(result.discomfort).toBe(discomfort);
+        expect(classifyFromBins(value, HUMIDEX_DISCOMFORT_BINS)).toBe(
+          discomfort,
+        );
+      },
+    );
+
+    test("a NaN or +Infinity humidex is heat stroke probable by the model and NaN by the bins", () => {
+      const infinite = humidex({ tdb: -237.70000001, rh: 50 });
+      const nan = humidex({ tdb: 30, rh: 0, model: "masterson" });
+      for (const result of [infinite, nan]) {
+        expect(result.discomfort).toBe("Heat stroke probable");
+        expect(
+          classifyFromBins(result.humidex, HUMIDEX_DISCOMFORT_BINS),
+        ).toBeNaN();
+      }
     });
   });
 

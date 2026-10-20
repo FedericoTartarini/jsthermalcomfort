@@ -247,6 +247,12 @@ export function two_nodes_gagge(
     },
     TWO_NODES_GAGGE_SCHEMA,
   );
+  // ADR 0005 as amended: position takes one string. Upstream broadcasts a
+  // list (position=["sitting"] returns [23.51] in 4.6.2), and String() would
+  // pass ["sitting"] to the check below and compute it as standing.
+  if (Array.isArray(position)) {
+    throw new TypeError("position must be a string, got an array");
+  }
   // Upstream skips a None position, which then computes as standing.
   if (
     position !== null &&

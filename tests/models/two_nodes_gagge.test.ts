@@ -59,6 +59,86 @@ describe("two_nodes_gagge beyond upstream's tests", () => {
     }
   });
 
+  // Upstream's fixture has no row with a non-default wme, body_surface_area
+  // or p_atm.
+  test.each([
+    [
+      { wme: 0.5 },
+      {
+        e_skin: 8.474954747359735,
+        e_rsw: -0.0,
+        e_max: 141.24924578932894,
+        q_sensible: 39.38340630838099,
+        q_skin: 47.85836105574073,
+        q_res: 5.159704668041644,
+        t_core: 36.649152918616046,
+        t_skin: 32.203684229881866,
+        m_bl: 3.603793486757707,
+        m_rsw: -0.0,
+        w: 0.06,
+        w_max: 0.649654290898561,
+        set: 23.90125008148429,
+        et: 24.98866872231046,
+        pmv_gagge: -1.1540564265645477,
+        pmv_set: -1.2613805196017867,
+        disc: -0.35696351619470656,
+        t_sens: -0.35696351619470656,
+      },
+    ],
+    [
+      { body_surface_area: 2.0 },
+      {
+        e_skin: 16.17961312466139,
+        e_rsw: 7.007931195388816,
+        e_max: 159.86929668326502,
+        q_sensible: 47.615173881574826,
+        q_skin: 63.79478700623622,
+        q_res: 5.159704668041644,
+        t_core: 36.85516331045233,
+        t_skin: 33.71325832869229,
+        m_bl: 12.919597254280337,
+        m_rsw: 10.305781169689435,
+        w: 0.10120525617071197,
+        w_max: 0.649654290898561,
+        set: 23.559441266318448,
+        et: 25.000016230415103,
+        pmv_gagge: 0.11158710043676474,
+        pmv_set: -0.005233051681076339,
+        disc: 0.11091308544955392,
+        t_sens: 0.09156951205024809,
+      },
+    ],
+    [
+      { p_atm: 90000 },
+      {
+        e_skin: 17.037433203624804,
+        e_rsw: 7.026493252344099,
+        e_max: 173.87549244035586,
+        q_sensible: 46.751498821103134,
+        q_skin: 63.78893202472794,
+        q_res: 5.159704668041644,
+        t_core: 36.85519472421706,
+        t_skin: 33.71409216205026,
+        m_bl: 12.923366906047182,
+        m_rsw: 10.333078312270732,
+        w: 0.09798639799377776,
+        w_max: 0.649654290898561,
+        set: 23.801391731576466,
+        et: 25.000030131117995,
+        pmv_gagge: 0.11286948550875846,
+        pmv_set: 0.012603757813802708,
+        disc: 0.10246010836158657,
+        t_sens: 0.09243081958876966,
+      },
+    ],
+  ])("unrounded output with %p", (input, expected: Record<string, number>) => {
+    const result = two_nodes_gagge({ ...base, ...input, round_output: false });
+    expect(Object.keys(result).sort()).toEqual(Object.keys(expected).sort());
+    for (const [key, value] of Object.entries(expected)) {
+      expect(result[key as keyof TwoNodesGaggeResult]).toBeCloseTo(value, 12);
+    }
+  });
+
   test("rounds every field to 2 decimals by default", () => {
     expect(two_nodes_gagge(base)).toEqual({
       e_skin: 16.17,
@@ -132,14 +212,31 @@ describe("two_nodes_gagge beyond upstream's tests", () => {
     expect(two_nodes_gagge(params).set).toBe(23.56);
   });
 
-  test.each(["lying", 1])("position %p throws upstream's ValueError", (p) => {
-    const params = { ...base, position: p } as unknown as TwoNodesGaggeParams;
-    expect(() => two_nodes_gagge(params)).toThrow(
-      new Error(
-        "position must be one of ['sitting', 'standing', 'standing, forced convection']",
-      ),
-    );
-  });
+  test.each(["lying", 1, true, { a: 1 }])(
+    "position %p throws upstream's ValueError",
+    (p) => {
+      const params = { ...base, position: p } as unknown as TwoNodesGaggeParams;
+      expect(() => two_nodes_gagge(params)).toThrow(
+        new Error(
+          "position must be one of ['sitting', 'standing', 'standing, forced convection']",
+        ),
+      );
+    },
+  );
+
+  // ADR 0005 as amended: position takes one string. pythermalcomfort 4.6.2
+  // broadcasts a list instead: two_nodes_gagge(tdb=25, tr=25, v=0.3, rh=50,
+  // met=1.2, clo=0.5, position=["sitting"]).set is [23.51], and with
+  // ["sitting", "standing"] it is [23.51 23.56].
+  test.each([[["sitting"]], [["sitting", "standing"]]])(
+    "position %p throws a TypeError",
+    (p) => {
+      const params = { ...base, position: p } as unknown as TwoNodesGaggeParams;
+      const call = () => two_nodes_gagge(params);
+      expect(call).toThrow(TypeError);
+      expect(call).toThrow("position must be a string, got an array");
+    },
+  );
 
   test.each([false, null, 0] as const)(
     "w_max %p computes the practical upper limit",

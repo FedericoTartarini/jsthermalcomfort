@@ -32,12 +32,15 @@ export interface Bound {
  *
  * `key` names the quantity, `value` is what the call had for it (SI, and for a
  * `derived` or `output` row the unrounded value the gate compared), and `bound`
- * is the range it fell outside. `bound` is frozen. For a fixed limit it is the
- * shared object the model's `*_INFO` metadata references, not a copy; for a
+ * is the range it fell outside. `bound` is frozen. For a fixed limit it is a
+ * shared object, not a copy: the one the model's `*_INFO` metadata references,
+ * or, where a quantity is checked against two nested fixed limits, the wider
+ * one, which `*_INFO` does not publish because any value outside it is outside
+ * the narrower one too (`ankle_draft`'s `vr`, 0 to 2 and 0 to 0.2 m/s). For a
  * limit that depends on the call, such as ASHRAE 55's airspeed limit between
  * 23 and 25.5 °C operative temperature when the occupant cannot control the
  * airspeed, it is built for that call. One quantity can break more than one
- * limit, so `key` can repeat.
+ * limit, so `key` can repeat, and the rows are told apart by `bound`.
  *
  * `role` says where the quantity comes from: `input` for one the caller
  * supplied, `derived` for one computed from the inputs (vapour pressure in

@@ -43,7 +43,7 @@ interface Ashrae55Params {
   met?: number;
   clo?: number;
   airspeed_control?: boolean;
-  v_limited?: number;
+  v_limited?: Ashrae55AirSpeed;
 }
 
 /**
@@ -66,12 +66,16 @@ interface Ashrae55Params {
  * Here they are two inputs, each with its own row key: the 0-2 m/s range row
  * reads `v_range`, and the no-control rules read `v_no_control`, both for the
  * three limits and for the operative temperature that chooses between them.
- * `v_limited` is upstream's: an air speed checked against
- * `ASHRAE_55_V_LIMITED`, with the row key upstream's warning names.
  * They are apart for the correction ADR 0004 records for `pmv_ppd_ashrae`,
  * which checks the no-control rules on the average air speed `v` and leaves
  * the range row on the relative air speed `vr`. Neither defaults to the
  * other: a caller with one speed, as `adaptive_ashrae`, passes it as both.
+ *
+ * `v_limited` is upstream's second check of an air speed, against
+ * `ASHRAE_55_V_LIMITED`. Upstream's warning names it `'v_limited'`, the name
+ * of the check; here its row carries the key of the speed checked, as the
+ * range row does, so a caller that checks `vr` twice gets two `vr` rows, told
+ * apart by their bounds.
  *
  * Each broken limit is one row on `warnings` instead of a `UserWarning`. The
  * operative-temperature bound depends on the call, so it is built and frozen
@@ -80,8 +84,7 @@ interface Ashrae55Params {
  * stood: it exempts at exactly 0.7 clo or 1.3 met and weighs to by ISO 7726.
  *
  * The rows come in upstream's order: tdb, tr, the range speed, the airspeed
- * rules, met and clo, then `v_limited`. The `v_limited` row has the role
- * `derived`: its key names no parameter of the model that checks it.
+ * rules, met and clo, then `v_limited`.
  *
  * Private: not exported from the package root.
  *
@@ -146,12 +149,7 @@ export function _check_ashrae55_compliance(
   }
 
   if (v_limited !== undefined) {
-    _valid_range(
-      warnings,
-      "v_limited",
-      "derived",
-      v_limited,
-      ASHRAE_55_V_LIMITED,
-    );
+    const { key, value } = v_limited;
+    _valid_range(warnings, key, "input", value, ASHRAE_55_V_LIMITED);
   }
 }

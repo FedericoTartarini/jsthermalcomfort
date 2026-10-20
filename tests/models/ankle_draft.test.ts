@@ -285,7 +285,7 @@ describe("ankle_draft beyond upstream's tests", () => {
   // Each limit upstream warns about is a row (ADR 0001), built whatever
   // limit_inputs is; the gate reads the rows.
   describe("warnings rows", () => {
-    test("rows come in upstream's order: tdb, tr, vr, met, clo, v_limited", () => {
+    test("rows come in upstream's order: tdb, tr, vr, met, clo, then vr's second check", () => {
       const result = ankle_draft({
         tdb: 5,
         tr: 45,
@@ -304,17 +304,14 @@ describe("ankle_draft beyond upstream's tests", () => {
         { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.vr },
         { key: "met", role: "input", value: 0.5, bound: ASHRAE_55_LIMITS.met },
         { key: "clo", role: "input", value: 2, bound: ASHRAE_55_LIMITS.clo },
-        {
-          key: "v_limited",
-          role: "derived",
-          value: 2.5,
-          bound: ASHRAE_55_V_LIMITED,
-        },
+        { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_V_LIMITED },
       ]);
     });
 
-    // Keyed as upstream's warning names it (ashrae55.py:101 at v4.6.2).
-    test("vr above 0.2 m/s is a v_limited row with limit_inputs false", () => {
+    // Upstream names this warning 'v_limited' (ashrae55.py:101 at v4.6.2),
+    // the name of its check; the quantity checked is vr. A row's key names
+    // the quantity and its bound says which limit it broke.
+    test("vr above 0.2 m/s is a vr row bound by ASHRAE_55_V_LIMITED with limit_inputs false", () => {
       const result = ankle_draft({
         ...base,
         vr: 0.5,
@@ -324,12 +321,7 @@ describe("ankle_draft beyond upstream's tests", () => {
       expect(result.ppd_ad).toBe(17.6);
       expect(result.acceptability).toBe(true);
       expect(result.warnings).toEqual([
-        {
-          key: "v_limited",
-          role: "derived",
-          value: 0.5,
-          bound: ASHRAE_55_V_LIMITED,
-        },
+        { key: "vr", role: "input", value: 0.5, bound: ASHRAE_55_V_LIMITED },
       ]);
       expect(result.warnings[0].bound).toBe(ASHRAE_55_V_LIMITED);
     });
@@ -418,9 +410,9 @@ describe("ankle_draft beyond upstream's tests", () => {
         limit_inputs: false,
       });
       expect(result.ppd_ad).toBe(14.3);
-      expect(result.warnings.map((row) => row.key)).toEqual([
-        "vr",
-        "v_limited",
+      expect(result.warnings.map((row) => [row.key, row.bound])).toEqual([
+        ["vr", ASHRAE_55_LIMITS.vr],
+        ["vr", ASHRAE_55_V_LIMITED],
       ]);
     });
 

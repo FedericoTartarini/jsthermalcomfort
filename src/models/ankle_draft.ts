@@ -53,12 +53,12 @@ export interface AnkleDraftParams {
  *
  * Experimental — the shape of `ModelInfo` may change before release.
  *
- * `vr` has two bounds, as upstream checks it twice: the Table 7.3.4 range,
- * a row keyed `vr`, and the equation's own range, a row keyed `v_limited`
- * (upstream's key). `v_limited` is `vr` in m/s, so it is listed under
- * `derived`, where a consumer finds the unit of that row's key. Under
- * `limit_inputs` a `vr` outside the equation's range throws, so the
- * `v_limited` row reaches a result only with `limit_inputs` off.
+ * Upstream checks `vr` twice: against `ASHRAE_55_LIMITS.vr`, 0 to 2 m/s, and
+ * against the equation's own range, `ASHRAE_55_V_LIMITED`, 0 to 0.2 m/s. Each
+ * check it breaks is a row keyed `vr`, told apart by its bound. Under
+ * `limit_inputs` a `vr` outside the narrower range throws, so that is the
+ * range the model computes in, and the one `vr` publishes; any `vr` outside
+ * the wider range is outside it too.
  * `acceptability` is a boolean, so it carries no unit and no classifier.
  *
  * @public
@@ -72,14 +72,11 @@ export const ANKLE_DRAFT_INFO: ModelInfo = deepFreeze({
   inputs: {
     tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
     tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
-    vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
+    vr: { unit: "m/s", applicability: ASHRAE_55_V_LIMITED },
     rh: { unit: "%" },
     met: { unit: "met", applicability: ASHRAE_55_LIMITS.met },
     clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo },
     v_ankle: { unit: "m/s" },
-  },
-  derived: {
-    v_limited: { unit: "m/s", applicability: ASHRAE_55_V_LIMITED },
   },
   outputs: {
     ppd_ad: { unit: "%" },
@@ -233,13 +230,13 @@ export function ankle_draft(params: AnkleDraftParams): AnkleDraftResult {
     v_range: { value: vr, key: "vr" },
     met,
     clo,
-    v_limited: vr,
+    v_limited: { value: vr, key: "vr" },
   });
   if (limit_inputs) {
     // Upstream raises when every v_limited is NaN once masked
     // (ankle_draft.py:151), which for one finite vr is whenever it is outside
-    // its bound.
-    if (warnings.some((row) => row.key === "v_limited")) {
+    // its bound: the row that carries ASHRAE_55_V_LIMITED.
+    if (warnings.some((row) => row.bound === ASHRAE_55_V_LIMITED)) {
       throw new RangeError(
         "This equation is only applicable for air speed lower than 0.2 m/s",
       );

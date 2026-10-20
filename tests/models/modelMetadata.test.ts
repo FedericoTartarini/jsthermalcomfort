@@ -957,7 +957,7 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
   });
 
   test("input bounds are the ASHRAE_55_LIMITS objects, not copies", () => {
-    for (const key of ["tdb", "tr", "vr", "met", "clo"] as const) {
+    for (const key of ["tdb", "tr", "met", "clo"] as const) {
       expect(ANKLE_DRAFT_INFO.inputs[key].applicability).toBe(
         ASHRAE_55_LIMITS[key],
       );
@@ -965,16 +965,13 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
     expect(ANKLE_DRAFT_INFO.inputs.rh.applicability).toBeUndefined();
   });
 
-  // Upstream's key for the equation's air-speed range (ashrae55.py:101 at
-  // v4.6.2); derived, as it names no parameter.
-  test("the v_limited row's key is a derived quantity in m/s, bound by ASHRAE_55_V_LIMITED", () => {
-    expect(Object.keys(ANKLE_DRAFT_INFO.derived!)).toEqual(["v_limited"]);
-    expect(ANKLE_DRAFT_INFO.derived!.v_limited.unit).toBe("m/s");
-    expect(ANKLE_DRAFT_INFO.derived!.v_limited.applicability).toBe(
-      ASHRAE_55_V_LIMITED,
-    );
+  // vr is checked twice, against 0 to 2 and 0 to 0.2 m/s; outside the
+  // narrower range the model throws, so that is the range it computes in.
+  test("vr's bound is ASHRAE_55_V_LIMITED, and there is no derived quantity", () => {
+    expect(ANKLE_DRAFT_INFO.inputs.vr.applicability).toBe(ASHRAE_55_V_LIMITED);
     expect(ASHRAE_55_V_LIMITED).toEqual({ min: 0, max: 0.2 });
     expect(Object.isFrozen(ASHRAE_55_V_LIMITED)).toBe(true);
+    expect(ANKLE_DRAFT_INFO.derived).toBeUndefined();
   });
 
   test("ankle_draft's warnings rows carry the bounds INFO references, keyed as INFO keys them", () => {
@@ -991,13 +988,15 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
       // not what this test checks.
       suppress_warnings: true,
     });
+    // vr's first row carries the wider range, which INFO does not publish:
+    // any vr outside it is outside the published one too.
     const expected = [
       ["tdb", ANKLE_DRAFT_INFO.inputs.tdb.applicability],
       ["tr", ANKLE_DRAFT_INFO.inputs.tr.applicability],
-      ["vr", ANKLE_DRAFT_INFO.inputs.vr.applicability],
+      ["vr", ASHRAE_55_LIMITS.vr],
       ["met", ANKLE_DRAFT_INFO.inputs.met.applicability],
       ["clo", ANKLE_DRAFT_INFO.inputs.clo.applicability],
-      ["v_limited", ANKLE_DRAFT_INFO.derived!.v_limited.applicability],
+      ["vr", ANKLE_DRAFT_INFO.inputs.vr.applicability],
     ];
     expect(warnings).toHaveLength(expected.length);
     warnings.forEach((w, i) => {
@@ -1021,9 +1020,9 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
       expect(Number.isFinite(ppd_ad({ [key]: max }))).toBe(true);
       expect(ppd_ad({ [key]: max + 0.01 })).toBeNaN();
     }
-    // vr outside v_limited's bound throws under limit_inputs, so its edges
-    // are a number and a throw.
-    const { min, max } = ANKLE_DRAFT_INFO.derived!.v_limited.applicability as {
+    // vr outside its bound throws under limit_inputs, so its edges are a
+    // number and a throw.
+    const { min, max } = ANKLE_DRAFT_INFO.inputs.vr.applicability as {
       min: number;
       max: number;
     };
@@ -1051,8 +1050,7 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
     expect(Object.isFrozen(ANKLE_DRAFT_INFO.standards)).toBe(true);
     expect(Object.isFrozen(ANKLE_DRAFT_INFO.inputs)).toBe(true);
     expect(Object.isFrozen(ANKLE_DRAFT_INFO.inputs.v_ankle)).toBe(true);
-    expect(Object.isFrozen(ANKLE_DRAFT_INFO.derived)).toBe(true);
-    expect(Object.isFrozen(ANKLE_DRAFT_INFO.derived!.v_limited)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.inputs.vr)).toBe(true);
     expect(Object.isFrozen(ANKLE_DRAFT_INFO.outputs)).toBe(true);
     expect(Object.isFrozen(ANKLE_DRAFT_INFO.outputs.acceptability)).toBe(true);
   });

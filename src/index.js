@@ -105,6 +105,12 @@ export * from "./models/index.js";
 /**
  * @typedef {import("./models/utci.js").UtciResult} UtciResult
  */
+/**
+ * @typedef {import("./models/vertical_tmp_grad_ppd.js").VerticalTmpGradPpdParams} VerticalTmpGradPpdParams
+ */
+/**
+ * @typedef {import("./models/vertical_tmp_grad_ppd.js").VerticalTmpGradPpdResult} VerticalTmpGradPpdResult
+ */
 
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";

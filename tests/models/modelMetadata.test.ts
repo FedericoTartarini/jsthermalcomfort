@@ -16,6 +16,7 @@ import {
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
   USE_FANS_HEATWAVES_INFO,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -26,6 +27,7 @@ import {
   solar_gain,
   use_fans_heatwaves,
   utci,
+  vertical_tmp_grad_ppd,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
 import { ADAPTIVE_EN_LIMITS } from "../../src/models/adaptive_en.ts";
@@ -66,6 +68,7 @@ const expectedMetadataExports = [
   "UTCI_INFO",
   "UTCI_STRESS_CATEGORY_BINS",
   "USE_FANS_HEATWAVES_INFO",
+  "VERTICAL_TMP_GRAD_PPD_INFO",
 ];
 
 describe("Model Metadata Exports — enumeration test", () => {
@@ -1317,6 +1320,140 @@ describe("USE_FANS_HEATWAVES_INFO — the fan-use model's metadata", () => {
     expect(Object.isFrozen(USE_FANS_HEATWAVES_INFO.outputs.heat_strain)).toBe(
       true,
     );
+  });
+});
+
+describe("VERTICAL_TMP_GRAD_PPD_INFO — the vertical temperature gradient model's metadata", () => {
+  const base = {
+    tdb: 25,
+    tr: 25,
+    vr: 0.1,
+    rh: 50,
+    met: 1.2,
+    clo: 0.5,
+    vertical_tmp_grad: 7,
+  };
+
+  test("labels the model and lists ASHRAE 55 as its only standard", () => {
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.name).toBe("vertical_tmp_grad_ppd");
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.label).toBe(
+      "Vertical air temperature gradient",
+    );
+    expect(typeof VERTICAL_TMP_GRAD_PPD_INFO.description).toBe("string");
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.standards).toEqual([
+      Standard.ashrae_55_2023,
+    ]);
+  });
+
+  test("inputs are vertical_tmp_grad_ppd's seven quantities, in SI units", () => {
+    expect(Object.keys(VERTICAL_TMP_GRAD_PPD_INFO.inputs)).toEqual([
+      "tdb",
+      "tr",
+      "vr",
+      "rh",
+      "met",
+      "clo",
+      "vertical_tmp_grad",
+    ]);
+    // The same quantity has the same unit as in the PMV wrapper (ADR 0011).
+    for (const key of ["tdb", "tr", "vr", "rh", "met", "clo"]) {
+      expect(VERTICAL_TMP_GRAD_PPD_INFO.inputs[key].unit).toBe(
+        PMV_PPD_ASHRAE_INFO.inputs[key].unit,
+      );
+    }
+    // Upstream documents the gradient in [°C/m]
+    // (vertical_tmp_grad_ppd.py:66-67 at v4.6.2) and does not check it.
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.inputs.vertical_tmp_grad).toEqual({
+      unit: "°C/m",
+    });
+  });
+
+  test("input bounds are the ASHRAE_55_LIMITS objects, not copies", () => {
+    for (const key of ["tdb", "tr", "met", "clo"] as const) {
+      expect(VERTICAL_TMP_GRAD_PPD_INFO.inputs[key].applicability).toBe(
+        ASHRAE_55_LIMITS[key],
+      );
+    }
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.inputs.rh.applicability).toBeUndefined();
+  });
+
+  // Upstream checks vr only against 0 to 0.2 m/s (vertical_tmp_grad_ppd.py:143).
+  test("vr's bound is ASHRAE_55_V_LIMITED, and there is no derived quantity", () => {
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.inputs.vr.applicability).toBe(
+      ASHRAE_55_V_LIMITED,
+    );
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.derived).toBeUndefined();
+  });
+
+  test("vertical_tmp_grad_ppd's warnings rows carry the bounds INFO references, keyed as INFO keys them", () => {
+    const { warnings } = vertical_tmp_grad_ppd({
+      tdb: 45,
+      tr: 5,
+      vr: 2.5,
+      rh: 50,
+      met: 0.5,
+      clo: 1.6,
+      vertical_tmp_grad: 3,
+      limit_inputs: false,
+      // The cooling effect cannot be calculated here; its console message is
+      // not what this test checks.
+      suppress_warnings: true,
+    });
+    const keys = ["tdb", "tr", "met", "clo", "vr"];
+    expect(warnings.map((w) => w.key)).toEqual(keys);
+    warnings.forEach((w, i) => {
+      expect(w.bound).toBe(
+        VERTICAL_TMP_GRAD_PPD_INFO.inputs[keys[i]].applicability,
+      );
+    });
+  });
+
+  test("the published bounds are the ones vertical_tmp_grad_ppd gates on, inclusive at both ends", () => {
+    const ppd_vg = (input: Partial<typeof base>, limit_inputs = true) =>
+      vertical_tmp_grad_ppd({ ...base, ...input, limit_inputs }).ppd_vg;
+    for (const key of ["tdb", "tr", "vr", "met", "clo"] as const) {
+      const { min, max } = VERTICAL_TMP_GRAD_PPD_INFO.inputs[key]
+        .applicability as { min: number; max: number };
+      expect(Number.isFinite(ppd_vg({ [key]: min }))).toBe(true);
+      expect(ppd_vg({ [key]: min - 0.01 })).toBeNaN();
+      expect(Number.isFinite(ppd_vg({ [key]: max }))).toBe(true);
+      expect(ppd_vg({ [key]: max + 0.01 })).toBeNaN();
+      // With limit_inputs off the same values compute, so the NaN above came
+      // from the bound and not from the arithmetic.
+      expect(Number.isFinite(ppd_vg({ [key]: min - 0.01 }, false))).toBe(true);
+      expect(Number.isFinite(ppd_vg({ [key]: max + 0.01 }, false))).toBe(true);
+    }
+  });
+
+  test("vertical_tmp_grad_ppd output keys match VERTICAL_TMP_GRAD_PPD_INFO.outputs", () => {
+    const result = vertical_tmp_grad_ppd(base);
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(
+      Object.keys(VERTICAL_TMP_GRAD_PPD_INFO.outputs).sort(),
+    );
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.outputs.ppd_vg.unit).toBe("%");
+    expect(typeof result.acceptability).toBe("boolean");
+    expect(VERTICAL_TMP_GRAD_PPD_INFO.outputs.acceptability).toEqual({
+      unit: null,
+    });
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO)).toBe(true);
+    expect(Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO.inputs)).toBe(true);
+    expect(
+      Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO.inputs.vertical_tmp_grad),
+    ).toBe(true);
+    expect(Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO.inputs.vr)).toBe(true);
+    expect(Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO.outputs)).toBe(true);
+    expect(
+      Object.isFrozen(VERTICAL_TMP_GRAD_PPD_INFO.outputs.acceptability),
+    ).toBe(true);
   });
 });
 describe("UTCI_INFO — the UTCI model's metadata", () => {

@@ -24,7 +24,10 @@ import { pmv } from "./pmv.js";
 import { pmv_a } from "./pmv_a.ts";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
 import { e_pmv } from "./e_pmv.js";
-import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
+import {
+  vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
+} from "./vertical_tmp_grad_ppd.ts";
 import {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
@@ -90,6 +93,7 @@ export {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
   vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
   wc,
   wind_chill_temperature,
@@ -138,6 +142,7 @@ export default {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
   vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
   wc,
   wind_chill_temperature,

@@ -626,6 +626,17 @@ interface _PhsKernelInputs {
 // computes from the inputs (ADR 0012 as amended,
 // .scratch/v2-models/wave-2/decisions.md D3 (ii)); x === 0 is true for -0
 // too, as Python's 0.0 == -0.0 is.
+// Upstream's t_cl and t_cr loops are `while True` (models/phs.py:724, :779 at
+// v4.6.2). Each loop here runs at most this many iterations and then throws
+// Error("Max iterations exceeded"), the class and message ADR 0012 as amended
+// gives upstream's own capped loops (ADR 0015,
+// .scratch/v2-models/wave-2/decisions.md D3 (iii)). Over the 75,168 cases the
+// library returned for in the two iteration sweeps
+// (.scratch/v2-models/wave-2/research/phs/iter_sweep*.out), the t_cl loop
+// needed at most 19 iterations and the t_cr loop at most 32, except at a
+// weight of 1e-9 kg, where the t_cl loop needed 83 to 103.
+const _MAX_ITERATIONS = 1000;
+
 function _divisor(x: number): number {
   if (x === 0) {
     throw new RangeError("division by zero");
@@ -878,7 +889,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
     const p_sk = 0.6105 * Math.exp((17.27 * t_sk) / _divisor(t_sk + 237.3));
     let t_cl = tr + 0.1; // clothing surface temperature
     let h_r;
-    while (true) {
+    for (let iteration = 1; ; iteration++) {
       // radiative heat transfer coefficient
       const t_cl_k = t_cl + 273;
       h_r =
@@ -889,6 +900,9 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
         _divisor(fcl * (hc_dyn + h_r) + 1 / i_cl_dyn);
       if (Math.abs(t_cl - t_cl_new) <= 0.001) {
         break;
+      }
+      if (iteration === _MAX_ITERATIONS) {
+        throw new Error("Max iterations exceeded");
       }
       t_cl = (t_cl + t_cl_new) / 2;
     }
@@ -947,7 +961,7 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
     // body heat storage rate [W/m2]
     const d_storage = e_req - e_p + d_stored_eq;
     let t_cr_new = t_cr0;
-    while (true) {
+    for (let iteration = 1; ; iteration++) {
       t_sk_t_cr_wg = 0.3 - 0.09 * (t_cr_new - 36.8);
       t_sk_t_cr_wg = Math.min(t_sk_t_cr_wg, 0.3);
       t_sk_t_cr_wg = Math.max(t_sk_t_cr_wg, 0.1);
@@ -958,6 +972,9 @@ function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
       t_cr = (t_cr + t_cr0 * (1 - t_sk_t_cr_wg0 / 2)) / (1 - t_sk_t_cr_wg / 2);
       if (Math.abs(t_cr - t_cr_new) <= 0.001) {
         break;
+      }
+      if (iteration === _MAX_ITERATIONS) {
+        throw new Error("Max iterations exceeded");
       }
       t_cr_new = (t_cr_new + t_cr) / 2;
     }

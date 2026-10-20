@@ -1523,6 +1523,20 @@ describe("phs beyond upstream's tests", () => {
       expect(call).toThrow(new RangeError("division by zero"));
     });
 
+    // Upstream's t_cl and t_cr loops are `while True` (models/phs.py:724,
+    // :779). The library caps each at 1000 iterations and throws upstream's
+    // capped loops' message (ADR 0015). At weight 1e-9 kg under 7933-2004
+    // upstream returns t_re 2373433.2 °C, a non-physical value; at height -1
+    // neither side returns.
+    test.each<[string, Partial<PhsParams>]>([
+      ["weight 1e-9 under 7933-2004", { weight: 1e-9, standard: "7933-2004" }],
+      ["height -1", { height: -1 }],
+      ["height -1 under 7933-2004", { height: -1, standard: "7933-2004" }],
+    ])("%s throws Error('Max iterations exceeded')", (_, extra) => {
+      const call = () => phs({ ...base, duration: 30, ...extra } as PhsParams);
+      expect(call).toThrow(new Error("Max iterations exceeded"));
+    });
+
     // PHSInputs checks posture in any case (classes_input.py:180-183), and
     // _posture_to_code then compares the exact string (models/phs.py:500-510).
     test.each(["Standing", "STANDING", null])(

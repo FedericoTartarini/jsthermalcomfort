@@ -72,11 +72,13 @@ interface Ashrae55Params {
  * the range row on the relative air speed `vr`. Neither defaults to the
  * other: a caller with one speed, as `adaptive_ashrae`, passes it as both.
  *
- * `v_limited` is upstream's second check of an air speed, against
- * `ASHRAE_55_V_LIMITED`. Upstream's warning names it `'v_limited'`, the name
- * of the check; here its row carries the key of the speed checked, as the
- * range row does, so a caller that checks `vr` twice gets two `vr` rows, told
- * apart by their bounds.
+ * `v_limited` checks an air speed against `ASHRAE_55_V_LIMITED`, 0 to
+ * 0.2 m/s. Upstream's warning names it `'v_limited'`, the name of the check;
+ * here its row carries the key of the speed checked, as the range row does.
+ * `ankle_draft` passes `vr` as the range speed and as `v_limited`
+ * (ankle_draft.py:139-148 at v4.6.2), so it gets two `vr` rows, told apart by
+ * their bounds; `vertical_tmp_grad_ppd` passes `vr` as `v_limited` alone
+ * (vertical_tmp_grad_ppd.py:133-146), so that is its only `vr` row.
  *
  * Each broken limit is one row on `warnings` instead of a `UserWarning`. The
  * operative-temperature bound depends on the call, so it is built and frozen

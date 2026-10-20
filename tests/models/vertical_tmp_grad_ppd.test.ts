@@ -404,8 +404,8 @@ describe("vertical_tmp_grad_ppd beyond upstream's tests", () => {
       expect(() => vertical_tmp_grad_ppd(params)).toThrow(TypeError);
     });
 
-    // ADR 0008: upstream raises a TypeError for an unexpected keyword; it
-    // has had no units parameter since v3.4.3.
+    // ADR 0008: upstream raises a TypeError for an unexpected keyword. units
+    // was removed upstream in 387708d and here in v2 (ADR 0001 as amended).
     test("the removed key 'units' throws a TypeError naming it", () => {
       const params = {
         ...base,
@@ -472,6 +472,50 @@ describe("vertical_tmp_grad_ppd beyond upstream's tests", () => {
         [key]: false,
       } as unknown as VerticalTmpGradPpdParams;
       expect(() => vertical_tmp_grad_ppd(params)).toThrow(TypeError);
+    });
+
+    // ADR 0012 as amended (D11): upstream's StopIteration("Max iterations
+    // exceeded") is an Error with upstream's message. On these finite inputs
+    // pythermalcomfort 4.6.2 raises it from two_nodes_gagge.py:351 (through
+    // SET, for the cooling effect) and from _pmv_ppd_optimized.py:58, with
+    // limit_inputs true and false.
+    test.each<[string, VerticalTmpGradPpdParams]>([
+      [
+        "two_nodes_gagge's loop (through SET) exceeding its iterations",
+        {
+          tdb: 14.35,
+          tr: 20.72,
+          vr: 1.624,
+          rh: 98.7,
+          met: 1.03,
+          clo: -0.39,
+          vertical_tmp_grad: -1.6,
+        },
+      ],
+      [
+        "the PMV clothing loop exceeding its iterations",
+        {
+          tdb: 49.97,
+          tr: 55.88,
+          vr: 1.807,
+          rh: 52.0,
+          met: 4.44,
+          clo: -0.49,
+          vertical_tmp_grad: -4.51,
+        },
+      ],
+    ])("%s throws an Error 'Max iterations exceeded'", (_loop, inputs) => {
+      for (const limit_inputs of [true, false]) {
+        let thrown: unknown;
+        try {
+          vertical_tmp_grad_ppd({ ...inputs, limit_inputs });
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown).toBeInstanceOf(Error);
+        expect((thrown as Error).constructor).toBe(Error);
+        expect((thrown as Error).message).toBe("Max iterations exceeded");
+      }
     });
 
     // ADR 0005: quantities are numbers; upstream would broadcast the list.

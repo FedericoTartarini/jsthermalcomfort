@@ -454,8 +454,9 @@ function _gagge_two_nodes_optimized(
       n_iterations += 1;
 
       if (n_iterations > iteration_limit) {
-        // Upstream raises StopIteration, a Python class with no JavaScript
-        // counterpart; ADR 0012 maps no class to it, so it stays an Error.
+        // Upstream raises StopIteration("Max iterations exceeded")
+        // (two_nodes_gagge.py:349-351 at v4.6.2), which ADR 0012 as amended
+        // maps to an Error with upstream's message.
         throw new Error("Max iterations exceeded");
       }
     }

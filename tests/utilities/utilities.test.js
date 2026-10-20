@@ -271,6 +271,43 @@ describe("running_mean_outdoor_temperature", () => {
       );
     },
   );
+
+  // Upstream calls units.upper() on what it is given
+  // (pythermalcomfort/environment/running_mean_outdoor_temperature.py:121 at
+  // v4.6.2), so running_mean_outdoor_temperature([20] * 7, units=None), 5,
+  // 1.5, True, ["iso"] and {"a": 1} raise AttributeError in pythermalcomfort
+  // 4.6.2, which ADR 0012 maps to a TypeError when a wrong type raises it.
+  it.each([null, 5, 1.5, true, ["SI"], { a: 1 }])(
+    "throws TypeError if units is %p, not a string",
+    (units) => {
+      const temps = [20, 20, 20, 20, 20, 20, 20];
+      expect(() => running_mean_outdoor_temperature(temps, 0.8, units)).toThrow(
+        TypeError,
+      );
+      expect(() => running_mean_outdoor_temperature(temps, 0.8, units)).toThrow(
+        'Parameter "units" must be a string',
+      );
+    },
+  );
+
+  // Upstream upper-cases units and converts only for "IP"; any other string
+  // computes in SI (running_mean_outdoor_temperature.py:121-129 at v4.6.2).
+  // The IP path converts to °C and back, so at a rounding tie it can round
+  // the other way: pythermalcomfort 4.6.2 returns 30.8 for [30.75] * 7, alpha
+  // 0.8, with "IP", "ip" and "Ip", and 30.7 with "SI", "si", "XX" and "".
+  it.each([
+    ["IP", 30.8],
+    ["ip", 30.8],
+    ["Ip", 30.8],
+    ["SI", 30.7],
+    ["si", 30.7],
+    ["XX", 30.7],
+    ["", 30.7],
+  ])("with units %p, returns upstream's %p at a tie", (units, expected) => {
+    expect(
+      running_mean_outdoor_temperature(Array(7).fill(30.75), 0.8, units),
+    ).toBe(expected);
+  });
 });
 
 describe("f_svv", () => {

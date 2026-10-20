@@ -1,10 +1,13 @@
-// JS-only: every function of jos3_functions against pythermalcomfort 4.6.2,
-// on 348 random cases of upstream's own calls (`fn_up.py` in the ticket 25
-// scratchpad, seed 42; the inputs and outputs are in
-// jos3_functions_v4.6.2.json). The functions use numpy's evaluation order
-// (ADR 0009), so every value is compared bit for bit. Upstream's own tests
-// of these functions are mirrored in tests/models/jos3.test.ts, under
-// test_jos3.
+// JS-only: 35 functions of jos3_functions against pythermalcomfort 4.6.2, on
+// 418 random cases of upstream's own calls (`fn_up.py` in the ticket 25
+// scratchpad, seeds 42 and 4325; the inputs and outputs are in
+// jos3_functions_v4.6.2.json): every function but index_order,
+// index_by_layer, valid_index_by_layer, to_array_body_parts and
+// validate_body_parameters, which take no input to randomize or only
+// validate, and which the mirrored tests in tests/models/jos3.test.ts call.
+// The functions use numpy's evaluation order (ADR 0009), so every value is
+// compared bit for bit. Upstream's own tests of these functions are mirrored
+// in tests/models/jos3.test.ts, under test_jos3.
 import { describe, expect, test } from "@jest/globals";
 import { readFileSync } from "node:fs";
 import { jos3_functions } from "../../src/index.js";
@@ -90,13 +93,35 @@ const run: Record<string, (a: any[]) => unknown> = {
   error_signals: (a) => T.error_signals(a[0]),
   resp_heat_loss: (a) => T.resp_heat_loss(a[0], a[1], a[2]),
   tetens: (a) => T.tetens(a[0]),
+  natural_convection: (a) => T.natural_convection(a[0], a[1], a[2]),
+  forced_convection: (a) => T.forced_convection(a[0]),
+  // upstream's JOS3BodyParts dataclass, as dataclasses.asdict gives it
+  pass_values_to_jos3_body_parts: (a) =>
+    C.pass_values_to_jos3_body_parts(a[0], a[1], a[2]),
+  remove_body_name: (a) => M.remove_body_name(a[0]),
 };
 
 describe("jos3_functions against pythermalcomfort 4.6.2", () => {
-  test("the fixture covers every function", () => {
+  test("the fixture covers every function jos3_functions exports, but the five the mirrored tests call", () => {
+    const elsewhere = [
+      "index_order",
+      "index_by_layer",
+      "valid_index_by_layer",
+      "to_array_body_parts",
+      "validate_body_parameters",
+    ];
+    const exported = [C, M, T].flatMap((module) =>
+      Object.entries(module)
+        .filter(([, value]) => typeof value === "function")
+        .map(([name]) => name),
+    );
     expect(new Set(fixture.cases.map((c) => c.fn))).toEqual(
       new Set(Object.keys(run)),
     );
+    expect(new Set([...Object.keys(run), ...elsewhere])).toEqual(
+      new Set(exported),
+    );
+    expect(exported).toHaveLength(40);
   });
 
   test.each(fixture.cases.map((c, i) => [`${c.fn} #${i}`, c] as const))(

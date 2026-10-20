@@ -63,9 +63,9 @@ import {
   assertNumber,
   met_to_w_m2,
   round,
+  Standard,
   validateInputs,
 } from "../utilities/utilities.js";
-import { Standard } from "../utilities/utilities.js";
 import { _check_params_object } from "../_internal/validation.ts";
 
 // Upstream's JOS3Output (pythermalcomfort/classes_return.py:849-1033 at
@@ -312,8 +312,8 @@ function timedelta_us(seconds: number): number {
  * NaN or an infinity computes (NaN results), a boolean fills a boolean array
  * on which the next step raises a numpy UFuncTypeError, and None raises the
  * setter's ValueError; here each throws a TypeError at the setter, None
- * because a null quantity does whatever upstream does with it (ADR 0005 as
- * amended). A string or an array of another length raises upstream's
+ * because a null quantity throws a TypeError whatever upstream does with
+ * None (ADR 0005 as amended). A string or an array of another length raises upstream's
  * ValueError, an Error (ADR 0012), from `to_array_body_parts`.
  */
 function to_17_finite(inp: JOS3BodyPartsInput, name: string): number[] {
@@ -384,14 +384,31 @@ function to_17_finite(inp: JOS3BodyPartsInput, name: string): number[] {
  * @throws {Error} For an unknown bmr_equation or bsa_equation.
  *
  * @example
+ * // Upstream's example (pythermalcomfort/models/jos3.py:248-370 at v4.6.2),
+ * // without its pandas plot.
+ * import { JOS3, jos3_functions } from "jsthermalcomfort";
+ * const { local_clo_typical_ensembles } = jos3_functions.parameters;
+ *
  * const model = new JOS3({ height: 1.7, weight: 60, fat: 20, age: 30, sex: "male", bmr_equation: "japanese", bsa_equation: "fujimoto" });
+ * // Environmental parameters can be a number, 17 numbers, or an object keyed by body part.
  * model.tdb = 28; // Air temperature [°C]
  * model.tr = 30; // Mean radiant temperature [°C]
  * model.rh = 40; // Relative humidity [%]
- * model.v = 0.2; // Air velocity [m/s]
- * model.par = 1.2; // Physical activity ratio [-]
- * model.posture = "sitting";
- * model.simulate(30, 60); // 30 steps of 60 s
+ * // Air velocity [m/s]: head, neck, chest, back, pelvis, left shoulder, left arm, left hand,
+ * // right shoulder, right arm, right hand, left thigh, left leg, left foot, right thigh, right leg, right foot
+ * model.v = [0.2, 0.4, 0.4, 0.1, 0.1, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1];
+ * model.clo = local_clo_typical_ensembles["briefs, socks, undershirt, work jacket, work pants, safety shoes"].local_body_part;
+ * model.par = 1.2; // Physical activity ratio [-], assuming a sitting position
+ * model.posture = "sitting"; // 0 = "standing", 1 = "sitting", 2 = "lying"
+ * model.simulate(30, 60); // 30 steps of 60 s: 30 min
+ * // Set the next condition: only the parameters that change
+ * model.to = 20; // Operative temperature [°C]
+ * model.v = { head: 0.2, neck: 0.4, chest: 0.4, back: 0.1, pelvis: 0.1, left_shoulder: 0.4, left_arm: 0.4, left_hand: 0.4, right_shoulder: 0.4, right_arm: 0.4, right_hand: 0.4, left_thigh: 0.1, left_leg: 0.1, left_foot: 0.1, right_thigh: 0.1, right_leg: 0.1, right_foot: 0.1 }; // a desk fan
+ * model.simulate(60, 60); // 60 more min
+ * model.tdb = 30; // Air temperature [°C]
+ * model.tr = 35; // Mean radiant temperature [°C]
+ * model.simulate(30, 60); // 30 more min
+ *
  * const results = model.results();
  * console.log(results.t_skin_mean); // the mean skin temperature at every step
  * console.log(results.t_skin.head); // the skin temperature of the head at every step
@@ -692,6 +709,10 @@ export class JOS3 {
    * broadcasting raises a ValueError.
    */
   simulate(times: number, dtime: number = 60, output: boolean = true): void {
+    // jos3 D7 (a): a whole number such as 2.0 runs, where Python's range
+    // raises a TypeError for the float 2.0 ("'float' object cannot be
+    // interpreted as an integer"): a JavaScript number has no int/float
+    // distinction (ADR 0001's first reason, as amended).
     if (typeof times !== "number" || !Number.isInteger(times)) {
       throw new TypeError(
         `'${py_type_name(times)}' object cannot be interpreted as an integer`,
@@ -706,7 +727,10 @@ export class JOS3 {
       // Execute the simulation step
       const dict_data = this._run(dtime, false, output);
 
-      // If output is True, append the results to the history
+      // If output is True, append the results to the history. output is read
+      // for JavaScript's truth value (ADR 0001 as amended): NaN is true in
+      // Python and false here, and an empty array or object false in Python
+      // and true here.
       if (output) {
         this._history.push(dict_data);
       }
@@ -989,8 +1013,12 @@ export class JOS3 {
     );
     // np.linalg.inv stays mathjs's inv (ADR 0014). Upstream's LAPACK inverse
     // and its BLAS product below sum in other orders, so the body
-    // temperatures differ from upstream's: by at most 2.4e-10 °C, and every
-    // rounded output equal, in the 837 simulations of ticket 25's sweep.
+    // temperatures differ from upstream's in the last bits: in 568 of the 570
+    // simulations of ticket 25's spec-verifier sweep (seed 7351020; the other
+    // 2 diverge or are ill-conditioned), by up to 5.4e-11 °C in t_body and
+    // 8.3e-10 in w. A rounded output differs where its unrounded value is
+    // that close to a rounding tie: in that sweep, 4 of 3,666,954 rounded
+    // values, `to` at 12.875 and 18.125, round the other way.
     const arr_a_inv = math.inv(arr_a);
 
     // Matrix Q = Matrix for heat generation rate from thermogenesis, respiratory, sweating,
@@ -1403,11 +1431,15 @@ export class JOS3 {
   }
 
   set t_body(inp: readonly number[]) {
-    // ADR 0012: upstream's inp.copy() raises an AttributeError for a
-    // non-array, a TypeError here.
+    // ADR 0012: upstream's inp.copy() raises an AttributeError for a value
+    // that has no copy method, a TypeError here, with Python's type name. A
+    // dict has one, and upstream raises a TypeError ("unhashable type:
+    // 'list'") when a getter indexes it; here the setter throws it.
     if (!Array.isArray(inp)) {
       throw new TypeError(
-        `'${typeof inp === "number" ? "float" : typeof inp}' object has no attribute 'copy'`,
+        typeof inp === "object" && inp !== null
+          ? "unhashable type: 'list'"
+          : `'${py_type_name(inp)}' object has no attribute 'copy'`,
       );
     }
     for (const value of inp) assertNumber(value, "t_body");

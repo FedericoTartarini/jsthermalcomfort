@@ -1581,7 +1581,11 @@ describe("jos3 beyond upstream's tests", () => {
     test("par below 1 throws a RangeError when the model runs, as upstream raises then", () => {
       const model = new JOS3();
       model.par = 0.8;
-      expect(() => model.simulate(1)).toThrow("par must be 1 or more");
+      expect_throw(
+        () => model.simulate(1),
+        RangeError,
+        "par must be 1 or more",
+      );
       expect(() => {
         model.par = NaN;
       }).toThrow(TypeError);
@@ -1749,6 +1753,31 @@ describe("jos3 beyond upstream's tests", () => {
         "'right_foot'",
       );
     });
+
+    // pythermalcomfort 4.6.2's AttributeError from inp.copy(), a TypeError
+    // here (ADR 0012), with Python's type names (up_tbody_msg.py in the
+    // ticket 25 batch-1 scratchpad).
+    test.each([
+      ["x", "'str' object has no attribute 'copy'"],
+      [5, "'int' object has no attribute 'copy'"],
+      [5.5, "'float' object has no attribute 'copy'"],
+      [null, "'NoneType' object has no attribute 'copy'"],
+      [true, "'bool' object has no attribute 'copy'"],
+      // upstream accepts a dict and raises when a getter indexes it
+      [{}, "unhashable type: 'list'"],
+    ])(
+      "the t_body setter given %p throws upstream's message",
+      (value, message) => {
+        const model = new JOS3();
+        expect_throw(
+          () => {
+            model.t_body = value as never;
+          },
+          TypeError,
+          message,
+        );
+      },
+    );
 
     test("_set_ex_q throws upstream's KeyError for a tissue that is not a layer as a TypeError", () => {
       const model = new JOS3();

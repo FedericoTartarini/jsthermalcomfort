@@ -1,7 +1,10 @@
 import { require_numeric } from "../_internal/numpy.ts";
 
 // Upstream's messages (construction.py:48-60 at v4.6.2); the weight and fat
-// ones used to read "[20, 200]" and "Body Fat must be ...".
+// ones used to read "[20, 200]" and "Body Fat must be ...". Upstream's
+// docstring calls body_fat "The body fat percentage as a fraction of total
+// body mass" (construction.py:32-33), which its own check contradicts: it
+// takes a percentage in [1, 90] (:57-60), so the JSDoc says so (ADR 0013).
 /**
  * Validate the parameters: height, weight, age, and body fat percentage
  * (`pythermalcomfort/jos3_functions/construction.py:16-60` at v4.6.2).
@@ -9,7 +12,7 @@ import { require_numeric } from "../_internal/numpy.ts";
  * @param {number} height - The height of the person in meters.
  * @param {number} weight - The weight of the person in kilograms.
  * @param {number} age - The age of the person in years.
- * @param {number} body_fat - The body fat percentage as a fraction of total body mass.
+ * @param {number} body_fat - The body fat percentage [%], in [1, 90].
  *
  * @throws {RangeError} If any of the parameters are out of the specified
  * range, as upstream raises a ValueError (ADR 0012). A NaN is out of range,

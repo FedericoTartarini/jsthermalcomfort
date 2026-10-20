@@ -55,6 +55,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/heat_index_rothfusz.js").HeatIndexRothfuszResult} HeatIndexRothfuszResult
  */
 /**
+ * @typedef {import("./models/pmv_a.js").PmvAParams} PmvAParams
+ */
+/**
+ * @typedef {import("./models/pmv_a.js").PmvAResult} PmvAResult
+ */
+/**
  * @typedef {import("./models/pmv_ppd_ashrae.js").PmvPpdAshraeParams} PmvPpdAshraeParams
  */
 /**

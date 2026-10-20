@@ -135,7 +135,7 @@ const displayNameMap = {
   cooling_effect: "Cooling Effect (CE)",
   athb: "Adaptive Thermal Heat Balance (ATHB)",
   pmv: "Predicted Mean Vote (PMV)",
-  a_pmv: "Adjusted PMV (aPMV)",
+  pmv_a: "Adaptive Predicted Mean Vote (aPMV)",
   ankle_draft: "Ankle Draft",
   e_pmv: "Extended PMV (ePMV)",
   vertical_tmp_grad_ppd: "Vertical Temperature Gradient PPD",

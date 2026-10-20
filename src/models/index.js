@@ -23,7 +23,7 @@ import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { pmv_a } from "./pmv_a.ts";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
-import { e_pmv } from "./e_pmv.js";
+import { pmv_e } from "./pmv_e.ts";
 import {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
@@ -57,7 +57,7 @@ export {
   ADAPTIVE_EN_INFO,
   pmv_a,
   athb,
-  e_pmv,
+  pmv_e,
   at,
   ankle_draft,
   ANKLE_DRAFT_INFO,
@@ -110,7 +110,7 @@ export default {
   ADAPTIVE_EN_INFO,
   pmv_a,
   athb,
-  e_pmv,
+  pmv_e,
   at,
   ankle_draft,
   ANKLE_DRAFT_INFO,

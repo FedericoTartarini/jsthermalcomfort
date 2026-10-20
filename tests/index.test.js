@@ -130,8 +130,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pet_steady");
   });
 
-  it("should have models.e_pmv", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("e_pmv");
+  // Renamed as upstream renamed it, with no alias (ADR 0010).
+  it("should have models.pmv_e and not models.e_pmv", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_e");
+    expect(namedExports).toHaveProperty("pmv_e");
+    expect(jsthermalcomfort.models).not.toHaveProperty("e_pmv");
+    expect(namedExports).not.toHaveProperty("e_pmv");
   });
 
   it("should have models.vertical_tmp_grad_ppd", () => {

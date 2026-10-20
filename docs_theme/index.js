@@ -137,7 +137,7 @@ const displayNameMap = {
   pmv: "Predicted Mean Vote (PMV)",
   pmv_a: "Adaptive Predicted Mean Vote (aPMV)",
   ankle_draft: "Ankle Draft",
-  e_pmv: "Extended PMV (ePMV)",
+  pmv_e: "Adjusted Predicted Mean Votes with Expectancy Factor (ePMV)",
   vertical_tmp_grad_ppd: "Vertical Temperature Gradient PPD",
   use_fans_heatwaves: "Use of Fans During Heatwaves",
   clo_tout: "Clothing Insulation (Tout)",

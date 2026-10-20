@@ -73,6 +73,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/pmv_a.js").PmvAResult} PmvAResult
  */
 /**
+ * @typedef {import("./models/pmv_e.js").PmvEParams} PmvEParams
+ */
+/**
+ * @typedef {import("./models/pmv_e.js").PmvEResult} PmvEResult
+ */
+/**
  * @typedef {import("./models/pmv_ppd_ashrae.js").PmvPpdAshraeParams} PmvPpdAshraeParams
  */
 /**

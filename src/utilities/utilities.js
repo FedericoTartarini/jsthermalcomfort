@@ -108,33 +108,7 @@ export const Standard = Object.freeze({
 });
 
 /**
- * Applicability limit sets that are not standards in their own right.
- *
- * These were previously mixed into `Standard`, which conflated two things: a
- * published standard, and the range over which one particular model has been
- * validated. pythermalcomfort keeps them apart and this now matches.
- *
- * `use_fans_heatwaves` has **no parent**. Its limits are unrelated to ASHRAE
- * 55 -- `tdb` 20-50 against 10-40, `v` 0.1-4.5 against 0-2, `met` 0.7-2
- * against 1-4 -- and `use_fans_heatwaves.py` uses bare `valid_range` calls
- * with no standard identifier at all.
- *
- * The `ankle_draft` set (met <= 1.3, clo <= 0.7) is removed: pythermalcomfort
- * v4.6.2 has no such check, and `ankle_draft` applies only the ASHRAE 55
- * limits (`ankle_draft.py:138-164`).
- *
- * @public
- */
-export const LimitSet = Object.freeze({
-  use_fans_heatwaves: "use_fans_heatwaves",
-});
-
-/**
  * @typedef {(typeof Standard)[keyof typeof Standard]} Standard
- */
-
-/**
- * @typedef {(typeof LimitSet)[keyof typeof LimitSet]} LimitSet
  */
 
 /**
@@ -202,7 +176,7 @@ export function is_iso_7730(standard) {
 /**
  * Check that the values comply with the standard provided
  *
- * @param {"7730-2005"|"7730-2025"|"55-2023"|"7933-2004"|"7933-2023"|"use_fans_heatwaves"} standard
+ * @param {"7730-2005"|"7730-2025"|"55-2023"|"7933-2004"|"7933-2023"} standard
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted
@@ -211,8 +185,6 @@ export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
     case Standard.ashrae_55_2023:
       return _ashrae_compliance(kwargs);
-    case LimitSet.use_fans_heatwaves:
-      return _fan_heatwaves_compliance(kwargs);
     // The two ISO 7730 editions specify identical limits, so both resolve to
     // the same check. They are listed separately rather than collapsed so that
     // a future divergence has an obvious place to go.
@@ -226,8 +198,7 @@ export function check_standard_compliance(standard, kwargs) {
     default:
       throw new Error(
         `Unknown standard "${standard}". Expected one of: ` +
-          `${Object.values(Standard).join(", ")}, ` +
-          `${Object.values(LimitSet).join(", ")}. ` +
+          `${Object.values(Standard).join(", ")}. ` +
           `The unversioned "ISO" and "ASHRAE" identifiers were removed in v2 ` +
           `-- use "7730-2025" and "55-2023".`,
       );
@@ -308,54 +279,6 @@ function _ashrae_compliance(kwargs) {
       );
   }
 
-  return warnings;
-}
-
-/**
- * @param {ComplianceKwargs} kwargs
- *
- * @returns {string[]} strings with warnings emitted
- */
-function _fan_heatwaves_compliance(kwargs) {
-  /** @type {string[]} */
-  let warnings = [];
-  for (const [key, value] of Object.entries(kwargs)) {
-    if (value === undefined) continue;
-    switch (key) {
-      case "tdb":
-      case "tr":
-        let parameter = key === "tdb" ? "dry-bulb" : "mean radiant";
-        if (value > 50 || value < 20)
-          warnings.push(
-            `Fan use during heatwaves ${parameter} temperature applicability limits between 20 and 50 ºC`,
-          );
-        break;
-      case "v":
-        if (value > 4.5 || value < 0.1)
-          warnings.push(
-            "Fan use during heatwaves air speed applicability limits between 0.1 and 4.5 m/s",
-          );
-        break;
-      case "rh":
-        if (value > 100 || value < 0)
-          warnings.push(
-            "Fan use during heatwaves rh applicability limits between 0 and 100 %",
-          );
-        break;
-      case "met":
-        if (value > 2 || value < 0.7)
-          warnings.push(
-            "Fan use during heatwaves met applicability limits between 0.7 and 2 met",
-          );
-        break;
-      case "clo":
-        if (value > 1 || value < 0)
-          warnings.push(
-            "Fan use during heatwaves clo applicability limits between 0 and 1 clo",
-          );
-        break;
-    }
-  }
   return warnings;
 }
 

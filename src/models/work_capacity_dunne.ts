@@ -15,11 +15,15 @@ export interface WorkCapacityDunneParams {
 }
 
 // A non-finite wbgt throws a TypeError here (ADR 0001, reason three), where
-// upstream returns NaN for NaN, 0 for +inf and 100 for -inf. A boolean,
-// null or array wbgt throws a TypeError too (ADR 0005), where upstream
-// returns 100 for True and False, a list for a list, and raises a TypeError
-// for None. work_intensity is declared here and checked below, as upstream's
-// WorkCapacityHothapsInputs checks it.
+// upstream, given a work_intensity string it accepts, returns NaN for NaN, 0
+// for +inf and 100 for -inf. A boolean, null or array wbgt throws a
+// TypeError too (ADR 0005), where upstream, given such a string, returns 100
+// for True and False and a numpy array for a list, and raises a TypeError
+// for None. Given any other work_intensity, upstream raises for
+// work_intensity instead (its ValueError for a value outside the three, its
+// AttributeError for None or a list with no item outside the three), where
+// this function checks wbgt first. work_intensity is declared here and checked
+// below, as upstream's WorkCapacityHothapsInputs checks it.
 const WORK_CAPACITY_DUNNE_SCHEMA = {
   wbgt: { type: "number" },
   work_intensity: {},
@@ -34,9 +38,10 @@ const _FACTORS = {
   [WorkIntensity.LIGHT]: 4,
 };
 
-// Upstream's first sentence cites [Dunne2013]_, a Sphinx citation; the
-// JSDoc names it as Dunne et al. (2013), whose full reference the second
-// paragraph gives as upstream's does.
+// Upstream's first sentence and its note on work_intensity cite
+// [Dunne2013]_, a Sphinx citation (work_capacity_dunne.py:17, :40 at
+// v4.6.2); the JSDoc writes each as Dunne et al. (2013), whose full
+// reference the third paragraph gives as upstream's does.
 /**
  * Estimate work capacity due to heat based on Dunne et al. (2013).
  *

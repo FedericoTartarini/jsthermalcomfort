@@ -180,8 +180,9 @@ describe("work_capacity_dunne beyond upstream's tests", () => {
     },
   );
 
-  // ADR 0005: wbgt is a number. Upstream returns 100 for True and False and
-  // [26.899556544678347] for [30], raises a TypeError for "30" and None.
+  // ADR 0005: wbgt is a number. With the default work_intensity, upstream
+  // returns 100 for True and False and the numpy array [26.899556544678347]
+  // for [30], and raises a TypeError for "30" and None.
   test.each([[true], [false], [[30]], ["30"], [null]])(
     "throws TypeError for wbgt %p",
     (wbgt) => {

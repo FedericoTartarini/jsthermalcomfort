@@ -232,7 +232,9 @@ describe("humidex beyond upstream's tests", () => {
   });
 
   // The model keeps upstream's masks (humidex.py:91-96); the bins give a
-  // consumer the same categories as a classifier.
+  // consumer the same category for every finite humidex. For a NaN or
+  // +Infinity humidex they give NaN, where the model gives "Heat stroke
+  // probable".
   describe("HUMIDEX_DISCOMFORT_BINS", () => {
     test("are upstream's five right-inclusive edges, a top edge of Infinity, and its six labels", () => {
       expect(HUMIDEX_DISCOMFORT_BINS).toEqual({
@@ -256,7 +258,9 @@ describe("humidex beyond upstream's tests", () => {
     });
 
     // Each rounded humidex at rh 50 lands on a category edge or 0.1 above
-    // it; the discomfort is upstream's for the same call.
+    // it, except at tdb -237.7, where the rana exponent's denominator
+    // 237.7 + tdb is 0 and the humidex is -243.3; the discomfort is
+    // upstream's for the same call.
     test.each([
       [26.15898951357993, 30, "Little or no discomfort"],
       [26.22327611127268, 30.1, "Noticeable discomfort"],

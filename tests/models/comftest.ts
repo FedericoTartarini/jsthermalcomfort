@@ -24,7 +24,7 @@ export const testDataUrls = {
   use_fans_heatwaves: prefixURL + "ts_use_fans_heatwaves.json",
   utci: prefixURL + "ts_utci.json",
   verticalTmpGradPpd: prefixURL + "ts_vertical_tmp_grad_ppd.json",
-  wc: prefixURL + "ts_wind_chill.json",
+  wci: prefixURL + "ts_wind_chill.json",
   wbgt: prefixURL + "ts_wbgt.json",
   twoNodes: prefixURL + "ts_two_nodes_gagge.json",
   solarGain: prefixURL + "ts_solar_gain.json",

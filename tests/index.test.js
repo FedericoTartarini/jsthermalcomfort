@@ -22,8 +22,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("heat_index_rothfusz");
   });
 
-  it("should have models.wc", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("wc");
+  // Upstream's name (ADR 0010); the old name wc keeps no alias.
+  it("should have models.wci and not models.wc", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("wci");
+    expect(namedExports).toHaveProperty("wci");
+    expect(jsthermalcomfort.models).not.toHaveProperty("wc");
+    expect(namedExports).not.toHaveProperty("wc");
   });
 
   it("should have models.phs", () => {

@@ -761,8 +761,9 @@ export class JOS3 {
    * `limit_dshiv/dt` is truthy and neither true nor a number.
    * @throws {RangeError} If t_body has fewer than NUM_NODES values, as numpy
    * raises an IndexError (ADR 0012 as amended); if dtime, or the elapsed time
-   * after adding it, is beyond ±999,999,999 days, as Python's timedelta
-   * raises an OverflowError (ADR 0012 as amended), before that step runs.
+   * after adding it, is outside Python's timedelta range (from -999,999,999
+   * days to 999,999,999 days 23:59:59.999999), as Python's timedelta raises
+   * an OverflowError (ADR 0012 as amended), before that step runs.
    * @throws {Error} If t_body has more than NUM_NODES values, as numpy's
    * broadcasting raises a ValueError.
    */

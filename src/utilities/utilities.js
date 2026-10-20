@@ -568,6 +568,13 @@ function _v_relative_single(v, met) {
  *
  */
 export function units_converter(kwargs, from_units = "IP") {
+  // Upstream calls from_units.upper() on what it is given (utilities.py:133
+  // at v4.6.2), so None or a number raises AttributeError, which ADR 0012
+  // maps to a TypeError when a wrong type raises it. Only undefined takes the
+  // default. As upstream, "ip" and "si" convert as "IP" and "SI" do.
+  if (typeof from_units !== "string")
+    throw new TypeError('Parameter "from_units" must be a string');
+  from_units = from_units.toUpperCase();
   let result = { ...kwargs };
   if (from_units === "IP") {
     for (const [key, value] of Object.entries(result)) {

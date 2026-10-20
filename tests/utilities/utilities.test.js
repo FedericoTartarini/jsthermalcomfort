@@ -193,6 +193,36 @@ describe("units_converter", () => {
       deep_close_to_obj(result, expected, DEFAULT_TOLERANCE);
     },
   );
+
+  // Upstream calls from_units.upper() on what it is given
+  // (pythermalcomfort/utilities.py:133 at v4.6.2), so
+  // units_converter(from_units=None, tdb=77), 5, 1.5, True, ["iso"] and
+  // {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
+  // maps to a TypeError when a wrong type raises it.
+  it.each([null, 5, 1.5, true, ["IP"], { a: 1 }])(
+    "throws TypeError if from_units is %p, not a string",
+    (from_units) => {
+      expect(() => units_converter({ tdb: 77 }, from_units)).toThrow(TypeError);
+      expect(() => units_converter({ tdb: 77 }, from_units)).toThrow(
+        'Parameter "from_units" must be a string',
+      );
+    },
+  );
+
+  // Upstream upper-cases from_units before it compares
+  // (pythermalcomfort/utilities.py:133-135 at v4.6.2). Expected values from
+  // units_converter(from_units=..., tdb=77, v=10) and (..., tdb=20, v=2) in
+  // pythermalcomfort 4.6.2.
+  it.each([
+    ["ip", { tdb: 77, v: 10 }, { tdb: 25.0, v: 3.047851264858275 }],
+    ["Ip", { tdb: 77, v: 10 }, { tdb: 25.0, v: 3.047851264858275 }],
+    ["si", { tdb: 20, v: 2 }, { tdb: 68.0, v: 6.562 }],
+  ])(
+    "converts from %p as from its upper case",
+    (from_units, args, expected) => {
+      expect(units_converter(args, from_units)).toEqual(expected);
+    },
+  );
 });
 
 describe("running_mean_outdoor_temperature", () => {

@@ -40,6 +40,12 @@ export function t_mrt(
   emissivity = 0.95,
   standard = "Mixed Convection",
 ) {
+  // Upstream calls standard.lower() on what it is given
+  // (mean_radiant_tmp.py:67 at v4.6.2), so None or a number raises
+  // AttributeError, which ADR 0012 maps to a TypeError when a wrong type
+  // raises it. Only undefined takes the default.
+  if (typeof standard !== "string")
+    throw new TypeError('Parameter "standard" must be a string');
   standard = standard.toLowerCase();
   let tr = 0;
   if (standard === "mixed convection") {

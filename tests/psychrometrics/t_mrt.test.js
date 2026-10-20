@@ -37,4 +37,25 @@ describe("t_mrt", () => {
     const result = t_mrt(tg, tdb, v, d, emissivity, standard);
     expect(result).toBe(expected);
   });
+
+  // Upstream calls standard.lower() on what it is given
+  // (pythermalcomfort/environment/mean_radiant_tmp.py:67 at v4.6.2), so
+  // mean_radiant_tmp(tg=30, tdb=25, v=0.2, standard=None), 5, 1.5, True,
+  // ["iso"] and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2,
+  // which ADR 0012 maps to a TypeError when a wrong type raises it.
+  it.each([null, 5, 1.5, true, ["ISO"], { a: 1 }])(
+    "throws TypeError if standard is %p, not a string",
+    (standard) => {
+      expect(() => t_mrt(30, 25, 0.2, 0.15, 0.95, standard)).toThrow(TypeError);
+      expect(() => t_mrt(30, 25, 0.2, 0.15, 0.95, standard)).toThrow(
+        'Parameter "standard" must be a string',
+      );
+    },
+  );
+
+  it("takes the default standard only when standard is undefined", () => {
+    expect(t_mrt(30, 25, 0.2, 0.15, 0.95, undefined)).toBe(
+      t_mrt(30, 25, 0.2, 0.15, 0.95, "Mixed Convection"),
+    );
+  });
 });

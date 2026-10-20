@@ -44,8 +44,9 @@ export interface PmvAParams {
 // rounded pmv is zero (tdb 24.46 with the other inputs as above), as inf
 // times zero is NaN. A boolean for any numeric parameter, a quantity or
 // a_coefficient, which upstream reads as 1 or 0 (a_coefficient True returns
-// 0.07, False 0.08), throws a TypeError too (ADR 0005 as amended
-// 2026-10-21). units is validated, as upstream gives it to APMVInputs
+// 0.07 and False 0.08 at tdb 25 with the other inputs as above), throws a
+// TypeError too (ADR 0005 as amended 2026-10-21). units is validated, as
+// upstream gives it to APMVInputs
 // (pmv_a.py:107-117 at v4.6.2). limit_inputs is declared and left to
 // pmv_ppd_iso, which validates it as upstream's pmv_ppd_iso does: APMVInputs
 // is not given it, PMVPPDInputs is (pmv_ppd_iso.py:143-153).

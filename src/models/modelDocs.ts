@@ -105,9 +105,7 @@ export interface VariableInfo {
  * which has an applicability bound of its own.
  *
  * `standards` lists the editions this function accepts, default first; empty
- * for a model with no standard, or with one `Standard` has no member for, as
- * upstream's `Models` has none (`adaptive_en`'s EN 16798-1). Every entry is a
- * `Standard` value.
+ * for a model with no standard. Every entry is a `Standard` value.
  *
  * @public
  */

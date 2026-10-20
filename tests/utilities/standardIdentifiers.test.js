@@ -29,11 +29,26 @@ const PYTHERMALCOMFORT_MODELS = {
 // `clo_dynamic_iso` brought ISO 9920 in.
 const NOT_IMPLEMENTED_IN_JS = [];
 
+// Identifiers jsthermalcomfort has and pythermalcomfort does not (ADR 0003 as
+// amended): EN 16798-1, which adaptive_en implements and ADAPTIVE_EN_INFO
+// names. If pythermalcomfort adds one, the test below fails until the two are
+// reconciled.
+const JS_ONLY = { en_16798_1_2019: "16798-1-2019" };
+
 describe("Standard mirrors pythermalcomfort's Models enum", () => {
-  test("every JS identifier exists in pythermalcomfort with the same value", () => {
+  test("every JS identifier exists in pythermalcomfort with the same value, apart from the JS-only ones", () => {
     for (const [name, value] of Object.entries(Standard)) {
+      if (name in JS_ONLY) continue;
       expect(PYTHERMALCOMFORT_MODELS).toHaveProperty(name);
       expect(PYTHERMALCOMFORT_MODELS[name]).toBe(value);
+    }
+  });
+
+  test("the JS-only identifiers are in Standard and not in pythermalcomfort", () => {
+    for (const [name, value] of Object.entries(JS_ONLY)) {
+      expect(Standard[name]).toBe(value);
+      expect(PYTHERMALCOMFORT_MODELS).not.toHaveProperty(name);
+      expect(Object.values(PYTHERMALCOMFORT_MODELS)).not.toContain(value);
     }
   });
 
@@ -46,10 +61,11 @@ describe("Standard mirrors pythermalcomfort's Models enum", () => {
 
   test("names are canonical and values are the API strings, never swapped", () => {
     for (const [name, value] of Object.entries(Standard)) {
-      // Canonical: <body>_<number>_<year>, lowercase.
-      expect(name).toMatch(/^(iso|ashrae)_\d+_\d{4}$/);
+      // Canonical: <body>_<number>_<year>, lowercase; a part number stays in
+      // the number (en_16798_1_2019).
+      expect(name).toMatch(/^(iso|ashrae|en)_\d+(_\d+)?_\d{4}$/);
       // API string: the short form pythermalcomfort accepts.
-      expect(value).toMatch(/^\d+-\d{4}$/);
+      expect(value).toMatch(/^\d+(-\d+)?-\d{4}$/);
       expect(name).not.toBe(value);
     }
   });

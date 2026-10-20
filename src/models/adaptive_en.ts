@@ -85,9 +85,9 @@ export const ADAPTIVE_EN_LIMITS = Object.freeze({
  *
  * Experimental — the shape of `ModelInfo` may change before release.
  *
- * `standards` is empty: `Standard` has no member for EN 16798-1, as
- * upstream's `Models` enum has none (utilities.py:23-31 at v4.6.2), and its
- * members follow upstream's (ADR 0003).
+ * `standards` names EN 16798-1:2019 through `Standard.en_16798_1_2019`, a
+ * member upstream's `Models` enum lacks (utilities.py:23-31 at v4.6.2; ADR
+ * 0003 as amended). The function takes no `standard`.
  * Only `t_running_mean` has an applicability bound. The acceptability
  * outputs are booleans, so they carry no unit and no classifier.
  *
@@ -98,7 +98,7 @@ export const ADAPTIVE_EN_INFO: ModelInfo = deepFreeze({
   label: "Adaptive (EN 16798-1)",
   description:
     "Adaptive comfort temperature and its category I, II and III acceptability ranges from the running mean outdoor temperature.",
-  standards: [],
+  standards: [Standard.en_16798_1_2019],
   inputs: {
     tdb: { unit: "°C" },
     tr: { unit: "°C" },

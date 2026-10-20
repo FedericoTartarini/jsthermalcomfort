@@ -80,11 +80,17 @@ export function transpose_sharp_altitude(sharp, altitude) {
 /**
  * Canonical identifiers for the comfort standards this library implements.
  *
- * Mirrors `pythermalcomfort.utilities.Models` exactly: the **property name** is
- * the canonical key, shared across both libraries and used to key the limits
- * file in #182; the **value** is the string a caller passes. Keeping both forms
- * means neither library has to translate, and a binding test can assert that
- * the two key sets are identical.
+ * Mirrors `pythermalcomfort.utilities.Models`: the **property name** is the
+ * canonical key, shared across both libraries and used to key the limits file
+ * in #182; the **value** is the string a caller passes. Keeping both forms
+ * means neither library has to translate, and a binding test asserts that the
+ * two key sets are identical apart from the members upstream lacks.
+ *
+ * Upstream lacks one member: `en_16798_1_2019`, EN 16798-1:2019, which
+ * `adaptive_en` implements and `ADAPTIVE_EN_INFO.standards` names (ADR 0003 as
+ * amended). Its key and value follow upstream's `<body>_<number>_<year>` and
+ * `<number>-<year>`, with the part number kept in the number. No function
+ * accepts it as a `standard` argument.
  *
  * @public
  */
@@ -95,6 +101,7 @@ export const Standard = Object.freeze({
   iso_9920_2007: "9920-2007",
   iso_7933_2004: "7933-2004",
   iso_7933_2023: "7933-2023",
+  en_16798_1_2019: "16798-1-2019",
 });
 
 /**

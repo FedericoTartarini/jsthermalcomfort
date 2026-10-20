@@ -926,12 +926,13 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
 describe("ADAPTIVE_EN_INFO — the EN 16798-1 adaptive model's metadata", () => {
   const base = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
 
-  // Upstream's Models enum has no EN 16798-1 member, so neither has Standard.
-  test("labels the model and lists no standard", () => {
+  // Standard.en_16798_1_2019 is a member upstream's Models enum lacks (ADR
+  // 0003 as amended).
+  test("labels the model and lists EN 16798-1 as its only standard", () => {
     expect(ADAPTIVE_EN_INFO.name).toBe("adaptive_en");
     expect(ADAPTIVE_EN_INFO.label).toBe("Adaptive (EN 16798-1)");
     expect(typeof ADAPTIVE_EN_INFO.description).toBe("string");
-    expect(ADAPTIVE_EN_INFO.standards).toEqual([]);
+    expect(ADAPTIVE_EN_INFO.standards).toEqual([Standard.en_16798_1_2019]);
   });
 
   test("inputs are adaptive_en's four quantities, with adaptive_ashrae's units", () => {

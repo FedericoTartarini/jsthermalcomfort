@@ -55,6 +55,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/heat_index_rothfusz.js").HeatIndexRothfuszResult} HeatIndexRothfuszResult
  */
 /**
+ * @typedef {import("./models/humidex.js").HumidexParams} HumidexParams
+ */
+/**
+ * @typedef {import("./models/humidex.js").HumidexResult} HumidexResult
+ */
+/**
  * @typedef {import("./models/pmv_a.js").PmvAParams} PmvAParams
  */
 /**

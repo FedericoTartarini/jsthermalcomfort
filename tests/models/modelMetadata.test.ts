@@ -7,6 +7,8 @@ import {
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
+  HUMIDEX_DISCOMFORT_BINS,
+  HUMIDEX_INFO,
   PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -22,6 +24,7 @@ import {
   ankle_draft,
   clo_tout,
   heat_index_rothfusz,
+  humidex,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
@@ -57,6 +60,8 @@ const expectedMetadataExports = [
   "CLO_TOUT_INFO",
   "HEAT_INDEX_ROTHFUSZ_INFO",
   "HEAT_INDEX_STRESS_CATEGORY_BINS",
+  "HUMIDEX_DISCOMFORT_BINS",
+  "HUMIDEX_INFO",
   "PMV_CATEGORY_BINS_ISO_7730_2005",
   "PMV_CATEGORY_BINS_ISO_7730_2025",
   "PMV_COMPLIANCE_INTERVAL_ASHRAE",
@@ -430,6 +435,12 @@ describe("Identity — bins exported separately are the same object as in INFO",
   test("HEAT_INDEX_STRESS_CATEGORY_BINS === HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier", () => {
     expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toBe(
       HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
+    );
+  });
+
+  test("HUMIDEX_DISCOMFORT_BINS === HUMIDEX_INFO.outputs.discomfort.classifier", () => {
+    expect(HUMIDEX_DISCOMFORT_BINS).toBe(
+      HUMIDEX_INFO.outputs.discomfort.classifier,
     );
   });
 
@@ -1456,6 +1467,76 @@ describe("VERTICAL_TMP_GRAD_PPD_INFO — the vertical temperature gradient model
     ).toBe(true);
   });
 });
+
+describe("HUMIDEX_INFO — the humidex's metadata", () => {
+  const base = { tdb: 25, rh: 50 };
+
+  test("labels the model and lists no standard", () => {
+    expect(HUMIDEX_INFO.name).toBe("humidex");
+    expect(HUMIDEX_INFO.label).toBe("Humidex");
+    expect(typeof HUMIDEX_INFO.description).toBe("string");
+    expect(HUMIDEX_INFO.standards).toEqual([]);
+  });
+
+  // model is a string option, not a quantity.
+  test("inputs are tdb and rh, in the units other models give them", () => {
+    expect(Object.keys(HUMIDEX_INFO.inputs)).toEqual(["tdb", "rh"]);
+    // The same quantity has the same unit in every model (ADR 0011).
+    for (const key of ["tdb", "rh"]) {
+      expect(HUMIDEX_INFO.inputs[key].unit).toBe(
+        HEAT_INDEX_ROTHFUSZ_INFO.inputs[key].unit,
+      );
+    }
+  });
+
+  // Upstream checks no applicability range (humidex.py at v4.6.2); an rh
+  // outside 0 to 100 % raises instead.
+  test("no quantity has an applicability bound, and no call has a row", () => {
+    for (const info of Object.values(HUMIDEX_INFO.inputs)) {
+      expect(info.applicability).toBeUndefined();
+    }
+    expect(HUMIDEX_INFO.derived).toBeUndefined();
+    for (const params of [
+      { tdb: -50, rh: 0 },
+      { tdb: 60, rh: 100 },
+      { tdb: 30, rh: 0, model: "masterson" as const },
+    ]) {
+      expect(humidex(params).warnings).toEqual([]);
+    }
+  });
+
+  test("humidex output keys match HUMIDEX_INFO.outputs", () => {
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(humidex(base))
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(Object.keys(HUMIDEX_INFO.outputs).sort());
+  });
+
+  test("humidex is in °C; discomfort is unitless, classified by HUMIDEX_DISCOMFORT_BINS", () => {
+    expect(HUMIDEX_INFO.outputs.humidex).toEqual({ unit: "°C" });
+    expect(HUMIDEX_INFO.outputs.discomfort).toEqual({
+      unit: null,
+      classifier: HUMIDEX_DISCOMFORT_BINS,
+    });
+    expect(typeof humidex(base).discomfort).toBe("string");
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(HUMIDEX_INFO)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_INFO.inputs.tdb)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_INFO.inputs.rh)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_INFO.outputs.discomfort)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_DISCOMFORT_BINS)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_DISCOMFORT_BINS.edges)).toBe(true);
+    expect(Object.isFrozen(HUMIDEX_DISCOMFORT_BINS.labels)).toBe(true);
+  });
+});
+
 describe("UTCI_INFO — the UTCI model's metadata", () => {
   test("labels the model and lists no standard", () => {
     expect(UTCI_INFO.name).toBe("utci");

@@ -4,7 +4,7 @@ import {
   HEAT_INDEX_STRESS_CATEGORY_BINS,
 } from "./heat_index_rothfusz.ts";
 import { phs } from "./phs.js";
-import { humidex } from "./humidex.js";
+import { humidex, HUMIDEX_DISCOMFORT_BINS, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
@@ -70,6 +70,8 @@ export {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   humidex,
+  HUMIDEX_DISCOMFORT_BINS,
+  HUMIDEX_INFO,
   net,
   phs,
   pet_steady,
@@ -119,6 +121,8 @@ export default {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   humidex,
+  HUMIDEX_DISCOMFORT_BINS,
+  HUMIDEX_INFO,
   net,
   phs,
   pet_steady,

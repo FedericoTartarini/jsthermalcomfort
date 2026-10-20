@@ -1442,6 +1442,24 @@ describe("jos3 beyond upstream's tests", () => {
     },
   );
 
+  // Above 2^53 microseconds (about 285 years) a double no longer holds every
+  // whole microsecond; upstream's timedelta counts them in Python's integers
+  // and total_seconds() divides them by 10**6, correctly rounded
+  // (up_simtime_big.py in the ticket 25 batch-1 scratchpad).
+  test.each<[number, number, number[]]>([
+    [2, 9007199254.740993, [0.0, 9007199254.740993, 18014398509.481987]],
+    [1, 42603263734250.09, [0.0, 42603263734250.09]],
+    [2, 14287480121307.64, [0.0, 14287480121307.64, 28574960242615.28]],
+    [1, 56099087240450.445, [0.0, 56099087240450.445]],
+  ])(
+    "simulation_time after %i steps of dtime %p, above 2^53 microseconds, is upstream's",
+    (times, dtime, expected) => {
+      const model = new JOS3();
+      model.simulate(times, dtime);
+      expect(model.results().simulation_time).toEqual(expected);
+    },
+  );
+
   test("the clothing ensemble of upstream's docstring example sets clo as upstream", () => {
     const { local_clo_typical_ensembles, ALL_OUT_PARAMS } = parameters;
     const ens = local_clo_typical_ensembles[up.ensemble.name];

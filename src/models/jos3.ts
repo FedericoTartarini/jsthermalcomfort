@@ -274,36 +274,62 @@ const c_round = (x: number) => Math.sign(x) * Math.round(Math.abs(x));
  * The whole microseconds of CPython's `timedelta(0, seconds)` for a float
  * `seconds`, as `accum` and `delta_new` compute them
  * (`Modules/_datetimemodule.c:2430-2502, :2577-2601` at CPython v3.12.12):
- * `modf` splits off the integer seconds; their microseconds are exact; the
- * fraction times 1e6 is split again, and its fractional part is rounded with
- * C's `round`, a tie going to the even total. Upstream adds this timedelta
- * to the elapsed time every step (`jos3.py:705-706` at v4.6.2), so the
- * elapsed seconds, the microseconds over 1e6, are upstream's
- * `total_seconds()` while the total stays below 2^53 microseconds (about 285
- * years), where every step here is exact. A single `round(dtime * 1e6)`
- * gave 600.0 s per step for a dtime of 600.0000005, where upstream gives
- * 600.000001 s.
+ * `modf` splits off the integer seconds, whose microseconds Python's
+ * integers hold exactly, as a BigInt does here; the fraction times 1e6 is
+ * split again, and its fractional part is rounded with C's `round`, a tie
+ * going to the even total. A single `round(dtime * 1e6)` gave 600.0 s per
+ * step for a dtime of 600.0000005, where upstream gives 600.000001 s.
  *
  * @param {number} seconds - the time delta [s], finite
- * @returns {number} its whole microseconds
+ * @returns {bigint} its whole microseconds
  */
-function timedelta_us(seconds: number): number {
+function timedelta_us(seconds: number): bigint {
   const int_s = Math.trunc(seconds);
-  let us = int_s * 1e6;
+  let us = BigInt(int_s) * 1000000n;
   const frac = seconds - int_s; // modf: exact
   if (frac === 0) return us;
   const scaled = 1e6 * frac; // one rounding, as C's dnum *= fracpart
   const int_us = Math.trunc(scaled);
-  us += int_us;
+  us += BigInt(int_us);
   const leftover = scaled - int_us; // exact
   if (leftover === 0) return us;
   let whole = c_round(leftover);
   if (Math.abs(whole - leftover) === 0.5) {
     // exactly halfway: round half to even against the microseconds so far
-    const odd = Math.abs(us % 2);
+    const odd = us % 2n === 0n ? 0 : 1;
     whole = 2 * c_round((leftover + odd) * 0.5) - odd;
   }
-  return us + whole;
+  return us + BigInt(whole);
+}
+
+/**
+ * `timedelta.total_seconds()`: the microseconds divided by 10**6 as Python
+ * divides two integers (`delta_total_seconds`, `_datetimemodule.c:2720-2733`
+ * at v3.12.12), rounded to the nearest double, a tie to even (Python 3.12
+ * matched the exact quotient so rounded on 250,000 integers from 2^53 to
+ * 2^67 in magnitude, `int_div_check.py` in the ticket 25 batch-1
+ * scratchpad). Up to 2^53 microseconds both operands are doubles and `/` is
+ * that division; above, the quotient is taken in BigInt with at least 55
+ * bits and a sticky bit for the remainder, so that `Number`'s rounding of it
+ * (to nearest, ties to even) is the rounding of the exact quotient, for
+ * every count of microseconds a timedelta can hold (below 2^67).
+ *
+ * @param {bigint} us - the microseconds
+ * @returns {number} the seconds
+ */
+function total_seconds(us: bigint): number {
+  const n = us < 0n ? -us : us;
+  let s: number;
+  if (n <= 2n ** 53n) {
+    s = Number(n) / 1e6;
+  } else {
+    const k = 75 - n.toString(2).length; // 10**6 has 20 bits
+    const scaled = n << BigInt(k);
+    let q = scaled / 1000000n;
+    if (scaled % 1000000n !== 0n) q |= 1n;
+    s = Number(q) * 2 ** -k;
+  }
+  return us < 0n ? -s : s;
 }
 
 /**
@@ -454,9 +480,9 @@ export class JOS3 {
   _par: number;
   _posture: JOS3Posture;
   // Upstream's elapsed time is a datetime.timedelta (jos3.py:500), whole
-  // microseconds; it is kept here as an integer count of microseconds
-  // (timedelta_us).
-  _time_us: number;
+  // microseconds in Python's integers; it is kept here as a BigInt count of
+  // microseconds (timedelta_us), simulation_time its total_seconds().
+  _time_us: bigint;
   _history: JOS3Output[];
 
   // jos3 D1: ex_output is gone, as upstream has none (jos3.py:372-382). The
@@ -542,7 +568,7 @@ export class JOS3 {
     this._hc = null; // Convective heat transfer coefficient
     this._hr = null; // Radiative heat transfer coefficient
     this.ex_q = full(NUM_NODES, 0); // External heat gain
-    this._time_us = 0; // Elapsed time
+    this._time_us = 0n; // Elapsed time
     this.model_name = "JOS3"; // Model name
     this.options = {
       nonshivering_thermogenesis: true,
@@ -1079,7 +1105,7 @@ export class JOS3 {
     const vfat = (a: readonly number[]) => VINDEX.fat.map((i) => a[i]);
     const parts = pass_values_to_jos3_body_parts;
     return {
-      simulation_time: this._time_us / 1e6,
+      simulation_time: total_seconds(this._time_us),
       dt: dtime,
       t_skin_mean: round(this.t_skin_mean, 2),
       t_skin: parts(this.t_skin),

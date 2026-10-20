@@ -73,7 +73,7 @@ import { _check_params_object } from "../_internal/validation.ts";
 // a value stays assignable to Record<string, unknown>. simulation_time is a
 // datetime.timedelta upstream; JavaScript has none, so it is the elapsed
 // time in seconds, as before (ADR 0001's first reason), equal to upstream's
-// total_seconds(). The previous output had cycle_time and name, which
+// total_seconds() (see timedelta_us). The previous output had cycle_time and name, which
 // upstream dropped, and returned per-segment values as arrays, a subset of
 // the fields unless ex_output was "all" (jos3 D1).
 /**
@@ -267,6 +267,45 @@ const JOS3_SCHEMA = {
   bsa_equation: {},
 };
 
+// C's round(): half away from zero.
+const c_round = (x: number) => Math.sign(x) * Math.round(Math.abs(x));
+
+/**
+ * The whole microseconds of CPython's `timedelta(0, seconds)` for a float
+ * `seconds`, as `accum` and `delta_new` compute them
+ * (`Modules/_datetimemodule.c:2430-2502, :2577-2601` at CPython v3.12.12):
+ * `modf` splits off the integer seconds; their microseconds are exact; the
+ * fraction times 1e6 is split again, and its fractional part is rounded with
+ * C's `round`, a tie going to the even total. Upstream adds this timedelta
+ * to the elapsed time every step (`jos3.py:705-706` at v4.6.2), so the
+ * elapsed seconds, the microseconds over 1e6, are upstream's
+ * `total_seconds()` while the total stays below 2^53 microseconds (about 285
+ * years), where every step here is exact. A single `round(dtime * 1e6)`
+ * gave 600.0 s per step for a dtime of 600.0000005, where upstream gives
+ * 600.000001 s.
+ *
+ * @param {number} seconds - the time delta [s], finite
+ * @returns {number} its whole microseconds
+ */
+function timedelta_us(seconds: number): number {
+  const int_s = Math.trunc(seconds);
+  let us = int_s * 1e6;
+  const frac = seconds - int_s; // modf: exact
+  if (frac === 0) return us;
+  const scaled = 1e6 * frac; // one rounding, as C's dnum *= fracpart
+  const int_us = Math.trunc(scaled);
+  us += int_us;
+  const leftover = scaled - int_us; // exact
+  if (leftover === 0) return us;
+  let whole = c_round(leftover);
+  if (Math.abs(whole - leftover) === 0.5) {
+    // exactly halfway: round half to even against the microseconds so far
+    const odd = Math.abs(us % 2);
+    whole = 2 * c_round((leftover + odd) * 0.5) - odd;
+  }
+  return us + whole;
+}
+
 /**
  * `to_array_body_parts`, then ADR 0001's and ADR 0005's checks, which every
  * value a setter takes passes: a finite number. In pythermalcomfort 4.6.2 a
@@ -398,8 +437,8 @@ export class JOS3 {
   _par: number;
   _posture: JOS3Posture;
   // Upstream's elapsed time is a datetime.timedelta (jos3.py:500), whole
-  // microseconds; it is kept here as an integer count of microseconds, so
-  // simulation_time is upstream's total_seconds() for any dtime.
+  // microseconds; it is kept here as an integer count of microseconds
+  // (timedelta_us).
   _time_us: number;
   _history: JOS3Output[];
 
@@ -661,9 +700,8 @@ export class JOS3 {
     assertNumber(dtime, "dtime");
     // Loop through the simulation for the given number of times
     for (let i = 0; i < times; i++) {
-      // Increment the elapsed time by the time delta: timedelta(0, dtime)
-      // holds whole microseconds, rounded half to even.
-      this._time_us += round(dtime * 1e6, 0);
+      // Increment the elapsed time by the time delta, timedelta(0, dtime)
+      this._time_us += timedelta_us(dtime);
 
       // Execute the simulation step
       const dict_data = this._run(dtime, false, output);

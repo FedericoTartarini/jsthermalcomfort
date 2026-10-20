@@ -1376,7 +1376,7 @@ describe("jos3 beyond upstream's tests", () => {
     },
   );
 
-  test("simulation_time is upstream's elapsed timedelta in seconds, whole microseconds", () => {
+  test("simulation_time is upstream's elapsed timedelta in seconds", () => {
     let model = new JOS3();
     model.simulate(10, 0.1);
     expect(model.results().simulation_time).toEqual(up.sim_time_0_1);
@@ -1384,6 +1384,36 @@ describe("jos3 beyond upstream's tests", () => {
     model.simulate(3, 1 / 3);
     expect(model.results().simulation_time).toEqual(up.sim_time_third);
   });
+
+  // CPython's timedelta(0, dtime) (Modules/_datetimemodule.c, accum and
+  // delta_new, at v3.12.12) splits dtime with modf, scales the fraction by
+  // 1e6, splits it again and rounds the rest half to even against the
+  // microseconds so far; a single round(dtime * 1e6) gives other values for
+  // 600.0000005 and 123456789.0000005. Expected: pythermalcomfort 4.6.2's total_seconds() after 3 steps
+  // (up_simtime.py in the ticket 25 batch-1 scratchpad).
+  test.each<[number, number[]]>([
+    [600.0000005, [0.0, 600.000001, 1200.000002, 1800.000003]],
+    [5e-7, [0.0, 0.0, 0.0, 0.0]],
+    [1.5e-6, [0.0, 2e-6, 4e-6, 6e-6]],
+    [2.5e-6, [0.0, 2e-6, 4e-6, 6e-6]],
+    [-5e-7, [0.0, 0.0, 0.0, 0.0]],
+    [-1.5e-6, [0.0, -2e-6, -4e-6, -6e-6]],
+    [
+      123456789.0000005,
+      [0.0, 123456789.000001, 246913578.000002, 370370367.000003],
+    ],
+    [1140.5696404999999, [0.0, 1140.56964, 2281.13928, 3421.70892]],
+    [541.3030675000001, [0.0, 541.303068, 1082.606136, 1623.909204]],
+    [0.1, [0.0, 0.1, 0.2, 0.3]],
+    [0.3333333333333333, [0.0, 0.333333, 0.666666, 0.999999]],
+  ])(
+    "simulation_time for dtime %p is upstream's timedelta conversion",
+    (dtime, expected) => {
+      const model = new JOS3();
+      model.simulate(3, dtime);
+      expect(model.results().simulation_time).toEqual(expected);
+    },
+  );
 
   test("the clothing ensemble of upstream's docstring example sets clo as upstream", () => {
     const { local_clo_typical_ensembles, ALL_OUT_PARAMS } = parameters;

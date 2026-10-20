@@ -286,8 +286,9 @@ describe("pmv_a beyond upstream's tests", () => {
     });
 
     // Upstream reads True as 1 (a tdb of True returns NaN with a tdb row, an
-    // a_coefficient of True returns 0.07); a quantity is a number
-    // (ADR 0005).
+    // a_coefficient of True returns 0.07); a boolean for any numeric
+    // parameter, a quantity or a_coefficient, throws (ADR 0005 as amended
+    // 2026-10-21).
     test.each(keys)("%s true throws a TypeError", (key) => {
       const params = { ...base, [key]: true } as unknown as PmvAParams;
       expect(() => pmv_a(params)).toThrow(TypeError);

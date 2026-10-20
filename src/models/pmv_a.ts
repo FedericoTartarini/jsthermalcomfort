@@ -37,15 +37,18 @@ export interface PmvAParams {
 }
 
 // A non-finite number throws a TypeError here (ADR 0001, reason three), where
-// upstream returns a result for each: NaN, except 0.0 and -0.0 for an
-// a_coefficient of +inf and -inf, and 0.12 for a NaN or -inf vr with
-// limit_inputs False (at tdb 25, tr 25, rh 50, met 1.2, clo 0.5). A boolean
-// quantity or a_coefficient, which upstream reads as 0 or 1, throws a
-// TypeError too: quantities are numbers (ADR 0005). units is validated, as
-// upstream gives it to APMVInputs (pmv_a.py:107-117 at v4.6.2). limit_inputs
-// is declared and left to pmv_ppd_iso, which validates it as upstream's
-// pmv_ppd_iso does: APMVInputs is not given it, PMVPPDInputs is
-// (pmv_ppd_iso.py:143-153).
+// upstream returns a result for each. At tdb 25, tr 25, vr 0.1, rh 50,
+// met 1.2, clo 0.5 and a_coefficient 0.293 it returns NaN, except 0.0 and
+// -0.0 for an a_coefficient of +inf and -inf, and 0.12 for a NaN or -inf vr
+// with limit_inputs False. An infinite a_coefficient gives NaN where the
+// rounded pmv is zero (tdb 24.46 with the other inputs as above), as inf
+// times zero is NaN. A boolean for any numeric parameter, a quantity or
+// a_coefficient, which upstream reads as 1 or 0 (a_coefficient True returns
+// 0.07, False 0.08), throws a TypeError too (ADR 0005 as amended
+// 2026-10-21). units is validated, as upstream gives it to APMVInputs
+// (pmv_a.py:107-117 at v4.6.2). limit_inputs is declared and left to
+// pmv_ppd_iso, which validates it as upstream's pmv_ppd_iso does: APMVInputs
+// is not given it, PMVPPDInputs is (pmv_ppd_iso.py:143-153).
 const PMV_A_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
@@ -94,7 +97,7 @@ const PMV_A_SCHEMA = {
  * @param {'SI'|'IP'} [params.units='SI'] - Units system, 'SI' or 'IP'. Defaults to 'SI'.
  * @param {boolean} [params.limit_inputs=true] - If True, returns nan for inputs outside standard limits. Defaults to True.
  *
- *   Note: ISO 7730 {@link #ref_2|[2]} limits, inclusive: 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40, 0 <= vr [m/s] <= 1,
+ *   Note: ISO 7730 {@link #ref_2|[2]} {@link #ref_28|[28]} limits, inclusive: 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40, 0 <= vr [m/s] <= 1,
  *   0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, -2 <= PMV <= 2.
  *
  * @returns {PmvAResult} the Predicted Mean Vote (a_pmv), and the applicability bounds the call broke.

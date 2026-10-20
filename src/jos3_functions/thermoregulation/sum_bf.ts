@@ -1,4 +1,4 @@
-import { np_sum } from "../_numpy.ts";
+import { np_sum } from "../../_internal/numpy.ts";
 
 /**
  * Sum the total blood flow in various body parts

@@ -1,5 +1,5 @@
-import { ew } from "../jos3_functions/_numpy.ts";
-import type { NumOrArray } from "../jos3_functions/_numpy.ts";
+import { ew } from "../_internal/numpy.ts";
+import type { NumOrArray } from "../_internal/numpy.ts";
 
 // Moved from jos3_functions/thermoregulation/evaporation.js to upstream's
 // home, pythermalcomfort/psychrometrics/antoine.py (v4.6.2). Upstream also

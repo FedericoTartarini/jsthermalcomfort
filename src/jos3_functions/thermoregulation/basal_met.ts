@@ -1,4 +1,4 @@
-import { py_max, require_numeric } from "../_numpy.ts";
+import { py_max, require_numeric } from "../../_internal/numpy.ts";
 
 /** An equation `basal_met` accepts. */
 export type JOS3BmrEquation =

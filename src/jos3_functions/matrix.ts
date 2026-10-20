@@ -4,7 +4,12 @@
 import { BODY_NAMES } from "./_body_parts.ts";
 import type { JOS3BodyPartName } from "./_body_parts.ts";
 import { Default } from "./Default.ts";
-import { key_error, np_sum, py_type_name, zeros2d } from "./_numpy.ts";
+import {
+  key_error,
+  np_sum,
+  py_type_name,
+  zeros2d,
+} from "../_internal/numpy.ts";
 
 /** The name of a layer of a JOS-3 body part. */
 export type JOS3LayerName =

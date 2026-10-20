@@ -2,8 +2,8 @@ import { Default } from "../Default.ts";
 import { error_signals } from "./error_signals.ts";
 import { bsa_rate } from "../bsa_rate.ts";
 import { antoine } from "../../psychrometrics/antoine.ts";
-import { ewa, full, py_max } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ewa, full, py_max } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * @typedef EvaporationResult

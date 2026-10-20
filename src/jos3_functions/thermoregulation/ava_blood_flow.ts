@@ -1,7 +1,7 @@
 import { Default } from "../Default.ts";
 import { bfb_rate } from "../bfb_rate.ts";
-import { np_average, py_max, py_min } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { np_average, py_max, py_min } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * @typedef AvaBloodFlowResult

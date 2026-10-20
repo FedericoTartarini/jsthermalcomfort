@@ -1,4 +1,4 @@
-import { ew } from "../_numpy.ts";
+import { ew } from "../../_internal/numpy.ts";
 
 // New: upstream's tetens (thermoregulation.py:539-552 at v4.6.2), which the
 // library lacked. Upstream's model does not call it.

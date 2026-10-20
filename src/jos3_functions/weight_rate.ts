@@ -1,5 +1,5 @@
 import { Default } from "./Default.ts";
-import { require_numeric } from "./_numpy.ts";
+import { require_numeric } from "../_internal/numpy.ts";
 
 // Upstream does not validate the weight here (construction.py:190-203 at
 // v4.6.2), so neither does this any more.

@@ -1,4 +1,4 @@
-import { require_numeric } from "./_numpy.ts";
+import { require_numeric } from "../_internal/numpy.ts";
 
 // Upstream's messages (construction.py:48-60 at v4.6.2); the weight and fat
 // ones used to read "[20, 200]" and "Body Fat must be ...".

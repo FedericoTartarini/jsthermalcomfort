@@ -1,8 +1,8 @@
 import { Default } from "../Default.ts";
 import { error_signals } from "./error_signals.ts";
 import { bsa_rate } from "../bsa_rate.ts";
-import { full, key_error, np_average, py_max } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { full, key_error, np_average, py_max } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * The options `shivering` reads, as `JOS3`'s `options` holds them.

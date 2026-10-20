@@ -1,5 +1,5 @@
-import { ewa } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ewa } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 import { invalid_posture, lower_posture } from "./_posture.ts";
 import type { JOS3Posture } from "./_posture.ts";
 

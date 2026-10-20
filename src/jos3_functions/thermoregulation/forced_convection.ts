@@ -1,5 +1,5 @@
-import { ewa } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ewa } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 // Was a closure inside conv_coef; upstream's module-level function
 // (thermoregulation.py:143-201 at v4.6.2), one file per function.

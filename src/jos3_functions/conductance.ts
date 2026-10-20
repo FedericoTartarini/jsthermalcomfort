@@ -2,7 +2,7 @@ import { weight_rate } from "./weight_rate.ts";
 import { bsa_rate } from "./bsa_rate.ts";
 import { NUM_NODES, IDICT } from "./matrix.ts";
 import { BODY_NAMES } from "./_body_parts.ts";
-import { require_numeric, zeros2d } from "./_numpy.ts";
+import { require_numeric, zeros2d } from "../_internal/numpy.ts";
 
 // Upstream does not validate the body here (construction.py:267-538 at
 // v4.6.2), so neither does this any more; a fat that is not a number raises

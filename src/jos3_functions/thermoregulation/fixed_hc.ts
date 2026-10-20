@@ -1,6 +1,6 @@
 import { Default } from "../Default.ts";
-import { ewa, np_average, py_max } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ewa, np_average, py_max } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * Fixes hc values to fit two-node-model's values

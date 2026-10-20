@@ -1,6 +1,6 @@
 import { Default } from "./Default.ts";
 import { body_surface_area } from "../utilities/utilities.js";
-import { np_sum, require_numeric } from "./_numpy.ts";
+import { np_sum, require_numeric } from "../_internal/numpy.ts";
 
 // Upstream does not validate the body here (construction.py:98-143 at
 // v4.6.2); the call to validate_body_parameters that passed bsa_equation in

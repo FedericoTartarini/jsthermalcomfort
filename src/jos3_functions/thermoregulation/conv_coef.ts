@@ -1,5 +1,5 @@
-import { ewa } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ewa } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 import { natural_convection } from "./natural_convection.ts";
 import { forced_convection } from "./forced_convection.ts";
 import type { JOS3Posture } from "./_posture.ts";

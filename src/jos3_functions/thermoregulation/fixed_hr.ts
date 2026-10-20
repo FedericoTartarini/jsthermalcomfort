@@ -1,5 +1,5 @@
 import { Default } from "../Default.ts";
-import { ewa, np_average } from "../_numpy.ts";
+import { ewa, np_average } from "../../_internal/numpy.ts";
 
 /**
  * Fixes hr values to fit two-node-model's values

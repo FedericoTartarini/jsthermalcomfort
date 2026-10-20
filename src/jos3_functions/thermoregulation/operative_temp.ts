@@ -1,5 +1,5 @@
-import { ew, py_div } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ew, py_div } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * Calculate operative temperature [°C]

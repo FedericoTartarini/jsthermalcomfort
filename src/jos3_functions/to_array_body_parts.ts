@@ -1,7 +1,7 @@
 import { Default } from "./Default.ts";
 import { BODY_NAMES } from "./_body_parts.ts";
 import type { JOS3BodyParts } from "./_body_parts.ts";
-import { key_error, py_type_name } from "./_numpy.ts";
+import { key_error, py_type_name } from "../_internal/numpy.ts";
 
 /** What `to_array_body_parts` takes: a number, 17 numbers, or one per body part. */
 export type JOS3BodyPartsInput =

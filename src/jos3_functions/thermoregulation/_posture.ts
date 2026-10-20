@@ -1,4 +1,4 @@
-import { py_type_name } from "../_numpy.ts";
+import { py_type_name } from "../../_internal/numpy.ts";
 
 // The postures upstream's natural_convection and rad_coef accept, in the
 // order their message lists them (thermoregulation.py:131-139, :323-333 at

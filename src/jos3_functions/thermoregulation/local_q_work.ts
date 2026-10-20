@@ -1,4 +1,4 @@
-import { require_numeric } from "../_numpy.ts";
+import { require_numeric } from "../../_internal/numpy.ts";
 
 // Upstream's message (thermoregulation.py:1104-1105 at v4.6.2); it used to
 // read "par must be greater than or equal to 1". A ValueError for a value

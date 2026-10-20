@@ -1,6 +1,6 @@
 import { Default } from "./Default.ts";
 import { bsa_rate } from "./bsa_rate.ts";
-import { np_sum, require_numeric } from "./_numpy.ts";
+import { np_sum, require_numeric } from "../_internal/numpy.ts";
 
 // Upstream does not validate the body here (construction.py:206-264 at
 // v4.6.2), so neither does this any more.

@@ -1,7 +1,7 @@
 import { error_signals } from "./error_signals.ts";
 import { bsa_rate } from "../bsa_rate.ts";
-import { py_min } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { py_min } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * Calculate local metabolic rate by non-shivering [W]

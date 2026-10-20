@@ -1,6 +1,6 @@
 import { clo_area_factor } from "./clo_area_factor.ts";
-import { ew, py_div } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ew, py_div } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 // Upstream's message (thermoregulation.py:440-441 at v4.6.2), a ValueError
 // for a value out of range, so a RangeError (ADR 0012).

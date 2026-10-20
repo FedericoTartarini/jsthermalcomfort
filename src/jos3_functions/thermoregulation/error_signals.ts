@@ -1,5 +1,5 @@
-import { ewa, np_sum } from "../_numpy.ts";
-import type { NumOrArray } from "../_numpy.ts";
+import { ewa, np_sum } from "../../_internal/numpy.ts";
+import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
  * @typedef ErrorSignalsResult

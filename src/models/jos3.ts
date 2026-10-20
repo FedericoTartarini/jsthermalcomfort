@@ -29,7 +29,7 @@ import {
   np_average,
   np_sum,
   py_type_name,
-} from "../jos3_functions/_numpy.ts";
+} from "../_internal/numpy.ts";
 import { fixed_hc } from "../jos3_functions/thermoregulation/fixed_hc.ts";
 import { conv_coef } from "../jos3_functions/thermoregulation/conv_coef.ts";
 import { fixed_hr } from "../jos3_functions/thermoregulation/fixed_hr.ts";

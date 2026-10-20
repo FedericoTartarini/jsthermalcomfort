@@ -1,4 +1,4 @@
-import { ew } from "../_numpy.ts";
+import { ew } from "../../_internal/numpy.ts";
 
 /**
  * Calculate clothing area factor

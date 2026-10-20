@@ -1010,7 +1010,8 @@ describe("phs beyond upstream's tests", () => {
     );
 
     // D3 (i) (.scratch/v2-models/wave-2/decisions.md): under limit_inputs
-    // the gate is evaluated before the kernel, which does not end for clo 0.
+    // the gate is evaluated before the kernel, which throws
+    // RangeError("division by zero") at i_cl_dyn for clo 0 (D3 (ii)).
     // Upstream computes, then masks, and returns NaN in every field.
     test.each(
       [0, -0].flatMap((clo) =>

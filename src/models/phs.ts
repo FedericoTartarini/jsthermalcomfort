@@ -253,7 +253,7 @@ const _POSTURES = ["sitting", "standing", "crouching"];
 // speed vr (:77), where the code checks v (:433); it leaves out the vapour
 // pressure limit (:429, :434); and it gives the metabolic rate limits in met
 // as "1.7 < met [met] < 7.5 (100-450 W/m2)" and "0.96 < met [met] < 4.3
-// (56-250 W/m2)" (:77-78), where the code checks met times 58.15 in W/m2
+// (56-250 W/m2)" (:78-79), where the code checks met times 58.15 in W/m2
 // (:257, :435), and 100, 450, 56 and 250 W/m2 are 1.7197, 7.7386, 0.9630
 // and 4.2992 met: the limits are given in W/m2 here. It says t_re and t_cr_eq fall back "If False" (:107-111),
 // where only a value not given falls back (:313-316): an explicit 0 is used.
@@ -505,16 +505,18 @@ export function phs(params: PhsParams): PhsResult {
   // (ADR 0011). Multiplying by 1000 flips the gate against upstream's kPa
   // comparison for none of the values within 2000 ulps of 0, 0.5 and 4.5 kPa
   // (.scratch/v2-models/wave-2/research/phs/d2_edges.py). p_a itself can
-  // differ from upstream's in the last bit, from Math.exp (see p_a above).
+  // differ from upstream's in the last bits: under 7933-2023 from Math.exp
+  // (see p_a above), under 7933-2004 from p_sat's Math.exp and Math.log
+  // (src/psychrometrics/p_sat.js:32-36).
   _valid_range(warnings, "pa", "derived", p_a * 1000, limits.pa);
   _valid_range(warnings, "met_w_m2", "derived", met_w_m2, limits.met_w_m2);
   _valid_range(warnings, "clo", "input", clo, limits.clo);
 
   // Upstream computes, then masks every field (:423-446). Here a masked
   // result is returned without computing it, as the mask replaces every field
-  // the kernel returns. So for clo 0, where the kernel's t_cl loop does not
-  // end, the library returns upstream's NaN
-  // (.scratch/v2-models/wave-2/decisions.md, D3 (i)).
+  // the kernel returns. So for clo 0, where the kernel throws
+  // RangeError("division by zero") at i_cl_dyn (D3 (ii)), the library returns
+  // upstream's NaN (.scratch/v2-models/wave-2/decisions.md, D3 (i)).
   if (limit_inputs && warnings.length > 0) {
     return {
       ...(Object.fromEntries(
@@ -639,8 +641,8 @@ interface _PhsKernelInputs {
 // .scratch/v2-models/wave-2/decisions.md D3 (iii)). Over the 75,168 cases the
 // library returned for in the two iteration sweeps
 // (.scratch/v2-models/wave-2/research/phs/iter_sweep*.out), the t_cl loop
-// needed at most 19 iterations and the t_cr loop at most 32, except at a
-// weight of 1e-9 kg, where the t_cl loop needed 83 to 103.
+// needed at most 19 iterations except at a weight of 1e-9 kg, where it
+// needed 83; the t_cr loop needed at most 32, at a weight of 1e-9 kg.
 const _MAX_ITERATIONS = 1000;
 
 function _divisor(x: number): number {

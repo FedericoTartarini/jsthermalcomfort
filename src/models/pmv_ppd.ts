@@ -355,7 +355,8 @@ const PMV_PPD_SCHEMA = {
   units: { enum: ["SI", "IP"], required: false },
   limit_inputs: { type: "boolean", required: false },
   airspeed_control: { type: "boolean", required: false },
-  round_output: { type: "boolean", required: false },
+  // Declared but not validated, as upstream; see where it is read.
+  round_output: {},
   suppress_warnings: { type: "boolean", required: false },
 };
 
@@ -409,7 +410,6 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
       units: units.toUpperCase(),
       limit_inputs,
       airspeed_control,
-      round_output,
       suppress_warnings,
     },
     PMV_PPD_SCHEMA,
@@ -539,6 +539,13 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     ppd = NaN;
   }
 
+  // Upstream reads round_output with `if round_output:`
+  // (pythermalcomfort/models/pmv_ppd_iso.py:205 and pmv_ppd_ashrae.py:223 at
+  // v4.6.2) and does not validate it: PMVPPDInputs is not given it
+  // (classes_input.py:593-620). This reads it with JavaScript's truth value,
+  // which differs from Python's on three values (ADR 0001): NaN is true in
+  // Python and false here, and an empty array or object is false in Python
+  // and true here.
   if (round_output) {
     pmv = round(pmv, 2);
     ppd = round(ppd, 1);

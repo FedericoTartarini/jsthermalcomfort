@@ -194,13 +194,22 @@ describe("pmv_ppd input validation", () => {
     ).toThrow(Error);
   });
 
-  test.each([
-    "limit_inputs",
-    "airspeed_control",
-    "round_output",
-    "suppress_warnings",
-  ])("throws TypeError if %s is not a boolean", (key) => {
-    expect(() => pmv_ppd({ ...valid, [key]: "true" })).toThrow(TypeError);
+  test.each(["limit_inputs", "airspeed_control", "suppress_warnings"])(
+    "throws TypeError if %s is not a boolean",
+    (key) => {
+      expect(() => pmv_ppd({ ...valid, [key]: "true" })).toThrow(TypeError);
+    },
+  );
+
+  // Upstream reads round_output for its truth value and does not validate it;
+  // the wrappers' tests check the values against pythermalcomfort 4.6.2.
+  test("reads round_output for its truth value", () => {
+    // Cast: a non-boolean round_output, as an untyped caller passes it.
+    const at = (round_output: unknown) =>
+      pmv_ppd({ ...valid, round_output } as unknown as PmvPpdParams);
+    expect(at(true)).not.toEqual(at(false));
+    expect(at("false")).toEqual(at(true));
+    expect(at(0)).toEqual(at(false));
   });
 });
 

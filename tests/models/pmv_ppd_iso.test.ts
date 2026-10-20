@@ -359,17 +359,14 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(() => pmv_ppd_iso(params)).toThrow('"units" must be one of');
     });
 
-    test.each(["limit_inputs", "round_output"] as const)(
-      "throws TypeError if %s is not a boolean",
-      (key) => {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = {
-          ...neutral,
-          [key]: "true",
-        } as unknown as PmvPpdIsoParams;
-        expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
-      },
-    );
+    test("throws TypeError if limit_inputs is not a boolean", () => {
+      // Cast: deliberately passing a string to test the runtime TypeError.
+      const params = {
+        ...neutral,
+        limit_inputs: "true",
+      } as unknown as PmvPpdIsoParams;
+      expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
+    });
 
     test("a switch passed as undefined takes its default", () => {
       expect(
@@ -440,6 +437,56 @@ describe("pmv_ppd_iso (JS-only)", () => {
       });
       // Must be exactly "Slightly Warm", not one of three options
       expect(result.tsv).toBe("Slightly Warm");
+    });
+  });
+
+  // Upstream reads round_output with `if round_output:`
+  // (pythermalcomfort/models/pmv_ppd_iso.py:205 at v4.6.2) and does not
+  // validate it: PMVPPDInputs is not given it (classes_input.py:593-620).
+  // Expected values from pythermalcomfort 4.6.2's pmv_ppd_iso at these inputs.
+  describe("round_output, read for its truth value as upstream", () => {
+    const cool = { tdb: 22, tr: 22, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+    const rounded = { pmv: -0.81, ppd: 18.9, tsv: "Slightly Cool" };
+    const unrounded = {
+      pmv: -0.8112323225085935,
+      ppd: 18.877872910092293,
+      tsv: "Slightly Cool",
+    };
+    // Cast: a non-boolean round_output, as an untyped caller passes it.
+    const at = (round_output: unknown) =>
+      pmv_ppd_iso({ ...cool, round_output } as unknown as PmvPpdIsoParams);
+
+    test.each([
+      { label: "1", value: 1 },
+      { label: "2", value: 2 },
+      { label: '"yes"', value: "yes" },
+      { label: '"no"', value: "no" },
+      { label: '"0"', value: "0" },
+      { label: "[0]", value: [0] },
+    ])("rounds for $label, which is true in Python and JS", ({ value }) => {
+      expect(at(value)).toMatchObject(rounded);
+    });
+
+    test.each([
+      { label: "0", value: 0 },
+      { label: "-0", value: -0 },
+      { label: '""', value: "" },
+      { label: "null", value: null },
+    ])(
+      "does not round for $label, which is false in Python and JS",
+      ({ value }) => {
+        expect(at(value)).toMatchObject(unrounded);
+      },
+    );
+
+    // ADR 0001, amended 2026-10-20 (pmv_ppd_ashrae D2): round_output is read
+    // for JavaScript's truth value, which differs from Python's on these three.
+    // Upstream 4.6.2 rounds for nan and returns the unrounded pmv and ppd for
+    // [] and {}.
+    test("NaN, [] and {} follow JavaScript's truth value, not Python's", () => {
+      expect(at(NaN)).toMatchObject(unrounded);
+      expect(at([])).toMatchObject(rounded);
+      expect(at({})).toMatchObject(rounded);
     });
   });
 

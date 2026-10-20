@@ -128,7 +128,13 @@ export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
  * @docname PMV/PPD (ASHRAE 55)
  */
 // A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three).
+// propagate (ADR 0001, reason three). round_output is declared but not
+// validated: upstream does not give it to PMVPPDInputs
+// (pythermalcomfort/classes_input.py:593-620 at v4.6.2) and reads it with
+// `if round_output:` (pmv_ppd_ashrae.py:223), so the shared module reads it
+// with JavaScript's truth value. Python's differs on three values (ADR 0001):
+// NaN is true in Python and false here, and an empty array or object is false
+// in Python and true here.
 const PMV_PPD_ASHRAE_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
@@ -145,7 +151,7 @@ const PMV_PPD_ASHRAE_SCHEMA = {
   units: { enum: ["SI", "IP"] },
   limit_inputs: { type: "boolean" },
   airspeed_control: { type: "boolean" },
-  round_output: { type: "boolean" },
+  round_output: {},
   suppress_warnings: { type: "boolean" },
 };
 
@@ -181,7 +187,6 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
       units: _upper_units(units),
       limit_inputs,
       airspeed_control,
-      round_output,
       suppress_warnings,
     },
     PMV_PPD_ASHRAE_SCHEMA,

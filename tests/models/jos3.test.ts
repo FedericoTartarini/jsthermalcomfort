@@ -1682,7 +1682,8 @@ describe("jos3 beyond upstream's tests", () => {
     );
 
     // 999999999 days and 86399.98 s, and -999999999 days: inside upstream's
-    // timedelta range (up_overflow_d24.py).
+    // timedelta range
+    // (`.scratch/v2-models/wave-2/research/jos3/up_overflow_d24.py`).
     test.each<[number, number, number, number]>([
       [1, 86399999999999.98, 2, 86399999999999.98],
       [1, -86399999913600.0, 2, -86399999913600.0],
@@ -1699,7 +1700,8 @@ describe("jos3 beyond upstream's tests", () => {
     );
 
     // The second call's own timedelta(0, dtime) is checked first, then the
-    // elapsed time after adding it (up_overflow_d24.py).
+    // elapsed time after adding it
+    // (`.scratch/v2-models/wave-2/research/jos3/up_overflow_d24.py`).
     test.each<[number, number, string]>([
       [8e13, 8e13, "days=1851851851; must have magnitude <= 999999999"],
       [8e13, 1e14, "days=1157407407; must have magnitude <= 999999999"],

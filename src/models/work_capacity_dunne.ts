@@ -113,9 +113,10 @@ export function work_capacity_dunne(
   const intensity = given.toLowerCase() as WorkIntensity;
 
   // work_capacity_dunne.py:58, :66, unrounded as upstream. Upstream's ** runs
-  // through numpy, the C library's pow, so Math.pow (ADR 0009).
+  // through numpy, whose float64 power calls the C library's pow (numpy
+  // 2.5.4: scalarmath.c.src:480-483, npy_math.h:202), so Math.pow (ADR 0009).
   const base = Math.min(
-    Math.max(100 - 25 * Math.max(0, wbgt - 25) ** (2 / 3), 0),
+    Math.max(100 - 25 * Math.pow(Math.max(0, wbgt - 25), 2 / 3), 0),
     100,
   );
   const capacity = Math.min(Math.max(base * _FACTORS[intensity], 0), 100);

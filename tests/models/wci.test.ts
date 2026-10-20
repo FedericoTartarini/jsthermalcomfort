@@ -147,7 +147,8 @@ describe("wci beyond upstream's tests", () => {
     });
 
     // Upstream raises a TypeError from the arithmetic ("unsupported operand
-    // type(s)"), as validate_type skips None (classes_input.py:138-139).
+    // type(s)"), as BaseInputs skips a None field before its type check
+    // (classes_input.py:138-139, :147).
     test.each(["tdb", "v"])("a null %s throws a TypeError", (key) => {
       const params = { tdb: 0, v: 0.1, [key]: null } as unknown as WciParams;
       expect(() => wci(params)).toThrow(TypeError);

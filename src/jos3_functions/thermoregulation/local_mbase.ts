@@ -2,6 +2,16 @@ import { Default } from "../Default.ts";
 import { basal_met } from "./basal_met.ts";
 import type { JOS3BmrEquation } from "./basal_met.ts";
 
+/** Local basal metabolic rate [W] of the core, muscle, fat and skin layers. */
+export type LocalMbaseResult = [
+  mbase_cr: number[],
+  mbase_ms: number[],
+  mbase_fat: number[],
+  mbase_sk: number[],
+];
+
+// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1081 at
+// v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 /**
  * Calculate local basal metabolic rate [W]
  * (`pythermalcomfort/jos3_functions/thermoregulation.py:961-1081` at v4.6.2).
@@ -20,7 +30,7 @@ export function local_mbase(
   age: number = Default.age,
   sex: string = Default.sex,
   bmr_equation: JOS3BmrEquation = Default.bmr_equation as JOS3BmrEquation,
-): [number[], number[], number[], number[]] {
+): LocalMbaseResult {
   const mbase_all = basal_met(height, weight, age, sex, bmr_equation);
   // Distribution coefficient of basal metabolic rate
   const mbf_cr = [

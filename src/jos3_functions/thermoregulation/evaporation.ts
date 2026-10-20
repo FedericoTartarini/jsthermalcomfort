@@ -6,20 +6,19 @@ import { ewa, full, py_max } from "../../_internal/numpy.ts";
 import type { NumOrArray } from "../../_internal/numpy.ts";
 
 /**
- * @typedef EvaporationResult
- * @type {object}
- * @property {number[]} wet - Local skin wettedness [-].
- * @property {number[]} e_sk - Evaporative heat loss at the skin by sweating and diffuse [W].
- * @property {number[]} e_max - Maximum evaporative heat loss at the skin [W].
- * @property {number[]} e_sweat - Evaporative heat loss at the skin by only sweating [W].
+ * Local skin wettedness [-], the evaporative heat loss at the skin by
+ * sweating and diffusion [W], the maximum evaporative heat loss at the skin
+ * [W] and the evaporative heat loss at the skin by sweating only [W].
  */
-export type EvaporationResult = {
-  wet: number[];
-  e_sk: number[];
-  e_max: number[];
-  e_sweat: number[];
-};
+export type EvaporationResult = [
+  wet: number[],
+  e_sk: number[],
+  e_max: number[],
+  e_sweat: number[],
+];
 
+// jos3 D8: upstream returns a plain tuple (thermoregulation.py:675 at
+// v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 // The sweat is distributed element by element, as upstream's
 // `skin_sweat * sig_sweat * sd_sweat * 2 ** (err_sk / 10)`
 // (thermoregulation.py:670 at v4.6.2); mathjs's multiply of the two vectors
@@ -40,7 +39,10 @@ export type EvaporationResult = {
  * @param {string} bsa_equation - The equation name (str) of bsa calculation. Choose a name from "dubois", "takahira", "fujimoto", or "kurazumi".
  * @param {number} age - age [years].
  *
- * @returns {EvaporationResult} an object containing the results of the calculation.
+ * @returns {[number[], number[], number[], number[]]} wet, e_sk, e_max,
+ * e_sweat: local skin wettedness [-], evaporative heat loss at the skin by
+ * sweating and diffusion [W], maximum evaporative heat loss at the skin [W],
+ * and evaporative heat loss at the skin by sweating only [W].
  */
 export function evaporation(
   err_cr: readonly number[],
@@ -54,7 +56,7 @@ export function evaporation(
   bsa_equation: string,
   age: number,
 ): EvaporationResult {
-  const { wrms, clds } = error_signals(err_sk); // Thermoregulation signals
+  const [wrms, clds] = error_signals(err_sk); // Thermoregulation signals
   const bsar = bsa_rate(height, weight, bsa_equation); // bsa rate
   const bsa = Default.local_bsa.map((x) => x * bsar); // bsa
   // Saturated vapor pressure of ambient [kPa]
@@ -102,5 +104,5 @@ export function evaporation(
   const wet = ewa((s, m) => Math.min(0.06 + 0.94 * (s / m), 1), e_sweat, e_max);
   const e_sk = ewa((w, m) => w * m, wet, e_max);
   e_sweat = ewa((w, m) => ((w - 0.06) / 0.94) * m, wet, e_max); // Effective sweating
-  return { wet, e_sk, e_max, e_sweat };
+  return [wet, e_sk, e_max, e_sweat];
 }

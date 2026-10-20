@@ -33,7 +33,8 @@ function dense(x: unknown): unknown {
   return x;
 }
 
-// Each function's result as upstream's: a tuple where upstream returns one.
+// Each function's result, compared with upstream's as it is: a tuple
+// upstream returns is an array here (jos3 D8).
 const run: Record<string, (a: any[]) => unknown> = {
   bsa_rate: (a) => C.bsa_rate(a[0], a[1], a[2]),
   local_bsa: (a) => C.local_bsa(a[0], a[1], a[2]),
@@ -43,27 +44,12 @@ const run: Record<string, (a: any[]) => unknown> = {
   capacity: (a) => C.capacity(a[0], a[1], a[2], a[3], a[4]),
   basal_met: (a) => T.basal_met(a[0], a[1], a[2], a[3], a[4]),
   local_mbase: (a) => T.local_mbase(a[0], a[1], a[2], a[3], a[4]),
-  evaporation: (a) => {
-    const r = T.evaporation(
-      a[0],
-      a[1],
-      a[2],
-      a[3],
-      a[4],
-      a[5],
-      a[6],
-      a[7],
-      a[8],
-      a[9],
-    );
-    return [r.wet, r.e_sk, r.e_max, r.e_sweat];
-  },
+  evaporation: (a) =>
+    T.evaporation(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9]),
   skin_blood_flow: (a) =>
     T.skin_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5], a[6]),
-  ava_blood_flow: (a) => {
-    const r = T.ava_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
-    return [r.bf_ava_hand, r.bf_ava_foot];
-  },
+  ava_blood_flow: (a) =>
+    T.ava_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5], a[6]),
   // The last argument is the PRE_SHIV the case starts from; the result is
   // q_shiv and PRE_SHIV after the call.
   shivering: (a) => {
@@ -85,24 +71,12 @@ const run: Record<string, (a: any[]) => unknown> = {
   },
   nonshivering: (a) => T.nonshivering(a[0], a[1], a[2], a[3], a[4], a[5], a[6]),
   local_q_work: (a) => T.local_q_work(a[0], a[1]),
-  sum_m: (a) => {
-    const r = T.sum_m(a[0], a[1], a[2], a[3]);
-    return [
-      r.q_thermogenesis_core,
-      r.q_thermogenesis_muscle,
-      r.q_thermogenesis_fat,
-      r.q_thermogenesis_skin,
-    ];
-  },
-  cr_ms_fat_blood_flow: (a) => {
-    const r = T.cr_ms_fat_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
-    return [r.bf_core, r.bf_muscle, r.bf_fat];
-  },
+  sum_m: (a) => T.sum_m(a[0], a[1], a[2], a[3]),
+  cr_ms_fat_blood_flow: (a) =>
+    T.cr_ms_fat_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5], a[6]),
   sum_bf: (a) => T.sum_bf(a[0], a[1], a[2], a[3], a[4], a[5]),
-  vessel_blood_flow: (a) => {
-    const r = M.vessel_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5]);
-    return [r.bf_art, r.bf_vein];
-  },
+  vessel_blood_flow: (a) =>
+    M.vessel_blood_flow(a[0], a[1], a[2], a[3], a[4], a[5]),
   local_arr: (a) => M.local_arr(a[0], a[1], a[2], a[3], a[4], a[5]),
   whole_body: (a) => M.whole_body(a[0], a[1], a[2], a[3]),
   conv_coef: (a) => T.conv_coef(a[0], a[1], a[2], a[3]),
@@ -113,14 +87,8 @@ const run: Record<string, (a: any[]) => unknown> = {
   clo_area_factor: (a) => T.clo_area_factor(a[0]),
   dry_r: (a) => T.dry_r(a[0], a[1], a[2]),
   wet_r: (a) => T.wet_r(a[0], a[1], a[2], a[3]),
-  error_signals: (a) => {
-    const r = T.error_signals(a[0]);
-    return [r.wrms, r.clds];
-  },
-  resp_heat_loss: (a) => {
-    const r = T.resp_heat_loss(a[0], a[1], a[2]);
-    return [r.res_sh, r.res_lh];
-  },
+  error_signals: (a) => T.error_signals(a[0]),
+  resp_heat_loss: (a) => T.resp_heat_loss(a[0], a[1], a[2]),
   tetens: (a) => T.tetens(a[0]),
 };
 

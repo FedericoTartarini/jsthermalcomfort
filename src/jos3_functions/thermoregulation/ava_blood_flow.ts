@@ -3,13 +3,11 @@ import { bfb_rate } from "../bfb_rate.ts";
 import { np_average, py_max, py_min } from "../../_internal/numpy.ts";
 import type { NumOrArray } from "../../_internal/numpy.ts";
 
-/**
- * @typedef AvaBloodFlowResult
- * @type {object}
- * @property {number} bf_ava_hand - AVA blood flow rate at hand [L/h].
- * @property {number} bf_ava_foot - AVA blood flow rate at foot [L/h].
- */
-export type AvaBloodFlowResult = { bf_ava_hand: number; bf_ava_foot: number };
+/** AVA blood flow rate at hand and at foot [L/h]. */
+export type AvaBloodFlowResult = [bf_ava_hand: number, bf_ava_foot: number];
+
+// jos3 D8: upstream returns a plain tuple (thermoregulation.py:890 at
+// v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**
  * Calculate areteriovenous anastmoses (AVA) blood flow rate [L/h] based on
@@ -24,7 +22,7 @@ export type AvaBloodFlowResult = { bf_ava_hand: number; bf_ava_foot: number };
  * @param {number} age - age [years]
  * @param {number} ci - Cardiac index [L/min/m2]
  *
- * @returns {AvaBloodFlowResult} AVA blood flow rate at hand and foot [L/h]
+ * @returns {[number, number]} AVA blood flow rate at hand and foot [L/h]
  *
  * @throws {TypeError} If err_cr has fewer than 5 values or err_sk is not
  * 17, as numpy's average raises.
@@ -61,5 +59,5 @@ export function ava_blood_flow(
   // AVA blood flow rate [L/h]
   const bf_ava_hand = 1.71 * bfbrate * sig_ava_hand; // Hand
   const bf_ava_foot = 2.16 * bfbrate * sig_ava_foot; // Foot
-  return { bf_ava_hand, bf_ava_foot };
+  return [bf_ava_hand, bf_ava_foot];
 }

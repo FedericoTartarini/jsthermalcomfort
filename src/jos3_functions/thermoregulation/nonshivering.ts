@@ -27,7 +27,7 @@ export function nonshivering(
   batpositive: boolean = true,
 ): number[] {
   // NST (Non-Shivering Thermogenesis) model, Asaka, 2016
-  const { clds } = error_signals(err_sk);
+  const [, clds] = error_signals(err_sk);
 
   // BMI (Body Mass Index)
   const bmi = weight / height ** 2;

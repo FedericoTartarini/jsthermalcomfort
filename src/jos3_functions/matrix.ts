@@ -47,7 +47,10 @@ export const LAYER_NAMES: readonly JOS3LayerName[] = Object.freeze([
  * part, keyed by body name and layer name, with `CB` (the central blood) at
  * 0; and the number of nodes
  */
-export function index_order(): [JOS3IndexDict, number] {
+export function index_order(): [
+  index_dict: JOS3IndexDict,
+  order_count: number,
+] {
   // Defines existing layers as 1 or null
   const index_dict = {} as Record<string, JOS3LayerIndices | number>;
 
@@ -241,13 +244,11 @@ export function local_arr(
   return bf_local;
 }
 
-/**
- * @typedef VesselBloodFlowResult
- * @type {object}
- * @property {number[]} bf_art - Artery blood flow rate [l/h].
- * @property {number[]} bf_vein - Vein blood flow rate [l/h].
- */
-export type VesselBloodFlowResult = { bf_art: number[]; bf_vein: number[] };
+/** Artery and vein blood flow rate [l/h]. */
+export type VesselBloodFlowResult = [bf_art: number[], bf_vein: number[]];
+
+// jos3 D8: upstream returns a plain tuple (matrix.py:246 at v4.6.2), an
+// array here, in upstream's order, typed as a labelled tuple.
 
 /**
  * Get artery and vein blood flow rate [l/h] (`matrix.py:171-246`).
@@ -259,7 +260,7 @@ export type VesselBloodFlowResult = { bf_art: number[]; bf_vein: number[] };
  * @param {number} bf_ava_hand - AVA blood flow rate at hand [l/h].
  * @param {number} bf_ava_foot - AVA blood flow rate at foot [l/h].
  *
- * @returns {VesselBloodFlowResult} bf_artery, bf_vein - Artery and vein blood flow rate [l/h].
+ * @returns {[number[], number[]]} bf_artery, bf_vein - Artery and vein blood flow rate [l/h].
  */
 export function vessel_blood_flow(
   bf_core: readonly number[],
@@ -344,7 +345,7 @@ export function vessel_blood_flow(
   bf_art[16] = xbf[16] + bf_ava_foot;
   bf_vein[16] = xbf[16];
 
-  return { bf_art, bf_vein };
+  return [bf_art, bf_vein];
 }
 
 /**
@@ -459,7 +460,7 @@ export function whole_body(
  */
 export function remove_body_name(
   text: string,
-): [string, JOS3BodyPartName | null] {
+): [rtext: string, removed: JOS3BodyPartName | null] {
   let rtext = text;
   let removed: JOS3BodyPartName | null = null;
 

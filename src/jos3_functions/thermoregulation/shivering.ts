@@ -78,7 +78,7 @@ export function shivering(
   options: ShiveringOptions | null = null,
 ): number[] {
   // Integrated error signal in the warm and cold receptors
-  const { clds } = error_signals(err_sk);
+  const [, clds] = error_signals(err_sk);
 
   // Distribution coefficient of thermogenesis by shivering
   const shivf = [

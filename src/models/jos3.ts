@@ -777,7 +777,7 @@ export class JOS3 {
 
     // SWEATING THERMOREGULATION
     // Skin wettedness [-], e_skin, e_max, e_sweat [W]
-    const { wet, e_sk, e_max, e_sweat } = evaporation(
+    const [wet, e_sk, e_max, e_sweat] = evaporation(
       err_cr,
       err_sk,
       tsk,
@@ -803,7 +803,7 @@ export class JOS3 {
     );
 
     // Calculate hands and feet's AVA blood flow [L/h]
-    let { bf_ava_hand, bf_ava_foot } = ava_blood_flow(
+    let [bf_ava_hand, bf_ava_foot] = ava_blood_flow(
       err_cr,
       err_sk,
       this._height,
@@ -879,12 +879,12 @@ export class JOS3 {
     const q_work = local_q_work(q_bmr_total, this._par);
 
     // Calculate the sum of thermogenesis in core, muscle, fat, skin [W]
-    const {
+    const [
       q_thermogenesis_core,
       q_thermogenesis_muscle,
       q_thermogenesis_fat,
       q_thermogenesis_skin,
-    } = sum_m(q_bmr_local, q_work, q_shiv, q_nst);
+    ] = sum_m(q_bmr_local, q_work, q_shiv, q_nst);
     const q_thermogenesis_total =
       np_sum(q_thermogenesis_core) +
       np_sum(q_thermogenesis_muscle) +
@@ -895,7 +895,7 @@ export class JOS3 {
     // Others
     // ------------------------------------------------------------------
     // Calculate blood flow in core, muscle, fat [L/h]
-    const { bf_core, bf_muscle, bf_fat } = cr_ms_fat_blood_flow(
+    const [bf_core, bf_muscle, bf_fat] = cr_ms_fat_blood_flow(
       q_work,
       q_shiv,
       this._height,
@@ -907,7 +907,7 @@ export class JOS3 {
 
     // Calculate heat loss by respiratory
     const p_a = antoine(this._tdb).map((a, i) => (a * this._rh[i]) / 100);
-    const { res_sh, res_lh } = resp_heat_loss(
+    const [res_sh, res_lh] = resp_heat_loss(
       this._tdb[0],
       p_a[0],
       q_thermogenesis_total,
@@ -940,7 +940,7 @@ export class JOS3 {
 
     // Matrix A = Matrix for heat exchange due to blood flow and conduction occurring between tissues
     // (85, 85,) ndarray
-    const { bf_art, bf_vein } = vessel_blood_flow(
+    const [bf_art, bf_vein] = vessel_blood_flow(
       bf_core,
       bf_muscle,
       bf_fat,
@@ -1462,7 +1462,7 @@ export class JOS3 {
   get w(): number[] {
     const err_cr = this.t_core.map((x, i) => x - this.cr_set_point[i]);
     const err_sk = this.t_skin.map((x, i) => x - this.sk_set_point[i]);
-    const { wet } = evaporation(
+    const [wet] = evaporation(
       err_cr,
       err_sk,
       this.t_skin,

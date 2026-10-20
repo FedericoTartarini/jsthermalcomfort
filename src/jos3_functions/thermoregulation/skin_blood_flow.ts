@@ -27,7 +27,7 @@ export function skin_blood_flow(
   age: number,
   ci: number,
 ): number[] {
-  const { wrms, clds } = error_signals(err_sk);
+  const [wrms, clds] = error_signals(err_sk);
 
   // BFBsk
   const bfb_sk = [

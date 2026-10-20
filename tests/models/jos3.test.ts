@@ -479,7 +479,7 @@ describe("test_jos3", () => {
   test("test_vessel_blood_flow", () => {
     const { bf_core, bf_muscle, bf_fat, bf_skin, bf_ava_hand, bf_ava_foot } =
       rng;
-    const { bf_art, bf_vein } = vessel_blood_flow(
+    const [bf_art, bf_vein] = vessel_blood_flow(
       bf_core,
       bf_muscle,
       bf_fat,
@@ -652,18 +652,18 @@ describe("test_jos3", () => {
   });
 
   test("test_error_signals", () => {
-    let { wrms, clds } = error_signals();
+    let [wrms, clds] = error_signals();
     expect(wrms).toBe(0);
     expect(clds).toBe(0);
-    ({ wrms, clds } = error_signals(2));
+    [wrms, clds] = error_signals(2);
     expect(wrms).toBeGreaterThan(0);
     expect(clds).toBe(0);
-    ({ wrms, clds } = error_signals(-2));
+    [wrms, clds] = error_signals(-2);
     expect(wrms).toBe(0);
     expect(clds).toBeGreaterThan(0);
-    ({ wrms, clds } = error_signals([
+    [wrms, clds] = error_signals([
       -2, 2, -3, 3, -1, 1, 0, -0.5, 0.5, -2, 2, -1, 1, -0.5, 0.5, -1, 1,
-    ]));
+    ]);
     expect(wrms).toBeGreaterThan(0);
     expect(clds).toBeGreaterThan(0);
     // A broadcasting ValueError is an Error (ADR 0012).
@@ -692,10 +692,11 @@ describe("test_jos3", () => {
       "dubois",
       20,
     );
-    for (const a of [r.wet, r.e_sk, r.e_max, r.e_sweat]) {
+    for (const a of r) {
       expect(Array.isArray(a)).toBe(true);
     }
-    expect(r.wet.every((w) => w >= 0 && w <= 1)).toBe(true);
+    const [wet] = r;
+    expect(wet.every((w) => w >= 0 && w <= 1)).toBe(true);
 
     // Test age effects
     err_cr = [0.5];
@@ -724,7 +725,8 @@ describe("test_jos3", () => {
       "dubois",
       65,
     );
-    expect(old.e_sweat.every((e, i) => e <= young.e_sweat[i])).toBe(true);
+    // e_sweat, the fourth value
+    expect(old[3].every((e, i) => e <= young[3][i])).toBe(true);
 
     // Test with valid BSA equations
     for (const bsa_equation of ["dubois", "takahira", "fujimoto", "kurazumi"]) {
@@ -740,7 +742,7 @@ describe("test_jos3", () => {
         bsa_equation,
         20,
       );
-      for (const a of [r.wet, r.e_sk, r.e_max, r.e_sweat]) {
+      for (const a of r) {
         expect(Array.isArray(a)).toBe(true);
       }
     }
@@ -777,8 +779,9 @@ describe("test_jos3", () => {
       "dubois",
       20,
     );
-    expect(r.e_max.every((e) => e === 0.001)).toBe(true);
-    r.wet.forEach((w) => approx(w, 1, 1e-3));
+    const [wet_1, , e_max] = r;
+    expect(e_max.every((e) => e === 0.001)).toBe(true);
+    wet_1.forEach((w) => approx(w, 1, 1e-3));
   });
 
   test("test_skin_blood_flow", () => {
@@ -847,15 +850,7 @@ describe("test_jos3", () => {
       0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6,
       1.7, 1.8,
     ];
-    let r = ava_blood_flow(err_cr, err_sk, 1.72, 74.43, "dubois", 20, 2.59);
-    expect(typeof r.bf_ava_hand).toBe("number");
-    expect(typeof r.bf_ava_foot).toBe("number");
-    expect(r.bf_ava_hand).toBeGreaterThanOrEqual(0);
-    expect(r.bf_ava_foot).toBeGreaterThanOrEqual(0);
-
-    // Test age effect
-    err_sk = ones(17, 0.2);
-    const young = ava_blood_flow(
+    let [bf_ava_hand, bf_ava_foot] = ava_blood_flow(
       err_cr,
       err_sk,
       1.72,
@@ -864,9 +859,33 @@ describe("test_jos3", () => {
       20,
       2.59,
     );
-    const old = ava_blood_flow(err_cr, err_sk, 1.72, 74.43, "dubois", 65, 2.59);
-    expect(old.bf_ava_hand).toBeLessThanOrEqual(young.bf_ava_hand);
-    expect(old.bf_ava_foot).toBeLessThanOrEqual(young.bf_ava_foot);
+    expect(typeof bf_ava_hand).toBe("number");
+    expect(typeof bf_ava_foot).toBe("number");
+    expect(bf_ava_hand).toBeGreaterThanOrEqual(0);
+    expect(bf_ava_foot).toBeGreaterThanOrEqual(0);
+
+    // Test age effect
+    err_sk = ones(17, 0.2);
+    const [young_hand, young_foot] = ava_blood_flow(
+      err_cr,
+      err_sk,
+      1.72,
+      74.43,
+      "dubois",
+      20,
+      2.59,
+    );
+    const [old_hand, old_foot] = ava_blood_flow(
+      err_cr,
+      err_sk,
+      1.72,
+      74.43,
+      "dubois",
+      65,
+      2.59,
+    );
+    expect(old_hand).toBeLessThanOrEqual(young_hand);
+    expect(old_foot).toBeLessThanOrEqual(young_foot);
 
     // Test with input length mismatch: numpy's average raises a TypeError
     expect(() =>
@@ -884,9 +903,17 @@ describe("test_jos3", () => {
     // Test with zero signal
     err_cr = ones(5, 0);
     err_sk = ones(17, 0);
-    r = ava_blood_flow(err_cr, err_sk, 1.72, 74.43, "dubois", 20, 2.59);
-    approx(r.bf_ava_hand, 1.71258, 1e-3);
-    approx(r.bf_ava_foot, 1.42223, 1e-3);
+    [bf_ava_hand, bf_ava_foot] = ava_blood_flow(
+      err_cr,
+      err_sk,
+      1.72,
+      74.43,
+      "dubois",
+      20,
+      2.59,
+    );
+    approx(bf_ava_hand, 1.71258, 1e-3);
+    approx(bf_ava_foot, 1.42223, 1e-3);
   });
 
   test("test_basal_met", () => {
@@ -1022,12 +1049,12 @@ describe("test_jos3", () => {
   });
 
   test("test_resp_heat_loss", () => {
-    let { res_sh, res_lh } = resp_heat_loss(25.0, 1.0, 100.0);
+    let [res_sh, res_lh] = resp_heat_loss(25.0, 1.0, 100.0);
     expect(typeof res_sh).toBe("number");
     expect(typeof res_lh).toBe("number");
     expect(res_sh).toBe(0.0014 * 100.0 * (34 - 25.0));
     expect(res_lh).toBe(0.0173 * 100.0 * (5.87 - 1.0));
-    ({ res_sh } = resp_heat_loss(34.0, 1.0, 100.0));
+    [res_sh] = resp_heat_loss(34.0, 1.0, 100.0);
     expect(res_sh).toBe(0.0);
   });
 
@@ -1165,7 +1192,7 @@ describe("jos3 beyond upstream's tests", () => {
       "dubois",
       20,
     );
-    expect([r.wet, r.e_sk, r.e_max, r.e_sweat]).toEqual(out);
+    expect(r).toEqual(out);
   });
 
   test.each(Object.entries(up.neutral_to) as [string, number][])(

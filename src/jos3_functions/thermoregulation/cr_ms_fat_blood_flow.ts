@@ -2,18 +2,15 @@ import { bfb_rate } from "../bfb_rate.ts";
 import { IDICT } from "../matrix.ts";
 import { BODY_NAMES } from "../_body_parts.ts";
 
-/**
- * @typedef CrMsFatBloodFlowResult
- * @type {object}
- * @property {number[]} bf_core - Core blood flow rate [L/h].
- * @property {number[]} bf_muscle - Muscle blood flow rate [L/h].
- * @property {number[]} bf_fat - Fat blood flow rate [L/h].
- */
-export type CrMsFatBloodFlowResult = {
-  bf_core: number[];
-  bf_muscle: number[];
-  bf_fat: number[];
-};
+/** Core, muscle and fat blood flow rate [L/h]. */
+export type CrMsFatBloodFlowResult = [
+  bf_core: number[],
+  bf_muscle: number[],
+  bf_fat: number[],
+];
+
+// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1520 at
+// v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**
  * Calculate core, muscle and fat blood flow rate [L/h]
@@ -27,7 +24,7 @@ export type CrMsFatBloodFlowResult = {
  * @param {number} age - Age [years].
  * @param {number} ci - Cardiac index [L/min/㎡].
  *
- * @returns {CrMsFatBloodFlowResult} - Core, muscle and fat blood flow rate [L/h].
+ * @returns {[number[], number[], number[]]} - Core, muscle and fat blood flow rate [L/h].
  */
 export function cr_ms_fat_blood_flow(
   q_work: readonly number[],
@@ -70,5 +67,5 @@ export function cr_ms_fat_blood_flow(
       bf_core[i] += (q_work[i] + q_shiv[i]) / 1.163;
     }
   });
-  return { bf_core, bf_muscle, bf_fat };
+  return [bf_core, bf_muscle, bf_fat];
 }

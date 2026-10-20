@@ -1,20 +1,16 @@
 import { IDICT } from "../matrix.ts";
 import { BODY_NAMES } from "../_body_parts.ts";
 
-/**
- * @typedef SumMResult
- * @type {object}
- * @property {number[]} q_thermogenesis_core - Total thermogenesis in core layer [W].
- * @property {number[]} q_thermogenesis_muscle - Total thermogenesis in muscle layer [W].
- * @property {number[]} q_thermogenesis_fat - Total thermogenesis in fat layer [W].
- * @property {number[]} q_thermogenesis_skin - Total thermogenesis in skin layer [W].
- */
-export type SumMResult = {
-  q_thermogenesis_core: number[];
-  q_thermogenesis_muscle: number[];
-  q_thermogenesis_fat: number[];
-  q_thermogenesis_skin: number[];
-};
+/** Total thermogenesis in the core, muscle, fat and skin layers [W]. */
+export type SumMResult = [
+  q_thermogenesis_core: number[],
+  q_thermogenesis_muscle: number[],
+  q_thermogenesis_fat: number[],
+  q_thermogenesis_skin: number[],
+];
+
+// jos3 D8: upstream returns a plain tuple (thermoregulation.py:1397-1402 at
+// v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**
  * Calculate total thermogenesis in each layer [W]
@@ -25,7 +21,7 @@ export type SumMResult = {
  * @param {number[]} q_shiv - Local thermogenesis by shivering [W].
  * @param {number[]} q_nst - Local thermogenesis by non-shivering [W].
  *
- * @return {SumMResult} Total thermogenesis in core, muscle, fat, skin layers [W].
+ * @return {[number[], number[], number[], number[]]} Total thermogenesis in core, muscle, fat, skin layers [W].
  */
 export function sum_m(
   mbase: readonly (readonly number[])[],
@@ -50,10 +46,10 @@ export function sum_m(
   });
   // Non-shivering thermogenesis occurs in core layers
   const core = q_thermogenesis_core.map((x, i) => x + q_nst[i]);
-  return {
-    q_thermogenesis_core: core,
+  return [
+    core,
     q_thermogenesis_muscle,
     q_thermogenesis_fat,
     q_thermogenesis_skin,
-  };
+  ];
 }

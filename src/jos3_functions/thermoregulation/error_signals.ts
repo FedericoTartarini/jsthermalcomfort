@@ -1,13 +1,14 @@
 import { ewa, np_sum } from "../../_internal/numpy.ts";
 import type { NumOrArray } from "../../_internal/numpy.ts";
 
-/**
- * @typedef ErrorSignalsResult
- * @type {object}
- * @property {number} wrms - Warm signal [°C].
- * @property {number} clds - Cold signal [°C].
- */
-export type ErrorSignalsResult = { wrms: number; clds: number };
+/** Warm signal (WRMS) [°C] and cold signal (CLDS) [°C]. */
+export type ErrorSignalsResult = [
+  warm_signal_sum: number,
+  cold_signal_sum: number,
+];
+
+// jos3 D8: upstream returns a plain tuple (thermoregulation.py:536 at
+// v4.6.2), an array here, in upstream's order, typed as a labelled tuple.
 
 /**
  * Calculate WRMS and CLDS signals of thermoregulation
@@ -16,7 +17,7 @@ export type ErrorSignalsResult = { wrms: number; clds: number };
  * @param {number | number[]} [err_sk=0] - Difference between set-point and skin temperatures [°C].
  * If the provided value is an array, its length should be 17.
  *
- * @returns {ErrorSignalsResult} an object containing the results of the calculation.
+ * @returns {[number, number]} Warm signal (WRMS) [°C] and Cold signal (CLDS) [°C].
  *
  * @throws {Error} If err_sk is an array of another length, as numpy's
  * broadcasting raises a ValueError.
@@ -36,5 +37,5 @@ export function error_signals(err_sk: NumOrArray = 0.0): ErrorSignalsResult {
   // clds signal: np.minimum(err_sk, 0) * -receptor
   const cld = ewa((e, r) => Math.min(e, 0) * -r, err_sk, receptor);
   const clds = np_sum(cld);
-  return { wrms, clds };
+  return [wrms, clds];
 }

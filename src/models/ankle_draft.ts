@@ -104,8 +104,9 @@ const ANKLE_DRAFT_SCHEMA = {
   suppress_warnings: { type: "boolean" },
 };
 
-// Upstream's docstring gives the equation's range as "vr < 0.2 m/s (40 fps)",
-// and the limit_inputs ranges as strict ("10 < tdb [°C] < 40"). 0.2 m/s is
+// ADR 0013. Upstream's docstring gives the equation's range as "vr < 0.2 m/s
+// (40 fps)" (ankle_draft.py:26), and the limit_inputs ranges as strict
+// ("10 < tdb [°C] < 40", ankle_draft.py:75-76). 0.2 m/s is
 // about 0.656 fps (40 fpm); the bounds are inclusive (_valid_range,
 // _internal/validation.py:22), so vr = 0.2 computes; and a vr outside 0 to
 // 0.2 m/s raises a ValueError rather than returning NaN (ankle_draft.py:151-154).

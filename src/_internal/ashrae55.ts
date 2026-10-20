@@ -14,8 +14,9 @@ const ASHRAE_55_AIRSPEED_NO_CONTROL = Object.freeze({
 
 /**
  * The bound of upstream's `v_limited` check, 0 to 0.2 m/s inclusive
- * (`ashrae55.py:100-102`): the relative air speed below which the ankle-draft
- * equation applies. Upstream checks it only for a caller that passes
+ * (`ashrae55.py:100-102`): the range of relative air speed in which the
+ * ankle-draft and vertical-gradient equations apply, the two models that
+ * pass it (`ankle_draft.py:143`, `vertical_tmp_grad_ppd.py:143`). Upstream checks it only for a caller that passes
  * `v_limited`, so it is kept apart from `ASHRAE_55_LIMITS`.
  * Frozen, and referenced by identity from the model info of a model that
  * checks it. Not exported from the package root.
@@ -32,8 +33,8 @@ interface Ashrae55AirSpeed {
  * The quantities `_check_ashrae55_compliance` takes, in SI, keyed as
  * upstream's keyword arguments, except the air speed: upstream's `v` and
  * `v_param_name` are split into `v_range` and `v_no_control`, each with its
- * row key. `met` and `clo` go together, as upstream checks both when `met`
- * is given.
+ * row key, and `v_limited` takes its row key beside the value. `met` and
+ * `clo` go together, as upstream checks both when `met` is given.
  */
 interface Ashrae55Params {
   tdb: number;

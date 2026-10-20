@@ -1006,10 +1006,8 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
   });
 
   test("the published bounds are the ones ankle_draft gates on, inclusive at both ends", () => {
-    // At some edges the cooling effect cannot be calculated; its console
-    // message is not what this test checks.
     const ppd_ad = (input: Partial<typeof base>) =>
-      ankle_draft({ ...base, ...input, suppress_warnings: true }).ppd_ad;
+      ankle_draft({ ...base, ...input }).ppd_ad;
     for (const key of ["tdb", "tr", "met", "clo"] as const) {
       const { min, max } = ANKLE_DRAFT_INFO.inputs[key].applicability as {
         min: number;

@@ -37,7 +37,7 @@ A documented difference from upstream, allowed only because JavaScript or TypeSc
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
-What every main model exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
+What every main model exposes beyond upstream's function: its model info, `round_output` and `limit_inputs` where upstream has them (`ankle_draft` has no `round_output`), the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:

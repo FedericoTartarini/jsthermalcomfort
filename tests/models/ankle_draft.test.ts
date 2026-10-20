@@ -450,14 +450,23 @@ describe("ankle_draft beyond upstream's tests", () => {
       );
     });
 
+    const quantities = ["tdb", "tr", "vr", "rh", "met", "clo", "v_ankle"];
+
     // ADR 0001: a public model throws a TypeError for a non-finite number.
-    test.each(["tdb", "tr", "vr", "rh", "met", "clo", "v_ankle"])(
-      "a non-finite %s throws a TypeError",
-      (key) => {
-        const params = { ...base, [key]: NaN } as unknown as AnkleDraftParams;
-        expect(() => ankle_draft(params)).toThrow(TypeError);
-      },
-    );
+    test.each(
+      quantities.flatMap((key) =>
+        [NaN, Infinity, -Infinity].map((value) => [key, value] as const),
+      ),
+    )("%s %p throws a TypeError", (key, value) => {
+      const params = { ...base, [key]: value } as unknown as AnkleDraftParams;
+      expect(() => ankle_draft(params)).toThrow(TypeError);
+    });
+
+    // ADR 0005 as amended: upstream reads True and False as 1 and 0.
+    test.each(quantities)("a boolean %s throws a TypeError", (key) => {
+      const params = { ...base, [key]: false } as unknown as AnkleDraftParams;
+      expect(() => ankle_draft(params)).toThrow(TypeError);
+    });
 
     // ADR 0005: quantities are numbers; upstream would broadcast the list.
     test("an array throws a TypeError", () => {

@@ -2,9 +2,9 @@ import { describe, expect, test } from "@jest/globals";
 import {
   check_standard_compliance,
   is_iso_7730,
-  LimitSet,
   Standard,
 } from "../../src/utilities/utilities.js";
+import * as utilitiesModule from "../../src/utilities/utilities.js";
 import * as pkg from "../../src/index.js";
 
 // These identifiers are shared with pythermalcomfort, which is the reference
@@ -74,20 +74,11 @@ describe("Standard mirrors pythermalcomfort's Models enum", () => {
   });
 });
 
-describe("LimitSet is separate from Standard", () => {
-  test("limit sets are not standards and do not leak into Standard", () => {
-    for (const key of Object.keys(LimitSet)) {
-      expect(Standard).not.toHaveProperty(key);
-    }
-    for (const value of Object.values(LimitSet)) {
-      expect(Object.values(Standard)).not.toContain(value);
-    }
-  });
-
+describe("the removed identifiers and limit sets", () => {
   test("the unversioned identifiers are gone", () => {
     // Removed in v2. Their absence is the breaking change, so assert it rather
     // than trusting that nobody re-adds them for convenience.
-    const values = [...Object.values(Standard), ...Object.values(LimitSet)];
+    const values = Object.values(Standard);
     expect(values).not.toContain("ISO");
     expect(values).not.toContain("ASHRAE");
     expect(values).not.toContain("ANKLE_DRAFT");
@@ -97,25 +88,42 @@ describe("LimitSet is separate from Standard", () => {
   // pythermalcomfort v4.6.2 has no ankle-draft limit set (met <= 1.3,
   // clo <= 0.7); ankle_draft checks the ASHRAE 55 limits only.
   test("the ankle_draft limit set is gone", () => {
-    expect(LimitSet).not.toHaveProperty("ankle_draft");
     expect(() =>
       check_standard_compliance("ankle_draft", { met: 1.2 }),
     ).toThrow('Unknown standard "ankle_draft"');
   });
+
+  // pythermalcomfort v4.6.2 has no fan-use limit set: use_fans_heatwaves
+  // calls _valid_range inline (models/use_fans_heatwaves.py:178-195), and
+  // use_fans_heatwaves here reads its own USE_FANS_HEATWAVES_LIMITS.
+  test("the use_fans_heatwaves limit set is gone", () => {
+    expect(() =>
+      check_standard_compliance("use_fans_heatwaves", { tdb: 60 }),
+    ).toThrow(
+      'Unknown standard "use_fans_heatwaves". Expected one of: 55-2023, ' +
+        "7730-2005, 7730-2025, 9920-2007, 7933-2004, 7933-2023, " +
+        '16798-1-2019. The unversioned "ISO" and "ASHRAE" identifiers were ' +
+        'removed in v2 -- use "7730-2025" and "55-2023".',
+    );
+  });
+
+  test("LimitSet is gone from the utilities module and the package root", () => {
+    expect(utilitiesModule).not.toHaveProperty("LimitSet");
+    expect(pkg).not.toHaveProperty("LimitSet");
+    expect(pkg.default.utilities).not.toHaveProperty("LimitSet");
+  });
 });
 
 describe("public API surface", () => {
-  test("Standard, LimitSet and is_iso_7730 are importable from the package root", () => {
+  test("Standard and is_iso_7730 are importable from the package root", () => {
     // check_standard_compliance is public and requires one of these values, so
     // leaving them unreachable forced callers to pass bare strings and hope.
     expect(pkg.Standard).toBe(Standard);
-    expect(pkg.LimitSet).toBe(LimitSet);
     expect(typeof pkg.is_iso_7730).toBe("function");
   });
 
-  test("Standard and LimitSet are frozen", () => {
+  test("Standard is frozen", () => {
     expect(Object.isFrozen(Standard)).toBe(true);
-    expect(Object.isFrozen(LimitSet)).toBe(true);
   });
 });
 

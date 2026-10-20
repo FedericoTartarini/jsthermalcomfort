@@ -16,7 +16,7 @@ import {
   round,
 } from "../../src/utilities/utilities";
 import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
-import { LimitSet, Standard } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/utilities.js";
 
 const DEFAULT_TOLERANCE = 0.01;
 
@@ -666,34 +666,6 @@ describe("check_standard_compliance", () => {
         clo: 0.5,
         airspeed_control: true,
       });
-      expect(warnings).toHaveLength(0);
-    });
-  });
-
-  describe("FAN_HEATWAVES branch", () => {
-    const valid = { tdb: 30, tr: 30, v: 1, rh: 50, met: 1, clo: 0.5 };
-
-    it.each([
-      { field: "tdb", value: 51 },
-      { field: "tr", value: 19 },
-      { field: "v", value: 5 },
-      { field: "rh", value: 101 },
-      { field: "met", value: 0.5 },
-      { field: "clo", value: 1.5 },
-    ])("flags an out-of-range $field of $value", ({ field, value }) => {
-      const kwargs = { ...valid, [field]: value };
-      const warnings = check_standard_compliance(
-        LimitSet.use_fans_heatwaves,
-        kwargs,
-      );
-      expect(warnings.length).toBeGreaterThan(0);
-    });
-
-    it("returns no warnings when all fields are within range", () => {
-      const warnings = check_standard_compliance(
-        LimitSet.use_fans_heatwaves,
-        valid,
-      );
       expect(warnings).toHaveLength(0);
     });
   });

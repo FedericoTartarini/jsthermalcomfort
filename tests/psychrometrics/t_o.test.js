@@ -1,6 +1,6 @@
 import { expect, describe, it, test } from "@jest/globals";
 import { t_o } from "../../src/psychrometrics/t_o";
-import { LimitSet, Standard } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/utilities.js";
 
 // Mirrors pythermalcomfort v4.6.2 tests/test_environment.py. Upstream's
 // operative_tmp takes "ISO" (the default) or "ASHRAE"; t_o takes the Standard

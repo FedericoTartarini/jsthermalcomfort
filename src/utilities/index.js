@@ -11,7 +11,6 @@ import {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   check_standard_compliance,
   is_iso_7730,
-  LimitSet,
   Standard,
 } from "./utilities.js";
 import {
@@ -47,7 +46,6 @@ export {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   check_standard_compliance,
   is_iso_7730,
-  LimitSet,
   Standard,
 };
 
@@ -70,7 +68,6 @@ export default {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   check_standard_compliance,
   is_iso_7730,
-  LimitSet,
   Standard,
 };
 

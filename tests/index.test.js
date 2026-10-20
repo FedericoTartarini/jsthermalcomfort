@@ -134,8 +134,33 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("use_fans_heatwaves");
   });
 
-  it("should have models.JOS3", () => {
+  // pythermalcomfort.models exports JOS3; it was only in the default export.
+  it("should have models.JOS3, also as a named export", () => {
     expect(jsthermalcomfort.models).toHaveProperty("JOS3");
+    expect(namedExports.JOS3).toBe(jsthermalcomfort.models.JOS3);
+  });
+
+  // jos3 D5: upstream's pythermalcomfort.jos3_functions, its four modules
+  // as namespaces.
+  it("should have jos3_functions with construction, matrix, parameters and thermoregulation", () => {
+    expect(namedExports.jos3_functions).toBe(jsthermalcomfort.jos3_functions);
+    for (const module of [
+      "construction",
+      "matrix",
+      "parameters",
+      "thermoregulation",
+    ]) {
+      expect(jsthermalcomfort.jos3_functions).toHaveProperty(module);
+    }
+    expect(jsthermalcomfort.jos3_functions.parameters).toHaveProperty(
+      "local_clo_typical_ensembles",
+    );
+    expect(jsthermalcomfort.jos3_functions.parameters).toHaveProperty(
+      "ALL_OUT_PARAMS",
+    );
+    expect(jsthermalcomfort.jos3_functions.thermoregulation).toHaveProperty(
+      "tetens",
+    );
   });
 
   it("should have utilities.body_surface_area", () => {

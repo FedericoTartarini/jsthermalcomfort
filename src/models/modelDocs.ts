@@ -36,8 +36,10 @@ export interface Bound {
  * shared object, not a copy: the one the model's `*_INFO` metadata references,
  * or, where a quantity is checked against two nested fixed limits, the wider
  * one, which `*_INFO` does not publish because any value outside it is outside
- * the narrower one too (`ankle_draft`'s `vr`, 0 to 2 and 0 to 0.2 m/s). For a
- * limit that depends on the call, such as ASHRAE 55's airspeed limit between
+ * the narrower one too (`ankle_draft`'s `vr`, 0 to 2 and 0 to 0.2 m/s). An
+ * edition-dependent limit is that edition's frozen bound (`phs`'s `pa` and
+ * `met_w_m2`, from `PHS_LIMITS`), while `*_INFO` references the default
+ * edition's. For a limit that depends on the call, such as ASHRAE 55's airspeed limit between
  * 23 and 25.5 °C operative temperature when the occupant cannot control the
  * airspeed, it is built for that call. One quantity can break more than one
  * limit, so `key` can repeat, and the rows are told apart by `bound`.

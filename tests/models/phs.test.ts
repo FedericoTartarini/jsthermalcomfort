@@ -1,7 +1,16 @@
 import { describe, expect, test } from "@jest/globals";
 import { phs } from "../../src/models/index.js";
 import { met_to_w_m2 } from "../../src/utilities/index.js";
-import type { PhsParams, PhsResult } from "../../src/models/phs.ts";
+import {
+  PHS_INFO,
+  PHS_LIMITS,
+  type PhsParams,
+  type PhsResult,
+} from "../../src/models/phs.ts";
+import type {
+  ApplicabilityWarning,
+  Bound,
+} from "../../src/models/modelDocs.ts";
 import { testDataUrls } from "./comftest.ts";
 import {
   assertNonEmptyRows,
@@ -29,12 +38,32 @@ const FIELDS = [
   "evap_load_wm2_min",
 ];
 
+// Upstream's fields, without the library's `warnings` rows.
+type PhsFields = Omit<PhsResult, "warnings">;
+
+// A result's keys: upstream's fields, then `warnings`.
+const KEYS = [...FIELDS, "warnings"];
+
+// One `warnings` row, as upstream's UserWarning reports it under
+// limit_inputs.
+const row = (
+  key: string,
+  role: ApplicabilityWarning["role"],
+  value: number,
+  bound: Bound,
+): ApplicabilityWarning => ({ key, role, value, bound });
+
 // Unrounded outputs can differ from upstream's in the last bits, from
-// Math.exp, Math.pow and Math.cos (see the note at the kernel); NaN and the
-// key order are checked exactly.
-function expectNear(result: PhsResult, expected: PhsResult): void {
-  expect(Object.keys(result)).toEqual(FIELDS);
-  for (const key of FIELDS as (keyof PhsResult)[]) {
+// Math.exp (see the note at the kernel); NaN and the key order are checked
+// exactly, and so are the `warnings` rows.
+function expectNear(
+  result: PhsResult,
+  expected: PhsFields,
+  warnings: ApplicabilityWarning[] = [],
+): void {
+  expect(Object.keys(result)).toEqual(KEYS);
+  expect(result.warnings).toEqual(warnings);
+  for (const key of FIELDS as (keyof PhsFields)[]) {
     if (Number.isNaN(expected[key])) {
       expect(result[key]).toBeNaN();
     } else {
@@ -45,7 +74,7 @@ function expectNear(result: PhsResult, expected: PhsResult): void {
   }
 }
 
-const MASKED: PhsResult = {
+const MASKED: PhsFields = {
   t_re: NaN,
   t_sk: NaN,
   t_cr: NaN,
@@ -322,8 +351,9 @@ describe("phs beyond upstream's tests", () => {
       sweat_loss_g: 5841.9,
       sweat_rate_watt: 251.9,
       evap_load_wm2_min: 121938.3,
+      warnings: [],
     });
-    expect(Object.keys(result)).toEqual(FIELDS);
+    expect(Object.keys(result)).toEqual(KEYS);
   });
 
   test("round_output false returns the unrounded values", () => {
@@ -369,6 +399,7 @@ describe("phs beyond upstream's tests", () => {
       sweat_loss_g: 10499.4,
       sweat_rate_watt: 388.4,
       evap_load_wm2_min: 219155.5,
+      warnings: [],
     });
   });
 
@@ -438,6 +469,7 @@ describe("phs beyond upstream's tests", () => {
       sweat_loss_g: 5978.8,
       sweat_rate_watt: 258.0,
       evap_load_wm2_min: 124797.2,
+      warnings: [],
     });
   });
 
@@ -510,6 +542,7 @@ describe("phs beyond upstream's tests", () => {
         sweat_loss_g: 3991.1,
         sweat_rate_watt: 180.0,
         evap_load_wm2_min: 89759.2,
+        warnings: [],
       });
     });
   });
@@ -518,7 +551,7 @@ describe("phs beyond upstream's tests", () => {
   describe("upstream's logic", () => {
     // 2023: the skin temperature is its equilibrium value on minute 1
     // (:716-720); 2004 keeps the exponential lag.
-    test.each<[NonNullable<PhsParams["standard"]>, PhsResult]>([
+    test.each<[NonNullable<PhsParams["standard"]>, PhsFields]>([
       [
         "7933-2004",
         {
@@ -608,7 +641,7 @@ describe("phs beyond upstream's tests", () => {
     });
 
     // Any walk_sp but 0 counts as walking (:582), a negative one included.
-    test.each<[NonNullable<PhsParams["standard"]>, PhsResult]>([
+    test.each<[NonNullable<PhsParams["standard"]>, PhsFields]>([
       [
         "7933-2004",
         {
@@ -740,7 +773,7 @@ describe("phs beyond upstream's tests", () => {
 
   describe("limit_inputs", () => {
     // tr is checked as tr - tdb (:432): a tr of 65 °C at tdb 40 °C computes.
-    test.each<[NonNullable<PhsParams["standard"]>, PhsResult]>([
+    test.each<[NonNullable<PhsParams["standard"]>, PhsFields]>([
       [
         "7933-2004",
         {
@@ -774,7 +807,10 @@ describe("phs beyond upstream's tests", () => {
         },
       ],
     ])("tr 65 at tdb 40 computes under %s", (standard, expected) => {
-      expect(phs({ ...base, tr: 65, standard })).toEqual(expected);
+      expect(phs({ ...base, tr: 65, standard })).toEqual({
+        ...expected,
+        warnings: [],
+      });
     });
 
     // met is checked in W/m2, 100 to 450 under 2004 and 56 to 250 under 2023
@@ -833,7 +869,12 @@ describe("phs beyond upstream's tests", () => {
             standard,
             round_output: false,
           }),
-        ).toEqual(MASKED);
+        ).toEqual({
+          ...MASKED,
+          warnings: [
+            row("met_w_m2", "derived", 52.335, PHS_LIMITS[standard].met_w_m2),
+          ],
+        });
       },
     );
 
@@ -862,53 +903,92 @@ describe("phs beyond upstream's tests", () => {
         sweat_rate_watt: 46.42417371328352,
         evap_load_wm2_min: 27404.738552286235,
       });
-      expect(phs({ ...params, standard: "7933-2023" })).toEqual(MASKED);
+      expect(phs({ ...params, standard: "7933-2023" })).toEqual({
+        ...MASKED,
+        warnings: [
+          row("pa", "derived", 116.85664013598608, PHS_LIMITS["7933-2023"].pa),
+        ],
+      });
     });
 
     // The bounds are inclusive (_internal/validation.py:47). Each pair is on
-    // a bound and just outside it, under both editions.
-    const edges: [string, Partial<PhsParams>, Partial<PhsParams>][] = [
-      ["tdb 15", { tdb: 15, tr: 15, rh: 50 }, { tdb: 14.999, tr: 15, rh: 50 }],
+    // a bound and just outside it, under both editions; the value outside is
+    // the one upstream's UserWarning reports.
+    type Edge = [
+      string,
+      Partial<PhsParams>,
+      Partial<PhsParams>,
+      keyof (typeof PHS_LIMITS)["7933-2023"],
+      ApplicabilityWarning["role"],
+      number,
+    ];
+    const edges: Edge[] = [
+      [
+        "tdb 15",
+        { tdb: 15, tr: 15, rh: 50 },
+        { tdb: 14.999, tr: 15, rh: 50 },
+        "tdb",
+        "input",
+        14.999,
+      ],
       [
         "tdb 50",
         { tdb: 50, tr: 50, rh: 20 },
         { tdb: 50.001, tr: 50.001, rh: 20 },
+        "tdb",
+        "input",
+        50.001,
       ],
       [
         "tr - tdb 0",
         { tdb: 35, tr: 35, rh: 40 },
         { tdb: 35, tr: 34.999, rh: 40 },
+        "tr_minus_tdb",
+        "derived",
+        -0.0009999999999976694,
       ],
       [
         "tr - tdb 60",
         { tdb: 20, tr: 80, rh: 40 },
         { tdb: 20, tr: 80.001, rh: 40 },
+        "tr_minus_tdb",
+        "derived",
+        60.001000000000005,
       ],
       [
         "v 3",
         { tdb: 35, tr: 35, rh: 40, v: 3 },
         { tdb: 35, tr: 35, rh: 40, v: 3.001 },
+        "v",
+        "input",
+        3.001,
       ],
       [
         "clo 0.1",
         { tdb: 35, tr: 35, rh: 40, clo: 0.1 },
         { tdb: 35, tr: 35, rh: 40, clo: 0.099 },
+        "clo",
+        "input",
+        0.099,
       ],
       [
         "clo 1",
         { tdb: 35, tr: 35, rh: 40, clo: 1 },
         { tdb: 35, tr: 35, rh: 40, clo: 1.001 },
+        "clo",
+        "input",
+        1.001,
       ],
     ];
     test.each(
-      edges.flatMap(([name, on, off]) =>
+      edges.flatMap(([name, on, off, key, role, value]) =>
         (["7933-2004", "7933-2023"] as const).map(
-          (standard) => [name, standard, on, off] as const,
+          (standard) => [name, standard, on, off, key, role, value] as const,
         ),
       ),
     )(
-      "%s under %s: on the bound computes, outside returns NaN",
-      (_, standard, on, off) => {
+      "%s under %s: on the bound computes, outside returns NaN with its row",
+      (_, standard, on, off, key, role, value) => {
         const params = {
           v: 0.3,
           met: 2.5,
@@ -918,15 +998,40 @@ describe("phs beyond upstream's tests", () => {
           round_output: false,
         } as const;
         const inside = phs({ ...params, ...on } as PhsParams);
-        for (const key of FIELDS as (keyof PhsResult)[]) {
-          expect(Number.isFinite(inside[key])).toBe(true);
+        for (const field of FIELDS as (keyof PhsFields)[]) {
+          expect(Number.isFinite(inside[field])).toBe(true);
         }
-        expect(phs({ ...params, ...off } as PhsParams)).toEqual(MASKED);
+        expect(inside.warnings).toEqual([]);
+        expect(phs({ ...params, ...off } as PhsParams)).toEqual({
+          ...MASKED,
+          warnings: [row(key, role, value, PHS_LIMITS[standard][key])],
+        });
       },
     );
 
+    // D3 (i) (.scratch/v2-models/wave-2/decisions.md): under limit_inputs
+    // the gate is evaluated before the kernel, which does not end for clo 0.
+    // Upstream computes, then masks, and returns NaN in every field.
+    test.each(
+      [0, -0].flatMap((clo) =>
+        (["7933-2004", "7933-2023"] as const).map(
+          (standard) => [clo, standard] as const,
+        ),
+      ),
+    )("clo %p under %s returns NaN with its row", (clo, standard) => {
+      expect(phs({ ...base, clo, standard, round_output: false })).toEqual({
+        ...MASKED,
+        warnings: [row("clo", "input", clo, PHS_LIMITS[standard].clo)],
+      });
+    });
+
     test("p_a above 4.5 kPa returns NaN", () => {
-      expect(phs({ ...base, rh: 70, round_output: false })).toEqual(MASKED);
+      expect(phs({ ...base, rh: 70, round_output: false })).toEqual({
+        ...MASKED,
+        warnings: [
+          row("pa", "derived", 5160.393695145819, PHS_LIMITS["7933-2023"].pa),
+        ],
+      });
     });
 
     test("limit_inputs false computes outside the limits", () => {
@@ -945,6 +1050,10 @@ describe("phs beyond upstream's tests", () => {
           sweat_rate_watt: 57.35935254210887,
           evap_load_wm2_min: 31779.390012499305,
         },
+        [
+          row("tdb", "input", 10, PHS_LIMITS["7933-2023"].tdb),
+          row("pa", "derived", 415.46118881403856, PHS_LIMITS["7933-2023"].pa),
+        ],
       );
     });
 
@@ -967,6 +1076,232 @@ describe("phs beyond upstream's tests", () => {
         round_output: false,
       } as unknown as PhsParams);
       expect(Number.isNaN(result.t_re)).toBe(masked);
+    });
+  });
+
+  // Upstream reports each bound a call breaks with a UserWarning under
+  // limit_inputs (models/phs.py:423-436); the library reports it as a
+  // `warnings` row whatever limit_inputs is (ADR 0001 as amended), keyed and
+  // in units as ADR 0011 as amended keys them: `tr - tdb` is
+  // `tr_minus_tdb`, p_a is `pa` in Pa, and met in W/m2 is `met_w_m2`. Each
+  // row carries the frozen bound of the call's edition. Every value is the
+  // one upstream's UserWarning reports (p_a times 1000).
+  describe("warnings rows", () => {
+    const all_out = {
+      tdb: 55,
+      tr: 120,
+      v: 3.5,
+      rh: 60,
+      met: 8,
+      clo: 1.2,
+      posture: "standing",
+      round_output: false,
+    } as const;
+    const all_out_rows = (
+      standard: NonNullable<PhsParams["standard"]>,
+      pa: number,
+    ) => {
+      const limits = PHS_LIMITS[standard];
+      return [
+        row("tdb", "input", 55, limits.tdb),
+        row("tr_minus_tdb", "derived", 65, limits.tr_minus_tdb),
+        row("v", "input", 3.5, limits.v),
+        row("pa", "derived", pa, limits.pa),
+        row("met_w_m2", "derived", 465.2, limits.met_w_m2),
+        row("clo", "input", 1.2, limits.clo),
+      ];
+    };
+
+    test.each<[NonNullable<PhsParams["standard"]>, number]>([
+      ["7933-2004", 9455.824165945343],
+      ["7933-2023", 9442.96243288389],
+    ])(
+      "every bound broken under %s: six rows, in upstream's order, and NaN",
+      (standard, pa) => {
+        const result = phs({ ...all_out, standard });
+        expect(result).toEqual({
+          ...MASKED,
+          warnings: all_out_rows(standard, pa),
+        });
+      },
+    );
+
+    test.each<[NonNullable<PhsParams["standard"]>, number, PhsFields]>([
+      [
+        "7933-2004",
+        9455.824165945343,
+        {
+          t_re: 85.8084648881509,
+          t_sk: 65.86856577658106,
+          t_cr: 84.96351117389136,
+          t_cr_eq: 38.27471999999996,
+          t_sk_t_cr_wg: 0.1,
+          d_lim_loss_50: 251.0,
+          d_lim_loss_95: 171.0,
+          d_lim_t_re: 8.0,
+          sweat_loss_g: 10978.42479735153,
+          sweat_rate_watt: 499.9999999999995,
+          evap_load_wm2_min: 229154.05822323557,
+        },
+      ],
+      [
+        "7933-2023",
+        9442.96243288389,
+        {
+          t_re: 82.3912498175909,
+          t_sk: 64.12313329550734,
+          t_cr: 81.59339827850872,
+          t_cr_eq: 38.27471999999996,
+          t_sk_t_cr_wg: 0.1,
+          d_lim_loss_50: 171.0,
+          d_lim_loss_95: 171.0,
+          d_lim_t_re: 9.0,
+          sweat_loss_g: 10980.457043688226,
+          sweat_rate_watt: 499.9999999999995,
+          evap_load_wm2_min: 229196.4775597032,
+        },
+      ],
+    ])(
+      "limit_inputs false under %s computes and still reports the six rows",
+      (standard, pa, expected) => {
+        expectNear(
+          phs({ ...all_out, standard, limit_inputs: false }),
+          expected,
+          all_out_rows(standard, pa),
+        );
+      },
+    );
+
+    test("rounding leaves the rows' values unrounded", () => {
+      const result = phs({
+        ...all_out,
+        standard: "7933-2023",
+        limit_inputs: false,
+        round_output: true,
+      });
+      expect(result).toEqual({
+        t_re: 82.4,
+        t_sk: 64.1,
+        t_cr: 81.6,
+        t_cr_eq: 38.3,
+        t_sk_t_cr_wg: 0.1,
+        d_lim_loss_50: 171.0,
+        d_lim_loss_95: 171.0,
+        d_lim_t_re: 9.0,
+        sweat_loss_g: 10980.5,
+        sweat_rate_watt: 500.0,
+        evap_load_wm2_min: 229196.5,
+        warnings: all_out_rows("7933-2023", 9442.96243288389),
+      });
+    });
+
+    // pa's lower bound is 0 under 7933-2004 and 500 Pa under 7933-2023.
+    test("pa 116.9 Pa: no row under 7933-2004, a row under 7933-2023", () => {
+      const params = {
+        tdb: 20,
+        tr: 20,
+        rh: 5,
+        v: 0.3,
+        met: 2.5,
+        clo: 0.5,
+        posture: "standing",
+        round_output: false,
+      } as const;
+      expect(phs({ ...params, standard: "7933-2004" }).warnings).toEqual([]);
+      expect(phs({ ...params, standard: "7933-2023" })).toEqual({
+        ...MASKED,
+        warnings: [
+          row("pa", "derived", 116.85664013598608, PHS_LIMITS["7933-2023"].pa),
+        ],
+      });
+    });
+
+    // met_w_m2's range is 100 to 450 W/m2 under 7933-2004 and 56 to 250
+    // under 7933-2023 (test_applicability_limit_metabolic_rate_is_standard_specific's
+    // inputs).
+    test("met 1.5 (87.225 W/m2): a row under 7933-2004, none under 7933-2023", () => {
+      const params = {
+        tdb: 30,
+        tr: 40,
+        rh: 50,
+        v: 0.5,
+        met: 1.5,
+        clo: 0.5,
+        posture: "standing",
+        round_output: false,
+      } as const;
+      expect(phs({ ...params, standard: "7933-2004" })).toEqual({
+        ...MASKED,
+        warnings: [
+          row("met_w_m2", "derived", 87.225, PHS_LIMITS["7933-2004"].met_w_m2),
+        ],
+      });
+      expectNear(phs({ ...params, standard: "7933-2023" }), {
+        t_re: 37.2046258316173,
+        t_sk: 34.434423734280266,
+        t_cr: 37.152737940816586,
+        t_cr_eq: 36.914009999999976,
+        t_sk_t_cr_wg: 0.268253585326507,
+        d_lim_loss_50: 480.0,
+        d_lim_loss_95: 480.0,
+        d_lim_t_re: 480.0,
+        sweat_loss_g: 2023.5727107736407,
+        sweat_rate_watt: 84.47050075851328,
+        evap_load_wm2_min: 42238.29076967766,
+      });
+    });
+  });
+
+  // ADR 0011 as amended (D1, D2): one frozen bound per edition for pa and
+  // met_w_m2, and one shared frozen bound for tdb, tr_minus_tdb, v and clo.
+  describe("PHS_LIMITS", () => {
+    test("upstream's bounds per edition, pa in Pa (models/phs.py:429-436)", () => {
+      expect(PHS_LIMITS).toEqual({
+        "7933-2004": {
+          tdb: { min: 15, max: 50 },
+          tr_minus_tdb: { min: 0, max: 60 },
+          v: { min: 0, max: 3 },
+          pa: { min: 0, max: 4500 },
+          met_w_m2: { min: 100, max: 450 },
+          clo: { min: 0.1, max: 1 },
+        },
+        "7933-2023": {
+          tdb: { min: 15, max: 50 },
+          tr_minus_tdb: { min: 0, max: 60 },
+          v: { min: 0, max: 3 },
+          pa: { min: 500, max: 4500 },
+          met_w_m2: { min: 56, max: 250 },
+          clo: { min: 0.1, max: 1 },
+        },
+      });
+    });
+
+    test("the bounds both editions share are one object", () => {
+      for (const key of ["tdb", "tr_minus_tdb", "v", "clo"] as const) {
+        expect(PHS_LIMITS["7933-2004"][key]).toBe(PHS_LIMITS["7933-2023"][key]);
+      }
+    });
+
+    test("is deep-frozen", () => {
+      expect(Object.isFrozen(PHS_LIMITS)).toBe(true);
+      for (const limits of Object.values(PHS_LIMITS)) {
+        expect(Object.isFrozen(limits)).toBe(true);
+        for (const bound of Object.values(limits)) {
+          expect(Object.isFrozen(bound)).toBe(true);
+        }
+      }
+    });
+
+    test("PHS_INFO references the 7933-2023 bounds", () => {
+      const limits = PHS_LIMITS["7933-2023"];
+      expect(PHS_INFO.inputs.tdb.applicability).toBe(limits.tdb);
+      expect(PHS_INFO.inputs.v.applicability).toBe(limits.v);
+      expect(PHS_INFO.inputs.clo.applicability).toBe(limits.clo);
+      expect(PHS_INFO.derived!.tr_minus_tdb.applicability).toBe(
+        limits.tr_minus_tdb,
+      );
+      expect(PHS_INFO.derived!.pa.applicability).toBe(limits.pa);
+      expect(PHS_INFO.derived!.met_w_m2.applicability).toBe(limits.met_w_m2);
     });
   });
 
@@ -1050,6 +1385,7 @@ describe("phs beyond upstream's tests", () => {
         sweat_loss_g: 0.0,
         sweat_rate_watt: 0.0,
         evap_load_wm2_min: 0.0,
+        warnings: [],
       });
     });
 

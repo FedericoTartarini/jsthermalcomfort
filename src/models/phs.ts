@@ -5,7 +5,9 @@ import {
   Standard,
   validateInputs,
 } from "../utilities/utilities.js";
-import { _check_params_object } from "../_internal/validation.ts";
+import { deepFreeze } from "./modelDocs.ts";
+import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
+import { _check_params_object, _valid_range } from "../_internal/validation.ts";
 
 // Renamed from PhsReturnType to <Model>Result, the name every converted
 // model's result has. A type alias, as the JSDoc typedef it replaces emitted,
@@ -26,6 +28,7 @@ import { _check_params_object } from "../_internal/validation.ts";
  * @property {number} sweat_loss_g - Cumulative evaporated sweat mass for the whole person over the simulated duration, [grams (g)]. This is a total mass per person (not per unit area).
  * @property {number} sweat_rate_watt - Instantaneous evaporative heat flux due to regulatory sweating at the skin, per unit area, [W·m⁻²]. Used at each simulation time step.
  * @property {number} evap_load_wm2_min - Accumulated evaporative load per unit area over the simulated duration, [W·min·m⁻²]. Computed as the running sum of the instantaneous evaporative heat flux (W·m⁻²) at each 1 minute step. Intended for chaining simulation segments.
+ * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export type PhsResult = {
@@ -40,6 +43,7 @@ export type PhsResult = {
   sweat_loss_g: number;
   sweat_rate_watt: number;
   evap_load_wm2_min: number;
+  readonly warnings: ApplicabilityWarning[];
 };
 
 /**
@@ -81,17 +85,115 @@ export interface PhsParams {
   evap_load_wm2_min?: number;
 }
 
-// Upstream's applicability limits, inclusive (models/phs.py:429-436 at v4.6.2;
-// _valid_range compares with < and >, _internal/validation.py:47): tr is
-// checked as tr - tdb, p_a in kPa and met in W/m2.
-const _PHS_GATE = {
-  [Standard.iso_7933_2004]: { p_a: [0, 4.5], met: [100, 450] },
-  [Standard.iso_7933_2023]: { p_a: [0.5, 4.5], met: [56, 250] },
-} as const;
+// The bounds both editions share (models/phs.py:431-436 at v4.6.2).
+const _PHS_SHARED_LIMITS = {
+  tdb: Object.freeze({ min: 15, max: 50 }),
+  tr_minus_tdb: Object.freeze({ min: 0, max: 60 }),
+  v: Object.freeze({ min: 0, max: 3 }),
+  clo: Object.freeze({ min: 0.1, max: 1 }),
+};
 
-// A non-finite number throws a TypeError here (ADR 0001, reason three); for a
-// NaN tdb or tr upstream never returns, as its while loops do not converge
-// (models/phs.py:724-732, :779-791). A boolean or null quantity throws a
+/**
+ * Applicability limits of the PHS model, keyed by edition, inclusive at both
+ * ends as upstream's `_valid_range` (`pythermalcomfort/models/phs.py:423-436`
+ * at v4.6.2).
+ *
+ * Upstream checks `tr - tdb`, not `tr`: its bound is the `derived` key
+ * `tr_minus_tdb`. It checks the vapour pressure in kPa, 0 to 4.5 under
+ * 7933-2004 and 0.5 to 4.5 under 7933-2023 (:429, :434): here it is the key
+ * `pa` in Pa, 0 to 4500 and 500 to 4500, as `pa` is in Pa elsewhere in the
+ * library (ADR 0011). It checks the metabolic rate in W/m², 100 to 450 under
+ * 7933-2004 and 56 to 250 under 7933-2023 (:257, :430, :435): the `derived`
+ * key `met_w_m2`, upstream's own name for it (`tests/test_ireq.py:38`).
+ * `tdb`, `tr_minus_tdb`, `v` and `clo` are one frozen object shared by both
+ * editions. Frozen, referenced by identity from `PHS_INFO` and the
+ * `warnings` rows, and read by the gate in `phs`. Exported for that identity
+ * test, deliberately not added to `src/models/index.js`.
+ */
+export const PHS_LIMITS = Object.freeze({
+  [Standard.iso_7933_2004]: Object.freeze({
+    ..._PHS_SHARED_LIMITS,
+    pa: Object.freeze({ min: 0, max: 4500 }),
+    met_w_m2: Object.freeze({ min: 100, max: 450 }),
+  }),
+  [Standard.iso_7933_2023]: Object.freeze({
+    ..._PHS_SHARED_LIMITS,
+    pa: Object.freeze({ min: 500, max: 4500 }),
+    met_w_m2: Object.freeze({ min: 56, max: 250 }),
+  }),
+});
+
+/**
+ * Model metadata for the Predicted Heat Strain model.
+ *
+ * Experimental — the shape of `ModelInfo` may change before release.
+ *
+ * The bounds are those of 7933-2023, the default and first edition
+ * (`PHS_LIMITS["7933-2023"]`). Under 7933-2004 the `pa` bound is 0 to 4500 Pa
+ * and the `met_w_m2` bound 100 to 450 W/m² (`PHS_LIMITS["7933-2004"]`), and a
+ * call's `warnings` rows carry its own edition's bounds. `tr` carries no
+ * bound of its own: its bound is on `tr - tdb`, the `derived` row
+ * `tr_minus_tdb`. `met` is checked in W/m², the `derived` row `met_w_m2`.
+ *
+ * @public
+ */
+export const PHS_INFO: ModelInfo = deepFreeze({
+  name: "phs",
+  label: "Predicted Heat Strain (PHS)",
+  description:
+    "Predicted Heat Strain (ISO 7933): the sweat rate and the core temperature a worker develops in a hot environment, and the allowable exposure times.",
+  standards: [Standard.iso_7933_2023, Standard.iso_7933_2004],
+  inputs: {
+    tdb: {
+      unit: "°C",
+      applicability: PHS_LIMITS[Standard.iso_7933_2023].tdb,
+    },
+    tr: { unit: "°C" },
+    v: { unit: "m/s", applicability: PHS_LIMITS[Standard.iso_7933_2023].v },
+    rh: { unit: "%" },
+    met: { unit: "met" },
+    clo: {
+      unit: "clo",
+      applicability: PHS_LIMITS[Standard.iso_7933_2023].clo,
+    },
+    wme: { unit: "met" },
+  },
+  // Upstream's units (classes_return.py:357-385 at v4.6.2), W/m² spelled as
+  // the other models spell it.
+  outputs: {
+    t_re: { unit: "°C" },
+    t_sk: { unit: "°C" },
+    t_cr: { unit: "°C" },
+    t_cr_eq: { unit: "°C" },
+    t_sk_t_cr_wg: { unit: null },
+    d_lim_loss_50: { unit: "min" },
+    d_lim_loss_95: { unit: "min" },
+    d_lim_t_re: { unit: "min" },
+    sweat_loss_g: { unit: "g" },
+    sweat_rate_watt: { unit: "W/m²" },
+    evap_load_wm2_min: { unit: "W·min/m²" },
+  },
+  derived: {
+    tr_minus_tdb: {
+      unit: "°C",
+      applicability: PHS_LIMITS[Standard.iso_7933_2023].tr_minus_tdb,
+    },
+    pa: { unit: "Pa", applicability: PHS_LIMITS[Standard.iso_7933_2023].pa },
+    met_w_m2: {
+      unit: "W/m²",
+      applicability: PHS_LIMITS[Standard.iso_7933_2023].met_w_m2,
+    },
+  },
+});
+
+// A non-finite number throws a TypeError here (ADR 0001, reason three).
+// Upstream returns a result for some of them: +inf wme, ±inf i_mst and
+// height, -inf walk_sp, a non-finite theta, a NaN duration, and a NaN or +inf
+// sweat_rate_watt or evap_load_wm2_min. It raises for a non-finite drink or
+// acclimatized, ±inf weight or t_sk_t_cr_wg, and -inf sweat_rate_watt or
+// evap_load_wm2_min. For every other non-finite quantity or initial state it
+// did not return within 15 s in ticket 16's parity sweep, as its while loops
+// do not converge (models/phs.py:724-732, :779-791). A boolean or null quantity throws a
 // TypeError too, where upstream reads True and False as 1 and 0 and an
 // explicit None t_re or t_cr_eq as t_cr: quantities are numbers (ADR 0005).
 // round_output is validated, as upstream gives it to PHSInputs
@@ -149,9 +251,11 @@ const _POSTURES = ["sitting", "standing", "crouching"];
 // ("15 < tdb [°C] < 50", models/phs.py:76-79); the code's bounds are
 // inclusive (_valid_range, _internal/validation.py:47). It names the air
 // speed vr (:77), where the code checks v (:433); it leaves out the vapour
-// pressure limit (:429, :434); and it gives the 2004 metabolic rate as
-// "1.7 < met [met] < 7.5 (100-450 W/m2)" (:78), where 450 W/m2 is 7.74 met
-// (450 / 58.15). It says t_re and t_cr_eq fall back "If False" (:107-111),
+// pressure limit (:429, :434); and it gives the metabolic rate limits in met
+// as "1.7 < met [met] < 7.5 (100-450 W/m2)" and "0.96 < met [met] < 4.3
+// (56-250 W/m2)" (:77-78), where the code checks met times 58.15 in W/m2
+// (:257, :435), and 100, 450, 56 and 250 W/m2 are 1.7197, 7.7386, 0.9630
+// and 4.2992 met: the limits are given in W/m2 here. It says t_re and t_cr_eq fall back "If False" (:107-111),
 // where only a value not given falls back (:313-316): an explicit 0 is used.
 // It describes evap_load_wm2_min's input as "an instantaneous rate in
 // [W·m⁻²]" (:118-119), where the code adds each minute's rates to it
@@ -193,9 +297,10 @@ const _POSTURES = ["sitting", "standing", "crouching"];
  * @param {boolean} [params.limit_inputs=true] - If True, limits the input parameters to the standard's applicability limits. Defaults to True.
  * By default, if the inputs are outside the standard applicability limits the function returns nan. If False returns values even if
  * input values are outside the applicability limits of the model. The 7933 limits are 15 <= tdb [°C] <= 50, 0 <= (tr - tdb) [°C] <= 60,
- * 0 <= v [m/s] <= 3, and 0.1 <= clo [clo] <= 1. The metabolic rate limit is standard-specific: 1.72 <= met [met] <= 7.74 (100-450 W/m2)
- * in the 2004 standard, and 0.96 <= met [met] <= 4.30 (56-250 W/m2) in the 2023 standard. The vapour pressure limit is
- * 0 <= p_a [kPa] <= 4.5 in the 2004 standard and 0.5 <= p_a [kPa] <= 4.5 in the 2023 standard.
+ * 0 <= v [m/s] <= 3, and 0.1 <= clo [clo] <= 1. The metabolic rate limit is standard-specific and checked in W/m2:
+ * 100 <= met × 58.15 [W/m2] <= 450 in the 2004 standard, and 56 <= met × 58.15 [W/m2] <= 250 in the 2023 standard. The vapour
+ * pressure limit is 0 <= pa [Pa] <= 4500 in the 2004 standard and 500 <= pa [Pa] <= 4500 in the 2023 standard. Each bound the
+ * inputs break is reported in the result's `warnings`, whatever `limit_inputs` is (`PHS_LIMITS`).
  * @param {number} [params.i_mst=0.38] - Static moisture permeability index, [dimensionless]. Defaults to 0.38.
  * @param {number} [params.a_p=0.54] - Fraction of the body surface covered by the reflective clothing, [dimensionless]. Defaults to 0.54.
  * @param {0 | 1} [params.drink=1] - 1 if workers can drink freely, 0 otherwise. Defaults to 1.
@@ -374,7 +479,46 @@ export function phs(params: PhsParams): PhsResult {
   }
 
   const met_w_m2 = met * met_to_w_m2;
-  let output: PhsResult = _phs_kernel({
+
+  // The rows are the channel for upstream's UserWarning, which JavaScript has
+  // no warnings filter for (ADR 0001). Upstream checks only under
+  // limit_inputs, in this order (:431-436); the rows are built on every call,
+  // so with the gate off they say what the numbers were computed despite.
+  const limits = PHS_LIMITS[standard];
+  const warnings: ApplicabilityWarning[] = [];
+  _valid_range(warnings, "tdb", "input", tdb, limits.tdb);
+  _valid_range(
+    warnings,
+    "tr_minus_tdb",
+    "derived",
+    tr - tdb,
+    limits.tr_minus_tdb,
+  );
+  _valid_range(warnings, "v", "input", v, limits.v);
+  // p_a is in kPa, as upstream computes it; the row and its bound are in Pa
+  // (ADR 0011). Multiplying by 1000 flips the gate against upstream's kPa
+  // comparison for none of the values within 2000 ulps of 0, 0.5 and 4.5 kPa
+  // (.scratch/v2-models/wave-2/research/phs/d2_edges.py). p_a itself can
+  // differ from upstream's in the last bit, from Math.exp (see p_a above).
+  _valid_range(warnings, "pa", "derived", p_a * 1000, limits.pa);
+  _valid_range(warnings, "met_w_m2", "derived", met_w_m2, limits.met_w_m2);
+  _valid_range(warnings, "clo", "input", clo, limits.clo);
+
+  // Upstream computes, then masks every field (:423-446). Here a masked
+  // result is returned without computing it, as the mask replaces every field
+  // the kernel returns. So for clo 0, where the kernel's t_cl loop does not
+  // end, the library returns upstream's NaN
+  // (.scratch/v2-models/wave-2/decisions.md, D3 (i)).
+  if (limit_inputs && warnings.length > 0) {
+    return {
+      ...(Object.fromEntries(
+        _PHS_FIELDS.map((key) => [key, NaN]),
+      ) as PhsFields),
+      warnings,
+    };
+  }
+
+  const output: PhsFields = _phs_kernel({
     tdb,
     tr,
     v,
@@ -403,35 +547,33 @@ export function phs(params: PhsParams): PhsResult {
     is_2023,
   });
 
-  // Upstream computes, then masks every field (:423-446).
-  if (limit_inputs) {
-    const gate = _PHS_GATE[standard];
-    const outside = (x: number, [min, max]: readonly [number, number]) =>
-      x < min || x > max;
-    if (
-      outside(tdb, [15.0, 50.0]) ||
-      outside(tr - tdb, [0.0, 60.0]) ||
-      outside(v, [0.0, 3.0]) ||
-      outside(p_a, gate.p_a) ||
-      outside(met_w_m2, gate.met) ||
-      outside(clo, [0.1, 1.0])
-    ) {
-      output = Object.fromEntries(
-        Object.keys(output).map((key) => [key, NaN]),
-      ) as PhsResult;
-    }
-  }
-
   if (round_output) {
     // np.around(x, 1), and 2 for t_sk_t_cr_wg (:448-453): round is half to
     // even.
-    for (const key of Object.keys(output) as (keyof PhsResult)[]) {
+    for (const key of Object.keys(output) as (keyof PhsFields)[]) {
       output[key] = round(output[key], key === "t_sk_t_cr_wg" ? 2 : 1);
     }
   }
 
-  return output;
+  return { ...output, warnings };
 }
+
+// Upstream's PHS fields, without the library's warnings rows, in PHS's order
+// (classes_return.py:389-399).
+type PhsFields = Omit<PhsResult, "warnings">;
+const _PHS_FIELDS: readonly (keyof PhsFields)[] = [
+  "t_re",
+  "t_sk",
+  "t_cr",
+  "t_cr_eq",
+  "t_sk_t_cr_wg",
+  "d_lim_loss_50",
+  "d_lim_loss_95",
+  "d_lim_t_re",
+  "sweat_loss_g",
+  "sweat_rate_watt",
+  "evap_load_wm2_min",
+];
 
 // Upstream's posture codes (models/phs.py:465-467).
 const _POSTURE_CODES: Record<string, number> = {
@@ -485,7 +627,7 @@ interface _PhsKernelInputs {
 // tr 24.999, v 1.5, rh 90, met 0.9, clo 1, sitting, 7933-2004, limit_inputs
 // false, t_sk_t_cr_wg is 0.2884163497945449 here and 0.28841635205858474
 // upstream.
-function _phs_kernel(inputs: _PhsKernelInputs): PhsResult {
+function _phs_kernel(inputs: _PhsKernelInputs): PhsFields {
   const {
     tdb,
     tr,

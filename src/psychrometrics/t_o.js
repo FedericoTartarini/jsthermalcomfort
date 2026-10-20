@@ -27,6 +27,12 @@ export function t_o(tdb, tr, v, standard = Standard.iso_7730_2025) {
   // negative v gives NaN from the square root under ISO 7726 and is weighed
   // as below 0.2 m/s under ASHRAE 55. The rejection this replaced was a
   // past deviation that ADR 0001 reverts.
+  // Upstream calls standard.lower() on what it is given (operative_tmp.py:38
+  // at v4.6.2), so None or a number raises AttributeError, which ADR 0012
+  // maps to a TypeError when a wrong type raises it. Only undefined takes the
+  // default.
+  if (typeof standard !== "string")
+    throw new TypeError('Parameter "standard" must be a string');
   if (is_iso_7730(standard)) return _t_o_calculation_iso(tdb, tr, v);
   if (standard === Standard.ashrae_55_2023)
     return _t_o_calculation_ashrae(tdb, tr, v);

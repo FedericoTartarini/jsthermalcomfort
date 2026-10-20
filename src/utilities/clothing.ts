@@ -174,6 +174,12 @@ export function clo_dynamic_ashrae(
   // Upstream's `model`; this library names the option `standard` (ADR 0003).
   standard: typeof Standard.ashrae_55_2023 = Standard.ashrae_55_2023,
 ): number {
+  // Upstream calls model.lower() on what it is given (clo_dynamic_ashrae.py:43
+  // at v4.6.2), so None or a number raises AttributeError, which ADR 0012 maps
+  // to a TypeError when a wrong type raises it. Only undefined takes the
+  // default.
+  if (typeof standard !== "string")
+    throw new TypeError('Parameter "standard" must be a string');
   if (standard !== Standard.ashrae_55_2023)
     throw new Error(
       `PMV calculations can only be performed in compliance with ASHRAE ${Standard.ashrae_55_2023}`,
@@ -270,6 +276,12 @@ export function clo_dynamic_iso_vr(
   i_a = 0.7,
   standard: typeof Standard.iso_9920_2007 = Standard.iso_9920_2007,
 ): number {
+  // Upstream's clo_dynamic_iso calls model.lower() on what it is given
+  // (clo_dynamic_iso.py:57 at v4.6.2), so None or a number raises
+  // AttributeError, which ADR 0012 maps to a TypeError when a wrong type
+  // raises it. Only undefined takes the default.
+  if (typeof standard !== "string")
+    throw new TypeError('Parameter "standard" must be a string');
   if (standard !== Standard.iso_9920_2007)
     throw new Error(
       `PMV calculations can only be performed in compliance with ISO ${Standard.iso_9920_2007}`,

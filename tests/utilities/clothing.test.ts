@@ -190,6 +190,23 @@ describe("clo_dynamic_ashrae", () => {
       "PMV calculations can only be performed in compliance with ASHRAE 55-2023",
     );
   });
+
+  // Upstream calls model.lower() on what it is given
+  // (pythermalcomfort/clothing/clo_dynamic_ashrae.py:43 at v4.6.2), so
+  // clo_dynamic_ashrae(clo=1, met=1.5, model=None), 5, 1.5, True, ["55-2023"]
+  // and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
+  // maps to a TypeError when a wrong type raises it.
+  test.each([null, 5, 1.5, true, ["55-2023"], { a: 1 }])(
+    "throws TypeError if standard is %p, not a string",
+    (standard) => {
+      // Cast: deliberately passing a non-string standard to test the TypeError.
+      const bad = standard as unknown as "55-2023";
+      expect(() => clo_dynamic_ashrae(1, 1.5, bad)).toThrow(TypeError);
+      expect(() => clo_dynamic_ashrae(1, 1.5, bad)).toThrow(
+        'Parameter "standard" must be a string',
+      );
+    },
+  );
 });
 
 describe("clo_dynamic_iso", () => {
@@ -242,6 +259,23 @@ describe("clo_dynamic_iso", () => {
       "PMV calculations can only be performed in compliance with ISO 9920-2007",
     );
   });
+
+  // Upstream calls model.lower() on what it is given
+  // (pythermalcomfort/clothing/clo_dynamic_iso.py:57 at v4.6.2), so
+  // clo_dynamic_iso(clo=1, met=1.5, v=0.1, model=None), 5, 1.5, True,
+  // ["9920-2007"] and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2,
+  // which ADR 0012 maps to a TypeError when a wrong type raises it.
+  test.each([null, 5, 1.5, true, ["9920-2007"], { a: 1 }])(
+    "throws TypeError if standard is %p, not a string",
+    (standard) => {
+      // Cast: deliberately passing a non-string standard to test the TypeError.
+      const bad = standard as unknown as "9920-2007";
+      expect(() => clo_dynamic_iso(1, 1.5, 0.1, 0.7, bad)).toThrow(TypeError);
+      expect(() => clo_dynamic_iso(1, 1.5, 0.1, 0.7, bad)).toThrow(
+        'Parameter "standard" must be a string',
+      );
+    },
+  );
 });
 
 // JS-only: pythermalcomfort has no function taking the relative air speed.
@@ -285,6 +319,22 @@ describe("clo_dynamic_iso_vr", () => {
       "PMV calculations can only be performed in compliance with ISO 9920-2007",
     );
   });
+
+  // As clo_dynamic_iso, whose model.lower() raises AttributeError for a
+  // non-string (pythermalcomfort/clothing/clo_dynamic_iso.py:57 at v4.6.2).
+  test.each([null, 5, 1.5, true, ["9920-2007"], { a: 1 }])(
+    "throws TypeError if standard is %p, not a string",
+    (standard) => {
+      // Cast: deliberately passing a non-string standard to test the TypeError.
+      const bad = standard as unknown as "9920-2007";
+      expect(() => clo_dynamic_iso_vr(1, 1.5, 0.2, 0.7, bad)).toThrow(
+        TypeError,
+      );
+      expect(() => clo_dynamic_iso_vr(1, 1.5, 0.2, 0.7, bad)).toThrow(
+        'Parameter "standard" must be a string',
+      );
+    },
+  );
 });
 
 // JS-only: upstream's `clo_individual_garments` carries no groups (ADR 0001).

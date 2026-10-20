@@ -77,7 +77,8 @@ describe("t_o", () => {
       expected: -1,
     },
     {
-      // This is another case like above, the Python version returns -191.1.
+      // pythermalcomfort 4.6.2's operative_tmp(-273, -1, 1, standard="ASHRAE")
+      // returns -191.4.
       airTemperature: -273,
       meanRadiantTemperature: -1,
       airSpeed: 1,
@@ -129,6 +130,34 @@ describe("t_o", () => {
   it("throws an error if standard is not valid", () => {
     expect(() => t_o(0, 0, 0, "JORDAN")).toThrow(
       /^Unknown standard "JORDAN"\./,
+    );
+  });
+
+  // Upstream calls standard.lower() on what it is given
+  // (pythermalcomfort/environment/operative_tmp.py:38 at v4.6.2), so
+  // operative_tmp(25, 25, 0.1, standard=None), 5, 1.5, True, ["7730-2025"]
+  // and {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
+  // maps to a TypeError when a wrong type raises it.
+  it.each([null, 5, 1.5, true, ["7730-2025"], { a: 1 }])(
+    "throws TypeError if standard is %p, not a string",
+    (standard) => {
+      expect(() => t_o(25, 25, 0.1, standard)).toThrow(TypeError);
+      expect(() => t_o(25, 25, 0.1, standard)).toThrow(
+        'Parameter "standard" must be a string',
+      );
+    },
+  );
+
+  // At v 0.4 the two weightings differ: in pythermalcomfort 4.6.2
+  // operative_tmp(25, 30, 0.4) returns 26.666666666666668 (standard="ISO",
+  // the default) and operative_tmp(25, 30, 0.4, standard="ASHRAE") returns
+  // 27.0. At v 0.1 both return 27.5, so a call there cannot tell the default.
+  it("takes the default standard only when standard is undefined", () => {
+    expect(t_o(25, 30, 0.4, undefined)).toBe(
+      t_o(25, 30, 0.4, Standard.iso_7730_2025),
+    );
+    expect(t_o(25, 30, 0.4, undefined)).not.toBe(
+      t_o(25, 30, 0.4, Standard.ashrae_55_2023),
     );
   });
 });

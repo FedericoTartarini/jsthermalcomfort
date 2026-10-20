@@ -3,10 +3,11 @@ import { deepFreeze } from "./modelDocs.ts";
 import { _check_params_object } from "../_internal/validation.ts";
 import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
 
-// The result of wc, `{ wci }`, typed as every converted model's result is
-// named, <Model>Result. A type alias, as a JSDoc typedef emits, so the result
-// stays assignable to Record<string, unknown>. The field and its text are
-// upstream's WCI (pythermalcomfort/classes_return.py:736-745 at v4.6.2).
+// The result of wci, `{ wci, warnings }`, named <Model>Result, as every
+// converted model's result is. A type alias, as a JSDoc typedef emits, so the
+// result stays assignable to Record<string, unknown>. The wci field and its
+// text are upstream's WCI (pythermalcomfort/classes_return.py:736-745 at
+// v4.6.2); warnings is the consumer's addition (ADR 0001).
 /**
  * @typedef {Object} WciResult
  * @property {number} wci - Wind Chill Index, [W/m^2].
@@ -61,8 +62,12 @@ export const WCI_INFO: ModelInfo = deepFreeze({
 // A non-finite number throws a TypeError here (ADR 0001, reason three).
 // Upstream returns NaN or an infinity for it: wci(tdb=nan, v=0.1) is nan and
 // wci(tdb=-inf, v=0.1) is inf. A boolean quantity, which upstream reads as 0
-// or 1 (wci(tdb=True, v=0.1) is 502.9), and a null one throw a TypeError too:
-// quantities are numbers (ADR 0005). round_output is validated, as upstream
+// or 1 (wci(tdb=True, v=0.1) is 502.9), throws a TypeError too: quantities
+// are numbers (ADR 0005). A null quantity throws a TypeError, as upstream
+// raises one for None: BaseInputs skips a None field before its type check
+// (classes_input.py:138-139, :147), and the arithmetic raises
+// (wci(tdb=None, v=0.1): "unsupported operand type(s) for -: 'int' and
+// 'NoneType'"). round_output is validated, as upstream
 // gives it to WCIInputs (wci.py:59-63), which raises a TypeError for a
 // non-boolean (classes_input.py:79, :123-129).
 const WCI_SCHEMA = {

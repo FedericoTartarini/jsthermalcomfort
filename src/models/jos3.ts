@@ -307,12 +307,13 @@ function timedelta_us(seconds: number): bigint {
  * divides two integers (`delta_total_seconds`, `_datetimemodule.c:2720-2733`
  * at v3.12.12), rounded to the nearest double, a tie to even (Python 3.12
  * matched the exact quotient so rounded on 250,000 integers from 2^53 to
- * 2^67 in magnitude, `int_div_check.py` in the ticket 25 batch-1
- * scratchpad). Up to 2^53 microseconds both operands are doubles and `/` is
- * that division; above, the quotient is taken in BigInt with at least 55
- * bits and a sticky bit for the remainder, so that `Number`'s rounding of it
- * (to nearest, ties to even) is the rounding of the exact quotient, for
- * every count of microseconds a timedelta can hold (below 2^67).
+ * 2^67 in magnitude,
+ * `.scratch/v2-models/wave-2/research/jos3/int_div_check.py`). Up to 2^53
+ * microseconds both operands are doubles and `/` is that division; above,
+ * the quotient is taken in BigInt with at least 55 bits and a sticky bit for
+ * the remainder, so that `Number`'s rounding of it (to nearest, ties to
+ * even) is the rounding of the exact quotient, for every count of
+ * microseconds a timedelta can hold (below 2^67).
  *
  * @param {bigint} us - the microseconds
  * @returns {number} the seconds

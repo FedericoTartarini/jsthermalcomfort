@@ -1417,7 +1417,7 @@ describe("jos3 beyond upstream's tests", () => {
   // 1e6, splits it again and rounds the rest half to even against the
   // microseconds so far; a single round(dtime * 1e6) gives other values for
   // 600.0000005 and 123456789.0000005. Expected: pythermalcomfort 4.6.2's total_seconds() after 3 steps
-  // (up_simtime.py in the ticket 25 batch-1 scratchpad).
+  // (`.scratch/v2-models/wave-2/research/jos3/up_simtime.py`).
   test.each<[number, number[]]>([
     [600.0000005, [0.0, 600.000001, 1200.000002, 1800.000003]],
     [5e-7, [0.0, 0.0, 0.0, 0.0]],
@@ -1445,7 +1445,7 @@ describe("jos3 beyond upstream's tests", () => {
   // Above 2^53 microseconds (about 285 years) a double no longer holds every
   // whole microsecond; upstream's timedelta counts them in Python's integers
   // and total_seconds() divides them by 10**6, correctly rounded
-  // (up_simtime_big.py in the ticket 25 batch-1 scratchpad).
+  // (`.scratch/v2-models/wave-2/research/jos3/up_simtime_big.py`).
   test.each<[number, number, number[]]>([
     [2, 9007199254.740993, [0.0, 9007199254.740993, 18014398509.481987]],
     [1, 42603263734250.09, [0.0, 42603263734250.09]],
@@ -1616,8 +1616,9 @@ describe("jos3 beyond upstream's tests", () => {
     });
 
     // pythermalcomfort 4.6.2 raises a KeyError for each missing key at the
-    // point it reads it (up_errors.py in the ticket 25 batch-1 scratchpad),
-    // a TypeError here (ADR 0012 as amended); "shivering" is not read.
+    // point it reads it
+    // (`.scratch/v2-models/wave-2/research/jos3/up_errors.py`), a TypeError
+    // here (ADR 0012 as amended); "shivering" is not read.
     test.each<[string, boolean, string | null]>([
       ["ava_zero", true, "'ava_zero'"],
       ["shivering_threshold", true, "'shivering_threshold'"],
@@ -1659,11 +1660,11 @@ describe("jos3 beyond upstream's tests", () => {
 
     // Upstream raises a TypeError (numpy's UFuncTypeError for a string and
     // an int dtime) or, for [0.01] with an int dtime, numpy's ValueError
-    // (up_errors.py); wave 2 D7 (c) throws a TypeError for every truthy value
-    // that is neither true nor a number, with Python's message for a float
-    // dtime, which upstream gives for dtime 60.5. An empty array or object is
-    // truthy in JavaScript (ADR 0001 as amended); upstream reads [] and {} as
-    // false and returns.
+    // (`.scratch/v2-models/wave-2/research/jos3/up_errors.py`); wave 2 D7 (c)
+    // throws a TypeError for every truthy value that is neither true nor a
+    // number, with Python's message for a float dtime, which upstream gives
+    // for dtime 60.5. An empty array or object is truthy in JavaScript
+    // (ADR 0001 as amended); upstream reads [] and {} as false and returns.
     test.each([
       ["0.01", "can't multiply sequence by non-int of type 'float'"],
       [{ a: 1 }, "unsupported operand type(s) for *: 'dict' and 'float'"],
@@ -1694,7 +1695,7 @@ describe("jos3 beyond upstream's tests", () => {
     // numpy's IndexError for an index past the end, a RangeError here
     // (ADR 0012 as amended), with numpy's message; an array longer than 85
     // fails numpy's broadcasting with a ValueError, an Error here
-    // (up_errors.py).
+    // (`.scratch/v2-models/wave-2/research/jos3/up_errors.py`).
     type BodyGetter =
       | "t_skin"
       | "t_core"
@@ -1773,8 +1774,8 @@ describe("jos3 beyond upstream's tests", () => {
     });
 
     // pythermalcomfort 4.6.2's AttributeError from inp.copy(), a TypeError
-    // here (ADR 0012), with Python's type names (up_tbody_msg.py in the
-    // ticket 25 batch-1 scratchpad).
+    // here (ADR 0012), with Python's type names
+    // (`.scratch/v2-models/wave-2/research/jos3/up_tbody_msg.py`).
     test.each([
       ["x", "'str' object has no attribute 'copy'"],
       [5, "'int' object has no attribute 'copy'"],

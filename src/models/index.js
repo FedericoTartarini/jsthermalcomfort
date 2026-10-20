@@ -35,7 +35,7 @@ import {
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO, UTCI_STRESS_CATEGORY_BINS } from "./utci.ts";
 import { pet_steady } from "./pet_steady.js";
-import { JOS3 } from "./JOS3.js";
+import { JOS3 } from "./jos3.ts";
 import {
   PMV_CATEGORY_BINS_ISO_7730_2005,
   PMV_CATEGORY_BINS_ISO_7730_2025,
@@ -72,6 +72,7 @@ export {
   humidex,
   HUMIDEX_DISCOMFORT_BINS,
   HUMIDEX_INFO,
+  JOS3,
   net,
   phs,
   PHS_INFO,

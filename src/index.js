@@ -1,6 +1,7 @@
 export * from "./utilities/index.js";
 export * from "./psychrometrics/index.js";
 export * from "./models/index.js";
+export { default as jos3_functions } from "./jos3_functions/index.ts";
 
 // Re-export only the types from modelDocs; deepFreeze is @internal and not exported
 /**
@@ -59,6 +60,18 @@ export * from "./models/index.js";
  */
 /**
  * @typedef {import("./models/humidex.js").HumidexResult} HumidexResult
+ */
+/**
+ * @typedef {import("./models/jos3.js").JOS3Params} JOS3Params
+ */
+/**
+ * @typedef {import("./models/jos3.js").JOS3Output} JOS3Output
+ */
+/**
+ * @typedef {import("./models/jos3.js").JOS3OutputSeries} JOS3OutputSeries
+ */
+/**
+ * @typedef {import("./jos3_functions/_body_parts.js").JOS3BodyParts} JOS3BodyParts
  */
 /**
  * @typedef {import("./models/phs.js").PhsParams} PhsParams
@@ -139,5 +152,6 @@ export * from "./models/index.js";
 import utilities from "./utilities/index.js";
 import psychrometrics from "./psychrometrics/index.js";
 import models from "./models/index.js";
+import jos3_functions from "./jos3_functions/index.ts";
 
-export default { utilities, psychrometrics, models };
+export default { utilities, psychrometrics, models, jos3_functions };

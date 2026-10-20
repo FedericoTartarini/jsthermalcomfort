@@ -1,5 +1,6 @@
 import { expect, describe, it } from "@jest/globals";
 import jsthermalcomfort, * as namedExports from "../src";
+import models, * as modelsNamed from "../src/models/index.js";
 
 describe("NPM Package", () => {
   it("should be an object", () => {
@@ -146,8 +147,44 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("use_fans_heatwaves");
   });
 
-  it("should have models.JOS3", () => {
+  // pythermalcomfort.models exports JOS3; it was only in the default export.
+  it("should have models.JOS3, also as a named export", () => {
     expect(jsthermalcomfort.models).toHaveProperty("JOS3");
+    expect(namedExports.JOS3).toBe(jsthermalcomfort.models.JOS3);
+  });
+
+  // #191: the named export block of src/models/index.js and its default
+  // object list the same models, so that none is in one and not the other,
+  // as JOS3 was in the default object only (07c7caf).
+  it("should export the same models by name as in the models' default object", () => {
+    const { default: _default, ...named } = modelsNamed;
+    expect(Object.keys(named).sort()).toEqual(Object.keys(models).sort());
+    for (const [name, value] of Object.entries(named)) {
+      expect(value).toBe(models[name]);
+    }
+  });
+
+  // jos3 D5: upstream's pythermalcomfort.jos3_functions, its four modules
+  // as namespaces.
+  it("should have jos3_functions with construction, matrix, parameters and thermoregulation", () => {
+    expect(namedExports.jos3_functions).toBe(jsthermalcomfort.jos3_functions);
+    for (const module of [
+      "construction",
+      "matrix",
+      "parameters",
+      "thermoregulation",
+    ]) {
+      expect(jsthermalcomfort.jos3_functions).toHaveProperty(module);
+    }
+    expect(jsthermalcomfort.jos3_functions.parameters).toHaveProperty(
+      "local_clo_typical_ensembles",
+    );
+    expect(jsthermalcomfort.jos3_functions.parameters).toHaveProperty(
+      "ALL_OUT_PARAMS",
+    );
+    expect(jsthermalcomfort.jos3_functions.thermoregulation).toHaveProperty(
+      "tetens",
+    );
   });
 
   it("should have utilities.body_surface_area", () => {

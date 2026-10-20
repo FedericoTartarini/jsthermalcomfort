@@ -131,4 +131,23 @@ describe("t_o", () => {
       /^Unknown standard "JORDAN"\./,
     );
   });
+
+  // Upstream calls standard.lower() on what it is given
+  // (pythermalcomfort/environment/operative_tmp.py:38 at v4.6.2), so
+  // operative_tmp(25, 25, 0.1, standard=None), 5, 1.5, True, ["iso"] and
+  // {"a": 1} raise AttributeError in pythermalcomfort 4.6.2, which ADR 0012
+  // maps to a TypeError when a wrong type raises it.
+  it.each([null, 5, 1.5, true, ["7730-2025"], { a: 1 }])(
+    "throws TypeError if standard is %p, not a string",
+    (standard) => {
+      expect(() => t_o(25, 25, 0.1, standard)).toThrow(TypeError);
+      expect(() => t_o(25, 25, 0.1, standard)).toThrow(
+        'Parameter "standard" must be a string',
+      );
+    },
+  );
+
+  it("takes the default standard only when standard is undefined", () => {
+    expect(t_o(25, 30, 0.1, undefined)).toBe(t_o(25, 30, 0.1));
+  });
 });

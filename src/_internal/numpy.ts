@@ -5,47 +5,33 @@
 // either and broadcast them; so do these, for a scalar or a length-1 array
 // against a longer array, as numpy broadcasting does.
 
+import dsumpw from "@stdlib/blas-ext-base-dsumpw";
+
 /** A scalar or a 1-D array, as upstream's `float | np.ndarray`. */
 export type NumOrArray = number | readonly number[];
 
 /**
  * `np.sum` of a 1-D float64 array: numpy's pairwise summation,
  * `DOUBLE_pairwise_sum` in `numpy/_core/src/umath/loops_utils.h.src:81-145`
- * at numpy v2.5.4. Below 8 values it adds them in order, starting from -0.0;
- * up to 128 it keeps 8 accumulators and adds the rest in order; above that
- * it splits the array in two at a multiple of 8. A left-to-right sum differs
- * from it on 63 % of random 17-element arrays, and on the 17 standard local
- * body surface areas it gives 1.8680000000000005 where numpy gives 1.868
- * (`sumorder.py` in the ticket 25 scratchpad). The reduction adds the
- * pairwise sum to add's identity, 0.0, so a sum of negative zeros is 0.0
- * (numpy 2.5.4 gives 0.0 for 1, 2, 3, 7, 8, 9, 16, 17 and 200 of them).
+ * at numpy v2.5.4, which `@stdlib/blas-ext-base-dsumpw` 0.3.1 performs
+ * (ADR 0014): below 8 values it adds them in
+ * order; up to 128 it keeps 8 accumulators and adds the rest in order; above
+ * that it splits the array in two at a multiple of 8. A left-to-right sum
+ * differs from it on 63 % of random 17-element arrays, and on the 17
+ * standard local body surface areas it gives 1.8680000000000005 where numpy
+ * gives 1.868 (`sumorder.py` in the ticket 25 scratchpad).
+ *
+ * The `0 +` is numpy's: the reduction adds the pairwise sum to add's
+ * identity, 0.0, so a sum of negative zeros is 0.0 (numpy 2.5.4 gives 0.0
+ * for 1, 2, 3, 7, 8, 9, 16, 17 and 200 of them), where `dsumpw` alone
+ * returns -0.0. The values go in as a `Float64Array`, the type `dsumpw`
+ * declares, which is numpy's float64.
  *
  * @param {readonly number[]} a - the values
  * @returns {number} their sum
  */
 export function np_sum(a: readonly number[]): number {
-  return 0 + pairwise(a, 0, a.length);
-}
-
-function pairwise(a: readonly number[], start: number, n: number): number {
-  if (n < 8) {
-    let res = -0.0;
-    for (let i = 0; i < n; i++) res += a[start + i];
-    return res;
-  }
-  if (n <= 128) {
-    const r = a.slice(start, start + 8);
-    let i = 8;
-    for (; i < n - (n % 8); i += 8) {
-      for (let j = 0; j < 8; j++) r[j] += a[start + i + j];
-    }
-    let res = r[0] + r[1] + (r[2] + r[3]) + (r[4] + r[5] + (r[6] + r[7]));
-    for (; i < n; i++) res += a[start + i];
-    return res;
-  }
-  let n2 = Math.floor(n / 2);
-  n2 -= n2 % 8;
-  return pairwise(a, start, n2) + pairwise(a, start + n2, n - n2);
+  return 0 + dsumpw(a.length, Float64Array.from(a), 1);
 }
 
 /**

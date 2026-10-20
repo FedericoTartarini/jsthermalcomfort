@@ -364,7 +364,7 @@ describe("ankle_draft beyond upstream's tests", () => {
     });
   });
 
-  // Upstream's pmv_ppd_ashrae raises a UserWarning when the cooling effect
+  // Upstream's pmv_ppd_ashrae warns with a UserWarning when the cooling effect
   // cannot be calculated, and ankle_draft passes it on; here it is a console
   // message, behind suppress_warnings (ADR 0001).
   describe("suppress_warnings", () => {
@@ -403,8 +403,8 @@ describe("ankle_draft beyond upstream's tests", () => {
   });
 
   describe("errors", () => {
-    // Upstream raises when every v_limited is out of [0, 0.2], so a negative
-    // vr raises too.
+    // Upstream raises when every v_limited is NaN once masked to [0, 0.2],
+    // so a negative vr raises too.
     test.each([-0.01, 0.20001, 2.5])("vr %p throws a RangeError", (vr) => {
       expect(() => ankle_draft({ ...base, vr })).toThrow(
         new RangeError(VR_MESSAGE),

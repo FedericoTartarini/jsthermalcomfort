@@ -87,8 +87,12 @@ export const ANKLE_DRAFT_INFO: ModelInfo = deepFreeze({
   },
 });
 
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three). limit_inputs is validated, as upstream
+// A non-finite number throws a TypeError here (ADR 0001, reason three).
+// Upstream returns NaN or a number for one, except that it raises
+// StopIteration where the cooling effect runs (vr above 0.1 m/s) or vr is
+// +inf, and its ValueError below for a NaN or -inf vr under limit_inputs. A
+// boolean quantity, which upstream reads as 0 or 1, throws a TypeError too:
+// quantities are numbers (ADR 0005). limit_inputs is validated, as upstream
 // gives it to AnkleDraftInputs (ankle_draft.py:96-106).
 const ANKLE_DRAFT_SCHEMA = {
   tdb: { type: "number" },
@@ -232,8 +236,9 @@ export function ankle_draft(params: AnkleDraftParams): AnkleDraftResult {
     v_limited: vr,
   });
   if (limit_inputs) {
-    // Upstream raises when every v_limited is outside its bound, which for a
-    // scalar is whenever it is.
+    // Upstream raises when every v_limited is NaN once masked
+    // (ankle_draft.py:151), which for one finite vr is whenever it is outside
+    // its bound.
     if (warnings.some((row) => row.key === "v_limited")) {
       throw new RangeError(
         "This equation is only applicable for air speed lower than 0.2 m/s",

@@ -987,6 +987,9 @@ describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
       clo: 1.6,
       v_ankle: 0.1,
       limit_inputs: false,
+      // The cooling effect cannot be calculated here; its console message is
+      // not what this test checks.
+      suppress_warnings: true,
     });
     const expected = [
       ["tdb", ANKLE_DRAFT_INFO.inputs.tdb.applicability],

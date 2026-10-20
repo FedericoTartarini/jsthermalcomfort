@@ -1,18 +1,22 @@
 import { round, validateInputs, Standard } from "../utilities/utilities.js";
 import { pmv_ppd_iso } from "./pmv_ppd_iso.ts";
 import { _check_params_object, _upper_units } from "../_internal/validation.ts";
+import type { ApplicabilityWarning } from "./modelDocs.ts";
 
 // Renamed from EPmvResult to <Model>Result, the name every converted model's
 // result has. A type alias, as the JSDoc typedef it replaces emitted, so the
-// result stays assignable to Record<string, unknown>. The field and its text
-// are upstream's EPMV (pythermalcomfort/classes_return.py:271-281 at v4.6.2).
+// result stays assignable to Record<string, unknown>. e_pmv and its text
+// are upstream's EPMV (pythermalcomfort/classes_return.py:271-281 at v4.6.2);
+// warnings stands in for upstream's UserWarnings (ADR 0001 as amended).
 /**
  * @typedef {Object} PmvEResult
  * @property {number} e_pmv - Adjusted Predicted Mean Votes with Expectancy Factor.
+ * @property { ApplicabilityWarning[] } warnings - Applicability bounds either `pmv_ppd_iso` call broke, whatever `limit_inputs` is, each row once; the row of a `met` adjusted for a positive PMV has role `derived`; see `ApplicabilityWarning`.
  * @public
  */
 export type PmvEResult = {
   e_pmv: number;
+  readonly warnings: ApplicabilityWarning[];
 };
 
 /**
@@ -34,10 +38,13 @@ export interface PmvEParams {
 }
 
 // A non-finite number throws a TypeError here (ADR 0001, reason three), where
-// upstream returns NaN for a non-finite quantity, and inf or -inf for an
-// infinite e_coefficient. A boolean quantity, which upstream reads as 0 or 1,
-// and an array, which upstream broadcasts for every quantity but
-// e_coefficient, throw a TypeError too: quantities are numbers (ADR 0005).
+// upstream returns a result for each: NaN for most, but inf, -inf or NaN for
+// an infinite e_coefficient, and with limit_inputs False a number for a NaN
+// or -inf vr and -inf for a -inf rh (pythermalcomfort 4.6.2, at each of 144
+// combinations of tdb, tr, vr, rh, met and clo). A boolean quantity, which
+// upstream reads as 0 or 1, and an array, which upstream broadcasts for every
+// quantity but e_coefficient, throw a TypeError too: quantities are numbers
+// (ADR 0005).
 // Upstream raises a TypeError for a None quantity, as this does for null.
 // Upstream's EPMVInputs checks the quantities and units
 // (pmv_e.py:109-119 at v4.6.2); limit_inputs is checked by pmv_ppd_iso, which
@@ -58,6 +65,9 @@ const PMV_E_SCHEMA = {
 // ADR 0013. Upstream's docstring gives the ISO 7730 limits as strict
 // ("10 < tdb [°C] < 30", pmv_e.py:75-77 at v4.6.2); pmv_ppd_iso's bounds are
 // inclusive (pmv_ppd_iso.py:185-191; _valid_range, _internal/validation.py:47).
+// Its limit_inputs text says that with False the function "returns pmv and
+// ppd values" (pmv_e.py:71-73), the text of pmv_ppd_iso's limit_inputs;
+// pmv_e returns only e_pmv (pmv_e.py:147-149; EPMV, classes_return.py:271-281).
 /**
  * Returns Adjusted Predicted Mean Votes with Expectancy Factor (ePMV). This index
  * was developed by Fanger, P. O. et al. (2002). In non-air- conditioned buildings in
@@ -97,13 +107,13 @@ const PMV_E_SCHEMA = {
  * @param {'SI'|'IP'} [params.units='SI'] - Select the SI (International System of Units) or the IP (Imperial Units) system.
  *   Supported values are 'SI' and 'IP'. Defaults to 'SI'.
  * @param {boolean} [params.limit_inputs=true] - By default, if the inputs are outside the standard applicability limits the
- *   function returns nan. If False, returns pmv and ppd values even if input values are
+ *   function returns nan. If False, returns `e_pmv` even if input values are
  *   outside the applicability limits of the model. Defaults to True.
  *
  *   Note: The ISO 7730-2005 {@link #ref_2|[2]} and ISO 7730-2025 limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
  *   0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, and -2 <= PMV <= 2.
  *
- * @returns {PmvEResult} the Adjusted Predicted Mean Votes with Expectancy Factor, in `e_pmv`.
+ * @returns {PmvEResult} the Adjusted Predicted Mean Votes with Expectancy Factor, in `e_pmv`, and the applicability bounds the call broke.
  *
  * @example
  * const tdb = 28;
@@ -148,7 +158,7 @@ export function pmv_e(params: PmvEParams): PmvEResult {
   // limit_inputs only (pmv_e.py:121-145), so its pmv is rounded to 2 decimal
   // places (round_output's default, pmv_ppd_iso.py:205-206) before met is
   // adjusted.
-  const iso_pmv = (met: number) =>
+  const iso = (met: number) =>
     pmv_ppd_iso({
       tdb,
       tr,
@@ -160,13 +170,40 @@ export function pmv_e(params: PmvEParams): PmvEResult {
       standard: Standard.iso_7730_2025,
       units,
       limit_inputs,
-    }).pmv;
+    });
 
-  let pmv = iso_pmv(params.met);
+  const first = iso(params.met);
   // np.where(_pmv > 0, ...) (pmv_e.py:134): a NaN pmv leaves met as it is.
-  const met = pmv > 0 ? params.met * (1 + pmv * -0.067) : params.met;
-  pmv = iso_pmv(met);
+  const adjusted = first.pmv > 0;
+  const met = adjusted ? params.met * (1 + first.pmv * -0.067) : params.met;
+  const second = iso(met);
+
+  // Upstream passes on both calls' UserWarnings, so a bound both calls break
+  // is warned twice. Python's "default" warnings filter shows a repeat once,
+  // and JavaScript has no filter (ADR 0001), so the rows are both calls',
+  // exact duplicates dropped, in first-seen order (decisions.md D4, wave 2).
+  // An adjusted met is computed from the inputs, so its row is `derived`
+  // (ApplicabilityWarning in modelDocs.ts), where pmv_ppd_iso, given it as
+  // its met, calls it `input`.
+  const warnings: ApplicabilityWarning[] = [];
+  const second_rows = second.warnings.map((row) =>
+    adjusted && row.key === "met" ? { ...row, role: "derived" as const } : row,
+  );
+  for (const row of [...first.warnings, ...second_rows]) {
+    if (!warnings.some((seen) => same_row(seen, row))) warnings.push(row);
+  }
+  const pmv = second.pmv;
 
   // np.around(_pmv * e_coefficient, 2) (pmv_e.py:147): round is half to even.
-  return { e_pmv: round(pmv * e_coefficient, 2) };
+  return { e_pmv: round(pmv * e_coefficient, 2), warnings };
+}
+
+function same_row(a: ApplicabilityWarning, b: ApplicabilityWarning): boolean {
+  return (
+    a.key === b.key &&
+    a.role === b.role &&
+    Object.is(a.value, b.value) &&
+    Object.is(a.bound.min, b.bound.min) &&
+    Object.is(a.bound.max, b.bound.max)
+  );
 }

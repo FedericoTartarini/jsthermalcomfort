@@ -137,6 +137,125 @@ describe("pmv_e beyond upstream's tests", () => {
     },
   );
 
+  // D4 (.scratch/v2-models/wave-2/decisions.md): pmv_e returns the rows of
+  // both pmv_ppd_iso calls, exact duplicates dropped, in first-seen order.
+  // Each expected row is the UserWarning upstream's pmv_ppd_iso emits for
+  // that call's inputs under limit_inputs True, with the second call's met
+  // upstream's adjusted met (pmv_e.py:121-145 at v4.6.2).
+  describe("warnings rows", () => {
+    test("a bound both calls break is one row, as upstream's default warnings filter shows it once", () => {
+      // Upstream warns "'tdb' has value 31.0 outside the applicability
+      // limits [10.0, 30.0]" once per call, so twice.
+      expect(pmv_e({ ...base, tdb: 31 })).toEqual({
+        e_pmv: NaN,
+        warnings: [
+          { key: "tdb", role: "input", value: 31, bound: { min: 10, max: 30 } },
+        ],
+      });
+    });
+
+    test("an adjusted met below 0.8 is a derived row", () => {
+      // The first pmv is 1.55, so met 0.85 becomes 0.7617275
+      // (pmv_e.py:134), and upstream warns "'met' has value 0.7617275
+      // outside the applicability limits [0.8, 4.0]" from the second call.
+      expect(
+        pmv_e({
+          tdb: 29,
+          tr: 29,
+          vr: 0.1,
+          rh: 50,
+          met: 0.85,
+          clo: 1.5,
+          e_coefficient: 0.6,
+        }),
+      ).toEqual({
+        e_pmv: NaN,
+        warnings: [
+          {
+            key: "met",
+            role: "derived",
+            value: 0.7617275,
+            bound: { min: 0.8, max: 4 },
+          },
+        ],
+      });
+    });
+
+    test("inside every bound there are no rows", () => {
+      expect(pmv_e(base)).toEqual({ e_pmv: 0.29, warnings: [] });
+    });
+
+    // Upstream warns nothing with limit_inputs False (its range checks run
+    // only under limit_inputs, pmv_ppd_iso.py:181-191); the rows say what
+    // e_pmv was computed despite, as every model's rows do.
+    test("with limit_inputs false, the first call's rows come first, then the second call's new ones", () => {
+      // The first pmv is 1.86, so met 0.85 becomes 0.744073; tdb 31 is out
+      // of bounds in both calls.
+      expect(
+        pmv_e({
+          tdb: 31,
+          tr: 29,
+          vr: 0.1,
+          rh: 50,
+          met: 0.85,
+          clo: 1.5,
+          e_coefficient: 0.6,
+          limit_inputs: false,
+        }),
+      ).toEqual({
+        e_pmv: 0.94,
+        warnings: [
+          { key: "tdb", role: "input", value: 31, bound: { min: 10, max: 30 } },
+          {
+            key: "met",
+            role: "derived",
+            value: 0.744073,
+            bound: { min: 0.8, max: 4 },
+          },
+        ],
+      });
+    });
+
+    test("with limit_inputs false, two calls' pmv above 2 are two rows, told apart by value", () => {
+      // The first pmv is 2.323863160308001 unrounded (2.32 rounded), so met
+      // 0.85 becomes 0.717876, and the second pmv is 2.045025099778569.
+      expect(
+        pmv_e({
+          tdb: 29,
+          tr: 35,
+          vr: 0.1,
+          rh: 50,
+          met: 0.85,
+          clo: 1.5,
+          e_coefficient: 0.6,
+          limit_inputs: false,
+        }),
+      ).toEqual({
+        e_pmv: 1.23,
+        warnings: [
+          {
+            key: "pmv",
+            role: "output",
+            value: 2.323863160308001,
+            bound: { min: -2, max: 2 },
+          },
+          {
+            key: "met",
+            role: "derived",
+            value: 0.717876,
+            bound: { min: 0.8, max: 4 },
+          },
+          {
+            key: "pmv",
+            role: "output",
+            value: 2.045025099778569,
+            bound: { min: -2, max: 2 },
+          },
+        ],
+      });
+    });
+  });
+
   test.each(["IP", "ip"])("units %p converts the inputs", (units) => {
     expect(
       pmv_e({

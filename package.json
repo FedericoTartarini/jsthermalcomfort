@@ -10,9 +10,8 @@
   "types": "./lib/esm/types/index.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "build": "npm run clean && npm run build:esm",
     "build:esm": "tsc -p ./configs/tsconfig.esm.json",
-    "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "docs": "npx documentation build ./src/index.js -f html --github --config documentation.yml -a public --theme ./docs_theme/index.js -o docs",
     "format": "npx prettier . --write",

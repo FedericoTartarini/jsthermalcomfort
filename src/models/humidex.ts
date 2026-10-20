@@ -49,6 +49,8 @@ export interface HumidexParams {
  * - humidex > 54: "Heat stroke probable"
  *
  * Upstream sets the category with masks, not bins, and `humidex` keeps them.
+ * These bins are a consumer-needed addition (ADR 0001): the app draws the
+ * humidex's discomfort bands from them.
  * The top edge is Infinity, not a finite value as in
  * `HEAT_INDEX_STRESS_CATEGORY_BINS`, because upstream gives every humidex
  * above 54 "Heat stroke probable". The bins give NaN for a NaN or +Infinity

@@ -265,8 +265,8 @@ describe("solar_gain (JS-only)", () => {
 
   // Upstream calls posture.lower() on what it is given
   // (pythermalcomfort/models/solar_gain.py:207 at v4.6.2), so None or a
-  // number raises AttributeError, a wrong type, which throws a TypeError as
-  // ADR 0012 maps Python's TypeError. Only undefined takes the default.
+  // number raises AttributeError, which ADR 0012 maps to a TypeError when a
+  // wrong type raises it. Only undefined takes the default.
   test("throws TypeError if posture is null or not a string", () => {
     for (const bad of [null, 5]) {
       // Cast: deliberately passing a non-string posture to test the TypeError.

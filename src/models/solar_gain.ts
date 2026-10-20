@@ -285,9 +285,8 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   _valid_range(warnings, "asw", "input", asw, SOLAR_GAIN_LIMITS.asw);
 
   // Upstream calls posture.lower() on what it is given (solar_gain.py:207 at
-  // v4.6.2), so None or a number raises AttributeError. ADR 0012's table does
-  // not list AttributeError; it is a wrong type, which throws a TypeError, as
-  // ADR 0012 maps Python's TypeError. Only undefined takes the default.
+  // v4.6.2), so None or a number raises AttributeError, which ADR 0012 maps to
+  // a TypeError when a wrong type raises it. Only undefined takes the default.
   const { posture: posture_given = "sitting" } = params;
   if (typeof posture_given !== "string") {
     throw new TypeError('Parameter "posture" must be a string');

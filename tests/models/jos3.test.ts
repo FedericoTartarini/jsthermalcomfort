@@ -1615,6 +1615,133 @@ describe("jos3 beyond upstream's tests", () => {
       expect(() => model.simulate(1, NaN)).toThrow(TypeError);
     });
 
+    // pythermalcomfort 4.6.2 raises CPython's OverflowError from
+    // timedelta(0, dtime), or from adding it to the elapsed time, before the
+    // step runs (models/jos3.py:706); a RangeError here (ADR 0012 as amended,
+    // wave 2 D24), with upstream's message, and the steps before it kept.
+    // Expected: `.scratch/v2-models/wave-2/research/jos3/up_overflow_d24.py`.
+    test.each<[number, number, string, number, number]>([
+      [1, 8.64e13, "days=1000000000; must have magnitude <= 999999999", 1, 0],
+      [
+        1,
+        86400000086400.0,
+        "days=1000000001; must have magnitude <= 999999999",
+        1,
+        0,
+      ],
+      [1, 1e14, "days=1157407407; must have magnitude <= 999999999", 1, 0],
+      [10, 1e13, "days=1041666666; must have magnitude <= 999999999", 9, 8e13],
+      [1, -1e14, "days=-1157407408; must have magnitude <= 999999999", 1, 0],
+      [
+        1,
+        -86399999913600.5,
+        "days=-1000000000; must have magnitude <= 999999999",
+        1,
+        0,
+      ],
+      [1, -8.64e13, "days=-1000000000; must have magnitude <= 999999999", 1, 0],
+      [1, 1.8e14, "days=2083333333; must have magnitude <= 999999999", 1, 0],
+      [
+        1,
+        185542587187199.97,
+        "days=2147483647; must have magnitude <= 999999999",
+        1,
+        0,
+      ],
+      [1, 185542587187200.0, "Python int too large to convert to C int", 1, 0],
+      [
+        1,
+        -185542587187200.0,
+        "days=-2147483648; must have magnitude <= 999999999",
+        1,
+        0,
+      ],
+      [1, -185542587187200.5, "Python int too large to convert to C int", 1, 0],
+      [1, 1.86e14, "Python int too large to convert to C int", 1, 0],
+      [1, -1.86e14, "Python int too large to convert to C int", 1, 0],
+      [1, 1e300, "Python int too large to convert to C int", 1, 0],
+      [1, -1e300, "Python int too large to convert to C int", 1, 0],
+      [2, 5e13, "days=1157407407; must have magnitude <= 999999999", 2, 5e13],
+      [
+        2,
+        -5e13,
+        "days=-1157407408; must have magnitude <= 999999999",
+        2,
+        -5e13,
+      ],
+      [3, 4e13, "days=1388888888; must have magnitude <= 999999999", 3, 8e13],
+    ])(
+      "simulate(%i, %p) throws upstream's OverflowError %p as a RangeError, keeping %i recorded rows up to %p s",
+      (times, dtime, message, rows, last) => {
+        const model = new JOS3();
+        expect_throw(() => model.simulate(times, dtime), RangeError, message);
+        const { simulation_time } = model.results();
+        expect(simulation_time).toHaveLength(rows);
+        expect(simulation_time.at(-1)).toBe(last);
+      },
+    );
+
+    // 999999999 days and 86399.98 s, and -999999999 days: inside upstream's
+    // timedelta range (up_overflow_d24.py).
+    test.each<[number, number, number, number]>([
+      [1, 86399999999999.98, 2, 86399999999999.98],
+      [1, -86399999913600.0, 2, -86399999913600.0],
+      [2, 9100000000.5, 3, 18200000001.0],
+    ])(
+      "simulate(%i, %p) inside upstream's timedelta range runs, as upstream returns",
+      (times, dtime, rows, last) => {
+        const model = new JOS3();
+        model.simulate(times, dtime);
+        const { simulation_time } = model.results();
+        expect(simulation_time).toHaveLength(rows);
+        expect(simulation_time.at(-1)).toBe(last);
+      },
+    );
+
+    // The second call's own timedelta(0, dtime) is checked first, then the
+    // elapsed time after adding it (up_overflow_d24.py).
+    test.each<[number, number, string]>([
+      [8e13, 8e13, "days=1851851851; must have magnitude <= 999999999"],
+      [8e13, 1e14, "days=1157407407; must have magnitude <= 999999999"],
+      [8e13, 6.4e12, "days=1000000000; must have magnitude <= 999999999"],
+      [-8e13, -6.4e12, "days=-1000000000; must have magnitude <= 999999999"],
+    ])(
+      "simulate(1, %p) then simulate(1, %p) throws upstream's OverflowError %p as a RangeError, keeping the first step",
+      (first, second, message) => {
+        const model = new JOS3();
+        model.simulate(1, first);
+        expect_throw(() => model.simulate(1, second), RangeError, message);
+        expect(model.results().simulation_time).toEqual([0, first]);
+      },
+    );
+
+    test.each<[number, number, number]>([
+      [8e13, 6.399999999999e12, 86399999999999.0],
+      [8e13, -8.6e13, -6e12],
+      [-8e13, -6.3999999136e12, -86399999913600.0],
+    ])(
+      "simulate(1, %p) then simulate(1, %p) runs to %p s, as upstream returns",
+      (first, second, last) => {
+        const model = new JOS3();
+        model.simulate(1, first);
+        model.simulate(1, second);
+        expect(model.results().simulation_time).toEqual([0, first, last]);
+      },
+    );
+
+    test("after upstream's OverflowError, a later simulate runs on from the elapsed time before it", () => {
+      const model = new JOS3();
+      expect_throw(
+        () => model.simulate(10, 1e13),
+        RangeError,
+        "days=1041666666; must have magnitude <= 999999999",
+      );
+      model.simulate(1, 60);
+      const { simulation_time } = model.results();
+      expect(simulation_time).toHaveLength(10);
+      expect(simulation_time.at(-1)).toBe(80000000000060.0);
+    });
+
     // pythermalcomfort 4.6.2 raises a KeyError for each missing key at the
     // point it reads it
     // (`.scratch/v2-models/wave-2/research/jos3/up_errors.py`), a TypeError

@@ -302,6 +302,35 @@ function timedelta_us(seconds: number): bigint {
   return us + BigInt(whole);
 }
 
+const US_PER_DAY = 86400000000n;
+
+/**
+ * CPython's range checks on a timedelta of `us` microseconds, which raise an
+ * OverflowError, a RangeError here (ADR 0012 as amended, wave 2 D24), with
+ * CPython's message. The days are the floor quotient of the microseconds
+ * (`microseconds_to_delta_ex`, `Modules/_datetimemodule.c:1925-1977` at
+ * CPython v3.12.12); days outside a C int fail `_PyLong_AsInt` (`:1969`), and
+ * days beyond 999,999,999 in magnitude fail `check_delta_day_range`
+ * (`MAX_DELTA_DAYS`, `:71`; `:436-444`). The days of the sum of two
+ * timedeltas (`delta_add`, `:2155-2168`) stay within a C int (the comments
+ * at `:66-70` and `:2161-2162`). Python 3.12 gives these messages for the
+ * cases in
+ * `.scratch/v2-models/wave-2/research/jos3/up_overflow_d24.py`.
+ *
+ * @param {bigint} us - the microseconds
+ * @throws {RangeError} If the days are outside ±999,999,999.
+ */
+function check_delta_range(us: bigint): void {
+  let days = us / US_PER_DAY; // truncates toward zero
+  if (us % US_PER_DAY < 0n) days -= 1n;
+  if (days < -(2n ** 31n) || days > 2n ** 31n - 1n) {
+    throw new RangeError("Python int too large to convert to C int");
+  }
+  if (days < -999999999n || days > 999999999n) {
+    throw new RangeError(`days=${days}; must have magnitude <= 999999999`);
+  }
+}
+
 /**
  * `timedelta.total_seconds()`: the microseconds divided by 10**6 as Python
  * divides two integers (`delta_total_seconds`, `_datetimemodule.c:2720-2733`
@@ -731,7 +760,9 @@ export class JOS3 {
    * upstream raises a KeyError (ADR 0012 as amended), or its
    * `limit_dshiv/dt` is truthy and neither true nor a number.
    * @throws {RangeError} If t_body has fewer than NUM_NODES values, as numpy
-   * raises an IndexError (ADR 0012 as amended).
+   * raises an IndexError (ADR 0012 as amended); if dtime, or the elapsed time
+   * after adding it, is beyond ±999,999,999 days, as Python's timedelta
+   * raises an OverflowError (ADR 0012 as amended), before that step runs.
    * @throws {Error} If t_body has more than NUM_NODES values, as numpy's
    * broadcasting raises a ValueError.
    */
@@ -748,8 +779,16 @@ export class JOS3 {
     assertNumber(dtime, "dtime");
     // Loop through the simulation for the given number of times
     for (let i = 0; i < times; i++) {
-      // Increment the elapsed time by the time delta, timedelta(0, dtime)
-      this._time_us += timedelta_us(dtime);
+      // Increment the elapsed time by the time delta, timedelta(0, dtime).
+      // Each timedelta upstream builds, dtime's and then the sum, is range
+      // checked before the step runs, so a RangeError leaves the elapsed time
+      // and the recorded steps as they were, as upstream's OverflowError
+      // does (wave 2 D24).
+      const step_us = timedelta_us(dtime);
+      check_delta_range(step_us);
+      const time_us = this._time_us + step_us;
+      check_delta_range(time_us);
+      this._time_us = time_us;
 
       // Execute the simulation step
       const dict_data = this._run(dtime, false, output);

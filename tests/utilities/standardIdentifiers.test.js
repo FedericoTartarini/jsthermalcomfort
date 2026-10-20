@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import {
+  check_standard_compliance,
   is_iso_7730,
   LimitSet,
   Standard,
@@ -72,6 +73,15 @@ describe("LimitSet is separate from Standard", () => {
     expect(values).not.toContain("ASHRAE");
     expect(values).not.toContain("ANKLE_DRAFT");
     expect(values).not.toContain("FAN_HEATWAVES");
+  });
+
+  // pythermalcomfort v4.6.2 has no ankle-draft limit set (met <= 1.3,
+  // clo <= 0.7); ankle_draft checks the ASHRAE 55 limits only.
+  test("the ankle_draft limit set is gone", () => {
+    expect(LimitSet).not.toHaveProperty("ankle_draft");
+    expect(() =>
+      check_standard_compliance("ankle_draft", { met: 1.2 }),
+    ).toThrow('Unknown standard "ankle_draft"');
   });
 });
 

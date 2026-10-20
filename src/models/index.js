@@ -22,7 +22,7 @@ import { cooling_effect } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { a_pmv } from "./a_pmv.js";
-import { ankle_draft } from "./ankle_draft.js";
+import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
@@ -53,6 +53,7 @@ export {
   e_pmv,
   at,
   ankle_draft,
+  ANKLE_DRAFT_INFO,
   classifyFromBins,
   clo_tout,
   CLO_TOUT_INFO,
@@ -98,6 +99,7 @@ export default {
   e_pmv,
   at,
   ankle_draft,
+  ANKLE_DRAFT_INFO,
   classifyFromBins,
   clo_tout,
   CLO_TOUT_INFO,

@@ -25,6 +25,12 @@ export * from "./models/index.js";
  * @typedef {import("./models/adaptive_ashrae.js").AdaptiveAshraeResult} AdaptiveAshraeResult
  */
 /**
+ * @typedef {import("./models/ankle_draft.js").AnkleDraftParams} AnkleDraftParams
+ */
+/**
+ * @typedef {import("./models/ankle_draft.js").AnkleDraftResult} AnkleDraftResult
+ */
+/**
  * @typedef {import("./models/clo_tout.js").CloToutParams} CloToutParams
  */
 /**

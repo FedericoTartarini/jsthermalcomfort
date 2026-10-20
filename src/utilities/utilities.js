@@ -104,24 +104,18 @@ export const Standard = Object.freeze({
  * published standard, and the range over which one particular model has been
  * validated. pythermalcomfort keeps them apart and this now matches.
  *
- * The two are deliberately different shapes, because they are different in
- * pythermalcomfort:
+ * `use_fans_heatwaves` has **no parent**. Its limits are unrelated to ASHRAE
+ * 55 -- `tdb` 20-50 against 10-40, `v` 0.1-4.5 against 0-2, `met` 0.7-2
+ * against 1-4 -- and `use_fans_heatwaves.py` uses bare `valid_range` calls
+ * with no standard identifier at all.
  *
- * - `ankle_draft` inherits ASHRAE 55 and narrows it (`met` and `clo`), the same
- *   way `ankle_draft.py` calls `_check_ashrae55_compliance` and then applies
- *   extra checks.
- * - `use_fans_heatwaves` has **no parent**. Its limits are unrelated to ASHRAE
- *   55 -- `tdb` 20-50 against 10-40, `v` 0.1-4.5 against 0-2, `met` 0.7-2
- *   against 1-4 -- and `use_fans_heatwaves.py` uses bare `valid_range` calls
- *   with no standard identifier at all.
- *
- * Flattening these into one pattern would mean inventing a parent for
- * `use_fans_heatwaves` or losing the inheritance for `ankle_draft`.
+ * The `ankle_draft` set (met <= 1.3, clo <= 0.7) is removed: pythermalcomfort
+ * v4.6.2 has no such check, and `ankle_draft` applies only the ASHRAE 55
+ * limits (`ankle_draft.py:138-164`).
  *
  * @public
  */
 export const LimitSet = Object.freeze({
-  ankle_draft: "ankle_draft",
   use_fans_heatwaves: "use_fans_heatwaves",
 });
 
@@ -163,7 +157,7 @@ export const ISO_7730_LIMITS = Object.freeze({
  * ASHRAE 55 compliance limits for the PMV inputs, the numbers
  * `_ashrae_compliance` enforces. Each variable has `min` and `max` inclusive
  * bounds. Read by `_check_ashrae55_compliance` for the `warnings` rows of
- * `pmv_ppd_ashrae` and `adaptive_ashrae`; `_ashrae_compliance` keeps its
+ * the models that call it; `_ashrae_compliance` keeps its
  * own literals so `check_standard_compliance` stays as it was. ASHRAE 55 bounds neither vapour pressure nor the PMV output,
  * so unlike `ISO_7730_LIMITS` there is no `pa` or `pmv` entry.
  *
@@ -198,15 +192,13 @@ export function is_iso_7730(standard) {
 /**
  * Check that the values comply with the standard provided
  *
- * @param {"7730-2005"|"7730-2025"|"55-2023"|"7933-2004"|"7933-2023"|"ankle_draft"|"use_fans_heatwaves"} standard
+ * @param {"7730-2005"|"7730-2025"|"55-2023"|"7933-2004"|"7933-2023"|"use_fans_heatwaves"} standard
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted
  */
 export function check_standard_compliance(standard, kwargs) {
   switch (standard) {
-    case LimitSet.ankle_draft:
-      return _ankle_draft_compliance(kwargs);
     case Standard.ashrae_55_2023:
       return _ashrae_compliance(kwargs);
     case LimitSet.use_fans_heatwaves:
@@ -230,24 +222,6 @@ export function check_standard_compliance(standard, kwargs) {
           `-- use "7730-2025" and "55-2023".`,
       );
   }
-}
-
-/**
- * @param {ComplianceKwargs} kwargs
- *
- * @returns {string[]} strings with warnings emitted
- */
-function _ankle_draft_compliance(kwargs) {
-  /** @type {string[]} */
-  let warnings = [];
-  for (const [key, value] of Object.entries(kwargs)) {
-    if (value === undefined) continue;
-    if (key === "met" && value > 1.3)
-      warnings.push("The ankle draft model is only valid for met <= 1.3");
-    if (key === "clo" && value > 0.7)
-      warnings.push("The ankle draft model is only valid for clo <= 0.7");
-  }
-  return warnings;
 }
 
 /**

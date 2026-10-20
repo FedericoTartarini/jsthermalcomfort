@@ -12,6 +12,16 @@ const ASHRAE_55_AIRSPEED_NO_CONTROL = Object.freeze({
   cool: Object.freeze({ max: 0.2 }),
 });
 
+/**
+ * The bound of upstream's `v_limited` check, 0 to 0.2 m/s inclusive
+ * (`ashrae55.py:100-102`): the relative air speed below which the ankle-draft
+ * equation applies. Upstream checks it only for a caller that passes
+ * `v_limited`, so it is kept apart from `ASHRAE_55_LIMITS`.
+ * Frozen, and referenced by identity from the model info of a model that
+ * checks it. Not exported from the package root.
+ */
+export const ASHRAE_55_V_LIMITED = Object.freeze({ min: 0, max: 0.2 });
+
 /** An air speed the helper checks, in m/s, with the key its rows carry. */
 interface Ashrae55AirSpeed {
   value: number;
@@ -33,6 +43,7 @@ interface Ashrae55Params {
   met?: number;
   clo?: number;
   airspeed_control?: boolean;
+  v_limited?: number;
 }
 
 /**
@@ -55,6 +66,8 @@ interface Ashrae55Params {
  * Here they are two inputs, each with its own row key: the 0-2 m/s range row
  * reads `v_range`, and the no-control rules read `v_no_control`, both for the
  * three limits and for the operative temperature that chooses between them.
+ * `v_limited` is upstream's: an air speed checked against
+ * `ASHRAE_55_V_LIMITED`, with the row key upstream's warning names.
  * They are apart for the correction ADR 0004 records for `pmv_ppd_ashrae`,
  * which checks the no-control rules on the average air speed `v` and leaves
  * the range row on the relative air speed `vr`. Neither defaults to the
@@ -67,8 +80,8 @@ interface Ashrae55Params {
  * stood: it exempts at exactly 0.7 clo or 1.3 met and weighs to by ISO 7726.
  *
  * The rows come in upstream's order: tdb, tr, the range speed, the airspeed
- * rules, then met and clo. Upstream's `v_limited` branch is left out: no
- * caller here passes it.
+ * rules, met and clo, then `v_limited`. The `v_limited` row has the role
+ * `derived`: its key names no parameter of the model that checks it.
  *
  * Private: not exported from the package root.
  *
@@ -79,7 +92,7 @@ export function _check_ashrae55_compliance(
   warnings: ApplicabilityWarning[],
   params: Ashrae55Params,
 ): void {
-  const { tdb, tr, v_range, v_no_control, met, clo } = params;
+  const { tdb, tr, v_range, v_no_control, met, clo, v_limited } = params;
   const { airspeed_control = true } = params;
 
   _valid_range(warnings, "tdb", "input", tdb, ASHRAE_55_LIMITS.tdb);
@@ -130,5 +143,15 @@ export function _check_ashrae55_compliance(
   if (met !== undefined && clo !== undefined) {
     _valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met);
     _valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo);
+  }
+
+  if (v_limited !== undefined) {
+    _valid_range(
+      warnings,
+      "v_limited",
+      "derived",
+      v_limited,
+      ASHRAE_55_V_LIMITED,
+    );
   }
 }

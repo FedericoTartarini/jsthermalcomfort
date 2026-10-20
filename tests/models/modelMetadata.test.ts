@@ -2,6 +2,7 @@ import { describe, expect, test } from "@jest/globals";
 import * as pkg from "../../src/index.js";
 import {
   ADAPTIVE_ASHRAE_INFO,
+  ANKLE_DRAFT_INFO,
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
@@ -14,6 +15,7 @@ import {
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
+  ankle_draft,
   clo_tout,
   heat_index_rothfusz,
   pmv_ppd_ashrae,
@@ -22,6 +24,7 @@ import {
   utci,
 } from "../../src/index.js";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
+import { ASHRAE_55_V_LIMITED } from "../../src/_internal/ashrae55.ts";
 import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import { UTCI_LIMITS } from "../../src/models/utci.ts";
 import {
@@ -40,6 +43,7 @@ import type { ModelInfo } from "../../src/models/modelDocs.ts";
 // manually updated whenever a new *_INFO or *_BINS export is published.
 const expectedMetadataExports = [
   "ADAPTIVE_ASHRAE_INFO",
+  "ANKLE_DRAFT_INFO",
   "classifyFromBins",
   "CLO_TOUT_INFO",
   "HEAT_INDEX_ROTHFUSZ_INFO",
@@ -912,6 +916,142 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
     expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80)).toBe(
       true,
     );
+  });
+});
+
+describe("ANKLE_DRAFT_INFO — the ankle draft model's metadata", () => {
+  const base = {
+    tdb: 25,
+    tr: 25,
+    vr: 0.2,
+    rh: 50,
+    met: 1.2,
+    clo: 0.5,
+    v_ankle: 0.3,
+  };
+
+  test("labels the model and lists ASHRAE 55 as its only standard", () => {
+    expect(ANKLE_DRAFT_INFO.name).toBe("ankle_draft");
+    expect(ANKLE_DRAFT_INFO.label).toBe("Ankle draft");
+    expect(typeof ANKLE_DRAFT_INFO.description).toBe("string");
+    expect(ANKLE_DRAFT_INFO.standards).toEqual([Standard.ashrae_55_2023]);
+  });
+
+  test("inputs are ankle_draft's seven quantities, in SI units", () => {
+    expect(Object.keys(ANKLE_DRAFT_INFO.inputs)).toEqual([
+      "tdb",
+      "tr",
+      "vr",
+      "rh",
+      "met",
+      "clo",
+      "v_ankle",
+    ]);
+    // The same quantity has the same unit as in the PMV wrapper (ADR 0011).
+    for (const key of ["tdb", "tr", "vr", "rh", "met", "clo"]) {
+      expect(ANKLE_DRAFT_INFO.inputs[key].unit).toBe(
+        PMV_PPD_ASHRAE_INFO.inputs[key].unit,
+      );
+    }
+    expect(ANKLE_DRAFT_INFO.inputs.v_ankle).toEqual({ unit: "m/s" });
+  });
+
+  test("input bounds are the ASHRAE_55_LIMITS objects, not copies", () => {
+    for (const key of ["tdb", "tr", "vr", "met", "clo"] as const) {
+      expect(ANKLE_DRAFT_INFO.inputs[key].applicability).toBe(
+        ASHRAE_55_LIMITS[key],
+      );
+    }
+    expect(ANKLE_DRAFT_INFO.inputs.rh.applicability).toBeUndefined();
+  });
+
+  // Upstream's key for the equation's air-speed range (ashrae55.py:101 at
+  // v4.6.2); derived, as it names no parameter.
+  test("the v_limited row's key is a derived quantity in m/s, bound by ASHRAE_55_V_LIMITED", () => {
+    expect(Object.keys(ANKLE_DRAFT_INFO.derived!)).toEqual(["v_limited"]);
+    expect(ANKLE_DRAFT_INFO.derived!.v_limited.unit).toBe("m/s");
+    expect(ANKLE_DRAFT_INFO.derived!.v_limited.applicability).toBe(
+      ASHRAE_55_V_LIMITED,
+    );
+    expect(ASHRAE_55_V_LIMITED).toEqual({ min: 0, max: 0.2 });
+    expect(Object.isFrozen(ASHRAE_55_V_LIMITED)).toBe(true);
+  });
+
+  test("ankle_draft's warnings rows carry the bounds INFO references, keyed as INFO keys them", () => {
+    const { warnings } = ankle_draft({
+      tdb: 45,
+      tr: 5,
+      vr: 2.5,
+      rh: 50,
+      met: 0.5,
+      clo: 1.6,
+      v_ankle: 0.1,
+      limit_inputs: false,
+    });
+    const expected = [
+      ["tdb", ANKLE_DRAFT_INFO.inputs.tdb.applicability],
+      ["tr", ANKLE_DRAFT_INFO.inputs.tr.applicability],
+      ["vr", ANKLE_DRAFT_INFO.inputs.vr.applicability],
+      ["met", ANKLE_DRAFT_INFO.inputs.met.applicability],
+      ["clo", ANKLE_DRAFT_INFO.inputs.clo.applicability],
+      ["v_limited", ANKLE_DRAFT_INFO.derived!.v_limited.applicability],
+    ];
+    expect(warnings).toHaveLength(expected.length);
+    warnings.forEach((w, i) => {
+      expect(w.key).toBe(expected[i][0]);
+      expect(w.bound).toBe(expected[i][1]);
+    });
+  });
+
+  test("the published bounds are the ones ankle_draft gates on, inclusive at both ends", () => {
+    // At some edges the cooling effect cannot be calculated; its console
+    // message is not what this test checks.
+    const ppd_ad = (input: Partial<typeof base>) =>
+      ankle_draft({ ...base, ...input, suppress_warnings: true }).ppd_ad;
+    for (const key of ["tdb", "tr", "met", "clo"] as const) {
+      const { min, max } = ANKLE_DRAFT_INFO.inputs[key].applicability as {
+        min: number;
+        max: number;
+      };
+      expect(Number.isFinite(ppd_ad({ [key]: min }))).toBe(true);
+      expect(ppd_ad({ [key]: min - 0.01 })).toBeNaN();
+      expect(Number.isFinite(ppd_ad({ [key]: max }))).toBe(true);
+      expect(ppd_ad({ [key]: max + 0.01 })).toBeNaN();
+    }
+    // vr outside v_limited's bound throws under limit_inputs, so its edges
+    // are a number and a throw.
+    const { min, max } = ANKLE_DRAFT_INFO.derived!.v_limited.applicability as {
+      min: number;
+      max: number;
+    };
+    expect(Number.isFinite(ppd_ad({ vr: min }))).toBe(true);
+    expect(Number.isFinite(ppd_ad({ vr: max }))).toBe(true);
+    expect(() => ppd_ad({ vr: min - 0.01 })).toThrow(RangeError);
+    expect(() => ppd_ad({ vr: max + 0.01 })).toThrow(RangeError);
+  });
+
+  test("ankle_draft output keys match ANKLE_DRAFT_INFO.outputs", () => {
+    const result = ankle_draft(base);
+    // `warnings` lists the bounds a call broke; it is not a quantity, so
+    // INFO.outputs does not describe it (#199).
+    const resultKeys = Object.keys(result)
+      .filter((key) => key !== "warnings")
+      .sort();
+    expect(resultKeys).toEqual(Object.keys(ANKLE_DRAFT_INFO.outputs).sort());
+    expect(ANKLE_DRAFT_INFO.outputs.ppd_ad.unit).toBe("%");
+    expect(typeof result.acceptability).toBe("boolean");
+    expect(ANKLE_DRAFT_INFO.outputs.acceptability).toEqual({ unit: null });
+  });
+
+  test("is deep-frozen", () => {
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.standards)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.inputs)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.inputs.v_ankle)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.derived)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.derived!.v_limited)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.outputs)).toBe(true);
+    expect(Object.isFrozen(ANKLE_DRAFT_INFO.outputs.acceptability)).toBe(true);
   });
 });
 

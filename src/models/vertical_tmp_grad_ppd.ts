@@ -91,9 +91,11 @@ export const VERTICAL_TMP_GRAD_PPD_INFO: ModelInfo = deepFreeze({
 });
 
 // A non-finite number throws a TypeError here (ADR 0001, reason three).
-// Upstream returns NaN or a number for one (a NaN rh gives ppd_vg NaN and
-// acceptability False; a -inf vertical_tmp_grad gives 0 and True), except
-// that it raises StopIteration for a +inf vr. A boolean quantity,
+// Upstream returns NaN or a number for one (under the default limit_inputs,
+// a NaN rh gives ppd_vg NaN and acceptability 0.0, and a -inf
+// vertical_tmp_grad gives 0.0 and 1.0), except that it raises StopIteration
+// for a non-finite tdb, tr, rh, met or clo where the cooling effect runs (vr
+// above 0.1 m/s), and for a +inf vr. A boolean quantity,
 // which upstream reads as 0 or 1, throws a TypeError too: quantities are
 // numbers (ADR 0005). limit_inputs is validated, as upstream gives it to
 // VerticalTGradPPDInputs (vertical_tmp_grad_ppd.py:97-106). round_output is
@@ -120,7 +122,7 @@ const VERTICAL_TMP_GRAD_PPD_SCHEMA = {
 // ranges as strict ("10 < tdb [°C] < 40", :74-75); the bounds are inclusive
 // (_valid_range, _internal/validation.py:22, :47), so vr = 0.2 computes.
 /**
- * Calculates the percentage of thermally dissatisfied people with a vertical temperature gradient between feet and head {@link #ref_1|[1]}.
+ * Calculates the percentage of thermally dissatisfied people with a vertical temperature gradient between feet and head {@link #ref_29|[29]}.
  * This equation is only applicable for 0 <= vr <= 0.2 m/s (40 fpm). The model subtracts a baseline of 34.5 % of
  * dissatisfied occupants; when the result would be negative, ppd_vg is 0.
  *

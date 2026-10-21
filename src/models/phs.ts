@@ -194,7 +194,8 @@ export const PHS_INFO: ModelInfo = deepFreeze({
 // evap_load_wm2_min. For every other non-finite quantity or initial state it
 // did not return within 15 s in ticket 16's parity sweep. For a duration of
 // ±inf, the loop over minutes, `range(1, duration + 1)` (models/phs.py:692),
-// runs past 10,000,000 iterations when numba 0.68.0 compiles it
+// reaches a cap of 10,000,000 iterations without ending in a copy of that
+// loop that numba 0.68.0 compiles
 // (.scratch/v2-models/wave-2/batch1-followup/implementer/dur_inf.py, .out).
 // A boolean or null quantity throws a TypeError too, where upstream reads
 // True and False as 1 and 0 and an explicit None t_re or t_cr_eq as t_cr:

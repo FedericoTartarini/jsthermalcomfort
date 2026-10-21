@@ -131,3 +131,63 @@ describe("jos3_functions against pythermalcomfort 4.6.2", () => {
     },
   );
 });
+
+// pythermalcomfort 4.6.2's sum_bf adds bf_core.sum(), bf_muscle.sum(),
+// bf_fat.sum() and bf_skin.sum() in that order (thermoregulation.py:1547-1551).
+// A string element in an object array raises "unsupported operand type(s) for
+// +: 'float' and 'str'"; a string in place of an array raises AttributeError
+// "'str' object has no attribute 'sum'", a TypeError here (ADR 0012)
+// (`.scratch/v2-models/wave-2/batch1-followup/implementer/d25_up.py`, `.out`).
+describe("sum_bf with a string, as pythermalcomfort 4.6.2 raises", () => {
+  const core = [
+    0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2000000000000002, 1.3, 1.4, 1.5, 1.6,
+    1.7000000000000002, 1.8, 1.9000000000000001, 2, 2.1,
+  ];
+  const muscle = [
+    0.2, 0.25, 0.30000000000000004, 0.35000000000000003, 0.4, 0.45, 0.5, 0.55,
+    0.6000000000000001, 0.65, 0.7, 0.75, 0.8, 0.8500000000000001,
+    0.9000000000000001, 0.95, 1,
+  ];
+  const fat = [
+    0.05, 0.060000000000000005, 0.07, 0.08, 0.09, 0.1, 0.11,
+    0.12000000000000001, 0.13, 0.14, 0.15000000000000002, 0.16,
+    0.16999999999999998, 0.18, 0.19, 0.2, 0.21000000000000002,
+  ];
+  const skin = [
+    0.3, 0.32, 0.33999999999999997, 0.36, 0.38, 0.4, 0.42, 0.44,
+    0.45999999999999996, 0.48, 0.5, 0.52, 0.54, 0.56, 0.5800000000000001, 0.6,
+    0.62,
+  ];
+  const with_x = [2.5, 2.5, 2.5, "x", ...new Array<number>(13).fill(2.5)];
+  const call = (k: number, value: unknown) => {
+    const arrays: unknown[] = [core, muscle, fat, skin];
+    arrays[k] = value;
+    const [a, b, c, d] = arrays as number[][];
+    return () => T.sum_bf(a, b, c, d, 0.5, 0.7);
+  };
+  const names = ["bf_core", "bf_muscle", "bf_fat", "bf_skin"];
+
+  test("numeric arrays return upstream's value", () => {
+    expect(call(0, core)()).toBe(44.730000000000004);
+  });
+
+  test.each(names.map((name, k) => [name, k] as const))(
+    '%s with "x" at index 3 throws upstream\'s TypeError for an object array',
+    (_name, k) => {
+      expect(call(k, with_x)).toThrow(
+        new TypeError("unsupported operand type(s) for +: 'float' and 'str'"),
+      );
+      expect(call(k, with_x)).toThrow(TypeError);
+    },
+  );
+
+  test.each(names.map((name, k) => [name, k] as const))(
+    '%s given "x" in place of an array throws upstream\'s AttributeError as a TypeError',
+    (_name, k) => {
+      expect(call(k, "x")).toThrow(
+        new TypeError("'str' object has no attribute 'sum'"),
+      );
+      expect(call(k, "x")).toThrow(TypeError);
+    },
+  );
+});

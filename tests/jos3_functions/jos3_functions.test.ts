@@ -264,4 +264,37 @@ describe("sum_bf with a non-numeric element, as pythermalcomfort 4.6.2 raises", 
     x[0] = element;
     expect(T.sum_bf(x as number[], base, base, base, 0.5, 0.7)).toBe(co);
   });
+
+  // With no number in the array, the elements' sum reaches `co += ...`
+  // (thermoregulation.py:1548-1551): `co` is the int 0 before bf_core's sum
+  // and a numpy float64 after it. For a string sum numpy raises a
+  // UFuncTypeError, a TypeError subclass; the message here is Python's for a
+  // float, as ADR 0012 makes the class the contract
+  // (`.scratch/v2-models/wave-2/batch1-followup/p1/p1_residual_up.py`, `.out`).
+  test.each<[number, unknown[], string]>([
+    [0, ["x"], "unsupported operand type(s) for +=: 'int' and 'str'"],
+    [0, ["x", "y"], "unsupported operand type(s) for +=: 'int' and 'str'"],
+    [0, [null], "unsupported operand type(s) for +=: 'int' and 'NoneType'"],
+    [0, [{}], "unsupported operand type(s) for +=: 'int' and 'dict'"],
+    [0, [[1]], "unsupported operand type(s) for +=: 'int' and 'list'"],
+    [3, ["x"], "unsupported operand type(s) for +: 'float' and 'str'"],
+    [3, ["x", "y"], "unsupported operand type(s) for +: 'float' and 'str'"],
+    [3, [null], "unsupported operand type(s) for +: 'float' and 'NoneType'"],
+    [3, [{}], "unsupported operand type(s) for +: 'float' and 'dict'"],
+    [
+      0,
+      [null, null],
+      "unsupported operand type(s) for +: 'NoneType' and 'NoneType'",
+    ],
+  ])(
+    "array %i = %p, with no number, throws upstream's TypeError",
+    (k, array, message) => {
+      const arrays: unknown[] = [base, base, base, base];
+      arrays[k] = array;
+      const [a, b, c, d] = arrays as number[][];
+      const run = () => T.sum_bf(a, b, c, d, 0.5, 0.7);
+      expect(run).toThrow(new TypeError(message));
+      expect(run).toThrow(TypeError);
+    },
+  );
 });

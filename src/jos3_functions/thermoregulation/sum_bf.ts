@@ -23,10 +23,10 @@ export function sum_bf(
 ): number {
   // Cardiac output (CO)
   let co = 0;
-  co += sum(bf_core);
-  co += sum(bf_muscle);
-  co += sum(bf_fat);
-  co += sum(bf_skin);
+  co += sum(bf_core, true);
+  co += sum(bf_muscle, false);
+  co += sum(bf_fat, false);
+  co += sum(bf_skin, false);
   co += 2 * bf_ava_hand;
   co += 2 * bf_ava_foot;
   return co;
@@ -40,15 +40,33 @@ export function sum_bf(
 // which adds the elements left to right from element 0 with Python's `+`
 // (pythermalcomfort 4.6.2;
 // `.scratch/v2-models/wave-2/batch1-followup/implementer/d25_up.py`,
-// `.scratch/v2-models/wave-2/batch1-followup/p1/p1_up.py`, `.out`). An array
-// with no number in it, and any other value, goes to `np_sum` as before.
-function sum(bf: readonly number[]): number {
+// `.scratch/v2-models/wave-2/batch1-followup/p1/p1_up.py`, `.out`). A sum
+// that is not a number (an array with no number in it) raises at upstream's
+// `co += ...`, where `co` is the int 0 before bf_core's sum and a numpy
+// float64 after it; for a string sum numpy raises a UFuncTypeError, a
+// TypeError subclass, and the message here is Python's for a float, as ADR
+// 0012 makes the class the contract
+// (`.scratch/v2-models/wave-2/batch1-followup/p1/p1_residual_up.py`, `.out`).
+// A list sum after bf_core goes to `np_sum`, where upstream broadcasts it to
+// an array: an open point in ticket 25. Any other value goes to `np_sum` as
+// before.
+function sum(bf: readonly number[], first: boolean): number {
   if (typeof (bf as unknown) === "string") {
     throw new TypeError("'str' object has no attribute 'sum'");
   }
   const elements = bf as readonly unknown[];
   if (Array.isArray(elements) && !elements.every(is_numeric)) {
-    elements.reduce(py_add);
+    const total = elements.reduce(py_add);
+    if (first) {
+      throw new TypeError(
+        `unsupported operand type(s) for +=: 'int' and '${py_type_name(total)}'`,
+      );
+    }
+    if (!Array.isArray(total)) {
+      throw new TypeError(
+        `unsupported operand type(s) for +: 'float' and '${py_type_name(total)}'`,
+      );
+    }
   }
   return np_sum(bf);
 }
@@ -59,7 +77,8 @@ function is_numeric(x: unknown): x is number | boolean {
 
 // Python's `a + b` for the values an element can be. A number is named
 // "float": a JS number has no int/float distinction (ADR 0001's first reason),
-// and upstream's arrays hold floats.
+// and ADR 0001 as amended 2026-10-21 (D21) compares a JS number with the
+// equivalent Python float.
 function py_add(a: unknown, b: unknown): unknown {
   if (is_numeric(a) && is_numeric(b)) return Number(a) + Number(b);
   if (typeof a === "string" && typeof b === "string") return a + b;

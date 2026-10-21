@@ -268,11 +268,10 @@ export function adaptive_ashrae(
   // adaptive_cooling_effect stays. Upstream gates on the room alone
   // (_internal/adaptive_cooling_effect.py:35), while its AdaptivePlot and the
   // deployed CBE tool draw this step (comfort_tool #89, PR #90; pythermalcomfort
-  // PR #321). A correction of what upstream returns, under ADR 0004, raised
-  // upstream as pythermalcomfort #486; ASHRAE 55-2023 §5.4.2.4. The inclusive
-  // >= at 25 °C, here and in the room gate, differs from that clause and is
-  // left, as the consumer's decision 79 leaves it. adaptive_en shares the
-  // helper and does not step.
+  // PR #321). A correction of what upstream returns, under ADR 0004; ASHRAE
+  // 55-2023 §5.4.2.4. The inclusive >= at 25 °C, here and in the room gate,
+  // differs from that clause and is left, as the consumer's decision 79 leaves
+  // it. adaptive_en shares the helper and does not step.
   const tmp_cmf_80_up_base = t_cmf + ACCEPTABILITY_80_OFFSET;
   const tmp_cmf_90_up_base = t_cmf + ACCEPTABILITY_90_OFFSET;
   let tmp_cmf_80_up =

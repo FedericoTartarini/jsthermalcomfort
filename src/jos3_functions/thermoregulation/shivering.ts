@@ -121,6 +121,12 @@ export function shivering(
     }
 
     const limit = dict_get(options, "limit_dshiv/dt");
+    // `if (limit)` reads JavaScript's truth value (ADR 0001's truth-value
+    // amendment): an empty array or object is true here and false in Python,
+    // so `[]` and `{}` reach the check below and throw a TypeError, where
+    // upstream's `if options["limit_dshiv/dt"]:` (thermoregulation.py:1224
+    // at v4.6.2) skips the limit and returns
+    // (`.scratch/v2-models/wave-2/research/batch1/examples/A5/a5_up.py`, `.out`).
     if (limit) {
       // wave 2 D7 (c): a truthy limit that is neither true nor a number throws
       // a TypeError. Upstream computes `limit * dtime` and compares it, which

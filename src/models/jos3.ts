@@ -1501,7 +1501,8 @@ export class JOS3 {
     // ADR 0012: upstream's inp.copy() raises an AttributeError for a value
     // that has no copy method, a TypeError here, with Python's type name. A
     // dict has one, and upstream raises a TypeError ("unhashable type:
-    // 'list'") when a getter indexes it; here the setter throws it.
+    // 'list'") when a getter indexes it; here the setter throws it, earlier
+    // (ADR 0005, ADR 0012).
     if (!Array.isArray(inp)) {
       throw new TypeError(
         typeof inp === "object" && inp !== null

@@ -29,7 +29,7 @@ A versioned identifier for a published standard (`Standard.ashrae_55_2023`, valu
 _Avoid_: model (for a standard), edition (except when contrasting two versions), norm
 
 **Deviation**:
-A documented difference from upstream, allowed only because JavaScript or TypeScript forces it, because a consumer needs it, or as a correction under ADR 0004. Outside a correction, it is never in a value upstream returns.
+A documented difference from upstream, allowed only because JavaScript or TypeScript forces it or because a consumer needs it. It never changes a value upstream returns and never adds an input that changes what a model computes.
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
@@ -49,5 +49,5 @@ The applicability bounds a call broke, as upstream checks them, returned as data
 _Avoid_: console warnings, errors, validation messages
 
 **Mirrored test**:
-A test that carries an upstream test's name, inputs and expected values into Jest, one upstream test file per `describe`. A test whose expected value an ADR 0004 correction changed keeps its upstream name and inputs, adding only an input the correction introduces, and says at the site that ADR 0004 changed it.
+A test that carries an upstream test's name, inputs and expected values into Jest, one upstream test file per `describe`.
 _Avoid_: ported test, parity test, copied test

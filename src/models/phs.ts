@@ -192,10 +192,13 @@ export const PHS_INFO: ModelInfo = deepFreeze({
 // sweat_rate_watt or evap_load_wm2_min. It raises for a non-finite drink or
 // acclimatized, ±inf weight or t_sk_t_cr_wg, and -inf sweat_rate_watt or
 // evap_load_wm2_min. For every other non-finite quantity or initial state it
-// did not return within 15 s in ticket 16's parity sweep, as its while loops
-// do not converge (models/phs.py:724-732, :779-791). A boolean or null quantity throws a
-// TypeError too, where upstream reads True and False as 1 and 0 and an
-// explicit None t_re or t_cr_eq as t_cr: quantities are numbers (ADR 0005).
+// did not return within 15 s in ticket 16's parity sweep. For a duration of
+// ±inf, the loop over minutes, `range(1, duration + 1)` (models/phs.py:692),
+// runs past 10,000,000 iterations when numba 0.68.0 compiles it
+// (.scratch/v2-models/wave-2/batch1-followup/implementer/dur_inf.py, .out).
+// A boolean or null quantity throws a TypeError too, where upstream reads
+// True and False as 1 and 0 and an explicit None t_re or t_cr_eq as t_cr:
+// quantities are numbers (ADR 0005).
 // round_output is validated, as upstream gives it to PHSInputs
 // (models/phs.py:209-219), which checks it before the quantities
 // (classes_input.py:123-129). limit_inputs is declared but not validated:

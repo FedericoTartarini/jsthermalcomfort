@@ -1489,7 +1489,11 @@ describe("phs beyond upstream's tests", () => {
     // range, so the kernel's exception is not dropped); phs then returns
     // whatever np.empty_like held (models/phs.py:862-876). The library throws
     // the class the raise maps to (ADR 0012 as amended,
-    // .scratch/v2-models/wave-2/decisions.md D3 (ii)).
+    // .scratch/v2-models/wave-2/decisions.md D3 (ii)). The fcl and
+    // t_sk + 237.3 rows use the inputs of ADR 0012's amendment that adds
+    // those two divisors
+    // (.scratch/v2-models/wave-2/research/batch1/examples/A7/a7_phs_up.py,
+    // .out).
     test.each<[string, Partial<PhsParams>]>([
       ["i_mst 0 (im_dyn, :654)", { i_mst: 0 }],
       ["height 0 (a_dubois, :560)", { height: 0 }],
@@ -1517,6 +1521,10 @@ describe("phs beyond upstream's tests", () => {
       [
         "tr 1e17 with limit_inputs false (t_cl - tr, :726)",
         { tr: 1e17, limit_inputs: false },
+      ],
+      [
+        "t_re -405.65047557196146 with clo 0.1, duration 1 (t_sk + 237.3, :722)",
+        { t_re: -405.65047557196146, clo: 0.1, duration: 1 },
       ],
     ])("%s throws RangeError('division by zero')", (_, extra) => {
       const call = () => phs({ ...base, duration: 30, ...extra } as PhsParams);

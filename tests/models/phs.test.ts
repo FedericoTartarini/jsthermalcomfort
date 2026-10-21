@@ -1009,9 +1009,9 @@ describe("phs beyond upstream's tests", () => {
       },
     );
 
-    // D3 (i) (.scratch/v2-models/wave-2/decisions.md): under limit_inputs
-    // the gate is evaluated before the kernel, which throws
-    // RangeError("division by zero") at i_cl_dyn for clo 0 (D3 (ii)).
+    // Under limit_inputs the gate is evaluated before the kernel, which
+    // throws RangeError("division by zero") at i_cl_dyn for clo 0 (ADR 0012
+    // as amended).
     // Upstream computes, then masks, and returns NaN in every field.
     test.each(
       [0, -0].flatMap((clo) =>
@@ -1488,8 +1488,7 @@ describe("phs beyond upstream's tests", () => {
     // at a zero divisor (pythermalcomfort 4.6.2 with numba's prange made a
     // range, so the kernel's exception is not dropped); phs then returns
     // whatever np.empty_like held (models/phs.py:862-876). The library throws
-    // the class the raise maps to (ADR 0012 as amended,
-    // .scratch/v2-models/wave-2/decisions.md D3 (ii)). The fcl and
+    // the class the raise maps to (ADR 0012 as amended). The fcl and
     // t_sk + 237.3 rows use the inputs of ADR 0012's amendment that adds
     // those two divisors
     // (.scratch/v2-models/wave-2/research/batch1/examples/A7/a7_phs_up.py,

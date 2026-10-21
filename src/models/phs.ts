@@ -518,8 +518,8 @@ export function phs(params: PhsParams): PhsResult {
   // Upstream computes, then masks every field (:423-446). Here a masked
   // result is returned without computing it, as the mask replaces every field
   // the kernel returns. So for clo 0, where the kernel throws
-  // RangeError("division by zero") at i_cl_dyn (D3 (ii)), the library returns
-  // upstream's NaN (.scratch/v2-models/wave-2/decisions.md, D3 (i)).
+  // RangeError("division by zero") at i_cl_dyn (ADR 0012 as amended), the
+  // library returns upstream's NaN (ADR 0001).
   if (limit_inputs && warnings.length > 0) {
     return {
       ...(Object.fromEntries(
@@ -634,14 +634,12 @@ interface _PhsKernelInputs {
 // v4.6.2; 0.0 on the runs the reviewers made, -inf and -1.77e+307 at 4096
 // elements, .scratch/v2-models/wave-2/research/phs/d3_*.py). The library
 // throws the class the raise maps to, at each divisor upstream's kernel
-// computes from the inputs (ADR 0012 as amended,
-// .scratch/v2-models/wave-2/decisions.md D3 (ii)); x === 0 is true for -0
+// computes from the inputs (ADR 0012 as amended); x === 0 is true for -0
 // too, as Python's 0.0 == -0.0 is.
 // Upstream's t_cl and t_cr loops are `while True` (models/phs.py:724, :779 at
 // v4.6.2). Each loop here runs at most this many iterations and then throws
 // Error("Max iterations exceeded"), the class and message ADR 0012 as amended
-// gives upstream's own capped loops (ADR 0015,
-// .scratch/v2-models/wave-2/decisions.md D3 (iii)). Over the 75,168 cases the
+// gives upstream's own capped loops (ADR 0015). Over the 75,168 cases the
 // library returned for in the two iteration sweeps
 // (.scratch/v2-models/wave-2/research/phs/iter_sweep*.out), the t_cl loop
 // needed at most 19 iterations except at a weight of 1e-9 kg, where it

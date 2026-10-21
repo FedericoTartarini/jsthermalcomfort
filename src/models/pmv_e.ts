@@ -181,7 +181,7 @@ export function pmv_e(params: PmvEParams): PmvEResult {
   // Upstream passes on both calls' UserWarnings, so a bound both calls break
   // is warned twice. Python's "default" warnings filter shows a repeat once,
   // and JavaScript has no filter (ADR 0001), so the rows are both calls',
-  // exact duplicates dropped, in first-seen order (decisions.md D4, wave 2).
+  // exact duplicates dropped, in first-seen order (ADR 0011 as amended).
   // An adjusted met is computed from the inputs, so its row is `derived`
   // (ApplicabilityWarning in modelDocs.ts), where pmv_ppd_iso, given it as
   // its met, calls it `input`.

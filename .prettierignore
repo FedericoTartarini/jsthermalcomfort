@@ -9,3 +9,4 @@ docs_theme/**
 !docs_theme/index.js
 validation-data-comfort-models/
 lib/
+.scratch/

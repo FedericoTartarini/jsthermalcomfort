@@ -298,4 +298,26 @@ describe("sum_bf with a non-numeric element, as pythermalcomfort 4.6.2 raises", 
       expect(run).toThrow(TypeError);
     },
   );
+
+  // Upstream's numpy float64 `co` broadcasts a list sum to an array
+  // (`[[1], [2]]` in bf_skin gives `array([130.9, 131.9])`,
+  // `.scratch/v2-models/wave-2/batch1-followup/p1/p1_residual_up.out`);
+  // sum_bf returns a number, so it throws Python's message for a float.
+  test.each<[number, unknown[]]>([
+    [1, [[1]]],
+    [3, [[1]]],
+    [3, [[1], [2]]],
+  ])(
+    "array %i = %p, a list sum after bf_core, throws a TypeError",
+    (k, array) => {
+      const arrays: unknown[] = [base, base, base, base];
+      arrays[k] = array;
+      const [a, b, c, d] = arrays as number[][];
+      const run = () => T.sum_bf(a, b, c, d, 0.5, 0.7);
+      expect(run).toThrow(
+        new TypeError("unsupported operand type(s) for +: 'float' and 'list'"),
+      );
+      expect(run).toThrow(TypeError);
+    },
+  );
 });

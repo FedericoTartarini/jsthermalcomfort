@@ -16,6 +16,10 @@ _Avoid_: core, engine, optimized function
 A public model that binds a kernel to one standard's limits and conventions (`pmv_ppd_iso`, `pmv_ppd_ashrae`).
 _Avoid_: variant, model function, facade
 
+**Main model**:
+A model the CBE Thermal Comfort Tool calls to compute a result it shows: today `pmv_ppd_iso`, `pmv_ppd_ashrae`, `adaptive_ashrae` and `heat_index_rothfusz`. A function that computes part of one (`cooling_effect`), a helper (`psy_ta_rh`, `t_o`) and an input calculator are not main models, even when the tool calls them.
+_Avoid_: core model, primary model, app model
+
 **Switch**:
 A boolean option a model takes, named as upstream names it (`limit_inputs`, `round_output`, `airspeed_control`).
 _Avoid_: flag, toggle, kwarg
@@ -33,7 +37,7 @@ A documented difference from upstream, allowed only because JavaScript or TypeSc
 _Avoid_: customisation, JS-only behaviour, fork
 
 **Consumer contract**:
-What every model the CBE Thermal Comfort Tool uses exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
+What every main model exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:

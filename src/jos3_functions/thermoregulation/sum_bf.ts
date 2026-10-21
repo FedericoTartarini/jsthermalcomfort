@@ -38,11 +38,15 @@ export function sum_bf(
 // here; a string element raises the TypeError numpy gives for an object array
 // (pythermalcomfort 4.6.2;
 // `.scratch/v2-models/wave-2/batch1-followup/implementer/d25_up.py`, `.out`).
+// Any other value goes to `np_sum` unchecked, as before.
 function sum(bf: readonly number[]): number {
   if (typeof (bf as unknown) === "string") {
     throw new TypeError("'str' object has no attribute 'sum'");
   }
-  if ((bf as readonly unknown[]).some((x) => typeof x === "string")) {
+  if (
+    Array.isArray(bf) &&
+    (bf as readonly unknown[]).some((x) => typeof x === "string")
+  ) {
     throw new TypeError("unsupported operand type(s) for +: 'float' and 'str'");
   }
   return np_sum(bf);

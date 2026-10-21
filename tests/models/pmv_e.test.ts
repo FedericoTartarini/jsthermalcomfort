@@ -137,8 +137,8 @@ describe("pmv_e beyond upstream's tests", () => {
     },
   );
 
-  // ADR 0011 as amended: pmv_e returns the rows of both pmv_ppd_iso calls,
-  // exact duplicates dropped, in first-seen order.
+  // pmv_e returns the rows of both pmv_ppd_iso calls, exact duplicates
+  // dropped (ADR 0011 as amended), in first-seen order.
   // Each expected row is the UserWarning upstream's pmv_ppd_iso emits for
   // that call's inputs under limit_inputs True, with the second call's met
   // upstream's adjusted met (pmv_e.py:121-145 at v4.6.2).

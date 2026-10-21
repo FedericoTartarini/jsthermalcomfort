@@ -48,19 +48,22 @@ export function sum_bf(
 // is Python's for a float, as ADR 0012 makes the class the contract
 // (`.scratch/v2-models/wave-2/batch1-followup/p1/p1_residual_up.py`, `.out`).
 // A list sum after bf_core throws the same way, where upstream's float64
-// `co` broadcasts it to an array: sum_bf returns a number, so it cannot
-// return that array. Any other value goes to `np_sum` as before.
+// `co` broadcasts it to an array (`[[1], [2]]`), or raises when numpy cannot
+// read the list as floats (`[[1, [2]]]`, a ValueError): sum_bf returns a
+// number, so it cannot return that array
+// (`.scratch/v2-models/wave-2/batch1-followup/p1/p1_list_up.py`, `.out`).
+// Any other value goes to `np_sum` as before.
 function sum(bf: readonly number[], first: boolean): number {
   if (typeof (bf as unknown) === "string") {
     throw new TypeError("'str' object has no attribute 'sum'");
   }
   const elements = bf as readonly unknown[];
   if (Array.isArray(elements) && !elements.every(is_numeric)) {
-    const total = py_type_name(elements.reduce(py_add));
+    const total_type = py_type_name(elements.reduce(py_add));
     throw new TypeError(
       first
-        ? `unsupported operand type(s) for +=: 'int' and '${total}'`
-        : `unsupported operand type(s) for +: 'float' and '${total}'`,
+        ? `unsupported operand type(s) for +=: 'int' and '${total_type}'`
+        : `unsupported operand type(s) for +: 'float' and '${total_type}'`,
     );
   }
   return np_sum(bf);

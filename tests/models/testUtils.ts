@@ -26,12 +26,18 @@
  * - A fixture test runs every row its upstream counterpart means to run, even
  *   where upstream's filter misses rows (the PMV tests match lowercase
  *   `"iso"`/`"ashrae"` against the fixture's uppercase labels).
- * - Error classes (ADR 0012): `TypeError` → `TypeError`; a `ValueError` for a
- *   value out of range, and a `ZeroDivisionError` → `RangeError`; any other
- *   `ValueError` → `Error`. An unexpected keyword argument is a `TypeError`,
- *   as an unknown params key is (ADR 0008). A `RangeError` is an `Error`, so
- *   `toThrow(Error)` passes either way. Assert the message too where upstream
- *   matches one (`pytest.raises(match=...)`).
+ * - Error classes (ADR 0012 and its amendments): `TypeError`, a `KeyError`
+ *   and an `AttributeError` that a wrong type raises → `TypeError`; a
+ *   `ValueError` for a value out of range, a `ZeroDivisionError` (also where
+ *   numba's `prange` drops it), an `IndexError` and an `OverflowError` →
+ *   `RangeError`; any other `ValueError`, and a
+ *   `StopIteration("Max iterations exceeded")` → `Error`. Where a call breaks
+ *   more than one rule, the class is the one upstream raises first. An
+ *   unexpected keyword argument is a `TypeError`, as an unknown params key is
+ *   (ADR 0008). A `RangeError` is an `Error`, so `toThrow(Error)` passes
+ *   either way. Assert the message too where upstream matches one
+ *   (`pytest.raises(match=...)`); where a model, utility or psychrometric
+ *   function raises at a site of its own, it copies upstream's message.
  * - A `UserWarning` assertion becomes an assertion on the `warnings` rows
  *   where the model returns them (every v1 model). Otherwise, and for any upstream test
  *   that cannot be ported, write `test.todo("<upstream name>: <reason>")`

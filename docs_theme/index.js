@@ -126,7 +126,7 @@ const displayNameMap = {
   discomfort_index: "Discomfort Index (DI)",
   two_nodes_gagge: "Two-Node Model (Gagge)",
   set_tmp: "Standard Effective Temperature (SET)",
-  wci: "Wind Chill Index (WCI)",
+  wci: "Wind chill index",
   adaptive_en: "Adaptive EN-16798",
   at: "Apparent Temperature (AT)",
   pmv_ppd: "PMV-PPD Model",
@@ -144,7 +144,7 @@ const displayNameMap = {
   utci: "Universal Thermal Climate Index (UTCI)",
   pet_steady: "Physiological Equivalent Temperature (PET)",
   JOS3: "JOS-3 Thermoregulation Model",
-  work_capacity_dunne: "Work Capacity (Dunne et al.)",
+  work_capacity_dunne: "Work capacity (Dunne et al.)",
   // Psychrometrics
   p_sat: "Saturation Vapor Pressure (p_sat)",
   p_sat_torr: "Saturation Vapor Pressure in Torr",

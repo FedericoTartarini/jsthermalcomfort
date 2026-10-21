@@ -59,7 +59,7 @@ const _FACTORS = {
  *
  * @public
  * @memberof models
- * @docname Work Capacity (Dunne et al.)
+ * @docname Work capacity (Dunne et al.)
  *
  * @param {Object} params - the model's parameters, named as in pythermalcomfort.
  * @param {number} params.wbgt - Wet bulb globe temperature, [°C].

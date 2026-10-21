@@ -226,17 +226,6 @@ pmv_ppd_iso({
   // @ts-expect-error airspeed_control does not exist on PmvPpdIsoParams.
   airspeed_control: true,
 });
-// v, the average air speed, is ASHRAE 55's alone (ADR 0004).
-pmv_ppd_iso({
-  tdb: 25,
-  tr: 25,
-  vr: 0.1,
-  rh: 50,
-  met: 1.2,
-  clo: 0.5,
-  // @ts-expect-error v does not exist on PmvPpdIsoParams.
-  v: 0.1,
-});
 
 // adaptive_ashrae takes one params object keyed like upstream's keyword
 // arguments (ADR 0002), and both the params and the result types are exported
@@ -328,7 +317,6 @@ const pmvAshraeParams: PmvPpdAshraeParams = {
   tdb: 77,
   tr: 77,
   vr: 0.328,
-  v: 0.328,
   rh: 50,
   met: 1.2,
   clo: 0.5,

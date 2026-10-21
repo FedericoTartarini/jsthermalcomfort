@@ -24,8 +24,6 @@ import type {
  * @property { number } tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
  * @property { number } tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
  * @property { number } vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
- * @property { number } [v] - ASHRAE 55 only: average air speed, default in [m/s] in [fps] if `units` = 'IP'.
- *    Required when `airspeed_control` is false, where only the airspeed limits read it; unused under ISO 7730.
  * @property { number } rh - relative humidity, [%]
  * @property { number } met - metabolic rate
  * @property { number } clo - clothing insulation
@@ -55,7 +53,6 @@ export interface PmvPpdParams {
   tdb: number;
   tr: number;
   vr: number;
-  v?: number;
   rh: number;
   met: number;
   clo: number;
@@ -346,7 +343,6 @@ const PMV_PPD_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
   vr: { type: "number" },
-  v: { type: "number", required: false },
   rh: { type: "number" },
   met: { type: "number" },
   clo: { type: "number" },
@@ -375,7 +371,7 @@ function partial_vapour_pressure(tdb: number, rh: number): number {
 }
 
 export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
-  let { tdb, tr, vr, v } = params;
+  let { tdb, tr, vr } = params;
   const { rh, met, clo } = params;
   // Destructuring defaults also apply to a key passed as undefined, so a
   // caller building `{ limit_inputs }` from a missing value keeps the gate on.
@@ -393,7 +389,6 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
       tdb,
       tr,
       vr,
-      v,
       rh,
       met,
       clo,
@@ -407,24 +402,10 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     },
     PMV_PPD_SCHEMA,
   );
-  // ADR 0004: without local control, ASHRAE 55's airspeed limits read the
-  // average air speed, which is never derived from vr, so a call that needs it
-  // and lacks it throws before anything is computed.
-  if (
-    PMV_STANDARD_RULES[standard].ashrae55 &&
-    !airspeed_control &&
-    v === undefined
-  ) {
-    throw new TypeError(
-      'Parameter "v" is required when airspeed_control is false',
-    );
-  }
 
   if (units.toUpperCase() === "IP") {
     // Conversion from IP to SI units
     ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
-    // An absent v stays absent rather than converting to NaN.
-    if (v !== undefined) ({ v } = units_converter({ v }, "IP"));
   }
 
   // Computed from the SI inputs before the ASHRAE cooling effect shifts tdb.
@@ -454,7 +435,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
       tdb,
       tr,
       v_range: { value: vr, key: "vr" },
-      v_no_control: v === undefined ? undefined : { value: v, key: "v" },
+      v_no_control: { value: vr, key: "vr" },
       met,
       clo,
       airspeed_control,

@@ -32,8 +32,7 @@ export type PmvPpdAshraeResult = {
 /**
  * The params of `pmv_ppd_ashrae`: upstream's keyword parameters, quantities
  * and switches alike, with upstream's defaults (ADR 0002), `standard` narrowed
- * to the one ASHRAE 55 version upstream accepts, and the average air speed
- * `v`, which upstream does not take (ADR 0004). Documented on the function's
+ * to the one ASHRAE 55 version upstream accepts. Documented on the function's
  * `params`.
  */
 export interface PmvPpdAshraeParams extends Omit<PmvPpdParams, "standard"> {
@@ -49,10 +48,9 @@ export interface PmvPpdAshraeParams extends Omit<PmvPpdParams, "standard"> {
  * vapour pressure nor the PMV output, and `pmv_ppd` gates both under ISO 7730
  * only (the `pa` and `pmv` bounds of its ISO 7730 rules).
  * The airspeed limits that apply when the occupant cannot control the
- * airspeed are limits on the average air speed `v`, and they depend on the
- * call (operative temperature, met and clo), so `v` has no fixed `Bound`
- * here; a call that breaks one reports it in `warnings` as a row keyed `v`,
- * with a bound built for that call.
+ * airspeed depend on the call (operative temperature, met and clo), so they
+ * have no fixed `Bound` here; a call that breaks one reports it in
+ * `warnings` with a bound built for that call.
  *
  * @public
  */
@@ -66,7 +64,6 @@ export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
     tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
     tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
     vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
-    v: { unit: "m/s" },
     met: { unit: "met", applicability: ASHRAE_55_LIMITS.met },
     clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo },
     rh: { unit: "%" },
@@ -99,11 +96,6 @@ export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
  * @param {number} params.tdb - Dry-bulb air temperature [°C] (or [°F] if units = 'IP')
  * @param {number} params.tr  - Mean radiant temperature [°C] (or [°F] if units = 'IP')
  * @param {number} params.vr  - Relative air speed [m/s] (or [fps] if units = 'IP')
- * @param {number} [params.v] - Average air speed [m/s] (or [fps] if units = 'IP'). Required when
- *    `airspeed_control` is false, where only the airspeed limits read it: without local control
- *    they apply up to 0.7 clo and 1.3 met inclusive, and are checked on `v`, at the operative
- *    temperature ASHRAE 55 weighs by `v`. The cooling effect, the PMV and the PPD read `vr`.
- *    Never derived from `vr`.
  * @param {number} params.rh  - Relative humidity [%]
  * @param {number} params.met - Metabolic rate [met]
  * @param {number} params.clo - Clothing insulation [clo]. This is the dynamic clothing insulation,
@@ -133,7 +125,6 @@ const PMV_PPD_ASHRAE_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
   vr: { type: "number" },
-  v: { type: "number", required: false },
   rh: { type: "number" },
   met: { type: "number" },
   clo: { type: "number" },
@@ -153,7 +144,7 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
   // The quantities were positional before v2 (ADR 0002); a call still written
   // that way fails here, naming the shape it should have.
   _check_params_object(params, "pmv_ppd_ashrae");
-  const { tdb, tr, vr, v, rh, met, clo } = params;
+  const { tdb, tr, vr, rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   // suppress_warnings has no pythermalcomfort counterpart: it stands in for
   // Python's warnings filter, which JavaScript lacks (see cooling_effect).
@@ -171,7 +162,6 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
       tdb,
       tr,
       vr,
-      v,
       rh,
       met,
       clo,
@@ -193,7 +183,6 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
     tdb,
     tr,
     vr,
-    v,
     rh,
     met,
     clo,

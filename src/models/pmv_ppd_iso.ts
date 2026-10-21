@@ -36,14 +36,13 @@ export type PmvPpdIsoResult = {
 /**
  * The params of `pmv_ppd_iso`: upstream's keyword parameters, quantities and
  * switches alike, with upstream's defaults (ADR 0002), `standard` narrowed to
- * the two ISO 7730 editions upstream accepts. `v`, `airspeed_control` and
- * `suppress_warnings` are left out, as upstream's `pmv_ppd_iso` has none of
- * them: all three only act under ASHRAE 55. Documented on the function's
- * `params`.
+ * the two ISO 7730 editions upstream accepts. `airspeed_control` and
+ * `suppress_warnings` are left out, as upstream's `pmv_ppd_iso` has neither:
+ * both only act under ASHRAE 55. Documented on the function's `params`.
  */
 export interface PmvPpdIsoParams extends Omit<
   PmvPpdParams,
-  "standard" | "v" | "airspeed_control" | "suppress_warnings"
+  "standard" | "airspeed_control" | "suppress_warnings"
 > {
   standard?: typeof Standard.iso_7730_2005 | typeof Standard.iso_7730_2025;
 }

@@ -1,5 +1,5 @@
 import { t_o } from "../psychrometrics/t_o.js";
-import { ASHRAE_55_LIMITS, Standard } from "../utilities/utilities.js";
+import { ASHRAE_55_LIMITS } from "../utilities/utilities.js";
 import { _valid_range } from "./validation.ts";
 import type { ApplicabilityWarning } from "../models/modelDocs.ts";
 
@@ -46,25 +46,21 @@ interface Ashrae55Params {
  * - v above 50.49 - 4.4047 to + 0.096425 to² when 23 < to < 25.5 °C;
  * - v above 0.2 m/s when to <= 23 °C.
  *
- * Here the rules apply at clo <= 0.7 and met <= 1.3, and to is weighted as
- * ASHRAE 55 weighs it, where upstream weighs it by ISO 7726: a correction
- * under ADR 0004, given at the branch.
- *
  * Upstream reads one air speed, `v`, for the Table 7.3.4 range and for the
  * no-control rules, and names it `v_param_name` in the warning text of both.
  * Here they are two inputs, each with its own row key: the 0-2 m/s range row
  * reads `v_range`, and the no-control rules read `v_no_control`, both for the
  * three limits and for the operative temperature that chooses between them.
  * They are apart for the correction ADR 0004 records for `pmv_ppd_ashrae`,
- * which checks the no-control rules on the average air speed `v` and leaves
- * the range row on the relative air speed `vr`. Neither defaults to the
- * other: a caller with one speed, as `adaptive_ashrae`, passes it as both.
+ * which moves the no-control rules onto the average air speed and leaves the
+ * range row on the relative air speed. Neither defaults to the other: a
+ * caller with one speed, as `adaptive_ashrae`, passes it as both.
  *
  * Each broken limit is one row on `warnings` instead of a `UserWarning`. The
  * operative-temperature bound depends on the call, so it is built and frozen
  * per call; the others are shared frozen objects. `check_standard_compliance`
- * keeps its own copy of these rules for its strings, as upstream's rules
- * stood: it exempts at exactly 0.7 clo or 1.3 met and weighs to by ISO 7726.
+ * keeps its own copy of these rules for its strings, so a change to one
+ * belongs in both.
  *
  * The rows come in upstream's order: tdb, tr, the range speed, the airspeed
  * rules, then met and clo. Upstream's `v_limited` branch is left out: no
@@ -94,27 +90,15 @@ export function _check_ashrae55_compliance(
     v_no_control !== undefined &&
     met !== undefined &&
     clo !== undefined &&
-    !(clo > 0.7 || met > 1.3)
+    clo < 0.7 &&
+    met < 1.3
   ) {
     const { key, value: v } = v_no_control;
     // Upper bounds only, and the operative-temperature one moves with the
     // call, so they are pushed as broken rather than through _valid_range.
     const pushAirspeedRow = (bound: Readonly<{ max: number }>) =>
       warnings.push({ key, role: "input", value: v, bound });
-    // A correction of what upstream returns, under ADR 0004, in three
-    // sub-rules: the limits apply at exactly 0.7 clo and 1.3 met, exempt only
-    // above either (ASHRAE 55-2023 §5.3.4.2); they read the speed the caller
-    // passes as v_no_control, which pmv_ppd_ashrae fills with the average air
-    // speed v (§3); and the operative temperature that chooses between them
-    // weighs tdb and tr by that speed as ASHRAE 55 does (Appendix A), not by
-    // ISO 7726. The deployed CBE tool checks its air speed input `d.vel`
-    // (d47d22e) and exempts only above 0.7 clo or 1.3 met (be91523); upstream
-    // exempts at both values, passes vr and weighs by ISO 7726 since
-    // d6786f3, which closed its #32. Two sub-rules differ from §5.3.4.2 and
-    // are left, as the consumer's decision 79 leaves them: the exemption
-    // covers all three limits, and the 0.8 m/s limit caps the curve where the
-    // curve exceeds it.
-    const to = t_o(tdb, tr, v, Standard.ashrae_55_2023);
+    const to = t_o(tdb, tr, v);
     const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
     if (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max)
       pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.any);

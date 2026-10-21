@@ -10,11 +10,7 @@ import {
   valid_range,
 } from "../../src/utilities/utilities.js";
 import { testDataUrls } from "./comftest.ts";
-import {
-  correctNoControlFixtureCase,
-  loadTestData,
-  validateResult,
-} from "./testUtils.ts";
+import { loadTestData, validateResult } from "./testUtils.ts";
 
 let returnArray = false;
 
@@ -49,8 +45,6 @@ let { testData, tolerances } = await loadTestData(
   testDataUrls.pmvPpd,
   returnArray,
 );
-// ADR 0004 changed the no-control row: see correctNoControlFixtureCase.
-testData.data = testData.data.map(correctNoControlFixtureCase);
 
 describe("test_pmv_ppd_optimised", () => {
   describe("TestPmvPpdOptimized", () => {
@@ -476,19 +470,16 @@ describe("pmv_ppd applicability warnings (#199)", () => {
   });
 
   describe("ASHRAE airspeed limits without airspeed control", () => {
-    // clo 0.5 and met 1.0, inside the limits' reach of clo <= 0.7 and
-    // met <= 1.3. The limits read the average air speed v (ADR 0004); the
-    // relative air speed vr is given the same value.
+    // clo < 0.7 and met < 1.3, the only case these limits apply to.
     const ashrae = (
       tdb: number,
-      v: number,
+      vr: number,
       params: Partial<PmvPpdParams> = {},
     ) =>
       pmv_ppd({
         tdb,
         tr: tdb,
-        vr: v,
-        v,
+        vr,
         rh: 50,
         met: 1.0,
         clo: 0.5,
@@ -497,37 +488,37 @@ describe("pmv_ppd applicability warnings (#199)", () => {
         ...params,
       });
 
-    test("to <= 23 °C: v above 0.2 m/s gives a v row against 0.2", () => {
+    test("to <= 23 °C: vr above 0.2 m/s gives a vr row against 0.2", () => {
       const result = ashrae(20, 0.3);
       expect(result.pmv).toBeNaN();
       expect(result.warnings).toEqual([
-        { key: "v", role: "input", value: 0.3, bound: { max: 0.2 } },
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
       ]);
     });
 
-    test("23 < to < 25.5 °C: v above the operative-temperature limit gives a row against it", () => {
+    test("23 < to < 25.5 °C: vr above the operative-temperature limit gives a row against it", () => {
       // v_limit = 50.49 - 4.4047 to + 0.096425 to², about 0.318 m/s at 24 °C.
       const to = 24;
       const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
       const result = ashrae(24, 0.5);
       expect(result.pmv).toBeNaN();
       expect(result.warnings).toEqual([
-        { key: "v", role: "input", value: 0.5, bound: { max: v_limit } },
+        { key: "vr", role: "input", value: 0.5, bound: { max: v_limit } },
       ]);
     });
 
-    test("v above 0.8 m/s gives a row against 0.8", () => {
+    test("vr above 0.8 m/s gives a row against 0.8", () => {
       const result = ashrae(26, 1.0);
       expect(result.pmv).toBeNaN();
       expect(result.warnings).toEqual([
-        { key: "v", role: "input", value: 1.0, bound: { max: 0.8 } },
+        { key: "vr", role: "input", value: 1.0, bound: { max: 0.8 } },
       ]);
     });
 
-    test("a speed outside both vr's range and the no-control limit gives a vr row and a v row", () => {
+    test("vr outside both its range and the no-control limit gives both rows", () => {
       expect(ashrae(26, 2.5).warnings).toEqual([
         { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.vr },
-        { key: "v", role: "input", value: 2.5, bound: { max: 0.8 } },
+        { key: "vr", role: "input", value: 2.5, bound: { max: 0.8 } },
       ]);
     });
 
@@ -535,7 +526,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
     // met and clo, so their rows come first.
     test("the airspeed rows come before the met and clo rows, as upstream's", () => {
       expect(ashrae(20, 0.3, { met: 0.9 }).warnings).toEqual([
-        { key: "v", role: "input", value: 0.3, bound: { max: 0.2 } },
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
         { key: "met", role: "input", value: 0.9, bound: ASHRAE_55_LIMITS.met },
       ]);
     });
@@ -551,11 +542,11 @@ describe("pmv_ppd applicability warnings (#199)", () => {
     });
 
     test.each([
-      { tdb: 20, v: 0.3 },
-      { tdb: 24, v: 0.5 },
-      { tdb: 26, v: 1.0 },
-    ])("the row's bound is frozen (tdb=$tdb, v=$v)", ({ tdb, v }) => {
-      expect(Object.isFrozen(ashrae(tdb, v).warnings[0].bound)).toBe(true);
+      { tdb: 20, vr: 0.3 },
+      { tdb: 24, vr: 0.5 },
+      { tdb: 26, vr: 1.0 },
+    ])("the row's bound is frozen (tdb=$tdb, vr=$vr)", ({ tdb, vr }) => {
+      expect(Object.isFrozen(ashrae(tdb, vr).warnings[0].bound)).toBe(true);
     });
   });
 
@@ -574,10 +565,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
   test("the input rows break exactly when check_standard_compliance warns", () => {
     // check_standard_compliance keeps its own copy of these bounds and of the
     // ASHRAE airspeed rules (its strings are left as they were), so this pins
-    // the two copies together across both standards and every branch. ADR
-    // 0004 moved pmv_ppd's no-control rules apart from that copy, at exactly
-    // 0.7 clo and 1.3 met and in the operative temperature where tdb and tr
-    // differ; the grid has neither, and passes the one speed as both vr and v.
+    // the two copies together across both standards and every branch.
     for (const standard of [Standard.iso_7730_2025, Standard.ashrae_55_2023])
       for (const airspeed_control of [true, false])
         for (const tdb of [5, 10, 20, 24, 30, 35, 40, 45])
@@ -588,7 +576,6 @@ describe("pmv_ppd applicability warnings (#199)", () => {
                   tdb,
                   tr: tdb,
                   vr,
-                  v: vr,
                   rh: 50,
                   met,
                   clo,

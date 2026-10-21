@@ -10,11 +10,10 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "../../src/models/pmv_ppd.ts";
-import { ASHRAE_55_LIMITS, Standard } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/utilities.js";
 import { testDataUrls } from "./comftest.ts";
 import {
   assertNonEmptyRows,
-  correctNoControlFixtureCase,
   loadTestData,
   validateResult,
 } from "./testUtils.ts";
@@ -25,19 +24,17 @@ let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd);
 // Upstream keeps the rows labelled "ashrae", which matches none of the
 // fixture's uppercase "ASHRAE" labels, so its fixture test runs no row. This
 // runs what it means to run: every ASHRAE row, SI and IP, arrays included.
-// ADR 0004 changed the no-control row: see correctNoControlFixtureCase.
 const ashraeRows = assertNonEmptyRows(
   testData.data.filter(({ inputs }) => inputs.standard === "ASHRAE"),
   "pmv_ppd_ashrae ASHRAE rows",
-).map(correctNoControlFixtureCase);
+);
 
 // Mirrors pythermalcomfort v4.6.0 tests/test_pmv_ppd_ashrae.py.
 describe("test_pmv_ppd_ashrae", () => {
   test.each(ashraeRows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
     // As upstream, which swaps the row's label for `model="55-2023"`; the key
-    // is `standard` here (ADR 0003). The rest of the row goes in unchanged,
-    // but for the v ADR 0004 adds to the no-control row.
+    // is `standard` here (ADR 0003). The rest of the row goes in unchanged.
     const result = pmv_ppd_ashrae({
       ...inputs,
       standard: Standard.ashrae_55_2023,
@@ -75,23 +72,19 @@ describe("test_pmv_ppd_ashrae", () => {
 
     test("test_returns_nan_for_invalid_input_values", () => {
       // test airspeed limits
-      // ADR 0004 changed this block: each call gains v at its vr, and at
-      // exactly 1.3 met and 0.7 clo the limits now apply, so the last three
-      // pmv are NaN where upstream has -0.14, -0.43 and -0.57.
       const airspeed: [number, number, number, number, number][] = [
         [26, 0.9, 1.1, 0.5, NaN],
         [24, 0.6, 1.1, 0.5, NaN],
         [22, 0.3, 1.1, 0.5, NaN],
-        [26, 0.9, 1.3, 0.7, NaN],
-        [24, 0.6, 1.3, 0.7, NaN],
-        [22, 0.3, 1.3, 0.7, NaN],
+        [26, 0.9, 1.3, 0.7, -0.14],
+        [24, 0.6, 1.3, 0.7, -0.43],
+        [22, 0.3, 1.3, 0.7, -0.57],
       ];
       for (const [t, vr, met, clo, pmv] of airspeed) {
         const result = pmv_ppd_ashrae({
           tdb: t,
           tr: t,
           vr,
-          v: vr,
           rh: 50,
           met,
           clo,
@@ -234,15 +227,13 @@ describe("test_pmv_ppd_ashrae", () => {
       ]);
     });
 
-    // "exceeding 0.8 m/s" is a v row bounded at 0.8. ADR 0004 changed this
-    // test: it gains v at upstream's vr, and the row is keyed v.
+    // "exceeding 0.8 m/s" is a vr row bounded at 0.8.
     test("test_airspeed_control_false_cond1_warns", () => {
       // to ≈ 26 > 25.5, so only cond1 applies: v=0.9 > 0.8, clo=0.5 < 0.7, met=1.1 < 1.3
       const result = pmv_ppd_ashrae({
         tdb: 26,
         tr: 26,
         vr: 0.9,
-        v: 0.9,
         rh: 50,
         met: 1.1,
         clo: 0.5,
@@ -250,20 +241,17 @@ describe("test_pmv_ppd_ashrae", () => {
         airspeed_control: false,
       });
       expect(result.warnings).toEqual([
-        { key: "v", role: "input", value: 0.9, bound: { max: 0.8 } },
+        { key: "vr", role: "input", value: 0.9, bound: { max: 0.8 } },
       ]);
     });
 
-    // "comfort zone" is a v row bounded at the operative-temperature limit.
-    // ADR 0004 changed this test: it gains v at upstream's vr, and the row is
-    // keyed v.
+    // "comfort zone" is a vr row bounded at the operative-temperature limit.
     test("test_airspeed_control_false_cond2_warns", () => {
       // to ≈ 24, so 23 < to < 25.5; v=0.6 exceeds computed v_limit ≈ 0.32
       const result = pmv_ppd_ashrae({
         tdb: 24,
         tr: 24,
         vr: 0.6,
-        v: 0.6,
         rh: 50,
         met: 1.1,
         clo: 0.5,
@@ -271,19 +259,17 @@ describe("test_pmv_ppd_ashrae", () => {
         airspeed_control: false,
       });
       expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0].key).toBe("v");
+      expect(result.warnings[0].key).toBe("vr");
       expect(result.warnings[0].bound.max).toBeCloseTo(0.318, 6);
     });
 
-    // "exceeding 0.2 m/s" is a v row bounded at 0.2. ADR 0004 changed this
-    // test: it gains v at upstream's vr, and the row is keyed v.
+    // "exceeding 0.2 m/s" is a vr row bounded at 0.2.
     test("test_airspeed_control_false_cond3_warns", () => {
       // to ≈ 22 <= 23; v=0.3 > 0.2, clo=0.5 < 0.7, met=1.1 < 1.3
       const result = pmv_ppd_ashrae({
         tdb: 22,
         tr: 22,
         vr: 0.3,
-        v: 0.3,
         rh: 50,
         met: 1.1,
         clo: 0.5,
@@ -291,7 +277,7 @@ describe("test_pmv_ppd_ashrae", () => {
         airspeed_control: false,
       });
       expect(result.warnings).toEqual([
-        { key: "v", role: "input", value: 0.3, bound: { max: 0.2 } },
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
       ]);
     });
   });
@@ -302,18 +288,14 @@ describe("test_pmv_ppd_ashrae", () => {
 // _check_ashrae55_compliance directly. Its JS counterpart
 // (src/_internal/ashrae55.ts) pushes rows instead of warning, and
 // pmv_ppd_ashrae returns them, so the tests go through the model, with
-// upstream's v as both vr and v and an rh the model needs and the helper does
-// not take. ADR 0004 changed the three cond tests: the no-control rows read v
-// and are keyed v, where upstream names the speed in its warning text by
-// v_param_name.
+// upstream's v as vr and an rh the model needs and the helper does not take.
 describe("test_internal", () => {
   describe("TestCheckAshrae55Compliance", () => {
-    const at = (tdb: number, v: number, airspeed_control: boolean) =>
+    const at = (tdb: number, vr: number, airspeed_control: boolean) =>
       pmv_ppd_ashrae({
         tdb,
         tr: tdb,
-        vr: v,
-        v,
+        vr,
         rh: 50,
         met: 1.2,
         clo: 0.5,
@@ -321,27 +303,24 @@ describe("test_internal", () => {
       }).warnings;
 
     // tdb=tr=30 → to=30 > 25.5, so cond2 does not trigger alongside cond1.
-    // ADR 0004 changed this test: the row is keyed v.
     test("test_airspeed_control_cond1_warns", () => {
       expect(at(30, 1.0, false)).toEqual([
-        { key: "v", role: "input", value: 1.0, bound: { max: 0.8 } },
+        { key: "vr", role: "input", value: 1.0, bound: { max: 0.8 } },
       ]);
     });
 
     // With tdb=tr=24, to=24; v_limit ≈ 0.32; v=0.5 > v_limit triggers cond2.
-    // ADR 0004 changed this test: the row is keyed v.
     test("test_airspeed_control_cond2_warns", () => {
       const rows = at(24, 0.5, false);
       expect(rows).toHaveLength(1);
-      expect(rows[0].key).toBe("v");
+      expect(rows[0].key).toBe("vr");
       expect(rows[0].bound.max).toBeCloseTo(0.318, 6);
     });
 
     // With tdb=tr=22, to=22 <= 23; v=0.3 > 0.2 triggers cond3.
-    // ADR 0004 changed this test: the row is keyed v.
     test("test_airspeed_control_cond3_warns", () => {
       expect(at(22, 0.3, false)).toEqual([
-        { key: "v", role: "input", value: 0.3, bound: { max: 0.2 } },
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
       ]);
     });
 
@@ -413,144 +392,6 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       ).toBeLessThanOrEqual(1e-6);
       expect(at(false).compliance).toBe(true);
       expect(at(true).compliance).toBe(true);
-    });
-  });
-
-  // ADR 0004: without local control, the rule reads the average air speed v,
-  // not vr, from exactly 0.7 clo and 1.3 met, at ASHRAE 55's operative
-  // temperature.
-  describe("the air-speed rule without local control", () => {
-    const noControl = {
-      tdb: 22,
-      tr: 22,
-      vr: 0.15,
-      v: 0.15,
-      rh: 50,
-      met: 1.1,
-      clo: 0.5,
-      airspeed_control: false,
-    };
-
-    test("a v that breaks a limit while vr does not gives a row keyed v", () => {
-      expect(pmv_ppd_ashrae({ ...noControl, v: 0.3 }).warnings).toEqual([
-        { key: "v", role: "input", value: 0.3, bound: { max: 0.2 } },
-      ]);
-    });
-
-    test("a vr that breaks a limit while v does not gives no row", () => {
-      expect(pmv_ppd_ashrae({ ...noControl, vr: 0.3 }).warnings).toEqual([]);
-    });
-
-    test("the 0-2 m/s range row stays on vr, keyed vr", () => {
-      expect(
-        pmv_ppd_ashrae({ ...noControl, tdb: 26, tr: 26, vr: 2.5, v: 0.5 })
-          .warnings,
-      ).toEqual([
-        { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.vr },
-      ]);
-      expect(
-        pmv_ppd_ashrae({ ...noControl, tdb: 26, tr: 26, vr: 0.5, v: 2.5 })
-          .warnings,
-      ).toEqual([{ key: "v", role: "input", value: 2.5, bound: { max: 0.8 } }]);
-    });
-
-    test("PMV and PPD read vr: they equal those of the call with local control", () => {
-      const off = { ...noControl, v: 0.3, limit_inputs: false };
-      const controlled = pmv_ppd_ashrae({ ...off, airspeed_control: true });
-      for (const v of [0.1, 0.3, 0.7]) {
-        const result = pmv_ppd_ashrae({ ...off, v });
-        expect(result.pmv).toBe(controlled.pmv);
-        expect(result.ppd).toBe(controlled.ppd);
-      }
-    });
-
-    test("a rule row makes pmv, ppd and compliance NaN under limit_inputs", () => {
-      const broken = pmv_ppd_ashrae({ ...noControl, v: 0.3 });
-      expect(broken.pmv).toBeNaN();
-      expect(broken.ppd).toBeNaN();
-      expect(broken.compliance).toBeNaN();
-      const kept = pmv_ppd_ashrae({ ...noControl, vr: 0.3 });
-      expect(Number.isFinite(kept.pmv)).toBe(true);
-      expect(typeof kept.compliance).toBe("boolean");
-    });
-
-    // 71.6 °F is 22 °C. 0.492 fps is about 0.15 m/s, inside the 0.2 m/s
-    // limit, which it would break unconverted; 0.984 fps is about 0.3 m/s.
-    test("in IP units, v is converted from fps as vr is", () => {
-      const ip = {
-        ...noControl,
-        tdb: 71.6,
-        tr: 71.6,
-        vr: 0.492,
-        units: "IP" as const,
-      };
-      expect(pmv_ppd_ashrae({ ...ip, v: 0.492 }).warnings).toEqual([]);
-      const [row] = pmv_ppd_ashrae({ ...ip, v: 0.984 }).warnings;
-      expect(row.key).toBe("v");
-      expect(row.value).toBeCloseTo(0.3, 3);
-      expect(row.bound).toEqual({ max: 0.2 });
-    });
-
-    test("throws TypeError if v is not a finite number", () => {
-      for (const bad of [NaN, Infinity, -Infinity, "0.3"]) {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = { ...noControl, v: bad } as PmvPpdAshraeParams;
-        expect(() => pmv_ppd_ashrae(params)).toThrow(TypeError);
-      }
-    });
-
-    test("the limits apply at exactly 0.7 clo and at exactly 1.3 met", () => {
-      const row = { key: "v", role: "input", value: 0.3, bound: { max: 0.2 } };
-      expect(
-        pmv_ppd_ashrae({ ...noControl, v: 0.3, clo: 0.7 }).warnings,
-      ).toEqual([row]);
-      expect(
-        pmv_ppd_ashrae({ ...noControl, v: 0.3, met: 1.3 }).warnings,
-      ).toEqual([row]);
-    });
-
-    test("above 0.7 clo or above 1.3 met, the occupant is exempt", () => {
-      expect(
-        pmv_ppd_ashrae({ ...noControl, v: 0.3, clo: 0.71 }).warnings,
-      ).toEqual([]);
-      expect(
-        pmv_ppd_ashrae({ ...noControl, v: 0.3, met: 1.31 }).warnings,
-      ).toEqual([]);
-    });
-
-    // At v = 0.79 m/s, tdb 30 and tr 14 °C weigh to 25.80 °C by ISO 7726,
-    // above the 25.5 °C limit, where nothing below 0.8 m/s breaks, and to
-    // 25.2 °C by ASHRAE 55 (0.7 tdb + 0.3 tr), where the limit is 0.7253 m/s.
-    // Weighed by vr = 0.15 m/s instead, to would be 22 °C and the limit
-    // 0.2 m/s.
-    test("the limit is chosen at the operative temperature ASHRAE 55 weighs by v", () => {
-      const rows = pmv_ppd_ashrae({
-        ...noControl,
-        tdb: 30,
-        tr: 14,
-        v: 0.79,
-      }).warnings;
-      expect(rows).toHaveLength(1);
-      expect(rows[0].key).toBe("v");
-      expect(rows[0].value).toBe(0.79);
-      expect(rows[0].bound.max).toBeCloseTo(0.725292, 6);
-    });
-
-    test("without v, the call throws a TypeError naming v", () => {
-      const { v: _, ...withoutV } = noControl;
-      expect(() => pmv_ppd_ashrae(withoutV)).toThrow(TypeError);
-      expect(() => pmv_ppd_ashrae(withoutV)).toThrow(/"v"/);
-      expect(() => pmv_ppd_ashrae({ ...withoutV, v: undefined })).toThrow(
-        TypeError,
-      );
-    });
-
-    test("with local control, v is optional and unused", () => {
-      const { v: _, ...withoutV } = noControl;
-      const controlled = { ...withoutV, airspeed_control: true };
-      expect(pmv_ppd_ashrae({ ...controlled, v: 0.5 })).toEqual(
-        pmv_ppd_ashrae(controlled),
-      );
     });
   });
 

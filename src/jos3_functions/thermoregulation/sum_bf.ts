@@ -1,4 +1,4 @@
-import { np_sum } from "../../_internal/numpy.ts";
+import { np_sum, py_type_name } from "../../_internal/numpy.ts";
 
 /**
  * Sum the total blood flow in various body parts
@@ -32,22 +32,46 @@ export function sum_bf(
   return co;
 }
 
-// `bf.sum()` as upstream calls it. `np_sum` reads a string as NaN, so a
-// string throws first, as upstream raises (ADR 0012 as amended 2026-10-21):
-// a string in place of an array raises Python's AttributeError, a TypeError
-// here; a string element raises the TypeError numpy gives for an object array
+// `bf.sum()` as upstream calls it. `np_sum` reads a non-numeric element as
+// NaN or a number, so such an input throws first, as upstream raises (ADR
+// 0012 as amended 2026-10-21): a string in place of an array raises Python's
+// AttributeError, a TypeError here; an array with an element that is not a
+// number or a boolean raises the TypeError numpy gives for an object array,
+// which adds the elements left to right from element 0 with Python's `+`
 // (pythermalcomfort 4.6.2;
-// `.scratch/v2-models/wave-2/batch1-followup/implementer/d25_up.py`, `.out`).
-// Any other value goes to `np_sum` unchecked, as before.
+// `.scratch/v2-models/wave-2/batch1-followup/implementer/d25_up.py`,
+// `.scratch/v2-models/wave-2/batch1-followup/p1/p1_up.py`, `.out`). An array
+// with no number in it, and any other value, goes to `np_sum` as before.
 function sum(bf: readonly number[]): number {
   if (typeof (bf as unknown) === "string") {
     throw new TypeError("'str' object has no attribute 'sum'");
   }
-  if (
-    Array.isArray(bf) &&
-    (bf as readonly unknown[]).some((x) => typeof x === "string")
-  ) {
-    throw new TypeError("unsupported operand type(s) for +: 'float' and 'str'");
+  const elements = bf as readonly unknown[];
+  if (Array.isArray(elements) && !elements.every(is_numeric)) {
+    elements.reduce(py_add);
   }
   return np_sum(bf);
+}
+
+function is_numeric(x: unknown): x is number | boolean {
+  return typeof x === "number" || typeof x === "boolean";
+}
+
+// Python's `a + b` for the values an element can be. A number is named
+// "float": a JS number has no int/float distinction (ADR 0001's first reason),
+// and upstream's arrays hold floats.
+function py_add(a: unknown, b: unknown): unknown {
+  if (is_numeric(a) && is_numeric(b)) return Number(a) + Number(b);
+  if (typeof a === "string" && typeof b === "string") return a + b;
+  if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
+  const name = (x: unknown) =>
+    typeof x === "number" ? "float" : py_type_name(x);
+  if (typeof a === "string" || Array.isArray(a)) {
+    throw new TypeError(
+      `can only concatenate ${name(a)} (not "${name(b)}") to ${name(a)}`,
+    );
+  }
+  throw new TypeError(
+    `unsupported operand type(s) for +: '${name(a)}' and '${name(b)}'`,
+  );
 }

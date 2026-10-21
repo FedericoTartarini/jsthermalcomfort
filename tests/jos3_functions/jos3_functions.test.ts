@@ -191,3 +191,77 @@ describe("sum_bf with a string, as pythermalcomfort 4.6.2 raises", () => {
     },
   );
 });
+
+// An object array adds its elements left to right from element 0, so a
+// non-numeric element after a number raises "unsupported operand type(s) for
+// +: 'float' and '<its type>'", and one at index 0 raises the message of
+// itself plus element 1 (pythermalcomfort 4.6.2;
+// `.scratch/v2-models/wave-2/batch1-followup/p1/p1_up.py`, `.out`).
+describe("sum_bf with a non-numeric element, as pythermalcomfort 4.6.2 raises", () => {
+  const base = new Array<number>(17).fill(2.5);
+  const call = (k: number, index: number, element: unknown) => {
+    const arrays: unknown[] = [base, base, base, base];
+    const x: unknown[] = [...base];
+    x[index] = element;
+    arrays[k] = x;
+    const [a, b, c, d] = arrays as number[][];
+    return () => T.sum_bf(a, b, c, d, 0.5, 0.7);
+  };
+
+  test.each<[number, number, unknown, string]>([
+    [0, 3, null, "NoneType"],
+    [3, 16, null, "NoneType"],
+    [0, 3, {}, "dict"],
+    [3, 16, {}, "dict"],
+    [0, 3, [1], "list"],
+    [3, 16, [1], "list"],
+  ])(
+    "array %i, index %i, element %p after a number throws upstream's TypeError",
+    (k, index, element, type) => {
+      expect(call(k, index, element)).toThrow(
+        new TypeError(
+          `unsupported operand type(s) for +: 'float' and '${type}'`,
+        ),
+      );
+      expect(call(k, index, element)).toThrow(TypeError);
+    },
+  );
+
+  test.each<[number, unknown, string]>([
+    [0, "x", 'can only concatenate str (not "float") to str'],
+    [3, "x", 'can only concatenate str (not "float") to str'],
+    [0, null, "unsupported operand type(s) for +: 'NoneType' and 'float'"],
+    [0, {}, "unsupported operand type(s) for +: 'dict' and 'float'"],
+    [0, [1], 'can only concatenate list (not "float") to list'],
+  ])(
+    "array %i, element %p at index 0 throws upstream's TypeError",
+    (k, element, message) => {
+      expect(call(k, 0, element)).toThrow(new TypeError(message));
+      expect(call(k, 0, element)).toThrow(TypeError);
+    },
+  );
+
+  test.each<[unknown, unknown, string]>([
+    ["x", "y", 'can only concatenate str (not "float") to str'],
+    [null, "y", "unsupported operand type(s) for +: 'NoneType' and 'str'"],
+  ])(
+    "elements %p and %p at index 0 and 1 throw upstream's TypeError",
+    (first, second, message) => {
+      const x: unknown[] = [...base];
+      x[0] = first;
+      x[1] = second;
+      const run = () => T.sum_bf(x as number[], base, base, base, 0.5, 0.7);
+      expect(run).toThrow(new TypeError(message));
+      expect(run).toThrow(TypeError);
+    },
+  );
+
+  test.each([
+    [true, 170.9],
+    [false, 169.9],
+  ])("a boolean %p at index 0 counts as %p, as in Python", (element, co) => {
+    const x: unknown[] = [...base];
+    x[0] = element;
+    expect(T.sum_bf(x as number[], base, base, base, 0.5, 0.7)).toBe(co);
+  });
+});

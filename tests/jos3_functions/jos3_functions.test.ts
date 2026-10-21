@@ -265,7 +265,8 @@ describe("sum_bf with a non-numeric element, as pythermalcomfort 4.6.2 raises", 
     expect(T.sum_bf(x as number[], base, base, base, 0.5, 0.7)).toBe(co);
   });
 
-  // With no number in the array, the elements' sum reaches `co += ...`
+  // With no number or boolean in the array, a sum that `+` can form reaches
+  // `co += ...` (`[null, null]` raises inside the sum, as above)
   // (thermoregulation.py:1548-1551): `co` is the int 0 before bf_core's sum
   // and a numpy float64 after it. For a string sum numpy raises a
   // UFuncTypeError, a TypeError subclass; the message here is Python's for a

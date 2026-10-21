@@ -41,11 +41,11 @@ export function sum_bf(
 // (pythermalcomfort 4.6.2;
 // `.scratch/v2-models/wave-2/batch1-followup/implementer/d25_up.py`,
 // `.scratch/v2-models/wave-2/batch1-followup/p1/p1_up.py`, `.out`). A sum
-// that is not a number (an array with no number in it) raises at upstream's
-// `co += ...`, where `co` is the int 0 before bf_core's sum and a numpy
-// float64 after it; for a string sum numpy raises a UFuncTypeError, a
-// TypeError subclass, and the message here is Python's for a float, as ADR
-// 0012 makes the class the contract
+// that is not a number (an array with no number or boolean in it, whose
+// elements `+` adds) raises at upstream's `co += ...`, where `co` is the int
+// 0 before bf_core's sum and a numpy float64 after it; for a string sum
+// numpy raises a UFuncTypeError, a TypeError subclass, and the message here
+// is Python's for a float, as ADR 0012 makes the class the contract
 // (`.scratch/v2-models/wave-2/batch1-followup/p1/p1_residual_up.py`, `.out`).
 // A list sum after bf_core goes to `np_sum`, where upstream broadcasts it to
 // an array: an open point in ticket 25. Any other value goes to `np_sum` as

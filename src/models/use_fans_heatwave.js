@@ -31,7 +31,7 @@ import { two_nodes_gagge } from "./two_nodes_gagge.js";
 
 /**
  * @typedef {Object} HeatwaveKwargs - a keywords argument set containing the additional arguments for use fans heatwave
- * @property {number} [max_sweating] - max sweating, [mL/h/m2] default 500
+ * @property {number} [max_sweating] - Maximum rate at which regulatory sweat is generated, [kg/h/m2]. Defaults to 500.
  * @property {boolean} [round=true] - if True rounds output value, if False it does not round it, default True
  * @property {boolean} [limit_inputs=true]  – By default, if the inputs are outsude the following limits the function returns nan. If
  * False returns values regardless of the input values, default True
@@ -71,9 +71,9 @@ import { two_nodes_gagge } from "./two_nodes_gagge.js";
  * 
  * The body surface area can be calculated using the function pythermalcomfort.utilities.body_surface_area().
  * @param {number} [p_atm] atmospheric pressure, default value 101325 [Pa] in [atm] if units = ‘IP’
- * @param {"standing" | "sitting"} [body_position="standing"] select either “sitting” or “standing”
+ * @param {"standing" | "sitting"} [position="standing"] select either “sitting” or “standing”
  * @param {"SI" | "IP"} [units="SI"] select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {number} [max_skin_blood_flow=80] maximum blood flow from the core to the skin
+ * @param {number} [max_skin_blood_flow=80] maximum blood flow from the core to the skin. Defaults to 80.
  * @param {HeatwaveKwargs} [kwargs]
  *
  * @returns {HeatwaveReturnType} object with results of use fans during heatwave
@@ -111,7 +111,7 @@ const USE_FANS_HEATWAVES_SCHEMA = {
   wme: { type: "number" },
   body_surface_area: { type: "number", required: false },
   p_atm: { type: "number", required: false },
-  body_position: { enum: ["sitting", "standing"] },
+  position: { enum: ["sitting", "standing"] },
   units: { enum: ["SI", "IP"] },
   max_skin_blood_flow: { type: "number" },
   round: { type: "boolean", required: false },
@@ -129,7 +129,7 @@ export function use_fans_heatwaves(
   wme = 0,
   body_surface_area,
   p_atm,
-  body_position = "standing",
+  position = "standing",
   units = "SI",
   max_skin_blood_flow = 80,
   kwargs = {},
@@ -154,7 +154,7 @@ export function use_fans_heatwaves(
       wme,
       body_surface_area,
       p_atm,
-      body_position,
+      position,
       units,
       max_skin_blood_flow,
       round: joint_kwargs.round,
@@ -196,7 +196,7 @@ export function use_fans_heatwaves(
     wme,
     body_surface_area,
     p_atm,
-    body_position,
+    position,
     max_skin_blood_flow,
     { round_output: false, max_sweating: joint_kwargs.max_sweating },
   );

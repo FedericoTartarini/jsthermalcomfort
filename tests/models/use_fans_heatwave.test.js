@@ -24,7 +24,7 @@ describe("use_fans_heatwaves", () => {
       wme,
       body_surface_area,
       p_atm,
-      position: body_position,
+      position: position,
       units,
       max_skin_blood_flow,
       kwargs,
@@ -40,7 +40,7 @@ describe("use_fans_heatwaves", () => {
       wme,
       body_surface_area,
       p_atm,
-      body_position,
+      position,
       units,
       max_skin_blood_flow,
       kwargs,
@@ -66,7 +66,7 @@ describe("use_fans_heatwaves input validation", () => {
     expect(() => use_fans_heatwaves(...args)).toThrow(TypeError);
   });
 
-  test("throws Error if body_position is not a valid enum", () => {
+  test("throws Error if position is not a valid enum", () => {
     expect(() =>
       use_fans_heatwaves(
         25,

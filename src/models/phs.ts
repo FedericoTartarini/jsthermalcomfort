@@ -645,7 +645,9 @@ interface _PhsKernelInputs {
 // library returned for in the two iteration sweeps
 // (.scratch/v2-models/wave-2/research/phs/iter_sweep*.out), the t_cl loop
 // needed at most 19 iterations except at a weight of 1e-9 kg, where it
-// needed 26 to 83; the t_cr loop needed at most 32, at a weight of 1e-9 kg.
+// needed 26 to 83 (eight cases 26, one 83:
+// .scratch/v2-models/wave-2/research/batch1/phs_cap/count.mjs, count.out);
+// the t_cr loop needed at most 32, at a weight of 1e-9 kg.
 const _MAX_ITERATIONS = 1000;
 
 function _divisor(x: number): number {

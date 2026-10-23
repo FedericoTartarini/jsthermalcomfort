@@ -1,13 +1,23 @@
-import { p_sat } from "../psychrometrics/p_sat.js";
-import {
-  body_surface_area,
-  round,
-  validateInputs,
-} from "../utilities/utilities.js";
+import { body_surface_area, round } from "../utilities/utilities.js";
+
+/**
+ * @typedef {number|boolean|PetNumericInput[]} PetNumericInput
+ * @public
+ */
+
+/**
+ * @typedef {string|PetChoiceInput[]} PetChoiceInput
+ * @public
+ */
+
+/**
+ * @typedef {number|PetValue[]} PetValue
+ * @public
+ */
 
 /**
  * @typedef {object} PetSteadyResult
- * @property {number} pet - Steady-state PET under the given ambient conditions
+ * @property {PetValue} pet - Steady-state PET under the given ambient conditions
  * @public
  */
 
@@ -32,49 +42,36 @@ import {
  * PET calculation routine, and implementing a state-of-the-art vapour diffusion model.
  * Walther and Goestchel (2018) model is therefore used to calculate the PET.
  *
- * **Warning:** Some tests are currently failing for this function. Please refer to the test
- * suite or the project's issue tracker for more details.
+ * Supports scalars and rectangular arrays with NumPy-style broadcasting.
+ * Results are rounded to two decimal places.
  *
  * @public
  * @memberof models
  * @docname Physiological Equivalent Temperature (PET)
  *
- * @param {number} tdb - dry bulb air temperature, [°C]
- * @param {number} tr - mean radiant temperature, [°C]
- * @param {number} v - air speed, [m/s]
- * @param {number} rh - relative humidity, [%]
- * @param {number} met - metabolic rate, [met]
- * @param {number} clo - clothing insulation, [clo]
- * @param {number} [p_atm=1013.25] - atmospheric pressure, default value 1013.25 [hPa]
- * @param {1 | 2 | 3} [position=1] - position of the individual (1=sitting, 2=standing, 3=standing, forced convection)
- * @param {number} [age=23] - age in years
- * @param {1 | 2} [sex=1] - male (1) or female (2).
- * @param {number} [weight=75] - body mass, [kg]
- * @param {number} [height=1.8] - height, [m]
- * @param {number} [wme=0] - external work, [W/(m2)]
+ * @param {PetNumericInput} tdb - dry bulb air temperature, [°C]
+ * @param {PetNumericInput} tr - mean radiant temperature, [°C]
+ * @param {PetNumericInput} v - air speed, [m/s]
+ * @param {PetNumericInput} rh - relative humidity, [%]
+ * @param {PetNumericInput} met - metabolic rate, [met]
+ * @param {PetNumericInput} clo - clothing insulation, [clo]
+ * @param {PetNumericInput} [p_atm=1013.25] - atmospheric pressure, default value 1013.25 [hPa]
+ * @param {PetChoiceInput} [position="sitting"] - "sitting", "standing", or "standing, forced convection"; scalar or array.
+ * @param {PetNumericInput} [age=23] - age in years
+ * @param {PetChoiceInput} [sex="male"] - "male" or "female"; scalar or array.
+ * @param {PetNumericInput} [weight=75] - body mass, [kg]
+ * @param {PetNumericInput} [height=1.8] - height, [m]
+ * @param {PetNumericInput} [wme=0] - external work, [met]
  *
  * @returns {PetSteadyResult} set containing results for the model
  *
  * @example
- * const result = pet_steady(20, 20, 50, 0.15, 1.37, 0.5);
+ * const result = pet_steady(20, 20, 0.15, 50, 1.37, 0.5);
  * console.log(result); // {pet: 18.85}
+ * @example
+ * pet_steady([25, 30], [25, 30], [0.1, 0.2], [50, 60], [1.2, 1.4], [0.5, 0.6]);
+ * // {pet: [24.67, 31.46]}
  */
-const PET_STEADY_SCHEMA = {
-  tdb: { type: "number" },
-  tr: { type: "number" },
-  v: { type: "number" },
-  rh: { type: "number" },
-  met: { type: "number" },
-  clo: { type: "number" },
-  p_atm: { type: "number" },
-  position: { type: "number" },
-  age: { type: "number" },
-  sex: { type: "number" },
-  weight: { type: "number" },
-  height: { type: "number" },
-  wme: { type: "number" },
-};
-
 export function pet_steady(
   tdb,
   tr,
@@ -83,32 +80,128 @@ export function pet_steady(
   met,
   clo,
   p_atm = 1013.25,
-  position = 1,
+  position = "sitting",
   age = 23,
-  sex = 1,
+  sex = "male",
   weight = 75,
   height = 1.8,
   wme = 0,
 ) {
-  validateInputs(
-    {
-      tdb,
-      tr,
-      v,
-      rh,
-      met,
-      clo,
-      p_atm,
-      position,
-      age,
-      sex,
-      weight,
-      height,
-      wme,
-    },
-    PET_STEADY_SCHEMA,
-  );
+  // Validate choices case-insensitively without normalizing them, as Python does.
+  const inputs = [
+    tdb,
+    tr,
+    v,
+    rh,
+    met,
+    clo,
+    p_atm,
+    position,
+    age,
+    sex,
+    weight,
+    height,
+    wme,
+  ];
+  const names = [
+    "tdb",
+    "tr",
+    "v",
+    "rh",
+    "met",
+    "clo",
+    "p_atm",
+    "position",
+    "age",
+    "sex",
+    "weight",
+    "height",
+    "wme",
+  ];
+  const shapes = inputs.map((value, i) => input_shape(value, names[i]));
+  const rank = Math.max(...shapes.map((shape) => shape.length));
+  const shape = Array.from({ length: rank }, (_, axis) => {
+    let size = 1;
+    for (const inputShape of shapes) {
+      const next = inputShape[axis - rank + inputShape.length] ?? 1;
+      if (size !== next && size !== 1 && next !== 1) {
+        throw new RangeError("inputs must have broadcast-compatible shapes");
+      }
+      if (size === 1) size = next;
+    }
+    return size;
+  });
+  function evaluate(indices) {
+    if (indices.length === rank) {
+      const values = inputs.map((value, i) => {
+        for (let axis = 0; axis < shapes[i].length; axis++) {
+          value =
+            value[
+              shapes[i][axis] === 1
+                ? 0
+                : indices[rank - shapes[i].length + axis]
+            ];
+        }
+        return i === 7 || i === 9 ? value : Number(value);
+      });
+      return calculate_pet(...values);
+    }
+    return Array.from({ length: shape[indices.length] }, (_, i) =>
+      evaluate([...indices, i]),
+    );
+  }
+  return { pet: evaluate([]) };
+}
 
+function input_shape(value, name) {
+  if (!Array.isArray(value)) {
+    const choices =
+      name === "position"
+        ? ["sitting", "standing", "standing, forced convection"]
+        : name === "sex"
+          ? ["male", "female"]
+          : null;
+    if (choices) {
+      if (typeof value !== "string")
+        throw new TypeError(`${name} must contain strings`);
+      if (!choices.includes(value.toLowerCase()))
+        throw new RangeError(`Invalid ${name}: ${value}`);
+    } else if (typeof value !== "number" && typeof value !== "boolean") {
+      throw new TypeError(`${name} must contain numbers`);
+    }
+    return [];
+  }
+  if (!value.length)
+    throw new RangeError("PET cannot be evaluated on empty arrays");
+  const children = Array.from(value, (child) => input_shape(child, name));
+  const first = children[0];
+  if (
+    children.some(
+      (child) =>
+        child.length !== first.length ||
+        child.some((size, i) => size !== first[i]),
+    )
+  ) {
+    throw new RangeError(`${name} must be a rectangular array`);
+  }
+  return [value.length, ...first];
+}
+
+function calculate_pet(
+  tdb,
+  tr,
+  v,
+  rh,
+  met,
+  clo,
+  p_atm,
+  position,
+  age,
+  sex,
+  weight,
+  height,
+  wme,
+) {
   const met_factor = 58.2; // met conversion factor
   met = met * met_factor; // metabolic rate
 
@@ -136,7 +229,7 @@ export function pet_steady(
       ),
     t_guess,
   );
-  return { pet: pet_fc(t_stable) };
+  return pet_fc(t_stable, p_atm, position, age, sex, weight, height, wme);
 }
 
 /**
@@ -145,7 +238,7 @@ export function pet_steady(
  * @param {[number,number,number]} _t_stable
  * @returns {number}
  */
-function pet_fc(_t_stable) {
+function pet_fc(_t_stable, p_atm, position, age, sex, weight, height, wme) {
   // solving for PET
   const pet_guess = _t_stable[2]; // start with the clothing temperature
 
@@ -160,6 +253,13 @@ function pet_fc(_t_stable) {
         undefined,
         undefined,
         false,
+        p_atm,
+        position,
+        age,
+        sex,
+        weight,
+        height,
+        wme,
       );
       return [result];
     },
@@ -245,8 +345,8 @@ function sweat_rate(t_body) {
  * @param {boolean} actual_environment - default False. True=solve 3eqs/3unknowns, False=solve for PET
  * @param {number} p_atm - atmospheric pressure, default value 1013.25 [hPa]
  * @param {number} age - age in years. default=23
- * @param {1 | 2 | 3} position - position of the individual (1=sitting, 2=standing, 3=standing, forced convection)
- * @param {1 | 2} sex - default 1. male (1) or female (2).
+ * @param {string} position - sitting, standing, or standing, forced convection
+ * @param {string} sex - male or female.
  * @param {number} weight - default 75. body mass, [kg]
  * @param {number} height - default 1.8. height, [m]
  * @param {number} wme - external work, [W/(m2)] default 0
@@ -262,9 +362,9 @@ function solve_pet(
   _clo = 0.9,
   actual_environment = false,
   p_atm = 1013.25,
-  position = 1,
+  position = "sitting",
   age = 23,
-  sex = 1,
+  sex = "male",
   weight = 75,
   height = 1.8,
   wme = 0,
@@ -293,7 +393,7 @@ function solve_pet(
       0.004 * (30.0 - age) +
       0.01 * ((height * 100.0) / Math.pow(weight, 1.0 / 3.0) - 43.4));
   //Attribution of internal energy depending on the sex of the subject
-  const met_correction = sex === 1 ? met_male : met_female;
+  const met_correction = sex === "male" ? met_male : met_female;
   // Source term : metabolic activity
   const he = (_met + met_correction) / a_dubois;
   // impact of efficiency
@@ -307,7 +407,7 @@ function solve_pet(
     (173.51 * _clo - 2.36 - 100.76 * _clo * _clo + 19.28 * _clo ** 3.0) / 100;
   const a_clo = a_dubois * f_a_cl + a_dubois * (fcl - 1.0); // clothed body surface area
 
-  const f_eff = position === 2 ? 0.696 : 0.725; // effective radiation factor
+  const f_eff = position === "standing" ? 0.696 : 0.725; // effective radiation factor
 
   const a_r_eff = a_dubois * f_eff; // Effective radiative area depending on the position of the subject
 
@@ -320,14 +420,14 @@ function solve_pet(
   // Convection coefficient depending on wind velocity and subject position
   let hc = 0;
   switch (position) {
-    case 1:
+    default:
       hc = 2.67 + 6.5 * Math.pow(_v, 0.67); // sitting
       break;
-    case 2:
+    case "standing":
       // standing
       hc = 2.26 + 7.42 * Math.pow(_v, 0.67);
       break;
-    case 3:
+    case "standing, forced convection":
       // standing, forced convection
       hc = 8.6 * Math.pow(_v, 0.513);
       break;
@@ -462,7 +562,7 @@ function solve_pet(
  *
  * @param {NewtonRaphsonSingleFunction} func
  * @param {[number]} initialGuess
- * @param {number} [tolerance=1e-3]
+ * @param {number} [tolerance=1e-6]
  * @param {number} [maxIterations=1000]
  *
  * @returns {[number]}
@@ -470,7 +570,7 @@ function solve_pet(
 function newtonRaphsonSingleEquation(
   func,
   initialGuess,
-  tolerance = 1e-3,
+  tolerance = 1e-6,
   maxIterations = 1000,
 ) {
   let solution = [...initialGuess];
@@ -487,7 +587,7 @@ function newtonRaphsonSingleEquation(
     solution[0] -= fValue[0] / dfdx[0][0];
     iteration++;
   }
-  throw new Error("Newton Raphson Single equation did not converged");
+  throw new Error("PET reference-environment solver did not converge");
 }
 
 /**
@@ -496,7 +596,7 @@ function newtonRaphsonSingleEquation(
  *
  * @param {NewtonRaphsonFunction} f
  * @param {[number, number, number]} initialGuess
- * @param {number} [tolerance=1e-3]
+ * @param {number} [tolerance=1e-6]
  * @param {number} [maxIterations=1000]
  *
  * @returns {[number, number, number]}
@@ -504,7 +604,7 @@ function newtonRaphsonSingleEquation(
 function newtonRaphson(
   f,
   initialGuess,
-  tolerance = 1e-3,
+  tolerance = 1e-6,
   maxIterations = 1000,
 ) {
   let iteration = 0;
@@ -547,13 +647,24 @@ function newtonRaphson(
       (J[0][0] * J[2][1] - J[0][1] * J[2][0]) * fValue[1] +
       (J[0][0] * J[1][1] - J[0][1] * J[1][0]) * fValue[2];
 
-    solution[0] -= d0 / detJ;
-    solution[1] -= d1 / detJ;
-    solution[2] -= d2 / detJ;
+    // Backtrack across the piecewise blood-flow/sweating equations instead of
+    // oscillating between branches with a full Newton step.
+    const step = [d0 / detJ, d1 / detJ, d2 / detJ];
+    const residual = Math.hypot(...fValue);
+    let scale = 1;
+    let candidate;
+    while (scale >= 1 / 1048576) {
+      candidate = solution.map((value, i) => value - scale * step[i]);
+      if (Math.hypot(...f(candidate)) < residual) break;
+      scale /= 2;
+    }
+    if (scale < 1 / 1048576)
+      throw new Error("PET solver could not reduce the residual");
+    solution = candidate;
 
     ++iteration;
   }
-  throw new Error("Newton Raphson did not converged");
+  throw new Error("PET body-temperature solver did not converge");
 }
 
 /**
@@ -561,11 +672,11 @@ function newtonRaphson(
  * @param {NewtonRaphsonFunction} f
  * @param {[number, number, number]} values
  * @param {[number, number, number]} [evaluated] - result of f(values)
- * @param {number} [h=1e-2]
+ * @param {number} [h=1e-5]
  * @param {number[][]} [matrix]
  * @returns {number[][]}
  */
-function numericalDerivatives(f, values, evaluated, h = 1e-2, matrix) {
+function numericalDerivatives(f, values, evaluated, h = 1e-5, matrix) {
   const n = values.length;
   let aux = [...values];
   if (evaluated === undefined) {
@@ -609,4 +720,45 @@ function createMatrix(n) {
   }
 
   return matrix;
+}
+
+// PET needs the unrounded Python saturation pressure: rounding creates
+// discontinuities in the numerical Jacobian. Keep the public p_sat API unchanged.
+function p_sat(tdb) {
+  const c_to_k = 273.15;
+
+  const ta_k = tdb + c_to_k;
+  const c1 = -5674.5359;
+  const c2 = 6.3925247;
+  const c3 = -0.009677843; // = -0.9677843 * math.pow(10, -2)
+  const c4 = 6.2215701e-7; // = 0.62215701 * math.pow(10, -6)
+  const c5 = 2.0747825e-9; // = 0.20747825 * math.pow(10, -8)
+  const c6 = -9.484024e-13; // = -0.9484024 * math.pow(10, -12)
+  const c7 = 4.1635019;
+  const c8 = -5800.2206;
+  const c9 = 1.3914993;
+  const c10 = -0.048640239;
+  const c11 = 0.000041764767999999996; // = 0.41764768 * math.pow(10, -4)
+  const c12 = -1.4452093e-8; // = -0.14452093 * math.pow(10, -7)
+  const c13 = 6.5459673;
+
+  const calc = () => {
+    if (ta_k < c_to_k) {
+      return Math.exp(
+        c1 / ta_k +
+          c2 +
+          ta_k * (c3 + ta_k * (c4 + ta_k * (c5 + c6 * ta_k))) +
+          c7 * Math.log(ta_k),
+      );
+    }
+
+    return Math.exp(
+      c8 / ta_k +
+        c9 +
+        ta_k * (c10 + ta_k * (c11 + ta_k * c12)) +
+        c13 * Math.log(ta_k),
+    );
+  };
+
+  return calc();
 }

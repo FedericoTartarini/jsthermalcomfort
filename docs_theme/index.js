@@ -116,6 +116,7 @@ const displayNameMap = {
   // Models
   heat_index: "Heat Index (HI)",
   heat_index_schoen: "Heat Index (Schoen)",
+  heat_index_lu: "Heat Index (Lu and Romps)",
   phs: "Predicted Heat Strain (PHS)",
   humidex: "Humidex",
   net: "Normal Effective Temperature (NET)",

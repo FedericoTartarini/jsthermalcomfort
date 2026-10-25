@@ -1,6 +1,6 @@
 # jsthermalcomfort
 
-A JavaScript/TypeScript port of pythermalcomfort. Upstream owns the science; this library owns only the language-level shape it takes in JS, plus what its consumers need on top.
+A JavaScript/TypeScript port of pythermalcomfort. Upstream owns the science; this library owns only the language-level shape it takes in JS, plus the v2 additions the user approved (ADR 0027).
 
 ## Language
 
@@ -9,7 +9,7 @@ pythermalcomfort at its current release; the source of every model's name, argum
 _Avoid_: Python version, original, reference implementation
 
 **Kernel**:
-The private solver a family of models shares (the PMV iteration). It is not part of the published surface.
+The private solver behind one or more models, at upstream's path and under upstream's name (`_pmv_ppd_optimized`, `_utci_optimized`). It is exported from its file for tests only, never from an entry point (ADR 0021).
 _Avoid_: core, engine, optimized function
 
 **Wrapper**:
@@ -17,7 +17,7 @@ A public model that binds a kernel to one standard's limits and conventions (`pm
 _Avoid_: variant, model function, facade
 
 **Main model**:
-A model the CBE Thermal Comfort Tool calls to compute a result it shows: today `pmv_ppd_iso`, `pmv_ppd_ashrae`, `adaptive_ashrae` and `heat_index_rothfusz`. A function that computes part of one (`cooling_effect`), a helper (`psy_ta_rh`, `t_o`) and an input calculator are not main models, even when the tool calls them.
+Every function and class upstream publishes in `pythermalcomfort.models`, that is, the `__all__` of `models/__init__.py`. At v4.6.2 that is 41 names: 39 functions, the class `JOS3` and the enum `Sports`, which goes with `sports_heat_stress_risk`. A private upstream file or helper that a main model calls goes with it and is not a main model itself, and neither is a function outside `models/` (`psy_ta_rh`, `t_o`) (ADR 0018).
 _Avoid_: core model, primary model, app model
 
 **Switch**:
@@ -33,25 +33,41 @@ A versioned identifier for a published standard (`Standard.ashrae_55_2023`, valu
 _Avoid_: model (for a standard), edition (except when contrasting two versions), norm
 
 **Deviation**:
-A documented difference from upstream, allowed only because JavaScript or TypeScript forces it or because a consumer needs it. It never changes a value upstream returns and never adds an input that changes what a model computes.
+A difference from upstream, allowed only where JavaScript or TypeScript forces it or as an approved v2 addition. The user approves each one, and each has a row in its model's deviation register (ADRs 0019, 0027). It never changes a value upstream returns and never adds an input that changes what a model computes.
 _Avoid_: customisation, JS-only behaviour, fork
 
+**Deviation register**:
+A model's table at `docs/deviations/<model>.md` of every deviation and addition. A comment at the deviation's site cites each row by id, and a test cross-checks the register against the code (ADR 0019).
+_Avoid_: deviation list, ledger, changelog
+
+**Whitelist**:
+The approved list of mechanical translations from upstream's Python, such as a params object for keyword arguments or `Math` for numpy math. They are not deviations and get no register row (ADR 0019).
+_Avoid_: allowlist, translation rules
+
+**Deviation class**:
+A kind of deviation the user approved once, such as scalar-only inputs or `@throws` with the JavaScript class. Each instance still gets a register row that names its class (ADR 0019).
+_Avoid_: deviation type, deviation category
+
 **Consumer contract**:
-What every main model exposes beyond upstream's function: its model info, a `round_output` switch, `limit_inputs`, the `warnings` rows, and for PMV the exported sensation bins and, under ISO 7730, the category bins. An input calculator, a function whose result fills another model's input (`clo_tout`, `solar_gain`), exposes its model info and only what upstream gives it grounds for: `round_output` where upstream has one (`solar_gain`; `clo_tout` always rounds), `warnings` rows where it has a range to report (`solar_gain`), and no `limit_inputs`, as upstream has none for either.
+What a main model exposes beyond upstream's function. Every model has its model info. Beyond that it has what upstream has: `limit_inputs` and `round_output` where upstream has them, `warnings` range rows where upstream checks ranges and notice rows where it warns otherwise, and bins where upstream calls `_mapping()` or for an approved added labelled output (ADR 0024). An addition upstream lacks, such as ISO 7730's `category` or `solar_gain`'s ASHRAE 55 Table C-2 rows, has a row in the model's deviation register.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
-The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under, label, description, standards, and per-quantity unit, applicability and, on a labelled output, classifier. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
+The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, standards, and per-quantity unit, applicability and, on a labelled output, classifier. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
 _Avoid_: schema, metadata object, model docs
 
 **Classifier**:
-A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one when upstream computes that output with `_mapping()`, or when a consumer-needed labelled output can be written as one (ISO 7730's categories, cut on |pmv|); a bound that moves with another input (adaptive acceptability) is not a classifier. The model info does not say which output the bins cut (`tsv`'s bins cut `pmv`): a consumer that bands a number states that pairing itself, as the app's dynamic-chart declaration does with `output` and `bands`.
+A `ClassifierBins` (fixed ascending edges, one label per bin, `right`) that turns one number into one label, exported next to its model and referenced by identity from the model info. A model has one when upstream computes that output with `_mapping()`, or for an approved added labelled output that can be written as one (ISO 7730's categories, cut on |pmv|; ADR 0024); a bound that moves with another input (adaptive acceptability) is not a classifier. The model info does not say which output the bins cut (`tsv`'s bins cut `pmv`): a consumer that bands a number states that pairing itself, as the app's dynamic-chart declaration does with `output` and `bands`.
 _Avoid_: mapping, thresholds, category table
 
 **Warnings rows**:
-The applicability bounds a call broke, as upstream checks them, returned as data instead of a Python `UserWarning`. Filled whatever `limit_inputs` is. A row can also report a bound the model info publishes and upstream does not check, `solar_gain`'s ASHRAE 55 Table C-2 ranges for `sol_radiation_dir` and `asw`: the row is reported and the value returned is still upstream's (a deviation, reason at `SOLAR_GAIN_LIMITS`).
+What a call returns in `warnings` in place of upstream's Python `UserWarning`, whatever `limit_inputs` is. A row is one of two kinds. A `range` row is an applicability bound the call broke, in upstream's unit and compared as upstream compares it, and it carries `unit`. A `notice` row holds the text of any other upstream `warnings.warn`, verbatim. A range row can also report a bound the model info publishes and upstream does not check, `solar_gain`'s ASHRAE 55 Table C-2 ranges for `sol_radiation_dir` and `asw`: the row is reported and the value returned is still upstream's (an addition, ADR 0024).
 _Avoid_: console warnings, errors, validation messages
 
 **Mirrored test**:
-A test that carries an upstream test's name, inputs and expected values into Jest, one upstream test file per `describe`.
+A test that carries an upstream test's name, inputs and expected values into Vitest, one upstream test file per `describe`. It compares only upstream's fields; an added field has its own test.
 _Avoid_: ported test, parity test, copied test
+
+**Parity suite**:
+The golden-master tests that compare the library with the committed outputs of a pinned pythermalcomfort on seeded inputs. Registered deviations are exempt (ADR 0020).
+_Avoid_: golden master, regression test, mirrored test

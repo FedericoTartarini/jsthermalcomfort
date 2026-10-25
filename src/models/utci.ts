@@ -57,8 +57,8 @@ export interface UtciParams {
  * ends as upstream's `_valid_range`.
  *
  * `tr` has no bound of its own: upstream bounds its difference from `tdb`,
- * which is `tr_minus_tdb` here and a `derived` row in `UTCI_INFO`. Same
- * arrangement as `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity
+ * which is `tr_minus_tdb` here and a `derived` row in `UTCI_INFO`. Frozen,
+ * referenced by identity
  * from `UTCI_INFO` and read by the gate in `utci`, so the metadata and the
  * NaN cannot disagree. Exported for that identity test, deliberately not
  * added to `src/models/index.ts`.

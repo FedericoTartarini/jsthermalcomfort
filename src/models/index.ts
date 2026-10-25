@@ -58,8 +58,9 @@ export type {
   CoolingEffectResult,
 } from "./cooling_effect.ts";
 export type {
-  HeatIndexRothfuszParams,
   HeatIndexRothfuszResult,
+  HI,
+  HIInputs,
 } from "./heat_index_rothfusz.ts";
 export type {
   PmvPpdAshraeParams,

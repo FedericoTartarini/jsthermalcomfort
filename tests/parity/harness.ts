@@ -31,6 +31,11 @@ export interface UpstreamCase {
   readonly inputs: Readonly<Record<string, number | boolean | string>>;
   readonly outputs: Readonly<Record<string, Encoded>>;
   readonly warnings: readonly UpstreamWarning[];
+  /**
+   * For a case with `limit_inputs` false, the warnings of the same call with
+   * `limit_inputs` true.
+   */
+  readonly gated_warnings?: readonly UpstreamWarning[];
 }
 
 /** Where and with what the data were generated. */
@@ -126,6 +131,24 @@ export function upstream_warning_key({
   return RANGE_MESSAGE.exec(message)?.[1] ?? message;
 }
 
+/**
+ * The keys the library's rows must have for a case. The library returns its
+ * range rows whatever `limit_inputs` is (ADR 0024), where upstream checks the
+ * ranges only under the gate, so for a case with the gate off the range keys
+ * come from the same call with the gate on, and any other key from the case.
+ */
+export function expected_warning_keys(expected: UpstreamCase): string[] {
+  const keys = (warnings: readonly UpstreamWarning[], range: boolean) =>
+    warnings.flatMap((warning) => {
+      const key = upstream_warning_key(warning);
+      return key === undefined || RANGE_MESSAGE.test(warning.message) !== range
+        ? []
+        : [key];
+    });
+  const gated = expected.gated_warnings ?? expected.warnings;
+  return [...keys(gated, true), ...keys(expected.warnings, false)];
+}
+
 /** Keys a library row: a range row by its key, a notice by its message. */
 export function library_warning_key(row: WarningRow): string {
   return row.kind === "range" ? row.key : row.message;
@@ -165,7 +188,8 @@ function compared_keys(keys: readonly string[], exempt: Parity): string[] {
 /**
  * Compares one case. Only upstream's outputs are compared, so an output the
  * library adds is ignored (ADR 0023). Warning keys compare as a multiset: each
- * upstream warning has one row, whatever the order.
+ * upstream warning has one row, whatever the order, and a case with the gate
+ * off is compared with the gate's range warnings (`expected_warning_keys`).
  */
 export function compare_case(
   expected: UpstreamCase,
@@ -190,9 +214,7 @@ export function compare_case(
   }
   if (warnings) {
     const upstream_keys = compared_keys(
-      expected.warnings.flatMap(
-        (warning) => upstream_warning_key(warning) ?? [],
-      ),
+      expected_warning_keys(expected),
       exempt,
     );
     const library_keys = compared_keys(

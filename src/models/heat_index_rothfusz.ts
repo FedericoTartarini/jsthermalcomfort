@@ -1,110 +1,23 @@
-import { validateInputs } from "../utilities/utilities.js";
-import { round } from "../_internal/round.ts";
-import { classifyFromBins } from "../_internal/classifierBins.ts";
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
+import { inputsInfo, parseParams } from "../_internal/define.ts";
+import type { Definition, ParamsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import {
-  _check_params_object,
-  _legacy_valid_range,
-} from "../_internal/validation.ts";
-import type {
-  ApplicabilityWarning,
-  ClassifierBins,
-  LegacyModelInfo,
-} from "../_internal/modelDocs.ts";
+import type { ModelInfo, ModelWarning } from "../_internal/modelDocs.ts";
+import { round } from "../_internal/round.ts";
+import { _mapping, _valid_range } from "../_internal/validation.ts";
 
-// Renamed from HeatIndexResult to <Model>Result, the name every converted
-// model's result has.
-/**
- * @property {number} hi - Heat Index, [°C].
- * @property {string|number} stress_category - Thermal stress category, or NaN if hi is NaN. Classified from the unrounded value.
- * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- * @public
- */
-export interface HeatIndexRothfuszResult {
-  hi: number;
-  stress_category: string | number;
-  readonly warnings: ApplicabilityWarning[];
-}
+/** The applicability limit, upstream's `(27.0, np.inf)`. */
+const HEAT_INDEX_ROTHFUSZ_LIMITS = deepFreeze({ tdb: { min: 27.0 } });
 
 /**
- * The params of `heat_index_rothfusz`: upstream's keyword parameters,
- * quantities and switches alike, with upstream's defaults (ADR 0002).
- * Documented on the function's `params`.
- */
-export interface HeatIndexRothfuszParams {
-  tdb: number;
-  rh: number;
-  round_output?: boolean;
-  limit_inputs?: boolean;
-}
-/**
- * Calculates the Heat Index (HI) using the Rothfusz regression. It combines air temperature and relative humidity to determine an apparent temperature.
- * The HI equation {@link #ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
- * of Steadman’s (1979) apparent temperature (AT) {@link #ref_13|[13]}.
- *
- * The Rothfusz regression applies at tdb >= 27 °C. Under the default
- * `limit_inputs=true` the function returns `{ hi: NaN, stress_category: NaN }` when `tdb`
- * is below this threshold; pass `limit_inputs=false` to compute regardless.
- *
- * @public
- * @memberof models
- * @docname Heat Index
- *
- * @param {Object} params - the model's parameters, named as in pythermalcomfort.
- * @param {number} params.tdb - Dry bulb air temperature, [°C].
- * @param {number} params.rh - Relative humidity, [%].
- * @param {boolean} [params.round_output=true] - If True rounds output value, if False it does not round it. Stress categories are always determined from the unrounded heat index.
- * @param {boolean} [params.limit_inputs=true] - If True (default), `tdb` below the Rothfusz applicability threshold (27 °C) returns `NaN`. If False, the regression is evaluated regardless of input range.
- *
- * @returns {HeatIndexRothfuszResult} set containing results for the model
- *
- * @example
- * const hi = heat_index_rothfusz({ tdb: 25, rh: 50 }); // returns {hi: NaN, stress_category: NaN} (below 27 °C threshold)
- * const hi2 = heat_index_rothfusz({ tdb: 25, rh: 50, limit_inputs: false }); // returns {hi: 25.9, stress_category: "no risk"}
- * const hi3 = heat_index_rothfusz({ tdb: 30, rh: 80 }); // returns {hi: 37.7, stress_category: "extreme caution"}
- *
- * @category Thermophysiological models
- */
-
-/**
- * Applicability limits of the Rothfusz regression, in SI units.
- *
- * Same shape as `ISO_7730_LIMITS`, so both read the same way and both match
- * what #182 will generate from `limits.json`. Frozen, and referenced by
- * identity from `HEAT_INDEX_ROTHFUSZ_INFO` rather than copied into it.
- *
- * Exported so a test can assert that the metadata references this object
- * rather than a literal copy of it. It is deliberately NOT added to
- * `src/models/index.ts`, so it does not become public API -- the consumer
- * path is `HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability`. Same
- * arrangement as `ISO_7730_LIMITS`.
- */
-export const HEAT_INDEX_ROTHFUSZ_LIMITS = Object.freeze({
-  tdb: Object.freeze({ min: 27 }),
-});
-
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three).
-const HEAT_INDEX_SCHEMA = {
-  tdb: { type: "number" },
-  rh: { type: "number" },
-  round_output: { type: "boolean" },
-  limit_inputs: { type: "boolean" },
-};
-
-/**
- * Stress category bins for heat index classification (right-inclusive).
- * Edges are [27, 32, 41, 54, 1000], giving categories:
- * - hi <= 27: "no risk"
- * - 27 < hi <= 32: "caution"
- * - 32 < hi <= 41: "extreme caution"
- * - 41 < hi <= 54: "danger"
- * - 54 < hi <= 1000: "extreme danger"
- * - hi > 1000: NaN
+ * The stress categories of the heat index, right-inclusive: upstream's
+ * `{27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}`
+ * (`models/heat_index_rothfusz.py:83`, `_internal/validation.py:172`). An hi
+ * above 1000 is unmapped, NaN.
  */
 export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
-  Object.freeze({
-    edges: [27, 32, 41, 54, 1000],
+  deepFreeze({
+    edges: [27.0, 32.0, 41.0, 54.0, 1000.0],
     labels: [
       "no risk",
       "caution",
@@ -115,22 +28,71 @@ export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
     right: true,
   });
 
+// Each comment is upstream's Parameters entry, its prose type dropped
+// (deviation heat_index_rothfusz-6).
+const HEAT_INDEX_ROTHFUSZ_PARAMS = {
+  /** Dry bulb air temperature, [°C]. */
+  tdb: {
+    kind: "quantity",
+    unit: "°C",
+    applicability: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+  },
+  /** Relative humidity, [%]. */
+  rh: { kind: "quantity", unit: "%" },
+  /**
+   * If True, rounds output value. If False, it does not round it. Defaults to True.
+   * Stress categories are always determined from the unrounded heat index.
+   */
+  round_output: { kind: "flag", default: true },
+  /**
+   * If True, limits the inputs to the standard applicability limits. Defaults to True.
+   *
+   * Note: By default, if the inputs are outside the standard applicability limits the
+   * function returns NaN. If False returns heat index
+   * values even if input values are outside the applicability limits of the model.
+   *
+   * The applicability limit is tdb \>= 27°C.
+   */
+  limit_inputs: { kind: "flag", default: true },
+} as const satisfies Definition;
+
+// deviation heat_index_rothfusz-1
 /**
- * Model metadata for Heat Index (Rothfusz regression).
+ * The params of {@link heat_index_rothfusz}: upstream's `HIInputs`, as its
+ * keyword arguments.
  *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * @public
+ * @interface
  */
-export const HEAT_INDEX_ROTHFUSZ_INFO: LegacyModelInfo = deepFreeze({
+export type HIInputs = ParamsOf<typeof HEAT_INDEX_ROTHFUSZ_PARAMS>;
+
+// Upstream's HI (classes_return.py:298), kept in the model file (deviation
+// heat_index_rothfusz-1).
+/** Dataclass to represent the Heat Index (HI). */
+export interface HI {
+  // Upstream adds "or [°F] depending on the units", which no model returning
+  // HI has (deviation heat_index_rothfusz-7).
+  /** Heat Index, [°C]. */
+  readonly hi: number;
+  readonly stress_category: string | number;
+}
+
+// deviation heat_index_rothfusz-3
+/**
+ * What {@link heat_index_rothfusz} returns: upstream's {@link HI}, plus the
+ * range rows of the call.
+ */
+export interface HeatIndexRothfuszResult extends HI {
+  /** Added: the bounds the call broke, whatever `limit_inputs` is. */
+  readonly warnings: readonly ModelWarning[];
+}
+
+// deviation heat_index_rothfusz-2
+/** Model info for {@link heat_index_rothfusz}. */
+export const HEAT_INDEX_ROTHFUSZ_INFO: ModelInfo = deepFreeze({
   name: "heat_index_rothfusz",
   label: "Heat Index (Rothfusz)",
-  description: "Apparent temperature — how hot it feels at a given humidity.",
   standards: [],
-  inputs: {
-    tdb: { unit: "°C", applicability: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb },
-    rh: { unit: "%" },
-  },
+  inputs: inputsInfo(HEAT_INDEX_ROTHFUSZ_PARAMS),
   outputs: {
     hi: { unit: "°C" },
     stress_category: {
@@ -140,53 +102,67 @@ export const HEAT_INDEX_ROTHFUSZ_INFO: LegacyModelInfo = deepFreeze({
   },
 });
 
-export function heat_index_rothfusz(
-  params: HeatIndexRothfuszParams,
-): HeatIndexRothfuszResult {
-  // tdb and rh were positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "heat_index_rothfusz");
-  const { tdb, rh } = params;
-  // Destructuring defaults also apply to a switch passed as undefined.
-  const { round_output = true, limit_inputs = true } = params;
-  validateInputs({ tdb, rh, round_output, limit_inputs }, HEAT_INDEX_SCHEMA);
+// The example is a TypeScript call with upstream's inputs and outputs
+// (deviation heat_index_rothfusz-5).
+/**
+ * Calculate the Heat Index (HI) in accordance with the Rothfusz (1990) model
+ * [Rothfusz1990](../../docs/references.md).
+ *
+ * @param params - The model's parameters, upstream's keyword arguments.
+ * @returns A dataclass containing the Heat Index. See {@link HI} for more
+ * details. To access the `hi` value, use the `hi` attribute of the returned
+ * `HI` instance, e.g., `result.hi`.
+ *
+ * @example
+ * ```ts
+ * import { heat_index_rothfusz } from "jsthermalcomfort/models";
+ *
+ * const result = heat_index_rothfusz({ tdb: 29, rh: 50 });
+ * console.log(result.hi); // 29.7
+ * console.log(result.stress_category); // "caution"
+ * ```
+ */
+export function heat_index_rothfusz(params: HIInputs): HeatIndexRothfuszResult {
+  const { tdb, rh, round_output, limit_inputs } = parseParams(
+    "heat_index_rothfusz",
+    HEAT_INDEX_ROTHFUSZ_PARAMS,
+    params,
+  );
 
   const hi = _rothfusz_heat_index_optimized(tdb, rh);
 
   // heat index should only be calculated for temperatures above 27 °C
-  // The row is the channel for upstream's UserWarning, which JavaScript has
-  // no warnings filter for (ADR 0001). Upstream checks only under
-  // limit_inputs; the row is built on every call, so with the gate off it
-  // says what the number was computed despite. The gate reads the row.
-  const warnings: ApplicabilityWarning[] = [];
-  const tdb_valid = _legacy_valid_range(
-    warnings,
-    "tdb",
-    "input",
+  // Upstream checks only under limit_inputs; the row is made on every call
+  // (deviation heat_index_rothfusz-4).
+  const warnings: ModelWarning[] = [];
+  const tdb_valid = _valid_range(
     tdb,
     HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+    "tdb",
+    "input",
+    HEAT_INDEX_ROTHFUSZ_PARAMS.tdb.unit,
+    warnings,
   );
-  let hi_valid = limit_inputs && !tdb_valid ? NaN : hi;
+  let hi_valid = limit_inputs && Number.isNaN(tdb_valid) ? NaN : hi;
 
-  // Classified before rounding, as upstream does, so rounding onto a bin edge
-  // cannot drop the category.
-  const stress_category = classifyFromBins(
-    hi_valid,
-    HEAT_INDEX_STRESS_CATEGORY_BINS,
-  );
+  const stress_category = _mapping(hi_valid, HEAT_INDEX_STRESS_CATEGORY_BINS);
 
   if (round_output) {
     hi_valid = round(hi_valid, 1);
   }
 
-  return { hi: hi_valid, stress_category, warnings };
+  return Object.freeze({
+    hi: hi_valid,
+    stress_category,
+    warnings: Object.freeze(warnings),
+  });
 }
 
 function _rothfusz_heat_index_optimized(tdb: number, rh: number): number {
   // Upstream's tdb**2 and rh**2 run under numba, which lowers a constant
   // integer power to multiplications (numba/cpython/numbers.py:281-288,
   // static_power_impl, numba 0.68.0), so x**2 is x * x (ADR 0009). It equals
-  // Math.pow(x, 2) on 2,000,000 random doubles, and the unrounded hi equals
+  // Math.pow(x, 2) on 2,000,000 random doubles (node v26.8.2), and the unrounded hi equals
   // upstream's bit for bit on the 409 such cases of the parity data.
   return (
     -8.784695 +

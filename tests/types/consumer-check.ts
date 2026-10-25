@@ -27,9 +27,10 @@ import type {
   CloToutResult,
   CoolingEffectParams,
   CoolingEffectResult,
-  HeatIndexRothfuszParams,
   HeatIndexRothfuszResult,
+  HIInputs,
   ModelInfo,
+  ModelWarning,
   PmvPpdAshraeParams,
   PmvPpdAshraeResult,
   PmvPpdIsoParams,
@@ -309,7 +310,7 @@ cooling_effect({ tdb: 25, tr: 25, vr: "0.3", rh: 50, met: 1.2, clo: 0.5 });
 // heat_index_rothfusz takes one params object too (ADR 0002), with its params
 // and result types exported by name; the lines below are errors only while
 // the published signature is typed.
-const heatIndexParams: HeatIndexRothfuszParams = {
+const heatIndexParams: HIInputs = {
   tdb: 30,
   rh: 80,
   round_output: false,
@@ -436,9 +437,16 @@ utci({ tdb: "25", tr: 25, v: 1, rh: 50 });
 // PMV wrappers, typed through to the bound.
 const adaptiveWarnings: ApplicabilityWarning[] = adaptiveResult.warnings;
 const adaptiveRowMax: number | undefined = adaptiveResult.warnings[0].bound.max;
-const heatIndexWarnings: ApplicabilityWarning[] = heatIndexResult.warnings;
+// heat_index_rothfusz returns ModelWarning rows: a row's bound reads once its
+// kind is narrowed to "range", and the rows are readonly.
+const heatIndexWarnings: readonly ModelWarning[] = heatIndexResult.warnings;
+const heatIndexRow = heatIndexResult.warnings[0];
 const heatIndexRowMax: number | undefined =
-  heatIndexResult.warnings[0].bound.max;
+  heatIndexRow.kind === "range" ? heatIndexRow.bound.max : undefined;
+// @ts-expect-error a notice row has no bound.
+const heatIndexUnnarrowed = heatIndexRow.bound;
+// @ts-expect-error the rows are readonly.
+heatIndexResult.warnings.push(heatIndexRow);
 const utciWarnings: ApplicabilityWarning[] = utciResult.warnings;
 const utciRowMax: number | undefined = utciResult.warnings[0].bound.max;
 
@@ -571,6 +579,7 @@ export {
   adaptiveRowMax,
   heatIndexWarnings,
   heatIndexRowMax,
+  heatIndexUnnarrowed,
   utciWarnings,
   utciRowMax,
   winterClo,

@@ -72,8 +72,8 @@ export interface AdaptiveAshraeParams {
  *
  * `tdb`, `tr` and `v` are gated by `_check_ashrae55_compliance`, which reads
  * `ASHRAE_55_LIMITS`; the running mean outdoor temperature is gated by
- * this model alone, so its bound lives here. Same arrangement as
- * `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity from
+ * this model alone, so its bound lives here. Frozen, referenced by identity
+ * from
  * `ADAPTIVE_ASHRAE_INFO` and read by the gate below, so the metadata and the
  * NaN cannot disagree. Exported for that identity test, deliberately not
  * added to `src/models/index.ts`.

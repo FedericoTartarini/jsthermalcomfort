@@ -177,81 +177,257 @@ describe("test_heat_index_rothfusz", () => {
   );
 });
 
+// The per-model checks of the template (ADRs 0022-0024), through the public
+// entry: what upstream's tests leave out, and what only the library adds.
 describe("heat_index_rothfusz (JS-only)", () => {
   const hot = { tdb: 30, rh: 80 };
+  // A call with params the type rejects, to test the runtime.
+  const call = (params: unknown) => () => heat_index_rothfusz(params as Params);
 
-  describe("input validation", () => {
-    const quantities = ["tdb", "rh"] as const;
-
-    // A numeric string is not coerced, unlike in arithmetic.
-    test.each(quantities)("throws TypeError if %s is not a number", (key) => {
-      // Cast: deliberately passing a string to test the runtime TypeError.
-      const params = {
-        ...hot,
-        [key]: "25",
-      } as unknown as Params;
-      expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
-    });
-
-    // A missing quantity is a TypeError, as a missing keyword argument is in
-    // Python.
-    test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<Params> = { ...hot };
-      delete params[key];
-      // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
-      expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
-    });
-
-    // ADR 0001: a non-finite number throws rather than propagating as NaN.
-    test.each(quantities)("throws TypeError if %s is not finite", (key) => {
-      for (const bad of [NaN, Infinity, -Infinity]) {
-        expect(() => heat_index_rothfusz({ ...hot, [key]: bad })).toThrow(
-          TypeError,
-        );
-      }
-    });
-
-    // tdb and rh were positional before v2 (ADR 0002). A call still written
-    // that way throws rather than running on anything else.
-    test("throws TypeError if called positionally", () => {
-      // @ts-expect-error the model takes one params object
-      expect(() => heat_index_rothfusz(30, 80)).toThrow(TypeError);
-      expect(() =>
-        // @ts-expect-error the model takes one params object
-        heat_index_rothfusz(30, 80, { round: false, units: "IP" }),
-      ).toThrow(TypeError);
-      // @ts-expect-error null is not a params object
-      expect(() => heat_index_rothfusz(null)).toThrow(TypeError);
-      // @ts-expect-error the params object is required
-      expect(() => heat_index_rothfusz()).toThrow(TypeError);
-    });
-
-    test.each(["round_output", "limit_inputs"] as const)(
-      "throws TypeError if %s is not a boolean",
+  describe("errors", () => {
+    // Upstream's BaseInputs messages (classes_input.py:128, validate_type).
+    test.each(["tdb", "rh"])(
+      "%s of another type throws upstream's TypeError",
       (key) => {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = {
-          ...hot,
-          [key]: "true",
-        } as unknown as Params;
-        expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
+        const message = `${key} must be one of the following types: (<class 'float'>, <class 'int'>, <class 'numpy.ndarray'>, <class 'list'>).`;
+        for (const bad of ["25", {}, () => 25, 25n])
+          expect(call({ ...hot, [key]: bad })).toThrow(new TypeError(message));
       },
     );
 
-    test("a switch passed as undefined takes its default", () => {
+    test.each(["round_output", "limit_inputs"])(
+      "%s that is not a boolean throws upstream's TypeError",
+      (key) => {
+        const message = `${key} must be a boolean (True or False).`;
+        for (const bad of ["true", 1, null])
+          expect(call({ ...hot, [key]: bad })).toThrow(new TypeError(message));
+      },
+    );
+
+    // Python's own messages, as the call fails to bind.
+    test("a missing quantity throws Python's TypeError, naming every one", () => {
+      expect(call({ tdb: 30 })).toThrow(
+        new TypeError(
+          "heat_index_rothfusz() missing 1 required positional argument: 'rh'",
+        ),
+      );
+      expect(call({ tdb: undefined, rh: undefined })).toThrow(
+        new TypeError(
+          "heat_index_rothfusz() missing 2 required positional arguments: 'tdb' and 'rh'",
+        ),
+      );
+    });
+
+    test("an unknown key throws Python's TypeError, naming the first", () => {
+      for (const key of ["foo", "round", "units"])
+        expect(call({ ...hot, [key]: 1 })).toThrow(
+          new TypeError(
+            `heat_index_rothfusz() got an unexpected keyword argument '${key}'`,
+          ),
+        );
+      expect(call({ ...hot, foo: 1, bar: 2 })).toThrow(
+        "unexpected keyword argument 'foo'",
+      );
+    });
+
+    // tdb and rh were positional before v2 (ADR 0002).
+    test("anything but a params object throws TypeError", () => {
+      for (const bad of [30, null, undefined, [30, 80], "tdb"])
+        expect(call(bad)).toThrow(
+          new TypeError("heat_index_rothfusz() takes one params object."),
+        );
+    });
+
+    // Upstream reads a boolean as a number and broadcasts an array
+    // (deviation _shared-5, deviation _shared-6).
+    test.each(["tdb", "rh"])(
+      "%s as a boolean, null or an array throws TypeError",
+      (key) => {
+        for (const bad of [true, false, null, [30]])
+          expect(call({ ...hot, [key]: bad })).toThrow(
+            new TypeError(`${key} must be a finite number.`),
+          );
+      },
+    );
+
+    // Upstream computes on with NaN and ±Infinity (deviation _shared-7).
+    test.each(["tdb", "rh"])(
+      "%s that is not finite throws RangeError",
+      (key) => {
+        for (const bad of [NaN, Infinity, -Infinity])
+          expect(call({ ...hot, [key]: bad })).toThrow(
+            new RangeError(`${key} must be a finite number.`),
+          );
+      },
+    );
+
+    // Upstream checks limit_inputs, round_output and then the quantities; the
+    // library checks in the definition's order (deviation _shared-9).
+    test("checks run in the definition's order", () => {
+      const bad = { tdb: "x", rh: NaN, round_output: "x", limit_inputs: "x" };
+      expect(call(bad)).toThrow(/^tdb must be one of/);
+      expect(call({ ...bad, tdb: 30 })).toThrow(
+        new RangeError("rh must be a finite number."),
+      );
+      expect(call({ ...bad, tdb: 30, rh: 50 })).toThrow(/^round_output must/);
+      expect(call({ rh: "x" })).toThrow(
+        /missing 1 required positional argument: 'tdb'$/,
+      );
+      expect(call({ tdb: "x" })).toThrow(/^tdb must be one of/);
+      // An unknown key fails first, as an unexpected keyword does in Python.
+      expect(call({ foo: 1 })).toThrow(/unexpected keyword argument 'foo'$/);
+    });
+
+    test("undefined takes the default, as an omitted keyword does", () => {
+      const omitted = heat_index_rothfusz({ tdb: 25, rh: 50 });
       expect(
-        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         heat_index_rothfusz({
           tdb: 25,
           rh: 50,
           round_output: undefined,
           limit_inputs: undefined,
-        }).hi,
-      ).toBeNaN();
-      // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
+        }),
+      ).toEqual(omitted);
       expect(heat_index_rothfusz({ ...hot, round_output: undefined }).hi).toBe(
         37.7,
       );
+    });
+  });
+
+  describe("result", () => {
+    // As upstream's frozen dataclass (classes_return.py:297).
+    test("is frozen, its warnings and rows included", () => {
+      const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
+      expect(Object.isFrozen(result)).toBe(true);
+      expect(Object.isFrozen(result.warnings)).toBe(true);
+      expect(result.warnings.every((row) => Object.isFrozen(row))).toBe(true);
+      expect(() => {
+        (result as { hi: number }).hi = 1;
+      }).toThrow(TypeError);
+    });
+
+    test("has upstream's fields, then warnings", () => {
+      expect(Object.keys(heat_index_rothfusz(hot))).toEqual([
+        "hi",
+        "stress_category",
+        "warnings",
+      ]);
+    });
+  });
+
+  // deviation heat_index_rothfusz-2
+  describe("HEAT_INDEX_ROTHFUSZ_INFO", () => {
+    test("names the model, with no description", () => {
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.name).toBe("heat_index_rothfusz");
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.label).toBe("Heat Index (Rothfusz)");
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.standards).toEqual([]);
+      expect(HEAT_INDEX_ROTHFUSZ_INFO).not.toHaveProperty("description");
+    });
+
+    // INFO.inputs comes from the input definition: its quantities, in order,
+    // and none of its switches.
+    test("lists the quantities of the definition, with upstream's bound", () => {
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs).toEqual({
+        tdb: { unit: "°C", applicability: { min: 27 } },
+        rh: { unit: "%" },
+      });
+      expect(Object.keys(HEAT_INDEX_ROTHFUSZ_INFO.inputs)).toEqual([
+        "tdb",
+        "rh",
+      ]);
+    });
+
+    test("references the stress category bins", () => {
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs).toEqual({
+        hi: { unit: "°C" },
+        stress_category: {
+          unit: null,
+          classifier: HEAT_INDEX_STRESS_CATEGORY_BINS,
+        },
+      });
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category?.classifier).toBe(
+        HEAT_INDEX_STRESS_CATEGORY_BINS,
+      );
+    });
+
+    // {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}
+    // (heat_index_rothfusz.py:83, _internal/validation.py:172).
+    test("the bins are upstream's mapping, right-inclusive, frozen", () => {
+      expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toEqual({
+        edges: [27, 32, 41, 54, 1000],
+        labels: [
+          "no risk",
+          "caution",
+          "extreme caution",
+          "danger",
+          "extreme danger",
+        ],
+        right: true,
+      });
+      expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORY_BINS.edges)).toBe(true);
+    });
+
+    test("is frozen deeply", () => {
+      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO)).toBe(true);
+      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs)).toBe(true);
+      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb)).toBe(true);
+      expect(
+        Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb?.applicability),
+      ).toBe(true);
+    });
+  });
+
+  // deviation heat_index_rothfusz-3
+  describe("warnings rows", () => {
+    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb?.applicability;
+
+    test("a row at one step below the bound, none at it", () => {
+      expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).warnings).toEqual([]);
+      const { warnings } = heat_index_rothfusz({ tdb: 26.9, rh: 50 });
+      expect(warnings).toEqual([
+        {
+          kind: "range",
+          key: "tdb",
+          role: "input",
+          value: 26.9,
+          unit: "°C",
+          bound: { min: 27 },
+        },
+      ]);
+      // `toBe`: the row carries the object HEAT_INDEX_ROTHFUSZ_INFO references.
+      const [row] = warnings;
+      expect(row?.kind === "range" && row.bound).toBe(bound);
+    });
+
+    // The bound has no max, as upstream's (27.0, np.inf).
+    test("no row however far above the bound", () => {
+      expect(heat_index_rothfusz({ tdb: 1e6, rh: 50 }).warnings).toEqual([]);
+    });
+
+    // deviation heat_index_rothfusz-4
+    test("the rows are the same with limit_inputs off, beside a finite hi", () => {
+      const on = heat_index_rothfusz({ tdb: 26.9, rh: 50 });
+      const off = heat_index_rothfusz({
+        tdb: 26.9,
+        rh: 50,
+        limit_inputs: false,
+      });
+      expect(Number.isFinite(off.hi)).toBe(true);
+      expect(off.warnings).toEqual(on.warnings);
+    });
+
+    // Upstream calls warnings.warn only in _valid_range, so no notice row.
+    test("a NaN under the gate never comes without a row, and no notice", () => {
+      for (const tdb of [-40, 0, 20, 26.99, 27, 30, 45, 60])
+        for (const rh of [0, 50, 100]) {
+          const { hi, warnings } = heat_index_rothfusz({ tdb, rh });
+          expect({ tdb, rh, gated: warnings.length > 0 }).toEqual({
+            tdb,
+            rh,
+            gated: Number.isNaN(hi),
+          });
+          expect(warnings.every((row) => row.kind === "range")).toBe(true);
+        }
     });
   });
 
@@ -261,31 +437,22 @@ describe("heat_index_rothfusz (JS-only)", () => {
       ["tdb well below 27", 20, 50],
       ["tdb at 0", 0, 50],
     ])("returns NaN under default limit_inputs when %s", (_, tdb, rh) => {
-      expect(heat_index_rothfusz({ tdb, rh }).hi).toBeNaN();
-    });
-
-    test.each([
-      ["tdb at 27", 27, 50],
-      ["tdb above 27", 35, 80],
-    ])(
-      "returns a finite hi under default limit_inputs when %s",
-      (_, tdb, rh) => {
-        expect(Number.isFinite(heat_index_rothfusz({ tdb, rh }).hi)).toBe(true);
-      },
-    );
-  });
-
-  describe("stress_category", () => {
-    test("returns NaN stress_category when below applicability threshold", () => {
-      const result = heat_index_rothfusz({
-        tdb: 25,
-        rh: 50,
-        limit_inputs: true,
-      });
+      const result = heat_index_rothfusz({ tdb, rh });
+      expect(result.hi).toBeNaN();
       expect(result.stress_category).toBeNaN();
     });
 
-    const validCategories = [
+    test("the gate is inclusive at 27 °C", () => {
+      expect(heat_index_rothfusz({ tdb: 26.99, rh: 50 }).hi).toBeNaN();
+      expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).hi).toBe(27.4);
+      expect(Number.isFinite(heat_index_rothfusz({ tdb: 35, rh: 80 }).hi)).toBe(
+        true,
+      );
+    });
+  });
+
+  describe("stress_category", () => {
+    const valid_categories = [
       "no risk",
       "caution",
       "extreme caution",
@@ -301,7 +468,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
       [30, 80],
     ])("returns a valid category for tdb=%s, rh=%s", (tdb, rh) => {
       const result = heat_index_rothfusz({ tdb, rh, limit_inputs: false });
-      expect(validCategories).toContain(result.stress_category);
+      expect(valid_categories).toContain(result.stress_category);
     });
 
     // heat_index_rothfusz(30, 91) rounds onto the 41 bin edge: rounded
@@ -311,7 +478,6 @@ describe("heat_index_rothfusz (JS-only)", () => {
       const rounded = heat_index_rothfusz({
         tdb: 30,
         rh: 91,
-        round_output: true,
         limit_inputs: false,
       });
       const unrounded = heat_index_rothfusz({
@@ -328,66 +494,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
     });
   });
 
-  describe("warnings rows", () => {
-    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability!;
-
-    test("no row at the bound, one row one step below it", () => {
-      expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).warnings).toEqual([]);
-      const { warnings } = heat_index_rothfusz({ tdb: 26.9, rh: 50 });
-      expect(warnings).toEqual([
-        { key: "tdb", role: "input", value: 26.9, bound },
-      ]);
-      // `toBe`: the row carries the object HEAT_INDEX_ROTHFUSZ_INFO references.
-      expect(warnings[0]!.bound).toBe(
-        HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability,
-      );
-    });
-
-    // The bound has no max, as upstream's (27.0, np.inf).
-    test("no row however far above the bound", () => {
-      expect(heat_index_rothfusz({ tdb: 1e6, rh: 50 }).warnings).toEqual([]);
-    });
-
-    test("the rows are the same with limit_inputs off, beside a finite hi", () => {
-      const on = heat_index_rothfusz({ tdb: 26.9, rh: 50 });
-      const off = heat_index_rothfusz({
-        tdb: 26.9,
-        rh: 50,
-        limit_inputs: false,
-      });
-      expect(Number.isFinite(off.hi)).toBe(true);
-      expect(off.warnings).toEqual(on.warnings);
-    });
-
-    test("a NaN under the gate never comes without a row", () => {
-      for (const tdb of [-40, 0, 20, 26.99, 27, 30, 45, 60])
-        for (const rh of [0, 50, 100]) {
-          const { hi, warnings } = heat_index_rothfusz({ tdb, rh });
-          expect({ tdb, rh, gated: warnings.length > 0 }).toEqual({
-            tdb,
-            rh,
-            gated: Number.isNaN(hi),
-          });
-        }
-    });
-  });
-
-  describe("exports", () => {
-    test("heat_index_rothfusz is exported from package root (src/index.ts)", () => {
-      expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
-    });
-  });
-
-  describe("applicability threshold", () => {
-    test("the gate is inclusive at 27 degC and excludes just below", () => {
-      expect(heat_index_rothfusz({ tdb: 26.99, rh: 50 }).hi).toBeNaN();
-      expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).hi).toBe(27.4);
-    });
-
-    test("the metadata's bound is upstream's (27.0, np.inf), frozen", () => {
-      const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability;
-      expect(bound).toEqual({ min: 27 });
-      expect(Object.isFrozen(bound)).toBe(true);
-    });
+  test("is exported from the package root as from its subpath", () => {
+    expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
   });
 });

@@ -106,7 +106,6 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
   test("has required top-level properties", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.name).toBe("heat_index_rothfusz");
     expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("label");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("description");
     expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("inputs");
     expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("outputs");
   });
@@ -114,10 +113,6 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
   test("label is a string", () => {
     expect(typeof HEAT_INDEX_ROTHFUSZ_INFO.label).toBe("string");
     expect(HEAT_INDEX_ROTHFUSZ_INFO.label).toMatch(/Heat Index/);
-  });
-
-  test("description is a string", () => {
-    expect(typeof HEAT_INDEX_ROTHFUSZ_INFO.description).toBe("string");
   });
 
   test("inputs contains tdb and rh", () => {

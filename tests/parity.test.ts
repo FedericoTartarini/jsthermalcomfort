@@ -8,6 +8,7 @@ import {
   compare_case,
   decode,
   DEFAULT_TOLERANCE,
+  expected_warning_keys,
   exemptions,
   library_warning_key,
   parity_failures,
@@ -233,6 +234,37 @@ describe("compare_case", () => {
     ).toEqual(['warnings: library ["tdb","tr"], upstream ["tdb","tdb"]']);
   });
 
+  // The library's range rows come whatever limit_inputs is (ADR 0024).
+  test("compares a gate-off case with the gate's range warnings", () => {
+    const off: UpstreamCase = {
+      ...upstream({}, []),
+      gated_warnings: [{ category: "UserWarning", message: TDB_WARNING }],
+    };
+    expect(
+      compare_case(off, { warnings: [{ kind: "range", key: "tdb" }] }, OPTIONS),
+    ).toEqual([]);
+    expect(compare_case(off, { warnings: [] }, OPTIONS)).toEqual([
+      'warnings: library [], upstream ["tdb"]',
+    ]);
+  });
+
+  test("takes a gate-off case's other warnings from the case itself", () => {
+    const notice = "Cooling effect could not be calculated. Returning 0.";
+    const off: UpstreamCase = {
+      ...upstream({}, [notice]),
+      gated_warnings: [
+        { category: "UserWarning", message: TDB_WARNING },
+        { category: "UserWarning", message: notice },
+        { category: "UserWarning", message: notice },
+      ],
+    };
+    expect(expected_warning_keys(off)).toEqual(["tdb", notice]);
+    expect(expected_warning_keys(upstream({}, [TDB_WARNING, notice]))).toEqual([
+      "tdb",
+      notice,
+    ]);
+  });
+
   test("ignores warnings of other categories", () => {
     const expected: UpstreamCase = {
       inputs: {},
@@ -385,9 +417,7 @@ const MODELS: readonly ParityModel[] = [
     }),
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
-    // The library returns its older rows until the model returns ModelWarning
-    // rows (ADR 0024).
-    warnings: false,
+    warnings: true,
   },
 ];
 

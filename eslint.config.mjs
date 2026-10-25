@@ -7,14 +7,19 @@ import tseslint from "typescript-eslint";
 // ticket adds its own files, and the contract ticket replaces this list with
 // every file. CI and the pre-commit hook both run `npm run lint`, so they
 // cover the same list (ADR 0020).
-const LINTED = [
+export const LINTED = [
   "vitest.config.ts",
   "src/_internal/classifierBins.ts",
+  "src/_internal/define.ts",
+  "src/_internal/errors.ts",
   "src/_internal/modelDocs.ts",
   "src/_internal/round.ts",
   "src/_internal/validation.ts",
   "src/utilities/options.ts",
+  "src/models/heat_index_rothfusz.ts",
+  "tests/call_sites.test.ts",
   "tests/internal.test.ts",
+  "tests/models/heat_index_rothfusz.test.ts",
 ];
 
 for (const file of LINTED) {

@@ -72,10 +72,22 @@ def _adaptive_ashrae(rng):
     }
 
 
+def _heat_index_rothfusz(rng):
+    # tdb reaches below the 27 °C gate, so NaN positions and the tdb warning
+    # are compared too.
+    return {
+        "tdb": _value(rng, 10.0, 50.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "round_output": bool(rng.random() < 0.5),
+        "limit_inputs": bool(rng.random() < 0.5),
+    }
+
+
 # Each model: upstream's function and the generator of one case's keyword
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
+    "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
 }
 
 
@@ -99,21 +111,35 @@ def _encode(model, name, value):
     return item
 
 
-def _run(model, function, inputs):
-    """Upstream's outputs and every warning it emitted for one case."""
+def _call(function, inputs):
+    """Upstream's result for one call and every warning it emitted."""
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         result = function(**inputs)
-    return {
+    return result, [
+        {"category": w.category.__name__, "message": str(w.message)} for w in caught
+    ]
+
+
+def _run(model, function, inputs):
+    """Upstream's outputs and every warning it emitted for one case.
+
+    A case with limit_inputs False also records the warnings of the same call
+    with limit_inputs True: upstream checks the ranges only under the gate, and
+    the library returns those range rows whatever limit_inputs is (ADR 0024).
+    """
+    result, emitted = _call(function, inputs)
+    case = {
         "inputs": inputs,
         "outputs": {
             field.name: _encode(model, field.name, getattr(result, field.name))
             for field in dataclasses.fields(result)
         },
-        "warnings": [
-            {"category": w.category.__name__, "message": str(w.message)} for w in caught
-        ],
+        "warnings": emitted,
     }
+    if inputs.get("limit_inputs") is False:
+        case["gated_warnings"] = _call(function, {**inputs, "limit_inputs": True})[1]
+    return case
 
 
 def _pins():

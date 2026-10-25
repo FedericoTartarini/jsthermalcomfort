@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { adaptive_ashrae } from "../src/models/index.ts";
+import { adaptive_ashrae, heat_index_rothfusz } from "../src/models/index.ts";
 import type { AdaptiveAshraeParams } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -373,6 +373,20 @@ const MODELS: readonly ParityModel[] = [
     // Upstream checks the ranges only under limit_inputs, and the library
     // returns its older rows; warnings are compared once the model returns
     // ModelWarning rows (ADR 0024).
+    warnings: false,
+  },
+  {
+    name: "heat_index_rothfusz",
+    // A Result is an interface, so it is spread into a record (ADR 0023).
+    run: (inputs) => ({
+      ...heat_index_rothfusz(
+        inputs as unknown as Parameters<typeof heat_index_rothfusz>[0],
+      ),
+    }),
+    // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
+    rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
+    // The library returns its older rows until the model returns ModelWarning
+    // rows (ADR 0024).
     warnings: false,
   },
 ];

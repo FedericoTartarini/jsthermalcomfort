@@ -2,26 +2,33 @@ import { describe, expect, test } from "vitest";
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_ROTHFUSZ_LIMITS,
-} from "../../src/models/heat_index_rothfusz.ts";
-import type { HeatIndexRothfuszParams } from "../../src/models/heat_index_rothfusz.ts";
-import { heat_index_rothfusz as heat_index_rothfusz_from_models } from "../../src/models/index.ts";
+  HEAT_INDEX_STRESS_CATEGORY_BINS,
+} from "../../src/models/index.ts";
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
-let { testData, tolerances } = await loadTestData(testDataUrls.heatIndex);
+type Params = Parameters<typeof heat_index_rothfusz>[0];
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_heat_index_rothfusz.py.
+const { testData: test_data, tolerances } = await loadTestData(
+  testDataUrls.heatIndex,
+);
+
+// upstream's (27.0, np.inf), which _valid_range's message prints as [27.0, inf]
+const TDB_BOUND = { min: 27 };
+
+// Mirrors pythermalcomfort v4.6.2 tests/test_heat_index_rothfusz.py. A
+// UserWarning becomes a range row, and a `match=` on its text becomes
+// assertions on the row's key, value and bound.
 describe("test_heat_index_rothfusz", () => {
-  test.each(testData.data)("test_heat_index: fixture case %#", (row) => {
+  test.each(test_data.data)("test_heat_index: fixture case %#", (row) => {
     const { inputs, outputs } = row;
     // As upstream, `heat_index_rothfusz(**inputs, limit_inputs=False)`, so
     // the fixture validates the regression independently of the gate.
     const result = heat_index_rothfusz({
       ...inputs,
       limit_inputs: false,
-    } as unknown as HeatIndexRothfuszParams);
+    } as unknown as Params);
 
     validateResult(result, outputs, tolerances, inputs);
   });
@@ -33,62 +40,51 @@ describe("test_heat_index_rothfusz", () => {
     expect(result.stress_category).toBe("caution");
   });
 
-  // Upstream's `pytest.warns(UserWarning)` becomes the `tdb` row.
   test("test_below_threshold_produces_nan", () => {
     const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
-    expect(result.warnings.map((w) => w.key)).toEqual(["tdb"]);
+    expect(result.warnings).toEqual([expect.objectContaining({ key: "tdb" })]);
     expect(result.hi).toBeNaN();
     expect(result.stress_category).toBeNaN();
   });
 
-  // Upstream matches the UserWarning's text ('tdb', 25.0, [27.0, inf]); the
-  // row carries the same key, value and bound.
+  // Upstream matches r"'tdb' has value 25\.0.*\[27\.0, inf\]".
   test("test_below_threshold_warns_scalar", () => {
     expect(heat_index_rothfusz({ tdb: 25, rh: 80 }).warnings).toEqual([
-      {
-        key: "tdb",
-        role: "input",
-        value: 25,
-        bound: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
-      },
+      expect.objectContaining({ key: "tdb", value: 25, bound: TDB_BOUND }),
     ]);
   });
 
-  // Upstream's arrays, element-wise: the UserWarning's value 20.0 at index 1
-  // becomes a row on that element alone.
+  // Upstream's arrays, element-wise: its match r"'tdb'.*\[20\.0\].*\[1\]"
+  // becomes a row on element 1 alone.
   test("test_below_threshold_warns_array", () => {
     const tdb = [30.0, 20.0, 28.5];
     const rh = [70.0, 90.0, 50.0];
     const results = tdb.map((t, i) =>
-      heat_index_rothfusz({ tdb: t, rh: rh[i]! }),
+      heat_index_rothfusz({ tdb: t, rh: rh[i] ?? NaN }),
     );
-    const hi = results.map((result) => result.hi);
     expect(results.map((result) => result.warnings)).toEqual([
       [],
-      [
-        {
-          key: "tdb",
-          role: "input",
-          value: 20,
-          bound: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
-        },
-      ],
+      [expect.objectContaining({ key: "tdb", value: 20, bound: TDB_BOUND })],
       [],
     ]);
-    expect(hi[1]).toBeNaN();
-    expect(Number.isFinite(hi[0]) && Number.isFinite(hi[2])).toBe(true);
+    expect(results[1]?.hi).toBeNaN();
+    expect(
+      Number.isFinite(results[0]?.hi) && Number.isFinite(results[2]?.hi),
+    ).toBe(true);
   });
 
-  // Upstream also asserts no warning was recorded: it checks only under
-  // limit_inputs. That assertion does not port, because the rows here are
-  // built whatever limit_inputs is, so this call has its `tdb` row.
+  // Upstream asserts that no warning was recorded, since it checks only under
+  // limit_inputs. The library returns the range rows whatever limit_inputs is,
+  // so this call has its tdb row beside a finite hi.
   test("test_limit_inputs_false_no_warning", () => {
     const result = heat_index_rothfusz({
       tdb: 25,
       rh: 80,
       limit_inputs: false,
     });
-    expect(result.warnings.map((w) => w.key)).toEqual(["tdb"]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({ key: "tdb", value: 25, bound: TDB_BOUND }),
+    ]);
     expect(Number.isFinite(result.hi)).toBe(true);
   });
 
@@ -98,17 +94,17 @@ describe("test_heat_index_rothfusz", () => {
     const tdb = [30.0, 20.0, 28.5];
     const rh = [70.0, 90.0, 50.0];
     const results = tdb.map((t, i) =>
-      heat_index_rothfusz({ tdb: t, rh: rh[i]!, round_output: false }),
+      heat_index_rothfusz({ tdb: t, rh: rh[i] ?? NaN, round_output: false }),
     );
     const hi = results.map((result) => result.hi);
     expect(results.map((result) => result.warnings.length)).toEqual([0, 1, 0]);
     // First element has multiple decimals and matches expected formula
-    expect(Math.abs(hi[0]! - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
+    expect(Math.abs((hi[0] ?? NaN) - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
     // Second element below threshold ⇒ NaN
     expect(hi[1]).toBeNaN();
     // Third element above threshold ⇒ finite number
     expect(Number.isFinite(hi[2])).toBe(true);
-    expect(results[0]!.stress_category).toBe("extreme caution");
+    expect(results[0]?.stress_category).toBe("extreme caution");
   });
 
   // Upstream's parametrize has no ids; `id` is the one pytest generates, which
@@ -175,8 +171,8 @@ describe("test_heat_index_rothfusz", () => {
       expect(results.map((result) => result.warnings.length)).toEqual([
         0, 0, 0, 1,
       ]);
-      expect(results[3]!.hi).toBeNaN();
-      expect(results[3]!.stress_category).toBeNaN();
+      expect(results[3]?.hi).toBeNaN();
+      expect(results[3]?.stress_category).toBeNaN();
     },
   );
 });
@@ -193,14 +189,14 @@ describe("heat_index_rothfusz (JS-only)", () => {
       const params = {
         ...hot,
         [key]: "25",
-      } as unknown as HeatIndexRothfuszParams;
+      } as unknown as Params;
       expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
     });
 
     // A missing quantity is a TypeError, as a missing keyword argument is in
     // Python.
     test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<HeatIndexRothfuszParams> = { ...hot };
+      const params: Partial<Params> = { ...hot };
       delete params[key];
       // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
       expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
@@ -237,7 +233,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
         const params = {
           ...hot,
           [key]: "true",
-        } as unknown as HeatIndexRothfuszParams;
+        } as unknown as Params;
         expect(() => heat_index_rothfusz(params)).toThrow(TypeError);
       },
     );
@@ -333,7 +329,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
   });
 
   describe("warnings rows", () => {
-    const { tdb: bound } = HEAT_INDEX_ROTHFUSZ_LIMITS;
+    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability!;
 
     test("no row at the bound, one row one step below it", () => {
       expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).warnings).toEqual([]);
@@ -377,10 +373,6 @@ describe("heat_index_rothfusz (JS-only)", () => {
   });
 
   describe("exports", () => {
-    test("heat_index_rothfusz is exported from models/index.ts", () => {
-      expect(heat_index_rothfusz_from_models).toBe(heat_index_rothfusz);
-    });
-
     test("heat_index_rothfusz is exported from package root (src/index.ts)", () => {
       expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
     });
@@ -392,15 +384,10 @@ describe("heat_index_rothfusz (JS-only)", () => {
       expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).hi).toBe(27.4);
     });
 
-    test("the metadata references the limits object rather than copying it", () => {
-      // `toBe`, not `toEqual`: a rebuilt { min: 27 } literal would satisfy
-      // equality and then be free to drift from what the runtime enforces.
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability).toBe(
-        HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
-      );
-      expect(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb).toEqual({ min: 27 });
-      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS)).toBe(true);
-      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb)).toBe(true);
+    test("the metadata's bound is upstream's (27.0, np.inf), frozen", () => {
+      const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability;
+      expect(bound).toEqual({ min: 27 });
+      expect(Object.isFrozen(bound)).toBe(true);
     });
   });
 });

@@ -42,8 +42,8 @@ export interface HeatIndexRothfuszParams {
  * The HI equation {@link #ref_12|[12]} is derived by multiple regression analysis in temperature and relative humidity from the first version
  * of Steadman’s (1979) apparent temperature (AT) {@link #ref_13|[13]}.
  *
- * The Rothfusz regression is only valid above 27 °C (80.6 °F). Under the
- * default `limit_inputs=true` the function returns `{ hi: NaN, stress_category: NaN }` when `tdb`
+ * The Rothfusz regression applies at tdb >= 27 °C. Under the default
+ * `limit_inputs=true` the function returns `{ hi: NaN, stress_category: NaN }` when `tdb`
  * is below this threshold; pass `limit_inputs=false` to compute regardless.
  *
  * @public
@@ -151,39 +151,52 @@ export function heat_index_rothfusz(
   const { round_output = true, limit_inputs = true } = params;
   validateInputs({ tdb, rh, round_output, limit_inputs }, HEAT_INDEX_SCHEMA);
 
+  const hi = _rothfusz_heat_index_optimized(tdb, rh);
+
   // heat index should only be calculated for temperatures above 27 °C
   // The row is the channel for upstream's UserWarning, which JavaScript has
   // no warnings filter for (ADR 0001). Upstream checks only under
   // limit_inputs; the row is built on every call, so with the gate off it
   // says what the number was computed despite. The gate reads the row.
   const warnings: ApplicabilityWarning[] = [];
-  _legacy_valid_range(
+  const tdb_valid = _legacy_valid_range(
     warnings,
     "tdb",
     "input",
     tdb,
     HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
   );
-  if (limit_inputs && warnings.length > 0) {
-    return { hi: NaN, stress_category: NaN, warnings };
+  let hi_valid = limit_inputs && !tdb_valid ? NaN : hi;
+
+  // Classified before rounding, as upstream does, so rounding onto a bin edge
+  // cannot drop the category.
+  const stress_category = classifyFromBins(
+    hi_valid,
+    HEAT_INDEX_STRESS_CATEGORY_BINS,
+  );
+
+  if (round_output) {
+    hi_valid = round(hi_valid, 1);
   }
 
-  const tdb_squared = Math.pow(tdb, 2);
-  const rh_squared = Math.pow(rh, 2);
-  const hi =
+  return { hi: hi_valid, stress_category, warnings };
+}
+
+function _rothfusz_heat_index_optimized(tdb: number, rh: number): number {
+  // Upstream's tdb**2 and rh**2 run under numba, which lowers a constant
+  // integer power to multiplications (numba/cpython/numbers.py:281-288,
+  // static_power_impl, numba 0.68.0), so x**2 is x * x (ADR 0009). It equals
+  // Math.pow(x, 2) on 2,000,000 random doubles, and the unrounded hi equals
+  // upstream's bit for bit on the 409 such cases of the parity data.
+  return (
     -8.784695 +
     1.61139411 * tdb +
     2.338549 * rh -
     0.14611605 * tdb * rh -
-    0.012308094 * tdb_squared -
-    0.016424828 * rh_squared +
-    0.002211732 * tdb_squared * rh +
-    0.00072546 * tdb * rh_squared -
-    0.000003582 * tdb_squared * rh_squared;
-
-  // Classified before rounding, as upstream does, so rounding onto a bin edge
-  // cannot drop the category.
-  const stress_category = classifyFromBins(hi, HEAT_INDEX_STRESS_CATEGORY_BINS);
-
-  return { hi: round_output ? round(hi, 1) : hi, stress_category, warnings };
+    1.2308094e-2 * (tdb * tdb) -
+    1.6424828e-2 * (rh * rh) +
+    2.211732e-3 * (tdb * tdb) * rh +
+    7.2546e-4 * tdb * (rh * rh) -
+    3.582e-6 * (tdb * tdb) * (rh * rh)
+  );
 }

@@ -1,0 +1,306 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { read_registers } from "../deviations/register.ts";
+import type { Parity, Row } from "../deviations/register.ts";
+
+// Compares a model with the upstream outputs scripts/parity/generate.py
+// commits under tests/parity/data/ (ADR 0020). Rounded outputs compare
+// exactly, unrounded outputs within a tolerance, and NaN positions and warning
+// keys must agree. What a register row's `parity` names is exempt (ADR 0019).
+
+const DATA = "tests/parity/data";
+const REQUIREMENTS = "scripts/parity/requirements.txt";
+const DOCKERFILE = "scripts/parity/Dockerfile";
+
+// The data are generated on x86_64 only: scipy's arm64 build differs from its
+// x86_64 build, which the brentq port equals bit for bit (ADR 0026).
+const MACHINE = "x86_64";
+
+/** A value in the data; a non-finite float is tagged, as JSON has none. */
+export type Encoded =
+  number | boolean | string | null | { readonly float: "nan" | "inf" | "-inf" };
+
+/** One warning upstream emitted under `simplefilter("always")`. */
+export interface UpstreamWarning {
+  readonly category: string;
+  readonly message: string;
+}
+
+/** One seeded case: upstream's keyword arguments, outputs and warnings. */
+export interface UpstreamCase {
+  readonly inputs: Readonly<Record<string, number | boolean | string>>;
+  readonly outputs: Readonly<Record<string, Encoded>>;
+  readonly warnings: readonly UpstreamWarning[];
+}
+
+/** Where and with what the data were generated. */
+export interface Header {
+  readonly machine: string;
+  readonly python: string;
+  readonly packages: Readonly<Record<string, string>>;
+  readonly environment: Readonly<Record<string, string | null>>;
+  readonly numpy_runtime: unknown;
+  readonly seed: number;
+}
+
+/** One model's data file. */
+export interface ParityData {
+  readonly model: string;
+  readonly header: Header;
+  readonly cases: readonly UpstreamCase[];
+}
+
+/** The pinned Python and package versions. */
+export interface Pins {
+  readonly python: string;
+  readonly packages: Readonly<Record<string, string>>;
+}
+
+/** An unrounded output passes when |library − upstream| ≤ abs + rel·|upstream|. */
+export interface Tolerance {
+  readonly rel: number;
+  readonly abs: number;
+}
+
+/**
+ * The default tolerance. Its rel is about 4,500 times `Number.EPSILON`, room
+ * for the ulp by which V8's `Math` and glibc's libm can differ (ADR 0009) to
+ * grow through a model, and its abs covers outputs near zero. A model's suite
+ * may override it, giving its reason.
+ */
+export const DEFAULT_TOLERANCE: Tolerance = { rel: 1e-12, abs: 1e-12 };
+
+/** A library warning row, as far as the comparison reads it (ADR 0024). */
+export type WarningRow =
+  | { readonly kind: "range"; readonly key: string }
+  | { readonly kind: "notice"; readonly message: string };
+
+/** How one case is compared. */
+export interface CompareOptions {
+  /** The outputs this case rounds, compared exactly. */
+  readonly rounded: readonly string[];
+  readonly tolerance: Tolerance;
+  /** Whether warning keys are compared. */
+  readonly warnings: boolean;
+  readonly exempt: Parity;
+}
+
+/** One model's suite. */
+export interface ParityModel {
+  /** Upstream's function name, which names the data file and the register. */
+  readonly name: string;
+  /** Calls the model through its public entry with upstream's arguments. */
+  readonly run: (
+    inputs: UpstreamCase["inputs"],
+  ) => Readonly<Record<string, unknown>>;
+  /** The outputs a case rounds, compared exactly. */
+  readonly rounded: (inputs: UpstreamCase["inputs"]) => readonly string[];
+  readonly tolerance?: Tolerance;
+  readonly warnings: boolean;
+}
+
+const NON_FINITE = { nan: NaN, inf: Infinity, "-inf": -Infinity } as const;
+
+/** Reads a value from the data. */
+export function decode(value: Encoded): number | boolean | string | null {
+  return value !== null && typeof value === "object"
+    ? NON_FINITE[value.float]
+    : value;
+}
+
+// _valid_range's message and the airspeed_control checks' messages both quote
+// the name first (_internal/validation.py:51-54, _internal/ashrae55.py:44-88).
+const RANGE_MESSAGE = /^(?:airspeed_control=False: )?'(.+?)' has /;
+
+/**
+ * Keys an upstream warning as the library keys its row: a range check by the
+ * name upstream gives it, any other `UserWarning` by its message. A warning of
+ * another category, such as numpy's `RuntimeWarning`, has no counterpart and
+ * gives `undefined` (ADR 0027).
+ */
+export function upstream_warning_key({
+  category,
+  message,
+}: UpstreamWarning): string | undefined {
+  if (category !== "UserWarning") return undefined;
+  return RANGE_MESSAGE.exec(message)?.[1] ?? message;
+}
+
+/** Keys a library row: a range row by its key, a notice by its message. */
+export function library_warning_key(row: WarningRow): string {
+  return row.kind === "range" ? row.key : row.message;
+}
+
+function show(value: unknown): string {
+  return typeof value === "string" ? JSON.stringify(value) : String(value);
+}
+
+function compare_output(
+  name: string,
+  expected: number | boolean | string | null,
+  actual: unknown,
+  exact: boolean,
+  { rel, abs }: Tolerance,
+): string | undefined {
+  const failure = `output ${name}: library ${show(actual)}, upstream ${show(expected)}`;
+  // A boolean, a string or null compares exactly, and never equals a number:
+  // a masked boolean's NaN must be NaN (ADR 0006).
+  if (typeof expected !== "number" || typeof actual !== "number") {
+    return actual === expected ? undefined : failure;
+  }
+  if (Number.isNaN(expected) || Number.isNaN(actual)) {
+    return Number.isNaN(expected) && Number.isNaN(actual) ? undefined : failure;
+  }
+  if (actual === expected) return undefined;
+  if (exact || !Number.isFinite(expected)) return failure;
+  return Math.abs(actual - expected) <= abs + rel * Math.abs(expected)
+    ? undefined
+    : `${failure}, beyond rel ${rel} + abs ${abs}`;
+}
+
+function compared_keys(keys: readonly string[], exempt: Parity): string[] {
+  return keys.filter((key) => !exempt.warnings.includes(key)).sort();
+}
+
+/**
+ * Compares one case. Only upstream's outputs are compared, so an output the
+ * library adds is ignored (ADR 0023). Warning keys compare as a multiset: each
+ * upstream warning has one row, whatever the order.
+ */
+export function compare_case(
+  expected: UpstreamCase,
+  actual: Readonly<Record<string, unknown>>,
+  { rounded, tolerance, warnings, exempt }: CompareOptions,
+): string[] {
+  const failures: string[] = [];
+  for (const [name, value] of Object.entries(expected.outputs)) {
+    if (exempt.outputs.includes(name)) continue;
+    if (!(name in actual)) {
+      failures.push(`output ${name}: missing from the library's result`);
+      continue;
+    }
+    const failure = compare_output(
+      name,
+      decode(value),
+      actual[name],
+      rounded.includes(name),
+      tolerance,
+    );
+    if (failure !== undefined) failures.push(failure);
+  }
+  if (warnings) {
+    const upstream_keys = compared_keys(
+      expected.warnings.flatMap(
+        (warning) => upstream_warning_key(warning) ?? [],
+      ),
+      exempt,
+    );
+    const library_keys = compared_keys(
+      (actual.warnings as readonly WarningRow[]).map(library_warning_key),
+      exempt,
+    );
+    if (JSON.stringify(library_keys) !== JSON.stringify(upstream_keys)) {
+      failures.push(
+        `warnings: library ${JSON.stringify(library_keys)}, upstream ${JSON.stringify(upstream_keys)}`,
+      );
+    }
+  }
+  return failures;
+}
+
+/** What the model's register and the shared register exempt. */
+export function exemptions(rows: readonly Row[], model: string): Parity {
+  const files = [`docs/deviations/${model}.md`, "docs/deviations/_shared.md"];
+  const applying = rows.filter((row) => files.includes(row.file));
+  return {
+    outputs: applying.flatMap((row) => row.parity.outputs),
+    warnings: applying.flatMap((row) => row.parity.warnings),
+  };
+}
+
+/**
+ * Reads the pins: the Python version from the Dockerfile's base image, and
+ * every locked package from the lockfile.
+ */
+export function read_pins(root: string): Pins {
+  const dockerfile = readFileSync(join(root, DOCKERFILE), "utf8");
+  const python = /^FROM python:(\d+\.\d+\.\d+)-/m.exec(dockerfile)?.[1];
+  if (python === undefined) {
+    throw new Error(`${DOCKERFILE} has no FROM python:<x.y.z>- line`);
+  }
+  const requirements = readFileSync(join(root, REQUIREMENTS), "utf8");
+  const packages = Object.fromEntries(
+    [...requirements.matchAll(/^([A-Za-z0-9._-]+)==(\S+)/gm)].map(
+      ([, name = "", version = ""]) => [name.toLowerCase(), version],
+    ),
+  );
+  return { python, packages };
+}
+
+/**
+ * Checks that the data were generated on x86_64 with the pinned versions, so
+ * data regenerated elsewhere fail here instead of reading as library errors.
+ */
+export function check_header(header: Header, pins: Pins): string[] {
+  const failures: string[] = [];
+  if (header.machine !== MACHINE) {
+    failures.push(`header: machine "${header.machine}", expected "${MACHINE}"`);
+  }
+  if (header.python !== pins.python) {
+    failures.push(
+      `header: python "${header.python}", expected the pinned "${pins.python}"`,
+    );
+  }
+  for (const [name, version] of Object.entries(pins.packages)) {
+    const found = header.packages[name];
+    if (found === version) continue;
+    failures.push(
+      found === undefined
+        ? `header: ${name} missing, expected the pinned "${version}"`
+        : `header: ${name} "${found}", expected the pinned "${version}"`,
+    );
+  }
+  for (const [name, version] of Object.entries(header.packages)) {
+    if (!(name in pins.packages)) {
+      failures.push(`header: ${name} "${version}" is not pinned`);
+    }
+  }
+  return failures;
+}
+
+/** Reads a model's data file. */
+export function read_data(root: string, model: string): ParityData {
+  return JSON.parse(
+    readFileSync(join(root, DATA, `${model}.json`), "utf8"),
+  ) as ParityData;
+}
+
+/**
+ * Runs one model's suite: checks the header first, then compares every case,
+ * prefixing each failure with the case's index and inputs.
+ */
+export function parity_failures(root: string, model: ParityModel): string[] {
+  const data = read_data(root, model.name);
+  if (data.model !== model.name) {
+    return [`${DATA}/${model.name}.json holds the model "${data.model}"`];
+  }
+  const header_failures = check_header(data.header, read_pins(root));
+  if (header_failures.length > 0) return header_failures;
+  const exempt = exemptions(read_registers(root).rows, model.name);
+  const tolerance = model.tolerance ?? DEFAULT_TOLERANCE;
+  return data.cases.flatMap((expected, i) => {
+    const at = `case ${i} ${JSON.stringify(expected.inputs)}`;
+    let actual: Readonly<Record<string, unknown>>;
+    try {
+      actual = model.run(expected.inputs);
+    } catch (error) {
+      return [`${at}: library threw ${String(error)}`];
+    }
+    return compare_case(expected, actual, {
+      rounded: model.rounded(expected.inputs),
+      tolerance,
+      warnings: model.warnings,
+      exempt,
+    }).map((failure) => `${at}: ${failure}`);
+  });
+}

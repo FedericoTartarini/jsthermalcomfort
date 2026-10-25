@@ -7,3 +7,5 @@ _site/
 validation-data-comfort-models/
 lib/
 .scratch/
+# Generated, and must equal the CI artifact byte for byte (scripts/parity/README.md).
+tests/parity/data/

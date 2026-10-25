@@ -1,0 +1,111 @@
+import { existsSync } from "node:fs";
+import tsdoc from "eslint-plugin-tsdoc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import tseslint from "typescript-eslint";
+
+// The files strict lint covers. Lint grows with the migration: each model
+// ticket adds its own files, and the contract ticket replaces this list with
+// every file. CI and the pre-commit hook both run `npm run lint`, so they
+// cover the same list (ADR 0020).
+const LINTED = ["vitest.config.ts"];
+
+for (const file of LINTED) {
+  if (!existsSync(new URL(file, import.meta.url))) {
+    throw new Error(`eslint.config.mjs lists ${file}, which does not exist`);
+  }
+}
+
+export default defineConfig(
+  // Everything except the listed files, while keeping directories traversable.
+  // Unignoring every directory also unignores node_modules/ and .git/, so they
+  // are ignored again. .scratch/ holds evidence with its own eslint.config.mjs,
+  // which ESLint 10 would otherwise apply to the files beside it.
+  globalIgnores([
+    "**/*",
+    "!**/*/",
+    "**/node_modules/",
+    "**/.git/",
+    ".scratch/",
+    ...LINTED.map((file) => `!${file}`),
+  ]),
+  {
+    files: ["**/*.ts"],
+    extends: [
+      tseslint.configs.strictTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
+    ],
+    plugins: { tsdoc },
+    languageOptions: {
+      parserOptions: {
+        project: ["configs/tsconfig.json", "tests/tsconfig.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "tsdoc/syntax": "error",
+      // Upstream's messages embed numbers. The other options repeat
+      // strictTypeChecked's, since the rule's own defaults allow more.
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        {
+          allowAny: false,
+          allowBoolean: false,
+          allowNever: false,
+          allowNullish: false,
+          allowNumber: true,
+          allowRegExp: false,
+        },
+      ],
+      // Names copied from upstream keep its spelling: snake_case, the `_`
+      // prefix, and its class names. Names the library adds follow TS
+      // conventions: camelCase functions, UPPER_CASE constants, PascalCase
+      // types (ADR 0021). A mixed name matches no format.
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          selector: "default",
+          format: ["snake_case"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "variable",
+          types: ["function"],
+          format: ["snake_case", "camelCase"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "function",
+          format: ["snake_case", "camelCase"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "variable",
+          modifiers: ["const"],
+          format: ["snake_case", "UPPER_CASE"],
+          leadingUnderscore: "allow",
+        },
+        // Upstream's enum classes become `as const` objects (`Units`).
+        {
+          selector: "variable",
+          modifiers: ["const", "global"],
+          format: ["snake_case", "UPPER_CASE", "PascalCase"],
+          leadingUnderscore: "allow",
+        },
+        { selector: "typeLike", format: ["PascalCase", "UPPER_CASE"] },
+        // A default or namespace import takes the name its module uses.
+        {
+          selector: "import",
+          format: ["snake_case", "camelCase", "PascalCase"],
+        },
+        // Properties also take the camelCase of the APIs the code calls.
+        {
+          selector: "memberLike",
+          format: ["snake_case", "camelCase", "UPPER_CASE"],
+          leadingUnderscore: "allow",
+        },
+        // A quoted key is upstream's check name verbatim ("tr - tdb").
+        { selector: "memberLike", modifiers: ["requiresQuotes"], format: null },
+      ],
+    },
+  },
+);

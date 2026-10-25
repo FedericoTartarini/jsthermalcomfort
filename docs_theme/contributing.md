@@ -61,6 +61,10 @@ To set up jsthermalcomfort for local development:
     ```bash
     npm run format
     ```
+    - Run ESLint over the files listed in `eslint.config.mjs`:
+    ```bash
+    npm run lint
+    ```
     - Commit your changes:
     ```bash
     git add .

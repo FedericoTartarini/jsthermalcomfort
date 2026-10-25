@@ -17,6 +17,7 @@
     "docs": "npx documentation build ./src/index.js -f html --github --config documentation.yml -a public --theme ./docs_theme/index.js -o docs",
     "format": "npx prettier . --write",
     "check:format": "npx prettier . --check",
+    "lint": "eslint",
     "check:types": "./node_modules/.bin/tsc -p tests/types/tsconfig.json",
     "check:types:tests": "./node_modules/.bin/tsc -p tests/tsconfig.json",
     "prepare": "husky && npm run build"
@@ -46,12 +47,15 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "documentation": "^14.0.3",
+    "eslint": "^10.13.0",
+    "eslint-plugin-tsdoc": "^0.5.4",
     "github-slugger": "^2.0.0",
     "highlight.js": "^11.12.0",
     "husky": "^9.1.7",
     "lodash": "^4.18.1",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0",
     "vitest": "^5.0.5"
   },
   "dependencies": {

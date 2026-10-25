@@ -1,9 +1,6 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
-import {
-  body_surface_area,
-  round,
-  validateInputs,
-} from "../utilities/utilities.js";
+import { body_surface_area, validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 
 /**
  * @typedef {object} PetSteadyResult

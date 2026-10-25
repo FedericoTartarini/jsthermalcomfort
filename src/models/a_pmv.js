@@ -1,4 +1,6 @@
-import { validateInputs, round, Standard } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { round } from "../_internal/round.ts";
 import { pmv } from "./pmv.js";
 
 /**

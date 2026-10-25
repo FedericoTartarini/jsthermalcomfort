@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { classifyFromBins } from "../../src/models/classifierBins.ts";
+import { classifyFromBins } from "../../src/models/index.ts";
 
 /**
  * Test classifyFromBins function matching numpy.digitize behavior
@@ -433,5 +433,37 @@ describe("classifyFromBins - divergence at boundary (intentional)", () => {
     // Right-inclusive: -0.5 < pmv <= 0.5 -> "Neutral" (labels[3])
     expect(classifyFromBins(0.5, binsLeft)).toBe("Slightly Warm");
     expect(classifyFromBins(0.5, binsRight)).toBe("Neutral");
+  });
+});
+
+// np.digitize also takes decreasing edges; the library throws unless they are
+// strictly increasing (deviation _shared-2).
+describe("classifyFromBins - edges must be strictly increasing", () => {
+  test.each([
+    ["equal", [0, 10, 10, 20]],
+    ["decreasing", [20, 10, 0]],
+    ["NaN", [0, NaN, 20]],
+  ])("throws RangeError for %s edges, whatever the value", (_, edges) => {
+    const bins = { edges, labels: edges.map(String), right: true };
+    for (const value of [-100, 5, 15, 100, NaN]) {
+      expect(() => classifyFromBins(value, bins)).toThrow(
+        new RangeError("edges must be strictly increasing."),
+      );
+    }
+  });
+
+  test("accepts strictly increasing edges, a single edge and infinite edges", () => {
+    const labels = ["a", "b", "c"];
+    expect(
+      classifyFromBins(5, { edges: [0, 10, 20], labels, right: true }),
+    ).toBe("b");
+    expect(classifyFromBins(5, { edges: [10], labels, right: true })).toBe("a");
+    expect(
+      classifyFromBins(5, {
+        edges: [-Infinity, 0, Infinity],
+        labels,
+        right: true,
+      }),
+    ).toBe("c");
   });
 });

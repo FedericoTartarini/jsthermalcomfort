@@ -1,13 +1,13 @@
 import { pmv_ppd, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE } from "./pmv_ppd.ts";
 import type { PmvPpdParams } from "./pmv_ppd.ts";
-import {
-  validateInputs,
-  ASHRAE_55_LIMITS,
-  Standard,
-} from "../utilities/utilities.js";
-import { deepFreeze } from "./modelDocs.ts";
+import { validateInputs, ASHRAE_55_LIMITS } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
 import { _check_params_object } from "../_internal/validation.ts";
-import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
+import type {
+  ApplicabilityWarning,
+  LegacyModelInfo,
+} from "../_internal/modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not. Renamed from
@@ -18,7 +18,7 @@ import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses right-inclusive bins (pythermalcomfort#382).
  * @property {boolean|number} compliance - True if -0.5 < pmv < 0.5 (`PMV_COMPLIANCE_INTERVAL_ASHRAE`), read from the unrounded pmv; NaN when `limit_inputs` returns NaN for the inputs.
- * @property {import("./modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
+ * @property {import("../_internal/modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export type PmvPpdAshraeResult = {
@@ -54,7 +54,7 @@ export interface PmvPpdAshraeParams extends Omit<PmvPpdParams, "standard"> {
  *
  * @public
  */
-export const PMV_PPD_ASHRAE_INFO: ModelInfo = deepFreeze({
+export const PMV_PPD_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
   name: "pmv_ppd_ashrae",
   label: "PMV / PPD (ASHRAE 55)",
   description:

@@ -1,4 +1,5 @@
-import { is_iso_7730, Standard } from "../utilities/utilities.js";
+import { is_iso_7730 } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
 
 /**
  * Calculates operative temperature in accordance with ISO 7726:1998 {@link #ref_5|[5]}.

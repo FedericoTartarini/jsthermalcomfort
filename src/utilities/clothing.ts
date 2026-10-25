@@ -1,4 +1,6 @@
-import { round, Standard, v_relative } from "./utilities.js";
+import { v_relative } from "./utilities.js";
+import { Standard } from "./options.ts";
+import { round } from "../_internal/round.ts";
 
 // pythermalcomfort's `clothing` package. The functions are members of this
 // library's `utilities` namespace, as `v_relative` is (upstream's

@@ -1,16 +1,16 @@
+import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
+import { classifyFromBins } from "../_internal/classifierBins.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
 import {
-  round,
-  units_converter,
-  validateInputs,
-} from "../utilities/utilities.js";
-import { classifyFromBins } from "./classifierBins.ts";
-import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object, _valid_range } from "../_internal/validation.ts";
+  _check_params_object,
+  _legacy_valid_range,
+} from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   ClassifierBins,
-  ModelInfo,
-} from "./modelDocs.ts";
+  LegacyModelInfo,
+} from "../_internal/modelDocs.ts";
 
 const g = [
   -2836.5744,
@@ -103,7 +103,7 @@ export const UTCI_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
  *
  * @public
  */
-export const UTCI_INFO: ModelInfo = deepFreeze({
+export const UTCI_INFO: LegacyModelInfo = deepFreeze({
   name: "utci",
   label: "UTCI",
   description:
@@ -206,15 +206,15 @@ export function utci(params: UtciParams): UtciResult {
   // limit_inputs; the rows are built on every call, so with the gate off they
   // say what the number was computed despite. The gate reads the rows.
   const warnings: ApplicabilityWarning[] = [];
-  _valid_range(warnings, "tdb", "input", tdb, UTCI_LIMITS.tdb);
-  _valid_range(
+  _legacy_valid_range(warnings, "tdb", "input", tdb, UTCI_LIMITS.tdb);
+  _legacy_valid_range(
     warnings,
     "tr_minus_tdb",
     "derived",
     delta_t_tr,
     UTCI_LIMITS.tr_minus_tdb,
   );
-  _valid_range(warnings, "v", "input", v, UTCI_LIMITS.v);
+  _legacy_valid_range(warnings, "v", "input", v, UTCI_LIMITS.v);
   if (limit_inputs && warnings.length > 0) utci_approx = NaN;
 
   // Stress-category thresholds are in °C; keep the SI value before IP conversion.

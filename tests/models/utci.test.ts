@@ -7,11 +7,11 @@ import {
   UTCI_STRESS_CATEGORY_BINS,
 } from "../../src/models/utci.ts";
 import type { UtciParams } from "../../src/models/utci.ts";
-import { classifyFromBins } from "../../src/models/classifierBins.ts";
+import { classifyFromBins } from "../../src/_internal/classifierBins.ts";
 import { utci as utci_from_models } from "../../src/models/index.ts";
 import { utci as utci_from_root } from "../../src/index.ts";
 import { p_sat } from "../../src/psychrometrics/p_sat.js";
-import { round } from "../../src/utilities/utilities.js";
+import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 

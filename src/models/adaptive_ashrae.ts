@@ -1,16 +1,22 @@
 import { t_o } from "../psychrometrics/t_o.js";
 import {
-  round,
   units_converter,
   validateInputs,
   ASHRAE_55_LIMITS,
-  Standard,
 } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { round } from "../_internal/round.ts";
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
-import { deepFreeze } from "./modelDocs.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
 import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
-import { _check_params_object, _valid_range } from "../_internal/validation.ts";
-import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
+import {
+  _check_params_object,
+  _legacy_valid_range,
+} from "../_internal/validation.ts";
+import type {
+  ApplicabilityWarning,
+  LegacyModelInfo,
+} from "../_internal/modelDocs.ts";
 
 // Comfort temperature as a linear function of the running mean outdoor
 // temperature, t_cmf = SLOPE * t_running_mean + INTERCEPT, as upstream names them.
@@ -88,7 +94,7 @@ export const ADAPTIVE_ASHRAE_LIMITS = Object.freeze({
  *
  * @public
  */
-export const ADAPTIVE_ASHRAE_INFO: ModelInfo = deepFreeze({
+export const ADAPTIVE_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
   name: "adaptive_ashrae",
   label: "Adaptive (ASHRAE 55)",
   description:
@@ -238,7 +244,7 @@ export function adaptive_ashrae(
   // Upstream passes no airspeed_control, so the no-control rules never apply.
   const warnings: ApplicabilityWarning[] = [];
   _check_ashrae55_compliance(warnings, { tdb, tr, v });
-  _valid_range(
+  _legacy_valid_range(
     warnings,
     "t_running_mean",
     "input",

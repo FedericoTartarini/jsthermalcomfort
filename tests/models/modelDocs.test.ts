@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { deepFreeze } from "../../src/models/modelDocs.ts";
+import { deepFreeze } from "../../src/_internal/modelDocs.ts";
 
 describe("deepFreeze", () => {
   // The cycle guard from #197: without it, a self-reference recurses until

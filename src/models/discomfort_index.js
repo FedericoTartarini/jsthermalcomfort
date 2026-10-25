@@ -1,4 +1,5 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 
 /**
  * @typedef {Object} DiscomfortIndexReturnType - a result set containing the discomfort index and the classification of the

@@ -27,9 +27,9 @@ import { UTCI_LIMITS } from "../../src/models/utci.ts";
 import {
   ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
-  Standard,
 } from "../../src/utilities/utilities.js";
-import type { ModelInfo } from "../../src/models/modelDocs.ts";
+import { Standard } from "../../src/utilities/options.ts";
+import type { ModelInfo } from "../../src/_internal/modelDocs.ts";
 
 // NOTE: A directory scan approach was attempted to make this test self-maintaining,
 // but the Jest ESM configuration of the time did not support CommonJS require() or

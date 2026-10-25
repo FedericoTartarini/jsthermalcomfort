@@ -1,8 +1,5 @@
-import {
-  round,
-  units_converter,
-  validateInputs,
-} from "../utilities/utilities.js";
+import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 import { set_tmp } from "./set_tmp.js";
 import { _check_params_object } from "../_internal/validation.ts";
 

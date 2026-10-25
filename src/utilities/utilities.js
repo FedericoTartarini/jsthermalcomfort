@@ -1,21 +1,7 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
 import { t_o } from "../psychrometrics/t_o.js";
-
-/**
- * Rounds a number to the given precision, half to even, as numpy's `round` does.
- *
- * @param {number} number - the number to round
- * @param {number} precision - the number of decimal places to round to
- * @returns {number} the rounded result
- */
-export function round(number, precision) {
-  const smudge = 10 ** precision;
-  const scaled = number * smudge;
-  let rounded = Math.round(scaled);
-  // Math.round sends a tie up; numpy's rint sends it to the even neighbour.
-  if (rounded - scaled === 0.5 && rounded % 2 !== 0) rounded -= 1;
-  return rounded / smudge;
-}
+import { round } from "../_internal/round.ts";
+import { Standard } from "./options.ts";
 
 /**
  * Converts degrees to radians
@@ -75,29 +61,6 @@ export function transpose_sharp_altitude(sharp, altitude) {
  */
 
 /**
- * Standard names accepted by {@link check_standard_compliance}.
- */
-/**
- * Canonical identifiers for the comfort standards this library implements.
- *
- * Mirrors `pythermalcomfort.utilities.Models` exactly: the **property name** is
- * the canonical key, shared across both libraries and used to key the limits
- * file in #182; the **value** is the string a caller passes. Keeping both forms
- * means neither library has to translate, and a binding test can assert that
- * the two key sets are identical.
- *
- * @public
- */
-export const Standard = Object.freeze({
-  ashrae_55_2023: "55-2023",
-  iso_7730_2005: "7730-2005",
-  iso_7730_2025: "7730-2025",
-  iso_9920_2007: "9920-2007",
-  iso_7933_2004: "7933-2004",
-  iso_7933_2023: "7933-2023",
-});
-
-/**
  * Applicability limit sets that are not standards in their own right.
  *
  * These were previously mixed into `Standard`, which conflated two things: a
@@ -124,10 +87,6 @@ export const LimitSet = Object.freeze({
   ankle_draft: "ankle_draft",
   use_fans_heatwaves: "use_fans_heatwaves",
 });
-
-/**
- * @typedef {(typeof Standard)[keyof typeof Standard]} Standard
- */
 
 /**
  * @typedef {(typeof LimitSet)[keyof typeof LimitSet]} LimitSet

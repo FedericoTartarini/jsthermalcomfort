@@ -1,11 +1,17 @@
 import {
-  round,
   transpose_sharp_altitude,
   validateInputs,
 } from "../utilities/utilities.js";
-import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object, _valid_range } from "../_internal/validation.ts";
-import type { ApplicabilityWarning, ModelInfo } from "./modelDocs.ts";
+import { round } from "../_internal/round.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
+import {
+  _check_params_object,
+  _legacy_valid_range,
+} from "../_internal/validation.ts";
+import type {
+  ApplicabilityWarning,
+  LegacyModelInfo,
+} from "../_internal/modelDocs.ts";
 
 // avoid reallocating these arrays accross function calls
 const _ALT_RANGE = [0, 15, 30, 45, 60, 75, 90];
@@ -126,7 +132,7 @@ export const SOLAR_GAIN_LIMITS = Object.freeze({
  *
  * @public
  */
-export const SOLAR_GAIN_INFO: ModelInfo = deepFreeze({
+export const SOLAR_GAIN_INFO: LegacyModelInfo = deepFreeze({
   name: "solar_gain",
   label: "Solar gain on people",
   description:
@@ -257,28 +263,28 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   // upstream sets to NaN; sol_radiation_dir and asw are Table C-2's ranges,
   // reported and not gated (see SOLAR_GAIN_LIMITS).
   const warnings: ApplicabilityWarning[] = [];
-  const sol_altitude_in_table = _valid_range(
+  const sol_altitude_in_table = _legacy_valid_range(
     warnings,
     "sol_altitude",
     "input",
     sol_altitude,
     SOLAR_GAIN_LIMITS.sol_altitude,
   );
-  const sharp_in_table = _valid_range(
+  const sharp_in_table = _legacy_valid_range(
     warnings,
     "sharp",
     "input",
     sharp,
     SOLAR_GAIN_LIMITS.sharp,
   );
-  _valid_range(
+  _legacy_valid_range(
     warnings,
     "sol_radiation_dir",
     "input",
     sol_radiation_dir,
     SOLAR_GAIN_LIMITS.sol_radiation_dir,
   );
-  _valid_range(warnings, "asw", "input", asw, SOLAR_GAIN_LIMITS.asw);
+  _legacy_valid_range(warnings, "asw", "input", asw, SOLAR_GAIN_LIMITS.asw);
 
   const posture = (params.posture ?? "sitting").toLowerCase();
   if (!_POSTURES.includes(posture)) {

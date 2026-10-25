@@ -8,7 +8,8 @@ import type {
   PmvPpdIsoParams,
   PmvPpdIsoResult,
 } from "../../src/models/pmv_ppd_iso.ts";
-import { round, Standard } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
+import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
 import {
   assertNonEmptyRows,

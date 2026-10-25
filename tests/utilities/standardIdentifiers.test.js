@@ -1,9 +1,6 @@
 import { describe, expect, test } from "vitest";
-import {
-  is_iso_7730,
-  LimitSet,
-  Standard,
-} from "../../src/utilities/utilities.js";
+import { is_iso_7730, LimitSet } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
 import * as pkg from "../../src/index.ts";
 
 // These identifiers are shared with pythermalcomfort, which is the reference
@@ -87,6 +84,15 @@ describe("public API surface", () => {
   test("Standard and LimitSet are frozen", () => {
     expect(Object.isFrozen(Standard)).toBe(true);
     expect(Object.isFrozen(LimitSet)).toBe(true);
+  });
+});
+
+// Upstream's `Units` enum (utilities.py), added as a constant (deviation
+// _shared-1).
+describe("Units mirrors pythermalcomfort's Units enum", () => {
+  test("has upstream's members and values, frozen, from the package root", () => {
+    expect(pkg.Units).toEqual({ SI: "SI", IP: "IP" });
+    expect(Object.isFrozen(pkg.Units)).toBe(true);
   });
 });
 

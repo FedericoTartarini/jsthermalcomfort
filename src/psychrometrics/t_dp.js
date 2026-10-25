@@ -1,4 +1,4 @@
-import { round } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 
 /**
  * Calculates the dew point temperature.

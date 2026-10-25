@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { pmv } from "../../src/models/pmv.js";
-import { Standard } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
 import { validateResult } from "./testUtils.ts";
 
 describe("pmv", () => {

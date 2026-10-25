@@ -2,5 +2,9 @@
 
 Deviations from pythermalcomfort v4.6.2 that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the definition helper, `classifyFromBins`, `ModelInfo`) and the helpers the models call. The format is in the [README](README.md).
 
-| id  | part | upstream site | TS site | reason | class/ADR | status | date | parity |
-| --- | ---- | ------------- | ------- | ------ | --------- | ------ | ---- | ------ |
+| id        | part        | upstream site                 | TS site                           | reason                                                                                                                                                   | class/ADR                       | status   | date       | parity |
+| --------- | ----------- | ----------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | -------- | ---------- | ------ |
+| _shared-1 | v2-addition | `utilities.py:34`             | `src/utilities/options.ts`        | Upstream's `Units` enum becomes a frozen constant, `Units.SI` and `Units.IP`, which the library did not have.                                            | addition: `Units` (ADR 0019)    | approved | 2026-10-26 | none   |
+| _shared-2 | logic       | `_internal/validation.py:216` | `src/_internal/classifierBins.ts` | `np.digitize` also takes decreasing edges; `classifyFromBins` throws `RangeError` unless they are strictly increasing.                                   | ADR 0024                        | approved | 2026-10-26 | none   |
+| _shared-3 | v2-addition | `_internal/validation.py:55`  | `src/_internal/modelDocs.ts`      | Each `UserWarning` upstream emits becomes a `range` or `notice` row in the result's `warnings`; `_valid_range` appends a range row where upstream warns. | addition: warnings (ADR 0024)   | approved | 2026-10-26 | none   |
+| _shared-4 | v2-addition | none                          | `src/_internal/modelDocs.ts`      | `ModelInfo`, the type of every model's `*_INFO`, which upstream lacks.                                                                                   | addition: model info (ADR 0024) | approved | 2026-10-26 | none   |

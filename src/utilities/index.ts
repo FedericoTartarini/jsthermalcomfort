@@ -11,8 +11,8 @@ import {
   check_standard_compliance,
   is_iso_7730,
   LimitSet,
-  Standard,
 } from "./utilities.js";
+import { Standard, Units } from "./options.ts";
 import {
   clo_area_factor,
   clo_dynamic_ashrae,
@@ -47,6 +47,7 @@ export {
   is_iso_7730,
   LimitSet,
   Standard,
+  Units,
 };
 
 export default {
@@ -69,6 +70,7 @@ export default {
   is_iso_7730,
   LimitSet,
   Standard,
+  Units,
 };
 
 /**

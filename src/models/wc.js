@@ -1,4 +1,5 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 
 /**
  * Calculates the Wind Chill Index (WCI) in accordance with the ASHRAE 2017 Handbook Fundamentals - Chapter 9 {@link #ref_18|[18]}.

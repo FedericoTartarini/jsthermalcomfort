@@ -1,20 +1,20 @@
 import {
-  round,
   units_converter,
   validateInputs,
   ISO_7730_LIMITS,
-  Standard,
 } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { round } from "../_internal/round.ts";
 import { cooling_effect } from "./cooling_effect.ts";
-import { classifyFromBins } from "./classifierBins.ts";
+import { classifyFromBins } from "../_internal/classifierBins.ts";
 import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
-import { _valid_range } from "../_internal/validation.ts";
-import { deepFreeze } from "./modelDocs.ts";
+import { _legacy_valid_range } from "../_internal/validation.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
-} from "./modelDocs.ts";
+} from "../_internal/modelDocs.ts";
 
 /**
  * The parameters the PMV wrappers share, keyed like upstream's keyword
@@ -426,7 +426,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   const warnings: ApplicabilityWarning[] = [];
   if (!rules.ashrae55) {
     for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
-      _valid_range(warnings, key, "input", value, rules.limits[key]!);
+      _legacy_valid_range(warnings, key, "input", value, rules.limits[key]!);
     }
   } else {
     _check_ashrae55_compliance(warnings, {
@@ -439,7 +439,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
       v_param_name: "vr",
     });
   }
-  if (rules.pa) _valid_range(warnings, "pa", "derived", pa, rules.pa);
+  if (rules.pa) _legacy_valid_range(warnings, "pa", "derived", pa, rules.pa);
 
   let ce = 0;
   if (rules.ashrae55) {
@@ -473,7 +473,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
     95.0 *
       Math.exp(-0.03353 * Math.pow(pmv, 4.0) - 0.2179 * Math.pow(pmv, 2.0));
 
-  if (rules.pmv) _valid_range(warnings, "pmv", "output", pmv, rules.pmv);
+  if (rules.pmv) _legacy_valid_range(warnings, "pmv", "output", pmv, rules.pmv);
 
   // Checks that inputs are within the bounds accepted by the model if not return NaN
   const gated = limit_inputs && (isNaN(pmv) || warnings.length > 0);

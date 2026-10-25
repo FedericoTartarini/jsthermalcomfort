@@ -1,5 +1,6 @@
 import { pmv_ppd } from "./pmv_ppd.ts";
-import { validateInputs, Standard } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
 
 /**
  * @typedef {Object} PmvKwargs

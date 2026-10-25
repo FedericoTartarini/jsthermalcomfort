@@ -37,7 +37,7 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "./pmv_ppd.ts";
-import { classifyFromBins } from "./classifierBins.ts";
+import { classifyFromBins } from "../_internal/classifierBins.ts";
 
 // deepFreeze is internal, so modelDocs contributes its types only.
 export type {
@@ -45,8 +45,9 @@ export type {
   Bound,
   ClassifierBins,
   ModelInfo,
+  ModelWarning,
   VariableInfo,
-} from "./modelDocs.ts";
+} from "../_internal/modelDocs.ts";
 export type {
   AdaptiveAshraeParams,
   AdaptiveAshraeResult,

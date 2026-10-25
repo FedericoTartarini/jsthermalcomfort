@@ -1,10 +1,7 @@
 import { t_o } from "../psychrometrics/t_o.js";
-import {
-  units_converter,
-  round,
-  validateInputs,
-  Standard,
-} from "../utilities/utilities.js";
+import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { round } from "../_internal/round.ts";
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
 
 /**

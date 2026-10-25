@@ -1,12 +1,16 @@
-import { round, validateInputs } from "../utilities/utilities.js";
-import { classifyFromBins } from "./classifierBins.ts";
-import { deepFreeze } from "./modelDocs.ts";
-import { _check_params_object, _valid_range } from "../_internal/validation.ts";
+import { validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
+import { classifyFromBins } from "../_internal/classifierBins.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
+import {
+  _check_params_object,
+  _legacy_valid_range,
+} from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   ClassifierBins,
-  ModelInfo,
-} from "./modelDocs.ts";
+  LegacyModelInfo,
+} from "../_internal/modelDocs.ts";
 
 // Renamed from HeatIndexResult to <Model>Result, the name every converted
 // model's result has.
@@ -118,7 +122,7 @@ export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
  *
  * @public
  */
-export const HEAT_INDEX_ROTHFUSZ_INFO: ModelInfo = deepFreeze({
+export const HEAT_INDEX_ROTHFUSZ_INFO: LegacyModelInfo = deepFreeze({
   name: "heat_index_rothfusz",
   label: "Heat Index (Rothfusz)",
   description: "Apparent temperature — how hot it feels at a given humidity.",
@@ -153,7 +157,13 @@ export function heat_index_rothfusz(
   // limit_inputs; the row is built on every call, so with the gate off it
   // says what the number was computed despite. The gate reads the row.
   const warnings: ApplicabilityWarning[] = [];
-  _valid_range(warnings, "tdb", "input", tdb, HEAT_INDEX_ROTHFUSZ_LIMITS.tdb);
+  _legacy_valid_range(
+    warnings,
+    "tdb",
+    "input",
+    tdb,
+    HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
+  );
   if (limit_inputs && warnings.length > 0) {
     return { hi: NaN, stress_category: NaN, warnings };
   }

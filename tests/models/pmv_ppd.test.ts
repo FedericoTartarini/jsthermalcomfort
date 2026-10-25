@@ -4,11 +4,11 @@ import type { PmvPpdParams, PmvStandard } from "../../src/models/pmv_ppd.ts";
 import {
   ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
-  Standard,
   check_standard_compliance,
-  round,
   valid_range,
 } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
+import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 

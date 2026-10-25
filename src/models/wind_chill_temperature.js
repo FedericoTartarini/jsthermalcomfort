@@ -1,4 +1,5 @@
-import { round, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 
 /**
  * Calculates the Wind Chill Temperature (WCT) using the North American

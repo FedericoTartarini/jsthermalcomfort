@@ -1,11 +1,8 @@
-import {
-  round,
-  units_converter,
-  validateInputs,
-} from "../utilities/utilities.js";
-import { deepFreeze } from "./modelDocs.ts";
+import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
 import { _check_params_object } from "../_internal/validation.ts";
-import type { ModelInfo } from "./modelDocs.ts";
+import type { LegacyModelInfo } from "../_internal/modelDocs.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so documentation.js
 // keeps naming it from the typedef line.
@@ -43,7 +40,7 @@ export interface CloToutParams {
  *
  * @public
  */
-export const CLO_TOUT_INFO: ModelInfo = deepFreeze({
+export const CLO_TOUT_INFO: LegacyModelInfo = deepFreeze({
   name: "clo_tout",
   label: "Clothing prediction",
   description:

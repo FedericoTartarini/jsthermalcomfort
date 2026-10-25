@@ -2,9 +2,9 @@ import { p_sat } from "../psychrometrics/p_sat.js";
 import {
   body_surface_area,
   check_standard_compliance,
-  round,
   validateInputs,
 } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 
 const MET_WATT_PER_MET = 58.15;
 

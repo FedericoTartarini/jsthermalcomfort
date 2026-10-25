@@ -1,10 +1,10 @@
 import {
   units_converter,
   check_standard_compliance,
-  round,
   validateInputs,
   LimitSet,
 } from "../utilities/utilities.js";
+import { round } from "../_internal/round.ts";
 import { two_nodes } from "../models/two_nodes.js";
 
 /**

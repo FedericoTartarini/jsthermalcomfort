@@ -1,7 +1,7 @@
 import { t_o } from "../psychrometrics/t_o.js";
 import { ASHRAE_55_LIMITS } from "../utilities/utilities.js";
-import { _valid_range } from "./validation.ts";
-import type { ApplicabilityWarning } from "../models/modelDocs.ts";
+import { _legacy_valid_range } from "./validation.ts";
+import type { ApplicabilityWarning } from "./modelDocs.ts";
 
 /**
  * The fixed airspeed bounds of the `airspeed_control` rules: `any` at every
@@ -61,10 +61,16 @@ export function _check_ashrae55_compliance(
   const { tdb, tr, v, met, clo } = params;
   const { airspeed_control = true, v_param_name = "v" } = params;
 
-  _valid_range(warnings, "tdb", "input", tdb, ASHRAE_55_LIMITS.tdb!);
-  _valid_range(warnings, "tr", "input", tr, ASHRAE_55_LIMITS.tr!);
+  _legacy_valid_range(warnings, "tdb", "input", tdb, ASHRAE_55_LIMITS.tdb!);
+  _legacy_valid_range(warnings, "tr", "input", tr, ASHRAE_55_LIMITS.tr!);
   if (v !== undefined) {
-    _valid_range(warnings, v_param_name, "input", v, ASHRAE_55_LIMITS.vr!);
+    _legacy_valid_range(
+      warnings,
+      v_param_name,
+      "input",
+      v,
+      ASHRAE_55_LIMITS.vr!,
+    );
   }
 
   if (
@@ -76,7 +82,7 @@ export function _check_ashrae55_compliance(
     met < 1.3
   ) {
     // Upper bounds only, and the operative-temperature one moves with the
-    // call, so they are pushed as broken rather than through _valid_range.
+    // call, so they are pushed as broken rather than through _legacy_valid_range.
     const pushAirspeedRow = (bound: Readonly<{ max: number }>) =>
       warnings.push({ key: v_param_name, role: "input", value: v, bound });
     const to = t_o(tdb, tr, v);
@@ -93,7 +99,7 @@ export function _check_ashrae55_compliance(
   // then reads clo unguarded. Requiring both is the same for every caller,
   // which passes both or neither, and lets TypeScript narrow clo.
   if (met !== undefined && clo !== undefined) {
-    _valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met!);
-    _valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo!);
+    _legacy_valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met!);
+    _legacy_valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo!);
   }
 }

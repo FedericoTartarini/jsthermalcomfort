@@ -1,11 +1,11 @@
 import { pmv } from "../models/pmv.js";
 import {
   check_standard_compliance,
-  round,
   units_converter,
   validateInputs,
-  Standard,
 } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { round } from "../_internal/round.ts";
 
 /**
  * @typedef {Object} VerTmpGradReturnType - a result set containing the predicted precentage of dissatisfied and the acceptability

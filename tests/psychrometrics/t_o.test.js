@@ -1,6 +1,7 @@
 import { expect, describe, it, test } from "vitest";
 import { t_o } from "../../src/psychrometrics/t_o";
-import { LimitSet, Standard } from "../../src/utilities/utilities.js";
+import { LimitSet } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
 
 // Mirrors pythermalcomfort v4.6.0 tests/test_environment.py. Upstream's
 // operative_tmp takes "ISO" (the default) or "ASHRAE"; t_o takes the Standard

@@ -13,10 +13,11 @@ import {
   assertNumber,
   validateInputs,
   check_standard_compliance,
-  round,
 } from "../../src/utilities/utilities";
+import { round } from "../../src/_internal/round.ts";
 import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
-import { LimitSet, Standard } from "../../src/utilities/utilities.js";
+import { LimitSet } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
 
 const DEFAULT_TOLERANCE = 0.01;
 

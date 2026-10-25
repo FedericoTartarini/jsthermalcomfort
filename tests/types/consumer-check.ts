@@ -123,6 +123,14 @@ const nameNotANumber: number = PMV_PPD_ISO_INFO.name;
 // @ts-expect-error `name` is required: a ModelInfo without it is rejected.
 const nameless: ModelInfo = {
   label: "l",
+  standards: [],
+  inputs: {},
+  outputs: {},
+};
+const described: ModelInfo = {
+  name: "n",
+  label: "l",
+  // @ts-expect-error ModelInfo has no `description`.
   description: "d",
   standards: [],
   inputs: {},

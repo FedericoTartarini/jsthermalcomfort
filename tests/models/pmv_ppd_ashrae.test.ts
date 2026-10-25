@@ -5,12 +5,12 @@ import {
   pmv_ppd_iso,
 } from "../../src/models/index.ts";
 import type { PmvPpdAshraeParams } from "../../src/models/pmv_ppd_ashrae.ts";
-import { classifyFromBins } from "../../src/models/classifierBins.ts";
+import { classifyFromBins } from "../../src/_internal/classifierBins.ts";
 import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "../../src/models/pmv_ppd.ts";
-import { Standard } from "../../src/utilities/utilities.js";
+import { Standard } from "../../src/utilities/options.ts";
 import { testDataUrls } from "./comftest.ts";
 import {
   assertNonEmptyRows,

@@ -1,11 +1,11 @@
 import { two_nodes } from "../models/two_nodes.js";
 import {
   check_standard_compliance,
-  round,
   units_converter,
   validateInputs,
-  Standard,
 } from "../utilities/utilities.js";
+import { Standard } from "../utilities/options.ts";
+import { round } from "../_internal/round.ts";
 
 /**
  * @typedef {Object} SetTmpResult

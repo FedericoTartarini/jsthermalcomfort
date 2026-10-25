@@ -6,14 +6,7 @@
 // `expect.hasAssertions()` so the meta-tests cannot themselves silent-skip
 // with zero effective assertions.
 
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  jest,
-  test,
-} from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, vi, test } from "vitest";
 import {
   validateResult,
   expandArrayRows,
@@ -25,11 +18,11 @@ import {
 // silence the log spam here. Real model test failures still surface the
 // context because they run with the unmocked console.
 beforeEach(() => {
-  jest.spyOn(console, "log").mockImplementation(() => {});
+  vi.spyOn(console, "log").mockImplementation(() => {});
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("validateResult — silent-skip guards", () => {

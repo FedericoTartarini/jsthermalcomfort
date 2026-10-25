@@ -1,4 +1,4 @@
-import { expect, describe, test, it } from "@jest/globals";
+import { expect, describe, test, it } from "vitest";
 import { assertNonEmptyRows, loadTestData, validateResult } from "./testUtils";
 import { two_nodes } from "../../src/models/two_nodes";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js

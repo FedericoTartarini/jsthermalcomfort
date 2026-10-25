@@ -1,8 +1,8 @@
 {
   // Type-checks the TypeScript test files against the sources in src/.
-  // Run by `npm run check:types:tests`. Nothing else checks tests/: the Jest
-  // transform only strips types, so without this a `.test.ts` file would be
-  // TypeScript in name only.
+  // Run by `npm run check:types:tests`. Nothing else checks tests/: Vitest
+  // only strips types, so without this a `.test.ts` file would be TypeScript
+  // in name only. It also checks the Vitest config.
   //
   // tests/types/ is excluded because it checks the *built* package by name
   // (see tests/types/tsconfig.json) rather than the sources.
@@ -22,6 +22,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "../vitest.config.ts"],
   "exclude": ["types"]
 }

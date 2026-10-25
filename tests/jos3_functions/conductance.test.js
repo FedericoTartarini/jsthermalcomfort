@@ -1,6 +1,6 @@
 import { conductance } from "../../src/jos3_functions/conductance";
 import JOS3Defaults from "../../src/jos3_functions/JOS3Defaults";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("conductance", () => {
   it("should use correct default values", () => {

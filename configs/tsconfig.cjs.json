@@ -1,10 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "lib": ["ES6", "DOM"],
+    // ES2020 is the lib @types/node added before TypeScript 6 stopped loading
+    // it by default; the sources call Object.entries and Array.includes.
+    "lib": ["ES2020", "DOM"],
     "target": "ES6",
     "module": "CommonJS",
-    "moduleResolution": "Node",
+    // node10 resolution is deprecated in TypeScript 6 (TS5107).
+    "moduleResolution": "Bundler",
+    // This build compiles the ESM sources to CommonJS, which
+    // verbatimModuleSyntax forbids. ADR 0020 drops the build.
+    "verbatimModuleSyntax": false,
     "outDir": "../lib/cjs",
     "declarationDir": "../lib/cjs/types"
   }

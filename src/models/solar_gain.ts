@@ -309,14 +309,14 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
     // As upstream: a -1 span must not index the table.
     return { erf: NaN, delta_mrt: NaN, warnings };
   }
-  const fp11 = fp_table[az_i][alt_i];
-  const fp12 = fp_table[az_i][alt_i + 1];
-  const fp21 = fp_table[az_i + 1][alt_i];
-  const fp22 = fp_table[az_i + 1][alt_i + 1];
-  const az1 = _AZ_RANGE[az_i];
-  const az2 = _AZ_RANGE[az_i + 1];
-  const alt1 = _ALT_RANGE[alt_i];
-  const alt2 = _ALT_RANGE[alt_i + 1];
+  const fp11 = fp_table[az_i]![alt_i]!;
+  const fp12 = fp_table[az_i]![alt_i + 1]!;
+  const fp21 = fp_table[az_i + 1]![alt_i]!;
+  const fp22 = fp_table[az_i + 1]![alt_i + 1]!;
+  const az1 = _AZ_RANGE[az_i]!;
+  const az2 = _AZ_RANGE[az_i + 1]!;
+  const alt1 = _ALT_RANGE[alt_i]!;
+  const alt2 = _ALT_RANGE[alt_i + 1]!;
   let fp = fp11 * (az2 - sharp) * (alt2 - sol_altitude);
   fp += fp21 * (sharp - az1) * (alt2 - sol_altitude);
   fp += fp12 * (az2 - sharp) * (sol_altitude - alt1);
@@ -353,7 +353,7 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
 // inclusive at both ends, or -1 for a value outside the table or NaN.
 function _find_span(arr: readonly number[], x: number): number {
   for (let i = 0; i < arr.length - 1; i++) {
-    if (arr[i + 1] >= x && x >= arr[i]) {
+    if (arr[i + 1]! >= x && x >= arr[i]!) {
       return i;
     }
   }

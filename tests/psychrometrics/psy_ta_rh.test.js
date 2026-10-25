@@ -1,4 +1,4 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it } from "vitest";
 import { deep_close_to_obj } from "../test_utilities";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh";
 

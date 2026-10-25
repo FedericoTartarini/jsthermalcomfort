@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { humidex } from "../../src/models/humidex";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities

@@ -61,10 +61,10 @@ export function _check_ashrae55_compliance(
   const { tdb, tr, v, met, clo } = params;
   const { airspeed_control = true, v_param_name = "v" } = params;
 
-  _valid_range(warnings, "tdb", "input", tdb, ASHRAE_55_LIMITS.tdb);
-  _valid_range(warnings, "tr", "input", tr, ASHRAE_55_LIMITS.tr);
+  _valid_range(warnings, "tdb", "input", tdb, ASHRAE_55_LIMITS.tdb!);
+  _valid_range(warnings, "tr", "input", tr, ASHRAE_55_LIMITS.tr!);
   if (v !== undefined) {
-    _valid_range(warnings, v_param_name, "input", v, ASHRAE_55_LIMITS.vr);
+    _valid_range(warnings, v_param_name, "input", v, ASHRAE_55_LIMITS.vr!);
   }
 
   if (
@@ -93,7 +93,7 @@ export function _check_ashrae55_compliance(
   // then reads clo unguarded. Requiring both is the same for every caller,
   // which passes both or neither, and lets TypeScript narrow clo.
   if (met !== undefined && clo !== undefined) {
-    _valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met);
-    _valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo);
+    _valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met!);
+    _valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo!);
   }
 }

@@ -1,4 +1,4 @@
-import { expect, describe, it, test } from "@jest/globals";
+import { expect, describe, it, test } from "vitest";
 import { t_o } from "../../src/psychrometrics/t_o";
 import { LimitSet, Standard } from "../../src/utilities/utilities.js";
 

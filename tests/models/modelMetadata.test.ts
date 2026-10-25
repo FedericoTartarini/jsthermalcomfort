@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import * as pkg from "../../src/index.js";
 import {
   ADAPTIVE_ASHRAE_INFO,
@@ -32,8 +32,8 @@ import {
 import type { ModelInfo } from "../../src/models/modelDocs.ts";
 
 // NOTE: A directory scan approach was attempted to make this test self-maintaining,
-// but Jest's ESM configuration does not support CommonJS require() or synchronous
-// dynamic imports in test files. Keep this hardcoded list instead. When a new model's
+// but the Jest ESM configuration of the time did not support CommonJS require() or
+// synchronous dynamic imports in test files. Keep this hardcoded list instead. When a new model's
 // _INFO or _BINS constants are added, this test will fail because the new constant
 // is not in the list, catching the JOS3 failure mode: a model whose constants exist
 // but are never added to src/models/index.js or src/index.js. The list must be

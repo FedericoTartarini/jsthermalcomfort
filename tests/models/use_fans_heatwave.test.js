@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { use_fans_heatwaves } from "../../src/models/use_fans_heatwave";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, validateResult } from "./testUtils";

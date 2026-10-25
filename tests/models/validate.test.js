@@ -1,4 +1,4 @@
-import { expect, describe, it, jest } from "@jest/globals";
+import { expect, describe, it, vi } from "vitest";
 import { validateResult } from "./testUtils.ts";
 
 describe("validateResult (Testing the Test)", () => {

@@ -1,6 +1,6 @@
 import { capacity } from "../../src/jos3_functions/capacity";
 import JOS3Defaults from "../../src/jos3_functions/JOS3Defaults";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("capacity", () => {
   it("should use appropriate defaults", () => {

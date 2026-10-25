@@ -1,4 +1,4 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it } from "vitest";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.js";
 import { rh_from_wet_bulb } from "../../src/psychrometrics/rh_from_wet_bulb.ts";
 

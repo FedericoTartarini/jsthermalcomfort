@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import {
   clo_area_factor,
   clo_dynamic_ashrae,

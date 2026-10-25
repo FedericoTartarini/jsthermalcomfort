@@ -1,4 +1,4 @@
-import { expect, describe, test } from "@jest/globals";
+import { expect, describe, test } from "vitest";
 import { phs } from "../../src/models/phs";
 import { testDataUrls } from "./comftest"; // Import test URLs from comftest.js
 import {
@@ -29,7 +29,7 @@ const scalarRows = assertNonEmptyRows(
 // Known gap, reported rather than fixed: at met 1.55 (90 W/m², below
 // ISO 7933:2004's 100 W/m²) upstream returns NaN, but phs.js checks the
 // metabolic rate limits in W rather than W/m², so the case passes the gate.
-// `test.failing` turns red once phs is fixed.
+// `test.fails` turns red once phs is fixed.
 const isMetLimitGap = ({ inputs }) => inputs.met === 1.55;
 
 describe("phs", () => {
@@ -37,7 +37,7 @@ describe("phs", () => {
     "row #$index",
     checkRow,
   );
-  test.failing.each(scalarRows.filter(isMetLimitGap))(
+  test.fails.each(scalarRows.filter(isMetLimitGap))(
     "row #$index (known gap: met limits checked in W)",
     checkRow,
   );

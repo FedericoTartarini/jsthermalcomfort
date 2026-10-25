@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { solar_gain, SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import type { SolarGainParams } from "../../src/models/solar_gain.ts";
 import { testDataUrls } from "./comftest.ts";

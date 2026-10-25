@@ -1,4 +1,4 @@
-import { describe } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { athb } from "../../src/models/athb.js";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities

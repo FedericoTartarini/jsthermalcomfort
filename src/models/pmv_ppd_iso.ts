@@ -64,16 +64,16 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
   description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
   standards: [Standard.iso_7730_2025, Standard.iso_7730_2005],
   inputs: {
-    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb },
-    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr },
-    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr },
-    met: { unit: "met", applicability: ISO_7730_LIMITS.met },
-    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo },
+    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb! },
+    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr! },
+    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr! },
+    met: { unit: "met", applicability: ISO_7730_LIMITS.met! },
+    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo! },
     rh: { unit: "%" },
     wme: { unit: "met" },
   },
   outputs: {
-    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv },
+    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv! },
     ppd: { unit: "%" },
     tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
     category: { unit: null, classifier: PMV_CATEGORY_BINS_ISO_7730_2025 },
@@ -82,7 +82,7 @@ export const PMV_PPD_ISO_INFO: ModelInfo = deepFreeze({
     // Computed from tdb and rh, not supplied by the caller. Exposed so a
     // front end can explain why a warm, humid combination that looks inside
     // every input limit still returns NaN.
-    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa },
+    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa! },
   },
 });
 

@@ -49,7 +49,7 @@ To set up jsthermalcomfort for local development:
     ```
    Now you can make your changes locally.
 
-4. When you’re done making changes run all tests using Jest:
+4. When you’re done making changes run all tests using Vitest:
     - Install dependencies
     ```bash
     npm install

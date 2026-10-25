@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals";
+import { describe, test, expect } from "vitest";
 import { e_pmv } from "../../src/models/e_pmv";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities

@@ -1,4 +1,4 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it } from "vitest";
 import { p_sat } from "../../src/psychrometrics/p_sat";
 
 describe("p_sat", () => {

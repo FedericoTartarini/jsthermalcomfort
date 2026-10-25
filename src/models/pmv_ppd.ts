@@ -239,8 +239,8 @@ type PmvStandardRules = (
 const ISO_7730_SHARED_RULES = {
   ashrae55: false as const,
   limits: ISO_7730_LIMITS,
-  pa: ISO_7730_LIMITS.pa,
-  pmv: ISO_7730_LIMITS.pmv,
+  pa: ISO_7730_LIMITS.pa!,
+  pmv: ISO_7730_LIMITS.pmv!,
   tsv_bins: PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
 };
 
@@ -424,11 +424,9 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
   // go through the shared helper, as in upstream's pmv_ppd_ashrae.
   const rules = PMV_STANDARD_RULES[standard];
   const warnings: ApplicabilityWarning[] = [];
-  // `in`, not `ashrae55`: the build's non-strict config narrows no union on a
-  // boolean.
-  if ("limits" in rules) {
+  if (!rules.ashrae55) {
     for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
-      _valid_range(warnings, key, "input", value, rules.limits[key]);
+      _valid_range(warnings, key, "input", value, rules.limits[key]!);
     }
   } else {
     _check_ashrae55_compliance(warnings, {

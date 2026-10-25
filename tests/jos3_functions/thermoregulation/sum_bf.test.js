@@ -1,5 +1,5 @@
 import { sum_bf } from "../../../src/jos3_functions/thermoregulation/sum_bf";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $lerp } from "../../../src/supa";
 
 describe("sum_bf", () => {

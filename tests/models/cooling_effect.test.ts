@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, describe, expect, vi, test } from "vitest";
 import { cooling_effect } from "../../src/models/index.js";
 import type { CoolingEffectParams } from "../../src/models/cooling_effect.ts";
 import { testDataUrls } from "./comftest.ts";
@@ -39,12 +39,12 @@ describe("cooling_effect (JS-only)", () => {
   const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   // Records console.warn calls without printing them; afterEach restores it.
   const silenceConsoleWarn = () =>
-    jest.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
 
   // Expected value from pythermalcomfort 4.6.0, cooling_effect(..., wme=0.1).
   test("wme reaches the SET calculation", () => {

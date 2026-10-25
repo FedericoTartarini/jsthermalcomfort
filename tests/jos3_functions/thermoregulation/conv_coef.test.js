@@ -1,6 +1,6 @@
 import JOS3Defaults from "../../../src/jos3_functions/JOS3Defaults";
 import { conv_coef } from "../../../src/jos3_functions/thermoregulation/conv_coef";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $array } from "../../../src/supa";
 
 describe("conv_coef", () => {

@@ -3,7 +3,7 @@
 // merges these rows should move to ts_wind_chill_temperature.json and the
 // suite should switch to loadTestData(testDataUrls.windChillTemperature).
 
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { wind_chill_temperature } from "../../src/models/wind_chill_temperature.js";
 import { validateResult } from "./testUtils";
 

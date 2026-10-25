@@ -1,4 +1,4 @@
-import { expect, describe, it } from "@jest/globals";
+import { expect, describe, it } from "vitest";
 import { phs } from "../../src/models/phs";
 
 describe("phs 2023", () => {

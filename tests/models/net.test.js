@@ -1,4 +1,4 @@
-import { describe, test } from "@jest/globals";
+import { describe, test, expect } from "vitest";
 import { net } from "../../src/models/net";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities

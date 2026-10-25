@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import {
   pmv_ppd_iso,
   PMV_CATEGORY_BINS_ISO_7730_2005,

@@ -1,4 +1,4 @@
-import { describe } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { vertical_tmp_grad_ppd } from "../../src/models/vertical_tmp_grad_ppd";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, validateResult } from "./testUtils"; // Import utility functions

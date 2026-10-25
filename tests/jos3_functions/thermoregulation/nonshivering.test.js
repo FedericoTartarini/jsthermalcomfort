@@ -1,5 +1,5 @@
 import { nonshivering } from "../../../src/jos3_functions/thermoregulation/nonshivering";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $lerp } from "../../../src/supa";
 import * as math from "mathjs";
 

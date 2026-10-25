@@ -82,7 +82,7 @@ export function classifyFromBins(
 
   // -Infinity falls into the first bin in both left and right inclusive modes
   if (value === -Infinity) {
-    return bins.labels[0];
+    return bins.labels[0]!;
   }
 
   const { edges, labels, right } = bins;
@@ -92,12 +92,12 @@ export function classifyFromBins(
     // value <= edges[0] -> labels[0]
     // edges[i-1] < value <= edges[i] -> labels[i]
     // value > edges[-1] -> NaN
-    if (value <= edges[0]) {
-      return labels[0];
+    if (value <= edges[0]!) {
+      return labels[0]!;
     }
     for (let i = 1; i < edges.length; i++) {
-      if (value <= edges[i]) {
-        return labels[i];
+      if (value <= edges[i]!) {
+        return labels[i]!;
       }
     }
     return NaN;
@@ -106,12 +106,12 @@ export function classifyFromBins(
     // value < edges[0] -> labels[0]
     // edges[i-1] <= value < edges[i] -> labels[i]
     // value >= edges[-1] -> NaN
-    if (value < edges[0]) {
-      return labels[0];
+    if (value < edges[0]!) {
+      return labels[0]!;
     }
     for (let i = 1; i < edges.length; i++) {
-      if (value < edges[i]) {
-        return labels[i];
+      if (value < edges[i]!) {
+        return labels[i]!;
       }
     }
     return NaN;

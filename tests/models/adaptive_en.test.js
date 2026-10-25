@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { adaptive_en } from "../../src/models/adaptive_en";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // use the utils

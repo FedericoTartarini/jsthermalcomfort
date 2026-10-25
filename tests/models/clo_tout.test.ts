@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { clo_tout } from "../../src/models/clo_tout.ts";
 import type { CloToutParams } from "../../src/models/clo_tout.ts";
 import { testDataUrls } from "./comftest.ts";

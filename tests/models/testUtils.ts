@@ -3,7 +3,7 @@
  * pythermalcomfort's tests use and checks a model's result against a row.
  *
  * Mirroring an upstream test. A mirrored test carries an upstream test's
- * name, inputs and expected values into Jest; follow these conventions so a
+ * name, inputs and expected values into Vitest; follow these conventions so a
  * gap or a regression can be found by grepping either side:
  *
  * - One `describe` per upstream test file, named after that file
@@ -38,8 +38,7 @@
  *   mirrored ones. A JS-only test that a mirrored test now covers with the
  *   same inputs is deleted.
  */
-import { expect } from "@jest/globals";
-import fetch from "node-fetch"; // Import node-fetch to support data fetching
+import { expect } from "vitest";
 
 /** One row of a validation-data fixture: the model inputs and expected outputs. */
 export interface FixtureRow {

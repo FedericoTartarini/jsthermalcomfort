@@ -1,5 +1,5 @@
 import { local_q_work } from "../../../src/jos3_functions/thermoregulation/local_q_work";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("local_q_work", () => {
   it("should return the right values", () => {

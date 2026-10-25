@@ -19,9 +19,8 @@
 
     // Resolve by package name rather than by a relative path into lib/, so the
     // `types` entry in package.json is exercised the way a consumer hits it.
-    "baseUrl": "../..",
     "paths": {
-      "jsthermalcomfort": ["lib/esm/types/index.d.ts"]
+      "jsthermalcomfort": ["../../lib/esm/types/index.d.ts"]
     }
   },
   "include": ["consumer-check.ts"]

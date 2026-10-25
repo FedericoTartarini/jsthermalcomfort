@@ -2,7 +2,7 @@
 
 JavaScript port of pythermalcomfort (thermal comfort, thermal stress and thermophysiological indices), migrating every model to v2 TypeScript (ADR 0018).
 
-- Tests are Vitest (ADR 0020). Until the migration replaces Jest, they run under `--experimental-vm-modules`: single file `npm test -- tests/<file>`, type-check with `npm run check:types:tests`.
+- Tests are Vitest (ADR 0020): all with `npm test`, a single file with `npm test -- tests/<file>`, type-check with `npm run check:types:tests`.
 - Comments are TSDoc, with sections in the upstream docstring's order, and TypeDoc builds the docs (ADRs 0020, 0025). A file not yet migrated still carries JSDoc for documentation.js.
 - Commit messages: `type(scope): summary`, scope the model or module touched, `!` after the scope for a breaking change, `type(#issue)` only when a GitHub issue exists; semantic-release on `main`.
 - Follow pythermalcomfort's current release: adopt its logic, reference values _and_ naming by default; when upstream renames something, rename here too. Deviate only where TypeScript requires it or as an approved v2 addition; each deviation gets a row in `docs/deviations/<model>.md`, cited by its id at the site (ADRs 0019, 0027).

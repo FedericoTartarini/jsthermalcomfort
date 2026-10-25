@@ -1,6 +1,6 @@
 import { weight_rate } from "../../src/jos3_functions/weight_rate";
 import JOS3Defaults from "../../src/jos3_functions/JOS3Defaults";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("weight_rate", () => {
   it("should use correct default values", () => {

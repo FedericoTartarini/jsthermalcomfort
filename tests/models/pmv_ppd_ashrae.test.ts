@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, describe, expect, vi, test } from "vitest";
 import {
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   pmv_ppd_ashrae,
@@ -206,7 +206,7 @@ describe("test_pmv_ppd_ashrae", () => {
     // limit_inputs on (a consumer-contract deviation: a caller that shows the
     // out-of-range numbers can say which bounds they broke).
     test("test_limit_inputs_false_no_warning", () => {
-      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       const params = {
         tdb: 41,
         tr: 41,
@@ -335,7 +335,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
   const neutral = { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("compliance", () => {
@@ -501,7 +501,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
 
   // At 45 °C and 90 % RH the cooling effect falls back to 0 with a warning.
   test("suppress_warnings passes through to the cooling effect", () => {
-    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const hot = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
     pmv_ppd_ashrae({ ...hot, suppress_warnings: true });
     expect(warn).not.toHaveBeenCalled();

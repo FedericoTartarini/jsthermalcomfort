@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from "@jest/globals";
+import { describe, expect, it, test } from "vitest";
 import { wbgt } from "../../src/models/wbgt";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, validateResult } from "./testUtils"; // Import utility functions

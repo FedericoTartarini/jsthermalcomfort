@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
@@ -112,7 +112,7 @@ describe("test_heat_index_rothfusz", () => {
   });
 
   // Upstream's parametrize has no ids; `id` is the one pytest generates, which
-  // Jest's %s would print as 27 rather than 27.0.
+  // Vitest's %s would print as 27 rather than 27.0.
   test.each([
     {
       id: "26.583615-27.0-caution",

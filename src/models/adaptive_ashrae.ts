@@ -95,13 +95,13 @@ export const ADAPTIVE_ASHRAE_INFO: ModelInfo = deepFreeze({
     "Adaptive comfort temperature and its 80 % and 90 % acceptability ranges from the running mean outdoor temperature.",
   standards: [Standard.ashrae_55_2023],
   inputs: {
-    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
-    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
+    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb! },
+    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr! },
     t_running_mean: {
       unit: "°C",
       applicability: ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
     },
-    v: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr },
+    v: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr! },
   },
   outputs: {
     tmp_cmf: { unit: "°C" },

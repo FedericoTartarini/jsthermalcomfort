@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, describe, expect, vi, test } from "vitest";
 import { _pmv_ppd_optimized, pmv_ppd } from "../../src/models/pmv_ppd.ts";
 import type { PmvPpdParams, PmvStandard } from "../../src/models/pmv_ppd.ts";
 import {
@@ -213,11 +213,11 @@ describe("pmv_ppd suppress_warnings", () => {
 
   const spyConsole = () =>
     (["log", "info", "warn", "error"] as const).map((method) =>
-      jest.spyOn(console, method).mockImplementation(() => {}),
+      vi.spyOn(console, method).mockImplementation(() => {}),
     );
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test("a call that falls back writes nothing with the switch on", () => {

@@ -244,7 +244,7 @@ function exponential(t_db: number): number {
   const tk = t_db + 273.15; // air temp in K
   let es = 2.7150305 * Math.log(tk);
   for (let i = 0; i < g.length; i++) {
-    es = es + g[i] * Math.pow(tk, i - 2);
+    es = es + g[i]! * Math.pow(tk, i - 2);
   }
   es = Math.exp(es) * 0.01; // convert Pa to hPa
   return es;

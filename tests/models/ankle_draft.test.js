@@ -1,4 +1,4 @@
-import { describe } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { ankle_draft } from "../../src/models/ankle_draft.js";
 import { testDataUrls } from "./comftest";
 import { loadTestData, validateResult } from "./testUtils"; // Import shared utilities

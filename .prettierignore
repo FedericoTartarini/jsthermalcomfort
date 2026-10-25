@@ -2,11 +2,8 @@
 **/.svn
 **/.hg
 **/node_modules
-docs/**
-!docs/examples/
-!docs/examples/**
-docs_theme/**
-!docs_theme/index.js
+docs/adr/
+_site/
 validation-data-comfort-models/
 lib/
 .scratch/

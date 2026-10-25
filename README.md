@@ -59,20 +59,12 @@ You can also import it in the website directly, and caution that you need to mar
 </script>
 ```
 
-# Examples and Tutorials
-
-We developed a few [examples](https://github.com/FedericoTartarini/jsthermalcomfort/tree/main/docs/examples) files on how to use some of the functions.
-
-Here is a list of examples running in the browser:
-
-- [PHS](/docs/examples/phs.html)
-
 # Contributing
 
 Contributions are welcome.
 
-- Contributor guide: [`docs_theme/contributing.md`](docs_theme/contributing.md)
-- Online docs version: [Contributing](https://federicotartarini.github.io/jsthermalcomfort/contributing.html)
+- Contributor guide: [`docs/contributing.md`](docs/contributing.md)
+- Online docs version: [Contributing](https://federicotartarini.github.io/jsthermalcomfort/documents/contributing.html)
 - Bug reports and feature requests: [GitHub Issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues)
 
 ## Local development (quick start)

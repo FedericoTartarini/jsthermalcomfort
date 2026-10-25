@@ -1,0 +1,21 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/index.ts",
+    "src/models/index.ts",
+    "src/psychrometrics/index.ts",
+    "src/utilities/index.ts"
+  ],
+  "tsconfig": "configs/tsconfig.esm.json",
+  "out": "_site",
+  "readme": "docs/overview.md",
+  "projectDocuments": [
+    "docs/installation.md",
+    "docs/contributing.md",
+    "docs/authors.md",
+    "docs/surveys.md",
+    "docs/references.md",
+    "docs/changelog.md"
+  ],
+  "sortEntryPoints": false
+}

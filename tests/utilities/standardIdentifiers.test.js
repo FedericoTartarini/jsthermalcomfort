@@ -4,7 +4,7 @@ import {
   LimitSet,
   Standard,
 } from "../../src/utilities/utilities.js";
-import * as pkg from "../../src/index.js";
+import * as pkg from "../../src/index.ts";
 
 // These identifiers are shared with pythermalcomfort, which is the reference
 // implementation. Its `pythermalcomfort.utilities.Models` enum is the source:

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import * as pkg from "../../src/index.js";
+import * as pkg from "../../src/index.ts";
 import {
   ADAPTIVE_ASHRAE_INFO,
   CLO_TOUT_INFO,
@@ -20,7 +20,7 @@ import {
   pmv_ppd_iso,
   solar_gain,
   utci,
-} from "../../src/index.js";
+} from "../../src/index.ts";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
 import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import { UTCI_LIMITS } from "../../src/models/utci.ts";
@@ -36,7 +36,7 @@ import type { ModelInfo } from "../../src/models/modelDocs.ts";
 // synchronous dynamic imports in test files. Keep this hardcoded list instead. When a new model's
 // _INFO or _BINS constants are added, this test will fail because the new constant
 // is not in the list, catching the JOS3 failure mode: a model whose constants exist
-// but are never added to src/models/index.js or src/index.js. The list must be
+// but are never added to src/models/index.ts or src/index.ts. The list must be
 // manually updated whenever a new *_INFO or *_BINS export is published.
 const expectedMetadataExports = [
   "ADAPTIVE_ASHRAE_INFO",
@@ -126,16 +126,16 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
   });
 
   test("tdb input has applicability minimum of 27 (SI unit)", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBeDefined();
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability!.min).toBe(27);
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability).toBeDefined();
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability!.min).toBe(27);
   });
 
   test("tdb input has unit °C", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.unit).toBe("°C");
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.unit).toBe("°C");
   });
 
   test("rh input has unit %", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.rh.unit).toBe("%");
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.rh!.unit).toBe("%");
   });
 
   test("outputs contains hi and stress_category", () => {
@@ -144,18 +144,18 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
   });
 
   test("hi output has unit °C", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.hi.unit).toBe("°C");
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.hi!.unit).toBe("°C");
   });
 
   test("stress_category output is dimensionless with classifier", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.unit).toBeNull();
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.unit).toBeNull();
     expect(
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier,
     ).toBeDefined();
   });
 
   test("stress_category classifier references HEAT_INDEX_STRESS_CATEGORY_BINS", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toBe(
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier).toBe(
       HEAT_INDEX_STRESS_CATEGORY_BINS,
     );
   });
@@ -190,52 +190,52 @@ describe("PMV_PPD_ISO_INFO structure", () => {
   });
 
   test("tdb has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability!.min).toBe(
-      ISO_7730_LIMITS.tdb.min,
+    expect(PMV_PPD_ISO_INFO.inputs.tdb!.applicability!.min).toBe(
+      ISO_7730_LIMITS.tdb!.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability!.max).toBe(
-      ISO_7730_LIMITS.tdb.max,
+    expect(PMV_PPD_ISO_INFO.inputs.tdb!.applicability!.max).toBe(
+      ISO_7730_LIMITS.tdb!.max,
     );
   });
 
   test("tr has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability!.min).toBe(
-      ISO_7730_LIMITS.tr.min,
+    expect(PMV_PPD_ISO_INFO.inputs.tr!.applicability!.min).toBe(
+      ISO_7730_LIMITS.tr!.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability!.max).toBe(
-      ISO_7730_LIMITS.tr.max,
+    expect(PMV_PPD_ISO_INFO.inputs.tr!.applicability!.max).toBe(
+      ISO_7730_LIMITS.tr!.max,
     );
   });
 
   test("vr has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability!.min).toBe(
-      ISO_7730_LIMITS.vr.min,
+    expect(PMV_PPD_ISO_INFO.inputs.vr!.applicability!.min).toBe(
+      ISO_7730_LIMITS.vr!.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability!.max).toBe(
-      ISO_7730_LIMITS.vr.max,
+    expect(PMV_PPD_ISO_INFO.inputs.vr!.applicability!.max).toBe(
+      ISO_7730_LIMITS.vr!.max,
     );
   });
 
   test("met has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability!.min).toBe(
-      ISO_7730_LIMITS.met.min,
+    expect(PMV_PPD_ISO_INFO.inputs.met!.applicability!.min).toBe(
+      ISO_7730_LIMITS.met!.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability!.max).toBe(
-      ISO_7730_LIMITS.met.max,
+    expect(PMV_PPD_ISO_INFO.inputs.met!.applicability!.max).toBe(
+      ISO_7730_LIMITS.met!.max,
     );
   });
 
   test("clo has correct applicability bounds from ISO_7730_LIMITS", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability!.min).toBe(
-      ISO_7730_LIMITS.clo.min,
+    expect(PMV_PPD_ISO_INFO.inputs.clo!.applicability!.min).toBe(
+      ISO_7730_LIMITS.clo!.min,
     );
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability!.max).toBe(
-      ISO_7730_LIMITS.clo.max,
+    expect(PMV_PPD_ISO_INFO.inputs.clo!.applicability!.max).toBe(
+      ISO_7730_LIMITS.clo!.max,
     );
   });
 
   test("wme has unit 'met' (not W/m²)", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.wme.unit).toBe("met");
+    expect(PMV_PPD_ISO_INFO.inputs.wme!.unit).toBe("met");
   });
 
   test("outputs contains pmv, ppd, and tsv", () => {
@@ -245,22 +245,22 @@ describe("PMV_PPD_ISO_INFO structure", () => {
   });
 
   test("pmv output has applicability bounds [-2, 2]", () => {
-    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability).toBeDefined();
-    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability!.min).toBe(-2);
-    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability!.max).toBe(2);
+    expect(PMV_PPD_ISO_INFO.outputs.pmv!.applicability).toBeDefined();
+    expect(PMV_PPD_ISO_INFO.outputs.pmv!.applicability!.min).toBe(-2);
+    expect(PMV_PPD_ISO_INFO.outputs.pmv!.applicability!.max).toBe(2);
   });
 
   test("ppd output has unit %", () => {
-    expect(PMV_PPD_ISO_INFO.outputs.ppd.unit).toBe("%");
+    expect(PMV_PPD_ISO_INFO.outputs.ppd!.unit).toBe("%");
   });
 
   test("tsv output is dimensionless with classifier", () => {
-    expect(PMV_PPD_ISO_INFO.outputs.tsv.unit).toBeNull();
-    expect(PMV_PPD_ISO_INFO.outputs.tsv.classifier).toBeDefined();
+    expect(PMV_PPD_ISO_INFO.outputs.tsv!.unit).toBeNull();
+    expect(PMV_PPD_ISO_INFO.outputs.tsv!.classifier).toBeDefined();
   });
 
   test("tsv classifier references PMV_THERMAL_SENSATION_VOTE_BINS_ISO", () => {
-    expect(PMV_PPD_ISO_INFO.outputs.tsv.classifier).toBe(
+    expect(PMV_PPD_ISO_INFO.outputs.tsv!.classifier).toBe(
       PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
     );
   });
@@ -337,7 +337,7 @@ describe("Deep freezing — objects are immutable", () => {
 
   test("HEAT_INDEX_STRESS_CATEGORY_BINS nested in INFO is frozen", () => {
     const classifier =
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier!;
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
     expect(Object.isFrozen(classifier.edges)).toBe(true);
     expect(Object.isFrozen(classifier.labels)).toBe(true);
@@ -360,7 +360,7 @@ describe("Deep freezing — objects are immutable", () => {
   });
 
   test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO nested in INFO is frozen", () => {
-    const classifier = PMV_PPD_ISO_INFO.outputs.tsv.classifier!;
+    const classifier = PMV_PPD_ISO_INFO.outputs.tsv!.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
     expect(Object.isFrozen(classifier.edges)).toBe(true);
     expect(Object.isFrozen(classifier.labels)).toBe(true);
@@ -372,20 +372,28 @@ describe("Identity — applicability bounds are shared, not copied", () => {
   // runtime checks against, not a literal rebuilt from it. A copy compares
   // equal on the day it is written and can drift silently afterwards.
   test("PMV_PPD_ISO_INFO input bounds are the ISO_7730_LIMITS objects", () => {
-    expect(PMV_PPD_ISO_INFO.inputs.tdb.applicability).toBe(ISO_7730_LIMITS.tdb);
-    expect(PMV_PPD_ISO_INFO.inputs.tr.applicability).toBe(ISO_7730_LIMITS.tr);
-    expect(PMV_PPD_ISO_INFO.inputs.vr.applicability).toBe(ISO_7730_LIMITS.vr);
-    expect(PMV_PPD_ISO_INFO.inputs.met.applicability).toBe(ISO_7730_LIMITS.met);
-    expect(PMV_PPD_ISO_INFO.inputs.clo.applicability).toBe(ISO_7730_LIMITS.clo);
+    expect(PMV_PPD_ISO_INFO.inputs.tdb!.applicability).toBe(
+      ISO_7730_LIMITS.tdb,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.tr!.applicability).toBe(ISO_7730_LIMITS.tr);
+    expect(PMV_PPD_ISO_INFO.inputs.vr!.applicability).toBe(ISO_7730_LIMITS.vr);
+    expect(PMV_PPD_ISO_INFO.inputs.met!.applicability).toBe(
+      ISO_7730_LIMITS.met,
+    );
+    expect(PMV_PPD_ISO_INFO.inputs.clo!.applicability).toBe(
+      ISO_7730_LIMITS.clo,
+    );
   });
 
   test("the derived pa bound is the ISO_7730_LIMITS object", () => {
-    expect(PMV_PPD_ISO_INFO.derived!.pa.applicability).toBe(ISO_7730_LIMITS.pa);
+    expect(PMV_PPD_ISO_INFO.derived!.pa!.applicability).toBe(
+      ISO_7730_LIMITS.pa,
+    );
     expect(ISO_7730_LIMITS.pa).toEqual({ min: 0, max: 2700 });
   });
 
   test("the PMV output gate in the metadata is the object the runtime gates on", () => {
-    expect(PMV_PPD_ISO_INFO.outputs.pmv.applicability).toBe(
+    expect(PMV_PPD_ISO_INFO.outputs.pmv!.applicability).toBe(
       ISO_7730_LIMITS.pmv,
     );
     expect(ISO_7730_LIMITS.pmv).toEqual({ min: -2, max: 2 });
@@ -402,25 +410,25 @@ describe("Identity — applicability bounds are shared, not copied", () => {
 describe("Identity — bins exported separately are the same object as in INFO", () => {
   test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO === PMV_PPD_ISO_INFO.outputs.tsv.classifier", () => {
     expect(PMV_THERMAL_SENSATION_VOTE_BINS_ISO).toBe(
-      PMV_PPD_ISO_INFO.outputs.tsv.classifier,
+      PMV_PPD_ISO_INFO.outputs.tsv!.classifier,
     );
   });
 
   test("PMV_CATEGORY_BINS_ISO_7730_2025 === PMV_PPD_ISO_INFO.outputs.category.classifier", () => {
     expect(PMV_CATEGORY_BINS_ISO_7730_2025).toBe(
-      PMV_PPD_ISO_INFO.outputs.category.classifier,
+      PMV_PPD_ISO_INFO.outputs.category!.classifier,
     );
   });
 
   test("HEAT_INDEX_STRESS_CATEGORY_BINS === HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier", () => {
     expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toBe(
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
+      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier,
     );
   });
 
   test("UTCI_STRESS_CATEGORY_BINS === UTCI_INFO.outputs.stress_category.classifier", () => {
     expect(UTCI_STRESS_CATEGORY_BINS).toBe(
-      UTCI_INFO.outputs.stress_category.classifier,
+      UTCI_INFO.outputs.stress_category!.classifier,
     );
   });
 });
@@ -633,9 +641,9 @@ describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {
       wme: 0,
     });
     const expected = [
-      PMV_PPD_ISO_INFO.inputs.tdb.applicability,
-      PMV_PPD_ISO_INFO.inputs.tr.applicability,
-      PMV_PPD_ISO_INFO.outputs.pmv.applicability,
+      PMV_PPD_ISO_INFO.inputs.tdb!.applicability,
+      PMV_PPD_ISO_INFO.inputs.tr!.applicability,
+      PMV_PPD_ISO_INFO.outputs.pmv!.applicability,
     ];
     expect(warnings).toHaveLength(expected.length);
     // Identity, not equality: the rows reference INFO's frozen bounds.
@@ -671,30 +679,30 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
       Object.keys(PMV_PPD_ISO_INFO.inputs).sort(),
     );
     for (const key of Object.keys(PMV_PPD_ASHRAE_INFO.inputs)) {
-      expect(PMV_PPD_ASHRAE_INFO.inputs[key].unit).toBe(
-        PMV_PPD_ISO_INFO.inputs[key].unit,
+      expect(PMV_PPD_ASHRAE_INFO.inputs[key]!.unit).toBe(
+        PMV_PPD_ISO_INFO.inputs[key]!.unit,
       );
     }
   });
 
   test("input bounds are the ASHRAE_55_LIMITS objects, not copies", () => {
-    expect(PMV_PPD_ASHRAE_INFO.inputs.tdb.applicability).toBe(
+    expect(PMV_PPD_ASHRAE_INFO.inputs.tdb!.applicability).toBe(
       ASHRAE_55_LIMITS.tdb,
     );
-    expect(PMV_PPD_ASHRAE_INFO.inputs.tr.applicability).toBe(
+    expect(PMV_PPD_ASHRAE_INFO.inputs.tr!.applicability).toBe(
       ASHRAE_55_LIMITS.tr,
     );
-    expect(PMV_PPD_ASHRAE_INFO.inputs.vr.applicability).toBe(
+    expect(PMV_PPD_ASHRAE_INFO.inputs.vr!.applicability).toBe(
       ASHRAE_55_LIMITS.vr,
     );
-    expect(PMV_PPD_ASHRAE_INFO.inputs.met.applicability).toBe(
+    expect(PMV_PPD_ASHRAE_INFO.inputs.met!.applicability).toBe(
       ASHRAE_55_LIMITS.met,
     );
-    expect(PMV_PPD_ASHRAE_INFO.inputs.clo.applicability).toBe(
+    expect(PMV_PPD_ASHRAE_INFO.inputs.clo!.applicability).toBe(
       ASHRAE_55_LIMITS.clo,
     );
-    expect(PMV_PPD_ASHRAE_INFO.inputs.rh.applicability).toBeUndefined();
-    expect(PMV_PPD_ASHRAE_INFO.inputs.wme.applicability).toBeUndefined();
+    expect(PMV_PPD_ASHRAE_INFO.inputs.rh!.applicability).toBeUndefined();
+    expect(PMV_PPD_ASHRAE_INFO.inputs.wme!.applicability).toBeUndefined();
   });
 
   test("pmv_ppd_ashrae's warnings rows carry the bounds INFO references", () => {
@@ -708,9 +716,9 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
       wme: 0,
     });
     const expected = [
-      PMV_PPD_ASHRAE_INFO.inputs.tdb.applicability,
-      PMV_PPD_ASHRAE_INFO.inputs.vr.applicability,
-      PMV_PPD_ASHRAE_INFO.inputs.clo.applicability,
+      PMV_PPD_ASHRAE_INFO.inputs.tdb!.applicability,
+      PMV_PPD_ASHRAE_INFO.inputs.vr!.applicability,
+      PMV_PPD_ASHRAE_INFO.inputs.clo!.applicability,
     ];
     expect(warnings).toHaveLength(expected.length);
     warnings.forEach((w, i) => expect(w.bound).toBe(expected[i]));
@@ -734,7 +742,7 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
   });
 
   test("tsv's classifier is the ASHRAE bins object, which is not the ISO one", () => {
-    expect(PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier).toBe(
+    expect(PMV_PPD_ASHRAE_INFO.outputs.tsv!.classifier).toBe(
       PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
     );
     // Same edges and labels, opposite edge convention (pythermalcomfort#382),
@@ -748,7 +756,7 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
 
   test("no derived row and no pmv gate: ASHRAE 55 bounds neither vapour pressure nor the PMV output", () => {
     expect(PMV_PPD_ASHRAE_INFO.derived).toBeUndefined();
-    expect(PMV_PPD_ASHRAE_INFO.outputs.pmv.applicability).toBeUndefined();
+    expect(PMV_PPD_ASHRAE_INFO.outputs.pmv!.applicability).toBeUndefined();
     // 39 °C at 90 % rh is about 6300 Pa, far above ISO 7730's 2700 Pa
     // ceiling, and the resulting PMV is well outside ISO's [-2, 2] band. The
     // ASHRAE wrapper gates neither, so with every input inside
@@ -772,7 +780,7 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
     expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.inputs)).toBe(true);
     expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.inputs.met)).toBe(true);
     expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.outputs)).toBe(true);
-    const classifier = PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier!;
+    const classifier = PMV_PPD_ASHRAE_INFO.outputs.tsv!.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
     expect(Object.isFrozen(classifier.edges)).toBe(true);
     expect(Object.isFrozen(classifier.labels)).toBe(true);
@@ -794,25 +802,25 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
       "t_running_mean",
       "v",
     ]);
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.tdb.unit).toBe("°C");
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.tr.unit).toBe("°C");
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.unit).toBe("°C");
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.v.unit).toBe("m/s");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tdb!.unit).toBe("°C");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tr!.unit).toBe("°C");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean!.unit).toBe("°C");
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.v!.unit).toBe("m/s");
   });
 
   test("input bounds are the limits objects the gate reads, not copies", () => {
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.tdb.applicability).toBe(
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tdb!.applicability).toBe(
       ASHRAE_55_LIMITS.tdb,
     );
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.tr.applicability).toBe(
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.tr!.applicability).toBe(
       ASHRAE_55_LIMITS.tr,
     );
     // The function's input is `v`; `_ashrae_compliance` applies the same
     // limit to `v` and `vr`, and ASHRAE_55_LIMITS names the PMV input.
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.v.applicability).toBe(
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.v!.applicability).toBe(
       ASHRAE_55_LIMITS.vr,
     );
-    expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability).toBe(
+    expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean!.applicability).toBe(
       ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
     );
     expect(ADAPTIVE_ASHRAE_LIMITS.t_running_mean).toEqual({
@@ -824,7 +832,7 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
   });
 
   test("the t_running_mean bound is the one adaptive_ashrae gates on, inclusive at both ends", () => {
-    const { min, max } = ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean
+    const { min, max } = ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean!
       .applicability as { min: number; max: number };
     const tmp_cmf = (trm: number) =>
       adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: trm, v: 0.1 }).tmp_cmf;
@@ -852,12 +860,12 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
     const tmp_cmf = (tdb: number, tr: number, v: number) =>
       adaptive_ashrae({ tdb, tr, t_running_mean: 20, v }).tmp_cmf;
     const { tdb, tr, vr } = ASHRAE_55_LIMITS;
-    expect(tmp_cmf(tdb.max + 0.01, 25, 0.1)).toBeNaN();
-    expect(Number.isFinite(tmp_cmf(tdb.max, 25, 0.1))).toBe(true);
-    expect(tmp_cmf(25, tr.min - 0.01, 0.1)).toBeNaN();
-    expect(Number.isFinite(tmp_cmf(25, tr.min, 0.1))).toBe(true);
-    expect(tmp_cmf(25, 25, vr.max + 0.01)).toBeNaN();
-    expect(Number.isFinite(tmp_cmf(25, 25, vr.max))).toBe(true);
+    expect(tmp_cmf(tdb!.max + 0.01, 25, 0.1)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(tdb!.max, 25, 0.1))).toBe(true);
+    expect(tmp_cmf(25, tr!.min - 0.01, 0.1)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(25, tr!.min, 0.1))).toBe(true);
+    expect(tmp_cmf(25, 25, vr!.max + 0.01)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(25, 25, vr!.max))).toBe(true);
   });
 
   test("adaptive_ashrae output keys match ADAPTIVE_ASHRAE_INFO.outputs", () => {
@@ -919,18 +927,18 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
 
   test("inputs are utci's four quantities", () => {
     expect(Object.keys(UTCI_INFO.inputs)).toEqual(["tdb", "tr", "v", "rh"]);
-    expect(UTCI_INFO.inputs.tdb.unit).toBe("°C");
-    expect(UTCI_INFO.inputs.tr.unit).toBe("°C");
-    expect(UTCI_INFO.inputs.v.unit).toBe("m/s");
-    expect(UTCI_INFO.inputs.rh.unit).toBe("%");
+    expect(UTCI_INFO.inputs.tdb!.unit).toBe("°C");
+    expect(UTCI_INFO.inputs.tr!.unit).toBe("°C");
+    expect(UTCI_INFO.inputs.v!.unit).toBe("m/s");
+    expect(UTCI_INFO.inputs.rh!.unit).toBe("%");
   });
 
   test("bounds are the UTCI_LIMITS objects the gate reads, not copies", () => {
     // `toBe`, not `toEqual`: a rebuilt literal would satisfy equality and
     // then be free to drift from what the runtime enforces.
-    expect(UTCI_INFO.inputs.tdb.applicability).toBe(UTCI_LIMITS.tdb);
-    expect(UTCI_INFO.inputs.v.applicability).toBe(UTCI_LIMITS.v);
-    expect(UTCI_INFO.derived!.tr_minus_tdb.applicability).toBe(
+    expect(UTCI_INFO.inputs.tdb!.applicability).toBe(UTCI_LIMITS.tdb);
+    expect(UTCI_INFO.inputs.v!.applicability).toBe(UTCI_LIMITS.v);
+    expect(UTCI_INFO.derived!.tr_minus_tdb!.applicability).toBe(
       UTCI_LIMITS.tr_minus_tdb,
     );
     expect(UTCI_LIMITS).toEqual({
@@ -939,10 +947,10 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
       tr_minus_tdb: { min: -30, max: 70 },
     });
     // tr is bounded only through its difference from tdb, and rh not at all.
-    expect(UTCI_INFO.inputs.tr.applicability).toBeUndefined();
-    expect(UTCI_INFO.inputs.rh.applicability).toBeUndefined();
+    expect(UTCI_INFO.inputs.tr!.applicability).toBeUndefined();
+    expect(UTCI_INFO.inputs.rh!.applicability).toBeUndefined();
     expect(Object.keys(UTCI_INFO.derived!)).toEqual(["tr_minus_tdb"]);
-    expect(UTCI_INFO.derived!.tr_minus_tdb.unit).toBe("°C");
+    expect(UTCI_INFO.derived!.tr_minus_tdb!.unit).toBe("°C");
   });
 
   test("every UTCI_LIMITS entry is frozen, not just the container", () => {
@@ -956,15 +964,15 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
     const value = (tdb: number, tr: number, v: number) =>
       utci({ tdb, tr, v, rh: 50 }).utci;
     const { tdb, v } = UTCI_INFO.inputs;
-    const { min: tdbMin, max: tdbMax } = tdb.applicability as {
+    const { min: tdbMin, max: tdbMax } = tdb!.applicability as {
       min: number;
       max: number;
     };
-    const { min: vMin, max: vMax } = v.applicability as {
+    const { min: vMin, max: vMax } = v!.applicability as {
       min: number;
       max: number;
     };
-    const { min: diffMin, max: diffMax } = UTCI_INFO.derived!.tr_minus_tdb
+    const { min: diffMin, max: diffMax } = UTCI_INFO.derived!.tr_minus_tdb!
       .applicability as { min: number; max: number };
     expect(Number.isFinite(value(tdbMax, tdbMax, 1))).toBe(true);
     expect(value(tdbMax + 0.01, tdbMax, 1)).toBeNaN();
@@ -981,9 +989,9 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
   });
 
   test("stress_category is dimensionless and classified by UTCI_STRESS_CATEGORY_BINS", () => {
-    expect(UTCI_INFO.outputs.utci.unit).toBe("°C");
-    expect(UTCI_INFO.outputs.stress_category.unit).toBeNull();
-    expect(UTCI_INFO.outputs.stress_category.classifier).toBe(
+    expect(UTCI_INFO.outputs.utci!.unit).toBe("°C");
+    expect(UTCI_INFO.outputs.stress_category!.unit).toBeNull();
+    expect(UTCI_INFO.outputs.stress_category!.classifier).toBe(
       UTCI_STRESS_CATEGORY_BINS,
     );
     expect(UTCI_STRESS_CATEGORY_BINS.right).toBe(true);
@@ -1013,7 +1021,7 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
     expect(Object.isFrozen(UTCI_INFO.outputs)).toBe(true);
     expect(Object.isFrozen(UTCI_INFO.derived)).toBe(true);
     expect(Object.isFrozen(UTCI_INFO.derived!.tr_minus_tdb)).toBe(true);
-    const classifier = UTCI_INFO.outputs.stress_category.classifier!;
+    const classifier = UTCI_INFO.outputs.stress_category!.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
     expect(Object.isFrozen(classifier.edges)).toBe(true);
     expect(Object.isFrozen(classifier.labels)).toBe(true);
@@ -1031,17 +1039,17 @@ describe("CLO_TOUT_INFO — the clothing prediction's metadata", () => {
 
   test("tout is the one input, in °C, with no applicability", () => {
     expect(Object.keys(CLO_TOUT_INFO.inputs)).toEqual(["tout"]);
-    expect(CLO_TOUT_INFO.inputs.tout.unit).toBe("°C");
+    expect(CLO_TOUT_INFO.inputs.tout!.unit).toBe("°C");
     // Upstream bounds nothing: the formula saturates below -5 °C and at or
     // above 26 °C, so there is no gate to publish.
-    expect(CLO_TOUT_INFO.inputs.tout.applicability).toBeUndefined();
+    expect(CLO_TOUT_INFO.inputs.tout!.applicability).toBeUndefined();
     expect(CLO_TOUT_INFO.derived).toBeUndefined();
   });
 
   test("clo_tout is the one output, in clo", () => {
     expect(Object.keys(CLO_TOUT_INFO.outputs)).toEqual(["clo_tout"]);
-    expect(CLO_TOUT_INFO.outputs.clo_tout.unit).toBe("clo");
-    expect(CLO_TOUT_INFO.outputs.clo_tout.applicability).toBeUndefined();
+    expect(CLO_TOUT_INFO.outputs.clo_tout!.unit).toBe("clo");
+    expect(CLO_TOUT_INFO.outputs.clo_tout!.applicability).toBeUndefined();
   });
 
   test("clo_tout output keys match CLO_TOUT_INFO.outputs", () => {
@@ -1083,9 +1091,9 @@ describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
       "floor_reflectance",
     ]);
     expect(SOLAR_GAIN_INFO.inputs).not.toHaveProperty("posture");
-    expect(SOLAR_GAIN_INFO.inputs.sol_altitude.unit).toBe("°");
-    expect(SOLAR_GAIN_INFO.inputs.sharp.unit).toBe("°");
-    expect(SOLAR_GAIN_INFO.inputs.sol_radiation_dir.unit).toBe("W/m²");
+    expect(SOLAR_GAIN_INFO.inputs.sol_altitude!.unit).toBe("°");
+    expect(SOLAR_GAIN_INFO.inputs.sharp!.unit).toBe("°");
+    expect(SOLAR_GAIN_INFO.inputs.sol_radiation_dir!.unit).toBe("W/m²");
     for (const key of [
       "sol_transmittance",
       "f_svv",
@@ -1093,7 +1101,7 @@ describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
       "asw",
       "floor_reflectance",
     ]) {
-      expect(SOLAR_GAIN_INFO.inputs[key].unit).toBeNull();
+      expect(SOLAR_GAIN_INFO.inputs[key]!.unit).toBeNull();
     }
     expect(SOLAR_GAIN_INFO.derived).toBeUndefined();
   });
@@ -1101,16 +1109,16 @@ describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
   test("bounds are the SOLAR_GAIN_LIMITS objects the function reads, not copies", () => {
     // `toBe`, not `toEqual`: a rebuilt literal would satisfy equality and
     // then be free to drift from what the runtime reports.
-    expect(SOLAR_GAIN_INFO.inputs.sol_altitude.applicability).toBe(
+    expect(SOLAR_GAIN_INFO.inputs.sol_altitude!.applicability).toBe(
       SOLAR_GAIN_LIMITS.sol_altitude,
     );
-    expect(SOLAR_GAIN_INFO.inputs.sharp.applicability).toBe(
+    expect(SOLAR_GAIN_INFO.inputs.sharp!.applicability).toBe(
       SOLAR_GAIN_LIMITS.sharp,
     );
-    expect(SOLAR_GAIN_INFO.inputs.sol_radiation_dir.applicability).toBe(
+    expect(SOLAR_GAIN_INFO.inputs.sol_radiation_dir!.applicability).toBe(
       SOLAR_GAIN_LIMITS.sol_radiation_dir,
     );
-    expect(SOLAR_GAIN_INFO.inputs.asw.applicability).toBe(
+    expect(SOLAR_GAIN_INFO.inputs.asw!.applicability).toBe(
       SOLAR_GAIN_LIMITS.asw,
     );
     expect(SOLAR_GAIN_LIMITS).toEqual({
@@ -1127,7 +1135,7 @@ describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
       "f_bes",
       "floor_reflectance",
     ]) {
-      expect(SOLAR_GAIN_INFO.inputs[key].applicability).toBeUndefined();
+      expect(SOLAR_GAIN_INFO.inputs[key]!.applicability).toBeUndefined();
     }
   });
 
@@ -1140,8 +1148,8 @@ describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
 
   test("outputs are erf in W/m² and delta_mrt in °C", () => {
     expect(Object.keys(SOLAR_GAIN_INFO.outputs)).toEqual(["erf", "delta_mrt"]);
-    expect(SOLAR_GAIN_INFO.outputs.erf.unit).toBe("W/m²");
-    expect(SOLAR_GAIN_INFO.outputs.delta_mrt.unit).toBe("°C");
+    expect(SOLAR_GAIN_INFO.outputs.erf!.unit).toBe("W/m²");
+    expect(SOLAR_GAIN_INFO.outputs.delta_mrt!.unit).toBe("°C");
   });
 
   test("solar_gain output keys match SOLAR_GAIN_INFO.outputs", () => {

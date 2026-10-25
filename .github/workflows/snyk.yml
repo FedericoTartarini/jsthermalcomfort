@@ -21,13 +21,13 @@ jobs:
 
       - name: Run Snyk test on pull requests
         if: ${{ env.SNYK_TOKEN != '' && github.event_name == 'pull_request' }}
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@v1.0.0
         with:
           command: test
 
       - name: Run Snyk monitor on main
         if: ${{ env.SNYK_TOKEN != '' && github.event_name == 'push' }}
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@v1.0.0
         with:
           command: monitor
 

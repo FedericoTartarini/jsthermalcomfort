@@ -96,7 +96,7 @@ export function expandArrayRows<
           return [key, value[index]];
         }),
       );
-    return Array.from({ length }, (_, index) => ({
+    return Array.from({ length: length! }, (_, index) => ({
       ...row,
       inputs: elementAt(row.inputs, index),
       ...(row.outputs && { outputs: elementAt(row.outputs, index) }),

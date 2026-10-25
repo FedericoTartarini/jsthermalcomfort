@@ -71,7 +71,7 @@ export interface HeatIndexRothfuszParams {
  *
  * Exported so a test can assert that the metadata references this object
  * rather than a literal copy of it. It is deliberately NOT added to
- * `src/models/index.js`, so it does not become public API -- the consumer
+ * `src/models/index.ts`, so it does not become public API -- the consumer
  * path is `HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability`. Same
  * arrangement as `ISO_7730_LIMITS`.
  */

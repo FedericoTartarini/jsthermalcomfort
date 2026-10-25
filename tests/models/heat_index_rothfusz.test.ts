@@ -5,8 +5,8 @@ import {
   HEAT_INDEX_ROTHFUSZ_LIMITS,
 } from "../../src/models/heat_index_rothfusz.ts";
 import type { HeatIndexRothfuszParams } from "../../src/models/heat_index_rothfusz.ts";
-import { heat_index_rothfusz as heat_index_rothfusz_from_models } from "../../src/models/index.js";
-import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.js";
+import { heat_index_rothfusz as heat_index_rothfusz_from_models } from "../../src/models/index.ts";
+import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
@@ -60,7 +60,7 @@ describe("test_heat_index_rothfusz", () => {
     const tdb = [30.0, 20.0, 28.5];
     const rh = [70.0, 90.0, 50.0];
     const results = tdb.map((t, i) =>
-      heat_index_rothfusz({ tdb: t, rh: rh[i] }),
+      heat_index_rothfusz({ tdb: t, rh: rh[i]! }),
     );
     const hi = results.map((result) => result.hi);
     expect(results.map((result) => result.warnings)).toEqual([
@@ -98,17 +98,17 @@ describe("test_heat_index_rothfusz", () => {
     const tdb = [30.0, 20.0, 28.5];
     const rh = [70.0, 90.0, 50.0];
     const results = tdb.map((t, i) =>
-      heat_index_rothfusz({ tdb: t, rh: rh[i], round_output: false }),
+      heat_index_rothfusz({ tdb: t, rh: rh[i]!, round_output: false }),
     );
     const hi = results.map((result) => result.hi);
     expect(results.map((result) => result.warnings.length)).toEqual([0, 1, 0]);
     // First element has multiple decimals and matches expected formula
-    expect(Math.abs(hi[0] - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
+    expect(Math.abs(hi[0]! - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
     // Second element below threshold ⇒ NaN
     expect(hi[1]).toBeNaN();
     // Third element above threshold ⇒ finite number
     expect(Number.isFinite(hi[2])).toBe(true);
-    expect(results[0].stress_category).toBe("extreme caution");
+    expect(results[0]!.stress_category).toBe("extreme caution");
   });
 
   // Upstream's parametrize has no ids; `id` is the one pytest generates, which
@@ -175,8 +175,8 @@ describe("test_heat_index_rothfusz", () => {
       expect(results.map((result) => result.warnings.length)).toEqual([
         0, 0, 0, 1,
       ]);
-      expect(results[3].hi).toBeNaN();
-      expect(results[3].stress_category).toBeNaN();
+      expect(results[3]!.hi).toBeNaN();
+      expect(results[3]!.stress_category).toBeNaN();
     },
   );
 });
@@ -244,6 +244,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
 
     test("a switch passed as undefined takes its default", () => {
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         heat_index_rothfusz({
           tdb: 25,
           rh: 50,
@@ -251,6 +252,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
           limit_inputs: undefined,
         }).hi,
       ).toBeNaN();
+      // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
       expect(heat_index_rothfusz({ ...hot, round_output: undefined }).hi).toBe(
         37.7,
       );
@@ -340,8 +342,8 @@ describe("heat_index_rothfusz (JS-only)", () => {
         { key: "tdb", role: "input", value: 26.9, bound },
       ]);
       // `toBe`: the row carries the object HEAT_INDEX_ROTHFUSZ_INFO references.
-      expect(warnings[0].bound).toBe(
-        HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability,
+      expect(warnings[0]!.bound).toBe(
+        HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability,
       );
     });
 
@@ -375,11 +377,11 @@ describe("heat_index_rothfusz (JS-only)", () => {
   });
 
   describe("exports", () => {
-    test("heat_index_rothfusz is exported from models/index.js", () => {
+    test("heat_index_rothfusz is exported from models/index.ts", () => {
       expect(heat_index_rothfusz_from_models).toBe(heat_index_rothfusz);
     });
 
-    test("heat_index_rothfusz is exported from package root (src/index.js)", () => {
+    test("heat_index_rothfusz is exported from package root (src/index.ts)", () => {
       expect(heat_index_rothfusz_from_root).toBe(heat_index_rothfusz);
     });
   });
@@ -393,7 +395,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
     test("the metadata references the limits object rather than copying it", () => {
       // `toBe`, not `toEqual`: a rebuilt { min: 27 } literal would satisfy
       // equality and then be free to drift from what the runtime enforces.
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability).toBe(
+      expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability).toBe(
         HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
       );
       expect(HEAT_INDEX_ROTHFUSZ_LIMITS.tdb).toEqual({ min: 27 });

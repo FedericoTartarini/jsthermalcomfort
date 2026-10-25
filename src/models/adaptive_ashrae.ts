@@ -70,7 +70,7 @@ export interface AdaptiveAshraeParams {
  * `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity from
  * `ADAPTIVE_ASHRAE_INFO` and read by the gate below, so the metadata and the
  * NaN cannot disagree. Exported for that identity test, deliberately not
- * added to `src/models/index.js`.
+ * added to `src/models/index.ts`.
  */
 export const ADAPTIVE_ASHRAE_LIMITS = Object.freeze({
   t_running_mean: Object.freeze({ min: 10, max: 33.5 }),

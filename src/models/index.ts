@@ -39,6 +39,35 @@ import {
 } from "./pmv_ppd.ts";
 import { classifyFromBins } from "./classifierBins.ts";
 
+// deepFreeze is internal, so modelDocs contributes its types only.
+export type {
+  ApplicabilityWarning,
+  Bound,
+  ClassifierBins,
+  ModelInfo,
+  VariableInfo,
+} from "./modelDocs.ts";
+export type {
+  AdaptiveAshraeParams,
+  AdaptiveAshraeResult,
+} from "./adaptive_ashrae.ts";
+export type { CloToutParams, CloToutResult } from "./clo_tout.ts";
+export type {
+  CoolingEffectParams,
+  CoolingEffectResult,
+} from "./cooling_effect.ts";
+export type {
+  HeatIndexRothfuszParams,
+  HeatIndexRothfuszResult,
+} from "./heat_index_rothfusz.ts";
+export type {
+  PmvPpdAshraeParams,
+  PmvPpdAshraeResult,
+} from "./pmv_ppd_ashrae.ts";
+export type { PmvPpdIsoParams, PmvPpdIsoResult } from "./pmv_ppd_iso.ts";
+export type { SolarGainParams, SolarGainResult } from "./solar_gain.ts";
+export type { UtciParams, UtciResult } from "./utci.ts";
+
 /**
  * @public
  * @name models

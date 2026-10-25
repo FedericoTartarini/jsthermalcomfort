@@ -12,7 +12,7 @@ import {
   clo_individual_garments,
   v_relative,
 } from "../../src/utilities/utilities.js";
-import * as pkg from "../../src/index.js";
+import * as pkg from "../../src/index.ts";
 
 // Upstream's `np.isclose(..., atol=...)` on a scalar.
 function expectClose(actual: number, expected: number, atol: number) {
@@ -45,7 +45,7 @@ describe("test_clothing", () => {
     const i_t = [1.21, 1.26, 1.56];
     i_t.forEach((value, i) =>
       expectClose(
-        clo_total_insulation(value, 0.15, 0, 0.5, i_cl[i]),
+        clo_total_insulation(value, 0.15, 0, 0.5, i_cl[i]!),
         value,
         0.001,
       ),
@@ -56,8 +56,8 @@ describe("test_clothing", () => {
     const normal = [1.21 * 0.5, 1.26 * 0.565, 1.56 * 0.62];
     i_t.forEach((value, i) =>
       expectClose(
-        clo_total_insulation(value, 2, v_walk[i], 0.5, i_cl[i]),
-        normal[i],
+        clo_total_insulation(value, 2, v_walk[i]!, 0.5, i_cl[i]!),
+        normal[i]!,
         0.005,
       ),
     );
@@ -73,8 +73,8 @@ describe("test_clothing", () => {
     const nude = [0.71 * 0.7, 0.61 * 0.4, 0.5 * 0.32];
     i_a_static.forEach((value, i) =>
       expectClose(
-        clo_total_insulation(0, vr[i], 0.5, value, 0),
-        nude[i],
+        clo_total_insulation(0, vr[i]!, 0.5, value, 0),
+        nude[i]!,
         0.004,
       ),
     );
@@ -122,7 +122,7 @@ describe("test_clothing", () => {
       0.85, 1.06, 0.86, 0.52, 0.76, 0.61, 0.97, 0.68, 1.03, 0.63, 0.17,
     ];
     clo.forEach((value, i) =>
-      expectClose(clo_dynamic_iso(value, met[i], v[i]), expected[i], 0.01),
+      expectClose(clo_dynamic_iso(value, met[i]!, v[i]!), expected[i]!, 0.01),
     );
 
     // Test invalid standard input

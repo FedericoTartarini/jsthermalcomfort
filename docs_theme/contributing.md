@@ -151,7 +151,7 @@ export function my_new_model(tdb, rh) {
 
 ### 3. Register the Model
 
-Export your new function in `src/models/index.js`:
+Export your new function in `src/models/index.ts`:
 
 ```javascript
 import { my_new_model } from "./my_new_model.js";

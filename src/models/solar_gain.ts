@@ -105,7 +105,7 @@ export interface SolarGainParams {
  * Same arrangement as `UTCI_LIMITS`: frozen, referenced by identity from
  * `SOLAR_GAIN_INFO` and read by `solar_gain`, so the metadata and the rows
  * cannot disagree. Exported for that identity test, deliberately not added
- * to `src/models/index.js`.
+ * to `src/models/index.ts`.
  */
 export const SOLAR_GAIN_LIMITS = Object.freeze({
   sol_altitude: Object.freeze({ min: 0, max: 90 }),

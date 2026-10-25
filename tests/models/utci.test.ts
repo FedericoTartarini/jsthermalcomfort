@@ -8,8 +8,8 @@ import {
 } from "../../src/models/utci.ts";
 import type { UtciParams } from "../../src/models/utci.ts";
 import { classifyFromBins } from "../../src/models/classifierBins.ts";
-import { utci as utci_from_models } from "../../src/models/index.js";
-import { utci as utci_from_root } from "../../src/index.js";
+import { utci as utci_from_models } from "../../src/models/index.ts";
+import { utci as utci_from_root } from "../../src/index.ts";
 import { p_sat } from "../../src/psychrometrics/p_sat.js";
 import { round } from "../../src/utilities/utilities.js";
 import { testDataUrls } from "./comftest.ts";
@@ -50,7 +50,7 @@ describe("test_utci", () => {
     );
 
     [76.3, 110.5].forEach((expected, i) =>
-      expect(Math.abs(results[i].utci - expected)).toBeLessThanOrEqual(1e-6),
+      expect(Math.abs(results[i]!.utci - expected)).toBeLessThanOrEqual(1e-6),
     );
     expect(results.map((result) => result.stress_category)).toEqual([
       "no thermal stress",
@@ -105,10 +105,10 @@ describe("test_utci", () => {
       utci({ tdb: t, tr: t, v: 3.28084, rh: 50, units: "IP" }),
     );
 
-    expect(Math.abs(vector_result[0].utci - 76.3)).toBeLessThanOrEqual(1e-6);
-    expect(vector_result[1].utci).toBeNaN();
-    expect(vector_result[0].stress_category).toBe("no thermal stress");
-    expect(vector_result[1].stress_category).toBeNaN();
+    expect(Math.abs(vector_result[0]!.utci - 76.3)).toBeLessThanOrEqual(1e-6);
+    expect(vector_result[1]!.utci).toBeNaN();
+    expect(vector_result[0]!.stress_category).toBe("no thermal stress");
+    expect(vector_result[1]!.stress_category).toBeNaN();
   });
 
   test("test_utci_saturation_vapour_pressure_matches_p_sat", () => {
@@ -197,6 +197,7 @@ describe("utci (JS-only)", () => {
 
     test("a switch passed as undefined takes its default", () => {
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         utci({
           ...mild,
           units: undefined,
@@ -205,6 +206,7 @@ describe("utci (JS-only)", () => {
         }).utci,
       ).toBe(24.6);
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         utci({ tdb: 51, tr: 22, v: 16, rh: 50, limit_inputs: undefined }).utci,
       ).toBeNaN();
     });
@@ -289,7 +291,7 @@ describe("utci (JS-only)", () => {
         key: "tdb",
         role: "input",
         value: tdb.max + step,
-        bound: UTCI_INFO.inputs.tdb.applicability,
+        bound: UTCI_INFO.inputs.tdb!.applicability,
       },
       {
         name: "tdb below its minimum",
@@ -297,7 +299,7 @@ describe("utci (JS-only)", () => {
         key: "tdb",
         role: "input",
         value: tdb.min - step,
-        bound: UTCI_INFO.inputs.tdb.applicability,
+        bound: UTCI_INFO.inputs.tdb!.applicability,
       },
       {
         name: "v below its minimum",
@@ -305,7 +307,7 @@ describe("utci (JS-only)", () => {
         key: "v",
         role: "input",
         value: v.min - step,
-        bound: UTCI_INFO.inputs.v.applicability,
+        bound: UTCI_INFO.inputs.v!.applicability,
       },
       {
         name: "v above its maximum",
@@ -313,7 +315,7 @@ describe("utci (JS-only)", () => {
         key: "v",
         role: "input",
         value: v.max + step,
-        bound: UTCI_INFO.inputs.v.applicability,
+        bound: UTCI_INFO.inputs.v!.applicability,
       },
       {
         name: "tr - tdb above its maximum",
@@ -321,7 +323,7 @@ describe("utci (JS-only)", () => {
         key: "tr_minus_tdb",
         role: "derived",
         value: 20 + tr_minus_tdb.max + step - 20,
-        bound: UTCI_INFO.derived!.tr_minus_tdb.applicability,
+        bound: UTCI_INFO.derived!.tr_minus_tdb!.applicability,
       },
       {
         name: "tr - tdb below its minimum",
@@ -329,14 +331,14 @@ describe("utci (JS-only)", () => {
         key: "tr_minus_tdb",
         role: "derived",
         value: 20 + tr_minus_tdb.min - step - 20,
-        bound: UTCI_INFO.derived!.tr_minus_tdb.applicability,
+        bound: UTCI_INFO.derived!.tr_minus_tdb!.applicability,
       },
     ])(
       "one row one step outside: $name",
       ({ inputs, key, role, value, bound }) => {
         const on = utci({ ...inputs, rh: 50 });
         expect(on.warnings).toEqual([{ key, role, value, bound }]);
-        expect(on.warnings[0].bound).toBe(bound);
+        expect(on.warnings[0]!.bound).toBe(bound);
         expect(on.utci).toBeNaN();
         // The same rows with the gate off, beside a finite utci.
         const off = utci({ ...inputs, rh: 50, limit_inputs: false });
@@ -361,7 +363,7 @@ describe("utci (JS-only)", () => {
         units: "IP",
       });
       expect(warnings.map((w) => w.key)).toEqual(["tr_minus_tdb"]);
-      expect(warnings[0].value).toBeCloseTo(80, 6);
+      expect(warnings[0]!.value).toBeCloseTo(80, 6);
     });
 
     test("a NaN under the gate never comes without a row", () => {
@@ -459,11 +461,11 @@ describe("utci (JS-only)", () => {
   });
 
   describe("exports", () => {
-    test("utci is exported from models/index.js", () => {
+    test("utci is exported from models/index.ts", () => {
       expect(utci_from_models).toBe(utci);
     });
 
-    test("utci is exported from package root (src/index.js)", () => {
+    test("utci is exported from package root (src/index.ts)", () => {
       expect(utci_from_root).toBe(utci);
     });
   });

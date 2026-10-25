@@ -8,19 +8,26 @@
   // (see tests/types/tsconfig.json) rather than the sources.
   "compilerOptions": {
     "noEmit": true,
-    "strict": true,
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowJs": true,
     "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "erasableSyntaxOnly": true,
+
+    // The same strict set as configs/tsconfig.json (ADR 0020).
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
     "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
+
     "types": ["node"],
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["**/*.ts", "../vitest.config.ts"],
   "exclude": ["types"]

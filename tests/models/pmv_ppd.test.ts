@@ -136,7 +136,9 @@ describe("pmv_pdd", () => {
     // A fixture row built as `{ units, limit_inputs }` carries an explicit
     // undefined for a key it lacks; that must not switch the gate off.
     const params = { tdb: 35, tr: 25, vr: 0.1, rh: 30, met: 1.2, clo: 0.5 };
+    // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
     expect(pmv_ppd({ ...params, limit_inputs: undefined }).pmv).toBeNaN();
+    // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
     expect(pmv_ppd({ ...params, round_output: undefined })).toEqual(
       pmv_ppd(params),
     );
@@ -328,7 +330,7 @@ describe("pmv_ppd ISO vapour pressure limit (#195)", () => {
     // Asserts the comparison is `<=` and not `<`, without routing through
     // exp() and so without depending on floating-point reproducibility.
     // This is the half the bracketing cases above cannot prove.
-    const { min, max } = ISO_7730_LIMITS.pa;
+    const { min, max } = ISO_7730_LIMITS.pa!;
     expect(max).toBe(2700);
     expect(min).toBe(0);
 
@@ -371,7 +373,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
       { key: "tdb", role: "input", value: 35, bound: ISO_7730_LIMITS.tdb },
     ]);
     // The same frozen object the metadata references, not a copy.
-    expect(warnings[0].bound).toBe(ISO_7730_LIMITS.tdb);
+    expect(warnings[0]!.bound).toBe(ISO_7730_LIMITS.tdb);
   });
 
   test("a humid call gives a derived pa row with the kernel's value", () => {
@@ -392,7 +394,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
         bound: ISO_7730_LIMITS.pa,
       },
     ]);
-    expect(warnings[0].bound).toBe(ISO_7730_LIMITS.pa);
+    expect(warnings[0]!.bound).toBe(ISO_7730_LIMITS.pa);
   });
 
   test("a PMV beyond ±2 gives an output row with the unrounded pmv", () => {
@@ -413,7 +415,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
         bound: ISO_7730_LIMITS.pmv,
       },
     ]);
-    expect(warnings[0].bound).toBe(ISO_7730_LIMITS.pmv);
+    expect(warnings[0]!.bound).toBe(ISO_7730_LIMITS.pmv);
   });
 
   test("the rows are the same with limit_inputs on and off", () => {
@@ -546,7 +548,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
       { tdb: 24, vr: 0.5 },
       { tdb: 26, vr: 1.0 },
     ])("the row's bound is frozen (tdb=$tdb, vr=$vr)", ({ tdb, vr }) => {
-      expect(Object.isFrozen(ashrae(tdb, vr).warnings[0].bound)).toBe(true);
+      expect(Object.isFrozen(ashrae(tdb, vr).warnings[0]!.bound)).toBe(true);
     });
   });
 

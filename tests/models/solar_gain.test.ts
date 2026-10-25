@@ -52,7 +52,7 @@ describe("test_solar_gain", () => {
         sol_transmittance: trans,
         f_svv: svv,
         f_bes: bes,
-        posture: posture as SolarGainParams["posture"],
+        posture: posture as NonNullable<SolarGainParams["posture"]>,
         round_output: false,
       });
       // np.isclose(..., atol=1e-3)
@@ -132,7 +132,7 @@ describe("solar_gain (JS-only)", () => {
         bound: SOLAR_GAIN_LIMITS.sol_radiation_dir,
       },
     ]);
-    expect(result.warnings[0].bound).toBe(SOLAR_GAIN_LIMITS.sol_radiation_dir);
+    expect(result.warnings[0]!.bound).toBe(SOLAR_GAIN_LIMITS.sol_radiation_dir);
     expect(Number.isFinite(result.erf)).toBe(true);
     expect(Number.isFinite(result.delta_mrt)).toBe(true);
   });
@@ -237,6 +237,7 @@ describe("solar_gain (JS-only)", () => {
 
   test("a default passed as undefined takes its default", () => {
     expect(
+      // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
       solar_gain({
         ...base,
         asw: undefined,

@@ -14,7 +14,7 @@
  *      `@ts-expect-error` lines are what make that failure loud.
  *
  * Imports use the package name rather than a relative path into `lib/`, so
- * the `types` entry in package.json is exercised the way a consumer hits it.
+ * the `exports` map in package.json is exercised the way a consumer hits it.
  */
 
 import type {
@@ -75,6 +75,14 @@ import * as jsthermalcomfort from "jsthermalcomfort";
 // '@ts-expect-error' directive".
 // @ts-expect-error PMV_CATEGORY_BINS_ISO is no longer exported.
 import { PMV_CATEGORY_BINS_ISO } from "jsthermalcomfort";
+// Each subpath entry carries the same declarations as the root.
+import { utci as utciFromModels } from "jsthermalcomfort/models";
+import { p_sat } from "jsthermalcomfort/psychrometrics";
+import { Standard as standardFromUtilities } from "jsthermalcomfort/utilities";
+// The exports map seals every file behind the entries. If this stops being an
+// error, tsc fails with "Unused '@ts-expect-error' directive".
+// @ts-expect-error a deep import is not exported.
+import { utci as utciDeep } from "jsthermalcomfort/lib/esm/models/utci.js";
 
 // The published metadata must satisfy the published type.
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
@@ -507,6 +515,11 @@ const garmentClo: number[] = CLO_INDIVIDUAL_GARMENT_GROUPS.flatMap(
 // @ts-expect-error a group's garments are readonly.
 CLO_INDIVIDUAL_GARMENT_GROUPS[0].garments.push("Bra");
 
+// A subpath export is the root's export, so their types are interchangeable.
+const sameUtci: typeof utci = utciFromModels;
+const samePSat: typeof jsthermalcomfort.p_sat = p_sat;
+const sameStandard: typeof Standard = standardFromUtilities;
+
 export {
   iso,
   ashrae,
@@ -554,4 +567,8 @@ export {
   utciRowMax,
   winterClo,
   garmentClo,
+  sameUtci,
+  samePSat,
+  sameStandard,
+  utciDeep,
 };

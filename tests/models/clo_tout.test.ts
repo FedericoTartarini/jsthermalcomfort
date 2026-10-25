@@ -58,6 +58,7 @@ describe("clo_tout (JS-only)", () => {
   });
 
   test("units passed as undefined takes its default", () => {
+    // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
     expect(clo_tout({ tout: 20, units: undefined })).toEqual(
       clo_tout({ tout: 20, units: "SI" }),
     );

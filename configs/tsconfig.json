@@ -23,5 +23,5 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true
   },
-  "files": ["../src/index.js"]
+  "files": ["../src/index.ts"]
 }

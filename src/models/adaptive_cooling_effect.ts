@@ -5,7 +5,7 @@
  * is at least 0.6 m/s.
  *
  * Private: shared by `adaptive_ashrae` and `adaptive_en`, deliberately not
- * added to `src/models/index.js`.
+ * added to `src/models/index.ts`.
  *
  * @param {number} v - air speed, [m/s]
  * @param {number} to - operative temperature, [°C]

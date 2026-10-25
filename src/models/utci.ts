@@ -61,7 +61,7 @@ export interface UtciParams {
  * arrangement as `HEAT_INDEX_ROTHFUSZ_LIMITS`: frozen, referenced by identity
  * from `UTCI_INFO` and read by the gate in `utci`, so the metadata and the
  * NaN cannot disagree. Exported for that identity test, deliberately not
- * added to `src/models/index.js`.
+ * added to `src/models/index.ts`.
  */
 export const UTCI_LIMITS = Object.freeze({
   tdb: Object.freeze({ min: -50, max: 50 }),
@@ -251,7 +251,7 @@ function exponential(t_db: number): number {
 }
 
 // Exported for the mirrored tests, which import it as upstream's do; not
-// added to src/models/index.js.
+// added to src/models/index.ts.
 /**
  * @param {number} tdb
  * @param {number} v

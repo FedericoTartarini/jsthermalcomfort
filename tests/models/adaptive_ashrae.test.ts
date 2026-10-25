@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,
-} from "../../src/models/index.js";
+} from "../../src/models/index.ts";
 import type { AdaptiveAshraeParams } from "../../src/models/adaptive_ashrae.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -224,7 +224,7 @@ describe("adaptive_ashrae (JS-only)", () => {
 
   describe("warnings rows", () => {
     const { inputs } = ADAPTIVE_ASHRAE_INFO;
-    const bound = (key: keyof typeof inputs) => inputs[key].applicability!;
+    const bound = (key: keyof typeof inputs) => inputs[key]!.applicability!;
 
     test.each([
       ["tdb", bound("tdb").min!],
@@ -258,7 +258,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       expect(on.warnings).toEqual([
         { key, role: "input", value, bound: bound(key) },
       ]);
-      expect(on.warnings[0].bound).toBe(bound(key));
+      expect(on.warnings[0]!.bound).toBe(bound(key));
       expect(on.tmp_cmf).toBeNaN();
       // The same rows with the gate off, beside a finite tmp_cmf.
       const off = adaptive_ashrae({
@@ -304,7 +304,7 @@ describe("adaptive_ashrae (JS-only)", () => {
         units: "IP",
       });
       expect(warnings.map((w) => w.key)).toEqual(["tdb"]);
-      expect(warnings[0].value).toBeCloseTo(((106 - 32) * 5) / 9, 6);
+      expect(warnings[0]!.value).toBeCloseTo(((106 - 32) * 5) / 9, 6);
     });
 
     test("a NaN under the gate never comes without a row", () => {
@@ -465,6 +465,7 @@ describe("adaptive_ashrae (JS-only)", () => {
 
     test("a switch passed as undefined takes its default", () => {
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         adaptive_ashrae({
           ...neutral,
           t_running_mean: 5,
@@ -474,6 +475,7 @@ describe("adaptive_ashrae (JS-only)", () => {
         }).tmp_cmf,
       ).toBeNaN();
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         adaptive_ashrae({
           ...neutral,
           t_running_mean: 22,

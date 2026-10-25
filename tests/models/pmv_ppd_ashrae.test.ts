@@ -3,7 +3,7 @@ import {
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
-} from "../../src/models/index.js";
+} from "../../src/models/index.ts";
 import type { PmvPpdAshraeParams } from "../../src/models/pmv_ppd_ashrae.ts";
 import { classifyFromBins } from "../../src/models/classifierBins.ts";
 import {
@@ -259,8 +259,8 @@ describe("test_pmv_ppd_ashrae", () => {
         airspeed_control: false,
       });
       expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0].key).toBe("vr");
-      expect(result.warnings[0].bound.max).toBeCloseTo(0.318, 6);
+      expect(result.warnings[0]!.key).toBe("vr");
+      expect(result.warnings[0]!.bound.max).toBeCloseTo(0.318, 6);
     });
 
     // "exceeding 0.2 m/s" is a vr row bounded at 0.2.
@@ -313,8 +313,8 @@ describe("test_internal", () => {
     test("test_airspeed_control_cond2_warns", () => {
       const rows = at(24, 0.5, false);
       expect(rows).toHaveLength(1);
-      expect(rows[0].key).toBe("vr");
-      expect(rows[0].bound.max).toBeCloseTo(0.318, 6);
+      expect(rows[0]!.key).toBe("vr");
+      expect(rows[0]!.bound.max).toBeCloseTo(0.318, 6);
     });
 
     // With tdb=tr=22, to=22 <= 23; v=0.3 > 0.2 triggers cond3.
@@ -485,6 +485,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
 
     test("a switch passed as undefined takes its default", () => {
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         pmv_ppd_ashrae({
           ...neutral,
           wme: undefined,

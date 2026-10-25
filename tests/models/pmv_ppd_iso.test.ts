@@ -3,7 +3,7 @@ import {
   pmv_ppd_iso,
   PMV_CATEGORY_BINS_ISO_7730_2005,
   PMV_CATEGORY_BINS_ISO_7730_2025,
-} from "../../src/models/index.js";
+} from "../../src/models/index.ts";
 import type {
   PmvPpdIsoParams,
   PmvPpdIsoResult,
@@ -53,17 +53,17 @@ describe("test_pmv_ppd_iso", () => {
       const clo = [0.5, 1.8];
       const results = tdb.map((_, i) =>
         pmv_ppd_iso({
-          tdb: tdb[i],
-          tr: tr[i],
-          vr: vr[i],
-          rh: rh[i],
-          met: met[i],
-          clo: clo[i],
+          tdb: tdb[i]!,
+          tr: tr[i]!,
+          vr: vr[i]!,
+          rh: rh[i]!,
+          met: met[i]!,
+          clo: clo[i]!,
           standard: Standard.iso_7730_2005,
         }),
       );
-      expect(results[1].pmv).toBeNaN();
-      expect(results[1].ppd).toBeNaN();
+      expect(results[1]!.pmv).toBeNaN();
+      expect(results[1]!.ppd).toBeNaN();
 
       expect(
         round(
@@ -351,6 +351,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
 
     test("a switch passed as undefined takes its default", () => {
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         pmv_ppd_iso({
           ...neutral,
           wme: undefined,

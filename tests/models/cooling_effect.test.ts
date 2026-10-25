@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, vi, test } from "vitest";
-import { cooling_effect } from "../../src/models/index.js";
+import { cooling_effect } from "../../src/models/index.ts";
 import type { CoolingEffectParams } from "../../src/models/cooling_effect.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -149,6 +149,7 @@ describe("cooling_effect (JS-only)", () => {
 
     test("a switch passed as undefined takes its default", () => {
       expect(
+        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         cooling_effect({
           ...still,
           wme: undefined,

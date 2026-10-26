@@ -1,0 +1,24 @@
+# Coding standards
+
+What a review checks a change against. Prettier, ESLint over `eslint.config.mjs`'s list, strict `tsc`, the register cross-check and the parity suite already run in the pre-commit hook and CI; a review covers what they cannot.
+
+## Where the rules live
+
+- **Upstream fidelity and the deviation register:** `docs/deviations/README.md` (the whitelist, the deviation classes, the additions, the row format and the site-comment form). Every difference from pythermalcomfort v4.6.2's `.py` is whitelisted or has a row.
+- **Names, files, file order, exports:** ADR 0021.
+- **Inputs, error classes and messages:** ADR 0022.
+- **Results:** ADR 0023. **Model info and warnings rows:** ADR 0024.
+- **TSDoc, mapped from upstream's docstring:** ADR 0025, with its 2026-10-26 amendment.
+- **Arithmetic on upstream's executed path:** ADR 0009.
+- **Mirrored tests:** the header of `tests/models/testUtils.ts`.
+- **Terms:** `GLOSSARY.md`; each entry's _Avoid_ list names the words a change replaces.
+
+The ADRs live in `docs/adr/`, which git ignores; from a worktree, read them at the main checkout.
+
+## Judgement rules
+
+- **Evidence in comments.** A factual claim in a comment, a test title or an upstream issue draft carries its source: an upstream `path:line` at v4.6.2, a doc with its scope, or the measurement with its scope (version, platform, case count).
+- **Live referents.** A comment that names a symbol, file or line names one that exists and still means it; a rename or an unexport updates every comment that names the old form.
+- **Upstream's words.** Copied TSDoc and messages read as upstream's text; any change to them is a register row.
+- **Added fields marked.** An added output or field says it is an addition in its TSDoc, not only in a row citation.
+- **Tests at the public surface.** Behaviour tests import through the subpath indexes (seam S1); the mirrored `describe` compares upstream's fields only.

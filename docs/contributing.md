@@ -119,52 +119,34 @@ The site is generated into the `_site` folder, which git ignores.
 
 ## How to Add a New Thermal Comfort Model
 
-To add a new model to the library, follow these steps:
+A model follows pythermalcomfort's current release: its logic, values, names and docstring. `src/models/heat_index_rothfusz.ts`, its test and its register are the worked example.
 
 ### 1. Create the Model File
 
-Create a new JavaScript file in `src/models/` (e.g., `my_new_model.js`).
+Create `src/models/<name>.ts`, with upstream's file and function name. In order, it holds: the added constants (`*_LIMITS`, `*_BINS`), the input definition `*_PARAMS` and the params type derived from it, the Result interface, `*_INFO`, the public function, and the private functions in upstream's order.
 
-### 2. Implement the Logic and Add JSDoc
+### 2. Follow Upstream, and Document With TSDoc
 
-Implement your model function and ensure it is documented correctly using JSDoc.
-
-**Requirements for JSDoc:**
-
-- Use `@public` to indicate it is part of the public API.
-- Use `@memberof models` to ensure it is partitioned correctly in the documentation.
-- Provide clear `@param` and `@returns` descriptions.
-
-Example:
-
-```javascript
-/**
- * @public
- * @memberof models
- * @name my_new_model
- * @description Calculates a new thermal comfort index.
- *
- * @param {number} tdb Dry bulb air temperature [°C]
- * @param {number} rh Relative humidity [%]
- * @returns {number} The calculated index value.
- */
-export function my_new_model(tdb, rh) {
-  // your implementation here
-}
-```
+- Validate through the input definition (`parseParams` in `src/_internal/define.ts`), with upstream's error messages.
+- Write the TSDoc in upstream's docstring order: the summary and each parameter's text verbatim, an example as a TypeScript call with upstream's inputs and outputs.
+- Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, and cite the row id in a comment at the site.
 
 ### 3. Register the Model
 
-Export your new function in `src/models/index.ts`:
+List the function, its `*_INFO` and its types by name in `src/models/index.ts`:
 
-```javascript
-import { my_new_model } from "./my_new_model.js";
-
-export default {
-  // ... existing models
-  my_new_model,
-};
+```ts
+import { my_new_model, MY_NEW_MODEL_INFO } from "./my_new_model.ts";
+export type { MyModelInputs, MyModelResult } from "./my_new_model.ts";
 ```
+
+then add `my_new_model` and `MY_NEW_MODEL_INFO` to both the `export { … }` list and the default export there. The package root re-exports the subpath indexes, so nothing else needs editing.
+
+### 4. Test It
+
+- Mirror upstream's `tests/test_<name>.py` in `tests/models/<name>.test.ts`, following the conventions at the top of `tests/models/testUtils.ts`.
+- Add the model to the parity suite, as `scripts/parity/README.md` ("Adding a model") describes.
+- Add the model's files to `LINTED` in `eslint.config.mjs`.
 
 ---
 

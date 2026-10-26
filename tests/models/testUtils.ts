@@ -26,12 +26,17 @@
  * - A fixture test runs every row its upstream counterpart means to run, even
  *   where upstream's filter misses rows (the PMV tests match lowercase
  *   `"iso"`/`"ashrae"` against the fixture's uppercase labels).
- * - Error classes: `ValueError` → `Error`, `TypeError` → `TypeError`. Assert
+ * - Error classes follow ADR 0022: `TypeError` for a wrong type, `RangeError`
+ *   for a value outside its range or option set, `Error` otherwise. Assert
  *   the message too where upstream matches one (`pytest.raises(match=...)`).
- * - A `UserWarning` assertion becomes an assertion on the `warnings` rows
- *   where the model returns them (every v1 model). Otherwise, and for any upstream test
- *   that cannot be ported, write `test.todo("<upstream name>: <reason>")`
- *   so the gap stays visible in the test runner.
+ * - A `UserWarning` assertion becomes an assertion on the `warnings` rows. A
+ *   `match=` on a range warning's text becomes assertions on the row's key,
+ *   value and bound, as `expect.objectContaining({ key, value, bound })`, and
+ *   an assertion of no warning with `limit_inputs` off becomes the registered
+ *   gate-off rows (ADR 0024).
+ * - For any upstream test that cannot be ported, write
+ *   `test.todo("<upstream name>: <reason>")` so the gap stays visible in the
+ *   test runner.
  * - Whole-object equality (`assert result == {...}`) becomes a field-by-field
  *   check of upstream's fields; extra JS-only fields on the result are fine.
  * - JS-only tests live in their own `describe` in the same file, after the

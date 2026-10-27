@@ -16,10 +16,8 @@ import {
   pmv_ppd_iso,
 } from "../../src/index.ts";
 import { ADAPTIVE_ASHRAE_LIMITS } from "../../src/models/adaptive_ashrae.ts";
-import {
-  ASHRAE_55_LIMITS,
-  ISO_7730_LIMITS,
-} from "../../src/utilities/utilities.js";
+import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
+import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
 import type { ModelInfo } from "../../src/_internal/modelDocs.ts";
 
@@ -660,7 +658,7 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
       ASHRAE_55_LIMITS.tr,
     );
     expect(PMV_PPD_ASHRAE_INFO.inputs.vr!.applicability).toBe(
-      ASHRAE_55_LIMITS.vr,
+      ASHRAE_55_LIMITS.v,
     );
     expect(PMV_PPD_ASHRAE_INFO.inputs.met!.applicability).toBe(
       ASHRAE_55_LIMITS.met,
@@ -782,10 +780,8 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
     expect(ADAPTIVE_ASHRAE_INFO.inputs.tr!.applicability).toBe(
       ASHRAE_55_LIMITS.tr,
     );
-    // The function's input is `v`; `_ashrae_compliance` applies the same
-    // limit to `v` and `vr`, and ASHRAE_55_LIMITS names the PMV input.
     expect(ADAPTIVE_ASHRAE_INFO.inputs.v!.applicability).toBe(
-      ASHRAE_55_LIMITS.vr,
+      ASHRAE_55_LIMITS.v,
     );
     expect(ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean!.applicability).toBe(
       ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
@@ -826,13 +822,13 @@ describe("ADAPTIVE_ASHRAE_INFO — the adaptive model's metadata", () => {
   test("the tdb, tr and v bounds are the ones adaptive_ashrae gates on", () => {
     const tmp_cmf = (tdb: number, tr: number, v: number) =>
       adaptive_ashrae({ tdb, tr, t_running_mean: 20, v }).tmp_cmf;
-    const { tdb, tr, vr } = ASHRAE_55_LIMITS;
-    expect(tmp_cmf(tdb!.max + 0.01, 25, 0.1)).toBeNaN();
-    expect(Number.isFinite(tmp_cmf(tdb!.max, 25, 0.1))).toBe(true);
-    expect(tmp_cmf(25, tr!.min - 0.01, 0.1)).toBeNaN();
-    expect(Number.isFinite(tmp_cmf(25, tr!.min, 0.1))).toBe(true);
-    expect(tmp_cmf(25, 25, vr!.max + 0.01)).toBeNaN();
-    expect(Number.isFinite(tmp_cmf(25, 25, vr!.max))).toBe(true);
+    const { tdb, tr, v } = ASHRAE_55_LIMITS;
+    expect(tmp_cmf(tdb.max + 0.01, 25, 0.1)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(tdb.max, 25, 0.1))).toBe(true);
+    expect(tmp_cmf(25, tr.min - 0.01, 0.1)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(25, tr.min, 0.1))).toBe(true);
+    expect(tmp_cmf(25, 25, v.max + 0.01)).toBeNaN();
+    expect(Number.isFinite(tmp_cmf(25, 25, v.max))).toBe(true);
   });
 
   test("adaptive_ashrae output keys match ADAPTIVE_ASHRAE_INFO.outputs", () => {

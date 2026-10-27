@@ -4,7 +4,7 @@ import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { cooling_effect } from "./cooling_effect.ts";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
-import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
+import { _legacy_check_ashrae55_compliance } from "../_internal/ashrae55.ts";
 import { _legacy_valid_range } from "../_internal/validation.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
@@ -426,7 +426,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
       _legacy_valid_range(warnings, key, "input", value, rules.limits[key]!);
     }
   } else {
-    _check_ashrae55_compliance(warnings, {
+    _legacy_check_ashrae55_compliance(warnings, {
       tdb,
       tr,
       v: vr,

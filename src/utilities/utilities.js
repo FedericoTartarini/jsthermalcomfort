@@ -1,5 +1,9 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
-import { t_o } from "../psychrometrics/t_o.js";
+import { operative_tmp } from "../environment/operative_tmp.ts";
+import {
+  ASHRAE_55_AIRSPEED_NO_CONTROL,
+  ASHRAE_55_LIMITS,
+} from "../_internal/ashrae55.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "./options.ts";
 import { units_converter } from "./units_converter.ts";
@@ -73,25 +77,6 @@ export const ISO_7730_LIMITS = Object.freeze({
   // limits above (pmv_ppd_iso.py:181-187), and because #182 will generate the
   // whole object from one place.
   pmv: Object.freeze({ min: -2, max: 2 }),
-});
-
-/**
- * ASHRAE 55 compliance limits for the PMV inputs, the numbers
- * `_ashrae_compliance` enforces. Each variable has `min` and `max` inclusive
- * bounds. Read by `_check_ashrae55_compliance` for the `warnings` rows of
- * `pmv_ppd_ashrae` and `adaptive_ashrae`; `_ashrae_compliance` keeps its
- * own literals so `check_standard_compliance` stays as it was. ASHRAE 55 bounds neither vapour pressure nor the PMV output,
- * so unlike `ISO_7730_LIMITS` there is no `pa` or `pmv` entry.
- *
- * @type {Readonly<Record<string, Readonly<{ min: number, max: number }>>>}
- * @public
- */
-export const ASHRAE_55_LIMITS = Object.freeze({
-  tdb: Object.freeze({ min: 10, max: 40 }),
-  tr: Object.freeze({ min: 10, max: 40 }),
-  vr: Object.freeze({ min: 0, max: 2 }),
-  met: Object.freeze({ min: 1, max: 4 }),
-  clo: Object.freeze({ min: 0, max: 1.5 }),
 });
 
 /**
@@ -181,32 +166,41 @@ function _ashrae_compliance(kwargs) {
       case "tdb":
       case "tr":
         let parameter = key === "tdb" ? "dry-bulb" : "mean radiant";
-        if (value > 40 || value < 10)
+        if (
+          value > ASHRAE_55_LIMITS[key].max ||
+          value < ASHRAE_55_LIMITS[key].min
+        )
           warnings.push(
             `ASHRAE ${parameter} temperature application limits between 10 and 40 ºC`,
           );
         break;
       case "v":
       case "vr":
-        if (value > 2 || value < 0)
+        if (value > ASHRAE_55_LIMITS.v.max || value < ASHRAE_55_LIMITS.v.min)
           warnings.push(
             "ASHRAE air speed applicability limits between 0 and 2 m/s",
           );
         break;
       case "met":
-        if (value > 4 || value < 1)
+        if (
+          value > ASHRAE_55_LIMITS.met.max ||
+          value < ASHRAE_55_LIMITS.met.min
+        )
           warnings.push(
             "ASHRAE met applicability limits between 1.0 and 4.0 met",
           );
         break;
       case "clo":
-        if (value > 1.5 || value < 0)
+        if (
+          value > ASHRAE_55_LIMITS.clo.max ||
+          value < ASHRAE_55_LIMITS.clo.min
+        )
           warnings.push(
             "ASHRAE clo applicability limits between 0.0 and 1.5 clo",
           );
         break;
       case "v_limited":
-        if (value > 0.2)
+        if (value > ASHRAE_55_LIMITS.v_limited.max)
           throw new Error(
             "This equation is only applicable for air speed lower than 0.2 m/s",
           );
@@ -228,12 +222,15 @@ function _ashrae_compliance(kwargs) {
     const v = kwargs.v;
     const met = kwargs.met;
     const clo = kwargs.clo;
-    const to = t_o(kwargs.tdb, kwargs.tr, v);
+    const to = operative_tmp(kwargs.tdb, kwargs.tr, v);
     const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
     const violates =
-      (v > 0.8 && clo < 0.7 && met < 1.3) ||
+      (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max && clo < 0.7 && met < 1.3) ||
       (to > 23 && to < 25.5 && v > v_limit && clo < 0.7 && met < 1.3) ||
-      (to <= 23 && v > 0.2 && clo < 0.7 && met < 1.3);
+      (to <= 23 &&
+        v > ASHRAE_55_AIRSPEED_NO_CONTROL.cool.max &&
+        clo < 0.7 &&
+        met < 1.3);
     if (violates)
       warnings.push(
         "ASHRAE air speed applicability limits when the occupant does not control the airspeed",

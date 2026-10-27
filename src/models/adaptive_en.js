@@ -1,9 +1,8 @@
-import { t_o } from "../psychrometrics/t_o.js";
+import { operative_tmp } from "../environment/operative_tmp.ts";
 import { validateInputs } from "../utilities/utilities.js";
 import { units_converter } from "../utilities/units_converter.ts";
-import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
-import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
+import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
 
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
@@ -101,7 +100,7 @@ export function adaptive_en(
     ADAPTIVE_EN_SCHEMA,
   );
 
-  const standard = Standard.iso_7730_2025;
+  const standard = "iso";
 
   if (units.toLowerCase() == "ip") {
     ({
@@ -117,7 +116,7 @@ export function adaptive_en(
     }));
   }
 
-  const to = t_o(tdb, tr, v, standard);
+  const to = operative_tmp(tdb, tr, v, standard);
 
   const ce = adaptive_cooling_effect(v, to);
 

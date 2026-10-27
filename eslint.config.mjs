@@ -8,6 +8,8 @@ import tseslint from "typescript-eslint";
 // cover the same list (ADR 0020).
 export const LINTED = [
   "vitest.config.ts",
+  "src/_internal/adaptive_cooling_effect.ts",
+  "src/_internal/ashrae55.ts",
   "src/_internal/classifierBins.ts",
   "src/_internal/define.ts",
   "src/_internal/errors.ts",
@@ -15,6 +17,7 @@ export const LINTED = [
   "src/_internal/round.ts",
   "src/_internal/validation.ts",
   "src/environment/index.ts",
+  "src/environment/operative_tmp.ts",
   "src/environment/transpose_sharp_altitude.ts",
   "src/utilities/options.ts",
   "src/utilities/units_converter.ts",
@@ -23,6 +26,7 @@ export const LINTED = [
   "src/models/solar_gain.ts",
   "src/models/utci.ts",
   "tests/call_sites.test.ts",
+  "tests/environment/operative_tmp.test.ts",
   "tests/environment/transpose_sharp_altitude.test.ts",
   "tests/internal.test.ts",
   "tests/models/clo_tout.test.ts",

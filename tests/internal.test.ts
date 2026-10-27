@@ -6,6 +6,11 @@ import {
   HEAT_INDEX_STRESS_CATEGORIES,
 } from "../src/_internal/validation.ts";
 import type { ModelWarning } from "../src/_internal/modelDocs.ts";
+import {
+  ASHRAE_55_AIRSPEED_NO_CONTROL,
+  ASHRAE_55_LIMITS,
+  _check_ashrae55_compliance,
+} from "../src/_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../src/_internal/define.ts";
 import { CLO_TOUT_INFO } from "../src/models/index.ts";
 
@@ -70,15 +75,203 @@ describe("test_internal", () => {
     ]);
   });
 
-  describe.todo(
-    "TestCheckAshrae55Compliance: mirrored when _check_ashrae55_compliance migrates",
-  );
+  // Upstream's airspeed_control warnings are range rows keyed v_param_name
+  // (deviation _shared-38): a `match=` on their text becomes the row's bound.
+  describe("TestCheckAshrae55Compliance", () => {
+    test("test_airspeed_control_cond1_warns", () => {
+      const warnings: ModelWarning[] = [];
+      _check_ashrae55_compliance(
+        {
+          tdb: 30,
+          tr: 30,
+          v: 1.0,
+          met: 1.2,
+          clo: 0.5,
+          airspeed_control: false,
+        },
+        warnings,
+      );
+      expect(warnings).toMatchObject([
+        { key: "v", value: 1.0, bound: { max: 0.8 } },
+      ]);
+      expect(warnings).toHaveLength(1);
+    });
+
+    // With tdb=tr=24, to=24; v_limit ≈ 0.32; v=0.5 > v_limit triggers cond2.
+    test("test_airspeed_control_cond2_warns", () => {
+      const warnings: ModelWarning[] = [];
+      _check_ashrae55_compliance(
+        {
+          tdb: 24,
+          tr: 24,
+          v: 0.5,
+          met: 1.2,
+          clo: 0.5,
+          airspeed_control: false,
+        },
+        warnings,
+      );
+      const v_limit = 50.49 - 4.4047 * 24 + 0.096425 * 24 * 24;
+      expect(warnings).toMatchObject([
+        { key: "v", value: 0.5, bound: { max: v_limit } },
+      ]);
+    });
+
+    test("test_airspeed_control_cond3_warns", () => {
+      const warnings: ModelWarning[] = [];
+      _check_ashrae55_compliance(
+        {
+          tdb: 22,
+          tr: 22,
+          v: 0.3,
+          met: 1.2,
+          clo: 0.5,
+          airspeed_control: false,
+        },
+        warnings,
+      );
+      expect(warnings).toMatchObject([
+        { key: "v", value: 0.3, bound: { max: 0.2 } },
+      ]);
+    });
+
+    test("test_airspeed_control_true_no_condition_warning", () => {
+      const warnings: ModelWarning[] = [];
+      _check_ashrae55_compliance(
+        { tdb: 25, tr: 25, v: 1.0, met: 1.2, clo: 0.5, airspeed_control: true },
+        warnings,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+  });
   test.todo(
     "test_validate_type: no counterpart, as the input definition's parse makes upstream's type checks",
   );
   test.todo(
     "test_base_inputs_store_normalized_numpy_scalar: no counterpart, as JavaScript has no numpy scalars",
   );
+});
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("_check_ashrae55_compliance (JS-only)", () => {
+  const check = (kwargs: Parameters<typeof _check_ashrae55_compliance>[0]) => {
+    const warnings: ModelWarning[] = [];
+    const values = _check_ashrae55_compliance(kwargs, warnings);
+    return { values, warnings };
+  };
+
+  // ashrae55.py:29-30, :36, :94-95, :101.
+  test("ASHRAE_55_LIMITS holds upstream's limits, keyed as its arguments, frozen", () => {
+    expect(ASHRAE_55_LIMITS).toEqual({
+      tdb: { min: 10.0, max: 40.0 },
+      tr: { min: 10.0, max: 40.0 },
+      v: { min: 0.0, max: 2.0 },
+      met: { min: 1.0, max: 4.0 },
+      clo: { min: 0.0, max: 1.5 },
+      v_limited: { min: 0.0, max: 0.2 },
+    });
+    expect(Object.isFrozen(ASHRAE_55_LIMITS.v_limited)).toBe(true);
+    expect(ASHRAE_55_AIRSPEED_NO_CONTROL).toEqual({
+      any: { max: 0.8 },
+      cool: { max: 0.2 },
+    });
+    expect(Object.isFrozen(ASHRAE_55_AIRSPEED_NO_CONTROL.cool)).toBe(true);
+  });
+
+  test("returns the values in upstream's order, NaN where a limit broke", () => {
+    expect(check({ tdb: 20, tr: 45, v: 0.1 }).values).toEqual([20, NaN, 0.1]);
+    expect(
+      check({ tdb: 20, tr: 20, v_limited: 0.3, met: 1.2, clo: 0.5 }).values,
+    ).toEqual([20, 20, 1.2, 0.5, NaN]);
+    expect(
+      check({
+        tdb: 20,
+        tr: 20,
+        v: 1.0,
+        met: 1.2,
+        clo: 0.5,
+        airspeed_control: false,
+      }).values,
+    ).toEqual([20, 20, NaN, 1.2, 0.5]);
+  });
+
+  // _check_ashrae55_compliance(tdb=20.0, tr=20.0, v=2.5, met=0.9, clo=0.5,
+  // airspeed_control=False, v_param_name="vr") warns 'vr' (0-2), 'vr' (cond1),
+  // 'vr' (cond3) and 'met', in that order.
+  test("rows come in upstream's order, the airspeed ones keyed v_param_name", () => {
+    const { values, warnings } = check({
+      tdb: 20,
+      tr: 20,
+      v: 2.5,
+      met: 0.9,
+      clo: 0.5,
+      airspeed_control: false,
+      v_param_name: "vr",
+    });
+    expect(warnings).toEqual([
+      {
+        kind: "range",
+        key: "vr",
+        role: "input",
+        value: 2.5,
+        unit: "m/s",
+        bound: ASHRAE_55_LIMITS.v,
+      },
+      {
+        kind: "range",
+        key: "vr",
+        role: "input",
+        value: 2.5,
+        unit: "m/s",
+        bound: ASHRAE_55_AIRSPEED_NO_CONTROL.any,
+      },
+      {
+        kind: "range",
+        key: "vr",
+        role: "input",
+        value: 2.5,
+        unit: "m/s",
+        bound: ASHRAE_55_AIRSPEED_NO_CONTROL.cool,
+      },
+      {
+        kind: "range",
+        key: "met",
+        role: "input",
+        value: 0.9,
+        unit: "met",
+        bound: ASHRAE_55_LIMITS.met,
+      },
+    ]);
+    expect(warnings.every((row) => Object.isFrozen(row))).toBe(true);
+    expect(values).toEqual([20, 20, NaN, NaN, 0.5]);
+  });
+
+  test("a row's fixed bound is the shared object, not a copy", () => {
+    const { warnings } = check({ tdb: 45, tr: 20, v_limited: 0.3 });
+    const bounds = warnings.map((row) => row.kind === "range" && row.bound);
+    expect(bounds[0]).toBe(ASHRAE_55_LIMITS.tdb);
+    expect(bounds[1]).toBe(ASHRAE_55_LIMITS.v_limited);
+  });
+
+  // _check_ashrae55_compliance(tdb=20.0, tr=20.0, v_limited=0.3, met=1.2,
+  // clo=0.5) warns 'v_limited' only.
+  test("checks v_limited, keyed as upstream names it", () => {
+    expect(
+      check({ tdb: 20, tr: 20, v_limited: 0.3, met: 1.2, clo: 0.5 }).warnings,
+    ).toMatchObject([{ key: "v_limited", value: 0.3, unit: "m/s" }]);
+  });
+
+  test("the airspeed rules need low clo and met", () => {
+    for (const [met, clo] of [
+      [1.3, 0.5],
+      [1.2, 0.7],
+    ] as const)
+      expect(
+        check({ tdb: 22, tr: 22, v: 1.0, met, clo, airspeed_control: false })
+          .warnings,
+      ).toEqual([]);
+  });
 });
 
 // What upstream's tests leave out: the row's other fields, and the unbounded

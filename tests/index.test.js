@@ -197,8 +197,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat_torr");
   });
 
-  it("should have psychrometrics.t_o", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_o");
+  it("should have environment.operative_tmp", () => {
+    expect(jsthermalcomfort.environment).toHaveProperty("operative_tmp");
   });
 
   it("should have psychrometrics.enthalpy", () => {

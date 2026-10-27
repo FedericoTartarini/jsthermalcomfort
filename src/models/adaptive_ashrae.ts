@@ -1,11 +1,14 @@
-import { t_o } from "../psychrometrics/t_o.js";
-import { validateInputs, ASHRAE_55_LIMITS } from "../utilities/utilities.js";
+import { operative_tmp } from "../environment/operative_tmp.ts";
+import { validateInputs } from "../utilities/utilities.js";
 import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
-import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
+import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import { _check_ashrae55_compliance } from "../_internal/ashrae55.ts";
+import {
+  ASHRAE_55_LIMITS,
+  _legacy_check_ashrae55_compliance,
+} from "../_internal/ashrae55.ts";
 import {
   _check_params_object,
   _legacy_valid_range,
@@ -67,7 +70,7 @@ export interface AdaptiveAshraeParams {
 /**
  * Applicability limit of the adaptive model's own input, in SI units.
  *
- * `tdb`, `tr` and `v` are gated by `_check_ashrae55_compliance`, which reads
+ * `tdb`, `tr` and `v` are gated by `_legacy_check_ashrae55_compliance`, which reads
  * `ASHRAE_55_LIMITS`; the running mean outdoor temperature is gated by
  * this model alone, so its bound lives here. Frozen, referenced by identity
  * from
@@ -84,8 +87,8 @@ export const ADAPTIVE_ASHRAE_LIMITS = Object.freeze({
  *
  * Experimental — the shape of `ModelInfo` may change before release.
  *
- * `v` is bounded by `ASHRAE_55_LIMITS.vr`: `_ashrae_compliance` applies the
- * same 0–2 m/s limit to `v` and `vr`, and the table names the PMV input.
+ * `v` is bounded by `ASHRAE_55_LIMITS.v`, the 0–2 m/s limit
+ * `_check_ashrae55_compliance` applies.
  * The acceptability outputs are booleans, so they carry no unit and no
  * classifier.
  *
@@ -98,13 +101,13 @@ export const ADAPTIVE_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
     "Adaptive comfort temperature and its 80 % and 90 % acceptability ranges from the running mean outdoor temperature.",
   standards: [Standard.ashrae_55_2023],
   inputs: {
-    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb! },
-    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr! },
+    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
     t_running_mean: {
       unit: "°C",
       applicability: ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
     },
-    v: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr! },
+    v: { unit: "m/s", applicability: ASHRAE_55_LIMITS.v },
   },
   outputs: {
     tmp_cmf: { unit: "°C" },
@@ -214,7 +217,7 @@ export function adaptive_ashrae(
     ADAPTIVE_ASHRAE_SCHEMA,
   );
 
-  const standard = Standard.ashrae_55_2023;
+  const standard = "ashrae";
   if (units.toUpperCase() === "IP") {
     ({
       tdb,
@@ -228,7 +231,7 @@ export function adaptive_ashrae(
       v,
     }));
   }
-  const to = t_o(tdb, tr, v, standard);
+  const to = operative_tmp(tdb, tr, v, standard);
   // calculate cooling effect (ce) of elevated air speed when top > 25 degC.
   const ce = adaptive_cooling_effect(v, to);
   // Relation between comfort and outdoor temperature
@@ -240,7 +243,7 @@ export function adaptive_ashrae(
   // say what the numbers were computed despite. The gate reads the rows.
   // Upstream passes no airspeed_control, so the no-control rules never apply.
   const warnings: ApplicabilityWarning[] = [];
-  _check_ashrae55_compliance(warnings, { tdb, tr, v });
+  _legacy_check_ashrae55_compliance(warnings, { tdb, tr, v });
   _legacy_valid_range(
     warnings,
     "t_running_mean",

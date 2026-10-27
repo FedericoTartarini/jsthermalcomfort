@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, vi, test } from "vitest";
 import { _pmv_ppd_optimized, pmv_ppd } from "../../src/models/pmv_ppd.ts";
 import type { PmvPpdParams, PmvStandard } from "../../src/models/pmv_ppd.ts";
+import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import {
-  ASHRAE_55_LIMITS,
   ISO_7730_LIMITS,
   check_standard_compliance,
   valid_range,
@@ -519,7 +519,7 @@ describe("pmv_ppd applicability warnings (#199)", () => {
 
     test("vr outside both its range and the no-control limit gives both rows", () => {
       expect(ashrae(26, 2.5).warnings).toEqual([
-        { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.vr },
+        { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.v },
         { key: "vr", role: "input", value: 2.5, bound: { max: 0.8 } },
       ]);
     });
@@ -600,15 +600,5 @@ describe("pmv_ppd applicability warnings (#199)", () => {
                   broke: strings.length > 0,
                 });
               }
-  });
-
-  test("ASHRAE_55_LIMITS holds the numbers _ashrae_compliance enforces", () => {
-    expect(ASHRAE_55_LIMITS).toEqual({
-      tdb: { min: 10, max: 40 },
-      tr: { min: 10, max: 40 },
-      vr: { min: 0, max: 2 },
-      met: { min: 1, max: 4 },
-      clo: { min: 0, max: 1.5 },
-    });
   });
 });

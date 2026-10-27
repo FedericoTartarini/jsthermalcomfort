@@ -1,6 +1,7 @@
 import { pmv_ppd, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE } from "./pmv_ppd.ts";
 import type { PmvPpdParams } from "./pmv_ppd.ts";
-import { validateInputs, ASHRAE_55_LIMITS } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
 import { Standard } from "../utilities/options.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import { _check_params_object } from "../_internal/validation.ts";
@@ -61,11 +62,11 @@ export const PMV_PPD_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
     "Predicted Mean Vote and Predicted Percentage Dissatisfied, with the ASHRAE 55 cooling effect of elevated air speed.",
   standards: [Standard.ashrae_55_2023],
   inputs: {
-    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb! },
-    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr! },
-    vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.vr! },
-    met: { unit: "met", applicability: ASHRAE_55_LIMITS.met! },
-    clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo! },
+    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
+    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
+    vr: { unit: "m/s", applicability: ASHRAE_55_LIMITS.v },
+    met: { unit: "met", applicability: ASHRAE_55_LIMITS.met },
+    clo: { unit: "clo", applicability: ASHRAE_55_LIMITS.clo },
     rh: { unit: "%" },
     wme: { unit: "met" },
   },

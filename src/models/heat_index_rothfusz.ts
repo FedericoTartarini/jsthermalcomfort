@@ -1,11 +1,10 @@
 import { parseInputs } from "../_internal/define.ts";
-import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
+  InputsOf,
   ModelInfo,
-  ModelResult,
   ModelWarning,
-  OutputsOf,
+  ResultOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import {
@@ -40,15 +39,14 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
 } as const satisfies ModelInfo);
 
 /** @interface */
-export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO.inputs>;
+export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
 
 /**
  * Dataclass to represent the Heat Index (HI).
  *
  * @interface
  */
-export type HI = ModelResult &
-  OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO.outputs>;
+export type HI = ResultOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
 
 /**
  * Calculate the Heat Index (HI) in accordance with the Rothfusz (1990) model

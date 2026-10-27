@@ -38,22 +38,21 @@ import {
 } from "./pmv_ppd.ts";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 
-export type {
-  BoolField,
-  ChoiceField,
-  InputsInfo,
-  NumericField,
-} from "../_internal/define.ts";
+export type { ClassifierBins } from "../_internal/classifierBins.ts";
 // deepFreeze is internal, so modelDocs contributes its types only.
 export type {
   ApplicabilityWarning,
+  BoolField,
   Bound,
-  ClassifierBins,
+  ChoiceField,
+  InputsInfo,
   ModelInfo,
   ModelResult,
   ModelWarning,
+  NumericField,
   OutputField,
   OutputInfo,
+  OutputsInfo,
   UnitSymbol,
 } from "../_internal/modelDocs.ts";
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";

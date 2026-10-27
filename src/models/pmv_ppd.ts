@@ -4,14 +4,11 @@ import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { cooling_effect } from "./cooling_effect.ts";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { _legacy_check_ashrae55_compliance } from "../_internal/ashrae55.ts";
 import { _legacy_valid_range } from "../_internal/validation.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import type {
-  ApplicabilityWarning,
-  Bound,
-  ClassifierBins,
-} from "../_internal/modelDocs.ts";
+import type { ApplicabilityWarning, Bound } from "../_internal/modelDocs.ts";
 
 /**
  * The parameters the PMV wrappers share, keyed like upstream's keyword
@@ -83,7 +80,7 @@ export interface Pmv_ppdReturns {
  * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
  * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
  */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO: Readonly<ClassifierBins> =
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO: ClassifierBins =
   Object.freeze({
     edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
     labels: [
@@ -102,7 +99,7 @@ export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO: Readonly<ClassifierBins> =
  * Thermal Sensation Vote bins used by pmv_ppd_ashrae (right-inclusive).
  * Note: pmv_ppd_iso uses left-inclusive; see pythermalcomfort#382.
  */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE: Readonly<ClassifierBins> =
+export const PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE: ClassifierBins =
   Object.freeze({
     edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
     labels: [
@@ -147,12 +144,11 @@ export const PMV_COMPLIANCE_INTERVAL_ASHRAE: Readonly<Required<Bound>> =
  * and prints the room's category from the bins of the edition it runs,
  * instead of keeping its own edges.
  */
-export const PMV_CATEGORY_BINS_ISO_7730_2025: Readonly<ClassifierBins> =
-  deepFreeze({
-    edges: [0.2, 0.5, 0.7, 1.0, 10],
-    labels: ["I", "II", "III", "IV", "none"],
-    right: false,
-  });
+export const PMV_CATEGORY_BINS_ISO_7730_2025: ClassifierBins = deepFreeze({
+  edges: [0.2, 0.5, 0.7, 1.0, 10],
+  labels: ["I", "II", "III", "IV", "none"],
+  right: false,
+});
 
 /**
  * The categories of thermal environment of ISO 7730:2005, which pmv_ppd_iso
@@ -181,12 +177,11 @@ export const PMV_CATEGORY_BINS_ISO_7730_2025: Readonly<ClassifierBins> =
  * Frozen deep, not with Object.freeze as the vote bins are: no model info
  * holds these bins, so no info's deepFreeze reaches their arrays.
  */
-export const PMV_CATEGORY_BINS_ISO_7730_2005: Readonly<ClassifierBins> =
-  deepFreeze({
-    edges: [0.2, 0.5, 0.7, 10],
-    labels: ["A", "B", "C", "none"],
-    right: false,
-  });
+export const PMV_CATEGORY_BINS_ISO_7730_2005: ClassifierBins = deepFreeze({
+  edges: [0.2, 0.5, 0.7, 10],
+  labels: ["A", "B", "C", "none"],
+  right: false,
+});
 
 /**
  * The standards PMV implements: pythermalcomfort's pmv_ppd_iso and
@@ -223,13 +218,13 @@ type PmvStandardRules = (
   | {
       ashrae55: false;
       limits: typeof ISO_7730_LIMITS;
-      category_bins: Readonly<ClassifierBins>;
+      category_bins: ClassifierBins;
     }
   | { ashrae55: true }
 ) & {
-  pa: Readonly<Bound> | null;
-  pmv: Readonly<Bound> | null;
-  tsv_bins: Readonly<ClassifierBins>;
+  pa: Bound | null;
+  pmv: Bound | null;
+  tsv_bins: ClassifierBins;
 };
 
 /** The rules both ISO 7730 editions share: they differ in `category_bins`. */

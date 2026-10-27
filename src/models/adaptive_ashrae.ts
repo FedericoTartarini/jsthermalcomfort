@@ -4,13 +4,12 @@ import {
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
+  InputsOf,
   ModelInfo,
-  ModelResult,
   ModelWarning,
-  OutputsOf,
+  ResultOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
@@ -60,7 +59,7 @@ export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
 } as const satisfies ModelInfo);
 
 /** @interface */
-export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO.inputs>;
+export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
 
 /**
  * A dataclass to store the results of the adaptive thermal comfort model based on
@@ -68,8 +67,7 @@ export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO.inputs>;
  *
  * @interface
  */
-export type AdaptiveASHRAE = ModelResult &
-  OutputsOf<typeof ADAPTIVE_ASHRAE_INFO.outputs>;
+export type AdaptiveASHRAE = ResultOf<typeof ADAPTIVE_ASHRAE_INFO>;
 
 /**
  * Calculate the adaptive thermal comfort based on ASHRAE 55.

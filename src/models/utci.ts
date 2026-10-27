@@ -1,11 +1,10 @@
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
+  InputsOf,
   ModelInfo,
-  ModelResult,
   ModelWarning,
-  OutputsOf,
+  ResultOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import { _mapping, _valid_range } from "../_internal/validation.ts";
@@ -68,14 +67,14 @@ export const UTCI_INFO = deepFreeze({
 } as const satisfies ModelInfo);
 
 /** @interface */
-export type UTCIInputs = InputsOf<typeof UTCI_INFO.inputs>;
+export type UTCIInputs = InputsOf<typeof UTCI_INFO>;
 
 /**
  * Dataclass to represent the Universal Thermal Climate Index (UTCI).
  *
  * @interface
  */
-export type UTCI = ModelResult & OutputsOf<typeof UTCI_INFO.outputs>;
+export type UTCI = ResultOf<typeof UTCI_INFO>;
 
 /**
  * Calculate the Universal Thermal Climate Index (UTCI).

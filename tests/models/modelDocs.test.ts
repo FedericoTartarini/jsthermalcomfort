@@ -1,6 +1,11 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { deepFreeze } from "../../src/_internal/modelDocs.ts";
-import type { OutputsOf } from "../../src/_internal/modelDocs.ts";
+import type {
+  InputsOf,
+  ModelWarning,
+  ResolvedOf,
+  ResultOf,
+} from "../../src/_internal/modelDocs.ts";
 
 describe("deepFreeze", () => {
   // The cycle guard from #197: without it, a self-reference recurses until
@@ -27,15 +32,51 @@ describe("deepFreeze", () => {
   });
 });
 
-describe("OutputsOf", () => {
+const INPUTS = {
+  n: { kind: "numeric", unit: null },
+  nd: { kind: "numeric", unit: null, default: 1 },
+  b: { kind: "bool", default: false },
+  c: { kind: "choice", allowed: ["SI", "IP"], message: "" },
+  cd: { kind: "choice", allowed: ["a", "b"], default: "a", message: "" },
+} as const;
+
+describe("InputsOf", () => {
+  // ADR 0019, whitelist item 6: `undefined` takes the default.
+  test("a key with a default is optional, a choice takes its allowed", () => {
+    expectTypeOf<InputsOf<{ inputs: typeof INPUTS }>>().toEqualTypeOf<{
+      n: number;
+      c: "SI" | "IP";
+      nd?: number | undefined;
+      b?: boolean | undefined;
+      cd?: "a" | "b" | undefined;
+    }>();
+  });
+});
+
+describe("ResolvedOf", () => {
+  // define.ts' parseChoice returns a choice in the case the caller gave.
+  test("every key is required, and a choice is a string", () => {
+    expectTypeOf<ResolvedOf<typeof INPUTS>>().toEqualTypeOf<{
+      n: number;
+      nd: number;
+      b: boolean;
+      c: string;
+      cd: string;
+    }>();
+  });
+});
+
+describe("ResultOf", () => {
   // `masked` adds the NaN `number` of a masked output (ADR 0023).
-  test("maps each kind to its value type", () => {
-    type Fields = OutputsOf<{
-      n: { kind: "numeric"; unit: null };
-      b: { kind: "bool"; unit: null };
-      bm: { kind: "bool"; unit: null; masked: true };
-      l: { kind: "label"; unit: null };
-      lm: { kind: "label"; unit: null; masked: true };
+  test("maps each kind to its value type, then warnings", () => {
+    type Fields = ResultOf<{
+      outputs: {
+        n: { kind: "numeric"; unit: null };
+        b: { kind: "bool"; unit: null };
+        bm: { kind: "bool"; unit: null; masked: true };
+        l: { kind: "label"; unit: null };
+        lm: { kind: "label"; unit: null; masked: true };
+      };
     }>;
     expectTypeOf<Fields>().toEqualTypeOf<{
       readonly n: number;
@@ -43,6 +84,7 @@ describe("OutputsOf", () => {
       readonly bm: boolean | number;
       readonly l: string;
       readonly lm: string | number;
+      readonly warnings: readonly ModelWarning[];
     }>();
   });
 });

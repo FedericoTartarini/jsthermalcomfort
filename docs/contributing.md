@@ -127,8 +127,8 @@ Create `src/models/<name>.ts`, with upstream's file and function name. In order,
 
 1. the imports;
 2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric`, `bool` or `choice`), unit, applicability and default, and its `outputs` hold each returned value with its kind (`numeric`, `bool` or `label`, and `masked` where a label or boolean can be NaN instead), unit and classifier, the classifier inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`), and the TSDoc of each output key is upstream's `Attributes` entry for it;
-3. the inputs type, `InputsOf<typeof MY_NEW_MODEL_INFO.inputs>`, named after upstream's input class;
-4. the result type, `ModelResult & OutputsOf<typeof MY_NEW_MODEL_INFO.outputs>`, named after upstream's dataclass, where `ModelResult` holds `warnings`;
+3. the inputs type, `InputsOf<typeof MY_NEW_MODEL_INFO>`, named after upstream's input class;
+4. the result type, `ResultOf<typeof MY_NEW_MODEL_INFO>`, named after upstream's dataclass: the fields of `outputs`, then `warnings`;
 5. the TSDoc block and the public function;
 6. the private functions in upstream's order.
 

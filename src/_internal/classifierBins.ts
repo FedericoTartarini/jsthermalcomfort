@@ -1,11 +1,9 @@
 /**
  * Bin configuration for {@link classifyFromBins}.
  *
- * The arrays are `ReadonlyArray` because the bin constants this library
- * publishes are frozen: `edges[0] = 0` would type-check and then throw, since
- * an ES module is always strict. Use `Readonly<ClassifierBins>` to lock the
- * properties as well as their contents -- the published constants are declared
- * that way.
+ * Readonly, because the bin constants this library publishes are frozen:
+ * `edges[0] = 0` would type-check and then throw, since an ES module is always
+ * strict.
  *
  * `right` selects the interval convention: `true` for right-inclusive
  * (`value <= edge`), `false` for left-inclusive (`value < edge`). The two
@@ -13,11 +11,11 @@
  */
 export interface ClassifierBins {
   /** Upper bin boundaries, strictly increasing. */
-  edges: readonly number[];
+  readonly edges: readonly number[];
   /** One label per bin, as many as `edges`. */
-  labels: readonly string[];
+  readonly labels: readonly string[];
   /** `true` for right-inclusive bins, `false` for left-inclusive. */
-  right: boolean;
+  readonly right: boolean;
 }
 
 /**
@@ -67,7 +65,7 @@ export interface ClassifierBins {
  */
 export function classifyFromBins(
   value: number,
-  bins: Readonly<ClassifierBins>,
+  bins: ClassifierBins,
 ): string | number {
   const { edges, labels, right } = bins;
 

@@ -1,12 +1,11 @@
 import { transpose_sharp_altitude } from "../environment/transpose_sharp_altitude.ts";
 import { parseInputs } from "../_internal/define.ts";
-import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
+  InputsOf,
   ModelInfo,
-  ModelResult,
   ModelWarning,
-  OutputsOf,
+  ResultOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
@@ -101,14 +100,14 @@ export const SOLAR_GAIN_INFO = deepFreeze({
 } as const satisfies ModelInfo);
 
 /** @interface */
-export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO.inputs>;
+export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO>;
 
 /**
  * Dataclass to represent the solar gain to the human body.
  *
  * @interface
  */
-export type SolarGain = ModelResult & OutputsOf<typeof SOLAR_GAIN_INFO.outputs>;
+export type SolarGain = ResultOf<typeof SOLAR_GAIN_INFO>;
 
 /**
  * Calculate the solar gain to the human body using the Effective Radiant Field
@@ -245,7 +244,7 @@ export function solar_gain(inputs: SolarGainInputs): SolarGain {
     warnings,
   );
 
-  posture = posture.toLowerCase() as typeof posture;
+  posture = posture.toLowerCase();
 
   let [erf, d_mrt] = _solar_gain_scalar(
     sol_altitude,
@@ -301,7 +300,7 @@ function _find_span(arr: readonly number[], x: number): number {
 function _projected_area_factor(
   sol_altitude: number,
   sharp: number,
-  posture: NonNullable<SolarGainInputs["posture"]>,
+  posture: string,
 ): number {
   const fp_table =
     posture === Postures.sitting ? _FP_TABLE_SITTING : _FP_TABLE_STANDING;
@@ -344,7 +343,7 @@ function _solar_gain_scalar(
   f_bes: number,
   asw: number,
   floor_reflectance: number,
-  posture: NonNullable<SolarGainInputs["posture"]>,
+  posture: string,
 ): [number, number] {
   const deg_to_rad = 0.0174532925;
   const hr = 6;

@@ -6,50 +6,12 @@ import {
   notOfType,
 } from "./errors.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { Bound, UnitSymbol } from "./modelDocs.ts";
+import type { ChoiceField, InputsInfo, ResolvedOf } from "./modelDocs.ts";
 import { Units } from "../utilities/options.ts";
 
-// Each model describes its inputs once, as its `*_INFO.inputs` (ADR 0022),
-// and its inputs type and its validation are derived from it. It stands in for upstream's input dataclass (`classes_input.py`) and its
-// checks (ADR 0019, whitelist item 2). The kinds take upstream's names there:
-// the `numeric_field` and `choice_field` helpers (`classes_input.py:19, :23`)
-// and the `is_bool` metadata key (`classes_input.py:66, :125`).
-
-/** A number, upstream's `numeric_field`, which the parse requires finite. */
-export interface NumericField {
-  readonly kind: "numeric";
-  readonly unit: UnitSymbol | null;
-  readonly applicability?: Bound;
-  readonly default?: number;
-}
-
-/** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
-export interface BoolField {
-  readonly kind: "bool";
-  readonly default: boolean;
-}
-
-/**
- * A string option, which takes one of `allowed` in any case, and fails with
- * `message`, upstream's own text for that check (ADR 0022): `units`, a plain
- * field that `BaseInputs` checks by its name (`classes_input.py:95, :114-121`),
- * and `solar_gain`'s `posture`, which the model checks itself
- * (`models/solar_gain.py:207-212`).
- */
-export interface ChoiceField {
-  readonly kind: "choice";
-  readonly allowed: readonly string[];
-  readonly default?: string;
-  readonly message: string;
-}
-
-/**
- * A model's `INFO.inputs`: upstream's keyword arguments, in its order, each
- * with its kind, unit, applicability and default.
- */
-export type InputsInfo = Readonly<
-  Record<string, NumericField | BoolField | ChoiceField>
->;
+// The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing
+// in for upstream's input dataclass checks (`classes_input.py`; ADR 0019,
+// whitelist item 2), and `BASE_INPUTS_UNITS`.
 
 /**
  * Upstream's `BaseInputs.units`: defaults to 'SI' and raises "Units must be
@@ -63,33 +25,6 @@ export const BASE_INPUTS_UNITS = deepFreeze({
   default: Units.SI,
   message: "Units must be either 'SI' or 'IP'",
 } as const satisfies ChoiceField);
-
-type ValueOf<E> = E extends NumericField
-  ? number
-  : E extends BoolField
-    ? boolean
-    : E extends ChoiceField
-      ? E["allowed"][number]
-      : never;
-type Values<I> = { -readonly [K in keyof I]: ValueOf<I[K]> };
-type OptionalKey<I> = {
-  [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
-}[keyof I];
-type Flatten<T> = { [K in keyof T]: T[K] } & {};
-
-/**
- * The inputs object a model's `INFO.inputs` accepts. A key with a default is
- * optional, and `undefined` takes the default, as an omitted keyword does
- * (ADR 0019, whitelist item 6).
- */
-export type InputsOf<I extends InputsInfo> = Flatten<
-  Pick<Values<I>, Exclude<keyof I, OptionalKey<I>>> & {
-    [K in keyof Pick<Values<I>, OptionalKey<I>>]?: Values<I>[K] | undefined;
-  }
->;
-
-/** The inputs after the defaults are applied. */
-export type ResolvedOf<I extends InputsInfo> = Values<I>;
 
 /** Checks one number, as given or defaulted. */
 function parseNumeric(key: string, value: unknown): number {
@@ -146,7 +81,7 @@ function parseChoice(value: unknown, entry: ChoiceField): string {
  * @returns The inputs, with each default applied.
  * @throws `TypeError` or `RangeError`, as above.
  */
-export function parseInputs<const I extends InputsInfo>(
+export function parseInputs<I extends InputsInfo>(
   info: { readonly name: string; readonly inputs: I },
   args: unknown,
 ): ResolvedOf<I> {

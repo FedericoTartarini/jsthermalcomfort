@@ -55,15 +55,15 @@ export function _valid_range(
   return NaN;
 }
 
-// Stress category thresholds shared by the Heat Index models (e.g. Rothfusz, Schoen).
-// Each model prepends its own "no risk" floor, since that lower bound depends on the
-// model's applicability range, e.g. {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}.
-export const HEAT_INDEX_STRESS_CATEGORIES: Readonly<
-  Pick<ClassifierBins, "edges" | "labels">
-> = deepFreeze({
+/**
+ * Stress category thresholds shared by the Heat Index models (e.g. Rothfusz, Schoen).
+ * Each model prepends its own "no risk" floor, since that lower bound depends on the
+ * model's applicability range, e.g. {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}.
+ */
+export const HEAT_INDEX_STRESS_CATEGORIES = deepFreeze({
   edges: [32.0, 41.0, 54.0, 1000.0],
   labels: ["caution", "extreme caution", "danger", "extreme danger"],
-});
+} as const satisfies Pick<ClassifierBins, "edges" | "labels">);
 
 /**
  * Map a temperature to stress categories.
@@ -84,10 +84,7 @@ export const HEAT_INDEX_STRESS_CATEGORIES: Readonly<
  * [20, 25, 30].map((t) => _mapping(t, bins)); // ["medium", "medium", "high"]
  * ```
  */
-export function _mapping(
-  value: number,
-  bins: Readonly<ClassifierBins>,
-): string | number {
+export function _mapping(value: number, bins: ClassifierBins): string | number {
   return classifyFromBins(value, bins);
 }
 

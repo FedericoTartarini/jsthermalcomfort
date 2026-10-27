@@ -1,11 +1,6 @@
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import type {
-  ModelInfo,
-  ModelResult,
-  OutputsOf,
-} from "../_internal/modelDocs.ts";
+import type { InputsOf, ModelInfo, ResultOf } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import { Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
@@ -24,7 +19,7 @@ export const CLO_TOUT_INFO = deepFreeze({
 } as const satisfies ModelInfo);
 
 /** @interface */
-export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO.inputs>;
+export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO>;
 
 /**
  * Dataclass to represent the clothing insulation Icl as a function of outdoor air
@@ -32,7 +27,7 @@ export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO.inputs>;
  *
  * @interface
  */
-export type CloTOut = ModelResult & OutputsOf<typeof CLO_TOUT_INFO.outputs>;
+export type CloTOut = ResultOf<typeof CLO_TOUT_INFO>;
 
 /**
  * Calculate representative clothing insulation Icl based on outdoor air temperature

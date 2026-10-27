@@ -1,13 +1,9 @@
 import type { ClassifierBins } from "./classifierBins.ts";
-import type { InputsInfo } from "./define.ts";
 import type { Standard } from "../utilities/options.ts";
 
-// The types of the model info every model publishes (`*_INFO`), of the result
-// every model returns and of its warnings rows (ADRs 0023, 0024), plus
-// `deepFreeze`, which locks them.
-// The old forms that the models not yet migrated still return,
-// `ApplicabilityWarning` and `LegacyModelInfo`, sit at the end of the file
-// until the contract ticket removes them.
+// The model info every model publishes (`*_INFO`), the inputs and result types
+// derived from it, the warnings rows (ADRs 0022-0024) and `deepFreeze`, with
+// the old forms the models not yet migrated use at the end.
 
 /** One of the identifiers in `Standard`, e.g. `"7730-2025"` or `"55-2023"`. */
 export type StandardId = (typeof Standard)[keyof typeof Standard];
@@ -77,8 +73,6 @@ export interface ModelResult {
   readonly warnings: readonly ModelWarning[];
 }
 
-export type { ClassifierBins };
-
 /**
  * Metadata for a single output or derived variable of a model; `INFO.inputs`
  * describes the inputs (`InputsInfo`).
@@ -114,15 +108,104 @@ export interface OutputField extends OutputInfo {
   readonly masked?: true;
 }
 
+/** A number, upstream's `numeric_field`, which the parse requires finite. */
+export interface NumericField {
+  readonly kind: "numeric";
+  readonly unit: UnitSymbol | null;
+  readonly applicability?: Bound;
+  readonly default?: number;
+}
+
+/** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
+export interface BoolField {
+  readonly kind: "bool";
+  readonly default: boolean;
+}
+
 /**
- * The result fields a model's `INFO.outputs` describes, each `readonly` and
- * typed by its kind.
+ * A string option, which takes one of `allowed` in any case, and fails with
+ * `message`, upstream's own text for that check (ADR 0022): `units`, a plain
+ * field that `BaseInputs` checks by its name (`classes_input.py:95, :114-121`),
+ * and `solar_gain`'s `posture`, which the model checks itself
+ * (`models/solar_gain.py:207-212`).
  */
-export type OutputsOf<O extends Readonly<Record<string, OutputField>>> = {
-  readonly [K in keyof O]:
-    | { numeric: number; bool: boolean; label: string }[O[K]["kind"]]
-    | (O[K] extends { readonly masked: true } ? number : never);
+export interface ChoiceField {
+  readonly kind: "choice";
+  readonly allowed: readonly string[];
+  readonly default?: string;
+  readonly message: string;
+}
+
+/**
+ * A model's `INFO.inputs`: upstream's keyword arguments, in its order, each
+ * with its kind, unit, applicability and default.
+ */
+export type InputsInfo = Readonly<
+  Record<string, NumericField | BoolField | ChoiceField>
+>;
+
+/**
+ * A model's `INFO.outputs`: each field of upstream's return dataclass other
+ * than `warnings`, in its order.
+ */
+export type OutputsInfo = Readonly<Record<string, OutputField>>;
+
+/**
+ * The value type of each kind. The input kinds take upstream's names: the
+ * `numeric_field` and `choice_field` helpers (`classes_input.py:19, :23`) and
+ * the `is_bool` metadata key (`classes_input.py:66, :125`). A `choice` is a
+ * `string`: the parse accepts it in any case and returns it as given.
+ */
+interface KindValues {
+  numeric: number;
+  bool: boolean;
+  choice: string;
+  label: string;
+}
+
+type OptionalKey<I extends InputsInfo> = {
+  [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
+}[keyof I];
+type InputValue<F extends InputsInfo[string]> = F extends ChoiceField
+  ? F["allowed"][number]
+  : KindValues[F["kind"]];
+type Flatten<T> = { [K in keyof T]: T[K] } & {};
+
+/**
+ * The inputs object a model's `INFO` accepts, upstream's input dataclass. A
+ * key with a default is optional, and `undefined` takes the default, as an
+ * omitted keyword does (ADR 0019, whitelist item 6); a `choice` takes one of
+ * its `allowed`.
+ */
+export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
+  {
+    -readonly [
+      K in keyof M["inputs"] as K extends OptionalKey<M["inputs"]> ? never : K
+    ]: InputValue<M["inputs"][K]>;
+  } & {
+    -readonly [
+      K in keyof M["inputs"] as K extends OptionalKey<M["inputs"]> ? K : never
+    ]?: InputValue<M["inputs"][K]> | undefined;
+  }
+>;
+
+/** The inputs after the parse, each default applied. */
+export type ResolvedOf<I extends InputsInfo> = {
+  -readonly [K in keyof I]: KindValues[I[K]["kind"]];
 };
+
+/**
+ * What a model returns, upstream's return dataclass: each field
+ * `INFO.outputs` describes, `readonly` and typed by its kind, then
+ * `warnings`; a `masked` field adds the NaN `number` (ADR 0023).
+ */
+export type ResultOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
+  {
+    readonly [K in keyof M["outputs"]]:
+      | KindValues[M["outputs"][K]["kind"]]
+      | (M["outputs"][K] extends { readonly masked: true } ? number : never);
+  } & ModelResult
+>;
 
 /**
  * Metadata describing a thermal comfort model: its `*_INFO` (ADR 0024,
@@ -151,7 +234,7 @@ export interface ModelInfo {
   readonly name: string;
   readonly label: string;
   readonly inputs: InputsInfo;
-  readonly outputs: Readonly<Record<string, OutputField>>;
+  readonly outputs: OutputsInfo;
   readonly derived?: Readonly<Record<string, OutputInfo>>;
 }
 

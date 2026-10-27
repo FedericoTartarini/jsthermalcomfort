@@ -520,10 +520,10 @@ describe("solar_gain (JS-only)", () => {
 
   // deviation solar_gain-1
   describe("SOLAR_GAIN_INFO", () => {
-    test("names the model, with no description", () => {
+    test("names the model, with no description or standards", () => {
       expect(SOLAR_GAIN_INFO.name).toBe("solar_gain");
       expect(SOLAR_GAIN_INFO.label).toBe("Solar gain on people");
-      expect(SOLAR_GAIN_INFO.standards).toEqual([]);
+      expect(SOLAR_GAIN_INFO).not.toHaveProperty("standards");
       expect(SOLAR_GAIN_INFO).not.toHaveProperty("description");
       expect(SOLAR_GAIN_INFO).not.toHaveProperty("derived");
     });
@@ -587,7 +587,6 @@ describe("solar_gain (JS-only)", () => {
     test("is frozen deeply", () => {
       const { inputs, outputs } = SOLAR_GAIN_INFO;
       expect(Object.isFrozen(SOLAR_GAIN_INFO)).toBe(true);
-      expect(Object.isFrozen(SOLAR_GAIN_INFO.standards)).toBe(true);
       expect(Object.isFrozen(inputs.sol_altitude.applicability)).toBe(true);
       expect(Object.isFrozen(inputs.posture.allowed)).toBe(true);
       expect(Object.isFrozen(outputs.erf)).toBe(true);

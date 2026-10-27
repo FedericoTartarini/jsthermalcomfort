@@ -476,10 +476,10 @@ describe("utci (JS-only)", () => {
 
   // deviation utci-1
   describe("UTCI_INFO", () => {
-    test("names the model, with no description", () => {
+    test("names the model, with no description or standards", () => {
       expect(UTCI_INFO.name).toBe("utci");
       expect(UTCI_INFO.label).toBe("UTCI");
-      expect(UTCI_INFO.standards).toEqual([]);
+      expect(UTCI_INFO).not.toHaveProperty("standards");
       expect(UTCI_INFO).not.toHaveProperty("description");
     });
 
@@ -571,7 +571,6 @@ describe("utci (JS-only)", () => {
     test("is frozen deeply", () => {
       const { inputs, outputs, derived } = UTCI_INFO;
       expect(Object.isFrozen(UTCI_INFO)).toBe(true);
-      expect(Object.isFrozen(UTCI_INFO.standards)).toBe(true);
       expect(Object.isFrozen(inputs.tdb.applicability)).toBe(true);
       expect(Object.isFrozen(inputs.units.allowed)).toBe(true);
       expect(Object.isFrozen(derived["pa (kPa)"].applicability)).toBe(true);

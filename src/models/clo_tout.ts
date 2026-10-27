@@ -9,7 +9,6 @@ import { units_converter } from "../utilities/units_converter.ts";
 export const CLO_TOUT_INFO = deepFreeze({
   name: "clo_tout",
   label: "Clothing prediction",
-  standards: [],
   inputs: {
     tout: { kind: "numeric", unit: "°C" },
     units: BASE_INPUTS_UNITS,

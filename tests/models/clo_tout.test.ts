@@ -154,10 +154,10 @@ describe("clo_tout (JS-only)", () => {
 
   // deviation clo_tout-2
   describe("CLO_TOUT_INFO", () => {
-    test("names the model, with no description", () => {
+    test("names the model, with no description or standards", () => {
       expect(CLO_TOUT_INFO.name).toBe("clo_tout");
       expect(CLO_TOUT_INFO.label).toBe("Clothing prediction");
-      expect(CLO_TOUT_INFO.standards).toEqual([]);
+      expect(CLO_TOUT_INFO).not.toHaveProperty("standards");
       expect(CLO_TOUT_INFO).not.toHaveProperty("description");
       expect(CLO_TOUT_INFO).not.toHaveProperty("derived");
     });
@@ -184,7 +184,6 @@ describe("clo_tout (JS-only)", () => {
     test("is frozen deeply", () => {
       const { inputs, outputs } = CLO_TOUT_INFO;
       expect(Object.isFrozen(CLO_TOUT_INFO)).toBe(true);
-      expect(Object.isFrozen(CLO_TOUT_INFO.standards)).toBe(true);
       expect(Object.isFrozen(inputs.tout)).toBe(true);
       expect(Object.isFrozen(inputs.units.allowed)).toBe(true);
       expect(Object.isFrozen(outputs.clo_tout)).toBe(true);

@@ -18,7 +18,10 @@ import {
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
-import type { ModelInfo } from "../../src/_internal/modelDocs.ts";
+import type {
+  LegacyModelInfo,
+  ModelInfo,
+} from "../../src/_internal/modelDocs.ts";
 
 // NOTE: A directory scan approach was attempted to make this test self-maintaining,
 // but the Jest ESM configuration of the time did not support CommonJS require() or
@@ -242,13 +245,13 @@ describe("PMV_PPD_ISO_INFO structure", () => {
   });
 });
 
-describe("standards — the editions each model accepts", () => {
-  const infos = Object.entries(pkg as Record<string, unknown>)
-    .filter(([name]) => name.endsWith("_INFO"))
-    .map(([, info]) => info as ModelInfo);
+describe("standards — what each model not yet migrated accepts", () => {
+  const infos: readonly LegacyModelInfo[] = [
+    PMV_PPD_ISO_INFO,
+    PMV_PPD_ASHRAE_INFO,
+  ];
 
-  test("every exported _INFO lists only Standard values", () => {
-    expect(infos.length).toBeGreaterThan(0);
+  test("every _INFO not yet migrated lists only Standard values", () => {
     const known: readonly string[] = Object.values(Standard);
     for (const info of infos) {
       for (const standard of info.standards) {
@@ -284,13 +287,8 @@ describe("standards — the editions each model accepts", () => {
     expect(PMV_PPD_ISO_INFO.standards[0]).toBe(Standard.iso_7730_2025);
   });
 
-  test("HEAT_INDEX_ROTHFUSZ_INFO.standards is empty: the model has no standard", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.standards).toEqual([]);
-  });
-
   test("standards arrays are frozen", () => {
     expect(Object.isFrozen(PMV_PPD_ISO_INFO.standards)).toBe(true);
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.standards)).toBe(true);
   });
 });
 

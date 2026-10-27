@@ -54,7 +54,6 @@ const _FP_TABLE_SITTING = [
 export const SOLAR_GAIN_INFO = deepFreeze({
   name: "solar_gain",
   label: "Solar gain on people",
-  standards: [],
   inputs: {
     sol_altitude: {
       kind: "numeric",

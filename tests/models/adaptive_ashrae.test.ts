@@ -528,10 +528,10 @@ describe("adaptive_ashrae (JS-only)", () => {
 
   // deviation adaptive_ashrae-1
   describe("ADAPTIVE_ASHRAE_INFO", () => {
-    test("names the model, with no description", () => {
+    test("names the model, with no description or standards", () => {
       expect(ADAPTIVE_ASHRAE_INFO.name).toBe("adaptive_ashrae");
       expect(ADAPTIVE_ASHRAE_INFO.label).toBe("Adaptive (ASHRAE 55)");
-      expect(ADAPTIVE_ASHRAE_INFO.standards).toEqual([]);
+      expect(ADAPTIVE_ASHRAE_INFO).not.toHaveProperty("standards");
       expect(ADAPTIVE_ASHRAE_INFO).not.toHaveProperty("description");
     });
 
@@ -604,7 +604,6 @@ describe("adaptive_ashrae (JS-only)", () => {
     test("is frozen deeply", () => {
       const { inputs, outputs } = ADAPTIVE_ASHRAE_INFO;
       expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO)).toBe(true);
-      expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO.standards)).toBe(true);
       expect(Object.isFrozen(inputs.t_running_mean.applicability)).toBe(true);
       expect(Object.isFrozen(inputs.units.allowed)).toBe(true);
       expect(Object.isFrozen(outputs.acceptability_80)).toBe(true);

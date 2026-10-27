@@ -114,10 +114,12 @@ const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
 const ppd: OutputInfo = iso.outputs.ppd;
 
-// Which standard a model is for, as data (issue #184): a list of Standard
-// values, empty for a model with no standard.
+// The models not yet migrated list the editions they accept as Standard
+// values. A migrated model has no `standards`: one that takes a standard has a
+// `standard` choice entry in `inputs`.
 const isoStandards: readonly (typeof Standard)[keyof typeof Standard][] =
   iso.standards;
+// @ts-expect-error ModelInfo has no `standards`.
 const heatIndexStandards: readonly string[] = heatIndex.standards;
 
 // Bins are reached through the metadata, and the models not yet migrated also
@@ -146,7 +148,6 @@ const nameNotANumber: number = PMV_PPD_ISO_INFO.name;
 // @ts-expect-error `name` is required: a ModelInfo without it is rejected.
 const nameless: ModelInfo = {
   label: "l",
-  standards: [],
   inputs: {},
   outputs: {},
 };
@@ -155,7 +156,6 @@ const described: ModelInfo = {
   label: "l",
   // @ts-expect-error ModelInfo has no `description`.
   description: "d",
-  standards: [],
   inputs: {},
   outputs: {},
 };

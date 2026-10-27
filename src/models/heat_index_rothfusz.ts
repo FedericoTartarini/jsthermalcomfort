@@ -16,7 +16,6 @@ import {
 export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
   name: "heat_index_rothfusz",
   label: "Heat Index (Rothfusz)",
-  standards: [],
   inputs: {
     tdb: { kind: "numeric", unit: "°C", applicability: { min: 27.0 } },
     rh: { kind: "numeric", unit: "%" },

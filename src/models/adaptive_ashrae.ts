@@ -23,7 +23,6 @@ const INTERCEPT = 17.8;
 export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
   name: "adaptive_ashrae",
   label: "Adaptive (ASHRAE 55)",
-  standards: [],
   inputs: {
     tdb: {
       kind: "numeric",

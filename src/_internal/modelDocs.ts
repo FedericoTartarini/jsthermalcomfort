@@ -120,13 +120,13 @@ export interface OutputInfo {
  * computed from the inputs rather than supplied by the caller, keyed by
  * upstream's name for the check, as the `warnings` rows are.
  *
- * `standards` lists the editions this function accepts, default first; empty
- * for a model with no standard. Every entry is a `Standard` value.
+ * A model that takes a standard has a `standard` choice entry in `inputs`,
+ * whose `allowed` lists the standards it accepts and whose `default` is
+ * upstream's. A model without that entry takes no standard.
  */
 export interface ModelInfo {
   readonly name: string;
   readonly label: string;
-  readonly standards: readonly StandardId[];
   readonly inputs: InputsInfo;
   readonly outputs: Readonly<Record<string, OutputInfo>>;
   readonly derived?: Readonly<Record<string, OutputInfo>>;

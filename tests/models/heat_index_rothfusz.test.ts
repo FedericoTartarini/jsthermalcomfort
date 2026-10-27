@@ -306,10 +306,10 @@ describe("heat_index_rothfusz (JS-only)", () => {
 
   // deviation heat_index_rothfusz-2
   describe("HEAT_INDEX_ROTHFUSZ_INFO", () => {
-    test("names the model, with no description", () => {
+    test("names the model, with no description or standards", () => {
       expect(HEAT_INDEX_ROTHFUSZ_INFO.name).toBe("heat_index_rothfusz");
       expect(HEAT_INDEX_ROTHFUSZ_INFO.label).toBe("Heat Index (Rothfusz)");
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.standards).toEqual([]);
+      expect(HEAT_INDEX_ROTHFUSZ_INFO).not.toHaveProperty("standards");
       expect(HEAT_INDEX_ROTHFUSZ_INFO).not.toHaveProperty("description");
     });
 

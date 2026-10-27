@@ -26,22 +26,41 @@ export const ASHRAE_55_LIMITS = deepFreeze({
  * at every operative temperature, `cool` when the operative temperature is at
  * or below 23 °C.
  */
-export const ASHRAE_55_AIRSPEED_NO_CONTROL = deepFreeze({
+const ASHRAE_55_AIRSPEED_NO_CONTROL = deepFreeze({
   any: { max: 0.8 },
   cool: { max: 0.2 },
 } as const satisfies Record<string, Bound>);
 
-/** The keyword arguments `_check_ashrae55_compliance` takes. */
-interface Ashrae55Kwargs {
+/**
+ * The keyword arguments `_check_ashrae55_compliance` takes. Upstream reads
+ * `clo` wherever `met` is given, and `v`, `met` and `clo` wherever
+ * `airspeed_control` is false (`_internal/ashrae55.py:40-41, :94-95` at
+ * v4.7.0), so the type requires them there.
+ */
+type Ashrae55Kwargs = {
   readonly tdb: number;
   readonly tr: number;
   readonly v?: number;
-  readonly met?: number;
-  readonly clo?: number;
   readonly v_limited?: number;
-  readonly airspeed_control?: boolean;
   readonly v_param_name?: string;
-}
+} & (
+  | {
+      readonly met?: undefined;
+      readonly clo?: undefined;
+      readonly airspeed_control?: true;
+    }
+  | {
+      readonly met: number;
+      readonly clo: number;
+      readonly airspeed_control?: true;
+    }
+  | {
+      readonly v: number;
+      readonly met: number;
+      readonly clo: number;
+      readonly airspeed_control?: boolean;
+    }
+);
 
 /**
  * ASHRAE 55-2023 input applicability check.
@@ -90,8 +109,9 @@ export function _check_ashrae55_compliance(
   values_to_return.tdb = tdb_valid;
   values_to_return.tr = tr_valid;
 
+  let v_valid = NaN;
   if (params.v !== undefined) {
-    const v_valid = _valid_range(
+    v_valid = _valid_range(
       params.v,
       ASHRAE_55_LIMITS.v,
       v_param_name,
@@ -102,13 +122,12 @@ export function _check_ashrae55_compliance(
     values_to_return.v = v_valid;
   }
 
-  // Upstream reads v, met and clo here unguarded; every caller that turns
-  // airspeed_control off passes all three.
+  // Ashrae55Kwargs gives v, met and clo wherever airspeed_control can be
+  // false; the checks on v and met only narrow the types.
   if (
     !params.airspeed_control &&
     params.v !== undefined &&
-    params.met !== undefined &&
-    params.clo !== undefined
+    params.met !== undefined
   ) {
     const { v, met, clo } = params;
     const exceeding = (bound: Bound) => {
@@ -123,8 +142,6 @@ export function _check_ashrae55_compliance(
         }),
       );
     };
-    let v_valid = values_to_return.v ?? v;
-
     const cond1 =
       v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max && clo < 0.7 && met < 1.3;
     if (cond1) exceeding(ASHRAE_55_AIRSPEED_NO_CONTROL.any);
@@ -148,9 +165,7 @@ export function _check_ashrae55_compliance(
     values_to_return.v = v_valid;
   }
 
-  // Upstream checks clo whenever met is given; every caller passes both or
-  // neither.
-  if (params.met !== undefined && params.clo !== undefined) {
+  if (params.met !== undefined) {
     const met_valid = _valid_range(
       params.met,
       ASHRAE_55_LIMITS.met,

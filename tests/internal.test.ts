@@ -7,7 +7,6 @@ import {
 } from "../src/_internal/validation.ts";
 import type { ModelWarning } from "../src/_internal/modelDocs.ts";
 import {
-  ASHRAE_55_AIRSPEED_NO_CONTROL,
   ASHRAE_55_LIMITS,
   _check_ashrae55_compliance,
 } from "../src/_internal/ashrae55.ts";
@@ -172,11 +171,6 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
       v_limited: { min: 0.0, max: 0.2 },
     });
     expect(Object.isFrozen(ASHRAE_55_LIMITS.v_limited)).toBe(true);
-    expect(ASHRAE_55_AIRSPEED_NO_CONTROL).toEqual({
-      any: { max: 0.8 },
-      cool: { max: 0.2 },
-    });
-    expect(Object.isFrozen(ASHRAE_55_AIRSPEED_NO_CONTROL.cool)).toBe(true);
   });
 
   test("returns the values in upstream's order, NaN where a limit broke", () => {
@@ -224,7 +218,7 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
         role: "input",
         value: 2.5,
         unit: "m/s",
-        bound: ASHRAE_55_AIRSPEED_NO_CONTROL.any,
+        bound: { max: 0.8 },
       },
       {
         kind: "range",
@@ -232,7 +226,7 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
         role: "input",
         value: 2.5,
         unit: "m/s",
-        bound: ASHRAE_55_AIRSPEED_NO_CONTROL.cool,
+        bound: { max: 0.2 },
       },
       {
         kind: "range",
@@ -260,6 +254,19 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
     expect(
       check({ tdb: 20, tr: 20, v_limited: 0.3, met: 1.2, clo: 0.5 }).warnings,
     ).toMatchObject([{ key: "v_limited", value: 0.3, unit: "m/s" }]);
+  });
+
+  // Upstream raises KeyError for met without clo, and for
+  // airspeed_control=False without v (_internal/ashrae55.py:40-41, :95), so
+  // the type rejects both calls.
+  test("the type requires what upstream reads unguarded", () => {
+    const typed = (kwargs: Parameters<typeof _check_ashrae55_compliance>[0]) =>
+      kwargs;
+    // @ts-expect-error clo goes with met.
+    typed({ tdb: 20, tr: 20, met: 1.2 });
+    // @ts-expect-error airspeed_control false needs v.
+    typed({ tdb: 20, tr: 20, met: 1.2, clo: 0.5, airspeed_control: false });
+    expect(typed({ tdb: 20, tr: 20 })).toEqual({ tdb: 20, tr: 20 });
   });
 
   test("the airspeed rules need low clo and met", () => {

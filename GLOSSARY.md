@@ -17,7 +17,7 @@ A public model that binds a kernel to one standard's limits and conventions (`pm
 _Avoid_: variant, model function, facade
 
 **Main model**:
-Every function and class upstream publishes in `pythermalcomfort.models`, that is, the `__all__` of `models/__init__.py`. At v4.7.0 that is 41 names: 39 functions, the class `JOS3` and the enum `Sports`, which goes with `sports_heat_stress_risk`. A private upstream file or helper that a main model calls goes with it and is not a main model itself, and neither is a function outside `models/` (`psy_ta_rh`, `t_o`) (ADR 0018).
+Every function and class upstream publishes in `pythermalcomfort.models`, that is, the `__all__` of `models/__init__.py`. At v4.7.0 that is 41 names: 39 functions, the class `JOS3` and the enum `Sports`, which goes with `sports_heat_stress_risk`. A private upstream file or helper that a main model calls goes with it and is not a main model itself, and neither is a function outside `models/` (`psy_ta_rh`, `operative_tmp`) (ADR 0018).
 _Avoid_: core model, primary model, app model
 
 **Switch**:

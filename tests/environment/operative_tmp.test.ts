@@ -55,7 +55,8 @@ describe("operative_tmp (JS-only)", () => {
 
   // numpy converts "20" to 20.0, True to 1.0 and None to nan, broadcasts a
   // list, and raises ValueError for "a"; .lower() raises AttributeError for a
-  // standard that is not a string (deviations _shared-33 to _shared-37).
+  // standard that is not a string (deviation _shared-33, deviation _shared-34,
+  // deviation _shared-35, deviation _shared-36, deviation _shared-37).
   test("an argument of the wrong type throws TypeError, naming it", () => {
     for (const bad of ["20", null, [20], true, {}]) {
       expect(call(bad, 30, 0.3)).toThrow(

@@ -1,9 +1,6 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
 import { operative_tmp } from "../environment/operative_tmp.ts";
-import {
-  ASHRAE_55_AIRSPEED_NO_CONTROL,
-  ASHRAE_55_LIMITS,
-} from "../_internal/ashrae55.ts";
+import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "./options.ts";
 import { units_converter } from "./units_converter.ts";
@@ -225,12 +222,9 @@ function _ashrae_compliance(kwargs) {
     const to = operative_tmp(kwargs.tdb, kwargs.tr, v);
     const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
     const violates =
-      (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max && clo < 0.7 && met < 1.3) ||
+      (v > 0.8 && clo < 0.7 && met < 1.3) ||
       (to > 23 && to < 25.5 && v > v_limit && clo < 0.7 && met < 1.3) ||
-      (to <= 23 &&
-        v > ASHRAE_55_AIRSPEED_NO_CONTROL.cool.max &&
-        clo < 0.7 &&
-        met < 1.3);
+      (to <= 23 && v > 0.2 && clo < 0.7 && met < 1.3);
     if (violates)
       warnings.push(
         "ASHRAE air speed applicability limits when the occupant does not control the airspeed",

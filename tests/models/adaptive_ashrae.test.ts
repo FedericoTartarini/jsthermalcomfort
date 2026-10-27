@@ -51,7 +51,7 @@ describe("test_adaptive_ashrae", () => {
         // @ts-expect-error units is "SI" or "IP"; the runtime check is under test
         units: "INVALID",
       }),
-    ).toThrow(Error);
+    ).toThrow(RangeError);
   });
 
   test("test_ashrae_inputs_invalid_tdb_type", () => {

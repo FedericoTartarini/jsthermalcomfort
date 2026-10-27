@@ -79,8 +79,7 @@ export interface HI extends ModelResult {
 export function heat_index_rothfusz(inputs: HIInputs): HI {
   // Validate inputs using the HIInputs class
   const { tdb, rh, round_output, limit_inputs } = parseInputs(
-    HEAT_INDEX_ROTHFUSZ_INFO.name,
-    HEAT_INDEX_ROTHFUSZ_INFO.inputs,
+    HEAT_INDEX_ROTHFUSZ_INFO,
     inputs,
   );
 

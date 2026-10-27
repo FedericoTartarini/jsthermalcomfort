@@ -73,11 +73,11 @@ function parseNumeric(key: string, value: unknown): number {
 }
 
 /**
- * Validates `args`, the inputs a model was called with, against `info`;
- * returns the values with the defaults applied.
+ * Validates `args`, the inputs a model was called with, against the model's
+ * `INFO.inputs`; returns the values with the defaults applied.
  *
  * An unknown key fails first, as an unexpected keyword does in Python when the
- * call binds. Then each key is checked in `info`'s order, so with
+ * call binds. Then each key is checked in `INFO.inputs`' order, so with
  * several errors the first named is predictable (deviation _shared-9):
  *
  * - a missing required key throws Python's `TypeError`, naming every missing
@@ -88,34 +88,34 @@ function parseNumeric(key: string, value: unknown): number {
  * - a switch must be a boolean, with `BaseInputs`' `TypeError`, whether or not
  *   upstream checks it (deviation _shared-8).
  *
- * @param name - The model's function name, for the messages.
- * @param info - The model's `*_INFO.inputs`.
+ * @param info - The model's `*_INFO`: its `name` for the messages, its
+ * `inputs` for the checks.
  * @param args - What the model was called with.
  * @returns The inputs, with each default applied.
  * @throws `TypeError` or `RangeError`, as above.
  */
 export function parseInputs<const I extends InputsInfo>(
-  name: string,
-  info: I,
+  info: { readonly name: string; readonly inputs: I },
   args: unknown,
 ): ResolvedOf<I> {
+  const { name, inputs } = info;
   if (typeof args !== "object" || args === null || Array.isArray(args)) {
     throw notInputsObject(name);
   }
   const given = args as Readonly<Record<string, unknown>>;
-  const unknown = Object.keys(given).find((key) => !Object.hasOwn(info, key));
+  const unknown = Object.keys(given).find((key) => !Object.hasOwn(inputs, key));
   if (unknown !== undefined) throw unexpectedKeyword(name, unknown);
 
   const read = (key: string) =>
     Object.hasOwn(given, key) ? given[key] : undefined;
   const values: Record<string, number | boolean> = {};
-  for (const [key, entry] of Object.entries(info)) {
+  for (const [key, entry] of Object.entries(inputs)) {
     let value = read(key);
     if (value === undefined) {
       if (entry.default === undefined) {
         throw missingArguments(
           name,
-          Object.entries(info)
+          Object.entries(inputs)
             .filter(
               ([k, e]) => e.default === undefined && read(k) === undefined,
             )

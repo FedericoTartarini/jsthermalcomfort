@@ -136,7 +136,7 @@ A result class that upstream shares between models (`HI`, `SET`, `WorkCapacity`)
 
 ### 2. Follow Upstream, and Document With TSDoc
 
-- Validate with `parseInputs(MY_NEW_MODEL_INFO.name, MY_NEW_MODEL_INFO.inputs, inputs)` (`src/_internal/define.ts`), with upstream's error messages. Write a fact once and reference it (`MY_NEW_MODEL_INFO.name`, not the name again). A unit is a `UnitSymbol` (`src/_internal/modelDocs.ts`); a model that needs a new one adds it there.
+- Validate with `parseInputs(MY_NEW_MODEL_INFO, inputs)` (`src/_internal/define.ts`), with upstream's error messages. Write a fact once and reference it from INFO, never by writing it again. A unit is a `UnitSymbol` (`src/_internal/modelDocs.ts`); a model that needs a new one adds it there.
 - The model file holds only upstream's docstrings and code comments. The docstring is one TSDoc block above the public function, in upstream's order: the summary, `@param inputs` and one `@param inputs.<key>` per Parameters entry with its text verbatim, each `.. note::` as `> [!NOTE]`, `@returns`, and the example as a TypeScript call with upstream's inputs and outputs. A citation `[Key]_` becomes a link to its entry, `[Key](../../docs/references.md#key)`. Upstream's `#` comments are copied verbatim.
 - Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, its TS site naming the file and the symbol. An error in an upstream docstring or code comment is fixed, given a row, and reported upstream. A note that is not a deviation, such as ADR 0009's on the executed path's arithmetic, goes in the register's Notes section.
 

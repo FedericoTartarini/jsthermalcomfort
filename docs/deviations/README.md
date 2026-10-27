@@ -21,26 +21,26 @@ Every difference between this library and pythermalcomfort v4.6.2, whose `.py` i
 8. 0-d ndarrays and numpy scalars become a JS `number` or `boolean`.
 9. Logic: numba kernels become scalar functions; `np.where` becomes a ternary, an `if` or an early return; conditional expressions and `max`/`min` become `if/else` or `Math.max`/`Math.min`; Python and numpy math becomes JS `Math`, with ADR 0009 site notes; inline literals become frozen module constants with the same values; `units_converter` takes and returns an object with the same keys.
 10. Upstream's docstring maps onto TSDoc as ADR 0025 lists.
+11. A model's Result and input types live in its model file, not in `classes_return.py` and `classes_input.py` (ADR 0021).
+12. A docstring's examples are TypeScript calls, with upstream's inputs and outputs (ADR 0025).
+13. A docstring's prose types, such as "float or list of floats", are dropped, since the signature gives the type (ADR 0025).
+14. A helper, like every JavaScript function, ignores surplus arguments, where Python raises `TypeError` for a call that does not bind (ADR 0022).
 
 **Deviation classes (C).** The user approved each class once, and every instance gets a row that names its class:
 
-| Class                     | What differs from upstream                                                                                  | ADR  |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------- | ---- |
-| types in the model file   | A model's Result and input types live in its file, not in `classes_return.py` and `classes_input.py`.       | 0021 |
-| scalars only              | A public model takes scalars. Time-series models keep upstream's shape.                                     | 0022 |
-| booleans and `null`       | A boolean or `null` for a numeric parameter throws `TypeError`.                                             | 0022 |
-| non-finite numbers        | A public model throws `RangeError` on NaN or ±Infinity.                                                     | 0022 |
-| error classes             | The error class follows JavaScript semantics (`TypeError`, `RangeError`, `Error`), not Python's class.      | 0022 |
-| unvalidated switches      | A switch upstream does not validate, such as `round_output`, is type-checked and throws `TypeError`.        | 0022 |
-| check order               | Validation runs in `INFO.inputs`' order.                                                                    | 0022 |
-| messages                  | A check that only the library makes uses a uniform message that names the key.                              | 0022 |
-| zero divisors numba drops | Where upstream's kernel raises and numba's `prange` drops the exception, the library throws `RangeError`.   | 0022 |
-| positional arity          | A helper given a surplus or a missing positional argument throws `TypeError` with Python's binding message. | 0022 |
-| loop cap                  | A loop with no upstream bound stops after 1000 iterations and throws `Error("Max iterations exceeded")`.    | 0015 |
-| `@throws`                 | Raises becomes `@throws`, with the JavaScript class.                                                        | 0025 |
-| TypeScript examples       | Examples are TypeScript calls, with upstream's inputs and outputs.                                          | 0025 |
-| prose types               | Prose types such as "float or list of floats" are dropped.                                                  | 0025 |
-| docstring errors          | An error in upstream's docstring, a typo included, is fixed. The user files the upstream issue.             | 0025 |
+| Class                     | What differs from upstream                                                                                                                                                                                                            | ADR  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| scalars only              | A public model takes scalars. Time-series models keep upstream's shape.                                                                                                                                                               | 0022 |
+| booleans and `null`       | A boolean or `null` for a numeric parameter throws `TypeError`.                                                                                                                                                                       | 0022 |
+| non-finite numbers        | A public model throws `RangeError` on NaN or ±Infinity.                                                                                                                                                                               | 0022 |
+| error classes             | The error class follows JavaScript semantics (`TypeError`, `RangeError`, `Error`), not Python's class.                                                                                                                                | 0022 |
+| unvalidated switches      | A switch upstream does not validate, such as `round_output`, is type-checked and throws `TypeError`.                                                                                                                                  | 0022 |
+| check order               | Validation runs in `INFO.inputs`' order.                                                                                                                                                                                              | 0022 |
+| messages                  | Upstream's own message about a value stays verbatim. A message that names Python's types or Python's call binding, or one for a check only the library makes, is the library's and names the key; the parse stops at the first error. | 0022 |
+| zero divisors numba drops | Where upstream's kernel raises and numba's `prange` drops the exception, the library throws `RangeError`.                                                                                                                             | 0022 |
+| loop cap                  | A loop with no upstream bound stops after 1000 iterations and throws `Error("Max iterations exceeded")`.                                                                                                                              | 0015 |
+| `@throws`                 | Raises becomes `@throws`, with the JavaScript class.                                                                                                                                                                                  | 0025 |
+| docstring errors          | An error in upstream's docstring, a typo included, is fixed. The user files the upstream issue.                                                                                                                                       | 0025 |
 
 ADR 0019 names error classes, check order and messages as classes of their own (whitelist item 2). ADR 0022 defines them.
 
@@ -70,7 +70,7 @@ A register is a Markdown file with a title, a line naming the model, one table w
 | Column        | Content                                                                                                                                                                                     |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | id            | The register's file name without `.md`, a hyphen and a number: `utci-1`, `_shared-3`. Rows are numbered from 1 as they are added, and a number is never reused.                             |
-| part          | One of `input`, `output`, `logic`, `comment`, `v2-addition` or `structure`. `structure` holds structural classes, such as types in the model file.                                          |
+| part          | One of `input`, `output`, `logic`, `comment`, `v2-addition` or `structure`. `structure` holds a difference in where code sits.                                                              |
 | upstream site | The path under `pythermalcomfort/` and the line at v4.6.2, in a code span (`models/utci.py:138`), or `none` where upstream has nothing.                                                     |
 | TS site       | The file and the symbol the row is about, each in a code span: `` `src/models/heat_index_rothfusz.ts` `HI.warnings` ``. A symbol is a top-level name, exported or not, followed by members. |
 | reason        | Why the library differs, in a sentence.                                                                                                                                                     |

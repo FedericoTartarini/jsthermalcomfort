@@ -369,8 +369,8 @@ describe("the repository", () => {
     const { classes, additions } = read_approved(
       readFileSync(`${root}docs/deviations/README.md`, "utf8"),
     );
-    expect([classes.size, additions.size]).toEqual([15, 7]);
-    expect(classes.get("types in the model file")).toBe("0021");
+    expect([classes.size, additions.size]).toEqual([11, 7]);
+    expect(classes.get("loop cap")).toBe("0015");
     expect(additions.get("gate-off rows")).toBe("0024");
   });
 

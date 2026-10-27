@@ -1,9 +1,9 @@
 import {
   missingInput,
   notAnInput,
-  notBoolean,
   notFiniteNumber,
   notInputsObject,
+  notOfType,
   notUnits,
 } from "./errors.ts";
 import type { Bound, UnitSymbol } from "./modelDocs.ts";
@@ -116,9 +116,6 @@ function parseChoice(value: unknown, allowed: readonly string[]): string {
  *   `BaseInputs`' message: a `TypeError` for a value that is not a string,
  *   a `RangeError` for one that is.
  *
- * Each message is the library's, except the string option's, which is
- * upstream's (deviation _shared-10).
- *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.
  * @param args - What the model was called with.
@@ -148,7 +145,7 @@ export function parseInputs<const I extends InputsInfo>(
     else if (entry.kind === "choice")
       values[key] = parseChoice(value, entry.allowed);
     else if (typeof value === "boolean") values[key] = value;
-    else throw notBoolean(key);
+    else throw notOfType(key, "a boolean");
   }
   return values as ResolvedOf<I>;
 }

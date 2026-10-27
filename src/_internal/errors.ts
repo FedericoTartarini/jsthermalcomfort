@@ -27,14 +27,10 @@ export function notFiniteNumber(
   return new error(`${key} must be a finite number.`);
 }
 
-/** The library's message for a switch that is not a boolean. */
-export function notBoolean(key: string): TypeError {
-  return new TypeError(`${key} must be a boolean.`);
-}
-
 /**
- * The library's message for a helper's argument of the wrong type, such as a
- * string for a number, where Python raises with its interpreter's text.
+ * The library's message for a value of the wrong type: a switch that is not a
+ * boolean, or a helper's argument of the wrong type where Python raises with
+ * its interpreter's text, such as a string for a number.
  */
 export function notOfType(key: string, expected: string): TypeError {
   return new TypeError(`${key} must be ${expected}.`);

@@ -1009,47 +1009,6 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
   });
 });
 
-describe("CLO_TOUT_INFO — the clothing prediction's metadata", () => {
-  test("labels the function and lists no standard", () => {
-    expect(CLO_TOUT_INFO.name).toBe("clo_tout");
-    expect(typeof CLO_TOUT_INFO.label).toBe("string");
-    expect(CLO_TOUT_INFO.description).toMatch(/Schiavon/);
-    expect(CLO_TOUT_INFO.description).toMatch(/2013/);
-    expect(CLO_TOUT_INFO.standards).toEqual([]);
-  });
-
-  test("tout is the one input, in °C, with no applicability", () => {
-    expect(Object.keys(CLO_TOUT_INFO.inputs)).toEqual(["tout"]);
-    expect(CLO_TOUT_INFO.inputs.tout!.unit).toBe("°C");
-    // Upstream bounds nothing: the formula saturates below -5 °C and at or
-    // above 26 °C, so there is no gate to publish.
-    expect(CLO_TOUT_INFO.inputs.tout!.applicability).toBeUndefined();
-    expect(CLO_TOUT_INFO.derived).toBeUndefined();
-  });
-
-  test("clo_tout is the one output, in clo", () => {
-    expect(Object.keys(CLO_TOUT_INFO.outputs)).toEqual(["clo_tout"]);
-    expect(CLO_TOUT_INFO.outputs.clo_tout!.unit).toBe("clo");
-    expect(CLO_TOUT_INFO.outputs.clo_tout!.applicability).toBeUndefined();
-  });
-
-  test("clo_tout output keys match CLO_TOUT_INFO.outputs", () => {
-    // No warnings field to filter out: there is no gate to report.
-    expect(Object.keys(clo_tout({ tout: 20 })).sort()).toEqual(
-      Object.keys(CLO_TOUT_INFO.outputs).sort(),
-    );
-  });
-
-  test("is deep-frozen", () => {
-    expect(Object.isFrozen(CLO_TOUT_INFO)).toBe(true);
-    expect(Object.isFrozen(CLO_TOUT_INFO.standards)).toBe(true);
-    expect(Object.isFrozen(CLO_TOUT_INFO.inputs)).toBe(true);
-    expect(Object.isFrozen(CLO_TOUT_INFO.inputs.tout)).toBe(true);
-    expect(Object.isFrozen(CLO_TOUT_INFO.outputs)).toBe(true);
-    expect(Object.isFrozen(CLO_TOUT_INFO.outputs.clo_tout)).toBe(true);
-  });
-});
-
 describe("SOLAR_GAIN_INFO — the solar gain's metadata", () => {
   test("labels the function and lists no standard", () => {
     expect(SOLAR_GAIN_INFO.name).toBe("solar_gain");

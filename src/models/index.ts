@@ -59,7 +59,7 @@ export type {
   AdaptiveAshraeParams,
   AdaptiveAshraeResult,
 } from "./adaptive_ashrae.ts";
-export type { CloToutParams, CloToutResult } from "./clo_tout.ts";
+export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type {
   CoolingEffectParams,
   CoolingEffectResult,

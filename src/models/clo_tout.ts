@@ -1,110 +1,86 @@
-import { validateInputs } from "../utilities/utilities.js";
-import { units_converter } from "../utilities/units_converter.ts";
-import { round } from "../_internal/round.ts";
+import { parseInputs } from "../_internal/define.ts";
+import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import { _check_params_object } from "../_internal/validation.ts";
-import type { LegacyModelInfo } from "../_internal/modelDocs.ts";
+import type { ModelInfo, ModelResult } from "../_internal/modelDocs.ts";
+import { round } from "../_internal/round.ts";
+import { Units } from "../utilities/options.ts";
+import { units_converter } from "../utilities/units_converter.ts";
 
-// A type alias, as the JSDoc typedef it replaces emitted, so documentation.js
-// keeps naming it from the typedef line.
-/**
- * @typedef {object} CloToutResult
- * @property {number} clo_tout - Representative clothing insulation Icl, [clo]
- * @public
- */
-export type CloToutResult = {
-  clo_tout: number;
-};
-
-/**
- * The params of `clo_tout`: upstream's keyword parameters with upstream's
- * default (ADR 0002). Documented on the function's `params`.
- *
- * No `round_output`: upstream has none and always rounds to two decimals, so
- * a switch would be a parameter upstream's callers do not have.
- */
-export interface CloToutParams {
-  tout: number;
-  units?: "SI" | "IP";
-}
-
-/**
- * Model metadata for the clothing prediction from the outdoor air
- * temperature at 06:00.
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * `tout` has no applicability: upstream bounds nothing, and the formula
- * saturates at 1 clo below -5 °C and at 0.46 clo from 26 °C. With no gate
- * there is no `limit_inputs`, as upstream has none, and nothing to report,
- * so the result has no `warnings` field.
- *
- * @public
- */
-export const CLO_TOUT_INFO: LegacyModelInfo = deepFreeze({
+export const CLO_TOUT_INFO = deepFreeze({
   name: "clo_tout",
   label: "Clothing prediction",
-  description:
-    "Representative clothing insulation predicted from the outdoor air temperature at 06:00 (Schiavon and Lee 2013).",
   standards: [],
   inputs: {
-    tout: { unit: "°C" },
+    tout: { kind: "numeric", unit: "°C" },
+    units: { kind: "choice", allowed: [Units.SI, Units.IP], default: Units.SI },
   },
   outputs: {
     clo_tout: { unit: "clo" },
   },
-});
+} as const satisfies ModelInfo);
 
-// The Note departs from upstream's docstring, which says ASHRAE 55 2020
-// accepts "this equation in mechanically conditioned buildings": the item
-// Addendum f to 55-2020 prints names Figure 5-1 and says nothing about
-// mechanically conditioned buildings, and the figure itself was not seen.
+/** @interface */
+export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO.inputs>;
+
 /**
- * Representative clothing insulation Icl as a function of outdoor air
- * temperature at 06:00 a.m {@link #ref_4|[4]}.
- *
- * Note: ASHRAE 55-2020 {@link #ref_1|[1]}, as revised by its Addendum f (2021), permits using
- * its Figure 5-1 to determine the clothing insulation Icl of a representative
- * occupant for a day as a function of the outdoor air temperature at
- * 06:00 a.m. (Section 5.2.2.2 (f)).
- *
- * @public
- * @memberof models
- * @docname Clothing prediction
- *
- *
- * @param {Object} params - the model's parameters, named as in pythermalcomfort.
- * @param {number} params.tout - outdoor air temperature at 06:00 a.m., default in
- * [°C] in [°F] if `units` = 'IP'
- * @param {("IP" | "SI")} [params.units="SI"] - select the SI (International System of Units)
- * or the IP (Imperial Units) system.
- *
- * @returns {CloToutResult} set containing results for the model
+ * Dataclass to represent the clothing insulation Icl as a function of outdoor air
+ * temperature.
  */
-// A non-finite number throws a TypeError here (ADR 0001, reason three).
-// Upstream returns a number for it: 0.46 for NaN and +Infinity, 1 for
-// -Infinity, since NaN fails every comparison in its np.where chain.
-const CLO_TOUT_SCHEMA = {
-  tout: { type: "number" },
-  units: { enum: ["SI", "IP"] },
-};
+export interface CloTOut extends ModelResult {
+  /** Representative clothing insulation Icl. */
+  readonly clo_tout: number;
+}
 
-export function clo_tout(params: CloToutParams): CloToutResult {
-  // tout and units were positional before v2 (ADR 0002); a call still
-  // written that way fails here, naming the shape it should have.
-  _check_params_object(params, "clo_tout");
-  // Destructuring defaults also apply to a units passed as undefined.
-  const { units = "SI" } = params;
-  let { tout } = params;
-  validateInputs({ tout, units: units.toUpperCase() }, CLO_TOUT_SCHEMA);
+/**
+ * Calculate representative clothing insulation Icl based on outdoor air temperature
+ * at 06:00 a.m. [Schiavon2013](../../docs/references.md#schiavon2013).
+ *
+ * @param inputs
+ * @param inputs.tout - Outdoor air temperature at 06:00 a.m., default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
+ *
+ * @returns A dataclass containing the representative clothing insulation Icl. See {@link CloTOut} for more details.
+ * To access the `clo_tout` value, use the `clo_tout` attribute of the returned `CloTOut` instance, e.g., `result.clo_tout`.
+ *
+ * @throws `TypeError` If `tout` is not a number.
+ * @throws `RangeError` If an invalid unit is provided.
+ *
+ * @remarks
+ * > [!NOTE]
+ * > The ASHRAE 55 2020 states that it is acceptable to determine the clothing
+ * > insulation Icl using this equation in mechanically conditioned buildings [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ *
+ * > [!NOTE]
+ * > Limitations:
+ * > - This equation may not be accurate for extreme temperature ranges.
+ *
+ * @example
+ * ```ts
+ * import { clo_tout } from "jsthermalcomfort/models";
+ *
+ * let result = clo_tout({ tout: 27 });
+ * console.log(result.clo_tout); // 0.46
+ *
+ * const clo = [27, 25].map((tout) => clo_tout({ tout }).clo_tout);
+ * console.log(clo); // [0.46, 0.47]
+ * ```
+ */
+export function clo_tout(inputs: CloTOutInputs): CloTOut {
+  // Validate inputs using the CloTOutInputs class
+  let { tout, units } = parseInputs(CLO_TOUT_INFO, inputs);
 
-  if (units.toUpperCase() === "IP") {
-    ({ tmp: tout } = units_converter("IP", { tmp: tout }));
+  // Convert units if necessary
+  if (units.toUpperCase() === Units.IP) {
+    ({ tmp: tout } = units_converter(Units.IP, { tmp: tout }));
   }
 
   let clo = tout < 26 ? Math.pow(10, -0.1635 - 0.0066 * tout) : 0.46;
   clo = tout < 5 ? 0.818 - 0.0364 * tout : clo;
   clo = tout < -5 ? 1 : clo;
 
-  return { clo_tout: round(clo, 2) };
+  return Object.freeze({
+    clo_tout: round(clo, 2),
+    warnings: Object.freeze([]),
+  });
 }

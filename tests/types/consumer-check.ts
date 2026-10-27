@@ -23,8 +23,8 @@ import type {
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
-  CloToutParams,
-  CloToutResult,
+  CloTOut,
+  CloTOutInputs,
   CoolingEffectParams,
   CoolingEffectResult,
   HI,
@@ -55,6 +55,7 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   SOLAR_GAIN_INFO,
   Standard,
+  Units,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
@@ -89,11 +90,11 @@ import { utci as utciDeep } from "jsthermalcomfort/lib/esm/models/utci.js";
 // migrated publish the old form, whose inputs carry no kind, until the
 // contract ticket removes it.
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
+const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
 const iso = PMV_PPD_ISO_INFO;
 const ashrae = PMV_PPD_ASHRAE_INFO;
 const adaptive = ADAPTIVE_ASHRAE_INFO;
 const utciInfo = UTCI_INFO;
-const cloToutInfo = CLO_TOUT_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 // @ts-expect-error the old form's inputs carry no kind.
 const isoAsModelInfo: ModelInfo = PMV_PPD_ISO_INFO;
@@ -469,12 +470,15 @@ heatIndexResult.warnings.push(heatIndexRow);
 const utciWarnings: ApplicabilityWarning[] = utciResult.warnings;
 const utciRowMax: number | undefined = utciResult.warnings[0].bound.max;
 
-// clo_tout takes one params object too (ADR 0002), with its params and
-// result types exported by name; the lines below are errors only while the
-// published signature is typed.
-const cloToutParams: CloToutParams = { tout: 68, units: "IP" };
-const cloToutResult: CloToutResult = clo_tout(cloToutParams);
+// clo_tout takes one inputs object too (ADR 0002), with its inputs and
+// result types named after upstream's classes; the lines below are errors
+// only while the published signature is typed. units takes the constant or
+// the literal (ADR 0019, whitelist item 5).
+const cloToutInputs: CloTOutInputs = { tout: 68, units: Units.IP };
+const cloToutResult: CloTOut = clo_tout(cloToutInputs);
 const cloTout: number = cloToutResult.clo_tout;
+const cloToutUnits: "SI" | "IP" | undefined = cloToutInputs.units;
+const cloToutUnitsDefault: "SI" = CLO_TOUT_INFO.inputs.units.default;
 // @ts-expect-error `t_out` is not a param; the temperature is `tout`.
 clo_tout({ t_out: 20 });
 // @ts-expect-error tout is a required quantity.
@@ -486,7 +490,9 @@ clo_tout({ tout: 20, units: "metric" });
 // @ts-expect-error the result's key is `clo_tout`, not `clo`.
 cloToutResult.clo;
 // @ts-expect-error the clo_tout metadata is readonly.
-CLO_TOUT_INFO.inputs.tout = { unit: "°F" };
+CLO_TOUT_INFO.inputs.tout = { kind: "numeric", unit: "°C" };
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+cloToutResult.clo_tout = 1;
 
 // solar_gain takes one params object too (ADR 0002), with its params and
 // result types exported by name; the lines below are errors only while the
@@ -571,6 +577,8 @@ export {
   utciLabel,
   cloToutInfo,
   cloTout,
+  cloToutUnits,
+  cloToutUnitsDefault,
   solarGainInfo,
   deltaMrt,
   solarGainWarnings,

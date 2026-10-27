@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { clo_tout } from "../../src/models/index.ts";
-import type { CloToutParams } from "../../src/models/index.ts";
+import { clo_tout, CLO_TOUT_INFO } from "../../src/models/index.ts";
+import { Units } from "../../src/utilities/index.ts";
+import { clo_tout as clo_tout_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
@@ -24,50 +25,178 @@ describe("test_clo_tout", () => {
   });
 });
 
+// The per-model checks of the template (ADRs 0022-0024), through the public
+// entry: what upstream's tests leave out, measured on pythermalcomfort 4.6.2,
+// and what only the library adds.
 describe("clo_tout (JS-only)", () => {
-  // A numeric string is not coerced, unlike in arithmetic.
-  test("throws TypeError if tout is not a number", () => {
-    // Cast: deliberately passing a string to test the runtime TypeError.
-    const params = { tout: "20" } as unknown as CloToutParams;
-    expect(() => clo_tout(params)).toThrow(TypeError);
+  // A call with inputs the type rejects, to test the runtime.
+  const call = (inputs: unknown) => () => clo_tout(inputs as Inputs);
+
+  describe("values", () => {
+    // Upstream's np.where chain (clo_tout.py:75-77): each breakpoint belongs
+    // to the piece above it.
+    test.each([
+      [-5.0001, 1.0],
+      [-5, 1.0],
+      [4.9999, 0.64],
+      [5, 0.64],
+      [25, 0.47],
+      [25.999, 0.46],
+      [26, 0.46],
+      [27, 0.46],
+    ])("tout %s °C gives %s clo, as upstream", (tout, expected) => {
+      expect(clo_tout({ tout }).clo_tout).toBe(expected);
+    });
+
+    test("converts tout from °F under IP, in any case, as upstream", () => {
+      expect(clo_tout({ tout: 68, units: "IP" }).clo_tout).toBe(0.51);
+      expect(clo_tout({ tout: 20, units: Units.IP }).clo_tout).toBe(1.0);
+      expect(call({ tout: 20, units: "ip" })().clo_tout).toBe(1.0);
+      expect(call({ tout: 20, units: "si" })().clo_tout).toBe(0.51);
+    });
   });
 
-  // ADR 0001: a non-finite number throws, where upstream returns 0.46 (NaN,
-  // +Infinity) or 1 (-Infinity).
-  test("throws TypeError if tout is not finite", () => {
-    for (const bad of [NaN, Infinity, -Infinity]) {
-      expect(() => clo_tout({ tout: bad })).toThrow(TypeError);
-    }
+  describe("errors", () => {
+    // Upstream's BaseInputs message (validate_type).
+    test("tout of another type throws upstream's TypeError", () => {
+      const message =
+        "tout must be one of the following types: (<class 'float'>, <class 'int'>, <class 'numpy.ndarray'>, <class 'list'>).";
+      for (const bad of ["20", {}, () => 20, 20n])
+        expect(call({ tout: bad })).toThrow(new TypeError(message));
+    });
+
+    // Upstream reads True as 1, fails later on None and broadcasts an array
+    // (deviation _shared-5, deviation _shared-6).
+    test("tout as a boolean, null or an array throws TypeError", () => {
+      for (const bad of [true, false, null, [20]])
+        expect(call({ tout: bad })).toThrow(
+          new TypeError("tout must be a finite number."),
+        );
+    });
+
+    // Upstream returns 0.46 for NaN and +Infinity and 1 for -Infinity
+    // (deviation _shared-7).
+    test("tout that is not finite throws RangeError", () => {
+      for (const bad of [NaN, Infinity, -Infinity])
+        expect(call({ tout: bad })).toThrow(
+          new RangeError("tout must be a finite number."),
+        );
+    });
+
+    // BaseInputs' message (classes_input.py:120), for a string outside the
+    // set and, as upstream compares str(units), any other value (deviation
+    // _shared-24).
+    test("units other than SI or IP throws upstream's message", () => {
+      const message = "Units must be either 'SI' or 'IP'";
+      for (const bad of ["XX", "", "metric"])
+        expect(call({ tout: 20, units: bad })).toThrow(new RangeError(message));
+      for (const bad of [null, 5, true, ["SI"]])
+        expect(call({ tout: 20, units: bad })).toThrow(new TypeError(message));
+    });
+
+    // Python's own messages, as the call fails to bind.
+    test("a missing tout throws Python's TypeError", () => {
+      for (const inputs of [{}, { units: "SI" }, { tout: undefined }])
+        expect(call(inputs)).toThrow(
+          new TypeError(
+            "clo_tout() missing 1 required positional argument: 'tout'",
+          ),
+        );
+    });
+
+    test("an unknown key throws Python's TypeError, naming the first", () => {
+      for (const key of ["foo", "t_out", "round_output", "limit_inputs"])
+        expect(call({ tout: 20, [key]: 1 })).toThrow(
+          new TypeError(
+            `clo_tout() got an unexpected keyword argument '${key}'`,
+          ),
+        );
+    });
+
+    // tout and units were positional before v2 (ADR 0002).
+    test("anything but an inputs object throws TypeError", () => {
+      for (const bad of [20, null, undefined, [20, "SI"], "tout"])
+        expect(call(bad)).toThrow(
+          new TypeError("clo_tout() takes one inputs object."),
+        );
+    });
+
+    // Upstream checks units first; the library checks in the definition's
+    // order (deviation _shared-9).
+    test("checks run in the definition's order", () => {
+      expect(call({ tout: "x", units: "XX" })).toThrow(/^tout must be one of/);
+      expect(call({ tout: 20, units: "XX" })).toThrow(/^Units must be/);
+    });
+
+    test("undefined takes the default, as an omitted keyword does", () => {
+      expect(clo_tout({ tout: 20, units: undefined })).toEqual(
+        clo_tout({ tout: 20, units: "SI" }),
+      );
+    });
   });
 
-  // tout and units were positional before v2 (ADR 0002). A call still
-  // written that way throws rather than running on anything else.
-  test("throws TypeError if called positionally", () => {
-    // @ts-expect-error the function takes one params object
-    expect(() => clo_tout(20)).toThrow(TypeError);
-    // @ts-expect-error the function takes one params object
-    expect(() => clo_tout(68, "IP")).toThrow(TypeError);
-    // @ts-expect-error null is not a params object
-    expect(() => clo_tout(null)).toThrow(TypeError);
-    // @ts-expect-error the params object is required
-    expect(() => clo_tout()).toThrow(TypeError);
+  describe("result", () => {
+    // As upstream's frozen dataclass (classes_return.py:227).
+    test("is frozen, its warnings included", () => {
+      const result = clo_tout({ tout: 20 });
+      expect(Object.isFrozen(result)).toBe(true);
+      expect(Object.isFrozen(result.warnings)).toBe(true);
+      expect(() => {
+        (result as { clo_tout: number }).clo_tout = 1;
+      }).toThrow(TypeError);
+    });
+
+    test("has upstream's field, then warnings", () => {
+      expect(Object.keys(clo_tout({ tout: 20 }))).toEqual([
+        "clo_tout",
+        "warnings",
+      ]);
+    });
+
+    // Upstream checks no range and calls no warnings.warn (deviation
+    // clo_tout-3).
+    test("has no warnings rows, whatever tout", () => {
+      for (const tout of [-60, -5, 0, 5, 20, 26, 60])
+        for (const units of ["SI", "IP"] as const)
+          expect(clo_tout({ tout, units }).warnings).toEqual([]);
+    });
   });
 
-  test("throws Error if units is not SI or IP", () => {
-    // @ts-expect-error units is "SI" or "IP"
-    expect(() => clo_tout({ tout: 20, units: "INVALID" })).toThrow(
-      /"units" must be one of/,
-    );
+  // deviation clo_tout-2
+  describe("CLO_TOUT_INFO", () => {
+    test("names the model, with no description", () => {
+      expect(CLO_TOUT_INFO.name).toBe("clo_tout");
+      expect(CLO_TOUT_INFO.label).toBe("Clothing prediction");
+      expect(CLO_TOUT_INFO.standards).toEqual([]);
+      expect(CLO_TOUT_INFO).not.toHaveProperty("description");
+      expect(CLO_TOUT_INFO).not.toHaveProperty("derived");
+    });
+
+    // Upstream bounds nothing: the formula saturates below -5 °C and from
+    // 26 °C, so there is no applicability to publish.
+    test("lists every keyword argument, with upstream's defaults", () => {
+      expect(CLO_TOUT_INFO.inputs).toEqual({
+        tout: { kind: "numeric", unit: "°C" },
+        units: { kind: "choice", allowed: ["SI", "IP"], default: "SI" },
+      });
+      expect(Object.keys(CLO_TOUT_INFO.inputs)).toEqual(["tout", "units"]);
+    });
+
+    test("clo_tout is the one output, in clo", () => {
+      expect(CLO_TOUT_INFO.outputs).toEqual({ clo_tout: { unit: "clo" } });
+    });
+
+    test("is frozen deeply", () => {
+      const { inputs, outputs } = CLO_TOUT_INFO;
+      expect(Object.isFrozen(CLO_TOUT_INFO)).toBe(true);
+      expect(Object.isFrozen(CLO_TOUT_INFO.standards)).toBe(true);
+      expect(Object.isFrozen(inputs.tout)).toBe(true);
+      expect(Object.isFrozen(inputs.units.allowed)).toBe(true);
+      expect(Object.isFrozen(outputs.clo_tout)).toBe(true);
+    });
   });
 
-  test("returns clo_tout only, with no warnings field", () => {
-    expect(clo_tout({ tout: 27 })).toEqual({ clo_tout: 0.46 });
-  });
-
-  test("units passed as undefined takes its default", () => {
-    // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
-    expect(clo_tout({ tout: 20, units: undefined })).toEqual(
-      clo_tout({ tout: 20, units: "SI" }),
-    );
+  test("is exported from the package root as from its subpath", () => {
+    expect(clo_tout_from_root).toBe(clo_tout);
   });
 });

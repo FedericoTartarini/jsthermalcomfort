@@ -419,9 +419,7 @@ const MODELS: readonly ParityModel[] = [
     }),
     // Upstream rounds clo_tout with np.around (clo_tout.py:79).
     rounded: () => ["clo_tout"],
-    // The result has no warnings field until the model returns ModelResult
-    // (ADR 0024).
-    warnings: false,
+    warnings: true,
   },
   {
     name: "heat_index_rothfusz",

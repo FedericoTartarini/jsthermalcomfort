@@ -2,19 +2,6 @@ import { checkArity } from "../_internal/arity.ts";
 import { notOfType } from "../_internal/errors.ts";
 import { Units } from "./options.ts";
 
-/** The keys `units_converter` converts: upstream's tests on each key. */
-type Converted<K extends string> = K extends
-  | `${string}tmp${string}`
-  | "tr"
-  | "tdb"
-  | "v"
-  | "vr"
-  | "vel"
-  | "area"
-  | "pressure"
-  ? K
-  : never;
-
 /** A value as a helper takes it: a number, NaN and ±Infinity included. */
 function number(key: string, value: unknown): number {
   if (typeof value !== "number") throw notOfType(key, "a number");
@@ -32,7 +19,22 @@ function number(key: string, value: unknown): number {
 export function units_converter<K extends string>(
   from_units: (typeof Units)[keyof typeof Units] = Units.IP,
   values: Readonly<Record<K, number>> = {} as Record<K, number>,
-): Record<Converted<K>, number> {
+): {
+  // The keys it converts, as upstream tests each key.
+  [
+    P in K as P extends
+      | `${string}tmp${string}`
+      | "tr"
+      | "tdb"
+      | "v"
+      | "vr"
+      | "vel"
+      | "area"
+      | "pressure"
+      ? P
+      : never
+  ]: number;
+} {
   // eslint-disable-next-line prefer-rest-params -- the check needs the count of arguments given, which a rest parameter would hide from the signature
   checkArity("units_converter", arguments, ["from_units", "values"], 0);
   if (typeof (from_units as unknown) !== "string") {
@@ -78,5 +80,5 @@ export function units_converter<K extends string>(
     }
   }
 
-  return results;
+  return results as ReturnType<typeof units_converter<K>>;
 }

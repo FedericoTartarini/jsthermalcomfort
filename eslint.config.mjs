@@ -17,9 +17,11 @@ export const LINTED = [
   "src/_internal/validation.ts",
   "src/utilities/options.ts",
   "src/utilities/units_converter.ts",
+  "src/models/clo_tout.ts",
   "src/models/heat_index_rothfusz.ts",
   "tests/call_sites.test.ts",
   "tests/internal.test.ts",
+  "tests/models/clo_tout.test.ts",
   "tests/models/heat_index_rothfusz.test.ts",
   "tests/utilities/units_converter.test.ts",
 ];
@@ -119,6 +121,10 @@ export default defineConfig(
         // A quoted key is upstream's check name verbatim ("tr - tdb").
         { selector: "memberLike", modifiers: ["requiresQuotes"], format: null },
       ],
+      // A model destructures every input from one parse, and upstream
+      // reassigns some of them (`tout = units_converter(tmp=tout)[0]`), so a
+      // destructuring is `let` when any of its names is reassigned.
+      "prefer-const": ["error", { destructuring: "all" }],
     },
   },
 );

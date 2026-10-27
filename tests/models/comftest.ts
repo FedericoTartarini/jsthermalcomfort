@@ -1,6 +1,6 @@
 // The tag pythermalcomfort's tests/conftest.py pins, so a change to the
 // fixture repository cannot move this suite before the pin is bumped with it.
-const validationDataRef = process.env.VALIDATION_DATA_REF || "v1.0.0";
+const validationDataRef = process.env.VALIDATION_DATA_REF || "v1.0.1";
 const prefixURL = `https://raw.githubusercontent.com/FedericoTartarini/validation-data-comfort-models/${validationDataRef}/`;
 
 export const testDataUrls = {

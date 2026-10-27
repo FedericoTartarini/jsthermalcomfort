@@ -693,8 +693,8 @@ describe("utci (JS-only)", () => {
       ]);
     });
 
-    // Measured on 4.7.0: utci(tdb=60, tr=140, v=20, rh=100) warns 'tdb',
-    // 'tr - tdb', 'v' and 'pa (kPa)', in that order.
+    // Measured on 4.7.0: utci(tdb=60, tr=140, v=20, rh=101) warns 'tdb',
+    // 'tr - tdb', 'v', 'pa (kPa)' and 'rh', in that order.
     test("rows come in upstream's order: tdb, tr - tdb, v, pa (kPa), rh", () => {
       const { warnings } = utci({ tdb: 60, tr: 140, v: 20, rh: 101 });
       expect(warnings.map((row) => row.kind === "range" && row.key)).toEqual([
@@ -706,8 +706,8 @@ describe("utci (JS-only)", () => {
       ]);
     });
 
-    // Upstream checks the converted values: 68 °F is 20 °C and 212 °F is
-    // 100 °C, so tr - tdb is 80 °C, not 144 °F.
+    // Upstream checks the converted values (models/utci.py:110, :138): 68 °F
+    // is 20 °C and 212 °F is 100 °C, so tr - tdb is 80 °C, not 144 °F.
     test("under IP the rows hold the SI values upstream compares", () => {
       const { warnings } = utci({
         tdb: 68,
@@ -725,7 +725,8 @@ describe("utci (JS-only)", () => {
       ]);
     });
 
-    // Upstream calls warnings.warn only in _valid_range, so no notice row.
+    // Upstream calls warnings.warn only in _valid_range
+    // (_internal/validation.py:55), so no notice row.
     test("a NaN under the gate never comes without a row, and no notice", () => {
       for (const t of [-60, -50, 0, 30, 50, 55])
         for (const dt of [-40, -30, 0, 70, 80])

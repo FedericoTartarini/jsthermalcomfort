@@ -5,7 +5,9 @@ import {
   notInputsObject,
   notOfType,
 } from "./errors.ts";
+import { deepFreeze } from "./modelDocs.ts";
 import type { Bound, UnitSymbol } from "./modelDocs.ts";
+import { Units } from "../utilities/options.ts";
 
 // Each model describes its inputs once, as its `*_INFO.inputs` (ADR 0022),
 // and its inputs type and its validation are derived from it. It stands in for upstream's input dataclass (`classes_input.py`) and its
@@ -48,6 +50,19 @@ export interface ChoiceField {
 export type InputsInfo = Readonly<
   Record<string, NumericField | BoolField | ChoiceField>
 >;
+
+/**
+ * Upstream's `BaseInputs.units`: defaults to 'SI' and raises "Units must be
+ * either 'SI' or 'IP'" (`classes_input.py:95, :114-121`). Every model that
+ * takes `units` references it from its `INFO.inputs`, so the check is written
+ * once, as upstream writes it.
+ */
+export const BASE_INPUTS_UNITS = deepFreeze({
+  kind: "choice",
+  allowed: [Units.SI, Units.IP],
+  default: Units.SI,
+  message: "Units must be either 'SI' or 'IP'",
+} as const satisfies ChoiceField);
 
 type ValueOf<E> = E extends NumericField
   ? number

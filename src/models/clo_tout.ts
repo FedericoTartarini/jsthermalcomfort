@@ -1,4 +1,4 @@
-import { parseInputs } from "../_internal/define.ts";
+import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
 import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type { ModelInfo, ModelResult } from "../_internal/modelDocs.ts";
@@ -12,12 +12,7 @@ export const CLO_TOUT_INFO = deepFreeze({
   standards: [],
   inputs: {
     tout: { kind: "numeric", unit: "°C" },
-    units: {
-      kind: "choice",
-      allowed: [Units.SI, Units.IP],
-      default: Units.SI,
-      message: "Units must be either 'SI' or 'IP'",
-    },
+    units: BASE_INPUTS_UNITS,
   },
   outputs: {
     clo_tout: { unit: "clo" },

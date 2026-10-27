@@ -6,7 +6,8 @@ import {
   HEAT_INDEX_STRESS_CATEGORIES,
 } from "../src/_internal/validation.ts";
 import type { ModelWarning } from "../src/_internal/modelDocs.ts";
-import { parseInputs } from "../src/_internal/define.ts";
+import { BASE_INPUTS_UNITS, parseInputs } from "../src/_internal/define.ts";
+import { CLO_TOUT_INFO } from "../src/models/index.ts";
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
 // _internal directly, so it imports the kernels' own file (seam S2). A
@@ -155,19 +156,27 @@ describe("HEAT_INDEX_STRESS_CATEGORIES", () => {
   });
 });
 
+// BaseInputs' units field (classes_input.py:95, :114-121), defined once.
+describe("BASE_INPUTS_UNITS (JS-only)", () => {
+  test("holds upstream's default and message, frozen", () => {
+    expect(BASE_INPUTS_UNITS).toEqual({
+      kind: "choice",
+      allowed: ["SI", "IP"],
+      default: "SI",
+      message: "Units must be either 'SI' or 'IP'",
+    });
+    expect(Object.isFrozen(BASE_INPUTS_UNITS)).toBe(true);
+    expect(Object.isFrozen(BASE_INPUTS_UNITS.allowed)).toBe(true);
+  });
+
+  test("a model's INFO references it rather than a copy", () => {
+    expect(CLO_TOUT_INFO.inputs.units).toBe(BASE_INPUTS_UNITS);
+  });
+});
+
 // The string-option kind, on a definition holding upstream's units field.
 describe("parseInputs, choice (JS-only)", () => {
-  const info = {
-    name: "f",
-    inputs: {
-      units: {
-        kind: "choice",
-        allowed: ["SI", "IP"],
-        default: "SI",
-        message: "Units must be either 'SI' or 'IP'",
-      },
-    },
-  } as const;
+  const info = { name: "f", inputs: { units: BASE_INPUTS_UNITS } } as const;
   const parse = (units: unknown) => () => parseInputs(info, { units });
 
   test("takes an allowed value in any case, and returns it as given", () => {

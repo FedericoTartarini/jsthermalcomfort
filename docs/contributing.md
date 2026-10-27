@@ -129,7 +129,7 @@ Create `src/models/<name>.ts`, with upstream's file and function name. In order,
 
 - Validate through the input definition (`parseParams` in `src/_internal/define.ts`), with upstream's error messages.
 - Write the TSDoc in upstream's docstring order: the summary and each parameter's text verbatim, an example as a TypeScript call with upstream's inputs and outputs.
-- Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, and cite the row id in a comment at the site.
+- Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, its TS site naming the file and the symbol.
 
 ### 3. Register the Model
 

@@ -60,26 +60,34 @@ ADR 0019 names error classes, check order and messages as classes of their own (
 
 ## Register format
 
-A register is a Markdown file with a title, a line naming the model, and one table with these columns, in this order:
+A register is a Markdown file with a title, a line naming the model, one table with these columns, in this order, and a Notes section after it where the register has notes:
 
 ```md
 | id  | part | upstream site | TS site | reason | class/ADR | status | date | parity |
 | --- | ---- | ------------- | ------- | ------ | --------- | ------ | ---- | ------ |
 ```
 
-| Column        | Content                                                                                                                                                                     |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id            | The register's file name without `.md`, a hyphen and a number: `utci-1`, `_shared-3`. Rows are numbered from 1 as they are added, and a number is never reused.             |
-| part          | One of `input`, `output`, `logic`, `comment`, `v2-addition` or `structure`. `structure` holds structural classes, such as types in the model file.                          |
-| upstream site | The path under `pythermalcomfort/` and the line at v4.6.2, in a code span (`models/utci.py:138`), or `none` where upstream has nothing.                                     |
-| TS site       | The file that holds the citing comment, in a code span (`src/models/utci.ts`).                                                                                              |
-| reason        | Why the library differs, in a sentence.                                                                                                                                     |
-| class/ADR     | `C: <class> (ADR 00xx)` for an instance of a class above, `addition: <addition> (ADR 00xx)`, `ADR 00xx` for another deviation an ADR approves, or `none` for any other row. |
-| status        | `approved`, `pending` or `pending (doubtful)`.                                                                                                                              |
-| date          | The date the status was last set, as `YYYY-MM-DD`.                                                                                                                          |
-| parity        | What the parity suite exempts for the row, in the grammar below.                                                                                                            |
+| Column        | Content                                                                                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id            | The register's file name without `.md`, a hyphen and a number: `utci-1`, `_shared-3`. Rows are numbered from 1 as they are added, and a number is never reused.                             |
+| part          | One of `input`, `output`, `logic`, `comment`, `v2-addition` or `structure`. `structure` holds structural classes, such as types in the model file.                                          |
+| upstream site | The path under `pythermalcomfort/` and the line at v4.6.2, in a code span (`models/utci.py:138`), or `none` where upstream has nothing.                                                     |
+| TS site       | The file and the symbol the row is about, each in a code span: `` `src/models/heat_index_rothfusz.ts` `HI.warnings` ``. A symbol is a top-level name, exported or not, followed by members. |
+| reason        | Why the library differs, in a sentence.                                                                                                                                                     |
+| class/ADR     | `C: <class> (ADR 00xx)` for an instance of a class above, `addition: <addition> (ADR 00xx)`, `ADR 00xx` for another deviation an ADR approves, or `none` for any other row.                 |
+| status        | `approved`, `pending` or `pending (doubtful)`.                                                                                                                                              |
+| date          | The date the status was last set, as `YYYY-MM-DD`.                                                                                                                                          |
+| parity        | What the parity suite exempts for the row, in the grammar below.                                                                                                                            |
 
 Every cell is filled. A pipe inside a cell is escaped as `\|`, code spans included, as GitHub Flavored Markdown requires. A class/ADR cell names a class or an addition exactly as the tables above list it, with the ADR they give. The register table is the file's only table.
+
+### The TS site's symbol
+
+A model file holds only upstream's docstrings and code comments (ADR 0019's 2026-10-27 amendment), so a row names its symbol instead of being cited at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelResult`).
+
+### Notes
+
+A register's `## Notes` section, after the table, holds what used to be comments at a site and is not a deviation, such as ADR 0009's notes on the arithmetic of upstream's executed path. Each note names the file and the symbol it is about, as a TS site does.
 
 ### Status and doubtful rows
 
@@ -106,9 +114,9 @@ No item appears twice. A pipe in a name is written `\|` and read as `|`.
 
 An item in a model's register applies to that model, and an item in `_shared.md` applies to every model.
 
-## Site comments
+## Citing comments
 
-A comment at the deviation's site cites its row: the word `deviation` (or `Deviation`), a space and the id. Any comment counts: line, block or TSDoc, in a file under `src/` or `tests/`.
+A comment outside a model file may cite a row, such as a test that checks the deviation or a line in `src/_internal/`: the word `deviation` (or `Deviation`), a space and the id. Any comment counts: line, block or TSDoc, in a file under `src/` or `tests/`. A row needs no citation.
 
 ```ts
 // Range rows are returned with the gate off (deviation utci-2).
@@ -120,8 +128,8 @@ One comment may cite several rows, each with its own `deviation`: `deviation utc
 
 `tests/deviations.test.ts` reads every register here and every comment under `src/` and `tests/`. It fails, naming the file, the line and the id, when:
 
+- a row's TS site names a file that does not exist, or a symbol the file does not declare;
 - a comment cites an id that has no row;
-- a row has no citing comment;
 - a row is pending;
 - a row breaks the format above.
 

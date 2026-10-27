@@ -1,11 +1,12 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import ts from "typescript";
 
-// Reads the deviation registers and the site comments that cite their rows,
-// in the format docs/deviations/README.md defines (ADR 0019). The cross-check
-// test uses all of it. Each row's `parity` is parsed for the parity suite
-// (ADR 0020), which exempts what it names.
+// Reads the deviation registers, resolves each row's TS site to its symbol,
+// and finds the comments that cite a row, in the format
+// docs/deviations/README.md defines (ADR 0019). The cross-check test uses all
+// of it. Each row's `parity` is parsed for the parity suite (ADR 0020), which
+// exempts what it names.
 
 const REGISTERS = "docs/deviations";
 
@@ -47,7 +48,10 @@ const PARITY_ITEM = /^(output|warning) `([^`]+)`$/;
 // A class/ADR cell that names a class or an addition from the README.
 const CLASS_ADR = /^(C|addition): (.+) \(ADR (\d{4})\)$/;
 
-// The site-comment form: "deviation" and the id, in any comment.
+// A TS site: the file and the symbol, each in a code span.
+const TS_SITE = /^`([^`]+)` `([^`]+)`$/;
+
+// The citation form: "deviation" and the id, in any comment.
 const CITATION = /\b[Dd]eviation ([a-z_][a-z0-9_]*-\d+)/g;
 
 /** What the parity suite exempts for one row. */
@@ -63,7 +67,8 @@ export interface Row {
   readonly id: string;
   readonly part: Part;
   readonly upstream_site: string;
-  readonly ts_site: string;
+  readonly ts_file: string;
+  readonly ts_symbol: string;
   readonly reason: string;
   readonly class_adr: string;
   readonly status: "approved" | "pending";
@@ -251,6 +256,12 @@ export function parse_register(
     if (!is_date(date)) {
       failures.push(`${at} has date "${date}", expected a YYYY-MM-DD date`);
     }
+    const site = TS_SITE.exec(ts_site);
+    if (ts_site !== "" && site === null) {
+      failures.push(
+        `${at} has TS site "${ts_site}", expected a file and a symbol, each in a code span`,
+      );
+    }
     const parsed_parity = parse_parity(parity);
     if (parsed_parity === undefined) {
       failures.push(
@@ -266,6 +277,7 @@ export function parse_register(
     if (
       failures.length > before ||
       !is_part(part) ||
+      site === null ||
       parsed_status === undefined ||
       parsed_parity === undefined
     ) {
@@ -277,7 +289,8 @@ export function parse_register(
       id,
       part,
       upstream_site,
-      ts_site,
+      ts_file: site[1] ?? "",
+      ts_symbol: site[2] ?? "",
       reason,
       class_adr,
       ...parsed_status,
@@ -321,27 +334,125 @@ export function find_citations(file: string, text: string): Citation[] {
 }
 
 /**
- * Checks the rows against the citations: every cited id has a row, every row
- * is cited, and no row is pending.
+ * Checks the rows against the citations: every cited id has a row, and no row
+ * is pending. A row needs no citation, since its TS site names its symbol.
  */
 export function cross_check(
   rows: readonly Row[],
   citations: readonly Citation[],
 ): string[] {
   const ids = new Set(rows.map((row) => row.id));
-  const cited = new Set(citations.map((citation) => citation.id));
   const failures = citations
     .filter((citation) => !ids.has(citation.id))
     .map(
       ({ file, line, id }) => `${file}:${line}: cites ${id}, which has no row`,
     );
   for (const { file, line, id, status, doubtful } of rows) {
-    if (!cited.has(id)) {
-      failures.push(`${file}:${line}: ${id} has no citing comment`);
-    }
     if (status === "pending") {
       failures.push(
         `${file}:${line}: ${id} is pending${doubtful ? " (doubtful)" : ""}`,
+      );
+    }
+  }
+  return failures;
+}
+
+type Declaration =
+  | ts.FunctionDeclaration
+  | ts.ClassDeclaration
+  | ts.InterfaceDeclaration
+  | ts.TypeAliasDeclaration
+  | ts.EnumDeclaration
+  | ts.VariableDeclaration;
+
+function is_declaration(node: ts.Node): node is Declaration {
+  return (
+    ts.isFunctionDeclaration(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isInterfaceDeclaration(node) ||
+    ts.isTypeAliasDeclaration(node) ||
+    ts.isEnumDeclaration(node) ||
+    ts.isVariableDeclaration(node)
+  );
+}
+
+/** The top-level declaration named `name` in `source`, exported or not. */
+function declaration_of(
+  source: ts.SourceFile,
+  name: string,
+): Declaration | undefined {
+  return source.statements
+    .flatMap((statement): readonly ts.Node[] =>
+      ts.isVariableStatement(statement)
+        ? statement.declarationList.declarations
+        : [statement],
+    )
+    .filter(is_declaration)
+    .find(
+      (node) =>
+        node.name !== undefined &&
+        ts.isIdentifier(node.name) &&
+        node.name.text === name,
+    );
+}
+
+/**
+ * Whether `source` declares the dotted `symbol`: a top-level name, then a
+ * property of its type at each step, inherited members included. A value's
+ * members are its value's (`INFO.inputs.tdb`); a type's are its instances'
+ * (`HI.warnings`).
+ */
+function declares(
+  checker: ts.TypeChecker,
+  source: ts.SourceFile,
+  symbol: string,
+): boolean {
+  const [head = "", ...members] = symbol.split(".");
+  const declaration = declaration_of(source, head);
+  if (declaration?.name === undefined) return false;
+  let current = checker.getSymbolAtLocation(declaration.name);
+  for (const member of members) {
+    if (current === undefined) return false;
+    const is_value =
+      (current.flags & ts.SymbolFlags.Value) !== 0 &&
+      (current.flags & ts.SymbolFlags.Class) === 0;
+    const type = is_value
+      ? checker.getTypeOfSymbol(current)
+      : checker.getDeclaredTypeOfSymbol(current);
+    current = checker.getPropertyOfType(type, member);
+  }
+  return current !== undefined;
+}
+
+/**
+ * Checks that each row's TS site file exists and declares its symbol. The
+ * files are compiled together, so a member inherited from another file
+ * resolves.
+ */
+export function check_symbols(root: string, rows: readonly Row[]): string[] {
+  const files = [...new Set(rows.map((row) => join(root, row.ts_file)))];
+  const program = ts.createProgram(
+    files.filter((path) => existsSync(path)),
+    {
+      noEmit: true,
+      allowJs: true,
+      allowImportingTsExtensions: true,
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      target: ts.ScriptTarget.ES2022,
+      skipLibCheck: true,
+    },
+  );
+  const checker = program.getTypeChecker();
+  const failures: string[] = [];
+  for (const { file, line, id, ts_file, ts_symbol } of rows) {
+    const at = `${file}:${line}: ${id} names`;
+    const source = program.getSourceFile(join(root, ts_file));
+    if (source === undefined) {
+      failures.push(`${at} ${ts_file}, which does not exist`);
+    } else if (!declares(checker, source, ts_symbol)) {
+      failures.push(
+        `${at} \`${ts_symbol}\`, which ${ts_file} does not declare`,
       );
     }
   }
@@ -378,5 +489,9 @@ export function check_repository(root: string): string[] {
         return find_citations(file, readFileSync(join(root, file), "utf8"));
       }),
   );
-  return [...failures, ...cross_check(rows, citations)];
+  return [
+    ...failures,
+    ...cross_check(rows, citations),
+    ...check_symbols(root, rows),
+  ];
 }

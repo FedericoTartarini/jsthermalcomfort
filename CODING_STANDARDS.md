@@ -4,7 +4,7 @@ What a review checks a change against. Prettier, ESLint over `eslint.config.mjs`
 
 ## Where the rules live
 
-- **Upstream fidelity and the deviation register:** `docs/deviations/README.md` (the whitelist, the deviation classes, the additions, the row format and the site-comment form). Every difference from pythermalcomfort v4.6.2's `.py` is whitelisted or has a row.
+- **Upstream fidelity and the deviation register:** `docs/deviations/README.md` (the whitelist, the deviation classes, the additions, the row format, the TS site's symbol and the citing-comment form). Every difference from pythermalcomfort v4.6.2's `.py` is whitelisted or has a row.
 - **Names, files, file order, exports:** ADR 0021.
 - **Inputs, error classes and messages:** ADR 0022.
 - **Results:** ADR 0023. **Model info and warnings rows:** ADR 0024.

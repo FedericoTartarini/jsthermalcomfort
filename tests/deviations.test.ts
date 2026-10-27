@@ -3,14 +3,15 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   check_repository,
+  check_symbols,
   cross_check,
   find_citations,
   parse_register,
   read_approved,
 } from "./deviations/register.ts";
 
-// The register format and the site-comment form are defined in
-// docs/deviations/README.md (ADR 0019).
+// The register format, the TS site's symbol and the comment form are defined
+// in docs/deviations/README.md (ADR 0019).
 const root = fileURLToPath(new URL("..", import.meta.url));
 
 // The README's class and addition tables, cut down to one row each.
@@ -46,7 +47,7 @@ function register(...rows: string[]): string {
 }
 
 function row(id: string, status = "approved", parity = "none"): string {
-  return `| ${id} | input | \`models/utci.py:138\` | \`src/models/utci.ts\` | why | C: scalars only (ADR 0022) | ${status} | 2026-10-27 | ${parity} |`;
+  return `| ${id} | input | \`models/utci.py:138\` | \`src/models/utci.ts\` \`utci\` | why | C: scalars only (ADR 0022) | ${status} | 2026-10-27 | ${parity} |`;
 }
 
 const FILE = "docs/deviations/utci.md";
@@ -62,7 +63,8 @@ describe("parse_register", () => {
         id: "utci-1",
         part: "input",
         upstream_site: "`models/utci.py:138`",
-        ts_site: "`src/models/utci.ts`",
+        ts_file: "src/models/utci.ts",
+        ts_symbol: "utci",
         reason: "why",
         class_adr: "C: scalars only (ADR 0022)",
         status: "approved",
@@ -84,7 +86,7 @@ describe("parse_register", () => {
     const text = [
       "| id     | part  | upstream site | TS site | reason | class/ADR | status   | date       | parity |",
       "| ------ | :---- | ------------- | ------- | ------ | --------- | -------- | ---------- | ------ |",
-      "| utci-1 | logic | `a.py:1`      | `b.ts`  | r      | none      | approved | 2026-10-27 | none   |",
+      "| utci-1 | logic | `a.py:1`      | `b.ts` `b` | r    | none      | approved | 2026-10-27 | none   |",
     ].join("\n");
     const { rows, failures } = parse(FILE, text);
     expect(failures).toEqual([]);
@@ -95,7 +97,7 @@ describe("parse_register", () => {
 
   test("keeps an escaped pipe inside its cell", () => {
     const text = register(
-      "| utci-1 | output | `a.py:1` | `b.ts` | `boolean \\| number` | none | approved | 2026-10-27 | none |",
+      "| utci-1 | output | `a.py:1` | `b.ts` `b` | `boolean \\| number` | none | approved | 2026-10-27 | none |",
     );
     const { rows, failures } = parse(FILE, text);
     expect(failures).toEqual([]);
@@ -211,6 +213,10 @@ describe("parse_register", () => {
       row("utci-6").replace("| why |", "|  |"),
       row("utci-7"),
       row("utci-7"),
+      row("utci-8").replace(
+        "`src/models/utci.ts` `utci`",
+        "`src/models/utci.ts`",
+      ),
     );
     expect(parse(FILE, text).failures).toEqual([
       `${FILE}:5: utci-1 has 8 cells, expected 9`,
@@ -222,6 +228,7 @@ describe("parse_register", () => {
       `${FILE}:11: utci-5 has parity "output utci", ${PARITY_EXPECTED}`,
       `${FILE}:12: utci-6 has an empty reason cell`,
       `${FILE}:14: utci-7 repeats the row at line 13`,
+      `${FILE}:15: utci-8 has TS site "\`src/models/utci.ts\`", expected a file and a symbol, each in a code span`,
     ]);
   });
 
@@ -280,15 +287,12 @@ describe("cross_check", () => {
     ),
   ).rows;
 
-  test("passes when every row is cited and approved", () => {
-    const cited = find_citations(
-      "src/models/utci.ts",
-      "// deviation utci-1\n// deviation utci-2\n",
-    );
+  test("passes approved rows, cited or not", () => {
+    const cited = find_citations("src/models/utci.ts", "// deviation utci-1\n");
     expect(cross_check(rows.slice(0, 2), cited)).toEqual([]);
   });
 
-  test("fails an uncited row, a citation with no row and a pending row", () => {
+  test("fails a citation with no row and a pending row", () => {
     const cited = find_citations(
       "src/models/utci.ts",
       [
@@ -301,9 +305,61 @@ describe("cross_check", () => {
     );
     expect(cross_check(rows, cited)).toEqual([
       "src/models/utci.ts:5: cites utci-9, which has no row",
-      `${FILE}:6: utci-2 has no citing comment`,
       `${FILE}:7: utci-3 is pending`,
       `${FILE}:8: utci-4 is pending (doubtful)`,
+    ]);
+  });
+});
+
+describe("check_symbols", () => {
+  const SITE = "tests/deviations/fixture.ts";
+  const sited = (...sites: [string, string][]) =>
+    parse(
+      FILE,
+      register(
+        ...sites.map(([file, symbol], i) =>
+          row(`utci-${i + 1}`).replace(
+            "`src/models/utci.ts` `utci`",
+            `\`${file}\` \`${symbol}\``,
+          ),
+        ),
+      ),
+    ).rows;
+
+  test("finds declarations, members, inherited members and locals", () => {
+    const rows = sited(
+      [SITE, "Result"],
+      [SITE, "Result.own"],
+      [SITE, "Result.inherited"],
+      [SITE, "INFO.inputs.tdb.unit"],
+      [SITE, "Params.tdb"],
+      [SITE, "model"],
+      [SITE, "_kernel"],
+      [SITE, "Base"],
+    );
+    expect(rows).toHaveLength(8);
+    expect(check_symbols(root, rows)).toEqual([]);
+  });
+
+  test("fails a symbol or a member the file does not declare", () => {
+    const rows = sited(
+      [SITE, "Missing"],
+      [SITE, "Result.missing"],
+      [SITE, "INFO.inputs.rh"],
+      [SITE, "model.params"],
+    );
+    expect(check_symbols(root, rows)).toEqual([
+      `${FILE}:5: utci-1 names \`Missing\`, which ${SITE} does not declare`,
+      `${FILE}:6: utci-2 names \`Result.missing\`, which ${SITE} does not declare`,
+      `${FILE}:7: utci-3 names \`INFO.inputs.rh\`, which ${SITE} does not declare`,
+      `${FILE}:8: utci-4 names \`model.params\`, which ${SITE} does not declare`,
+    ]);
+  });
+
+  test("fails a file that does not exist", () => {
+    const rows = sited(["src/models/missing.ts", "missing"]);
+    expect(check_symbols(root, rows)).toEqual([
+      `${FILE}:5: utci-1 names src/models/missing.ts, which does not exist`,
     ]);
   });
 });
@@ -318,7 +374,7 @@ describe("the repository", () => {
     expect(additions.get("gate-off rows")).toBe("0024");
   });
 
-  test("every register agrees with the site comments", () => {
+  test("every register agrees with the code", () => {
     expect(check_repository(root)).toEqual([]);
   });
 });

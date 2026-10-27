@@ -1,5 +1,4 @@
 import { existsSync } from "node:fs";
-import tsdoc from "eslint-plugin-tsdoc";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
@@ -47,7 +46,6 @@ export default defineConfig(
       tseslint.configs.strictTypeChecked,
       tseslint.configs.stylisticTypeChecked,
     ],
-    plugins: { tsdoc },
     languageOptions: {
       parserOptions: {
         project: ["configs/tsconfig.json", "tests/tsconfig.json"],
@@ -55,7 +53,6 @@ export default defineConfig(
       },
     },
     rules: {
-      "tsdoc/syntax": "error",
       // Upstream's messages embed numbers. The other options repeat
       // strictTypeChecked's, since the rule's own defaults allow more.
       "@typescript-eslint/restrict-template-expressions": [

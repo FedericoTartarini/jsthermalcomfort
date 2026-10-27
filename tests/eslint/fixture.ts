@@ -51,11 +51,3 @@ export function message(iterations: number, converged: boolean): string[] {
 export function first(values: Array<number>): number {
   return values[0]!;
 }
-
-/**
- * A JSDoc type in braces is not TSDoc.
- * @returns {number} the value
- */
-export function jsdoc_residue(x: number): number {
-  return x;
-}

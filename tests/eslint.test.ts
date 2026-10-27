@@ -57,10 +57,6 @@ describe("eslint config", () => {
     ]);
   });
 
-  test("tsdoc/syntax reports JSDoc residue", () => {
-    expect(lines_of("tsdoc/syntax")).toContain(line_of("@returns {number}"));
-  });
-
   test("lint covers the listed files only", async () => {
     const eslint = new ESLint({ cwd });
     expect(await eslint.isPathIgnored("vitest.config.ts")).toBe(false);

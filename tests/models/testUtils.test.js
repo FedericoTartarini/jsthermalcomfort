@@ -1,7 +1,7 @@
 // Meta-tests for the shared validation harness in `testUtils.js`.
 //
 // These tests target the harness itself, not any model. They guard against
-// the silent-skip class of bugs raised in Week 9 §一: a test wrapper that
+// the silent-skip class of bugs raised in Week 9 §1: a test wrapper that
 // runs zero assertions yet reports green. Each case uses
 // `expect.hasAssertions()` so the meta-tests cannot themselves silent-skip
 // with zero effective assertions.

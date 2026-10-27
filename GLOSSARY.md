@@ -28,9 +28,9 @@ _Avoid_: flag, toggle, kwarg
 The single object a model takes, whose keys are upstream's keyword parameters: physical quantities and switches alike, named and defaulted as upstream names and defaults them. Its type, `InputsOf<typeof X_INFO>`, takes upstream's input class name (`HIInputs`), and `INFO.inputs` describes each key.
 _Avoid_: params, options, kwargs, config, arguments object
 
-**Result**:
-What a model returns: the fields `INFO.outputs` describes, then `warnings`, which `ModelResult` holds. Its type, `ResultOf<typeof X_INFO>`, is named after upstream's dataclass (`HI`).
-_Avoid_: return value, response, outputs (for the returned object)
+**Outputs**:
+What a model returns: the fields `INFO.outputs` describes, then `warnings`, which `ModelOutputs` holds. Its type, `OutputsOf<typeof X_INFO>`, is named after upstream's dataclass (`HI`).
+_Avoid_: result, return value, response
 
 **Standard**:
 A versioned identifier for a published standard (`Standard.ashrae_55_2023`, value `"55-2023"`), the `standard` option that selects one. Upstream calls this `Models`/`model`; a model here is a function such as `pmv_ppd_iso`.

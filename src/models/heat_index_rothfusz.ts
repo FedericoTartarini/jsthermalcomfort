@@ -1,11 +1,11 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
   ModelWarning,
-  ResultOf,
-} from "../_internal/modelDocs.ts";
+  OutputsOf,
+} from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import {
   _mapping,
@@ -23,7 +23,6 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    /** Heat Index, [°C]. */
     hi: { kind: "numeric", unit: "°C" },
     stress_category: {
       kind: "label",
@@ -46,7 +45,7 @@ export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  *
  * @interface
  */
-export type HI = ResultOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
+export type HI = OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
 
 /**
  * Calculate the Heat Index (HI) in accordance with the Rothfusz (1990) model
@@ -68,6 +67,9 @@ export type HI = ResultOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  *
  * @returns A dataclass containing the Heat Index. See {@link HI} for more details.
  * To access the `hi` value, use the `hi` attribute of the returned `HI` instance, e.g., `result.hi`.
+ *
+ * - `hi` - Heat Index, [°C].
+ * - `stress_category`
  *
  * @example
  * ```ts

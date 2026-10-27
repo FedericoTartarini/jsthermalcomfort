@@ -1,6 +1,6 @@
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
-import type { InputsOf, ModelInfo, ResultOf } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
+import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
@@ -13,7 +13,6 @@ export const CLO_TOUT_INFO = deepFreeze({
     units: BASE_INPUTS_UNITS,
   },
   outputs: {
-    /** Representative clothing insulation Icl. */
     clo_tout: { kind: "numeric", unit: "clo" },
   },
 } as const satisfies ModelInfo);
@@ -27,7 +26,7 @@ export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO>;
  *
  * @interface
  */
-export type CloTOut = ResultOf<typeof CLO_TOUT_INFO>;
+export type CloTOut = OutputsOf<typeof CLO_TOUT_INFO>;
 
 /**
  * Calculate representative clothing insulation Icl based on outdoor air temperature
@@ -40,6 +39,8 @@ export type CloTOut = ResultOf<typeof CLO_TOUT_INFO>;
  *
  * @returns A dataclass containing the representative clothing insulation Icl. See {@link CloTOut} for more details.
  * To access the `clo_tout` value, use the `clo_tout` attribute of the returned `CloTOut` instance, e.g., `result.clo_tout`.
+ *
+ * - `clo_tout` - Representative clothing insulation Icl.
  *
  * @throws `TypeError` If `tout` is not a number, or `units` is not a string.
  * @throws `RangeError` If an invalid unit is provided.

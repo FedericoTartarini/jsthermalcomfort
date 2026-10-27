@@ -83,7 +83,7 @@ Every cell is filled. A pipe inside a cell is escaped as `\|`, code spans includ
 
 ### The TS site's symbol
 
-A model file holds upstream's docstrings and code comments, and at most a one-sentence why-comment (ADRs 0019 and 0025, 2026-10-27 amendments), so a row names its symbol instead of relying on a citation at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelResult`).
+A model file holds upstream's docstrings and code comments, and at most a one-sentence why-comment (ADRs 0019 and 0025, 2026-10-27 amendments), so a row names its symbol instead of relying on a citation at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelOutputs`).
 
 ### Notes
 

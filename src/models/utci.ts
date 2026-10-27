@@ -1,11 +1,11 @@
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
   ModelWarning,
-  ResultOf,
-} from "../_internal/modelDocs.ts";
+  OutputsOf,
+} from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { _mapping, _valid_range } from "../_internal/validation.ts";
 import { Units } from "../utilities/options.ts";
@@ -32,9 +32,7 @@ export const UTCI_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    /** Universal Thermal Climate Index, [°C] or in [°F]. */
     utci: { kind: "numeric", unit: "°C" },
-    /** UTCI categorized in terms of thermal stress [Blazejczyk2013](../../docs/references.md#blazejczyk2013). */
     stress_category: {
       kind: "label",
       masked: true,
@@ -74,7 +72,7 @@ export type UTCIInputs = InputsOf<typeof UTCI_INFO>;
  *
  * @interface
  */
-export type UTCI = ResultOf<typeof UTCI_INFO>;
+export type UTCI = OutputsOf<typeof UTCI_INFO>;
 
 /**
  * Calculate the Universal Thermal Climate Index (UTCI).
@@ -107,6 +105,9 @@ export type UTCI = ResultOf<typeof UTCI_INFO>;
  * See {@link UTCI} for more details. To access the
  * `utci` and `stress_category` values, use the corresponding attributes of the
  * returned `UTCI` instance, e.g., `result.utci`.
+ *
+ * - `utci` - Universal Thermal Climate Index, [°C] or in [°F].
+ * - `stress_category` - UTCI categorized in terms of thermal stress [Blazejczyk2013](../../docs/references.md#blazejczyk2013).
  *
  * @remarks
  * All four applicability limits applied when ``limit_inputs=True`` (air temperature,

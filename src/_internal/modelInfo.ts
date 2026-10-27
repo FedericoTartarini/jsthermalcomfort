@@ -1,7 +1,7 @@
 import type { ClassifierBins } from "./classifierBins.ts";
 import type { Standard } from "../utilities/options.ts";
 
-// The model info every model publishes (`*_INFO`), the inputs and result types
+// The model info every model publishes (`*_INFO`), the inputs and outputs types
 // derived from it, the warnings rows (ADRs 0022-0024) and `deepFreeze`, with
 // the old forms the models not yet migrated use at the end.
 
@@ -31,7 +31,7 @@ export interface Bound {
 }
 
 /**
- * One row of a result's `warnings`: what upstream reports with
+ * One row of a model's outputs' `warnings`: what upstream reports with
  * `warnings.warn` (ADR 0024, deviation _shared-3).
  *
  * A `range` row is one bound a call broke, where upstream's `_valid_range`
@@ -41,13 +41,13 @@ export interface Bound {
  *   `"tr - tdb"`, `"pa (kPa)"`), so rows with the same key are told apart by
  *   `role` and `unit`;
  * - `role` is `input` for a quantity as the caller gave it, `derived` for one
- *   computed from the inputs, `output` for a result upstream checks;
+ *   computed from the inputs, `output` for an output upstream checks;
  * - `value` is the value upstream compared, and `unit` and `bound` are
  *   upstream's, with no conversion. A fixed `bound` is the frozen object the
  *   model's `*_INFO` references.
  *
  * Range rows are returned whatever `limit_inputs` is: with it on they are why
- * the result is NaN, with it off they are what the numbers were computed
+ * the outputs are NaN, with it off they are what the numbers were computed
  * despite.
  *
  * A `notice` row carries the text of any other upstream `warnings.warn`,
@@ -65,24 +65,28 @@ export type ModelWarning =
   | { readonly kind: "notice"; readonly message: string };
 
 /**
- * What every model's result extends, as upstream's result dataclasses extend
- * `AutoStrMixin` (ADR 0023). A result is frozen, its rows included.
+ * What every model's outputs extend, as upstream's return dataclasses extend
+ * `AutoStrMixin` (ADR 0023). The outputs are frozen, their rows included.
  */
-export interface ModelResult {
+export interface ModelOutputs {
   /** Added: the call's {@link ModelWarning} rows, in the order of its checks. */
   readonly warnings: readonly ModelWarning[];
 }
 
 /**
- * Metadata for a single output or derived variable of a model; `INFO.inputs`
- * describes the inputs (`InputsInfo`).
+ * One returned value in `INFO.outputs`; `INFO.inputs` describes the inputs
+ * (`InputsInfo`).
+ *
+ * `kind` is its value kind, a number (`numeric`), a boolean (`bool`) or a
+ * label (`label`). `masked` adds the NaN `number` of a masked output, so a
+ * masked `label` is `string | number` (ADR 0023).
  *
  * `unit` is the unit of measurement, or `null` if dimensionless.
  *
  * `applicability` is the range over which the model is applicable. It is an
  * **applicability gate, not a clamp**. Outside it, and only when `limit_inputs`
  * is enabled, the model returns NaN — it does not constrain the value to the
- * bound. On an output such as `pmv_ppd_iso`'s `pmv`, read it as "results
+ * bound. On an output such as `pmv_ppd_iso`'s `pmv`, read it as "outputs
  * outside this band are suppressed", not "the output is guaranteed to fall
  * inside it". A front end should surface it as a condition on the answer rather
  * than as a slider limit.
@@ -91,21 +95,22 @@ export interface ModelResult {
  * into a categorical label. Pass it to `classifyFromBins` rather than
  * reimplementing the edge handling.
  */
-export interface OutputInfo {
+export interface OutputField {
+  readonly kind: "numeric" | "bool" | "label";
+  readonly masked?: true;
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly classifier?: ClassifierBins;
 }
 
 /**
- * One returned value in `INFO.outputs`: its {@link OutputInfo} plus its value
- * kind, a number (`numeric`), a boolean (`bool`) or a label (`label`).
- * `masked` adds the NaN `number` of a masked output, so a masked `label` is
- * `string | number` (ADR 0023).
+ * One quantity in `INFO.derived`, computed from the inputs and checked by the
+ * model. `unit` and `applicability` read as an {@link OutputField}'s do: the
+ * bound is a gate, not a clamp.
  */
-export interface OutputField extends OutputInfo {
-  readonly kind: "numeric" | "bool" | "label";
-  readonly masked?: true;
+export interface DerivedField {
+  readonly unit: UnitSymbol | null;
+  readonly applicability?: Bound;
 }
 
 /** A number, upstream's `numeric_field`, which the parse requires finite. */
@@ -149,6 +154,12 @@ export type InputsInfo = Readonly<
  * than `warnings`, in its order.
  */
 export type OutputsInfo = Readonly<Record<string, OutputField>>;
+
+/**
+ * A model's `INFO.derived`: each quantity upstream checks after computing it,
+ * keyed by upstream's name for the check.
+ */
+export type DerivedInfo = Readonly<Record<string, DerivedField>>;
 
 /**
  * The value type of each kind. The input kinds take upstream's names: the
@@ -199,12 +210,12 @@ export type ResolvedOf<I extends InputsInfo> = {
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
  * `warnings`; a `masked` field adds the NaN `number` (ADR 0023).
  */
-export type ResultOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
+export type OutputsOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
   {
     readonly [K in keyof M["outputs"]]:
       | KindValues[M["outputs"][K]["kind"]]
       | (M["outputs"][K] extends { readonly masked: true } ? number : never);
-  } & ModelResult
+  } & ModelOutputs
 >;
 
 /**
@@ -221,8 +232,8 @@ export type ResultOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
  * upstream's order, with its kind (`numeric`, `bool` or `choice`), unit, applicability
  * and default. The model validates its inputs against it, and its inputs type
  * is derived from it. `outputs` are the returned values, in the order of
- * upstream's result dataclass, each with its kind (`numeric`, `bool` or
- * `label`) and unit, and the result type is derived from it. `derived` covers
+ * upstream's return dataclass, each with its kind (`numeric`, `bool` or
+ * `label`) and unit, and the outputs type is derived from it. `derived` covers
  * quantities computed from the inputs rather than supplied by the caller,
  * keyed by upstream's name for the check, as the `warnings` rows are.
  *
@@ -235,7 +246,7 @@ export interface ModelInfo {
   readonly label: string;
   readonly inputs: InputsInfo;
   readonly outputs: OutputsInfo;
-  readonly derived?: Readonly<Record<string, OutputInfo>>;
+  readonly derived?: DerivedInfo;
 }
 
 /**
@@ -301,8 +312,20 @@ export interface LegacyModelInfo {
   readonly description: string;
   readonly standards: readonly StandardId[];
   readonly inputs: Readonly<
-    Record<string, Pick<OutputInfo, "unit" | "applicability">>
+    Record<
+      string,
+      { readonly unit: UnitSymbol | null; readonly applicability?: Bound }
+    >
   >;
-  readonly outputs: Readonly<Record<string, OutputInfo>>;
-  readonly derived?: Readonly<Record<string, OutputInfo>>;
+  readonly outputs: Readonly<
+    Record<
+      string,
+      {
+        readonly unit: UnitSymbol | null;
+        readonly applicability?: Bound;
+        readonly classifier?: ClassifierBins;
+      }
+    >
+  >;
+  readonly derived?: LegacyModelInfo["outputs"];
 }

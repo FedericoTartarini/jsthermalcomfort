@@ -3,12 +3,12 @@ import type { PmvPpdParams } from "./pmv_ppd.ts";
 import { validateInputs } from "../utilities/utilities.js";
 import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
 import { Standard } from "../utilities/options.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
 import { _check_params_object } from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   LegacyModelInfo,
-} from "../_internal/modelDocs.ts";
+} from "../_internal/modelInfo.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not. Renamed from
@@ -19,7 +19,7 @@ import type {
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses right-inclusive bins (pythermalcomfort#382).
  * @property {boolean|number} compliance - True if -0.5 < pmv < 0.5 (`PMV_COMPLIANCE_INTERVAL_ASHRAE`), read from the unrounded pmv; NaN when `limit_inputs` returns NaN for the inputs.
- * @property {import("../_internal/modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
+ * @property {import("../_internal/modelInfo.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export type PmvPpdAshraeResult = {

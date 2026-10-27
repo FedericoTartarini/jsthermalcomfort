@@ -5,8 +5,8 @@ import {
   notInputsObject,
   notOfType,
 } from "./errors.ts";
-import { deepFreeze } from "./modelDocs.ts";
-import type { ChoiceField, InputsInfo, ResolvedOf } from "./modelDocs.ts";
+import { deepFreeze } from "./modelInfo.ts";
+import type { ChoiceField, InputsInfo, ResolvedOf } from "./modelInfo.ts";
 import { Units } from "../utilities/options.ts";
 
 // The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing

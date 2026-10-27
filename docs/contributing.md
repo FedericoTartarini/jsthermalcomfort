@@ -126,17 +126,17 @@ A model follows pythermalcomfort's current release: its logic, values, names and
 Create `src/models/<name>.ts`, with upstream's file and function name. In order, it holds:
 
 1. the imports;
-2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric`, `bool` or `choice`), unit, applicability and default, and its `outputs` hold each returned value with its kind (`numeric`, `bool` or `label`, and `masked` where a label or boolean can be NaN instead), unit and classifier, the classifier inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`), and the TSDoc of each output key is upstream's `Attributes` entry for it;
+2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric`, `bool` or `choice`), unit, applicability and default, and its `outputs` hold each returned value with its kind (`numeric`, `bool` or `label`, and `masked` where a label or boolean can be NaN instead), unit and classifier, the classifier inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`); an output's description is a list item of the function's `@returns` (item 5), not a comment on its key;
 3. the inputs type, `InputsOf<typeof MY_NEW_MODEL_INFO>`, named after upstream's input class;
-4. the result type, `ResultOf<typeof MY_NEW_MODEL_INFO>`, named after upstream's dataclass: the fields of `outputs`, then `warnings`;
-5. the TSDoc block and the public function;
+4. the outputs type, `OutputsOf<typeof MY_NEW_MODEL_INFO>`, named after upstream's dataclass, its TSDoc the dataclass docstring's summary; its fields are those of `outputs`, then `warnings`;
+5. the TSDoc block and the public function, whose `@returns` lists each output, ``- `key` - text``, with the dataclass's `Attributes` text;
 6. the private functions in upstream's order.
 
-A result class that upstream shares between models (`HI`, `SET`, `WorkCapacity`) is declared in the file of the first migrated model that returns it, and the others import it.
+A return dataclass that upstream shares between models (`HI`, `SET`, `WorkCapacity`) is declared in the file of the first migrated model that returns it, and the others import it.
 
 ### 2. Follow Upstream, and Document With TSDoc
 
-- Validate with `parseInputs(MY_NEW_MODEL_INFO, inputs)` (`src/_internal/define.ts`). Its messages follow `CODING_STANDARDS.md` ("Upstream's words"). Write a fact once and reference it from INFO, never by writing it again. A unit is a `UnitSymbol` (`src/_internal/modelDocs.ts`); a model that needs a new one adds it there.
+- Validate with `parseInputs(MY_NEW_MODEL_INFO, inputs)` (`src/_internal/define.ts`). Its messages follow `CODING_STANDARDS.md` ("Upstream's words"). Write a fact once and reference it from INFO, never by writing it again. A unit is a `UnitSymbol` (`src/_internal/modelInfo.ts`); a model that needs a new one adds it there.
 - The model file holds only upstream's docstrings and code comments, with the why-comments `CODING_STANDARDS.md` ("Only upstream's words in a model file") allows. The docstring is one TSDoc block above the public function, in upstream's order: the summary, `@param inputs` and one `@param inputs.<key>` per Parameters entry with its text verbatim, each `.. note::` as `> [!NOTE]`, `@returns`, and the example as a TypeScript call with upstream's inputs and outputs. A citation `[Key]_` becomes a link to its entry, `[Key](../../docs/references.md#key)`. Upstream's `#` comments are copied verbatim.
 - Record every difference from upstream that the whitelist does not cover as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, its TS site naming the file and the symbol. An error in an upstream docstring or code comment is fixed, given a row, and reported upstream. A note that is not a deviation, such as ADR 0009's on the executed path's arithmetic, goes in the register's Notes section.
 

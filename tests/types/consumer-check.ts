@@ -27,6 +27,7 @@ import type {
   CloTOutInputs,
   CoolingEffectParams,
   CoolingEffectResult,
+  DerivedField,
   HI,
   HIInputs,
   ModelInfo,
@@ -39,7 +40,7 @@ import type {
   SolarGainInputs,
   UTCI,
   UTCIInputs,
-  OutputInfo,
+  OutputField,
   UnitSymbol,
 } from "jsthermalcomfort";
 import {
@@ -108,6 +109,9 @@ const limitInputsDefault: boolean =
 // type is derived.
 const acceptabilityKind: "bool" =
   ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80.kind;
+// A migrated INFO's entries are typed `OutputField` and `DerivedField`.
+const utciOutput: OutputField = UTCI_INFO.outputs.utci;
+const paDerived: DerivedField = UTCI_INFO.derived["pa (kPa)"];
 // A unit is one of the symbols the models use, so a misspelt one is rejected.
 const tdbUnit: UnitSymbol = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.unit;
 // @ts-expect-error "°c" is not a unit; the unit is "°C".
@@ -116,7 +120,6 @@ const misspeltUnit: UnitSymbol = "°c";
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
-const ppd: OutputInfo = iso.outputs.ppd;
 
 // The models not yet migrated list the editions they accept as Standard
 // values. A migrated model has no `standards`: one that takes a standard has a
@@ -170,7 +173,7 @@ const described: ModelInfo = {
 // @ts-expect-error `label` is a string, not a number.
 const notANumber: number = PMV_PPD_ISO_INFO.label;
 // @ts-expect-error `inputs` has no `nonexistent_variable` key.
-const notAKey: OutputInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
+const notAKey: unknown = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
 // @ts-expect-error `label` is a string, not a number.
 const notANumberEither: number = ADAPTIVE_ASHRAE_INFO.label;
 
@@ -618,7 +621,8 @@ export {
   minTdb,
   isoStandards,
   heatIndexStandards,
-  ppd,
+  utciOutput,
+  paDerived,
   label,
   tsvLabel,
   bins,

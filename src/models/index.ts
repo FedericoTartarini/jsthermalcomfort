@@ -39,22 +39,23 @@ import {
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 
 export type { ClassifierBins } from "../_internal/classifierBins.ts";
-// deepFreeze is internal, so modelDocs contributes its types only.
+// deepFreeze is internal, so modelInfo contributes its types only.
 export type {
   ApplicabilityWarning,
   BoolField,
   Bound,
   ChoiceField,
+  DerivedField,
+  DerivedInfo,
   InputsInfo,
   ModelInfo,
-  ModelResult,
+  ModelOutputs,
   ModelWarning,
   NumericField,
   OutputField,
-  OutputInfo,
   OutputsInfo,
   UnitSymbol,
-} from "../_internal/modelDocs.ts";
+} from "../_internal/modelInfo.ts";
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type {

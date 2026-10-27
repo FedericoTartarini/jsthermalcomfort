@@ -1,12 +1,12 @@
 import { transpose_sharp_altitude } from "../environment/transpose_sharp_altitude.ts";
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
   ModelWarning,
-  ResultOf,
-} from "../_internal/modelDocs.ts";
+  OutputsOf,
+} from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
 import { Postures } from "../utilities/options.ts";
@@ -89,12 +89,7 @@ export const SOLAR_GAIN_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    /** Solar gain to the human body using the Effective Radiant Field [W/m2]. */
     erf: { kind: "numeric", unit: "W/m²" },
-    /**
-     * Delta mean radiant temperature. The amount by which the mean radiant
-     * temperature of the space should be increased if no solar radiation is present.
-     */
     delta_mrt: { kind: "numeric", unit: "°C" },
   },
 } as const satisfies ModelInfo);
@@ -107,7 +102,7 @@ export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO>;
  *
  * @interface
  */
-export type SolarGain = ResultOf<typeof SOLAR_GAIN_INFO>;
+export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
 
 /**
  * Calculate the solar gain to the human body using the Effective Radiant Field
@@ -156,6 +151,10 @@ export type SolarGain = ResultOf<typeof SOLAR_GAIN_INFO>;
  * @returns A dataclass containing the solar gain to the human body and delta mean radiant temperature.
  * See {@link SolarGain} for more details.
  * To access the `erf` and `delta_mrt` values, use the corresponding attributes of the returned `SolarGain` instance, e.g., `result.erf`.
+ *
+ * - `erf` - Solar gain to the human body using the Effective Radiant Field [W/m2].
+ * - `delta_mrt` - Delta mean radiant temperature. The amount by which the mean radiant
+ *   temperature of the space should be increased if no solar radiation is present.
  *
  * @throws `TypeError` If the posture is not a string.
  * @throws `RangeError` If the posture is not one of 'standing', 'supine', or 'sitting'.

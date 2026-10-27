@@ -7,8 +7,8 @@ import { classifyFromBins } from "../_internal/classifierBins.ts";
 import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { _legacy_check_ashrae55_compliance } from "../_internal/ashrae55.ts";
 import { _legacy_valid_range } from "../_internal/validation.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
-import type { ApplicabilityWarning, Bound } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
+import type { ApplicabilityWarning, Bound } from "../_internal/modelInfo.ts";
 
 /**
  * The parameters the PMV wrappers share, keyed like upstream's keyword

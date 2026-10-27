@@ -6,12 +6,12 @@ import {
 import type { PmvPpdParams } from "./pmv_ppd.ts";
 import { validateInputs, ISO_7730_LIMITS } from "../utilities/utilities.js";
 import { Standard } from "../utilities/options.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
 import { _check_params_object } from "../_internal/validation.ts";
 import type {
   ApplicabilityWarning,
   LegacyModelInfo,
-} from "../_internal/modelDocs.ts";
+} from "../_internal/modelInfo.ts";
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not. Renamed from
@@ -22,7 +22,7 @@ import type {
  * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses left-inclusive bins (pythermalcomfort#382).
  * @property {string|number} category - ISO 7730 category of thermal environment: under 7730-2025 "I", "II", "III", "IV" or "none", the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO_7730_2025`; under 7730-2005 "A", "B", "C" or "none", by `PMV_CATEGORY_BINS_ISO_7730_2005`; NaN when `limit_inputs` returns NaN for the inputs.
- * @property {import("../_internal/modelDocs.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
+ * @property {import("../_internal/modelInfo.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
  * @public
  */
 export type PmvPpdIsoResult = {

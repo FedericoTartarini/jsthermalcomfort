@@ -1,6 +1,6 @@
 import { operative_tmp } from "../environment/operative_tmp.ts";
-import { deepFreeze } from "./modelDocs.ts";
-import type { ApplicabilityWarning, Bound, ModelWarning } from "./modelDocs.ts";
+import { deepFreeze } from "./modelInfo.ts";
+import type { ApplicabilityWarning, Bound, ModelWarning } from "./modelInfo.ts";
 import { _legacy_valid_range, _valid_range } from "./validation.ts";
 
 // The counterpart of upstream's `_internal/ashrae55.py`. The old form the

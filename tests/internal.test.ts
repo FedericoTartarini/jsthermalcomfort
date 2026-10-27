@@ -5,7 +5,7 @@ import {
   _valid_range,
   HEAT_INDEX_STRESS_CATEGORIES,
 } from "../src/_internal/validation.ts";
-import type { ModelWarning } from "../src/_internal/modelDocs.ts";
+import type { ModelWarning } from "../src/_internal/modelInfo.ts";
 import {
   ASHRAE_55_LIMITS,
   _check_ashrae55_compliance,

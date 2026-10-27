@@ -1,11 +1,11 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { deepFreeze } from "../../src/_internal/modelDocs.ts";
+import { deepFreeze } from "../../src/_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelWarning,
+  OutputsOf,
   ResolvedOf,
-  ResultOf,
-} from "../../src/_internal/modelDocs.ts";
+} from "../../src/_internal/modelInfo.ts";
 
 describe("deepFreeze", () => {
   // The cycle guard from #197: without it, a self-reference recurses until
@@ -66,10 +66,10 @@ describe("ResolvedOf", () => {
   });
 });
 
-describe("ResultOf", () => {
+describe("OutputsOf", () => {
   // `masked` adds the NaN `number` of a masked output (ADR 0023).
   test("maps each kind to its value type, then warnings", () => {
-    type Fields = ResultOf<{
+    type Fields = OutputsOf<{
       outputs: {
         n: { kind: "numeric"; unit: null };
         b: { kind: "bool"; unit: null };

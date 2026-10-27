@@ -1,12 +1,12 @@
 import { classifyFromBins } from "./classifierBins.ts";
 import type { ClassifierBins } from "./classifierBins.ts";
-import { deepFreeze } from "./modelDocs.ts";
+import { deepFreeze } from "./modelInfo.ts";
 import type {
   ApplicabilityWarning,
   Bound,
   ModelWarning,
   UnitSymbol,
-} from "./modelDocs.ts";
+} from "./modelInfo.ts";
 
 // The counterparts of upstream's `_internal/validation.py`, with upstream's
 // docstrings. The old forms the models not yet migrated call,

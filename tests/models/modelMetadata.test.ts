@@ -20,7 +20,7 @@ import { Standard } from "../../src/utilities/options.ts";
 import type {
   LegacyModelInfo,
   ModelInfo,
-} from "../../src/_internal/modelDocs.ts";
+} from "../../src/_internal/modelInfo.ts";
 
 // NOTE: A directory scan approach was attempted to make this test self-maintaining,
 // but the Jest ESM configuration of the time did not support CommonJS require() or

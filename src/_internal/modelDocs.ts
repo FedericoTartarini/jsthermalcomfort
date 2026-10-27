@@ -13,6 +13,14 @@ import type { Standard } from "../utilities/options.ts";
 export type StandardId = (typeof Standard)[keyof typeof Standard];
 
 /**
+ * A unit symbol, as upstream's docstrings write it: the units the models use.
+ * A model that needs a new one adds it here, so a misspelt unit fails to
+ * compile.
+ */
+export type UnitSymbol =
+  "°C" | "%" | "m/s" | "met" | "clo" | "W/m²" | "°" | "Pa" | "kPa";
+
+/**
  * A bound on a variable (minimum and/or maximum), inclusive. A missing side is
  * unbounded, as upstream's `np.inf` is.
  *
@@ -55,7 +63,7 @@ export type ModelWarning =
       readonly key: string;
       readonly role: "input" | "derived" | "output";
       readonly value: number;
-      readonly unit: string | null;
+      readonly unit: UnitSymbol | null;
       readonly bound: Bound;
     }
   | { readonly kind: "notice"; readonly message: string };
@@ -90,7 +98,7 @@ export type { ClassifierBins };
  * reimplementing the edge handling.
  */
 export interface OutputInfo {
-  readonly unit: string | null;
+  readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly classifier?: ClassifierBins;
 }

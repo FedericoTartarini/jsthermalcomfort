@@ -1,7 +1,12 @@
 import { classifyFromBins } from "./classifierBins.ts";
 import type { ClassifierBins } from "./classifierBins.ts";
 import { deepFreeze } from "./modelDocs.ts";
-import type { ApplicabilityWarning, Bound, ModelWarning } from "./modelDocs.ts";
+import type {
+  ApplicabilityWarning,
+  Bound,
+  ModelWarning,
+  UnitSymbol,
+} from "./modelDocs.ts";
 
 // The counterparts of upstream's `_internal/validation.py`, with upstream's
 // docstrings. The old forms the models not yet migrated call,
@@ -31,7 +36,7 @@ export function _valid_range(
   valid: Bound,
   param_name: string,
   role: Role,
-  unit: string | null,
+  unit: UnitSymbol | null,
   warnings: ModelWarning[],
 ): number {
   const out_of_range =

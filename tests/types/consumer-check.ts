@@ -40,6 +40,7 @@ import type {
   UtciParams,
   UtciResult,
   OutputInfo,
+  UnitSymbol,
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
@@ -102,6 +103,10 @@ const isoAsModelInfo: ModelInfo = PMV_PPD_ISO_INFO;
 const tdbKind: "numeric" = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.kind;
 const limitInputsDefault: boolean =
   HEAT_INDEX_ROTHFUSZ_INFO.inputs.limit_inputs.default;
+// A unit is one of the symbols the models use, so a misspelt one is rejected.
+const tdbUnit: UnitSymbol = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.unit;
+// @ts-expect-error "°c" is not a unit; the unit is "°C".
+const misspeltUnit: UnitSymbol = "°c";
 
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
@@ -557,6 +562,8 @@ export {
   isoAsModelInfo,
   tdbKind,
   limitInputsDefault,
+  tdbUnit,
+  misspeltUnit,
   heatIndexResult,
   adaptive,
   adaptiveResult,

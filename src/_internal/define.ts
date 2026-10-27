@@ -6,7 +6,7 @@ import {
   notInputsObject,
   unexpectedKeyword,
 } from "./errors.ts";
-import type { Bound } from "./modelDocs.ts";
+import type { Bound, UnitSymbol } from "./modelDocs.ts";
 
 // Each model describes its inputs once, as its `*_INFO.inputs` (ADR 0022),
 // and its inputs type and its validation are derived from it. It stands in for upstream's input dataclass (`classes_input.py`) and its
@@ -17,7 +17,7 @@ import type { Bound } from "./modelDocs.ts";
 /** A number, upstream's `numeric_field`, which the parse requires finite. */
 export interface NumericField {
   readonly kind: "numeric";
-  readonly unit: string | null;
+  readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly default?: number;
 }

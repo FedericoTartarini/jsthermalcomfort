@@ -52,6 +52,7 @@ export type {
   ModelResult,
   ModelWarning,
   OutputInfo,
+  UnitSymbol,
 } from "../_internal/modelDocs.ts";
 export type {
   AdaptiveAshraeParams,

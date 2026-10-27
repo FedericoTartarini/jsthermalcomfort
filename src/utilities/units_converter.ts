@@ -1,4 +1,3 @@
-import { checkArity } from "../_internal/arity.ts";
 import { notOfType } from "../_internal/errors.ts";
 import { Units } from "./options.ts";
 
@@ -35,8 +34,6 @@ export function units_converter<K extends string>(
       : never
   ]: number;
 } {
-  // eslint-disable-next-line prefer-rest-params -- the check needs the count of arguments given, which a rest parameter would hide from the signature
-  checkArity("units_converter", arguments, ["from_units", "values"], 0);
   if (typeof (from_units as unknown) !== "string") {
     throw notOfType("from_units", "a string");
   }

@@ -1,11 +1,10 @@
 import {
-  missingArguments,
+  missingInput,
+  notAnInput,
   notBoolean,
   notFiniteNumber,
-  notNumericType,
   notInputsObject,
   notUnits,
-  unexpectedKeyword,
 } from "./errors.ts";
 import type { Bound, UnitSymbol } from "./modelDocs.ts";
 
@@ -76,14 +75,11 @@ export type InputsOf<I extends InputsInfo> = Flatten<
 /** The inputs after the defaults are applied. */
 export type ResolvedOf<I extends InputsInfo> = Values<I>;
 
-/** Checks one number, as given or defaulted, in the order below. */
+/** Checks one number, as given or defaulted. */
 function parseNumeric(key: string, value: unknown): number {
-  // A boolean or null (deviation _shared-6), or an array (deviation _shared-5),
-  // which upstream accepts, is a TypeError.
-  if (typeof value === "boolean" || value === null || Array.isArray(value)) {
-    throw notFiniteNumber(key, TypeError);
-  }
-  if (typeof value !== "number") throw notNumericType(key);
+  // Any other type is a TypeError, a boolean or null (deviation _shared-6) and
+  // an array (deviation _shared-5) included, which upstream accepts.
+  if (typeof value !== "number") throw notFiniteNumber(key, TypeError);
   // Upstream computes on with NaN and ±Infinity (deviation _shared-7).
   if (!Number.isFinite(value)) throw notFiniteNumber(key, RangeError);
   return value;
@@ -107,19 +103,21 @@ function parseChoice(value: unknown, allowed: readonly string[]): string {
  * `INFO.inputs`; returns the values with the defaults applied.
  *
  * An unknown key fails first, as an unexpected keyword does in Python when the
- * call binds. Then each key is checked in `INFO.inputs`' order, so with
- * several errors the first named is predictable (deviation _shared-9):
+ * call binds, with a `TypeError` naming the first. Then each key is checked in
+ * `INFO.inputs`' order, and the parse stops at the first error, so with several
+ * errors the first named is predictable (deviation _shared-9):
  *
- * - a missing required key throws Python's `TypeError`, naming every missing
- *   key, as Python does;
- * - a number must be finite: upstream's `TypeError` for another
- *   type, a `TypeError` for a boolean, `null` or an array, and a `RangeError`
- *   for NaN or ±Infinity;
- * - a switch must be a boolean, with `BaseInputs`' `TypeError`, whether or not
+ * - a required key must be given, or a `TypeError` names it;
+ * - a number must be finite: a `TypeError` for any other type, a boolean,
+ *   `null` or an array included, and a `RangeError` for NaN or ±Infinity;
+ * - a switch must be a boolean, or a `TypeError` names it, whether or not
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, with
  *   `BaseInputs`' message: a `TypeError` for a value that is not a string,
  *   a `RangeError` for one that is.
+ *
+ * Each message is the library's, naming the key, except the string option's,
+ * which is upstream's (deviation _shared-10).
  *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.
@@ -137,24 +135,13 @@ export function parseInputs<const I extends InputsInfo>(
   }
   const given = args as Readonly<Record<string, unknown>>;
   const unknown = Object.keys(given).find((key) => !Object.hasOwn(inputs, key));
-  if (unknown !== undefined) throw unexpectedKeyword(name, unknown);
+  if (unknown !== undefined) throw notAnInput(unknown, name);
 
-  const read = (key: string) =>
-    Object.hasOwn(given, key) ? given[key] : undefined;
   const values: Record<string, number | boolean | string> = {};
   for (const [key, entry] of Object.entries(inputs)) {
-    let value = read(key);
+    let value = Object.hasOwn(given, key) ? given[key] : undefined;
     if (value === undefined) {
-      if (entry.default === undefined) {
-        throw missingArguments(
-          name,
-          Object.entries(inputs)
-            .filter(
-              ([k, e]) => e.default === undefined && read(k) === undefined,
-            )
-            .map(([k]) => k),
-        );
-      }
+      if (entry.default === undefined) throw missingInput(key);
       value = entry.default;
     }
     if (entry.kind === "numeric") values[key] = parseNumeric(key, value);

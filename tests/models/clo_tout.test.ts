@@ -57,18 +57,11 @@ describe("clo_tout (JS-only)", () => {
   });
 
   describe("errors", () => {
-    // Upstream's BaseInputs message (validate_type).
-    test("tout of another type throws upstream's TypeError", () => {
-      const message =
-        "tout must be one of the following types: (<class 'float'>, <class 'int'>, <class 'numpy.ndarray'>, <class 'list'>).";
-      for (const bad of ["20", {}, () => 20, 20n])
-        expect(call({ tout: bad })).toThrow(new TypeError(message));
-    });
-
     // Upstream reads True as 1, fails later on None and broadcasts an array
-    // (deviation _shared-5, deviation _shared-6).
-    test("tout as a boolean, null or an array throws TypeError", () => {
-      for (const bad of [true, false, null, [20]])
+    // (deviation _shared-5, deviation _shared-6), and its message for another
+    // type names Python's types (deviation _shared-10).
+    test("tout that is not a number throws TypeError", () => {
+      for (const bad of ["20", {}, () => 20, 20n, true, false, null, [20]])
         expect(call({ tout: bad })).toThrow(
           new TypeError("tout must be a finite number."),
         );
@@ -94,22 +87,17 @@ describe("clo_tout (JS-only)", () => {
         expect(call({ tout: 20, units: bad })).toThrow(new TypeError(message));
     });
 
-    // Python's own messages, as the call fails to bind.
-    test("a missing tout throws Python's TypeError", () => {
+    // The library's messages, where Python's name its call binding (deviation
+    // _shared-10).
+    test("a missing tout throws TypeError", () => {
       for (const inputs of [{}, { units: "SI" }, { tout: undefined }])
-        expect(call(inputs)).toThrow(
-          new TypeError(
-            "clo_tout() missing 1 required positional argument: 'tout'",
-          ),
-        );
+        expect(call(inputs)).toThrow(new TypeError("tout is required."));
     });
 
-    test("an unknown key throws Python's TypeError, naming the first", () => {
+    test("an unknown key throws TypeError, naming the first", () => {
       for (const key of ["foo", "t_out", "round_output", "limit_inputs"])
         expect(call({ tout: 20, [key]: 1 })).toThrow(
-          new TypeError(
-            `clo_tout() got an unexpected keyword argument '${key}'`,
-          ),
+          new TypeError(`${key} is not an input of clo_tout().`),
         );
     });
 
@@ -124,7 +112,9 @@ describe("clo_tout (JS-only)", () => {
     // Upstream checks units first; the library checks in the definition's
     // order (deviation _shared-9).
     test("checks run in the definition's order", () => {
-      expect(call({ tout: "x", units: "XX" })).toThrow(/^tout must be one of/);
+      expect(call({ tout: "x", units: "XX" })).toThrow(
+        new TypeError("tout must be a finite number."),
+      );
       expect(call({ tout: 20, units: "XX" })).toThrow(/^Units must be/);
     });
 

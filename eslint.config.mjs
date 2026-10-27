@@ -8,7 +8,6 @@ import tseslint from "typescript-eslint";
 // cover the same list (ADR 0020).
 export const LINTED = [
   "vitest.config.ts",
-  "src/_internal/arity.ts",
   "src/_internal/classifierBins.ts",
   "src/_internal/define.ts",
   "src/_internal/errors.ts",

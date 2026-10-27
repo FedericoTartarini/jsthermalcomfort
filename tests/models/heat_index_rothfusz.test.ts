@@ -185,48 +185,32 @@ describe("heat_index_rothfusz (JS-only)", () => {
   const call = (inputs: unknown) => () => heat_index_rothfusz(inputs as Inputs);
 
   describe("errors", () => {
-    // Upstream's BaseInputs messages (classes_input.py:128, validate_type).
-    test.each(["tdb", "rh"])(
-      "%s of another type throws upstream's TypeError",
-      (key) => {
-        const message = `${key} must be one of the following types: (<class 'float'>, <class 'int'>, <class 'numpy.ndarray'>, <class 'list'>).`;
-        for (const bad of ["25", {}, () => 25, 25n])
-          expect(call({ ...hot, [key]: bad })).toThrow(new TypeError(message));
-      },
-    );
-
+    // The library's messages, where upstream's name Python's types or its
+    // call binding (deviation _shared-10).
     test.each(["round_output", "limit_inputs"])(
-      "%s that is not a boolean throws upstream's TypeError",
+      "%s that is not a boolean throws TypeError",
       (key) => {
-        const message = `${key} must be a boolean (True or False).`;
         for (const bad of ["true", 1, null])
-          expect(call({ ...hot, [key]: bad })).toThrow(new TypeError(message));
+          expect(call({ ...hot, [key]: bad })).toThrow(
+            new TypeError(`${key} must be a boolean.`),
+          );
       },
     );
 
-    // Python's own messages, as the call fails to bind.
-    test("a missing quantity throws Python's TypeError, naming every one", () => {
-      expect(call({ tdb: 30 })).toThrow(
-        new TypeError(
-          "heat_index_rothfusz() missing 1 required positional argument: 'rh'",
-        ),
-      );
+    test("a missing quantity throws TypeError, naming the first", () => {
+      expect(call({ tdb: 30 })).toThrow(new TypeError("rh is required."));
       expect(call({ tdb: undefined, rh: undefined })).toThrow(
-        new TypeError(
-          "heat_index_rothfusz() missing 2 required positional arguments: 'tdb' and 'rh'",
-        ),
+        new TypeError("tdb is required."),
       );
     });
 
-    test("an unknown key throws Python's TypeError, naming the first", () => {
+    test("an unknown key throws TypeError, naming the first", () => {
       for (const key of ["foo", "round", "units"])
         expect(call({ ...hot, [key]: 1 })).toThrow(
-          new TypeError(
-            `heat_index_rothfusz() got an unexpected keyword argument '${key}'`,
-          ),
+          new TypeError(`${key} is not an input of heat_index_rothfusz().`),
         );
       expect(call({ ...hot, foo: 1, bar: 2 })).toThrow(
-        "unexpected keyword argument 'foo'",
+        new TypeError("foo is not an input of heat_index_rothfusz()."),
       );
     });
 
@@ -239,11 +223,12 @@ describe("heat_index_rothfusz (JS-only)", () => {
     });
 
     // Upstream reads a boolean as a number and broadcasts an array
-    // (deviation _shared-5, deviation _shared-6).
+    // (deviation _shared-5, deviation _shared-6), and its message for another
+    // type names Python's types (deviation _shared-10).
     test.each(["tdb", "rh"])(
-      "%s as a boolean, null or an array throws TypeError",
+      "%s that is not a number throws TypeError",
       (key) => {
-        for (const bad of [true, false, null, [30]])
+        for (const bad of ["25", {}, () => 25, 25n, true, false, null, [30]])
           expect(call({ ...hot, [key]: bad })).toThrow(
             new TypeError(`${key} must be a finite number.`),
           );
@@ -265,17 +250,21 @@ describe("heat_index_rothfusz (JS-only)", () => {
     // library checks in the definition's order (deviation _shared-9).
     test("checks run in the definition's order", () => {
       const bad = { tdb: "x", rh: NaN, round_output: "x", limit_inputs: "x" };
-      expect(call(bad)).toThrow(/^tdb must be one of/);
+      expect(call(bad)).toThrow(new TypeError("tdb must be a finite number."));
       expect(call({ ...bad, tdb: 30 })).toThrow(
         new RangeError("rh must be a finite number."),
       );
-      expect(call({ ...bad, tdb: 30, rh: 50 })).toThrow(/^round_output must/);
-      expect(call({ rh: "x" })).toThrow(
-        /missing 1 required positional argument: 'tdb'$/,
+      expect(call({ ...bad, tdb: 30, rh: 50 })).toThrow(
+        new TypeError("round_output must be a boolean."),
       );
-      expect(call({ tdb: "x" })).toThrow(/^tdb must be one of/);
+      expect(call({ rh: "x" })).toThrow(new TypeError("tdb is required."));
+      expect(call({ tdb: "x" })).toThrow(
+        new TypeError("tdb must be a finite number."),
+      );
       // An unknown key fails first, as an unexpected keyword does in Python.
-      expect(call({ foo: 1 })).toThrow(/unexpected keyword argument 'foo'$/);
+      expect(call({ foo: 1 })).toThrow(
+        new TypeError("foo is not an input of heat_index_rothfusz()."),
+      );
     });
 
     test("undefined takes the default, as an omitted keyword does", () => {

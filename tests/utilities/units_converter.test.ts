@@ -150,22 +150,10 @@ describe("units_converter (JS-only)", () => {
     });
   });
 
-  // Python's binding message (deviation _shared-22).
-  describe("arity", () => {
-    test("a surplus argument throws Python's TypeError", () => {
-      expect(call("IP", { tdb: 77 }, 1)).toThrow(
-        new TypeError(
-          "units_converter() takes from 0 to 2 positional arguments but 3 were given",
-        ),
-      );
-      expect(() =>
-        ["IP"].map(units_converter as (u: string) => unknown),
-      ).toThrow("but 3 were given");
-    });
-
-    test("a trailing undefined counts as omitted", () => {
-      expect(call("IP", { tdb: 77 }, undefined)()).toEqual({ tdb: 25 });
-    });
+  // Python raises TypeError for a call that does not bind (ADR 0019,
+  // whitelist item 14).
+  test("ignores a surplus argument, as a JavaScript function does", () => {
+    expect(call("IP", { tdb: 77 }, 1)()).toEqual({ tdb: 25 });
   });
 
   // Python raises with its interpreter's text, or reads a boolean as 1 or 0

@@ -6,7 +6,6 @@ import {
   HEAT_INDEX_STRESS_CATEGORIES,
 } from "../src/_internal/validation.ts";
 import type { ModelWarning } from "../src/_internal/modelDocs.ts";
-import { checkArity } from "../src/_internal/arity.ts";
 import { parseInputs } from "../src/_internal/define.ts";
 
 // Mirrors pythermalcomfort v4.6.2 tests/test_internal.py, which tests
@@ -153,80 +152,6 @@ describe("HEAT_INDEX_STRESS_CATEGORIES", () => {
     expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES)).toBe(true);
     expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES.edges)).toBe(true);
     expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES.labels)).toBe(true);
-  });
-});
-
-// Python's binding messages, measured on CPython 3.12.15 in the parity image
-// (scripts/parity/Dockerfile) with functions of each shape (deviation
-// _shared-22).
-describe("checkArity (JS-only)", () => {
-  const params = ["a", "b", "c"];
-  const check =
-    (required: number, ...args: unknown[]) =>
-    () => {
-      checkArity("f", args, params, required);
-    };
-
-  test.each([
-    {
-      required: 1,
-      args: [0, 1, 2, 3],
-      message: "f() takes from 1 to 3 positional arguments but 4 were given",
-    },
-    {
-      required: 3,
-      args: [0, 1, 2, 3, 4],
-      message: "f() takes 3 positional arguments but 5 were given",
-    },
-    {
-      required: 0,
-      args: [0, 1, 2, 3],
-      message: "f() takes from 0 to 3 positional arguments but 4 were given",
-    },
-    { required: 0, args: [], message: undefined },
-    { required: 2, args: [0, 1], message: undefined },
-    {
-      required: 3,
-      args: [],
-      message: "f() missing 3 required positional arguments: 'a', 'b', and 'c'",
-    },
-    {
-      required: 3,
-      args: [0],
-      message: "f() missing 2 required positional arguments: 'b' and 'c'",
-    },
-    {
-      required: 2,
-      args: [0],
-      message: "f() missing 1 required positional argument: 'b'",
-    },
-  ])(
-    "$required required, $args.length given: $message",
-    ({ required, args, message }) => {
-      if (message === undefined) expect(check(required, ...args)).not.toThrow();
-      else expect(check(required, ...args)).toThrow(new TypeError(message));
-    },
-  );
-
-  test("one positional parameter, and one given", () => {
-    expect(() => {
-      checkArity("f1", [0, 1], ["a"], 1);
-    }).toThrow(
-      new TypeError("f1() takes 1 positional argument but 2 were given"),
-    );
-    expect(() => {
-      checkArity("f0", [0], [], 0);
-    }).toThrow(
-      new TypeError("f0() takes 0 positional arguments but 1 was given"),
-    );
-  });
-
-  // An explicit undefined is an omitted argument (ADR 0022).
-  test("an undefined counts as omitted, trailing or not", () => {
-    expect(check(1, 0, 1, 2, undefined, undefined)).not.toThrow();
-    expect(check(3, 0, undefined, 2)).toThrow(
-      new TypeError("f() missing 1 required positional argument: 'b'"),
-    );
   });
 });
 

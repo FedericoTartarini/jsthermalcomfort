@@ -1,12 +1,11 @@
-import { describe, expect, expectTypeOf, test } from "vitest";
-import * as models from "../../src/models/index.ts";
+import { describe, expect, test } from "vitest";
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "../../src/models/index.ts";
-import type { HI, ModelWarning } from "../../src/models/index.ts";
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof heat_index_rothfusz>[0];
@@ -178,214 +177,31 @@ describe("test_heat_index_rothfusz", () => {
   );
 });
 
+describeModelContract(
+  heat_index_rothfusz,
+  HEAT_INDEX_ROTHFUSZ_INFO,
+  { tdb: 30, rh: 80 },
+  { tdb: 25, rh: 80 },
+);
+
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, and what only the library adds.
 describe("heat_index_rothfusz (JS-only)", () => {
-  const hot = { tdb: 30, rh: 80 };
-  // A call with inputs the type rejects, to test the runtime.
-  const call = (inputs: unknown) => () => heat_index_rothfusz(inputs as Inputs);
-
-  describe("errors", () => {
-    // The library's messages, where upstream's name Python's types or its
-    // call binding (deviation _shared-10).
-    test.each(["round_output", "limit_inputs"])(
-      "%s that is not a boolean throws TypeError",
-      (key) => {
-        for (const bad of ["true", 1, null])
-          expect(call({ ...hot, [key]: bad })).toThrow(
-            new TypeError(`${key} must be a boolean.`),
-          );
+  // deviation heat_index_rothfusz-2 (heat_index_rothfusz.py:83, _internal/validation.py:172)
+  test("the stress category bins are upstream's mapping, right-inclusive", () => {
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toEqual(
+      {
+        edges: [27, 32, 41, 54, 1000],
+        labels: [
+          "no risk",
+          "caution",
+          "extreme caution",
+          "danger",
+          "extreme danger",
+        ],
+        right: true,
       },
     );
-
-    test("a missing quantity throws TypeError, naming the first", () => {
-      expect(call({ tdb: 30 })).toThrow(new TypeError("rh is required."));
-      expect(call({ tdb: undefined, rh: undefined })).toThrow(
-        new TypeError("tdb is required."),
-      );
-    });
-
-    test("an unknown key throws TypeError, naming the first", () => {
-      for (const key of ["foo", "round", "units"])
-        expect(call({ ...hot, [key]: 1 })).toThrow(
-          new TypeError(`${key} is not an input of heat_index_rothfusz().`),
-        );
-      expect(call({ ...hot, foo: 1, bar: 2 })).toThrow(
-        new TypeError("foo is not an input of heat_index_rothfusz()."),
-      );
-    });
-
-    // tdb and rh were positional before v2 (ADR 0002).
-    test("anything but an inputs object throws TypeError", () => {
-      for (const bad of [30, null, undefined, [30, 80], "tdb"])
-        expect(call(bad)).toThrow(
-          new TypeError("heat_index_rothfusz() takes one inputs object."),
-        );
-    });
-
-    // Upstream reads a boolean as a number and broadcasts an array
-    // (deviation _shared-5, deviation _shared-6), and its message for another
-    // type names Python's types (deviation _shared-10).
-    test.each(["tdb", "rh"])(
-      "%s that is not a number throws TypeError",
-      (key) => {
-        for (const bad of ["25", {}, () => 25, 25n, true, false, null, [30]])
-          expect(call({ ...hot, [key]: bad })).toThrow(
-            new TypeError(`${key} must be a finite number.`),
-          );
-      },
-    );
-
-    // Upstream computes on with NaN and ±Infinity (deviation _shared-7).
-    test.each(["tdb", "rh"])(
-      "%s that is not finite throws RangeError",
-      (key) => {
-        for (const bad of [NaN, Infinity, -Infinity])
-          expect(call({ ...hot, [key]: bad })).toThrow(
-            new RangeError(`${key} must be a finite number.`),
-          );
-      },
-    );
-
-    // Upstream checks limit_inputs, round_output and then the quantities; the
-    // library checks in the definition's order (deviation _shared-9).
-    test("checks run in the definition's order", () => {
-      const bad = { tdb: "x", rh: NaN, round_output: "x", limit_inputs: "x" };
-      expect(call(bad)).toThrow(new TypeError("tdb must be a finite number."));
-      expect(call({ ...bad, tdb: 30 })).toThrow(
-        new RangeError("rh must be a finite number."),
-      );
-      expect(call({ ...bad, tdb: 30, rh: 50 })).toThrow(
-        new TypeError("round_output must be a boolean."),
-      );
-      expect(call({ rh: "x" })).toThrow(new TypeError("tdb is required."));
-      expect(call({ tdb: "x" })).toThrow(
-        new TypeError("tdb must be a finite number."),
-      );
-      // An unknown key fails first, as an unexpected keyword does in Python.
-      expect(call({ foo: 1 })).toThrow(
-        new TypeError("foo is not an input of heat_index_rothfusz()."),
-      );
-    });
-
-    test("undefined takes the default, as an omitted keyword does", () => {
-      const omitted = heat_index_rothfusz({ tdb: 25, rh: 50 });
-      expect(
-        heat_index_rothfusz({
-          tdb: 25,
-          rh: 50,
-          round_output: undefined,
-          limit_inputs: undefined,
-        }),
-      ).toEqual(omitted);
-      expect(heat_index_rothfusz({ ...hot, round_output: undefined }).hi).toBe(
-        37.7,
-      );
-    });
-  });
-
-  describe("result", () => {
-    // As upstream's frozen dataclass (classes_return.py:297).
-    test("is frozen, its warnings and rows included", () => {
-      const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
-      expect(Object.isFrozen(result)).toBe(true);
-      expect(Object.isFrozen(result.warnings)).toBe(true);
-      expect(result.warnings.every((row) => Object.isFrozen(row))).toBe(true);
-      expect(() => {
-        (result as { hi: number }).hi = 1;
-      }).toThrow(TypeError);
-    });
-
-    test("has upstream's fields, then warnings", () => {
-      expect(Object.keys(heat_index_rothfusz(hot))).toEqual([
-        "hi",
-        "stress_category",
-        "warnings",
-      ]);
-    });
-
-    // The fields' types come from the kinds in INFO.outputs: a masked label
-    // is NaN where the heat index is. `branded`, since expect-type's plain
-    // equality fails on an intersection (its README, "Why is my assertion
-    // failing?").
-    test("its fields have the types the hand-written interface had", () => {
-      expectTypeOf<HI>().branded.toEqualTypeOf<{
-        readonly hi: number;
-        readonly stress_category: string | number;
-        readonly warnings: readonly ModelWarning[];
-      }>();
-      // @ts-expect-error a masked label is not only a string
-      expectTypeOf<HI["stress_category"]>().toEqualTypeOf<string>();
-    });
-  });
-
-  // deviation heat_index_rothfusz-2
-  describe("HEAT_INDEX_ROTHFUSZ_INFO", () => {
-    test("names the model, with no description or standards", () => {
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.name).toBe("heat_index_rothfusz");
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.label).toBe("Heat Index (Rothfusz)");
-      expect(HEAT_INDEX_ROTHFUSZ_INFO).not.toHaveProperty("standards");
-      expect(HEAT_INDEX_ROTHFUSZ_INFO).not.toHaveProperty("description");
-    });
-
-    // INFO.inputs is the input definition: every keyword argument, in
-    // upstream's order, switches included.
-    test("lists every keyword argument, with upstream's bound and defaults", () => {
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs).toEqual({
-        tdb: { kind: "numeric", unit: "°C", applicability: { min: 27 } },
-        rh: { kind: "numeric", unit: "%" },
-        round_output: { kind: "bool", default: true },
-        limit_inputs: { kind: "bool", default: true },
-      });
-      expect(Object.keys(HEAT_INDEX_ROTHFUSZ_INFO.inputs)).toEqual([
-        "tdb",
-        "rh",
-        "round_output",
-        "limit_inputs",
-      ]);
-    });
-
-    // {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}
-    // (heat_index_rothfusz.py:83, _internal/validation.py:172), and
-    // _mapping's right=True.
-    test("the stress category bins are upstream's mapping, right-inclusive", () => {
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs).toEqual({
-        hi: { kind: "numeric", unit: "°C" },
-        stress_category: {
-          kind: "label",
-          masked: true,
-          unit: null,
-          classifier: {
-            edges: [27, 32, 41, 54, 1000],
-            labels: [
-              "no risk",
-              "caution",
-              "extreme caution",
-              "danger",
-              "extreme danger",
-            ],
-            right: true,
-          },
-        },
-      });
-    });
-
-    test("the bins are reached through INFO only", () => {
-      expect(models).not.toHaveProperty("HEAT_INDEX_STRESS_CATEGORY_BINS");
-      expect(models).not.toHaveProperty("HEAT_INDEX_STRESS_CATEGORIES");
-    });
-
-    test("is frozen deeply", () => {
-      const { inputs, outputs } = HEAT_INDEX_ROTHFUSZ_INFO;
-      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO)).toBe(true);
-      expect(Object.isFrozen(inputs)).toBe(true);
-      expect(Object.isFrozen(inputs.tdb)).toBe(true);
-      expect(Object.isFrozen(inputs.tdb.applicability)).toBe(true);
-      expect(Object.isFrozen(inputs.limit_inputs)).toBe(true);
-      expect(Object.isFrozen(outputs.stress_category.classifier.edges)).toBe(
-        true,
-      );
-    });
   });
 
   // deviation heat_index_rothfusz-3

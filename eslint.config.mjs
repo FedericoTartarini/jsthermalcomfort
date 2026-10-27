@@ -33,6 +33,7 @@ export const LINTED = [
   "tests/models/adaptive_ashrae.test.ts",
   "tests/models/clo_tout.test.ts",
   "tests/models/heat_index_rothfusz.test.ts",
+  "tests/models/modelContract.ts",
   "tests/models/returnsList.test.ts",
   "tests/models/solar_gain.test.ts",
   "tests/models/utci.test.ts",

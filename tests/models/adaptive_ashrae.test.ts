@@ -1,15 +1,14 @@
-import { describe, expect, expectTypeOf, test } from "vitest";
-import * as models from "../../src/models/index.ts";
+import { describe, expect, test } from "vitest";
 import {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,
   CLO_TOUT_INFO,
 } from "../../src/models/index.ts";
-import type { AdaptiveASHRAE, ModelWarning } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { adaptive_ashrae as adaptive_ashrae_from_root } from "../../src/index.ts";
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof adaptive_ashrae>[0];
@@ -191,6 +190,13 @@ describe("test_adaptive_ashrae", () => {
   });
 });
 
+describeModelContract(
+  adaptive_ashrae,
+  ADAPTIVE_ASHRAE_INFO,
+  { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
+  { tdb: 25, tr: 25, t_running_mean: 5, v: 0.1 },
+);
+
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, measured on pythermalcomfort 4.7.0,
 // and what only the library adds.
@@ -356,74 +362,7 @@ describe("adaptive_ashrae (JS-only)", () => {
   });
 
   describe("errors", () => {
-    // The library's messages, where upstream's name Python's types or its
-    // call binding (deviation _shared-10); upstream does not check
-    // limit_inputs, and reads "no" as true (deviation _shared-8).
-    test.each(["limit_inputs", "round_output"])(
-      "%s that is not a boolean throws TypeError",
-      (key) => {
-        for (const bad of ["true", 1, null])
-          expect(call({ ...neutral, [key]: bad })).toThrow(
-            new TypeError(`${key} must be a boolean.`),
-          );
-      },
-    );
-
-    test("a missing quantity throws TypeError, naming the first", () => {
-      expect(call({ tdb: 25, tr: 25, t_running_mean: 20 })).toThrow(
-        new TypeError("v is required."),
-      );
-      expect(call({ v: 0.1 })).toThrow(new TypeError("tdb is required."));
-      expect(call({ ...neutral, t_running_mean: undefined })).toThrow(
-        new TypeError("t_running_mean is required."),
-      );
-    });
-
-    test("an unknown key throws TypeError, naming the first", () => {
-      for (const key of ["foo", "vr", "standard"])
-        expect(call({ ...neutral, [key]: 1 })).toThrow(
-          new TypeError(`${key} is not an input of adaptive_ashrae().`),
-        );
-      expect(call({ ...neutral, foo: 1, bar: 2 })).toThrow(
-        new TypeError("foo is not an input of adaptive_ashrae()."),
-      );
-    });
-
-    // Every argument was positional before v2 (ADR 0002).
-    test("anything but an inputs object throws TypeError", () => {
-      for (const bad of [25, null, undefined, [25, 25, 20, 0.1], "tdb"])
-        expect(call(bad)).toThrow(
-          new TypeError("adaptive_ashrae() takes one inputs object."),
-        );
-    });
-
-    // Upstream reads a boolean as a number and broadcasts an array
-    // (deviation _shared-5, deviation _shared-6), and its message for another
-    // type names Python's types (deviation _shared-10).
-    test.each(["tdb", "tr", "t_running_mean", "v"])(
-      "%s that is not a number throws TypeError",
-      (key) => {
-        for (const bad of ["25", {}, () => 25, 25n, true, false, null, [25]])
-          expect(call({ ...neutral, [key]: bad })).toThrow(
-            new TypeError(`${key} must be a finite number.`),
-          );
-      },
-    );
-
-    // Upstream computes on with NaN and ±Infinity (deviation _shared-7).
-    test.each(["tdb", "tr", "t_running_mean", "v"])(
-      "%s that is not finite throws RangeError",
-      (key) => {
-        for (const bad of [NaN, Infinity, -Infinity])
-          expect(call({ ...neutral, [key]: bad })).toThrow(
-            new RangeError(`${key} must be a finite number.`),
-          );
-      },
-    );
-
-    // BaseInputs' message (classes_input.py:120), for a string outside the
-    // set and, as upstream compares str(units), any other value (deviation
-    // _shared-24).
+    // deviation _shared-24 (classes_input.py:120)
     test("units other than SI or IP throws upstream's message", () => {
       const message = "Units must be either 'SI' or 'IP'";
       for (const bad of ["INVALID", "", "metric"])
@@ -435,106 +374,10 @@ describe("adaptive_ashrae (JS-only)", () => {
           new TypeError(message),
         );
     });
-
-    // Upstream checks units, then the quantities and round_output; the
-    // library checks in the definition's order (deviation _shared-9).
-    test("checks run in the definition's order", () => {
-      const bad = {
-        tdb: "x",
-        tr: NaN,
-        t_running_mean: "x",
-        v: "x",
-        units: "XX",
-        limit_inputs: "x",
-        round_output: "x",
-      };
-      expect(call(bad)).toThrow(new TypeError("tdb must be a finite number."));
-      expect(call({ ...bad, tdb: 25 })).toThrow(
-        new RangeError("tr must be a finite number."),
-      );
-      expect(call({ ...bad, ...neutral })).toThrow(/^Units must be/);
-      expect(call({ ...bad, ...neutral, units: "SI" })).toThrow(
-        new TypeError("limit_inputs must be a boolean."),
-      );
-      expect(
-        call({ ...bad, ...neutral, units: "SI", limit_inputs: true }),
-      ).toThrow(new TypeError("round_output must be a boolean."));
-      // An unknown key fails first, as an unexpected keyword does in Python.
-      expect(call({ foo: 1 })).toThrow(
-        new TypeError("foo is not an input of adaptive_ashrae()."),
-      );
-    });
-
-    test("undefined takes the default, as an omitted keyword does", () => {
-      expect(
-        adaptive_ashrae({
-          ...neutral,
-          units: undefined,
-          limit_inputs: undefined,
-          round_output: undefined,
-        }),
-      ).toEqual(adaptive_ashrae(neutral));
-      expect(
-        adaptive_ashrae({
-          ...neutral,
-          t_running_mean: 22,
-          round_output: undefined,
-        }).tmp_cmf,
-      ).toBe(24.6);
-      expect(
-        adaptive_ashrae({
-          ...neutral,
-          t_running_mean: 5,
-          limit_inputs: undefined,
-        }).tmp_cmf,
-      ).toBeNaN();
-    });
   });
 
   describe("result", () => {
-    // As upstream's frozen dataclass (classes_return.py:111).
-    test("is frozen, its warnings and rows included", () => {
-      const result = adaptive_ashrae({ ...neutral, tdb: 45 });
-      expect(Object.isFrozen(result)).toBe(true);
-      expect(Object.isFrozen(result.warnings)).toBe(true);
-      expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings.every((row) => Object.isFrozen(row))).toBe(true);
-      expect(() => {
-        (result as { tmp_cmf: number }).tmp_cmf = 1;
-      }).toThrow(TypeError);
-    });
-
-    test("has upstream's fields, then warnings", () => {
-      expect(Object.keys(adaptive_ashrae(neutral))).toEqual([
-        "tmp_cmf",
-        "tmp_cmf_80_low",
-        "tmp_cmf_80_up",
-        "tmp_cmf_90_low",
-        "tmp_cmf_90_up",
-        "acceptability_80",
-        "acceptability_90",
-        "warnings",
-      ]);
-    });
-
-    // The fields' types come from the kinds in INFO.outputs. `branded`, since
-    // expect-type's plain equality fails on an intersection (its README, "Why
-    // is my assertion failing?").
-    test("its fields have the types the hand-written interface had", () => {
-      expectTypeOf<AdaptiveASHRAE>().branded.toEqualTypeOf<{
-        readonly tmp_cmf: number;
-        readonly tmp_cmf_80_low: number;
-        readonly tmp_cmf_80_up: number;
-        readonly tmp_cmf_90_low: number;
-        readonly tmp_cmf_90_up: number;
-        readonly acceptability_80: boolean;
-        readonly acceptability_90: boolean;
-        readonly warnings: readonly ModelWarning[];
-      }>();
-    });
-
-    // Upstream's acceptability is a comparison with NaN under the gate, so
-    // False, not masked (adaptive_ashrae.py:155-156).
+    // adaptive_ashrae.py:155-156
     test("the acceptability is a boolean even when tmp_cmf is NaN", () => {
       const result = adaptive_ashrae({ ...neutral, tdb: 45 });
       expect(result.tmp_cmf).toBeNaN();
@@ -545,85 +388,12 @@ describe("adaptive_ashrae (JS-only)", () => {
 
   // deviation adaptive_ashrae-1
   describe("ADAPTIVE_ASHRAE_INFO", () => {
-    test("names the model, with no description or standards", () => {
-      expect(ADAPTIVE_ASHRAE_INFO.name).toBe("adaptive_ashrae");
-      expect(ADAPTIVE_ASHRAE_INFO.label).toBe("Adaptive (ASHRAE 55)");
-      expect(ADAPTIVE_ASHRAE_INFO).not.toHaveProperty("standards");
-      expect(ADAPTIVE_ASHRAE_INFO).not.toHaveProperty("description");
-    });
-
-    // Upstream's limits (_internal/ashrae55.py:29-30, :36;
-    // models/adaptive_ashrae.py:138).
-    test("lists every keyword argument, with upstream's bounds and defaults", () => {
-      expect(ADAPTIVE_ASHRAE_INFO.inputs).toEqual({
-        tdb: {
-          kind: "numeric",
-          unit: "°C",
-          applicability: { min: 10, max: 40 },
-        },
-        tr: {
-          kind: "numeric",
-          unit: "°C",
-          applicability: { min: 10, max: 40 },
-        },
-        t_running_mean: {
-          kind: "numeric",
-          unit: "°C",
-          applicability: { min: 10, max: 33.5 },
-        },
-        v: { kind: "numeric", unit: "m/s", applicability: { min: 0, max: 2 } },
-        units: {
-          kind: "choice",
-          allowed: ["SI", "IP"],
-          default: "SI",
-          message: "Units must be either 'SI' or 'IP'",
-        },
-        limit_inputs: { kind: "bool", default: true },
-        round_output: { kind: "bool", default: true },
-      });
-      expect(Object.keys(ADAPTIVE_ASHRAE_INFO.inputs)).toEqual([
-        "tdb",
-        "tr",
-        "t_running_mean",
-        "v",
-        "units",
-        "limit_inputs",
-        "round_output",
-      ]);
-    });
-
-    // ASHRAE 55's limits, written once beside _check_ashrae55_compliance;
-    // BaseInputs' units field, written once.
     test("shares ASHRAE 55's bounds and BaseInputs' units, not copies", () => {
       const { inputs } = ADAPTIVE_ASHRAE_INFO;
       expect(inputs.tdb.applicability).toBe(ASHRAE_55_LIMITS.tdb);
       expect(inputs.tr.applicability).toBe(ASHRAE_55_LIMITS.tr);
       expect(inputs.v.applicability).toBe(ASHRAE_55_LIMITS.v);
       expect(inputs.units).toBe(CLO_TOUT_INFO.inputs.units);
-    });
-
-    test("the outputs are upstream's fields, temperatures in °C", () => {
-      expect(ADAPTIVE_ASHRAE_INFO.outputs).toEqual({
-        tmp_cmf: { kind: "numeric", unit: "°C" },
-        tmp_cmf_80_low: { kind: "numeric", unit: "°C" },
-        tmp_cmf_80_up: { kind: "numeric", unit: "°C" },
-        tmp_cmf_90_low: { kind: "numeric", unit: "°C" },
-        tmp_cmf_90_up: { kind: "numeric", unit: "°C" },
-        acceptability_80: { kind: "bool", unit: null },
-        acceptability_90: { kind: "bool", unit: null },
-      });
-    });
-
-    test("the limits are reached through INFO only", () => {
-      expect(models).not.toHaveProperty("ADAPTIVE_ASHRAE_LIMITS");
-    });
-
-    test("is frozen deeply", () => {
-      const { inputs, outputs } = ADAPTIVE_ASHRAE_INFO;
-      expect(Object.isFrozen(ADAPTIVE_ASHRAE_INFO)).toBe(true);
-      expect(Object.isFrozen(inputs.t_running_mean.applicability)).toBe(true);
-      expect(Object.isFrozen(inputs.units.allowed)).toBe(true);
-      expect(Object.isFrozen(outputs.acceptability_80)).toBe(true);
     });
   });
 

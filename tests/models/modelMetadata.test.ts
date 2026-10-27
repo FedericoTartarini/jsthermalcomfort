@@ -21,14 +21,10 @@ import type {
   LegacyModelInfo,
   ModelInfo,
 } from "../../src/_internal/modelInfo.ts";
+import { isDeepFrozen } from "./modelContract.ts";
 
-// NOTE: A directory scan approach was attempted to make this test self-maintaining,
-// but the Jest ESM configuration of the time did not support CommonJS require() or
-// synchronous dynamic imports in test files. Keep this hardcoded list instead. When a new model's
-// _INFO or _BINS constants are added, this test will fail because the new constant
-// is not in the list, catching the JOS3 failure mode: a model whose constants exist
-// but are never added to src/models/index.ts or src/index.ts. The list must be
-// manually updated whenever a new *_INFO or *_BINS export is published.
+// The list catches a constant missing from src/models/index.ts or
+// src/index.ts, which a scan of the package cannot.
 const expectedMetadataExports = [
   "ADAPTIVE_ASHRAE_INFO",
   "classifyFromBins",
@@ -89,54 +85,6 @@ describe("name — each model info names its model's export", () => {
       expect(`${info.name.toUpperCase()}_INFO`).toBe(exportName);
     },
   );
-});
-
-describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
-  test("has required top-level properties", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.name).toBe("heat_index_rothfusz");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("label");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("inputs");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO).toHaveProperty("outputs");
-  });
-
-  test("label is a string", () => {
-    expect(typeof HEAT_INDEX_ROTHFUSZ_INFO.label).toBe("string");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.label).toMatch(/Heat Index/);
-  });
-
-  test("inputs contains tdb and rh", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs).toHaveProperty("tdb");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs).toHaveProperty("rh");
-  });
-
-  test("tdb input has applicability minimum of 27 (SI unit)", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability).toBeDefined();
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.applicability!.min).toBe(27);
-  });
-
-  test("tdb input has unit °C", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb!.unit).toBe("°C");
-  });
-
-  test("rh input has unit %", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs.rh!.unit).toBe("%");
-  });
-
-  test("outputs contains hi and stress_category", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs).toHaveProperty("hi");
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs).toHaveProperty("stress_category");
-  });
-
-  test("hi output has unit °C", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.hi!.unit).toBe("°C");
-  });
-
-  test("stress_category output is dimensionless with classifier", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.unit).toBeNull();
-    expect(
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier,
-    ).toBeDefined();
-  });
 });
 
 describe("PMV_PPD_ISO_INFO structure", () => {
@@ -292,51 +240,10 @@ describe("standards — what each model not yet migrated accepts", () => {
 });
 
 describe("Deep freezing — objects are immutable", () => {
-  test("HEAT_INDEX_ROTHFUSZ_INFO is frozen", () => {
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO)).toBe(true);
-  });
-
-  test("HEAT_INDEX_ROTHFUSZ_INFO.inputs is frozen", () => {
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs)).toBe(true);
-  });
-
-  test("HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb is frozen", () => {
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb)).toBe(true);
-  });
-
-  test("HEAT_INDEX_ROTHFUSZ_INFO.outputs is frozen", () => {
-    expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.outputs)).toBe(true);
-  });
-
-  test("HEAT_INDEX_ROTHFUSZ_INFO's stress category bins are frozen", () => {
-    const classifier =
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier!;
-    expect(Object.isFrozen(classifier)).toBe(true);
-    expect(Object.isFrozen(classifier.edges)).toBe(true);
-    expect(Object.isFrozen(classifier.labels)).toBe(true);
-  });
-
-  test("PMV_PPD_ISO_INFO is frozen", () => {
-    expect(Object.isFrozen(PMV_PPD_ISO_INFO)).toBe(true);
-  });
-
-  test("PMV_PPD_ISO_INFO.inputs is frozen", () => {
-    expect(Object.isFrozen(PMV_PPD_ISO_INFO.inputs)).toBe(true);
-  });
-
-  test("PMV_PPD_ISO_INFO.inputs.met is frozen", () => {
-    expect(Object.isFrozen(PMV_PPD_ISO_INFO.inputs.met)).toBe(true);
-  });
-
-  test("PMV_PPD_ISO_INFO.outputs is frozen", () => {
-    expect(Object.isFrozen(PMV_PPD_ISO_INFO.outputs)).toBe(true);
-  });
-
-  test("PMV_THERMAL_SENSATION_VOTE_BINS_ISO nested in INFO is frozen", () => {
-    const classifier = PMV_PPD_ISO_INFO.outputs.tsv!.classifier!;
-    expect(Object.isFrozen(classifier)).toBe(true);
-    expect(Object.isFrozen(classifier.edges)).toBe(true);
-    expect(Object.isFrozen(classifier.labels)).toBe(true);
+  test.each(
+    expectedMetadataExports.filter((name) => /_INFO$|_BINS_/.test(name)),
+  )("%s is frozen deeply", (name) => {
+    expect(isDeepFrozen((pkg as Record<string, unknown>)[name])).toBe(true);
   });
 });
 
@@ -537,13 +444,6 @@ describe("Enforcement — extracted constants match runtime validation", () => {
     expect(resultAboveMaxNoLimit.pmv).toBeGreaterThanOrEqual(-2);
     expect(resultAboveMaxNoLimit.pmv).toBeLessThanOrEqual(2);
   });
-
-  // NOTE on issue #195: A vapour pressure bound test cannot be written yet.
-  // pythermalcomfort enforces vapour pressure in [0, 2700] Pa, but jsthermalcomfort
-  // has no such check (see issue #195). When that is fixed, add a test here similar
-  // to the met/clo tests above, using the three-part pattern:
-  // (1) outside limit_inputs=true -> NaN, (2) on bound limit_inputs=true -> finite,
-  // (3) outside limit_inputs=false -> finite AND inside [-2, 2].
 });
 
 // One call of each model whose INFO has the v2 form, its inputs carrying a
@@ -756,17 +656,5 @@ describe("PMV_PPD_ASHRAE_INFO — the ASHRAE 55 wrapper's metadata", () => {
     expect(Number.isFinite(result.pmv)).toBe(true);
     expect(result.pmv).toBeGreaterThan(2);
     expect(result.warnings).toEqual([]);
-  });
-
-  test("is deep-frozen", () => {
-    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO)).toBe(true);
-    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.standards)).toBe(true);
-    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.inputs)).toBe(true);
-    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.inputs.met)).toBe(true);
-    expect(Object.isFrozen(PMV_PPD_ASHRAE_INFO.outputs)).toBe(true);
-    const classifier = PMV_PPD_ASHRAE_INFO.outputs.tsv!.classifier!;
-    expect(Object.isFrozen(classifier)).toBe(true);
-    expect(Object.isFrozen(classifier.edges)).toBe(true);
-    expect(Object.isFrozen(classifier.labels)).toBe(true);
   });
 });

@@ -1,9 +1,9 @@
-import { describe, expect, expectTypeOf, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { solar_gain, SOLAR_GAIN_INFO } from "../../src/models/index.ts";
-import type { ModelWarning, SolarGain } from "../../src/models/index.ts";
 import { Postures } from "../../src/utilities/index.ts";
 import { solar_gain as solar_gain_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof solar_gain>[0];
@@ -180,6 +180,28 @@ describe("test_solar_gain", () => {
   });
 });
 
+describeModelContract(
+  solar_gain,
+  SOLAR_GAIN_INFO,
+  {
+    sol_altitude: 0,
+    sharp: 120,
+    sol_radiation_dir: 800,
+    sol_transmittance: 0.5,
+    f_svv: 0.5,
+    f_bes: 0.5,
+  },
+  {
+    sol_altitude: 0,
+    sharp: 120,
+    sol_radiation_dir: 800,
+    sol_transmittance: 0.5,
+    f_svv: 0.5,
+    f_bes: 0.5,
+    asw: 2,
+  },
+);
+
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, measured on pythermalcomfort 4.6.2
 // (the supine values on 4.7.0), and what only the library adds.
@@ -233,26 +255,6 @@ describe("solar_gain (JS-only)", () => {
       );
     });
 
-    test("undefined takes the default, as an omitted keyword does", () => {
-      expect(
-        solar_gain({
-          ...base,
-          asw: undefined,
-          posture: undefined,
-          floor_reflectance: undefined,
-          round_output: undefined,
-        }),
-      ).toEqual(
-        solar_gain({
-          ...base,
-          asw: 0.7,
-          posture: "sitting",
-          floor_reflectance: 0.6,
-          round_output: true,
-        }),
-      );
-    });
-
     // np.round(erf, 1) (models/solar_gain.py:252-254); the unrounded values
     // are upstream's, measured on pythermalcomfort 4.6.2.
     test("round_output rounds both outputs to one decimal, and only then", () => {
@@ -285,8 +287,7 @@ describe("solar_gain (JS-only)", () => {
   });
 
   describe("errors", () => {
-    // The model's own message (models/solar_gain.py:209-211), a RangeError
-    // where upstream raises ValueError (deviation solar_gain-5).
+    // deviation solar_gain-5 (models/solar_gain.py:209-211)
     test("posture outside the three throws RangeError with upstream's message", () => {
       for (const bad of ["lying", "crouching", "", "sitting "])
         expect(call({ ...base, posture: bad })).toThrow(
@@ -294,117 +295,10 @@ describe("solar_gain (JS-only)", () => {
         );
     });
 
-    // Upstream's posture.lower() raises AttributeError for these (deviation
-    // solar_gain-6).
+    // deviation solar_gain-6
     test("posture that is not a string throws TypeError with the same message", () => {
       for (const bad of [null, 5, true, ["sitting"], {}])
         expect(call({ ...base, posture: bad })).toThrow(new TypeError(POSTURE));
-    });
-
-    // Upstream reads True as 1, fails later on None and broadcasts an array
-    // (deviation _shared-5, deviation _shared-6), and its message for another
-    // type names Python's types (deviation _shared-10).
-    test("a quantity that is not a number throws TypeError", () => {
-      for (const key of Object.keys(SOLAR_GAIN_INFO.inputs).filter(
-        (key) =>
-          SOLAR_GAIN_INFO.inputs[key as keyof typeof SOLAR_GAIN_INFO.inputs]
-            .kind === "numeric",
-      ))
-        for (const bad of ["1", null, true, [1]])
-          expect(call({ ...base, [key]: bad })).toThrow(
-            new TypeError(`${key} must be a finite number.`),
-          );
-    });
-
-    // Upstream returns NaN for a NaN sol_altitude, with no warning (deviation
-    // _shared-7).
-    test("a quantity that is not finite throws RangeError", () => {
-      for (const bad of [NaN, Infinity, -Infinity])
-        for (const key of ["sol_altitude", "asw", "floor_reflectance"])
-          expect(call({ ...base, [key]: bad })).toThrow(
-            new RangeError(`${key} must be a finite number.`),
-          );
-    });
-
-    // Upstream reads round_output for its truth value (deviation _shared-8).
-    test("round_output that is not a boolean throws TypeError", () => {
-      for (const bad of [0, 1, "true", null])
-        expect(call({ ...base, round_output: bad })).toThrow(
-          new TypeError("round_output must be a boolean."),
-        );
-    });
-
-    // The library's messages, where Python's name its call binding (deviation
-    // _shared-10).
-    test("a missing quantity throws TypeError, naming the first", () => {
-      expect(call({})).toThrow(new TypeError("sol_altitude is required."));
-      expect(
-        call({
-          sol_altitude: 0,
-          sharp: 120,
-          sol_radiation_dir: 800,
-          sol_transmittance: 0.5,
-          f_svv: 0.5,
-        }),
-      ).toThrow(new TypeError("f_bes is required."));
-    });
-
-    test("an unknown key throws TypeError, naming the first", () => {
-      for (const key of ["altitude", "limit_inputs", "units"])
-        expect(call({ ...base, [key]: 1 })).toThrow(
-          new TypeError(`${key} is not an input of solar_gain().`),
-        );
-    });
-
-    // Every argument was positional before v2 (ADR 0002).
-    test("anything but an inputs object throws TypeError", () => {
-      for (const bad of [0, null, undefined, [0, 120, 800, 0.5, 0.5, 0.5]])
-        expect(call(bad)).toThrow(
-          new TypeError("solar_gain() takes one inputs object."),
-        );
-    });
-
-    // Upstream checks posture after the ranges (models/solar_gain.py:198-212);
-    // the library checks in the definition's order (deviation _shared-9).
-    test("checks run in the definition's order", () => {
-      expect(call({ ...base, sol_altitude: "x", posture: "lying" })).toThrow(
-        new TypeError("sol_altitude must be a finite number."),
-      );
-      expect(
-        call({ ...base, posture: "lying", floor_reflectance: "x" }),
-      ).toThrow(new RangeError(POSTURE));
-    });
-  });
-
-  describe("result", () => {
-    // As upstream's frozen dataclass (classes_return.py:480).
-    test("is frozen, its warnings included", () => {
-      const result = solar_gain({ ...base, sol_altitude: 95 });
-      expect(Object.isFrozen(result)).toBe(true);
-      expect(Object.isFrozen(result.warnings)).toBe(true);
-      expect(Object.isFrozen(result.warnings[0])).toBe(true);
-      expect(() => {
-        (result as { erf: number }).erf = 1;
-      }).toThrow(TypeError);
-    });
-
-    test("has upstream's fields, then warnings", () => {
-      expect(Object.keys(solar_gain(base))).toEqual([
-        "erf",
-        "delta_mrt",
-        "warnings",
-      ]);
-    });
-
-    // The fields' types come from the kinds in INFO.outputs. `branded`, since
-    // expect-type's plain equality fails on an intersection (its README, "Why
-    // is my assertion failing?").
-    test("its fields have the types the hand-written interface had", () => {
-      expectTypeOf<SolarGain>().branded.toEqualTypeOf<{
-        readonly erf: number;
-        readonly delta_mrt: number;
-        readonly warnings: readonly ModelWarning[];
-      }>();
     });
   });
 
@@ -527,81 +421,6 @@ describe("solar_gain (JS-only)", () => {
       });
       expect(result.warnings).toEqual([]);
       expect(Number.isFinite(result.erf)).toBe(true);
-    });
-  });
-
-  // deviation solar_gain-1
-  describe("SOLAR_GAIN_INFO", () => {
-    test("names the model, with no description or standards", () => {
-      expect(SOLAR_GAIN_INFO.name).toBe("solar_gain");
-      expect(SOLAR_GAIN_INFO.label).toBe("Solar gain on people");
-      expect(SOLAR_GAIN_INFO).not.toHaveProperty("standards");
-      expect(SOLAR_GAIN_INFO).not.toHaveProperty("description");
-      expect(SOLAR_GAIN_INFO).not.toHaveProperty("derived");
-    });
-
-    test("lists every keyword argument, in upstream's order, with its defaults", () => {
-      expect(SOLAR_GAIN_INFO.inputs).toEqual({
-        sol_altitude: {
-          kind: "numeric",
-          unit: "°",
-          applicability: { min: 0, max: 90 },
-        },
-        sharp: {
-          kind: "numeric",
-          unit: "°",
-          applicability: { min: 0, max: 180 },
-        },
-        sol_radiation_dir: {
-          kind: "numeric",
-          unit: "W/m²",
-          applicability: { min: 200, max: 1000 },
-        },
-        sol_transmittance: { kind: "numeric", unit: null },
-        f_svv: { kind: "numeric", unit: null },
-        f_bes: { kind: "numeric", unit: null },
-        asw: {
-          kind: "numeric",
-          unit: null,
-          applicability: { min: 0.2, max: 0.9 },
-          default: 0.7,
-        },
-        posture: {
-          kind: "choice",
-          allowed: ["standing", "supine", "sitting"],
-          default: "sitting",
-          message: POSTURE,
-        },
-        floor_reflectance: { kind: "numeric", unit: null, default: 0.6 },
-        round_output: { kind: "bool", default: true },
-      });
-      expect(Object.keys(SOLAR_GAIN_INFO.inputs)).toEqual([
-        "sol_altitude",
-        "sharp",
-        "sol_radiation_dir",
-        "sol_transmittance",
-        "f_svv",
-        "f_bes",
-        "asw",
-        "posture",
-        "floor_reflectance",
-        "round_output",
-      ]);
-    });
-
-    test("erf in W/m² and delta_mrt in °C are the outputs", () => {
-      expect(SOLAR_GAIN_INFO.outputs).toEqual({
-        erf: { kind: "numeric", unit: "W/m²" },
-        delta_mrt: { kind: "numeric", unit: "°C" },
-      });
-    });
-
-    test("is frozen deeply", () => {
-      const { inputs, outputs } = SOLAR_GAIN_INFO;
-      expect(Object.isFrozen(SOLAR_GAIN_INFO)).toBe(true);
-      expect(Object.isFrozen(inputs.sol_altitude.applicability)).toBe(true);
-      expect(Object.isFrozen(inputs.posture.allowed)).toBe(true);
-      expect(Object.isFrozen(outputs.erf)).toBe(true);
     });
   });
 

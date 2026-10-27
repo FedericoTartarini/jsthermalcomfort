@@ -7,27 +7,33 @@ import type { AdaptiveAshraeParams } from "../../src/models/adaptive_ashrae.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
-let { testData, tolerances } = await loadTestData(testDataUrls.adaptiveAshrae);
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.adaptiveAshrae,
+);
 
-const close = (actual: number, expected: number) =>
+const close = (actual: number, expected: number) => {
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(1e-6);
+};
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_adaptive_ashrae.py.
-//
-// The ASHRAE 55 compliance tests in tests/test_internal.py
-// (TestCheckAshrae55Compliance) are mirrored with pmv_ppd_ashrae, not here:
-// all four pass met and clo, and three take the airspeed_control=False path,
-// while adaptive_ashrae passes the helper tdb, tr and v only, as upstream's
-// does.
+// Mirrors pythermalcomfort v4.7.0 tests/test_adaptive_ashrae.py. The
+// _check_ashrae55_compliance cases of tests/test_internal.py are in
+// tests/internal.test.ts, and test_t_o of tests/test_environment.py is in
+// tests/environment/operative_tmp.test.ts.
 describe("test_adaptive_ashrae", () => {
-  test.each(testData.data)("test_adaptive_ashrae: fixture case %#", (row) => {
-    const { inputs, outputs } = row;
-    // The row goes in unchanged, as upstream's adaptive_ashrae(**inputs); a
-    // row without units runs on the "SI" default.
-    const result = adaptive_ashrae(inputs as unknown as AdaptiveAshraeParams);
+  test.each(reference_table.data)(
+    "test_adaptive_ashrae: fixture case %#",
+    (entry) => {
+      const { inputs, outputs } = entry;
+      // As upstream's adaptive_ashrae(tdb, tr, t_running_mean, v, units): the
+      // fixture's entries hold those keys only, and one without units runs on
+      // the "SI" default.
+      const result = adaptive_ashrae(
+        inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
+      );
 
-    validateResult(result, outputs, tolerances, inputs);
-  });
+      validateResult(result, outputs, tolerance, inputs);
+    },
+  );
 
   test("test_ashrae_inputs_invalid_units", () => {
     expect(() =>
@@ -178,22 +184,19 @@ describe("test_adaptive_ashrae", () => {
   });
 });
 
-// The mirror of test_t_o (pythermalcomfort v4.6.0 tests/test_environment.py)
-// is in tests/psychrometrics/t_o.test.js, next to the other t_o tests.
-
 describe("adaptive_ashrae (JS-only)", () => {
   const neutral = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
 
   test("neutral comfort, t_running_mean within range: comfort predicted", () => {
     const result = adaptive_ashrae(neutral);
-    validateResult(result, { tmp_cmf: 24.0 }, tolerances, {});
+    validateResult(result, { tmp_cmf: 24.0 }, tolerance, {});
     expect(result.acceptability_80).toBe(true);
     expect(result.acceptability_90).toBe(true);
   });
 
   test("warm indoor exceeds the comfort zone: not acceptable", () => {
     const result = adaptive_ashrae({ ...neutral, tdb: 32, tr: 32 });
-    validateResult(result, { tmp_cmf: 24.0 }, tolerances, {});
+    validateResult(result, { tmp_cmf: 24.0 }, tolerance, {});
     expect(result.acceptability_80).toBe(false);
     expect(result.acceptability_90).toBe(false);
   });
@@ -205,7 +208,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       tr: 15,
       t_running_mean: 12,
     });
-    validateResult(result, { tmp_cmf: 21.5 }, tolerances, {});
+    validateResult(result, { tmp_cmf: 21.5 }, tolerance, {});
     expect(result.acceptability_80).toBe(false);
     expect(result.acceptability_90).toBe(false);
   });
@@ -242,14 +245,14 @@ describe("adaptive_ashrae (JS-only)", () => {
     });
 
     // One step outside each bound: one row, whose bound is the object
-    // ADAPTIVE_ASHRAE_INFO references (`toBe`). v one step below 0 is not
-    // here: the operative temperature throws on a negative v first.
+    // ADAPTIVE_ASHRAE_INFO references (`toBe`).
     const step = 0.01;
     test.each<[string, number]>([
       ["tdb", bound("tdb").min! - step],
       ["tdb", bound("tdb").max! + step],
       ["tr", bound("tr").min! - step],
       ["tr", bound("tr").max! + step],
+      ["v", bound("v").min! - step],
       ["v", bound("v").max! + step],
       ["t_running_mean", bound("t_running_mean").min! - step],
       ["t_running_mean", bound("t_running_mean").max! + step],
@@ -351,6 +354,17 @@ describe("adaptive_ashrae (JS-only)", () => {
     expect(adaptive_ashrae({ ...neutral, t_running_mean: 22 }).tmp_cmf).toBe(
       24.6,
     );
+  });
+
+  // adaptive_ashrae(tdb=25, tr=25, t_running_mean=20, v=-0.5) gives nan with
+  // a 'v' warning, and 24.0 with limit_inputs=False: operative_tmp weights a
+  // negative v as one below 0.2 m/s.
+  test("a negative v computes as upstream does", () => {
+    const negative = { ...neutral, v: -0.5 };
+    expect(adaptive_ashrae(negative).tmp_cmf).toBeNaN();
+    const off = adaptive_ashrae({ ...negative, limit_inputs: false });
+    expect(off.tmp_cmf).toBe(24.0);
+    expect(off.acceptability_90).toBe(true);
   });
 
   // Locks the cooling-effect gate inside adaptive_ashrae. At v >= 0.6 and

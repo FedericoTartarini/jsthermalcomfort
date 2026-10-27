@@ -408,7 +408,9 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds t_cmf in SI before deriving the bounds
     // (adaptive_ashrae.py:147-148), and converts it afterwards under IP.
     rounded: ({ units, round_output }) =>
-      round_output === true && units === "SI" ? ["tmp_cmf"] : [],
+      round_output === true && String(units).toUpperCase() === "SI"
+        ? ["tmp_cmf"]
+        : [],
     // Upstream checks the ranges only under limit_inputs, and the library
     // returns its older rows; warnings are compared once the model returns
     // ModelWarning rows (ADR 0024).

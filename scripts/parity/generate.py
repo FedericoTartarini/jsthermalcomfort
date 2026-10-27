@@ -55,12 +55,14 @@ def _value(rng, low, high):
 
 def _adaptive_ashrae(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, v 0-2 m/s,
-    # t_running_mean 10-33.5 °C), so NaN positions are compared too.
-    units = str(rng.choice(["SI", "IP"]))
-    if units == "SI":
-        t, trm, v = (5.0, 45.0), (5.0, 38.0), (0.0, 2.5)
+    # t_running_mean 10-33.5 °C), so NaN positions are compared too, and v goes
+    # below 0, which operative_tmp computes on. units comes in either case, as
+    # upstream upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        t, trm, v = (5.0, 45.0), (5.0, 38.0), (-0.5, 2.5)
     else:
-        t, trm, v = (41.0, 113.0), (41.0, 100.4), (0.0, 8.2)
+        t, trm, v = (41.0, 113.0), (41.0, 100.4), (-1.6, 8.2)
     return {
         "tdb": _value(rng, *t),
         "tr": _value(rng, *t),

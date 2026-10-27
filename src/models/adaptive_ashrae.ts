@@ -18,14 +18,8 @@ import type {
   LegacyModelInfo,
 } from "../_internal/modelDocs.ts";
 
-// Comfort temperature as a linear function of the running mean outdoor
-// temperature, t_cmf = SLOPE * t_running_mean + INTERCEPT, as upstream names them.
 const SLOPE = 0.31;
 const INTERCEPT = 17.8;
-// Half-widths of the 80 % and 90 % acceptability bands around t_cmf, which
-// upstream writes inline (adaptive_ashrae.py:150-153).
-const ACCEPTABILITY_80_OFFSET = 3.5;
-const ACCEPTABILITY_90_OFFSET = 2.5;
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not.
@@ -258,10 +252,10 @@ export function adaptive_ashrae(
   // issue #179, which rounded last).
   if (round_output) t_cmf = round(t_cmf, 1);
 
-  let tmp_cmf_80_low = t_cmf - ACCEPTABILITY_80_OFFSET;
-  let tmp_cmf_90_low = t_cmf - ACCEPTABILITY_90_OFFSET;
-  let tmp_cmf_80_up = t_cmf + ACCEPTABILITY_80_OFFSET + ce;
-  let tmp_cmf_90_up = t_cmf + ACCEPTABILITY_90_OFFSET + ce;
+  let tmp_cmf_80_low = t_cmf - 3.5;
+  let tmp_cmf_90_low = t_cmf - 2.5;
+  let tmp_cmf_80_up = t_cmf + 3.5 + ce;
+  let tmp_cmf_90_up = t_cmf + 2.5 + ce;
 
   const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
   const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;

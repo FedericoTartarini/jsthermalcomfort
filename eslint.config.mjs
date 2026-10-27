@@ -122,7 +122,7 @@ export default defineConfig(
         { selector: "memberLike", modifiers: ["requiresQuotes"], format: null },
       ],
       // A model destructures every input from one parse, and upstream
-      // reassigns some of them (`tout = units_converter(tmp=tout)[0]`), so a
+      // reassigns some of them (`tout = units_converter(tmp=tout)[0]`, `models/clo_tout.py:73`), so a
       // destructuring is `let` when any of its names is reassigned.
       "prefer-const": ["error", { destructuring: "all" }],
     },

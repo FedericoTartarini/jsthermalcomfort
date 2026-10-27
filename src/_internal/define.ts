@@ -30,9 +30,10 @@ export interface BoolField {
 }
 
 /**
- * A string option, upstream's `choice_field`, which takes one of `allowed` in
- * any case. The one so far is `units`, which `BaseInputs` checks by its name
- * with a message of its own (`classes_input.py:114-120`).
+ * A string option, which takes one of `allowed` in any case. The one so far is
+ * `units`, a plain field that `BaseInputs` checks by its name with a message
+ * of its own (`classes_input.py:95, :114-121`), not a `choice_field`
+ * (`classes_input.py:23`), whose message comes with its first field.
  */
 export interface ChoiceField {
   readonly kind: "choice";

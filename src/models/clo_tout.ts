@@ -43,7 +43,7 @@ export interface CloTOut extends ModelResult {
  * @returns A dataclass containing the representative clothing insulation Icl. See {@link CloTOut} for more details.
  * To access the `clo_tout` value, use the `clo_tout` attribute of the returned `CloTOut` instance, e.g., `result.clo_tout`.
  *
- * @throws `TypeError` If `tout` is not a number.
+ * @throws `TypeError` If `tout` is not a number, or `units` is not a string.
  * @throws `RangeError` If an invalid unit is provided.
  *
  * @remarks

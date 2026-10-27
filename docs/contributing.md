@@ -126,7 +126,7 @@ A model follows pythermalcomfort's current release: its logic, values, names and
 Create `src/models/<name>.ts`, with upstream's file and function name. In order, it holds:
 
 1. the imports;
-2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric` or `bool`), unit, applicability and default, and its `outputs` hold each classifier, inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`);
+2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric`, `bool` or `choice`), unit, applicability and default, and its `outputs` hold each classifier, inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`);
 3. the inputs type, `InputsOf<typeof MY_NEW_MODEL_INFO.inputs>`, named after upstream's input class;
 4. the result interface, named after upstream's dataclass and extending `ModelResult`, which holds `warnings`;
 5. the TSDoc block and the public function;

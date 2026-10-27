@@ -33,7 +33,7 @@ describe("clo_tout (JS-only)", () => {
   const call = (inputs: unknown) => () => clo_tout(inputs as Inputs);
 
   describe("values", () => {
-    // Upstream's np.where chain (clo_tout.py:75-77): each breakpoint belongs
+    // Upstream's np.where chain (models/clo_tout.py:75-77): each breakpoint belongs
     // to the piece above it.
     test.each([
       [-5.0001, 1.0],

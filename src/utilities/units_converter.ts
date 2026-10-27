@@ -3,7 +3,7 @@ import { notOfType } from "../_internal/errors.ts";
 import { Units } from "./options.ts";
 
 /** A value as a helper takes it: a number, NaN and ±Infinity included. */
-function number(key: string, value: unknown): number {
+function asNumber(key: string, value: unknown): number {
   if (typeof value !== "number") throw notOfType(key, "a number");
   return value;
 }
@@ -50,32 +50,32 @@ export function units_converter<K extends string>(
     for (const [key, value] of Object.entries(kwargs)) {
       if (value === undefined) continue;
       if (key.includes("tmp") || key === "tr" || key === "tdb") {
-        results[key] = ((number(key, value) - 32) * 5) / 9;
+        results[key] = ((asNumber(key, value) - 32) * 5) / 9;
       }
       if (["v", "vr", "vel"].includes(key)) {
-        results[key] = number(key, value) / 3.281;
+        results[key] = asNumber(key, value) / 3.281;
       }
       if (key === "area") {
-        results[key] = number(key, value) / 10.764;
+        results[key] = asNumber(key, value) / 10.764;
       }
       if (key === "pressure") {
-        results[key] = number(key, value) * 101325;
+        results[key] = asNumber(key, value) * 101325;
       }
     }
   } else if (from_units_upper === Units.SI) {
     for (const [key, value] of Object.entries(kwargs)) {
       if (value === undefined) continue;
       if (key.includes("tmp") || key === "tr" || key === "tdb") {
-        results[key] = (number(key, value) * 9) / 5 + 32;
+        results[key] = (asNumber(key, value) * 9) / 5 + 32;
       }
       if (["v", "vr", "vel"].includes(key)) {
-        results[key] = number(key, value) * 3.281;
+        results[key] = asNumber(key, value) * 3.281;
       }
       if (key === "area") {
-        results[key] = number(key, value) * 10.764;
+        results[key] = asNumber(key, value) * 10.764;
       }
       if (key === "pressure") {
-        results[key] = number(key, value) / 101325;
+        results[key] = asNumber(key, value) / 101325;
       }
     }
   }

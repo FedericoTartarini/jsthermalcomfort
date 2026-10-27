@@ -417,7 +417,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => ({
       ...clo_tout(inputs as unknown as Parameters<typeof clo_tout>[0]),
     }),
-    // Upstream rounds clo_tout with np.around (clo_tout.py:79).
+    // Upstream rounds clo_tout with np.around (models/clo_tout.py:79).
     rounded: () => ["clo_tout"],
     warnings: true,
   },

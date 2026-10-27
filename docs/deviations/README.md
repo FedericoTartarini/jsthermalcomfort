@@ -1,6 +1,6 @@
 # Deviation registers
 
-Every difference between this library and pythermalcomfort v4.6.2, whose `.py` is the only standard, is either a whitelisted mechanical translation or a row in a register here (ADRs 0019, 0027). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
+Every difference between this library and pythermalcomfort v4.7.0, whose `.py` is the only standard, is either a whitelisted mechanical translation or a row in a register here (ADRs 0019, 0027). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
 
 - `<model>.md` holds one main model's rows, named after upstream's function (`utci.md`). A model's ticket creates its register when it migrates the model. A model with no register here has not been migrated yet, and its differences from upstream are not recorded yet.
 - `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the inputs parse, `classifyFromBins`, `ModelInfo`) and the helpers the models call.
@@ -71,7 +71,7 @@ A register is a Markdown file with a title, a line naming the model, one table w
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | id            | The register's file name without `.md`, a hyphen and a number: `utci-1`, `_shared-3`. Rows are numbered from 1 as they are added, and a number is never reused.                             |
 | part          | One of `input`, `output`, `logic`, `comment`, `v2-addition` or `structure`. `structure` holds a difference in where code sits.                                                              |
-| upstream site | The path under `pythermalcomfort/` and the line at v4.6.2, in a code span (`models/utci.py:138`), or `none` where upstream has nothing.                                                     |
+| upstream site | The path under `pythermalcomfort/` and the line at v4.7.0, in a code span (`models/utci.py:138`), or `none` where upstream has nothing.                                                     |
 | TS site       | The file and the symbol the row is about, each in a code span: `` `src/models/heat_index_rothfusz.ts` `HI.warnings` ``. A symbol is a top-level name, exported or not, followed by members. |
 | reason        | Why the library differs, in a sentence.                                                                                                                                                     |
 | class/ADR     | `C: <class> (ADR 00xx)` for an instance of a class above, `addition: <addition> (ADR 00xx)`, `ADR 00xx` for another deviation an ADR approves, or `none` for any other row.                 |

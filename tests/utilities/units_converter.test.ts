@@ -22,7 +22,7 @@ function allclose(
   );
 }
 
-// Mirrors the units_converter cases of pythermalcomfort v4.6.2
+// Mirrors the units_converter cases of pythermalcomfort v4.7.0
 // tests/test_utilities.py. Upstream returns a list in the keyword arguments'
 // order; the library returns an object with the same keys in the same order
 // (ADR 0019, whitelist item 9), so a list comparison compares the entries.

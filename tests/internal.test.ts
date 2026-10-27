@@ -8,7 +8,7 @@ import {
 import type { ModelWarning } from "../src/_internal/modelDocs.ts";
 import { parseInputs } from "../src/_internal/define.ts";
 
-// Mirrors pythermalcomfort v4.6.2 tests/test_internal.py, which tests
+// Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
 // _internal directly, so it imports the kernels' own file (seam S2). A
 // UserWarning becomes a range row (deviation _shared-3), and a `match=` on its
 // text becomes assertions on the row's key, value and bound.

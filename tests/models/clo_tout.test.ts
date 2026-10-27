@@ -11,7 +11,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   testDataUrls.cloTout,
 );
 
-// Mirrors pythermalcomfort v4.6.2 tests/test_clo_tout.py.
+// Mirrors pythermalcomfort v4.7.0 tests/test_clo_tout.py.
 describe("test_clo_tout", () => {
   test.each(reference_table.data)("test_clo_tout: fixture case %#", (entry) => {
     const { inputs, outputs } = entry;

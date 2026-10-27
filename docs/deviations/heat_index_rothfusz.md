@@ -1,6 +1,6 @@
 # heat_index_rothfusz
 
-Deviations of `heat_index_rothfusz` from pythermalcomfort v4.6.2. The format is in the [README](README.md).
+Deviations of `heat_index_rothfusz` from pythermalcomfort v4.7.0. The format is in the [README](README.md).
 
 | id                    | part        | upstream site                      | TS site                                                        | reason                                                                                                                                                                                                                                                | class/ADR                          | status   | date       | parity |
 | --------------------- | ----------- | ---------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | -------- | ---------- | ------ |

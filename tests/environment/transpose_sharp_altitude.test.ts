@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { transpose_sharp_altitude } from "../../src/environment/index.ts";
 import { transpose_sharp_altitude as from_root } from "../../src/index.ts";
 
-// Mirrors pythermalcomfort v4.6.2 tests/test_environment.py,
+// Mirrors pythermalcomfort v4.7.0 tests/test_environment.py,
 // test_transpose_sharp_altitude; its keyword calls are positional here.
 describe("test_environment", () => {
   test("test_transpose_sharp_altitude", () => {

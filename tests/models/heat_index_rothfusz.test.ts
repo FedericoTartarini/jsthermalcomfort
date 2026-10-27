@@ -17,7 +17,7 @@ const { testData: test_data, tolerances } = await loadTestData(
 // upstream's (27.0, np.inf), which _valid_range's message prints as [27.0, inf]
 const TDB_BOUND = { min: 27 };
 
-// Mirrors pythermalcomfort v4.6.2 tests/test_heat_index_rothfusz.py. A
+// Mirrors pythermalcomfort v4.7.0 tests/test_heat_index_rothfusz.py. A
 // UserWarning becomes a range row, and a `match=` on its text becomes
 // assertions on the row's key, value and bound.
 describe("test_heat_index_rothfusz", () => {

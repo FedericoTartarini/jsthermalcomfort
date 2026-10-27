@@ -1,19 +1,26 @@
 import { describe, expect, test } from "vitest";
-import { clo_tout } from "../../src/models/clo_tout.ts";
-import type { CloToutParams } from "../../src/models/clo_tout.ts";
+import { clo_tout } from "../../src/models/index.ts";
+import type { CloToutParams } from "../../src/models/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
-let { testData, tolerances } = await loadTestData(testDataUrls.cloTout);
+type Inputs = Parameters<typeof clo_tout>[0];
 
-// Mirrors pythermalcomfort v4.6.1 tests/test_clo_tout.py.
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.cloTout,
+);
+
+// Mirrors pythermalcomfort v4.6.2 tests/test_clo_tout.py.
 describe("test_clo_tout", () => {
-  test.each(testData.data)("test_clo_tout: fixture case %#", (row) => {
-    const { inputs, outputs } = row;
+  test.each(reference_table.data)("test_clo_tout: fixture case %#", (entry) => {
+    const { inputs, outputs } = entry;
     // As upstream, `clo_tout(tout=..., units=inputs.get("units", "SI"))`.
-    const result = clo_tout(inputs as unknown as CloToutParams);
+    const result = clo_tout({
+      tout: inputs.tout,
+      units: inputs.units ?? "SI",
+    } as unknown as Inputs);
 
-    validateResult(result, outputs, tolerances, inputs);
+    validateResult(result, outputs, tolerance, inputs);
   });
 });
 

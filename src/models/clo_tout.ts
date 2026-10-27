@@ -94,15 +94,17 @@ export function clo_tout(params: CloToutParams): CloToutResult {
   // written that way fails here, naming the shape it should have.
   _check_params_object(params, "clo_tout");
   // Destructuring defaults also apply to a units passed as undefined.
-  const { tout, units = "SI" } = params;
+  const { units = "SI" } = params;
+  let { tout } = params;
   validateInputs({ tout, units: units.toUpperCase() }, CLO_TOUT_SCHEMA);
-  const ip = units.toUpperCase() === "IP";
-  const t = ip ? units_converter("IP", { tmp: tout }).tmp : tout;
 
-  let clo = t < 26 ? 10 ** (-0.1635 - 0.0066 * t) : 0.46;
-  clo = t < 5 ? 0.818 - 0.0364 * t : clo;
-  clo = t < -5 ? 1 : clo;
-  clo = round(clo, 2);
+  if (units.toUpperCase() === "IP") {
+    ({ tmp: tout } = units_converter("IP", { tmp: tout }));
+  }
 
-  return { clo_tout: clo };
+  let clo = tout < 26 ? Math.pow(10, -0.1635 - 0.0066 * tout) : 0.46;
+  clo = tout < 5 ? 0.818 - 0.0364 * tout : clo;
+  clo = tout < -5 ? 1 : clo;
+
+  return { clo_tout: round(clo, 2) };
 }

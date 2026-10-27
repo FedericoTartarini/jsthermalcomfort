@@ -1,6 +1,10 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { adaptive_ashrae, heat_index_rothfusz } from "../src/models/index.ts";
+import {
+  adaptive_ashrae,
+  clo_tout,
+  heat_index_rothfusz,
+} from "../src/models/index.ts";
 import type { AdaptiveAshraeParams } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -406,6 +410,17 @@ const MODELS: readonly ParityModel[] = [
     // Upstream checks the ranges only under limit_inputs, and the library
     // returns its older rows; warnings are compared once the model returns
     // ModelWarning rows (ADR 0024).
+    warnings: false,
+  },
+  {
+    name: "clo_tout",
+    run: (inputs) => ({
+      ...clo_tout(inputs as unknown as Parameters<typeof clo_tout>[0]),
+    }),
+    // Upstream rounds clo_tout with np.around (clo_tout.py:79).
+    rounded: () => ["clo_tout"],
+    // The result has no warnings field until the model returns ModelResult
+    // (ADR 0024).
     warnings: false,
   },
   {

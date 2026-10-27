@@ -72,6 +72,14 @@ def _adaptive_ashrae(rng):
     }
 
 
+def _clo_tout(rng):
+    # tout spans the breakpoints at -5, 5 and 26 °C (23, 41 and 78.8 °F), and
+    # units comes in either case, as upstream upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    tout = (-15.0, 35.0) if units.upper() == "SI" else (5.0, 95.0)
+    return {"tout": _value(rng, *tout), "units": units}
+
+
 def _heat_index_rothfusz(rng):
     # tdb reaches below the 27 °C gate, so NaN positions and the tdb warning
     # are compared too.
@@ -87,6 +95,7 @@ def _heat_index_rothfusz(rng):
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
+    "clo_tout": (models.clo_tout, _clo_tout),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
 }
 

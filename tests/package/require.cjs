@@ -18,7 +18,12 @@ const root = require("jsthermalcomfort");
 assert.equal(typeof root.utci, "function");
 assert.equal(typeof root.default.models.utci, "function");
 
-for (const subpath of ["models", "psychrometrics", "utilities"]) {
+for (const subpath of [
+  "models",
+  "environment",
+  "psychrometrics",
+  "utilities",
+]) {
   const entry = require(`jsthermalcomfort/${subpath}`);
   assert.equal(entry.default, root.default[subpath], subpath);
 }

@@ -1,19 +1,12 @@
 // The messages the library's checks throw (ADR 0022). Upstream's own message
-// about a value stays verbatim, such as `BaseInputs`' for `units`
+// about a value stays verbatim, in the model's INFO entry for a string option
+// (`ChoiceField.message`), such as `BaseInputs`' for `units`
 // (`classes_input.py:120` at v4.6.2). Every other message is the library's
 // and starts with the key, in the `<key> must be …` form or a like one, or with
 // the model's name for a call with no inputs object; it replaces each upstream
 // message that names Python's types or Python's call binding (deviations
-// _shared-10, for the parse, and _shared-23, for `units_converter`).
-
-/**
- * `BaseInputs`' error for `units` other than `'SI'` or `'IP'`
- * (`classes_input.py:120` at v4.6.2), a `TypeError` for a value that is not a
- * string and a `RangeError` for one that is.
- */
-export function notUnits(error: typeof TypeError | typeof RangeError): Error {
-  return new error("Units must be either 'SI' or 'IP'");
-}
+// _shared-10, for the parse, _shared-23, for `units_converter`, and _shared-31,
+// for `transpose_sharp_altitude`).
 
 /**
  * The library's message for a quantity that is not a finite number: a

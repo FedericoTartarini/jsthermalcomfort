@@ -4,7 +4,6 @@ import {
   notFiniteNumber,
   notInputsObject,
   notOfType,
-  notUnits,
 } from "./errors.ts";
 import type { Bound, UnitSymbol } from "./modelDocs.ts";
 
@@ -29,15 +28,17 @@ export interface BoolField {
 }
 
 /**
- * A string option, which takes one of `allowed` in any case. The one so far is
- * `units`, a plain field that `BaseInputs` checks by its name with a message
- * of its own (`classes_input.py:95, :114-121`), not a `choice_field`
- * (`classes_input.py:23`), whose message comes with its first field.
+ * A string option, which takes one of `allowed` in any case, and fails with
+ * `message`, upstream's own text for that check (ADR 0022): `units`, a plain
+ * field that `BaseInputs` checks by its name (`classes_input.py:95, :114-121`),
+ * and `solar_gain`'s `posture`, which the model checks itself
+ * (`models/solar_gain.py:207-212`).
  */
 export interface ChoiceField {
   readonly kind: "choice";
   readonly allowed: readonly string[];
   readonly default?: string;
+  readonly message: string;
 }
 
 /**
@@ -90,11 +91,18 @@ function parseNumeric(key: string, value: unknown): number {
  * upstream's model reads its own argument, not the inputs class's upper-cased
  * copy.
  */
-function parseChoice(value: unknown, allowed: readonly string[]): string {
-  // Upstream compares `str(value).upper()`, so it raises the same error for
-  // any value that is not a string (deviation _shared-24).
-  if (typeof value !== "string") throw notUnits(TypeError);
-  if (!allowed.includes(value.toUpperCase())) throw notUnits(RangeError);
+function parseChoice(value: unknown, entry: ChoiceField): string {
+  const { allowed, message } = entry;
+  // Upstream compares `str(value).upper()` for `units`, so it raises the same
+  // error for any value that is not a string (deviation _shared-24).
+  if (typeof value !== "string") throw new TypeError(message);
+  // Upstream upper-cases `units` and lower-cases `posture`, and `allowed` is
+  // written in the case upstream compares in.
+  if (
+    !allowed.includes(value.toUpperCase()) &&
+    !allowed.includes(value.toLowerCase())
+  )
+    throw new RangeError(message);
   return value;
 }
 
@@ -112,9 +120,9 @@ function parseChoice(value: unknown, allowed: readonly string[]): string {
  *   `null` or an array included, and a `RangeError` for NaN or ±Infinity;
  * - a switch must be a boolean, or a `TypeError` names it, whether or not
  *   upstream checks it (deviation _shared-8);
- * - a string option must be one of its `allowed` values, in any case, with
- *   `BaseInputs`' message: a `TypeError` for a value that is not a string,
- *   a `RangeError` for one that is.
+ * - a string option must be one of its `allowed` values, in any case, or its
+ *   entry's `message` is thrown: a `TypeError` for a value that is not a
+ *   string, a `RangeError` for one that is.
  *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.
@@ -142,8 +150,7 @@ export function parseInputs<const I extends InputsInfo>(
       value = entry.default;
     }
     if (entry.kind === "numeric") values[key] = parseNumeric(key, value);
-    else if (entry.kind === "choice")
-      values[key] = parseChoice(value, entry.allowed);
+    else if (entry.kind === "choice") values[key] = parseChoice(value, entry);
     else if (typeof value === "boolean") values[key] = value;
     else throw notOfType(key, "a boolean");
   }

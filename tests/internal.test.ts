@@ -159,7 +159,14 @@ describe("HEAT_INDEX_STRESS_CATEGORIES", () => {
 describe("parseInputs, choice (JS-only)", () => {
   const info = {
     name: "f",
-    inputs: { units: { kind: "choice", allowed: ["SI", "IP"], default: "SI" } },
+    inputs: {
+      units: {
+        kind: "choice",
+        allowed: ["SI", "IP"],
+        default: "SI",
+        message: "Units must be either 'SI' or 'IP'",
+      },
+    },
   } as const;
   const parse = (units: unknown) => () => parseInputs(info, { units });
 
@@ -181,5 +188,36 @@ describe("parseInputs, choice (JS-only)", () => {
       expect(parse(bad)).toThrow(
         new TypeError("Units must be either 'SI' or 'IP'"),
       );
+  });
+
+  // solar_gain's own posture check (models/solar_gain.py:207-212), which
+  // lower-cases where BaseInputs upper-cases units.
+  const posture = {
+    name: "g",
+    inputs: {
+      posture: {
+        kind: "choice",
+        allowed: ["standing", "supine", "sitting"],
+        default: "sitting",
+        message: "Posture has to be either 'standing', 'supine' or 'sitting'.",
+      },
+    },
+  } as const;
+  const parse_posture = (value: unknown) => () =>
+    parseInputs(posture, { posture: value });
+
+  test("throws the entry's own message, in either case direction", () => {
+    expect(parse_posture("Supine")()).toEqual({ posture: "Supine" });
+    expect(parse_posture("SITTING")()).toEqual({ posture: "SITTING" });
+    for (const bad of ["lying", "", "SI"])
+      expect(parse_posture(bad)).toThrow(
+        new RangeError(posture.inputs.posture.message),
+      );
+    expect(parse_posture(5)).toThrow(
+      new TypeError(posture.inputs.posture.message),
+    );
+    expect(() => parseInputs(info, { units: "sitting" })).toThrow(
+      new RangeError("Units must be either 'SI' or 'IP'"),
+    );
   });
 });

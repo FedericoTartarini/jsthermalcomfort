@@ -12,7 +12,12 @@ export const CLO_TOUT_INFO = deepFreeze({
   standards: [],
   inputs: {
     tout: { kind: "numeric", unit: "°C" },
-    units: { kind: "choice", allowed: [Units.SI, Units.IP], default: Units.SI },
+    units: {
+      kind: "choice",
+      allowed: [Units.SI, Units.IP],
+      default: Units.SI,
+      message: "Units must be either 'SI' or 'IP'",
+    },
   },
   outputs: {
     clo_tout: { unit: "clo" },

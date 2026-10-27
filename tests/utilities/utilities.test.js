@@ -8,13 +8,11 @@ import {
   clo_typical_ensembles,
   met_typical_tasks,
   clo_individual_garments,
-  transpose_sharp_altitude,
   assertNumber,
   validateInputs,
   check_standard_compliance,
 } from "../../src/utilities/utilities";
 import { round } from "../../src/_internal/round.ts";
-import { deep_close_to_array } from "../test_utilities";
 import { LimitSet } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
 
@@ -45,27 +43,6 @@ describe("round", () => {
   test("passes NaN through", () => {
     expect(round(NaN, 1)).toBeNaN();
   });
-});
-
-describe("transpose_sharp_altitude", () => {
-  it.each([
-    { sharp: 0, altitude: 0, expected: [0, 90] },
-    { sharp: 0, altitude: 20, expected: [0, 70] },
-    { sharp: 0, altitude: 45, expected: [0, 45] },
-    { sharp: 0, altitude: 60, expected: [0, 30] },
-    { sharp: 90, altitude: 0, expected: [90, 0] },
-    { sharp: 90, altitude: 45, expected: [45, 0] },
-    { sharp: 90, altitude: 30, expected: [60, 0] },
-    { sharp: 135, altitude: 60, expected: [22.208, 20.705] },
-    { sharp: 120, altitude: 75, expected: [13.064, 7.435] },
-    { sharp: 150, altitude: 30, expected: [40.893, 48.59] },
-  ])(
-    "returns $expected when sharp is $sharp and altitude is $altitude",
-    ({ sharp, altitude, expected }) => {
-      const result = transpose_sharp_altitude(sharp, altitude);
-      deep_close_to_array(result, expected, 0.001);
-    },
-  );
 });
 
 describe("body_surface_area", () => {

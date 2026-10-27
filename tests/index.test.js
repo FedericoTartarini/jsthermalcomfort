@@ -10,6 +10,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toBeInstanceOf(Object);
   });
 
+  it("should have the environment functions", () => {
+    expect(jsthermalcomfort.environment).toBeInstanceOf(Object);
+  });
+
   it("should have the psychrometrics functions", () => {
     expect(jsthermalcomfort.psychrometrics).toBeInstanceOf(Object);
   });

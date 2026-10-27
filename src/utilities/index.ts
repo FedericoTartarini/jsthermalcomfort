@@ -12,7 +12,7 @@ import {
   LimitSet,
 } from "./utilities.js";
 import { units_converter } from "./units_converter.ts";
-import { Standard, Units } from "./options.ts";
+import { Postures, Standard, Units } from "./options.ts";
 import {
   clo_area_factor,
   clo_dynamic_ashrae,
@@ -48,6 +48,7 @@ export {
   LimitSet,
   Standard,
   Units,
+  Postures,
 };
 
 export default {
@@ -71,6 +72,7 @@ export default {
   LimitSet,
   Standard,
   Units,
+  Postures,
 };
 
 /**

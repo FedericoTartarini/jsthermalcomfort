@@ -96,6 +96,23 @@ describe("Units mirrors pythermalcomfort's Units enum", () => {
   });
 });
 
+// Upstream's `Postures` enum (utilities.py:48-57), added as a constant
+// (deviation _shared-29).
+describe("Postures mirrors pythermalcomfort's Postures enum", () => {
+  test("has upstream's members and values, in its order, frozen, from the package root", () => {
+    expect(Object.entries(pkg.Postures)).toEqual([
+      ["standing", "standing"],
+      ["sitting", "sitting"],
+      ["sedentary", "sedentary"],
+      ["reclining", "reclining"],
+      ["lying", "lying"],
+      ["supine", "supine"],
+      ["crouching", "crouching"],
+    ]);
+    expect(Object.isFrozen(pkg.Postures)).toBe(true);
+  });
+});
+
 describe("is_iso_7730", () => {
   test("accepts both editions and nothing else", () => {
     expect(is_iso_7730(Standard.iso_7730_2005)).toBe(true);

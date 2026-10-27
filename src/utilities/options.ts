@@ -25,3 +25,19 @@ export const Units = Object.freeze({
   SI: "SI",
   IP: "IP",
 } as const);
+
+/**
+ * Postures options.
+ *
+ * Upstream's `Postures` (`utilities.py`); a parameter accepts either
+ * `Postures.sitting` or `"sitting"` (deviation _shared-29).
+ */
+export const Postures = Object.freeze({
+  standing: "standing",
+  sitting: "sitting",
+  sedentary: "sedentary",
+  reclining: "reclining",
+  lying: "lying",
+  supine: "supine",
+  crouching: "crouching",
+} as const);

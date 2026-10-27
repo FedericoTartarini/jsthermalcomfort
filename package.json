@@ -17,6 +17,10 @@
       "types": "./lib/esm/types/models/index.d.ts",
       "default": "./lib/esm/models/index.js"
     },
+    "./environment": {
+      "types": "./lib/esm/types/environment/index.d.ts",
+      "default": "./lib/esm/environment/index.js"
+    },
     "./psychrometrics": {
       "types": "./lib/esm/types/psychrometrics/index.d.ts",
       "default": "./lib/esm/psychrometrics/index.js"

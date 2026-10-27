@@ -1,7 +1,5 @@
-import {
-  transpose_sharp_altitude,
-  validateInputs,
-} from "../utilities/utilities.js";
+import { transpose_sharp_altitude } from "../environment/transpose_sharp_altitude.ts";
+import { validateInputs } from "../utilities/utilities.js";
 import { round } from "../_internal/round.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import {

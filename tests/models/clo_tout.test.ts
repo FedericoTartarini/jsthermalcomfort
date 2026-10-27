@@ -167,7 +167,12 @@ describe("clo_tout (JS-only)", () => {
     test("lists every keyword argument, with upstream's defaults", () => {
       expect(CLO_TOUT_INFO.inputs).toEqual({
         tout: { kind: "numeric", unit: "°C" },
-        units: { kind: "choice", allowed: ["SI", "IP"], default: "SI" },
+        units: {
+          kind: "choice",
+          allowed: ["SI", "IP"],
+          default: "SI",
+          message: "Units must be either 'SI' or 'IP'",
+        },
       });
       expect(Object.keys(CLO_TOUT_INFO.inputs)).toEqual(["tout", "units"]);
     });

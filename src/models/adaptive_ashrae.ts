@@ -1,107 +1,45 @@
-import { operative_tmp } from "../environment/operative_tmp.ts";
-import { validateInputs } from "../utilities/utilities.js";
-import { units_converter } from "../utilities/units_converter.ts";
-import { Standard } from "../utilities/options.ts";
-import { round } from "../_internal/round.ts";
 import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
-import { deepFreeze } from "../_internal/modelDocs.ts";
 import {
+  _check_ashrae55_compliance,
   ASHRAE_55_LIMITS,
-  _legacy_check_ashrae55_compliance,
 } from "../_internal/ashrae55.ts";
-import {
-  _check_params_object,
-  _legacy_valid_range,
-} from "../_internal/validation.ts";
+import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
+import type { InputsOf } from "../_internal/define.ts";
+import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
-  ApplicabilityWarning,
-  LegacyModelInfo,
+  ModelInfo,
+  ModelResult,
+  ModelWarning,
 } from "../_internal/modelDocs.ts";
+import { round } from "../_internal/round.ts";
+import { _valid_range } from "../_internal/validation.ts";
+import { operative_tmp } from "../environment/operative_tmp.ts";
+import { Units } from "../utilities/options.ts";
+import { units_converter } from "../utilities/units_converter.ts";
 
 const SLOPE = 0.31;
 const INTERCEPT = 17.8;
 
-// A type alias, as the JSDoc typedef it replaces emitted, so the result stays
-// assignable to Record<string, unknown>; an interface is not.
-/**
- * @typedef {object} AdaptiveAshraeResult
- * @property {number} tmp_cmf - Comfort temperature a that specific running mean temperature, default in [°C] or in [°F]
- * @property {number} tmp_cmf_80_low - Lower acceptable comfort temperature for 80% occupants, default in [°C] or in [°F]
- * @property {number} tmp_cmf_80_up - Upper acceptable comfort temperature for 80% occupants, default in [°C] or in [°F]
- * @property {number} tmp_cmf_90_low - Lower acceptable comfort temperature for 90% occupants, default in [°C] or in [°F]
- * @property {number} tmp_cmf_90_up - Upper acceptable comfort temperature for 90% occupants, default in [°C] or in [°F]
- * @property {boolean} acceptability_80 - Acceptability for 80% occupants
- * @property {boolean} acceptability_90 - Acceptability for 90% occupants
- * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- * @public
- */
-export type AdaptiveAshraeResult = {
-  tmp_cmf: number;
-  tmp_cmf_80_low: number;
-  tmp_cmf_80_up: number;
-  tmp_cmf_90_low: number;
-  tmp_cmf_90_up: number;
-  acceptability_80: boolean;
-  acceptability_90: boolean;
-  readonly warnings: ApplicabilityWarning[];
-};
-
-/**
- * The params of `adaptive_ashrae`: upstream's keyword parameters, quantities
- * and switches alike, with upstream's defaults (ADR 0002). Documented on the
- * function's `params`.
- */
-export interface AdaptiveAshraeParams {
-  tdb: number;
-  tr: number;
-  t_running_mean: number;
-  v: number;
-  units?: "SI" | "IP";
-  limit_inputs?: boolean;
-  round_output?: boolean;
-}
-
-/**
- * Applicability limit of the adaptive model's own input, in SI units.
- *
- * `tdb`, `tr` and `v` are gated by `_legacy_check_ashrae55_compliance`, which reads
- * `ASHRAE_55_LIMITS`; the running mean outdoor temperature is gated by
- * this model alone, so its bound lives here. Frozen, referenced by identity
- * from
- * `ADAPTIVE_ASHRAE_INFO` and read by the gate below, so the metadata and the
- * NaN cannot disagree. Exported for that identity test, deliberately not
- * added to `src/models/index.ts`.
- */
-export const ADAPTIVE_ASHRAE_LIMITS = Object.freeze({
-  t_running_mean: Object.freeze({ min: 10, max: 33.5 }),
-});
-
-/**
- * Model metadata for the ASHRAE 55 adaptive model.
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * `v` is bounded by `ASHRAE_55_LIMITS.v`, the 0–2 m/s limit
- * `_check_ashrae55_compliance` applies.
- * The acceptability outputs are booleans, so they carry no unit and no
- * classifier.
- *
- * @public
- */
-export const ADAPTIVE_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
+export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
   name: "adaptive_ashrae",
   label: "Adaptive (ASHRAE 55)",
-  description:
-    "Adaptive comfort temperature and its 80 % and 90 % acceptability ranges from the running mean outdoor temperature.",
-  standards: [Standard.ashrae_55_2023],
+  standards: [],
   inputs: {
-    tdb: { unit: "°C", applicability: ASHRAE_55_LIMITS.tdb },
-    tr: { unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
-    t_running_mean: {
+    tdb: {
+      kind: "numeric",
       unit: "°C",
-      applicability: ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
+      applicability: ASHRAE_55_LIMITS.tdb,
     },
-    v: { unit: "m/s", applicability: ASHRAE_55_LIMITS.v },
+    tr: { kind: "numeric", unit: "°C", applicability: ASHRAE_55_LIMITS.tr },
+    t_running_mean: {
+      kind: "numeric",
+      unit: "°C",
+      applicability: { min: 10.0, max: 33.5 },
+    },
+    v: { kind: "numeric", unit: "m/s", applicability: ASHRAE_55_LIMITS.v },
+    units: BASE_INPUTS_UNITS,
+    limit_inputs: { kind: "bool", default: true },
+    round_output: { kind: "bool", default: true },
   },
   outputs: {
     tmp_cmf: { unit: "°C" },
@@ -112,145 +50,149 @@ export const ADAPTIVE_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
     acceptability_80: { unit: null },
     acceptability_90: { unit: null },
   },
-});
+} as const satisfies ModelInfo);
+
+/** @interface */
+export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO.inputs>;
 
 /**
- * Determines the adaptive thermal comfort based on ASHRAE 55. The adaptive
+ * A dataclass to store the results of the adaptive thermal comfort model based on
+ * ASHRAE 55.
+ */
+export interface AdaptiveASHRAE extends ModelResult {
+  /** Comfort temperature at a specific running mean temperature, default in [°C] or [°F]. */
+  readonly tmp_cmf: number;
+  /** Lower acceptable comfort temperature for 80% occupants, default in [°C] or [°F]. */
+  readonly tmp_cmf_80_low: number;
+  /** Upper acceptable comfort temperature for 80% occupants, default in [°C] or [°F]. */
+  readonly tmp_cmf_80_up: number;
+  /** Lower acceptable comfort temperature for 90% occupants, default in [°C] or [°F]. */
+  readonly tmp_cmf_90_low: number;
+  /** Upper acceptable comfort temperature for 90% occupants, default in [°C] or [°F]. */
+  readonly tmp_cmf_90_up: number;
+  /** Acceptability for 80% occupants. */
+  readonly acceptability_80: boolean;
+  /** Acceptability for 90% occupants. */
+  readonly acceptability_90: boolean;
+}
+
+/**
+ * Calculate the adaptive thermal comfort based on ASHRAE 55.
+ *
+ * The adaptive
  * model relates indoor design temperatures or acceptable temperature ranges
  * to outdoor meteorological or climatological parameters. The adaptive model
  * can only be used in occupant-controlled naturally conditioned spaces that
  * meet all the following criteria:
  *
- * - There is no mechianical cooling or heating system in operation
- * - Occupants have a metabolic rate between 1.0 and 1.5 met
- * - Occupants are free to adapt their clothing within a range as wide as 0.5 and 1.0 clo
- * - The prevailing mean (runnin mean) outdoor temperature is between 10 and 33.5 °C
+ * * There is no mechanical cooling or heating system in operation.
+ * * Occupants have a metabolic rate between 1.0 and 1.5 met.
+ * * Occupants are free to adapt their clothing within a range as wide as 0.5 and 1.0 clo.
+ * * The prevailing mean (running mean) outdoor temperature is between 10 and 33.5 °C.
  *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.tr - Mean radiant temperature, default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.t_running_mean - Running mean temperature, default in [°C] or [°F] if `units` = 'IP'.
  *
- * @public
- * @memberof models
- * @docname Adaptive ASHRAE
+ * > [!NOTE]
+ * > The running mean temperature can be calculated using the function `running_mean_outdoor_temperature`.
  *
- * @param {Object} params - the model's parameters, named as in pythermalcomfort.
- * @param {number} params.tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} params.tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} params.t_running_mean - running mean temperature, default in [°C] in [°C] in [°F] if `units` = 'IP'
- * The running mean temperature can be calculated using the function {@link #running_mean_outdoor_temperature|running_mean_outdoor_temperature}
- * @param {number} params.v - air speed, default in [m/s] in [fps] if `units` = 'IP'
- * @param {"SI" | "IP"} [params.units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [params.limit_inputs=true] - By default, if the inputs are outsude the standard applicability limits the
- * function returns nan. If False returns pmv and ppd values even if input values are
- * outside the applicability limits of the model.
- * @param {boolean} [params.round_output=true] - if true, rounds `tmp_cmf` to one decimal place in SI before the comfort bounds are derived, so `tmp_cmf_80_low`, `tmp_cmf_80_up`, `tmp_cmf_90_low`, `tmp_cmf_90_up`, `acceptability_80` and `acceptability_90` inherit that rounding; if false, returns them at full precision. Under `units` = 'IP' the rounded SI value is then converted to °F, so IP outputs carry the extra decimals from the °C-to-°F conversion.
+ * @param inputs.v - Air speed, default in [m/s] or [fps] if `units` = 'IP'.
+ * @param inputs.units - Units system, 'SI' or 'IP'. Defaults to 'SI'.
+ * @param inputs.limit_inputs - If True, returns nan for inputs outside standard limits. Defaults to True.
  *
- * @returns {AdaptiveAshraeResult} set containing results for the model
+ * > [!NOTE]
+ * > ASHRAE 55 2020 limits: 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40, 0 <= v [m/s] <= 2, 10 <= t_running_mean [°C] <= 33.5.
  *
- * The ASHRAE 55 2020 limits are 10 < tdb [°C] < 40, 10 < tr [°C] < 40,
- * 0 < vr [m/s] < 2, 10 < t running mean [°C] < 33.5
+ * @param inputs.round_output - If True, rounds ``t_cmf`` to one decimal place in SI before the comfort bounds are
+ * derived, so ``tmp_cmf_80_low``, ``tmp_cmf_80_up``, ``tmp_cmf_90_low`` and
+ * ``tmp_cmf_90_up`` inherit that rounding. If False, ``t_cmf`` and the derived bounds
+ * are returned at full precision. Under ``units='IP'`` the rounded SI value is then
+ * converted to °F, so IP outputs carry the extra decimals from the °C-to-°F conversion.
+ * Defaults to True.
  *
- * You can use this function to calculate if your conditions are within the `adaptive thermal comfort region`.
- * Calculations with comply with the ASHRAE 55 2020 Standard {@link #ref_1|[1]}.
+ * @returns A dataclass containing the results. See {@link AdaptiveASHRAE} for more details.
  *
  * @example
+ * ```ts
  * import { adaptive_ashrae } from "jsthermalcomfort/models";
- * const results = adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 });
+ *
+ * let results = adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 });
  * console.log(results);
- * // {tmp_cmf: 24.0, tmp_cmf_80_low: 20.5, tmp_cmf_80_up: 27.5,
- * //   tmp_cmf_90_low: 21.5, tmp_cmf_90_up: 26.5, acceptability_80: true,
- * //   acceptability_90: true}
- * console.log(results.acceptability_80);
+ * // { tmp_cmf: 24, tmp_cmf_80_low: 20.5, tmp_cmf_80_up: 27.5, tmp_cmf_90_low: 21.5, tmp_cmf_90_up: 26.5, acceptability_80: true, acceptability_90: true, warnings: [] }
+ *
+ * console.log(results.acceptability_80); // or use console.log(results["acceptability_80"])
  * // true
+ * // The conditions you entered are considered to be comfortable for 80% of the occupants.
  *
- * @example
- * import { adaptive_ashrae } from "jsthermalcomfort/models";
+ * const results_list = [25, 26].map((tdb) =>
+ *   adaptive_ashrae({ tdb, tr: 25, t_running_mean: 20, v: 0.1 }),
+ * );
+ * console.log(results_list.map((result) => result.tmp_cmf)); // [24, 24]
+ * console.log(results_list.map((result) => result.acceptability_80)); // [true, true]
+ *
  * // For users who want to use the IP system
- * const results = adaptive_ashrae({ tdb: 77, tr: 77, t_running_mean: 68, v: 0.3, units: "IP" });
+ * results = adaptive_ashrae({ tdb: 77, tr: 77, t_running_mean: 68, v: 0.3, units: "IP" });
  * console.log(results);
- * // {tmp_cmf: 75.2, tmp_cmf_80_low: 68.9, tmp_cmf_80_up: 81.5,
- * //  tmp_cmf_90_low: 70.7, tmp_cmf_90_up: 79.7, acceptability_80: true,
- * //  acceptability_90: true}
+ * // { tmp_cmf: 75.2, tmp_cmf_80_low: 68.9, tmp_cmf_80_up: 81.5, tmp_cmf_90_low: 70.7, tmp_cmf_90_up: 79.7, acceptability_80: true, acceptability_90: true, warnings: [] }
  *
- * @example
- * import { adaptive_ashrae } from "jsthermalcomfort/models";
- * const results = adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
- * console.log(results);
- * // {tmp_cmf: NaN, tmp_cmf_80_low: NaN, ...}
- * // The adaptive thermal comfort model can only be used
- * // if the running mean temperature is higher than 10°C
+ * adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
+ * // { tmp_cmf: NaN, ... acceptability_90: false, warnings: [...] }
+ * // The adaptive thermal comfort model can only be used if the running mean temperature is higher than 10°C.
+ * ```
  */
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three). limit_inputs is not validated, as
-// upstream's ASHRAEInputs is not given it.
-const ADAPTIVE_ASHRAE_SCHEMA = {
-  tdb: { type: "number" },
-  tr: { type: "number" },
-  t_running_mean: { type: "number" },
-  v: { type: "number" },
-  units: { enum: ["SI", "IP"] },
-  round_output: { type: "boolean" },
-};
-
-export function adaptive_ashrae(
-  params: AdaptiveAshraeParams,
-): AdaptiveAshraeResult {
-  // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "adaptive_ashrae");
-  let { tdb, tr, t_running_mean, v } = params;
-  // Destructuring defaults also apply to a switch passed as undefined.
-  const { units = "SI", limit_inputs = true, round_output = true } = params;
-  validateInputs(
-    {
-      tdb,
-      tr,
-      t_running_mean,
-      v,
-      units: units.toUpperCase(),
-      round_output,
-    },
-    ADAPTIVE_ASHRAE_SCHEMA,
-  );
+export function adaptive_ashrae(inputs: ASHRAEInputs): AdaptiveASHRAE {
+  // Validate inputs using the ASHRAEInputs class
+  let { tdb, tr, t_running_mean, v, units, limit_inputs, round_output } =
+    parseInputs(ADAPTIVE_ASHRAE_INFO, inputs);
 
   const standard = "ashrae";
-  if (units.toUpperCase() === "IP") {
+
+  if (units.toUpperCase() === Units.IP) {
     ({
       tdb,
       tr,
       tmp_running_mean: t_running_mean,
       v,
-    } = units_converter("IP", {
+    } = units_converter(Units.IP, {
       tdb,
       tr,
       tmp_running_mean: t_running_mean,
       v,
     }));
   }
+
   const to = operative_tmp(tdb, tr, v, standard);
-  // calculate cooling effect (ce) of elevated air speed when top > 25 degC.
+
   const ce = adaptive_cooling_effect(v, to);
-  // Relation between comfort and outdoor temperature
+
   let t_cmf = SLOPE * t_running_mean + INTERCEPT;
 
-  // The rows are the channel for upstream's UserWarning, which JavaScript has
-  // no warnings filter for (ADR 0001). Upstream checks only under
-  // limit_inputs; the rows are built on every call, so with the gate off they
-  // say what the numbers were computed despite. The gate reads the rows.
-  // Upstream passes no airspeed_control, so the no-control rules never apply.
-  const warnings: ApplicabilityWarning[] = [];
-  _legacy_check_ashrae55_compliance(warnings, { tdb, tr, v });
-  _legacy_valid_range(
+  const warnings: ModelWarning[] = [];
+  const [tdb_valid, tr_valid, v_valid] = _check_ashrae55_compliance(
+    { tdb, tr, v },
     warnings,
+  );
+  const trm_valid = _valid_range(
+    t_running_mean,
+    ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability,
     "t_running_mean",
     "input",
-    t_running_mean,
-    ADAPTIVE_ASHRAE_LIMITS.t_running_mean,
+    ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.unit,
+    warnings,
   );
-  if (limit_inputs && warnings.length > 0) t_cmf = NaN;
+  const all_valid = !(
+    Number.isNaN(tdb_valid) ||
+    Number.isNaN(tr_valid) ||
+    Number.isNaN(v_valid) ||
+    Number.isNaN(trm_valid)
+  );
+  t_cmf = limit_inputs && !all_valid ? NaN : t_cmf;
 
-  // Rounded in SI before the bounds and the acceptability are derived, and not
-  // rounded again after the IP conversion, as upstream does (ADR 0001 reverts
-  // issue #179, which rounded last).
-  if (round_output) t_cmf = round(t_cmf, 1);
+  if (round_output) {
+    t_cmf = round(t_cmf, 1);
+  }
 
   let tmp_cmf_80_low = t_cmf - 3.5;
   let tmp_cmf_90_low = t_cmf - 2.5;
@@ -260,14 +202,14 @@ export function adaptive_ashrae(
   const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
   const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
 
-  if (units.toUpperCase() === "IP") {
+  if (units.toUpperCase() === Units.IP) {
     ({
       tmp_cmf: t_cmf,
       tmp_cmf_80_low,
       tmp_cmf_80_up,
       tmp_cmf_90_low,
       tmp_cmf_90_up,
-    } = units_converter("SI", {
+    } = units_converter(Units.SI, {
       tmp_cmf: t_cmf,
       tmp_cmf_80_low,
       tmp_cmf_80_up,
@@ -276,7 +218,7 @@ export function adaptive_ashrae(
     }));
   }
 
-  return {
+  return Object.freeze({
     tmp_cmf: t_cmf,
     tmp_cmf_80_low,
     tmp_cmf_80_up,
@@ -284,6 +226,6 @@ export function adaptive_ashrae(
     tmp_cmf_90_up,
     acceptability_80,
     acceptability_90,
-    warnings,
-  };
+    warnings: Object.freeze(warnings),
+  });
 }

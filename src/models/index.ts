@@ -55,10 +55,7 @@ export type {
   OutputInfo,
   UnitSymbol,
 } from "../_internal/modelDocs.ts";
-export type {
-  AdaptiveAshraeParams,
-  AdaptiveAshraeResult,
-} from "./adaptive_ashrae.ts";
+export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type {
   CoolingEffectParams,

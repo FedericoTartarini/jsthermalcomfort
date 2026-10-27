@@ -18,8 +18,8 @@
  */
 
 import type {
-  AdaptiveAshraeParams,
-  AdaptiveAshraeResult,
+  AdaptiveASHRAE,
+  ASHRAEInputs,
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
@@ -93,7 +93,7 @@ const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
 const iso = PMV_PPD_ISO_INFO;
 const ashrae = PMV_PPD_ASHRAE_INFO;
-const adaptive = ADAPTIVE_ASHRAE_INFO;
+const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 // @ts-expect-error the old form's inputs carry no kind.
@@ -184,7 +184,7 @@ PMV_PPD_ISO_INFO.label = "something else";
 // @ts-expect-error push mutates, and the standards array is readonly.
 PMV_PPD_ISO_INFO.standards.push(Standard.ashrae_55_2023);
 // @ts-expect-error the adaptive metadata is readonly too.
-ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability!.max = 40;
+ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability.max = 40;
 // @ts-expect-error the ASHRAE PMV metadata is readonly.
 PMV_PPD_ASHRAE_INFO.outputs.pmv = { unit: null };
 // @ts-expect-error classifier bin edges are a readonly array.
@@ -268,11 +268,11 @@ pmv_ppd_iso({
   airspeed_control: true,
 });
 
-// adaptive_ashrae takes one params object keyed like upstream's keyword
-// arguments (ADR 0002), and both the params and the result types are exported
-// by name. If the published signature degrades to `any`, the lines below stop
-// being errors and tsc fails with "Unused '@ts-expect-error' directive".
-const adaptiveParams: AdaptiveAshraeParams = {
+// adaptive_ashrae takes one inputs object keyed like upstream's keyword
+// arguments (ADR 0002), with its inputs and result types named after
+// upstream's classes. If the published signature degrades to `any`, the lines
+// below stop being errors and tsc fails with "Unused '@ts-expect-error' directive".
+const adaptiveParams: ASHRAEInputs = {
   tdb: 77,
   tr: 77,
   t_running_mean: 68,
@@ -281,7 +281,7 @@ const adaptiveParams: AdaptiveAshraeParams = {
   limit_inputs: false,
   round_output: false,
 };
-const adaptiveResult: AdaptiveAshraeResult = adaptive_ashrae(adaptiveParams);
+const adaptiveResult: AdaptiveASHRAE = adaptive_ashrae(adaptiveParams);
 // @ts-expect-error `round` is not a param; the switch is `round_output`.
 adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 20, v: 0.1, round: false });
 // @ts-expect-error t_running_mean is a required quantity.
@@ -296,6 +296,8 @@ adaptive_ashrae({
 });
 // @ts-expect-error tdb must be a number.
 adaptive_ashrae({ tdb: "25", tr: 25, t_running_mean: 20, v: 0.1 });
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+adaptiveResult.tmp_cmf = 1;
 
 // cooling_effect takes one params object too (ADR 0002), with its params and
 // result types exported by name; the lines below are errors only while the
@@ -458,10 +460,12 @@ utci({ tdb: "25", tr: 25, v: 1, rh: 50 });
 // @ts-expect-error the result is readonly, as upstream's frozen dataclass.
 utciResult.utci = 1;
 
-// adaptive_ashrae returns the same rows as the PMV wrappers, typed through to
-// the bound.
-const adaptiveWarnings: ApplicabilityWarning[] = adaptiveResult.warnings;
-const adaptiveRowMax: number | undefined = adaptiveResult.warnings[0].bound.max;
+// adaptive_ashrae returns ModelWarning rows, typed through to the bound once
+// a row's kind is narrowed.
+const adaptiveWarnings: readonly ModelWarning[] = adaptiveResult.warnings;
+const adaptiveRow = adaptiveResult.warnings[0];
+const adaptiveRowMax: number | undefined =
+  adaptiveRow.kind === "range" ? adaptiveRow.bound.max : undefined;
 // heat_index_rothfusz returns ModelWarning rows: a row's bound reads once its
 // kind is narrowed to "range", and the rows are readonly.
 const heatIndexWarnings: readonly ModelWarning[] = heatIndexResult.warnings;

@@ -7,7 +7,6 @@ import {
   solar_gain,
   utci,
 } from "../src/models/index.ts";
-import type { AdaptiveAshraeParams } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
   check_header,
@@ -404,17 +403,18 @@ describe("read_pins", () => {
 const MODELS: readonly ParityModel[] = [
   {
     name: "adaptive_ashrae",
-    run: (inputs) => adaptive_ashrae(inputs as unknown as AdaptiveAshraeParams),
+    run: (inputs) => ({
+      ...adaptive_ashrae(
+        inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
+      ),
+    }),
     // Upstream rounds t_cmf in SI before deriving the bounds
     // (adaptive_ashrae.py:147-148), and converts it afterwards under IP.
     rounded: ({ units, round_output }) =>
       round_output === true && String(units).toUpperCase() === "SI"
         ? ["tmp_cmf"]
         : [],
-    // Upstream checks the ranges only under limit_inputs, and the library
-    // returns its older rows; warnings are compared once the model returns
-    // ModelWarning rows (ADR 0024).
-    warnings: false,
+    warnings: true,
   },
   {
     name: "clo_tout",

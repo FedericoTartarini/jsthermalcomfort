@@ -46,15 +46,15 @@ ADR 0019 names error classes, check order and messages as classes of their own (
 
 **Additions.** Something upstream lacks that changes no upstream value. Every instance gets a row. The additions an ADR approves:
 
-| Addition       | What it adds                                                                                 | ADR  |
-| -------------- | -------------------------------------------------------------------------------------------- | ---- |
-| model info     | `*_INFO` for every model.                                                                    | 0024 |
-| warnings       | `warnings` as data, with range and notice rows.                                              | 0024 |
-| gate-off rows  | Range rows whatever `limit_inputs` is.                                                       | 0024 |
-| added output   | An output upstream lacks, as a field of the result interface, such as ISO 7730's `category`. | 0023 |
-| added bins     | Bins for an approved added labelled output.                                                  | 0024 |
-| Table C-2 rows | `solar_gain`'s ASHRAE 55 Table C-2 rows.                                                     | 0024 |
-| `Units`        | The `Units` constant.                                                                        | 0019 |
+| Addition       | What it adds                                                                                                         | ADR  |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- | ---- |
+| model info     | `*_INFO` for every model.                                                                                            | 0024 |
+| warnings       | `warnings` as data, with range and notice rows.                                                                      | 0024 |
+| gate-off rows  | Range rows whatever `limit_inputs` is.                                                                               | 0024 |
+| added output   | An output upstream lacks, as an entry in `INFO.outputs` and so a field of the result, such as ISO 7730's `category`. | 0023 |
+| added bins     | Bins for an approved added labelled output.                                                                          | 0024 |
+| Table C-2 rows | `solar_gain`'s ASHRAE 55 Table C-2 rows.                                                                             | 0024 |
+| `Units`        | The `Units` constant.                                                                                                | 0019 |
 
 **Other deviations an ADR approves.** A deviation an ADR approves outside the classes and additions above names that ADR in its row. One case is `classifyFromBins`, which throws `RangeError` unless its edges are strictly increasing (ADR 0024).
 

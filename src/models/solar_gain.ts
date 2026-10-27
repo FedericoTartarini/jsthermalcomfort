@@ -6,6 +6,7 @@ import type {
   ModelInfo,
   ModelResult,
   ModelWarning,
+  OutputsOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
@@ -89,24 +90,25 @@ export const SOLAR_GAIN_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    erf: { unit: "W/m²" },
-    delta_mrt: { unit: "°C" },
+    /** Solar gain to the human body using the Effective Radiant Field [W/m2]. */
+    erf: { kind: "numeric", unit: "W/m²" },
+    /**
+     * Delta mean radiant temperature. The amount by which the mean radiant
+     * temperature of the space should be increased if no solar radiation is present.
+     */
+    delta_mrt: { kind: "numeric", unit: "°C" },
   },
 } as const satisfies ModelInfo);
 
 /** @interface */
 export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO.inputs>;
 
-/** Dataclass to represent the solar gain to the human body. */
-export interface SolarGain extends ModelResult {
-  /** Solar gain to the human body using the Effective Radiant Field [W/m2]. */
-  readonly erf: number;
-  /**
-   * Delta mean radiant temperature. The amount by which the mean radiant
-   * temperature of the space should be increased if no solar radiation is present.
-   */
-  readonly delta_mrt: number;
-}
+/**
+ * Dataclass to represent the solar gain to the human body.
+ *
+ * @interface
+ */
+export type SolarGain = ModelResult & OutputsOf<typeof SOLAR_GAIN_INFO.outputs>;
 
 /**
  * Calculate the solar gain to the human body using the Effective Radiant Field

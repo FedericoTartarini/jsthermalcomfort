@@ -10,6 +10,7 @@ import type {
   ModelInfo,
   ModelResult,
   ModelWarning,
+  OutputsOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
@@ -41,13 +42,20 @@ export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    tmp_cmf: { unit: "°C" },
-    tmp_cmf_80_low: { unit: "°C" },
-    tmp_cmf_80_up: { unit: "°C" },
-    tmp_cmf_90_low: { unit: "°C" },
-    tmp_cmf_90_up: { unit: "°C" },
-    acceptability_80: { unit: null },
-    acceptability_90: { unit: null },
+    /** Comfort temperature at a specific running mean temperature, default in [°C] or [°F]. */
+    tmp_cmf: { kind: "numeric", unit: "°C" },
+    /** Lower acceptable comfort temperature for 80% occupants, default in [°C] or [°F]. */
+    tmp_cmf_80_low: { kind: "numeric", unit: "°C" },
+    /** Upper acceptable comfort temperature for 80% occupants, default in [°C] or [°F]. */
+    tmp_cmf_80_up: { kind: "numeric", unit: "°C" },
+    /** Lower acceptable comfort temperature for 90% occupants, default in [°C] or [°F]. */
+    tmp_cmf_90_low: { kind: "numeric", unit: "°C" },
+    /** Upper acceptable comfort temperature for 90% occupants, default in [°C] or [°F]. */
+    tmp_cmf_90_up: { kind: "numeric", unit: "°C" },
+    /** Acceptability for 80% occupants. */
+    acceptability_80: { kind: "bool", unit: null },
+    /** Acceptability for 90% occupants. */
+    acceptability_90: { kind: "bool", unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -57,23 +65,11 @@ export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO.inputs>;
 /**
  * A dataclass to store the results of the adaptive thermal comfort model based on
  * ASHRAE 55.
+ *
+ * @interface
  */
-export interface AdaptiveASHRAE extends ModelResult {
-  /** Comfort temperature at a specific running mean temperature, default in [°C] or [°F]. */
-  readonly tmp_cmf: number;
-  /** Lower acceptable comfort temperature for 80% occupants, default in [°C] or [°F]. */
-  readonly tmp_cmf_80_low: number;
-  /** Upper acceptable comfort temperature for 80% occupants, default in [°C] or [°F]. */
-  readonly tmp_cmf_80_up: number;
-  /** Lower acceptable comfort temperature for 90% occupants, default in [°C] or [°F]. */
-  readonly tmp_cmf_90_low: number;
-  /** Upper acceptable comfort temperature for 90% occupants, default in [°C] or [°F]. */
-  readonly tmp_cmf_90_up: number;
-  /** Acceptability for 80% occupants. */
-  readonly acceptability_80: boolean;
-  /** Acceptability for 90% occupants. */
-  readonly acceptability_90: boolean;
-}
+export type AdaptiveASHRAE = ModelResult &
+  OutputsOf<typeof ADAPTIVE_ASHRAE_INFO.outputs>;
 
 /**
  * Calculate the adaptive thermal comfort based on ASHRAE 55.

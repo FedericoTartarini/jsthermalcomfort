@@ -52,6 +52,7 @@ export type {
   ModelInfo,
   ModelResult,
   ModelWarning,
+  OutputField,
   OutputInfo,
   UnitSymbol,
 } from "../_internal/modelDocs.ts";

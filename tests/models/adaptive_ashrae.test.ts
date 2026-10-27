@@ -1,10 +1,11 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import * as models from "../../src/models/index.ts";
 import {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,
   CLO_TOUT_INFO,
 } from "../../src/models/index.ts";
+import type { AdaptiveASHRAE, ModelWarning } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { adaptive_ashrae as adaptive_ashrae_from_root } from "../../src/index.ts";
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
@@ -516,6 +517,22 @@ describe("adaptive_ashrae (JS-only)", () => {
       ]);
     });
 
+    // The fields' types come from the kinds in INFO.outputs. `branded`, since
+    // expect-type's plain equality fails on an intersection (its README, "Why
+    // is my assertion failing?").
+    test("its fields have the types the hand-written interface had", () => {
+      expectTypeOf<AdaptiveASHRAE>().branded.toEqualTypeOf<{
+        readonly tmp_cmf: number;
+        readonly tmp_cmf_80_low: number;
+        readonly tmp_cmf_80_up: number;
+        readonly tmp_cmf_90_low: number;
+        readonly tmp_cmf_90_up: number;
+        readonly acceptability_80: boolean;
+        readonly acceptability_90: boolean;
+        readonly warnings: readonly ModelWarning[];
+      }>();
+    });
+
     // Upstream's acceptability is a comparison with NaN under the gate, so
     // False, not masked (adaptive_ashrae.py:155-156).
     test("the acceptability is a boolean even when tmp_cmf is NaN", () => {
@@ -587,13 +604,13 @@ describe("adaptive_ashrae (JS-only)", () => {
 
     test("the outputs are upstream's fields, temperatures in °C", () => {
       expect(ADAPTIVE_ASHRAE_INFO.outputs).toEqual({
-        tmp_cmf: { unit: "°C" },
-        tmp_cmf_80_low: { unit: "°C" },
-        tmp_cmf_80_up: { unit: "°C" },
-        tmp_cmf_90_low: { unit: "°C" },
-        tmp_cmf_90_up: { unit: "°C" },
-        acceptability_80: { unit: null },
-        acceptability_90: { unit: null },
+        tmp_cmf: { kind: "numeric", unit: "°C" },
+        tmp_cmf_80_low: { kind: "numeric", unit: "°C" },
+        tmp_cmf_80_up: { kind: "numeric", unit: "°C" },
+        tmp_cmf_90_low: { kind: "numeric", unit: "°C" },
+        tmp_cmf_90_up: { kind: "numeric", unit: "°C" },
+        acceptability_80: { kind: "bool", unit: null },
+        acceptability_90: { kind: "bool", unit: null },
       });
     });
 

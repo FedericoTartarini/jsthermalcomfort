@@ -29,7 +29,7 @@ The single object a model takes, whose keys are upstream's keyword parameters: p
 _Avoid_: params, options, kwargs, config, arguments object
 
 **Result**:
-What a model returns: upstream's dataclass as an interface (`HI`), extending `ModelResult` for `warnings`. `INFO.outputs` describes its fields other than `warnings`.
+What a model returns: `ModelResult`, which holds `warnings`, and the fields `INFO.outputs` describes. Its type is derived from `INFO.outputs` and named after upstream's dataclass (`HI`).
 _Avoid_: return value, response, outputs (for the returned object)
 
 **Standard**:
@@ -57,7 +57,7 @@ What a main model exposes beyond upstream's function. Every model has its model 
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
-The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, its inputs (every keyword argument, with its kind, unit, applicability and default), and per-output unit, applicability and, on a labelled output, classifier. A model that takes a standard has it among its inputs, as a `standard` choice entry whose allowed values are the standards it accepts. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
+The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, its inputs (every keyword argument, with its kind, unit, applicability and default), and per output its kind (`numeric`, `bool` or `label`, and whether it is masked), unit, applicability and, on a labelled output, classifier. A model that takes a standard has it among its inputs, as a `standard` choice entry whose allowed values are the standards it accepts. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
 _Avoid_: schema, metadata object, model docs
 
 **Classifier**:

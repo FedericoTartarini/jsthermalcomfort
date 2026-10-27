@@ -1,5 +1,6 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import { deepFreeze } from "../../src/_internal/modelDocs.ts";
+import type { OutputsOf } from "../../src/_internal/modelDocs.ts";
 
 describe("deepFreeze", () => {
   // The cycle guard from #197: without it, a self-reference recurses until
@@ -23,5 +24,25 @@ describe("deepFreeze", () => {
 
     expect(Object.isFrozen(obj[key])).toBe(true);
     expect(Object.isFrozen(obj[key].nested)).toBe(true);
+  });
+});
+
+describe("OutputsOf", () => {
+  // `masked` adds the NaN `number` of a masked output (ADR 0023).
+  test("maps each kind to its value type", () => {
+    type Fields = OutputsOf<{
+      n: { kind: "numeric"; unit: null };
+      b: { kind: "bool"; unit: null };
+      bm: { kind: "bool"; unit: null; masked: true };
+      l: { kind: "label"; unit: null };
+      lm: { kind: "label"; unit: null; masked: true };
+    }>;
+    expectTypeOf<Fields>().toEqualTypeOf<{
+      readonly n: number;
+      readonly b: boolean;
+      readonly bm: boolean | number;
+      readonly l: string;
+      readonly lm: string | number;
+    }>();
   });
 });

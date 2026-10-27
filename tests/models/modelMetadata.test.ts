@@ -11,7 +11,6 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   adaptive_ashrae,
   clo_tout,
-  heat_index_rothfusz,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
 } from "../../src/index.ts";
@@ -547,27 +546,50 @@ describe("Enforcement — extracted constants match runtime validation", () => {
   // (3) outside limit_inputs=false -> finite AND inside [-2, 2].
 });
 
-describe("Outputs staleness — heat_index_rothfusz output matches INFO", () => {
-  test("heat_index_rothfusz output keys match HEAT_INDEX_ROTHFUSZ_INFO.outputs", () => {
-    const result = heat_index_rothfusz({
-      tdb: 28,
-      rh: 60,
-      limit_inputs: false,
-    });
-    // `warnings` lists the bounds a call broke; it is not a quantity, so
-    // INFO.outputs does not describe it (#199).
-    const resultKeys = Object.keys(result)
-      .filter((key) => key !== "warnings")
-      .sort();
-    const infoKeys = Object.keys(HEAT_INDEX_ROTHFUSZ_INFO.outputs).sort();
-    expect(resultKeys).toEqual(infoKeys);
+// One call of each model whose INFO has the v2 form, its inputs carrying a
+// kind, with inputs it accepts. A model migrated later fails the first test
+// below until it has a call here.
+const v2Calls: Record<string, object> = {
+  adaptive_ashrae: { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
+  clo_tout: { tout: 20 },
+  heat_index_rothfusz: { tdb: 28, rh: 60 },
+  solar_gain: {
+    sol_altitude: 0,
+    sharp: 120,
+    sol_radiation_dir: 800,
+    sol_transmittance: 0.5,
+    f_svv: 0.5,
+    f_bes: 0.5,
+  },
+  utci: { tdb: 25, tr: 25, v: 1, rh: 50 },
+};
+const v2Infos = exportedInfos.filter(({ info }) =>
+  Object.values(info.inputs).every((entry) => "kind" in entry),
+);
+
+describe("Outputs staleness — each v2 model's result matches its INFO.outputs", () => {
+  test("every v2 model info has a call here", () => {
+    expect(v2Infos.map(({ info }) => info.name).sort()).toEqual(
+      Object.keys(v2Calls).sort(),
+    );
   });
 
-  test("heat_index_rothfusz always returns hi and stress_category", () => {
-    const result = heat_index_rothfusz({ tdb: 28, rh: 60 });
-    expect(result).toHaveProperty("hi");
-    expect(result).toHaveProperty("stress_category");
-  });
+  // The result type is derived from INFO.outputs, so a field INFO lacks fails
+  // to compile. A key removed from INFO while the body still returns it
+  // compiles, and only this catches it. `warnings` lists the bounds a call
+  // broke; it is not a quantity, so INFO.outputs does not describe it (#199).
+  test.each(v2Infos)(
+    "$exportName: the result's keys, less warnings, are INFO.outputs' keys in order",
+    ({ info }) => {
+      const model = (pkg as Record<string, unknown>)[info.name] as (
+        inputs: object,
+      ) => object;
+      const resultKeys = Object.keys(model(v2Calls[info.name]!)).filter(
+        (key) => key !== "warnings",
+      );
+      expect(resultKeys).toEqual(Object.keys(info.outputs));
+    },
+  );
 });
 
 describe("Outputs staleness — pmv_ppd_iso output matches INFO", () => {

@@ -104,6 +104,27 @@ export interface OutputInfo {
 }
 
 /**
+ * One returned value in `INFO.outputs`: its {@link OutputInfo} plus its value
+ * kind, a number (`numeric`), a boolean (`bool`) or a label (`label`).
+ * `masked` adds the NaN `number` of a masked output, so a masked `label` is
+ * `string | number` (ADR 0023).
+ */
+export interface OutputField extends OutputInfo {
+  readonly kind: "numeric" | "bool" | "label";
+  readonly masked?: true;
+}
+
+/**
+ * The result fields a model's `INFO.outputs` describes, each `readonly` and
+ * typed by its kind.
+ */
+export type OutputsOf<O extends Readonly<Record<string, OutputField>>> = {
+  readonly [K in keyof O]:
+    | { numeric: number; bool: boolean; label: string }[O[K]["kind"]]
+    | (O[K] extends { readonly masked: true } ? number : never);
+};
+
+/**
  * Metadata describing a thermal comfort model: its `*_INFO` (ADR 0024,
  * deviation _shared-4). Its shape is stable within the major version.
  *
@@ -116,9 +137,11 @@ export interface OutputInfo {
  * `inputs` describes the model's inputs: every keyword argument, in
  * upstream's order, with its kind (`numeric`, `bool` or `choice`), unit, applicability
  * and default. The model validates its inputs against it, and its inputs type
- * is derived from it. `outputs` are the returned values. `derived` covers quantities
- * computed from the inputs rather than supplied by the caller, keyed by
- * upstream's name for the check, as the `warnings` rows are.
+ * is derived from it. `outputs` are the returned values, in the order of
+ * upstream's result dataclass, each with its kind (`numeric`, `bool` or
+ * `label`) and unit, and the result type is derived from it. `derived` covers
+ * quantities computed from the inputs rather than supplied by the caller,
+ * keyed by upstream's name for the check, as the `warnings` rows are.
  *
  * A model that takes a standard has a `standard` choice entry in `inputs`,
  * whose `allowed` lists the standards it accepts and whose `default` is
@@ -128,7 +151,7 @@ export interface ModelInfo {
   readonly name: string;
   readonly label: string;
   readonly inputs: InputsInfo;
-  readonly outputs: Readonly<Record<string, OutputInfo>>;
+  readonly outputs: Readonly<Record<string, OutputField>>;
   readonly derived?: Readonly<Record<string, OutputInfo>>;
 }
 

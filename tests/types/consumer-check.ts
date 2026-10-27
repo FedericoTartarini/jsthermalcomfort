@@ -104,6 +104,10 @@ const isoAsModelInfo: ModelInfo = PMV_PPD_ISO_INFO;
 const tdbKind: "numeric" = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.kind;
 const limitInputsDefault: boolean =
   HEAT_INDEX_ROTHFUSZ_INFO.inputs.limit_inputs.default;
+// Its INFO.outputs gives each returned value's kind, from which the result
+// type is derived.
+const acceptabilityKind: "bool" =
+  ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80.kind;
 // A unit is one of the symbols the models use, so a misspelt one is rejected.
 const tdbUnit: UnitSymbol = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.unit;
 // @ts-expect-error "°c" is not a unit; the unit is "°C".
@@ -587,6 +591,7 @@ export {
   isoAsModelInfo,
   tdbKind,
   limitInputsDefault,
+  acceptabilityKind,
   tdbUnit,
   misspeltUnit,
   heatIndexResult,

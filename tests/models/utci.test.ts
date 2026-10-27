@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import * as models from "../../src/models/index.ts";
 import {
   classifyFromBins,
@@ -6,6 +6,7 @@ import {
   utci,
   UTCI_INFO,
 } from "../../src/models/index.ts";
+import type { ModelWarning, UTCI } from "../../src/models/index.ts";
 import { _utci_optimized } from "../../src/models/utci.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { utci as utci_from_root } from "../../src/index.ts";
@@ -472,6 +473,17 @@ describe("utci (JS-only)", () => {
         "warnings",
       ]);
     });
+
+    // The fields' types come from the kinds in INFO.outputs: a masked label
+    // is NaN where the UTCI is. `branded`, since expect-type's plain equality
+    // fails on an intersection (its README, "Why is my assertion failing?").
+    test("its fields have the types the hand-written interface had", () => {
+      expectTypeOf<UTCI>().branded.toEqualTypeOf<{
+        readonly utci: number;
+        readonly stress_category: string | number;
+        readonly warnings: readonly ModelWarning[];
+      }>();
+    });
   });
 
   // deviation utci-1
@@ -540,8 +552,10 @@ describe("utci (JS-only)", () => {
     // right=True.
     test("the stress category bins are upstream's mapping, right-inclusive", () => {
       expect(UTCI_INFO.outputs).toEqual({
-        utci: { unit: "°C" },
+        utci: { kind: "numeric", unit: "°C" },
         stress_category: {
+          kind: "label",
+          masked: true,
           unit: null,
           classifier: {
             edges: [-40, -27, -13, 0, 9, 26, 32, 38, 46, 1000],

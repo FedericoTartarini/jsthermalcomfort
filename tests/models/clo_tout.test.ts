@@ -1,5 +1,6 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import { clo_tout, CLO_TOUT_INFO } from "../../src/models/index.ts";
+import type { CloTOut, ModelWarning } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { clo_tout as clo_tout_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
@@ -143,6 +144,16 @@ describe("clo_tout (JS-only)", () => {
       ]);
     });
 
+    // The fields' types come from the kinds in INFO.outputs. `branded`, since
+    // expect-type's plain equality fails on an intersection (its README, "Why
+    // is my assertion failing?").
+    test("its fields have the types the hand-written interface had", () => {
+      expectTypeOf<CloTOut>().branded.toEqualTypeOf<{
+        readonly clo_tout: number;
+        readonly warnings: readonly ModelWarning[];
+      }>();
+    });
+
     // Upstream checks no range and calls no warnings.warn (deviation
     // clo_tout-3).
     test("has no warnings rows, whatever tout", () => {
@@ -178,7 +189,9 @@ describe("clo_tout (JS-only)", () => {
     });
 
     test("clo_tout is the one output, in clo", () => {
-      expect(CLO_TOUT_INFO.outputs).toEqual({ clo_tout: { unit: "clo" } });
+      expect(CLO_TOUT_INFO.outputs).toEqual({
+        clo_tout: { kind: "numeric", unit: "clo" },
+      });
     });
 
     test("is frozen deeply", () => {

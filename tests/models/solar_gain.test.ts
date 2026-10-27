@@ -1,5 +1,6 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import { solar_gain, SOLAR_GAIN_INFO } from "../../src/models/index.ts";
+import type { ModelWarning, SolarGain } from "../../src/models/index.ts";
 import { Postures } from "../../src/utilities/index.ts";
 import { solar_gain as solar_gain_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
@@ -394,6 +395,17 @@ describe("solar_gain (JS-only)", () => {
         "warnings",
       ]);
     });
+
+    // The fields' types come from the kinds in INFO.outputs. `branded`, since
+    // expect-type's plain equality fails on an intersection (its README, "Why
+    // is my assertion failing?").
+    test("its fields have the types the hand-written interface had", () => {
+      expectTypeOf<SolarGain>().branded.toEqualTypeOf<{
+        readonly erf: number;
+        readonly delta_mrt: number;
+        readonly warnings: readonly ModelWarning[];
+      }>();
+    });
   });
 
   // Upstream's _valid_range on sol_altitude and sharp, with no limit_inputs
@@ -579,8 +591,8 @@ describe("solar_gain (JS-only)", () => {
 
     test("erf in W/m² and delta_mrt in °C are the outputs", () => {
       expect(SOLAR_GAIN_INFO.outputs).toEqual({
-        erf: { unit: "W/m²" },
-        delta_mrt: { unit: "°C" },
+        erf: { kind: "numeric", unit: "W/m²" },
+        delta_mrt: { kind: "numeric", unit: "°C" },
       });
     });
 

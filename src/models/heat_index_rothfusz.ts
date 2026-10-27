@@ -5,6 +5,7 @@ import type {
   ModelInfo,
   ModelResult,
   ModelWarning,
+  OutputsOf,
 } from "../_internal/modelDocs.ts";
 import { round } from "../_internal/round.ts";
 import {
@@ -23,8 +24,11 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    hi: { unit: "°C" },
+    /** Heat Index, [°C]. */
+    hi: { kind: "numeric", unit: "°C" },
     stress_category: {
+      kind: "label",
+      masked: true,
       unit: null,
       classifier: {
         edges: [27.0, ...HEAT_INDEX_STRESS_CATEGORIES.edges],
@@ -38,12 +42,13 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
 /** @interface */
 export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO.inputs>;
 
-/** Dataclass to represent the Heat Index (HI). */
-export interface HI extends ModelResult {
-  /** Heat Index, [°C]. */
-  readonly hi: number;
-  readonly stress_category: string | number;
-}
+/**
+ * Dataclass to represent the Heat Index (HI).
+ *
+ * @interface
+ */
+export type HI = ModelResult &
+  OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO.outputs>;
 
 /**
  * Calculate the Heat Index (HI) in accordance with the Rothfusz (1990) model

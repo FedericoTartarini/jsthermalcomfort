@@ -123,13 +123,22 @@ A model follows pythermalcomfort's current release: its logic, values, names and
 
 ### 1. Create the Model File
 
-Create `src/models/<name>.ts`, with upstream's file and function name. In order, it holds: the added constants (`*_LIMITS`, `*_BINS`), the input definition `*_PARAMS` and the params type derived from it, the Result interface, `*_INFO`, the public function, and the private functions in upstream's order.
+Create `src/models/<name>.ts`, with upstream's file and function name. In order, it holds:
+
+1. the imports;
+2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric` or `bool`), unit, applicability and default, and its `outputs` hold each classifier, inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`);
+3. the params type, `ParamsOf<typeof MY_NEW_MODEL_INFO.inputs>`, named after upstream's input class;
+4. the result interface, named after upstream's dataclass and extending `ModelResult`, which holds `warnings`;
+5. the TSDoc block and the public function;
+6. the private functions in upstream's order.
+
+A result class that upstream shares between models (`HI`, `SET`, `WorkCapacity`) is declared in the file of the first migrated model that returns it, and the others import it.
 
 ### 2. Follow Upstream, and Document With TSDoc
 
-- Validate through the input definition (`parseParams` in `src/_internal/define.ts`), with upstream's error messages.
-- Write the TSDoc in upstream's docstring order: the summary and each parameter's text verbatim, an example as a TypeScript call with upstream's inputs and outputs.
-- Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, its TS site naming the file and the symbol.
+- Validate with `parseParams(name, MY_NEW_MODEL_INFO.inputs, params)` (`src/_internal/define.ts`), with upstream's error messages.
+- The model file holds only upstream's docstrings and code comments. The docstring is one TSDoc block above the public function, in upstream's order: the summary, `@param params` and one `@param params.<key>` per Parameters entry with its text verbatim, each `.. note::` as `> [!NOTE]`, `@returns`, and the example as a TypeScript call with upstream's inputs and outputs. A citation `[Key]_` becomes a link to its entry, `[Key](../../docs/references.md#key)`. Upstream's `#` comments are copied verbatim.
+- Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, its TS site naming the file and the symbol. An error in an upstream docstring or code comment is fixed, given a row, and reported upstream. A note that is not a deviation, such as ADR 0009's on the executed path's arithmetic, goes in the register's Notes section.
 
 ### 3. Register the Model
 
@@ -137,8 +146,10 @@ List the function, its `*_INFO` and its types by name in `src/models/index.ts`:
 
 ```ts
 import { my_new_model, MY_NEW_MODEL_INFO } from "./my_new_model.ts";
-export type { MyModelInputs, MyModelResult } from "./my_new_model.ts";
+export type { MyNewModelInputs, MyNewModel } from "./my_new_model.ts";
 ```
+
+The type names are upstream's input class and dataclass.
 
 then add `my_new_model` and `MY_NEW_MODEL_INFO` to both the `export { … }` list and the default export there. The package root re-exports the subpath indexes, so nothing else needs editing.
 

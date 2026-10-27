@@ -1,7 +1,6 @@
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_STRESS_CATEGORY_BINS,
 } from "./heat_index_rothfusz.ts";
 import { phs } from "./phs.js";
 import { humidex } from "./humidex.js";
@@ -39,6 +38,11 @@ import {
 } from "./pmv_ppd.ts";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 
+export type {
+  BoolField,
+  Definition,
+  NumericField,
+} from "../_internal/define.ts";
 // deepFreeze is internal, so modelDocs contributes its types only.
 export type {
   ApplicabilityWarning,
@@ -58,11 +62,7 @@ export type {
   CoolingEffectParams,
   CoolingEffectResult,
 } from "./cooling_effect.ts";
-export type {
-  HeatIndexRothfuszResult,
-  HI,
-  HIInputs,
-} from "./heat_index_rothfusz.ts";
+export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type {
   PmvPpdAshraeParams,
   PmvPpdAshraeResult,
@@ -92,7 +92,6 @@ export {
   discomfort_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_STRESS_CATEGORY_BINS,
   humidex,
   net,
   phs,
@@ -137,7 +136,6 @@ export default {
   discomfort_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_STRESS_CATEGORY_BINS,
   humidex,
   net,
   phs,

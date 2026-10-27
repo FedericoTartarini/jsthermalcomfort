@@ -27,7 +27,7 @@ import type {
   CloToutResult,
   CoolingEffectParams,
   CoolingEffectResult,
-  HeatIndexRothfuszResult,
+  HI,
   HIInputs,
   ModelInfo,
   ModelWarning,
@@ -46,7 +46,6 @@ import {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_STRESS_CATEGORY_BINS,
   PMV_CATEGORY_BINS_ISO_7730_2005,
   PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
@@ -85,14 +84,24 @@ import { Standard as standardFromUtilities } from "jsthermalcomfort/utilities";
 // @ts-expect-error a deep import is not exported.
 import { utci as utciDeep } from "jsthermalcomfort/lib/esm/models/utci.js";
 
-// The published metadata must satisfy the published type.
-const iso: ModelInfo = PMV_PPD_ISO_INFO;
-const ashrae: ModelInfo = PMV_PPD_ASHRAE_INFO;
+// The published metadata must satisfy the published type. The models not yet
+// migrated publish the old form, whose inputs carry no kind, until the
+// contract ticket removes it.
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
-const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
-const utciInfo: ModelInfo = UTCI_INFO;
-const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
-const solarGainInfo: ModelInfo = SOLAR_GAIN_INFO;
+const iso = PMV_PPD_ISO_INFO;
+const ashrae = PMV_PPD_ASHRAE_INFO;
+const adaptive = ADAPTIVE_ASHRAE_INFO;
+const utciInfo = UTCI_INFO;
+const cloToutInfo = CLO_TOUT_INFO;
+const solarGainInfo = SOLAR_GAIN_INFO;
+// @ts-expect-error the old form's inputs carry no kind.
+const isoAsModelInfo: ModelInfo = PMV_PPD_ISO_INFO;
+
+// A migrated model's INFO.inputs is its input definition, switches included,
+// typed by kind.
+const tdbKind: "numeric" = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.kind;
+const limitInputsDefault: boolean =
+  HEAT_INDEX_ROTHFUSZ_INFO.inputs.limit_inputs.default;
 
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
@@ -105,8 +114,12 @@ const isoStandards: readonly (typeof Standard)[keyof typeof Standard][] =
   iso.standards;
 const heatIndexStandards: readonly string[] = heatIndex.standards;
 
-// Bins are exported directly as well as through the metadata (issue #184 §3.4).
-const label = classifyFromBins(28.5, HEAT_INDEX_STRESS_CATEGORY_BINS);
+// Bins are reached through the metadata, and the models not yet migrated also
+// export them directly (issue #184 §3.4).
+const label = classifyFromBins(
+  28.5,
+  HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
+);
 const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
 const utciLabel = classifyFromBins(24.6, UTCI_STRESS_CATEGORY_BINS);
 
@@ -168,7 +181,9 @@ PMV_PPD_ASHRAE_INFO.outputs.pmv = { unit: null };
 // @ts-expect-error classifier bin edges are a readonly array.
 PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
-HEAT_INDEX_STRESS_CATEGORY_BINS.labels.push("new label");
+HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier.labels.push(
+  "new label",
+);
 // @ts-expect-error the UTCI metadata is readonly, its derived bound included.
 UTCI_INFO.derived!.tr_minus_tdb.applicability!.max = 80;
 
@@ -316,8 +331,7 @@ const heatIndexParams: HIInputs = {
   round_output: false,
   limit_inputs: false,
 };
-const heatIndexResult: HeatIndexRothfuszResult =
-  heat_index_rothfusz(heatIndexParams);
+const heatIndexResult: HI = heat_index_rothfusz(heatIndexParams);
 // @ts-expect-error `round` is not a param; the switch is `round_output`.
 heat_index_rothfusz({ tdb: 30, rh: 80, round: false });
 // @ts-expect-error `units` is not a param; the model is SI only, as upstream's.
@@ -540,6 +554,9 @@ export {
   iso,
   ashrae,
   heatIndex,
+  isoAsModelInfo,
+  tdbKind,
+  limitInputsDefault,
   heatIndexResult,
   adaptive,
   adaptiveResult,

@@ -5,10 +5,11 @@ What a review checks a change against. Prettier, ESLint over `eslint.config.mjs`
 ## Where the rules live
 
 - **Upstream fidelity and the deviation register:** `docs/deviations/README.md` (the whitelist, the deviation classes, the additions, the row format, the TS site's symbol and the citing-comment form). Every difference from pythermalcomfort v4.6.2's `.py` is whitelisted or has a row.
-- **Names, files, file order, exports:** ADR 0021.
-- **Inputs, error classes and messages:** ADR 0022.
-- **Results:** ADR 0023. **Model info and warnings rows:** ADR 0024.
-- **TSDoc, mapped from upstream's docstring:** ADR 0025, with its 2026-10-26 amendment.
+- **Names, files, file order, exports:** ADR 0021, with its 2026-10-27 amendment.
+- **Inputs, the input definition, error classes and messages:** ADR 0022, with its 2026-10-27 amendment.
+- **Results:** ADR 0023, with its 2026-10-27 amendment. **Model info and warnings rows:** ADR 0024, with its 2026-10-27 amendment.
+- **TSDoc, mapped from upstream's docstring:** ADR 0025, with its 2026-10-26 and 2026-10-27 amendments.
+- **The add-a-model steps:** `docs/contributing.md`, with `heat_index_rothfusz` as the worked example.
 - **Arithmetic on upstream's executed path:** ADR 0009.
 - **Mirrored tests:** the header of `tests/models/testUtils.ts`.
 - **Terms:** `GLOSSARY.md`; each entry's _Avoid_ list names the words a change replaces.
@@ -19,6 +20,6 @@ The ADRs live in `docs/adr/`, which git ignores; from a worktree, read them at t
 
 - **Evidence in comments.** A factual claim in a comment, a test title or an upstream issue draft carries its source: an upstream `path:line` at v4.6.2, a doc with its scope, or the measurement with its scope (version, platform, case count).
 - **Live referents.** A comment that names a symbol, file or line names one that exists and still means it; a rename or an unexport updates every comment that names the old form.
-- **Upstream's words.** Copied TSDoc and messages read as upstream's text; any change to them is a register row.
-- **Added fields marked.** An added output or field says it is an addition in its TSDoc, not only in a row citation.
+- **Upstream's words.** Copied TSDoc, code comments and messages read as upstream's text; any change to them is a register row.
+- **Only upstream's words in a model file.** A model file holds upstream's docstrings and code comments and nothing else. What the library adds is documented once, in the shared types (`ModelResult`, `ModelWarning`, `ModelInfo`); every other note is a register row or a line of its Notes section.
 - **Tests at the public surface.** Behaviour tests import through the subpath indexes (seam S1); the mirrored `describe` compares upstream's fields only.

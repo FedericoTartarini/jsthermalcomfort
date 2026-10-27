@@ -4,7 +4,6 @@ import {
   ADAPTIVE_ASHRAE_INFO,
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_STRESS_CATEGORY_BINS,
   PMV_CATEGORY_BINS_ISO_7730_2025,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -43,7 +42,6 @@ const expectedMetadataExports = [
   "classifyFromBins",
   "CLO_TOUT_INFO",
   "HEAT_INDEX_ROTHFUSZ_INFO",
-  "HEAT_INDEX_STRESS_CATEGORY_BINS",
   "PMV_CATEGORY_BINS_ISO_7730_2005",
   "PMV_CATEGORY_BINS_ISO_7730_2025",
   "PMV_COMPLIANCE_INTERVAL_ASHRAE",
@@ -147,12 +145,6 @@ describe("HEAT_INDEX_ROTHFUSZ_INFO structure", () => {
     expect(
       HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier,
     ).toBeDefined();
-  });
-
-  test("stress_category classifier references HEAT_INDEX_STRESS_CATEGORY_BINS", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier).toBe(
-      HEAT_INDEX_STRESS_CATEGORY_BINS,
-    );
   });
 });
 
@@ -330,7 +322,7 @@ describe("Deep freezing — objects are immutable", () => {
     expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.outputs)).toBe(true);
   });
 
-  test("HEAT_INDEX_STRESS_CATEGORY_BINS nested in INFO is frozen", () => {
+  test("HEAT_INDEX_ROTHFUSZ_INFO's stress category bins are frozen", () => {
     const classifier =
       HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier!;
     expect(Object.isFrozen(classifier)).toBe(true);
@@ -412,12 +404,6 @@ describe("Identity — bins exported separately are the same object as in INFO",
   test("PMV_CATEGORY_BINS_ISO_7730_2025 === PMV_PPD_ISO_INFO.outputs.category.classifier", () => {
     expect(PMV_CATEGORY_BINS_ISO_7730_2025).toBe(
       PMV_PPD_ISO_INFO.outputs.category!.classifier,
-    );
-  });
-
-  test("HEAT_INDEX_STRESS_CATEGORY_BINS === HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier", () => {
-    expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toBe(
-      HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category!.classifier,
     );
   });
 

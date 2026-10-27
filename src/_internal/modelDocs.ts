@@ -1,4 +1,5 @@
 import type { ClassifierBins } from "./classifierBins.ts";
+import type { Definition } from "./define.ts";
 import type { Standard } from "../utilities/options.ts";
 
 // The types of the model info every model publishes (`*_INFO`), of the result
@@ -71,7 +72,8 @@ export interface ModelResult {
 export type { ClassifierBins };
 
 /**
- * Metadata for a single input or output variable of a model.
+ * Metadata for a single output or derived variable of a model.
+ * `INFO.inputs` holds the input definition's entries instead.
  *
  * `unit` is the unit of measurement, or `null` if dimensionless.
  *
@@ -103,9 +105,10 @@ export interface VariableInfo {
  * can key a model by it without keeping its own copy of the string. `label` is
  * a short display name.
  *
- * `inputs` lists physical quantities only; switches (`round_output`,
- * `limit_inputs` and so on) are excluded. It is derived from the model's input
- * definition. `outputs` are the returned values. `derived` covers quantities
+ * `inputs` is the model's input definition: every keyword argument, in
+ * upstream's order, with its kind (`numeric` or `bool`), unit, applicability
+ * and default. The model validates its params against it, and its params type
+ * is derived from it. `outputs` are the returned values. `derived` covers quantities
  * computed from the inputs rather than supplied by the caller, keyed by
  * upstream's name for the check, as the `warnings` rows are.
  *
@@ -116,7 +119,7 @@ export interface ModelInfo {
   readonly name: string;
   readonly label: string;
   readonly standards: readonly StandardId[];
-  readonly inputs: Readonly<Record<string, VariableInfo>>;
+  readonly inputs: Definition;
   readonly outputs: Readonly<Record<string, VariableInfo>>;
   readonly derived?: Readonly<Record<string, VariableInfo>>;
 }

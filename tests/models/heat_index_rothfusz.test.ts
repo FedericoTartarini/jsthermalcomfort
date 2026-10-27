@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
+import * as models from "../../src/models/index.ts";
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  HEAT_INDEX_STRESS_CATEGORY_BINS,
 } from "../../src/models/index.ts";
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
@@ -324,62 +324,67 @@ describe("heat_index_rothfusz (JS-only)", () => {
       expect(HEAT_INDEX_ROTHFUSZ_INFO).not.toHaveProperty("description");
     });
 
-    // INFO.inputs comes from the input definition: its quantities, in order,
-    // and none of its switches.
-    test("lists the quantities of the definition, with upstream's bound", () => {
+    // INFO.inputs is the input definition: every keyword argument, in
+    // upstream's order, switches included.
+    test("lists every keyword argument, with upstream's bound and defaults", () => {
       expect(HEAT_INDEX_ROTHFUSZ_INFO.inputs).toEqual({
-        tdb: { unit: "°C", applicability: { min: 27 } },
-        rh: { unit: "%" },
+        tdb: { kind: "numeric", unit: "°C", applicability: { min: 27 } },
+        rh: { kind: "numeric", unit: "%" },
+        round_output: { kind: "bool", default: true },
+        limit_inputs: { kind: "bool", default: true },
       });
       expect(Object.keys(HEAT_INDEX_ROTHFUSZ_INFO.inputs)).toEqual([
         "tdb",
         "rh",
+        "round_output",
+        "limit_inputs",
       ]);
     });
 
-    test("references the stress category bins", () => {
+    // {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}
+    // (heat_index_rothfusz.py:83, _internal/validation.py:172), and
+    // _mapping's right=True.
+    test("the stress category bins are upstream's mapping, right-inclusive", () => {
       expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs).toEqual({
         hi: { unit: "°C" },
         stress_category: {
           unit: null,
-          classifier: HEAT_INDEX_STRESS_CATEGORY_BINS,
+          classifier: {
+            edges: [27, 32, 41, 54, 1000],
+            labels: [
+              "no risk",
+              "caution",
+              "extreme caution",
+              "danger",
+              "extreme danger",
+            ],
+            right: true,
+          },
         },
       });
-      expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category?.classifier).toBe(
-        HEAT_INDEX_STRESS_CATEGORY_BINS,
-      );
     });
 
-    // {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}
-    // (heat_index_rothfusz.py:83, _internal/validation.py:172).
-    test("the bins are upstream's mapping, right-inclusive, frozen", () => {
-      expect(HEAT_INDEX_STRESS_CATEGORY_BINS).toEqual({
-        edges: [27, 32, 41, 54, 1000],
-        labels: [
-          "no risk",
-          "caution",
-          "extreme caution",
-          "danger",
-          "extreme danger",
-        ],
-        right: true,
-      });
-      expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORY_BINS.edges)).toBe(true);
+    test("the bins are reached through INFO only", () => {
+      expect(models).not.toHaveProperty("HEAT_INDEX_STRESS_CATEGORY_BINS");
+      expect(models).not.toHaveProperty("HEAT_INDEX_STRESS_CATEGORIES");
     });
 
     test("is frozen deeply", () => {
+      const { inputs, outputs } = HEAT_INDEX_ROTHFUSZ_INFO;
       expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO)).toBe(true);
-      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs)).toBe(true);
-      expect(Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb)).toBe(true);
-      expect(
-        Object.isFrozen(HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb?.applicability),
-      ).toBe(true);
+      expect(Object.isFrozen(inputs)).toBe(true);
+      expect(Object.isFrozen(inputs.tdb)).toBe(true);
+      expect(Object.isFrozen(inputs.tdb.applicability)).toBe(true);
+      expect(Object.isFrozen(inputs.limit_inputs)).toBe(true);
+      expect(Object.isFrozen(outputs.stress_category.classifier.edges)).toBe(
+        true,
+      );
     });
   });
 
   // deviation heat_index_rothfusz-3
   describe("warnings rows", () => {
-    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb?.applicability;
+    const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability;
 
     test("a row at one step below the bound, none at it", () => {
       expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).warnings).toEqual([]);

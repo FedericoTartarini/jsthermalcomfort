@@ -6,7 +6,7 @@ import {
   notParamsObject,
   unexpectedKeyword,
 } from "./errors.ts";
-import type { Bound, VariableInfo } from "./modelDocs.ts";
+import type { Bound } from "./modelDocs.ts";
 
 // The input definition (ADR 0022): each model declares its inputs once, as
 // its `*_INFO.inputs`, and its params type and its validation are derived from
@@ -55,21 +55,6 @@ export type ParamsOf<D extends Definition> = Flatten<
 
 /** The params after the defaults are applied. */
 export type ResolvedOf<D extends Definition> = Values<D>;
-
-/** The `INFO.inputs` a definition derives: its quantities, in its order. */
-export function inputsInfo(
-  definition: Definition,
-): Record<string, VariableInfo> {
-  const info: Record<string, VariableInfo> = {};
-  for (const [key, entry] of Object.entries(definition)) {
-    if (entry.kind !== "numeric") continue;
-    info[key] =
-      entry.applicability === undefined
-        ? { unit: entry.unit }
-        : { unit: entry.unit, applicability: entry.applicability };
-  }
-  return info;
-}
 
 /** Checks one number, as given or defaulted, in the order below. */
 function parseNumeric(key: string, value: unknown): number {

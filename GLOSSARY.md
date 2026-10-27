@@ -53,7 +53,7 @@ What a main model exposes beyond upstream's function. Every model has its model 
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
-The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, standards, and per-quantity unit, applicability and, on a labelled output, classifier. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
+The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, standards, its inputs (every keyword argument, with its kind, unit, applicability and default: the model's input definition), and per-output unit, applicability and, on a labelled output, classifier. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
 _Avoid_: schema, metadata object, model docs
 
 **Classifier**:

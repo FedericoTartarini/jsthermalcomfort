@@ -17,5 +17,6 @@
     "docs/references.md",
     "docs/changelog.md"
   ],
-  "sortEntryPoints": false
+  "sortEntryPoints": false,
+  "sort": ["source-order"]
 }

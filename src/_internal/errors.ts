@@ -1,9 +1,10 @@
 // The messages the library's checks throw (ADR 0022). Upstream's own message
 // about a value stays verbatim, such as `BaseInputs`' for `units`
-// (`classes_input.py:120` at v4.6.2). Every other message is the library's,
-// in the `<key> must be …` form or one that likewise starts with the key, and
-// it replaces each upstream message that names Python's types or Python's call
-// binding (deviation _shared-10).
+// (`classes_input.py:120` at v4.6.2). Every other message is the library's
+// and starts with the key, in the `<key> must be …` form or a like one, or with
+// the model's name for a call with no inputs object; it replaces each upstream
+// message that names Python's types or Python's call binding (deviation
+// _shared-10).
 
 /**
  * `BaseInputs`' error for `units` other than `'SI'` or `'IP'`

@@ -116,8 +116,8 @@ function parseChoice(value: unknown, allowed: readonly string[]): string {
  *   `BaseInputs`' message: a `TypeError` for a value that is not a string,
  *   a `RangeError` for one that is.
  *
- * Each message is the library's, naming the key, except the string option's,
- * which is upstream's (deviation _shared-10).
+ * Each message is the library's, except the string option's, which is
+ * upstream's (deviation _shared-10).
  *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.

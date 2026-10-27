@@ -83,7 +83,7 @@ Every cell is filled. A pipe inside a cell is escaped as `\|`, code spans includ
 
 ### The TS site's symbol
 
-A model file holds only upstream's docstrings and code comments (ADR 0019's 2026-10-27 amendment), so a row names its symbol instead of being cited at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelResult`).
+A model file holds upstream's docstrings and code comments, and at most a one-sentence why-comment (ADRs 0019 and 0025, 2026-10-27 amendments), so a row names its symbol instead of relying on a citation at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelResult`).
 
 ### Notes
 
@@ -116,7 +116,7 @@ An item in a model's register applies to that model, and an item in `_shared.md`
 
 ## Citing comments
 
-A comment outside a model file may cite a row, such as a test that checks the deviation or a line in `src/_internal/`: the word `deviation` (or `Deviation`), a space and the id. Any comment counts: line, block or TSDoc, in a file under `src/` or `tests/`. A row needs no citation.
+A comment may cite a row, such as a test that checks the deviation, a line in `src/_internal/` or a model file's one-sentence why-comment (ADR 0025's 2026-10-27 amendment): the word `deviation` (or `Deviation`), a space and the id. Any comment counts: line, block or TSDoc, in a file under `src/` or `tests/`. A row needs no citation.
 
 ```ts
 // Range rows are returned with the gate off (deviation utci-2).

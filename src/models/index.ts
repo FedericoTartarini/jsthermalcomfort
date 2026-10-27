@@ -40,7 +40,7 @@ import { classifyFromBins } from "../_internal/classifierBins.ts";
 
 export type {
   BoolField,
-  Definition,
+  InputsInfo,
   NumericField,
 } from "../_internal/define.ts";
 // deepFreeze is internal, so modelDocs contributes its types only.
@@ -51,7 +51,7 @@ export type {
   ModelInfo,
   ModelResult,
   ModelWarning,
-  VariableInfo,
+  OutputInfo,
 } from "../_internal/modelDocs.ts";
 export type {
   AdaptiveAshraeParams,

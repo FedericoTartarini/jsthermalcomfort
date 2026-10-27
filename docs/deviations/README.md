@@ -3,7 +3,7 @@
 Every difference between this library and pythermalcomfort v4.6.2, whose `.py` is the only standard, is either a whitelisted mechanical translation or a row in a register here (ADRs 0019, 0027). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
 
 - `<model>.md` holds one main model's rows, named after upstream's function (`utci.md`). A model's ticket creates its register when it migrates the model. A model with no register here has not been migrated yet, and its differences from upstream are not recorded yet.
-- `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the definition helper, `classifyFromBins`, `ModelInfo`) and the helpers the models call.
+- `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the inputs parse, `classifyFromBins`, `ModelInfo`) and the helpers the models call.
 
 `tests/deviations.test.ts` checks the registers against the code.
 
@@ -11,8 +11,8 @@ Every difference between this library and pythermalcomfort v4.6.2, whose `.py` i
 
 **Whitelist (W).** A mechanical translation is not a deviation and gets no row (ADR 0019):
 
-1. A model's keyword arguments become one params object with the same keys and defaults (ADR 0002). A helper keeps upstream's positional order and defaults (ADR 0022).
-2. Upstream's input dataclass becomes the model's single input definition plus a parse function (ADR 0022).
+1. A model's keyword arguments become one inputs object with the same keys and defaults (ADR 0002). A helper keeps upstream's positional order and defaults (ADR 0022).
+2. Upstream's input dataclass becomes the model's `INFO.inputs`, the inputs type derived from it, and a parse function (ADR 0022).
 3. `model` becomes `standard`, and `Models` becomes `Standard` (ADR 0003).
 4. `.lower()` and `.upper()` become `.toLowerCase()` and `.toUpperCase()`, only where upstream calls them (ADR 0007).
 5. A string option's type is a literal union derived from an `as const` object, and the parameter accepts the constant or the literal. `Standard` and `Units` are `as const` objects, not `enum`s.
@@ -32,7 +32,7 @@ Every difference between this library and pythermalcomfort v4.6.2, whose `.py` i
 | non-finite numbers        | A public model throws `RangeError` on NaN or ±Infinity.                                                     | 0022 |
 | error classes             | The error class follows JavaScript semantics (`TypeError`, `RangeError`, `Error`), not Python's class.      | 0022 |
 | unvalidated switches      | A switch upstream does not validate, such as `round_output`, is type-checked and throws `TypeError`.        | 0022 |
-| check order               | Validation runs in the definition's order.                                                                  | 0022 |
+| check order               | Validation runs in `INFO.inputs`' order.                                                                    | 0022 |
 | messages                  | A check that only the library makes uses a uniform message that names the key.                              | 0022 |
 | zero divisors numba drops | Where upstream's kernel raises and numba's `prange` drops the exception, the library throws `RangeError`.   | 0022 |
 | positional arity          | A helper given a surplus or a missing positional argument throws `TypeError` with Python's binding message. | 0022 |

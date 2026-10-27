@@ -64,7 +64,7 @@ export function notFiniteNumber(
   return new error(`${key} must be a finite number.`);
 }
 
-/** The library's message for a model called with no params object. */
-export function notParamsObject(name: string): TypeError {
-  return new TypeError(`${name}() takes one params object.`);
+/** The library's message for a model called with no inputs object. */
+export function notInputsObject(name: string): TypeError {
+  return new TypeError(`${name}() takes one inputs object.`);
 }

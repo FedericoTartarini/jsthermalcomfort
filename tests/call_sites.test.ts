@@ -70,7 +70,7 @@ function callee(
 
 /**
  * Every argument in `files` named like a different parameter of the function
- * it is passed to: positionally, or as a property of a params object passed
+ * it is passed to: positionally, or as a property of an inputs object passed
  * to a model. Upstream's test binds keyword arguments the same way
  * (`tests/test_call_site_arguments.py:147`).
  */
@@ -163,7 +163,7 @@ describe("test_call_site_arguments", () => {
   });
 
   test.todo(
-    "test_package_calls_use_keyword_arguments: no counterpart, as models take a params object and helpers are positional (ADR 0022)",
+    "test_package_calls_use_keyword_arguments: no counterpart, as models take an inputs object and helpers are positional (ADR 0022)",
   );
 });
 

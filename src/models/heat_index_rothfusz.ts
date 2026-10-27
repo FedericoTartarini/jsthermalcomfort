@@ -1,5 +1,5 @@
-import { parseParams } from "../_internal/define.ts";
-import type { ParamsOf } from "../_internal/define.ts";
+import { parseInputs } from "../_internal/define.ts";
+import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import type {
   ModelInfo,
@@ -37,7 +37,7 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
 } as const satisfies ModelInfo);
 
 /** @interface */
-export type HIInputs = ParamsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO.inputs>;
+export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO.inputs>;
 
 /** Dataclass to represent the Heat Index (HI). */
 export interface HI extends ModelResult {
@@ -50,12 +50,12 @@ export interface HI extends ModelResult {
  * Calculate the Heat Index (HI) in accordance with the Rothfusz (1990) model
  * [Rothfusz1990](../../docs/references.md#rothfusz1990).
  *
- * @param params
- * @param params.tdb - Dry bulb air temperature, [°C].
- * @param params.rh - Relative humidity, [%].
- * @param params.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
  * Stress categories are always determined from the unrounded heat index.
- * @param params.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
  *
  * > [!NOTE]
  * > By default, if the inputs are outside the standard applicability limits the
@@ -76,12 +76,12 @@ export interface HI extends ModelResult {
  * console.log(result.stress_category); // "caution"
  * ```
  */
-export function heat_index_rothfusz(params: HIInputs): HI {
+export function heat_index_rothfusz(inputs: HIInputs): HI {
   // Validate inputs using the HIInputs class
-  const { tdb, rh, round_output, limit_inputs } = parseParams(
+  const { tdb, rh, round_output, limit_inputs } = parseInputs(
     "heat_index_rothfusz",
     HEAT_INDEX_ROTHFUSZ_INFO.inputs,
-    params,
+    inputs,
   );
 
   const hi = _rothfusz_heat_index_optimized(tdb, rh);

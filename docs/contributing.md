@@ -127,7 +127,7 @@ Create `src/models/<name>.ts`, with upstream's file and function name. In order,
 
 1. the imports;
 2. `*_INFO`, the single source of truth, `deepFreeze({ … } as const satisfies ModelInfo)`: its `inputs` hold every keyword argument with its kind (`numeric` or `bool`), unit, applicability and default, and its `outputs` hold each classifier, inline or composed from a shared constant at the place upstream keeps it (`HEAT_INDEX_STRESS_CATEGORIES` in `src/_internal/validation.ts`);
-3. the params type, `ParamsOf<typeof MY_NEW_MODEL_INFO.inputs>`, named after upstream's input class;
+3. the inputs type, `InputsOf<typeof MY_NEW_MODEL_INFO.inputs>`, named after upstream's input class;
 4. the result interface, named after upstream's dataclass and extending `ModelResult`, which holds `warnings`;
 5. the TSDoc block and the public function;
 6. the private functions in upstream's order.
@@ -136,8 +136,8 @@ A result class that upstream shares between models (`HI`, `SET`, `WorkCapacity`)
 
 ### 2. Follow Upstream, and Document With TSDoc
 
-- Validate with `parseParams(name, MY_NEW_MODEL_INFO.inputs, params)` (`src/_internal/define.ts`), with upstream's error messages.
-- The model file holds only upstream's docstrings and code comments. The docstring is one TSDoc block above the public function, in upstream's order: the summary, `@param params` and one `@param params.<key>` per Parameters entry with its text verbatim, each `.. note::` as `> [!NOTE]`, `@returns`, and the example as a TypeScript call with upstream's inputs and outputs. A citation `[Key]_` becomes a link to its entry, `[Key](../../docs/references.md#key)`. Upstream's `#` comments are copied verbatim.
+- Validate with `parseInputs(name, MY_NEW_MODEL_INFO.inputs, inputs)` (`src/_internal/define.ts`), with upstream's error messages.
+- The model file holds only upstream's docstrings and code comments. The docstring is one TSDoc block above the public function, in upstream's order: the summary, `@param inputs` and one `@param inputs.<key>` per Parameters entry with its text verbatim, each `.. note::` as `> [!NOTE]`, `@returns`, and the example as a TypeScript call with upstream's inputs and outputs. A citation `[Key]_` becomes a link to its entry, `[Key](../../docs/references.md#key)`. Upstream's `#` comments are copied verbatim.
 - Record every difference from upstream as a row in `docs/deviations/<name>.md`, in the format `docs/deviations/README.md` gives, its TS site naming the file and the symbol. An error in an upstream docstring or code comment is fixed, given a row, and reported upstream. A note that is not a deviation, such as ADR 0009's on the executed path's arithmetic, goes in the register's Notes section.
 
 ### 3. Register the Model

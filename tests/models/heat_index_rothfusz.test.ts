@@ -8,7 +8,7 @@ import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
-type Params = Parameters<typeof heat_index_rothfusz>[0];
+type Inputs = Parameters<typeof heat_index_rothfusz>[0];
 
 const { testData: test_data, tolerances } = await loadTestData(
   testDataUrls.heatIndex,
@@ -28,7 +28,7 @@ describe("test_heat_index_rothfusz", () => {
     const result = heat_index_rothfusz({
       ...inputs,
       limit_inputs: false,
-    } as unknown as Params);
+    } as unknown as Inputs);
 
     validateResult(result, outputs, tolerances, inputs);
   });
@@ -181,8 +181,8 @@ describe("test_heat_index_rothfusz", () => {
 // entry: what upstream's tests leave out, and what only the library adds.
 describe("heat_index_rothfusz (JS-only)", () => {
   const hot = { tdb: 30, rh: 80 };
-  // A call with params the type rejects, to test the runtime.
-  const call = (params: unknown) => () => heat_index_rothfusz(params as Params);
+  // A call with inputs the type rejects, to test the runtime.
+  const call = (inputs: unknown) => () => heat_index_rothfusz(inputs as Inputs);
 
   describe("errors", () => {
     // Upstream's BaseInputs messages (classes_input.py:128, validate_type).
@@ -231,10 +231,10 @@ describe("heat_index_rothfusz (JS-only)", () => {
     });
 
     // tdb and rh were positional before v2 (ADR 0002).
-    test("anything but a params object throws TypeError", () => {
+    test("anything but an inputs object throws TypeError", () => {
       for (const bad of [30, null, undefined, [30, 80], "tdb"])
         expect(call(bad)).toThrow(
-          new TypeError("heat_index_rothfusz() takes one params object."),
+          new TypeError("heat_index_rothfusz() takes one inputs object."),
         );
     });
 

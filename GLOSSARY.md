@@ -24,9 +24,13 @@ _Avoid_: core model, primary model, app model
 A boolean option a model takes, named as upstream names it (`limit_inputs`, `round_output`, `airspeed_control`).
 _Avoid_: flag, toggle, kwarg
 
-**Params**:
-The single object a model takes, whose keys are upstream's keyword parameters: physical quantities and switches alike, named and defaulted as upstream names and defaults them.
-_Avoid_: options, kwargs, config, arguments object
+**Inputs**:
+The single object a model takes, whose keys are upstream's keyword parameters: physical quantities and switches alike, named and defaulted as upstream names and defaults them. Its type takes upstream's input class name (`HIInputs`), and `INFO.inputs` describes each key.
+_Avoid_: params, options, kwargs, config, arguments object
+
+**Result**:
+What a model returns: upstream's dataclass as an interface (`HI`), extending `ModelResult` for `warnings`. `INFO.outputs` describes its fields other than `warnings`.
+_Avoid_: return value, response, outputs (for the returned object)
 
 **Standard**:
 A versioned identifier for a published standard (`Standard.ashrae_55_2023`, value `"55-2023"`), the `standard` option that selects one. Upstream calls this `Models`/`model`; a model here is a function such as `pmv_ppd_iso`.
@@ -41,7 +45,7 @@ A model's table at `docs/deviations/<model>.md` of every deviation and addition.
 _Avoid_: deviation list, ledger, changelog
 
 **Whitelist**:
-The approved list of mechanical translations from upstream's Python, such as a params object for keyword arguments or `Math` for numpy math. They are not deviations and get no register row (ADR 0019).
+The approved list of mechanical translations from upstream's Python, such as an inputs object for keyword arguments or `Math` for numpy math. They are not deviations and get no register row (ADR 0019).
 _Avoid_: allowlist, translation rules
 
 **Deviation class**:
@@ -53,7 +57,7 @@ What a main model exposes beyond upstream's function. Every model has its model 
 _Avoid_: pattern, app surface, extras
 
 **Model info**:
-The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, standards, its inputs (every keyword argument, with its kind, unit, applicability and default: the model's input definition), and per-output unit, applicability and, on a labelled output, classifier. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
+The published metadata for one model (`<MODEL>_INFO`): the name the model is exported under (upstream's function name), label, standards, its inputs (every keyword argument, with its kind, unit, applicability and default), and per-output unit, applicability and, on a labelled output, classifier. Its shape is stable from v2. A rule that is not a classifier, such as PMV ASHRAE's compliance interval, is an exported constant, not a model-info field. Upstream has no equivalent.
 _Avoid_: schema, metadata object, model docs
 
 **Classifier**:

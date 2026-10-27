@@ -6,7 +6,7 @@ What a review checks a change against. Prettier, ESLint over `eslint.config.mjs`
 
 - **Upstream fidelity and the deviation register:** `docs/deviations/README.md` (the whitelist, the deviation classes, the additions, the row format, the TS site's symbol and the citing-comment form). Every difference from pythermalcomfort v4.6.2's `.py` is whitelisted or has a row.
 - **Names, files, file order, exports:** ADR 0021, with its 2026-10-27 amendment.
-- **Inputs, the input definition, error classes and messages:** ADR 0022, with its 2026-10-27 amendment.
+- **Inputs, `INFO.inputs`, error classes and messages:** ADR 0022, with its 2026-10-27 amendment.
 - **Results:** ADR 0023, with its 2026-10-27 amendment. **Model info and warnings rows:** ADR 0024, with its 2026-10-27 amendment.
 - **TSDoc, mapped from upstream's docstring:** ADR 0025, with its 2026-10-26 and 2026-10-27 amendments.
 - **The add-a-model steps:** `docs/contributing.md`, with `heat_index_rothfusz` as the worked example.

@@ -3,14 +3,13 @@ import {
   notBoolean,
   notFiniteNumber,
   notNumericType,
-  notParamsObject,
+  notInputsObject,
   unexpectedKeyword,
 } from "./errors.ts";
 import type { Bound } from "./modelDocs.ts";
 
-// The input definition (ADR 0022): each model declares its inputs once, as
-// its `*_INFO.inputs`, and its params type and its validation are derived from
-// it. It stands in for upstream's input dataclass (`classes_input.py`) and its
+// Each model describes its inputs once, as its `*_INFO.inputs` (ADR 0022),
+// and its inputs type and its validation are derived from it. It stands in for upstream's input dataclass (`classes_input.py`) and its
 // checks (ADR 0019, whitelist item 2). The kinds take upstream's names there:
 // the `numeric_field` and `choice_field` helpers (`classes_input.py:19, :23`)
 // and the `is_bool` metadata key (`classes_input.py:66, :125`).
@@ -29,33 +28,36 @@ export interface BoolField {
   readonly default: boolean;
 }
 
-/** A model's input definition: upstream's keyword arguments, in its order. */
-export type Definition = Readonly<Record<string, NumericField | BoolField>>;
+/**
+ * A model's `INFO.inputs`: upstream's keyword arguments, in its order, each
+ * with its kind, unit, applicability and default.
+ */
+export type InputsInfo = Readonly<Record<string, NumericField | BoolField>>;
 
 type ValueOf<E> = E extends NumericField
   ? number
   : E extends BoolField
     ? boolean
     : never;
-type Values<D> = { -readonly [K in keyof D]: ValueOf<D[K]> };
-type OptionalKey<D> = {
-  [K in keyof D]: D[K] extends { readonly default: unknown } ? K : never;
-}[keyof D];
+type Values<I> = { -readonly [K in keyof I]: ValueOf<I[K]> };
+type OptionalKey<I> = {
+  [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
+}[keyof I];
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
 
 /**
- * The params object a definition accepts. A key with a default is optional,
- * and `undefined` takes the default, as an omitted keyword does (ADR 0019,
- * whitelist item 6).
+ * The inputs object a model's `INFO.inputs` accepts. A key with a default is
+ * optional, and `undefined` takes the default, as an omitted keyword does
+ * (ADR 0019, whitelist item 6).
  */
-export type ParamsOf<D extends Definition> = Flatten<
-  Pick<Values<D>, Exclude<keyof D, OptionalKey<D>>> & {
-    [K in keyof Pick<Values<D>, OptionalKey<D>>]?: Values<D>[K] | undefined;
+export type InputsOf<I extends InputsInfo> = Flatten<
+  Pick<Values<I>, Exclude<keyof I, OptionalKey<I>>> & {
+    [K in keyof Pick<Values<I>, OptionalKey<I>>]?: Values<I>[K] | undefined;
   }
 >;
 
-/** The params after the defaults are applied. */
-export type ResolvedOf<D extends Definition> = Values<D>;
+/** The inputs after the defaults are applied. */
+export type ResolvedOf<I extends InputsInfo> = Values<I>;
 
 /** Checks one number, as given or defaulted, in the order below. */
 function parseNumeric(key: string, value: unknown): number {
@@ -71,11 +73,11 @@ function parseNumeric(key: string, value: unknown): number {
 }
 
 /**
- * Validates `params` against `definition`; returns the values with the
- * defaults applied.
+ * Validates `args`, the inputs a model was called with, against `info`;
+ * returns the values with the defaults applied.
  *
  * An unknown key fails first, as an unexpected keyword does in Python when the
- * call binds. Then each key is checked in the definition's order, so with
+ * call binds. Then each key is checked in `info`'s order, so with
  * several errors the first named is predictable (deviation _shared-9):
  *
  * - a missing required key throws Python's `TypeError`, naming every missing
@@ -87,35 +89,33 @@ function parseNumeric(key: string, value: unknown): number {
  *   upstream checks it (deviation _shared-8).
  *
  * @param name - The model's function name, for the messages.
- * @param definition - The model's `*_INFO.inputs`.
- * @param params - What the model was called with.
- * @returns The params, with each default applied.
+ * @param info - The model's `*_INFO.inputs`.
+ * @param args - What the model was called with.
+ * @returns The inputs, with each default applied.
  * @throws `TypeError` or `RangeError`, as above.
  */
-export function parseParams<const D extends Definition>(
+export function parseInputs<const I extends InputsInfo>(
   name: string,
-  definition: D,
-  params: unknown,
-): ResolvedOf<D> {
-  if (typeof params !== "object" || params === null || Array.isArray(params)) {
-    throw notParamsObject(name);
+  info: I,
+  args: unknown,
+): ResolvedOf<I> {
+  if (typeof args !== "object" || args === null || Array.isArray(args)) {
+    throw notInputsObject(name);
   }
-  const given = params as Readonly<Record<string, unknown>>;
-  const unknown = Object.keys(given).find(
-    (key) => !Object.hasOwn(definition, key),
-  );
+  const given = args as Readonly<Record<string, unknown>>;
+  const unknown = Object.keys(given).find((key) => !Object.hasOwn(info, key));
   if (unknown !== undefined) throw unexpectedKeyword(name, unknown);
 
   const read = (key: string) =>
     Object.hasOwn(given, key) ? given[key] : undefined;
   const values: Record<string, number | boolean> = {};
-  for (const [key, entry] of Object.entries(definition)) {
+  for (const [key, entry] of Object.entries(info)) {
     let value = read(key);
     if (value === undefined) {
       if (entry.default === undefined) {
         throw missingArguments(
           name,
-          Object.entries(definition)
+          Object.entries(info)
             .filter(
               ([k, e]) => e.default === undefined && read(k) === undefined,
             )
@@ -128,5 +128,5 @@ export function parseParams<const D extends Definition>(
     else if (typeof value === "boolean") values[key] = value;
     else throw notBoolean(key);
   }
-  return values as ResolvedOf<D>;
+  return values as ResolvedOf<I>;
 }

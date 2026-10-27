@@ -1,5 +1,5 @@
 import type { ClassifierBins } from "./classifierBins.ts";
-import type { Definition } from "./define.ts";
+import type { InputsInfo } from "./define.ts";
 import type { Standard } from "../utilities/options.ts";
 
 // The types of the model info every model publishes (`*_INFO`), of the result
@@ -72,8 +72,8 @@ export interface ModelResult {
 export type { ClassifierBins };
 
 /**
- * Metadata for a single output or derived variable of a model.
- * `INFO.inputs` holds the input definition's entries instead.
+ * Metadata for a single output or derived variable of a model; `INFO.inputs`
+ * describes the inputs (`InputsInfo`).
  *
  * `unit` is the unit of measurement, or `null` if dimensionless.
  *
@@ -89,7 +89,7 @@ export type { ClassifierBins };
  * into a categorical label. Pass it to `classifyFromBins` rather than
  * reimplementing the edge handling.
  */
-export interface VariableInfo {
+export interface OutputInfo {
   readonly unit: string | null;
   readonly applicability?: Bound;
   readonly classifier?: ClassifierBins;
@@ -105,9 +105,9 @@ export interface VariableInfo {
  * can key a model by it without keeping its own copy of the string. `label` is
  * a short display name.
  *
- * `inputs` is the model's input definition: every keyword argument, in
+ * `inputs` describes the model's inputs: every keyword argument, in
  * upstream's order, with its kind (`numeric` or `bool`), unit, applicability
- * and default. The model validates its params against it, and its params type
+ * and default. The model validates its inputs against it, and its inputs type
  * is derived from it. `outputs` are the returned values. `derived` covers quantities
  * computed from the inputs rather than supplied by the caller, keyed by
  * upstream's name for the check, as the `warnings` rows are.
@@ -119,9 +119,9 @@ export interface ModelInfo {
   readonly name: string;
   readonly label: string;
   readonly standards: readonly StandardId[];
-  readonly inputs: Definition;
-  readonly outputs: Readonly<Record<string, VariableInfo>>;
-  readonly derived?: Readonly<Record<string, VariableInfo>>;
+  readonly inputs: InputsInfo;
+  readonly outputs: Readonly<Record<string, OutputInfo>>;
+  readonly derived?: Readonly<Record<string, OutputInfo>>;
 }
 
 /**
@@ -186,7 +186,9 @@ export interface LegacyModelInfo {
   readonly label: string;
   readonly description: string;
   readonly standards: readonly StandardId[];
-  readonly inputs: Readonly<Record<string, VariableInfo>>;
-  readonly outputs: Readonly<Record<string, VariableInfo>>;
-  readonly derived?: Readonly<Record<string, VariableInfo>>;
+  readonly inputs: Readonly<
+    Record<string, Pick<OutputInfo, "unit" | "applicability">>
+  >;
+  readonly outputs: Readonly<Record<string, OutputInfo>>;
+  readonly derived?: Readonly<Record<string, OutputInfo>>;
 }

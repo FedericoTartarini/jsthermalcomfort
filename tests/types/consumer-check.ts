@@ -39,7 +39,7 @@ import type {
   SolarGainResult,
   UtciParams,
   UtciResult,
-  VariableInfo,
+  OutputInfo,
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
@@ -106,7 +106,7 @@ const limitInputsDefault: boolean =
 // The shape a front end actually reaches for: a per-model applicability limit.
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
-const ppd: VariableInfo = iso.outputs.ppd;
+const ppd: OutputInfo = iso.outputs.ppd;
 
 // Which standard a model is for, as data (issue #184): a list of Standard
 // values, empty for a model with no standard.
@@ -157,7 +157,7 @@ const described: ModelInfo = {
 // @ts-expect-error `label` is a string, not a number.
 const notANumber: number = PMV_PPD_ISO_INFO.label;
 // @ts-expect-error `inputs` has no `nonexistent_variable` key.
-const notAKey: VariableInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
+const notAKey: OutputInfo = PMV_PPD_ISO_INFO.inputs.tdb.nonexistent_variable;
 // @ts-expect-error `label` is a string, not a number.
 const notANumberEither: number = ADAPTIVE_ASHRAE_INFO.label;
 
@@ -322,19 +322,19 @@ cooling_effect({
 // @ts-expect-error vr must be a number.
 cooling_effect({ tdb: 25, tr: 25, vr: "0.3", rh: 50, met: 1.2, clo: 0.5 });
 
-// heat_index_rothfusz takes one params object too (ADR 0002), with its params
+// heat_index_rothfusz takes one inputs object (ADR 0002), with its inputs
 // and result types exported by name; the lines below are errors only while
 // the published signature is typed.
-const heatIndexParams: HIInputs = {
+const heatIndexInputs: HIInputs = {
   tdb: 30,
   rh: 80,
   round_output: false,
   limit_inputs: false,
 };
-const heatIndexResult: HI = heat_index_rothfusz(heatIndexParams);
-// @ts-expect-error `round` is not a param; the switch is `round_output`.
+const heatIndexResult: HI = heat_index_rothfusz(heatIndexInputs);
+// @ts-expect-error `round` is not an input; the switch is `round_output`.
 heat_index_rothfusz({ tdb: 30, rh: 80, round: false });
-// @ts-expect-error `units` is not a param; the model is SI only, as upstream's.
+// @ts-expect-error `units` is not an input; the model is SI only, as upstream's.
 heat_index_rothfusz({ tdb: 30, rh: 80, units: "SI" });
 // @ts-expect-error rh is a required quantity.
 heat_index_rothfusz({ tdb: 30 });

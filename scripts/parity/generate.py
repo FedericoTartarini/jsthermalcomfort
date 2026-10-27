@@ -113,6 +113,28 @@ def _solar_gain(rng):
     }
 
 
+def _utci(rng):
+    # The ranges reach past the limits (tdb -50-50 °C, tr - tdb -30-70 °C,
+    # v 0.5-17 m/s, rh 0-100 %, pa 0-5 kPa), so NaN positions and every
+    # check's warning are compared too, and units comes in either case, as
+    # upstream upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        tdb, delta, v = (-60.0, 60.0), (-40.0, 80.0), (0.0, 20.0)
+    else:
+        tdb, delta, v = (-76.0, 140.0), (-72.0, 144.0), (0.0, 65.6)
+    t = _value(rng, *tdb)
+    return {
+        "tdb": t,
+        "tr": _value(rng, t + delta[0], t + delta[1]),
+        "v": _value(rng, *v),
+        "rh": _value(rng, -5.0, 105.0),
+        "units": units,
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 # Each model: upstream's function and the generator of one case's keyword
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
@@ -120,6 +142,7 @@ MODELS = {
     "clo_tout": (models.clo_tout, _clo_tout),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "solar_gain": (models.solar_gain, _solar_gain),
+    "utci": (models.utci, _utci),
 }
 
 

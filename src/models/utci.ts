@@ -13,16 +13,6 @@ import type {
   LegacyModelInfo,
 } from "../_internal/modelDocs.ts";
 
-const g = [
-  -2836.5744,
-  -6028.076559,
-  19.54263612,
-  -0.02737830188,
-  0.000016261698,
-  7.0229056 * Math.pow(10.0, -10),
-  -1.8680009 * Math.pow(10.0, -13),
-];
-
 // A type alias rather than an interface, like AdaptiveAshraeResult, so it
 // stays assignable to Record<string, unknown>.
 /**
@@ -68,6 +58,8 @@ export const UTCI_LIMITS = Object.freeze({
   tdb: Object.freeze({ min: -50, max: 50 }),
   v: Object.freeze({ min: 0.5, max: 17 }),
   tr_minus_tdb: Object.freeze({ min: -30, max: 70 }),
+  pa: Object.freeze({ min: 0, max: 5 }),
+  rh: Object.freeze({ min: 0, max: 100 }),
 });
 
 /**
@@ -114,7 +106,7 @@ export const UTCI_INFO: LegacyModelInfo = deepFreeze({
     tdb: { unit: "°C", applicability: UTCI_LIMITS.tdb },
     tr: { unit: "°C" },
     v: { unit: "m/s", applicability: UTCI_LIMITS.v },
-    rh: { unit: "%" },
+    rh: { unit: "%", applicability: UTCI_LIMITS.rh },
   },
   outputs: {
     utci: { unit: "°C" },
@@ -122,6 +114,7 @@ export const UTCI_INFO: LegacyModelInfo = deepFreeze({
   },
   derived: {
     tr_minus_tdb: { unit: "°C", applicability: UTCI_LIMITS.tr_minus_tdb },
+    "pa (kPa)": { unit: "kPa", applicability: UTCI_LIMITS.pa },
   },
 });
 
@@ -195,6 +188,26 @@ export function utci(params: UtciParams): UtciResult {
     ({ tdb, tr, v } = units_converter("IP", { tdb, tr, v }));
   }
 
+  function exponential(t_db: number): number {
+    const g = [
+      -2836.5744,
+      -6028.076559,
+      19.54263612,
+      -0.02737830188,
+      0.000016261698,
+      7.0229056 * Math.pow(10.0, -10),
+      -1.8680009 * Math.pow(10.0, -13),
+    ];
+    const tk = t_db + 273.15; // air temp in K
+    let es = 2.7150305 * Math.log(tk);
+    for (const [count, i] of g.entries()) {
+      // numpy's power gives tk to the -1 as 1 / tk does, where Math.pow can differ by an ulp.
+      es = es + i * (count - 2 === -1 ? 1 / tk : Math.pow(tk, count - 2));
+    }
+    es = Math.exp(es) * 0.01; // convert Pa to hPa
+    return es;
+  }
+
   const eh_pa = exponential(tdb) * (rh / 100.0);
   const delta_t_tr = tr - tdb;
   const pa = eh_pa / 10.0; // convert vapour pressure to kPa
@@ -212,10 +225,12 @@ export function utci(params: UtciParams): UtciResult {
     warnings,
     "tr_minus_tdb",
     "derived",
-    delta_t_tr,
+    tr - tdb,
     UTCI_LIMITS.tr_minus_tdb,
   );
   _legacy_valid_range(warnings, "v", "input", v, UTCI_LIMITS.v);
+  _legacy_valid_range(warnings, "pa (kPa)", "derived", pa, UTCI_LIMITS.pa);
+  _legacy_valid_range(warnings, "rh", "input", rh, UTCI_LIMITS.rh);
   if (limit_inputs && warnings.length > 0) utci_approx = NaN;
 
   // Stress-category thresholds are in °C; keep the SI value before IP conversion.
@@ -235,20 +250,6 @@ export function utci(params: UtciParams): UtciResult {
     stress_category: classifyFromBins(utci_si, UTCI_STRESS_CATEGORY_BINS),
     warnings,
   };
-}
-
-/**
- * @param {number} t_db
- * @returns {number}
- */
-function exponential(t_db: number): number {
-  const tk = t_db + 273.15; // air temp in K
-  let es = 2.7150305 * Math.log(tk);
-  for (let i = 0; i < g.length; i++) {
-    es = es + g[i]! * Math.pow(tk, i - 2);
-  }
-  es = Math.exp(es) * 0.01; // convert Pa to hPa
-  return es;
 }
 
 // Exported for the mirrored tests, which import it as upstream's do; not

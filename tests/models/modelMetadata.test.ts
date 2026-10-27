@@ -919,16 +919,23 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
     expect(UTCI_INFO.derived!.tr_minus_tdb!.applicability).toBe(
       UTCI_LIMITS.tr_minus_tdb,
     );
+    expect(UTCI_INFO.inputs.rh!.applicability).toBe(UTCI_LIMITS.rh);
+    expect(UTCI_INFO.derived!["pa (kPa)"]!.applicability).toBe(UTCI_LIMITS.pa);
     expect(UTCI_LIMITS).toEqual({
       tdb: { min: -50, max: 50 },
       v: { min: 0.5, max: 17 },
       tr_minus_tdb: { min: -30, max: 70 },
+      pa: { min: 0, max: 5 },
+      rh: { min: 0, max: 100 },
     });
-    // tr is bounded only through its difference from tdb, and rh not at all.
+    // tr is bounded only through its difference from tdb.
     expect(UTCI_INFO.inputs.tr!.applicability).toBeUndefined();
-    expect(UTCI_INFO.inputs.rh!.applicability).toBeUndefined();
-    expect(Object.keys(UTCI_INFO.derived!)).toEqual(["tr_minus_tdb"]);
+    expect(Object.keys(UTCI_INFO.derived!)).toEqual([
+      "tr_minus_tdb",
+      "pa (kPa)",
+    ]);
     expect(UTCI_INFO.derived!.tr_minus_tdb!.unit).toBe("°C");
+    expect(UTCI_INFO.derived!["pa (kPa)"]!.unit).toBe("kPa");
   });
 
   test("every UTCI_LIMITS entry is frozen, not just the container", () => {
@@ -940,7 +947,7 @@ describe("UTCI_INFO — the UTCI model's metadata", () => {
 
   test("the published bounds are the ones utci gates on, inclusive at both ends", () => {
     const value = (tdb: number, tr: number, v: number) =>
-      utci({ tdb, tr, v, rh: 50 }).utci;
+      utci({ tdb, tr, v, rh: 30 }).utci;
     const { tdb, v } = UTCI_INFO.inputs;
     const { min: tdbMin, max: tdbMax } = tdb!.applicability as {
       min: number;

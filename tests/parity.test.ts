@@ -5,6 +5,7 @@ import {
   clo_tout,
   heat_index_rothfusz,
   solar_gain,
+  utci,
 } from "../src/models/index.ts";
 import type { AdaptiveAshraeParams } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
@@ -445,6 +446,17 @@ const MODELS: readonly ParityModel[] = [
     // ASHRAE 55 Table C-2's rows, which upstream does not check, are exempt
     // by the register (deviation solar_gain-3, deviation solar_gain-4).
     warnings: true,
+  },
+  {
+    name: "utci",
+    run: (inputs) => ({
+      ...utci(inputs as unknown as Parameters<typeof utci>[0]),
+    }),
+    // Upstream rounds utci with np.round (models/utci.py:173-175).
+    rounded: ({ round_output }) => (round_output === true ? ["utci"] : []),
+    // The library returns its older rows; warnings are compared once the
+    // model returns ModelWarning rows (ADR 0024).
+    warnings: false,
   },
 ];
 

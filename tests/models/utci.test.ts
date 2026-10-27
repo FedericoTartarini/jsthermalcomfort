@@ -1,39 +1,208 @@
 import { describe, expect, test } from "vitest";
+import { utci } from "../../src/models/index.ts";
+import { _utci_optimized } from "../../src/models/utci.ts";
 import {
-  _utci_optimized,
-  utci,
   UTCI_INFO,
   UTCI_LIMITS,
   UTCI_STRESS_CATEGORY_BINS,
 } from "../../src/models/utci.ts";
 import type { UtciParams } from "../../src/models/utci.ts";
 import { classifyFromBins } from "../../src/_internal/classifierBins.ts";
-import { utci as utci_from_models } from "../../src/models/index.ts";
 import { utci as utci_from_root } from "../../src/index.ts";
-import { p_sat } from "../../src/psychrometrics/p_sat.js";
+import { p_sat } from "../../src/psychrometrics/index.ts";
 import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
-let { testData, tolerances } = await loadTestData(testDataUrls.utci);
+type Inputs = Parameters<typeof utci>[0];
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_utci.py.
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.utci,
+);
+
+// Mirrors pythermalcomfort v4.7.0 tests/test_utci.py. A UserWarning becomes a
+// range row, and a `match=` on its text becomes an assertion on the row's key.
+// Upstream's arrays are called element-wise.
 describe("test_utci", () => {
-  test.each(testData.data)("test_utci: fixture case %#", (row) => {
-    const { inputs, outputs } = row;
+  test.each(reference_table.data)("test_utci: fixture case %#", (entry) => {
+    const { inputs, outputs } = entry;
     // As upstream, `utci(**inputs)`: the fixture writes `units` in lowercase,
-    // which the model accepts as upstream does, so the row is cast rather
-    // than rewritten.
-    const result = utci(inputs as unknown as UtciParams);
+    // which the model accepts as upstream does.
+    const result = utci(inputs as unknown as Inputs);
 
-    validateResult(result, outputs, tolerances, inputs);
+    validateResult(result, outputs, tolerance, inputs);
   });
 
-  // Upstream's vector call, element-wise.
+  // The kernel through its own file (S2), as upstream imports it.
   test("test_utci_optimized", () => {
     expect(
       [25, 27].map((tdb) => round(_utci_optimized(tdb, 1, 1, 1.5), 2)),
     ).toEqual([24.73, 26.57]);
+  });
+
+  // Upstream's two stacked parametrize marks; `id` is the one pytest
+  // generates.
+  test.each([
+    { id: "SI-40-80", tdb: 40, rh: 80, units: "SI" },
+    { id: "SI-50-100", tdb: 50, rh: 100, units: "SI" },
+    { id: "IP-40-80", tdb: 40, rh: 80, units: "IP" },
+    { id: "IP-50-100", tdb: 50, rh: 100, units: "IP" },
+  ] as const)(
+    "test_utci_rejects_excess_vapour_pressure[$id]",
+    ({ tdb, rh, units }) => {
+      const temperature = units === "SI" ? tdb : tdb * 1.8 + 32;
+      const wind = units === "SI" ? 1 : 3.281;
+      const result = utci({
+        tdb: temperature,
+        tr: temperature,
+        v: wind,
+        rh,
+        units,
+      });
+      expect(result.warnings).toContainEqual(
+        expect.objectContaining({ key: "pa (kPa)" }),
+      );
+      expect(result.utci).toBeNaN();
+      expect(result.stress_category).toBeNaN();
+    },
+  );
+
+  test.each([-1, 101])(
+    "test_utci_rejects_relative_humidity_outside_physical_range[%s]",
+    (rh) => {
+      const result = utci({ tdb: 25, tr: 25, v: 1, rh });
+      expect(result.warnings).toContainEqual(
+        expect.objectContaining({ key: "rh" }),
+      );
+      expect(result.utci).toBeNaN();
+      expect(result.stress_category).toBeNaN();
+    },
+  );
+
+  test.each([0, 100])(
+    "test_utci_accepts_relative_humidity_endpoints[%s]",
+    (rh) => {
+      const limited = utci({ tdb: 25, tr: 25, v: 1, rh, round_output: false });
+      const unlimited = utci({
+        tdb: 25,
+        tr: 25,
+        v: 1,
+        rh,
+        limit_inputs: false,
+        round_output: false,
+      });
+      expect(Number.isFinite(limited.utci)).toBe(true);
+      expect(limited.utci).toBe(unlimited.utci);
+      expect(limited.stress_category).toBe(unlimited.stress_category);
+    },
+  );
+
+  // Upstream's `pytest.warns(UserWarning, match="pa")` becomes the row on the
+  // element above the limit.
+  test("test_utci_vapour_pressure_limit_is_inclusive", () => {
+    // Hardy's equation at 40 C: this RH gives exactly 5.0 kPa in float64.
+    const rh_at_limit = 67.70206528209202;
+    const rh = [rh_at_limit - 1e-10, rh_at_limit, rh_at_limit + 1e-10];
+    const limited = rh.map((value) =>
+      utci({ tdb: 40, tr: 40, v: 1, rh: value, round_output: false }),
+    );
+    const unlimited = rh.map((value) =>
+      utci({
+        tdb: 40,
+        tr: 40,
+        v: 1,
+        rh: value,
+        limit_inputs: false,
+        round_output: false,
+      }),
+    );
+    expect(limited.map((result) => result.warnings)).toEqual([
+      [],
+      [],
+      [expect.objectContaining({ key: "pa (kPa)" })],
+    ]);
+    expect(limited.map((result) => Number.isNaN(result.utci))).toEqual([
+      false,
+      false,
+      true,
+    ]);
+    expect(limited.slice(0, 2).map((result) => result.utci)).toEqual(
+      unlimited.slice(0, 2).map((result) => result.utci),
+    );
+    expect(limited.slice(0, 2).map((result) => result.stress_category)).toEqual(
+      unlimited.slice(0, 2).map((result) => result.stress_category),
+    );
+    expect(limited[2]?.stress_category).toBeNaN();
+  });
+
+  // Upstream broadcasts a 2×1 temperature over three rh values; element-wise
+  // here, and its `pytest.warns(UserWarning)` becomes the rows on the invalid
+  // elements.
+  test.each(["SI", "IP"] as const)(
+    "test_utci_humidity_guard_broadcasts_without_masking_valid_neighbors[%s]",
+    (units) => {
+      let temperature = [25.0, 50.0];
+      if (units === "IP") {
+        temperature = temperature.map((t) => t * 1.8 + 32);
+      }
+      const wind = units === "SI" ? 1 : 3.281;
+      const grid = (limit_inputs: boolean) =>
+        temperature.map((t) =>
+          [0, 50, 101].map((rh) =>
+            utci({ tdb: t, tr: t, v: wind, rh, units, limit_inputs }),
+          ),
+        );
+      const limited = grid(true);
+      const unlimited = grid(false);
+      const invalid = [
+        [false, false, true],
+        [false, true, true],
+      ];
+      expect(
+        limited.map((row) => row.map((result) => Number.isNaN(result.utci))),
+      ).toEqual(invalid);
+      expect(
+        limited.map((row) => row.map((result) => result.warnings.length > 0)),
+      ).toEqual(invalid);
+      limited.forEach((row, i) => {
+        row.forEach((result, j) => {
+          if (invalid[i]?.[j] === true) {
+            expect(result.stress_category).toBeNaN();
+          } else {
+            expect(result.utci).toBe(unlimited[i]?.[j]?.utci);
+            expect(result.stress_category).toBe(
+              unlimited[i]?.[j]?.stress_category,
+            );
+          }
+        });
+      });
+    },
+  );
+
+  test("test_utci_explicit_extrapolation_preserves_original_polynomial", () => {
+    const result = utci({
+      tdb: 50,
+      tr: 50,
+      v: 1,
+      rh: 100,
+      limit_inputs: false,
+      round_output: false,
+    });
+    // pytest.approx's default relative tolerance, 1e-6.
+    expect(Math.abs(result.utci - -326.0792322091629)).toBeLessThanOrEqual(
+      326.0792322091629 * 1e-6,
+    );
+    expect(result.stress_category).toBe("extreme cold stress");
+  });
+
+  // Upstream's rh = [50, np.nan], element-wise: a NaN rh throws here, where
+  // upstream propagates it (deviation _shared-7), and its valid neighbour
+  // keeps its value.
+  test("test_utci_nan_humidity_propagates_without_masking_valid_neighbors", () => {
+    const result = utci({ tdb: 25, tr: 25, v: 1, rh: 50 });
+    expect(result.utci).toBe(24.6);
+    expect(result.stress_category).toBe("no thermal stress");
+    expect(() => utci({ tdb: 25, tr: 25, v: 1, rh: NaN })).toThrow();
   });
 
   test("test_utci_ip_uses_si_thresholds_for_stress_category", () => {
@@ -43,15 +212,17 @@ describe("test_utci", () => {
     expect(result.stress_category).toBe("no thermal stress");
   });
 
-  // Upstream's vectors, element-wise.
   test("test_utci_ip_vector_stress_category", () => {
     const results = [77, 104].map((t) =>
       utci({ tdb: t, tr: t, v: 3.28084, rh: 50, units: "IP" }),
     );
 
-    [76.3, 110.5].forEach((expected, i) =>
-      expect(Math.abs(results[i]!.utci - expected)).toBeLessThanOrEqual(1e-6),
-    );
+    // np.testing.assert_allclose's default rtol, 1e-7.
+    [76.3, 110.5].forEach((expected, i) => {
+      expect(
+        Math.abs((results[i]?.utci ?? NaN) - expected),
+      ).toBeLessThanOrEqual(expected * 1e-7);
+    });
     expect(results.map((result) => result.stress_category)).toEqual([
       "no thermal stress",
       "very strong heat stress",
@@ -88,7 +259,6 @@ describe("test_utci", () => {
     expect(result.stress_category).toBe("moderate heat stress");
   });
 
-  // Upstream's scalar call, then its vector call element-wise.
   test("test_utci_ip_out_of_range_stress_category_is_nan", () => {
     const result = utci({
       tdb: 1000,
@@ -105,10 +275,12 @@ describe("test_utci", () => {
       utci({ tdb: t, tr: t, v: 3.28084, rh: 50, units: "IP" }),
     );
 
-    expect(Math.abs(vector_result[0]!.utci - 76.3)).toBeLessThanOrEqual(1e-6);
-    expect(vector_result[1]!.utci).toBeNaN();
-    expect(vector_result[0]!.stress_category).toBe("no thermal stress");
-    expect(vector_result[1]!.stress_category).toBeNaN();
+    expect(
+      Math.abs((vector_result[0]?.utci ?? NaN) - 76.3),
+    ).toBeLessThanOrEqual(76.3 * 1e-7);
+    expect(vector_result[1]?.utci).toBeNaN();
+    expect(vector_result[0]?.stress_category).toBe("no thermal stress");
+    expect(vector_result[1]?.stress_category).toBeNaN();
   });
 
   test("test_utci_saturation_vapour_pressure_matches_p_sat", () => {
@@ -118,7 +290,15 @@ describe("test_utci", () => {
     const rh = 80;
     const pa = (p_sat(tdb) * (rh / 100)) / 1000;
     const expected = _utci_optimized(tdb, v, tr - tdb, pa);
-    const actual = utci({ tdb, tr, v, rh, round_output: false }).utci;
+    // This pressure-formula regression intentionally evaluates beyond 5 kPa.
+    const actual = utci({
+      tdb,
+      tr,
+      v,
+      rh,
+      limit_inputs: false,
+      round_output: false,
+    }).utci;
     expect(Math.abs(actual - expected)).toBeLessThanOrEqual(0.1);
   });
 });
@@ -126,13 +306,12 @@ describe("test_utci", () => {
 describe("utci (JS-only)", () => {
   const mild = { tdb: 25, tr: 25, v: 1, rh: 50 };
 
-  // Upstream #372: with log1p in place of log the value was 61.3.
+  // Upstream #372: with log1p in place of log the value was 61.3. Its pa,
+  // 5.9 kPa, is above the 5 kPa limit, so the gate is off.
   test("40 °C at 80 % RH gives upstream's 60.6", () => {
-    expect(utci({ tdb: 40, tr: 40, v: 1, rh: 80 })).toEqual({
-      utci: 60.6,
-      stress_category: "extreme heat stress",
-      warnings: [],
-    });
+    expect(
+      utci({ tdb: 40, tr: 40, v: 1, rh: 80, limit_inputs: false }),
+    ).toMatchObject({ utci: 60.6, stress_category: "extreme heat stress" });
   });
 
   // Issue #147: the NaN propagates instead of a misleading label.
@@ -214,7 +393,7 @@ describe("utci (JS-only)", () => {
 
   // Each bound is inclusive at both ends, and a value just outside it is NaN
   // only while limit_inputs is on. Expected values from pythermalcomfort
-  // v4.6.0.
+  // v4.7.0, at 30 % RH, which keeps pa under 5 kPa at 50 °C.
   describe("applicability gate", () => {
     const { tdb, v, tr_minus_tdb } = UTCI_LIMITS;
 
@@ -222,25 +401,25 @@ describe("utci (JS-only)", () => {
       [
         "tdb and v at their maxima",
         { tdb: tdb.max, tr: tdb.max, v: 0.5 },
-        67.7,
+        52.8,
       ],
       [
         "tdb and v at their extremes, tr - tdb at its minimum",
         { tdb: tdb.min, tr: tdb.min + tr_minus_tdb.min, v: v.max },
-        -101.8,
+        -102.2,
       ],
       [
         "tr - tdb at its maximum",
         { tdb: 20, tr: 20 + tr_minus_tdb.max, v: 1 },
-        38.5,
+        38.2,
       ],
       [
         "tr - tdb at its minimum",
         { tdb: 20, tr: 20 + tr_minus_tdb.min, v: 1 },
-        9.6,
+        8.9,
       ],
     ])("returns a finite utci on the bound: %s", (_, inputs, expected) => {
-      expect(utci({ ...inputs, rh: 50 }).utci).toBe(expected);
+      expect(utci({ ...inputs, rh: 30 }).utci).toBe(expected);
     });
 
     test.each([
@@ -257,7 +436,7 @@ describe("utci (JS-only)", () => {
         { tdb: 20, tr: 20 + tr_minus_tdb.min - 0.01, v: 1 },
       ],
     ])("returns NaN outside the bound: %s", (_, inputs) => {
-      const params = { ...inputs, rh: 50 };
+      const params = { ...inputs, rh: 30 };
       expect(utci(params).utci).toBeNaN();
       // With limit_inputs off the same values compute, so the NaN above came
       // from the bound and not from the arithmetic.
@@ -278,7 +457,7 @@ describe("utci (JS-only)", () => {
       ["tr - tdb at its maximum", { tdb: 20, tr: 20 + tr_minus_tdb.max, v: 1 }],
       ["tr - tdb at its minimum", { tdb: 20, tr: 20 + tr_minus_tdb.min, v: 1 }],
     ])("no row on the bound: %s", (_, inputs) => {
-      expect(utci({ ...inputs, rh: 50 }).warnings).toEqual([]);
+      expect(utci({ ...inputs, rh: 30 }).warnings).toEqual([]);
     });
 
     // One step outside each bound: one row, whose bound is the object
@@ -336,20 +515,26 @@ describe("utci (JS-only)", () => {
     ])(
       "one row one step outside: $name",
       ({ inputs, key, role, value, bound }) => {
-        const on = utci({ ...inputs, rh: 50 });
+        const on = utci({ ...inputs, rh: 30 });
         expect(on.warnings).toEqual([{ key, role, value, bound }]);
         expect(on.warnings[0]!.bound).toBe(bound);
         expect(on.utci).toBeNaN();
         // The same rows with the gate off, beside a finite utci.
-        const off = utci({ ...inputs, rh: 50, limit_inputs: false });
+        const off = utci({ ...inputs, rh: 30, limit_inputs: false });
         expect(off.warnings).toEqual(on.warnings);
         expect(Number.isFinite(off.utci)).toBe(true);
       },
     );
 
-    test("rows come in upstream's order: tdb, tr - tdb, v", () => {
-      const { warnings } = utci({ tdb: 60, tr: 140, v: 20, rh: 50 });
-      expect(warnings.map((w) => w.key)).toEqual(["tdb", "tr_minus_tdb", "v"]);
+    test("rows come in upstream's order: tdb, tr - tdb, v, pa, rh", () => {
+      const { warnings } = utci({ tdb: 60, tr: 140, v: 20, rh: 101 });
+      expect(warnings.map((w) => w.key)).toEqual([
+        "tdb",
+        "tr_minus_tdb",
+        "v",
+        "pa (kPa)",
+        "rh",
+      ]);
     });
 
     // Row values are SI, as ApplicabilityWarning says: 68 °F is 20 °C and
@@ -461,10 +646,6 @@ describe("utci (JS-only)", () => {
   });
 
   describe("exports", () => {
-    test("utci is exported from models/index.ts", () => {
-      expect(utci_from_models).toBe(utci);
-    });
-
     test("utci is exported from package root (src/index.ts)", () => {
       expect(utci_from_root).toBe(utci);
     });

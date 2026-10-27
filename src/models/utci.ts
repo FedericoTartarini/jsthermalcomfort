@@ -1,191 +1,145 @@
-import { validateInputs } from "../utilities/utilities.js";
-import { units_converter } from "../utilities/units_converter.ts";
-import { round } from "../_internal/round.ts";
-import { classifyFromBins } from "../_internal/classifierBins.ts";
+import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
+import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import {
-  _check_params_object,
-  _legacy_valid_range,
-} from "../_internal/validation.ts";
 import type {
-  ApplicabilityWarning,
-  ClassifierBins,
-  LegacyModelInfo,
+  ModelInfo,
+  ModelResult,
+  ModelWarning,
 } from "../_internal/modelDocs.ts";
+import { round } from "../_internal/round.ts";
+import { _mapping, _valid_range } from "../_internal/validation.ts";
+import { Units } from "../utilities/options.ts";
+import { units_converter } from "../utilities/units_converter.ts";
 
-// A type alias rather than an interface, like AdaptiveAshraeResult, so it
-// stays assignable to Record<string, unknown>.
-/**
- * The result of `utci`: the index, in [°C] or in [°F] if `units` = 'IP', and
- * its thermal stress category, classified from the SI value (rounded when
- * `round_output` is on), or NaN if utci is NaN.
- *
- * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- */
-export type UtciResult = {
-  utci: number;
-  stress_category: string | number;
-  readonly warnings: ApplicabilityWarning[];
-};
-
-/**
- * The params of `utci`: upstream's keyword parameters, quantities and
- * switches alike, with upstream's defaults (ADR 0002). Documented on the
- * function's `params`.
- */
-export interface UtciParams {
-  tdb: number;
-  tr: number;
-  v: number;
-  rh: number;
-  units?: "SI" | "IP";
-  limit_inputs?: boolean;
-  round_output?: boolean;
-}
-
-/**
- * Applicability limits of the UTCI regression, in SI units, inclusive at both
- * ends as upstream's `_valid_range`.
- *
- * `tr` has no bound of its own: upstream bounds its difference from `tdb`,
- * which is `tr_minus_tdb` here and a `derived` row in `UTCI_INFO`. Frozen,
- * referenced by identity
- * from `UTCI_INFO` and read by the gate in `utci`, so the metadata and the
- * NaN cannot disagree. Exported for that identity test, deliberately not
- * added to `src/models/index.ts`.
- */
-export const UTCI_LIMITS = Object.freeze({
-  tdb: Object.freeze({ min: -50, max: 50 }),
-  v: Object.freeze({ min: 0.5, max: 17 }),
-  tr_minus_tdb: Object.freeze({ min: -30, max: 70 }),
-  pa: Object.freeze({ min: 0, max: 5 }),
-  rh: Object.freeze({ min: 0, max: 100 }),
-});
-
-/**
- * Stress category bins for UTCI classification (right-inclusive), in °C.
- * Upstream's edges and labels: a value on an edge belongs to the lower
- * category, and a value above the last edge (1000) is NaN.
- */
-export const UTCI_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
-  Object.freeze({
-    edges: [-40, -27, -13, 0, 9, 26, 32, 38, 46, 1000],
-    labels: [
-      "extreme cold stress",
-      "very strong cold stress",
-      "strong cold stress",
-      "moderate cold stress",
-      "slight cold stress",
-      "no thermal stress",
-      "moderate heat stress",
-      "strong heat stress",
-      "very strong heat stress",
-      "extreme heat stress",
-    ],
-    right: true,
-  });
-
-/**
- * Model metadata for the Universal Thermal Climate Index.
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * `tr` carries no applicability of its own; its bound is on `tr - tdb`, a
- * quantity computed from two inputs, so it is the `derived` row
- * `tr_minus_tdb`.
- *
- * @public
- */
-export const UTCI_INFO: LegacyModelInfo = deepFreeze({
+export const UTCI_INFO = deepFreeze({
   name: "utci",
   label: "UTCI",
-  description:
-    "Universal Thermal Climate Index — the air temperature of a reference outdoor environment with the same physiological strain.",
   standards: [],
   inputs: {
-    tdb: { unit: "°C", applicability: UTCI_LIMITS.tdb },
-    tr: { unit: "°C" },
-    v: { unit: "m/s", applicability: UTCI_LIMITS.v },
-    rh: { unit: "%", applicability: UTCI_LIMITS.rh },
+    tdb: {
+      kind: "numeric",
+      unit: "°C",
+      applicability: { min: -50.0, max: 50.0 },
+    },
+    tr: { kind: "numeric", unit: "°C" },
+    v: { kind: "numeric", unit: "m/s", applicability: { min: 0.5, max: 17.0 } },
+    rh: {
+      kind: "numeric",
+      unit: "%",
+      applicability: { min: 0.0, max: 100.0 },
+    },
+    units: BASE_INPUTS_UNITS,
+    limit_inputs: { kind: "bool", default: true },
+    round_output: { kind: "bool", default: true },
   },
   outputs: {
     utci: { unit: "°C" },
-    stress_category: { unit: null, classifier: UTCI_STRESS_CATEGORY_BINS },
+    stress_category: {
+      unit: null,
+      classifier: {
+        edges: [-40.0, -27.0, -13.0, 0.0, 9.0, 26.0, 32.0, 38.0, 46.0, 1000.0],
+        labels: [
+          "extreme cold stress",
+          "very strong cold stress",
+          "strong cold stress",
+          "moderate cold stress",
+          "slight cold stress",
+          "no thermal stress",
+          "moderate heat stress",
+          "strong heat stress",
+          "very strong heat stress",
+          "extreme heat stress",
+        ],
+        right: true,
+      },
+    },
   },
   derived: {
-    tr_minus_tdb: { unit: "°C", applicability: UTCI_LIMITS.tr_minus_tdb },
-    "pa (kPa)": { unit: "kPa", applicability: UTCI_LIMITS.pa },
+    "tr - tdb": {
+      unit: "°C",
+      applicability: { min: -30.0, max: 70.0 },
+    },
+    "pa (kPa)": { unit: "kPa", applicability: { min: 0.0, max: 5.0 } },
   },
-});
+} as const satisfies ModelInfo);
+
+/** @interface */
+export type UTCIInputs = InputsOf<typeof UTCI_INFO.inputs>;
+
+/** Dataclass to represent the Universal Thermal Climate Index (UTCI). */
+export interface UTCI extends ModelResult {
+  /** Universal Thermal Climate Index, [°C] or in [°F]. */
+  readonly utci: number;
+  /** UTCI categorized in terms of thermal stress [Blazejczyk2013](../../docs/references.md#blazejczyk2013). */
+  readonly stress_category: string | number;
+}
 
 /**
- * Determines the Universal Thermal Climate Index (UTCI). The UTCI is the
-    equivalent temperature for the environment derived from a reference
-    environment. It is defined as the air temperature of the reference
-    environment which produces the same strain index value in comparison with
-    the reference individual's response to the real environment. It is regarded
-    as one of the most comprehensive indices for calculating heat stress in
-    outdoor spaces. The parameters that are taken into account for calculating
-    UTCI involve dry bulb temperature, mean radiation temperature, the pressure
-    of water vapor or relative humidity, and wind speed (at the elevation of 10
-    m above the ground). {@link #ref_7|[7]}
- * - Note: You can use this function to calculate the Universal Thermal Climate Index (UTCI) The applicability wind speed value must be between 0.5 and 17 m/s.
- * 
- * @public
- * @memberof models
- * @docname Universal Thermal Climate Index (UTCI)
- * 
- * @param {Object} params - the model's parameters, named as in pythermalcomfort.
- * @param {number} params.tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} params.tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} params.v - wind speed 10m above ground level, default in [m/s] in [fps] if `units` = 'IP'
- * @param {number} params.rh - relative humidity, [%]
- * @param {"SI"|"IP"} [params.units="SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param {boolean} [params.limit_inputs=true] - default True. By default, if the inputs are outsude the standard applicability limits the
-        function returns nan. If False returns UTCI values even if input values are
-        outside the applicability limits of the model. The valid input ranges are
-        -50 < tdb [°C] < 50, tdb - 30 < tr [°C] < tdb + 70, and for 0.5 < v [m/s] < 17.0.
- * @param {boolean} [params.round_output=true] - If True, rounds output value. If False, it does not round it. The stress category is classified from the SI value, rounded when this is True.
+ * Calculate the Universal Thermal Climate Index (UTCI).
+ *
+ * The UTCI is the equivalent
+ * temperature for the environment derived from a reference environment. It is defined
+ * as the air temperature of the reference environment which produces the same strain
+ * index value in comparison with the reference individual's response to the real
+ * environment. It is regarded as one of the most comprehensive indices for calculating
+ * heat stress in outdoor spaces. The parameters that are taken into account for
+ * calculating UTCI involve dry bulb temperature, mean radiation temperature, the
+ * pressure of water vapor or relative humidity, and wind speed (at the elevation of 10
+ * m above the ground). [Zare2018](../../docs/references.md#zare2018)
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature. Default in [°C] in [°F] if `units` = 'IP'.
+ * @param inputs.tr - Mean radiant temperature. Default in [°C] in [°F] if `units` = 'IP'.
+ * @param inputs.v - Wind speed 10m above ground level. Default in [m/s] in [fps] if `units` = 'IP'.
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system. Defaults to 'SI'.
+ * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
+ * function returns nan. If False, returns UTCI values even if input values are
+ * outside the applicability limits of the model. The valid input ranges are
+ * -50 <= tdb [°C] <= 50, -30 <= tr - tdb [°C] <= 70,
+ * 0.5 <= v [m/s] <= 17.0, 0 <= rh [%] <= 100, and water vapour pressure
+ * between 0 and 5 kPa (inclusive). Defaults to True.
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ *
+ * @returns A dataclass containing the Universal Thermal Climate Index and stress category.
+ * See {@link UTCI} for more details. To access the
+ * `utci` and `stress_category` values, use the corresponding attributes of the
+ * returned `UTCI` instance, e.g., `result.utci`.
+ *
+ * @remarks
+ * All four applicability limits applied when ``limit_inputs=True`` (air temperature,
+ * ``tr - tdb``, wind speed and humidity) are the input checks of the official UTCI
+ * program, ``UTCI_a002.f90`` (version a 0.002, October 2009), available at
+ * https://utci.org/resources/UTCI%20Program%20Code.zip. That program accepts wind
+ * speeds up to 30 m/s, but its documentation and input prompt give 17 m/s, the limit
+ * used here.
+ * High relative humidity can exceed the vapour-pressure limit even when air
+ * temperature is within range. Setting ``limit_inputs=False`` permits polynomial
+ * extrapolation, which can produce unrealistic temperatures and stress categories.
+ * The original approximation can also have a non-monotonic wind-speed response;
+ * this function does not alter the polynomial to enforce monotonicity.
+ *
  * @example
- * console.log(utci({ tdb: 25, tr: 25, v: 1.0, rh: 50 }))
- * // will print {utci: 24.6, stress_category: "no thermal stress"}
- * console.log(utci({ tdb: 77, tr: 77, v: 3.28, rh: 50, units: "IP" }).utci) // will print 76.3
+ * ```ts
+ * import { utci } from "jsthermalcomfort/models";
+ *
+ * const result = utci({ tdb: 25, tr: 25, v: 1.0, rh: 50 });
+ * console.log(result.utci); // 24.6
+ * console.log(result.stress_category); // "no thermal stress"
+ *
+ * const values = [25, 40].map((tdb) => utci({ tdb, tr: 25, v: 1.0, rh: 50 }).utci);
+ * console.log(values); // [24.6, 40.4]
+ * ```
  */
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three). round_output is not validated, as
-// upstream's UTCIInputs is not given it.
-const UTCI_SCHEMA = {
-  tdb: { type: "number" },
-  tr: { type: "number" },
-  v: { type: "number" },
-  rh: { type: "number" },
-  units: { enum: ["SI", "IP"] },
-  limit_inputs: { type: "boolean" },
-};
-
-export function utci(params: UtciParams): UtciResult {
-  // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "utci");
-  let { tdb, tr, v } = params;
-  const { rh } = params;
-  // Destructuring defaults also apply to a switch passed as undefined.
-  const { units = "SI", limit_inputs = true, round_output = true } = params;
-  validateInputs(
-    {
-      tdb,
-      tr,
-      v,
-      rh,
-      units: units.toUpperCase(),
-      limit_inputs,
-    },
-    UTCI_SCHEMA,
+export function utci(inputs: UTCIInputs): UTCI {
+  // Validate inputs using the UTCIInputs class
+  let { tdb, tr, v, rh, units, limit_inputs, round_output } = parseInputs(
+    UTCI_INFO,
+    inputs,
   );
 
-  const ip = units.toUpperCase() === "IP";
-  if (ip) {
-    ({ tdb, tr, v } = units_converter("IP", { tdb, tr, v }));
+  if (units.toUpperCase() === Units.IP) {
+    ({ tdb, tr, v } = units_converter(Units.IP, { tdb, tr, v }));
   }
 
   function exponential(t_db: number): number {
@@ -215,29 +169,61 @@ export function utci(params: UtciParams): UtciResult {
   let utci_approx = _utci_optimized(tdb, v, delta_t_tr, pa);
 
   // Checks that inputs are within the bounds accepted by the model if not return nan
-  // The rows are the channel for upstream's UserWarning, which JavaScript has
-  // no warnings filter for (ADR 0001). Upstream checks only under
-  // limit_inputs; the rows are built on every call, so with the gate off they
-  // say what the number was computed despite. The gate reads the rows.
-  const warnings: ApplicabilityWarning[] = [];
-  _legacy_valid_range(warnings, "tdb", "input", tdb, UTCI_LIMITS.tdb);
-  _legacy_valid_range(
+  const warnings: ModelWarning[] = [];
+  const tdb_valid = _valid_range(
+    tdb,
+    UTCI_INFO.inputs.tdb.applicability,
+    "tdb",
+    "input",
+    UTCI_INFO.inputs.tdb.unit,
     warnings,
-    "tr_minus_tdb",
-    "derived",
-    tr - tdb,
-    UTCI_LIMITS.tr_minus_tdb,
   );
-  _legacy_valid_range(warnings, "v", "input", v, UTCI_LIMITS.v);
-  _legacy_valid_range(warnings, "pa (kPa)", "derived", pa, UTCI_LIMITS.pa);
-  _legacy_valid_range(warnings, "rh", "input", rh, UTCI_LIMITS.rh);
-  if (limit_inputs && warnings.length > 0) utci_approx = NaN;
+  const diff_valid = _valid_range(
+    tr - tdb,
+    UTCI_INFO.derived["tr - tdb"].applicability,
+    "tr - tdb",
+    "derived",
+    UTCI_INFO.derived["tr - tdb"].unit,
+    warnings,
+  );
+  const v_valid = _valid_range(
+    v,
+    UTCI_INFO.inputs.v.applicability,
+    "v",
+    "input",
+    UTCI_INFO.inputs.v.unit,
+    warnings,
+  );
+  const pa_valid = _valid_range(
+    pa,
+    UTCI_INFO.derived["pa (kPa)"].applicability,
+    "pa (kPa)",
+    "derived",
+    UTCI_INFO.derived["pa (kPa)"].unit,
+    warnings,
+  );
+  const rh_valid = _valid_range(
+    rh,
+    UTCI_INFO.inputs.rh.applicability,
+    "rh",
+    "input",
+    UTCI_INFO.inputs.rh.unit,
+    warnings,
+  );
+  const all_valid = !(
+    Number.isNaN(tdb_valid) ||
+    Number.isNaN(diff_valid) ||
+    Number.isNaN(v_valid) ||
+    Number.isNaN(pa_valid) ||
+    Number.isNaN(rh_valid)
+  );
+  utci_approx = limit_inputs && !all_valid ? NaN : utci_approx;
 
   // Stress-category thresholds are in °C; keep the SI value before IP conversion.
   let utci_si = utci_approx;
 
-  if (ip) {
-    utci_approx = units_converter("SI", { tmp: utci_approx }).tmp;
+  if (units.toUpperCase() === Units.IP) {
+    ({ tmp: utci_approx } = units_converter(Units.SI, { tmp: utci_approx }));
   }
 
   if (round_output) {
@@ -245,22 +231,16 @@ export function utci(params: UtciParams): UtciResult {
     utci_si = round(utci_si, 1);
   }
 
-  return {
+  return Object.freeze({
     utci: utci_approx,
-    stress_category: classifyFromBins(utci_si, UTCI_STRESS_CATEGORY_BINS),
-    warnings,
-  };
+    stress_category: _mapping(
+      utci_si,
+      UTCI_INFO.outputs.stress_category.classifier,
+    ),
+    warnings: Object.freeze(warnings),
+  });
 }
 
-// Exported for the mirrored tests, which import it as upstream's do; not
-// added to src/models/index.ts.
-/**
- * @param {number} tdb
- * @param {number} v
- * @param {number} delta_t_tr
- * @param {number} pa
- * @returns {number}
- */
 export function _utci_optimized(
   tdb: number,
   v: number,

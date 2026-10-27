@@ -37,8 +37,8 @@ import type {
   PmvPpdIsoResult,
   SolarGain,
   SolarGainInputs,
-  UtciParams,
-  UtciResult,
+  UTCI,
+  UTCIInputs,
   OutputInfo,
   UnitSymbol,
 } from "jsthermalcomfort";
@@ -58,7 +58,6 @@ import {
   Postures,
   Units,
   UTCI_INFO,
-  UTCI_STRESS_CATEGORY_BINS,
   adaptive_ashrae,
   classifyFromBins,
   clo_individual_garments,
@@ -95,7 +94,7 @@ const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
 const iso = PMV_PPD_ISO_INFO;
 const ashrae = PMV_PPD_ASHRAE_INFO;
 const adaptive = ADAPTIVE_ASHRAE_INFO;
-const utciInfo = UTCI_INFO;
+const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 // @ts-expect-error the old form's inputs carry no kind.
 const isoAsModelInfo: ModelInfo = PMV_PPD_ISO_INFO;
@@ -128,7 +127,10 @@ const label = classifyFromBins(
   HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
 );
 const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
-const utciLabel = classifyFromBins(24.6, UTCI_STRESS_CATEGORY_BINS);
+const utciLabel = classifyFromBins(
+  24.6,
+  UTCI_INFO.outputs.stress_category.classifier,
+);
 
 // The classifier reached through the metadata is typed, not `Object`, so a
 // consumer can read the edge convention without casting.
@@ -192,7 +194,7 @@ HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier.labels.push(
   "new label",
 );
 // @ts-expect-error the UTCI metadata is readonly, its derived bound included.
-UTCI_INFO.derived!.tr_minus_tdb.applicability!.max = 80;
+UTCI_INFO.derived["tr - tdb"].applicability.max = 80;
 
 // pmv_ppd_iso takes one params object too (ADR 0002), with its params and
 // result types exported by name; the lines below are errors only while the
@@ -425,10 +427,10 @@ const notARole: ApplicabilityWarning["role"] = "somewhere";
 // @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
 pmvIso.warnings[0].bound.max = 50;
 
-// utci takes one params object too (ADR 0002), with its params and result
-// types exported by name; the lines below are errors only while the published
-// signature is typed.
-const utciParams: UtciParams = {
+// utci takes one inputs object too (ADR 0002), with its inputs and result
+// types named after upstream's classes; the lines below are errors only while
+// the published signature is typed.
+const utciParams: UTCIInputs = {
   tdb: 77,
   tr: 77,
   v: 3.28084,
@@ -437,7 +439,7 @@ const utciParams: UtciParams = {
   limit_inputs: false,
   round_output: false,
 };
-const utciResult: UtciResult = utci(utciParams);
+const utciResult: UTCI = utci(utciParams);
 const utciCategory: string | number = utciResult.stress_category;
 // @ts-expect-error `return_stress_category` is not a param; stress_category is always returned.
 utci({ tdb: 25, tr: 25, v: 1, rh: 50, return_stress_category: true });
@@ -453,9 +455,11 @@ utci({
 });
 // @ts-expect-error tdb must be a number.
 utci({ tdb: "25", tr: 25, v: 1, rh: 50 });
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+utciResult.utci = 1;
 
-// adaptive_ashrae, heat_index_rothfusz and utci return the same rows as the
-// PMV wrappers, typed through to the bound.
+// adaptive_ashrae returns the same rows as the PMV wrappers, typed through to
+// the bound.
 const adaptiveWarnings: ApplicabilityWarning[] = adaptiveResult.warnings;
 const adaptiveRowMax: number | undefined = adaptiveResult.warnings[0].bound.max;
 // heat_index_rothfusz returns ModelWarning rows: a row's bound reads once its
@@ -468,8 +472,11 @@ const heatIndexRowMax: number | undefined =
 const heatIndexUnnarrowed = heatIndexRow.bound;
 // @ts-expect-error the rows are readonly.
 heatIndexResult.warnings.push(heatIndexRow);
-const utciWarnings: ApplicabilityWarning[] = utciResult.warnings;
-const utciRowMax: number | undefined = utciResult.warnings[0].bound.max;
+const utciWarnings: readonly ModelWarning[] = utciResult.warnings;
+const utciRow = utciResult.warnings[0];
+const utciRowMax: number | undefined =
+  utciRow.kind === "range" ? utciRow.bound.max : undefined;
+const utciPaBound: Bound = UTCI_INFO.derived["pa (kPa)"].applicability;
 
 // clo_tout takes one inputs object too (ADR 0002), with its inputs and
 // result types named after upstream's classes; the lines below are errors
@@ -623,6 +630,7 @@ export {
   heatIndexUnnarrowed,
   utciWarnings,
   utciRowMax,
+  utciPaBound,
   winterClo,
   garmentClo,
   sameUtci,

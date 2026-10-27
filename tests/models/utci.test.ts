@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { utci } from "../../src/models/index.ts";
-import { _utci_optimized } from "../../src/models/utci.ts";
+import * as models from "../../src/models/index.ts";
 import {
+  classifyFromBins,
+  CLO_TOUT_INFO,
+  utci,
   UTCI_INFO,
-  UTCI_LIMITS,
-  UTCI_STRESS_CATEGORY_BINS,
-} from "../../src/models/utci.ts";
-import type { UtciParams } from "../../src/models/utci.ts";
-import { classifyFromBins } from "../../src/_internal/classifierBins.ts";
+} from "../../src/models/index.ts";
+import { _utci_optimized } from "../../src/models/utci.ts";
+import { Units } from "../../src/utilities/index.ts";
 import { utci as utci_from_root } from "../../src/index.ts";
 import { p_sat } from "../../src/psychrometrics/index.ts";
 import { round } from "../../src/_internal/round.ts";
@@ -303,243 +303,412 @@ describe("test_utci", () => {
   });
 });
 
+// The per-model checks of the template (ADRs 0022-0024), through the public
+// entry: what upstream's tests leave out, measured on pythermalcomfort 4.7.0,
+// and what only the library adds.
 describe("utci (JS-only)", () => {
   const mild = { tdb: 25, tr: 25, v: 1, rh: 50 };
+  // A call with inputs the type rejects, to test the runtime.
+  const call = (inputs: unknown) => () => utci(inputs as Inputs);
 
-  // Upstream #372: with log1p in place of log the value was 61.3. Its pa,
-  // 5.9 kPa, is above the 5 kPa limit, so the gate is off.
-  test("40 °C at 80 % RH gives upstream's 60.6", () => {
-    expect(
-      utci({ tdb: 40, tr: 40, v: 1, rh: 80, limit_inputs: false }),
-    ).toMatchObject({ utci: 60.6, stress_category: "extreme heat stress" });
-  });
-
-  // Issue #147: the NaN propagates instead of a misleading label.
-  test("out-of-range inputs yield utci=NaN and stress_category=NaN", () => {
-    const result = utci({ tdb: 51, tr: 22, v: 16, rh: 50 });
-    expect(result.utci).toBeNaN();
-    expect(result.stress_category).toBeNaN();
-  });
-
-  describe("input validation", () => {
-    const quantities = ["tdb", "tr", "v", "rh"] as const;
-
-    // A numeric string is not coerced, unlike in arithmetic.
-    test.each(quantities)("throws TypeError if %s is not a number", (key) => {
-      // Cast: deliberately passing a string to test the runtime TypeError.
-      const params = { ...mild, [key]: "25" } as unknown as UtciParams;
-      expect(() => utci(params)).toThrow(TypeError);
-    });
-
-    // A missing quantity is a TypeError, as a missing keyword argument is in
-    // Python.
-    test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<UtciParams> = { ...mild };
-      delete params[key];
-      // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
-      expect(() => utci(params)).toThrow(TypeError);
-    });
-
-    // ADR 0001: a non-finite number throws rather than propagating as NaN.
-    test.each(quantities)("throws TypeError if %s is not finite", (key) => {
-      for (const bad of [NaN, Infinity, -Infinity]) {
-        expect(() => utci({ ...mild, [key]: bad })).toThrow(TypeError);
-      }
-    });
-
-    // Every argument was positional before v2 (ADR 0002). A call still
-    // written that way throws rather than running on anything else.
-    test("throws TypeError if called positionally", () => {
-      // @ts-expect-error the model takes one params object
-      expect(() => utci(25, 25, 1.0, 50)).toThrow(TypeError);
-      // @ts-expect-error the model takes one params object
-      expect(() => utci(25, 25, 1.0, 50, "SI", true)).toThrow(TypeError);
-      // @ts-expect-error null is not a params object
-      expect(() => utci(null)).toThrow(TypeError);
-      // @ts-expect-error the params object is required
-      expect(() => utci()).toThrow(TypeError);
-    });
-
-    test("throws Error if units is not a valid enum", () => {
-      // Cast: deliberately passing an unknown system to test the runtime Error.
-      const params = { ...mild, units: "INVALID" } as unknown as UtciParams;
-      expect(() => utci(params)).toThrow(Error);
-    });
-
-    // Only the switches upstream's UTCIInputs validates; round_output is not
-    // among them.
-    test("throws TypeError if limit_inputs is not a boolean", () => {
-      // Cast: deliberately passing a string to test the runtime TypeError.
-      const params = { ...mild, limit_inputs: "true" } as unknown as UtciParams;
-      expect(() => utci(params)).toThrow(TypeError);
-    });
-
-    test("a switch passed as undefined takes its default", () => {
+  describe("values", () => {
+    // Upstream #372: with log1p in place of log the value was 61.3. Its pa,
+    // 5.9 kPa, is above the 5 kPa limit, so the gate is off.
+    test("40 °C at 80 % RH gives upstream's 60.6", () => {
       expect(
-        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
+        utci({ tdb: 40, tr: 40, v: 1, rh: 80, limit_inputs: false }),
+      ).toMatchObject({ utci: 60.6, stress_category: "extreme heat stress" });
+    });
+
+    test("takes units in any case, and the constant, as upstream", () => {
+      const ip = { tdb: 77, tr: 77, v: 3.28084, rh: 50 };
+      expect(utci({ ...ip, units: Units.IP }).utci).toBe(76.3);
+      expect(call({ ...ip, units: "ip" })()).toEqual(
+        utci({ ...ip, units: "IP" }),
+      );
+      expect(call({ ...mild, units: "si" })()).toEqual(utci(mild));
+    });
+  });
+
+  describe("errors", () => {
+    // The library's messages, where upstream's name Python's types or its
+    // call binding (deviation _shared-10); upstream does not check
+    // round_output (deviation _shared-8).
+    test.each(["limit_inputs", "round_output"])(
+      "%s that is not a boolean throws TypeError",
+      (key) => {
+        for (const bad of ["true", 1, null])
+          expect(call({ ...mild, [key]: bad })).toThrow(
+            new TypeError(`${key} must be a boolean.`),
+          );
+      },
+    );
+
+    test("a missing quantity throws TypeError, naming the first", () => {
+      expect(call({ tdb: 25, tr: 25, v: 1 })).toThrow(
+        new TypeError("rh is required."),
+      );
+      expect(call({ rh: 50 })).toThrow(new TypeError("tdb is required."));
+      expect(call({ ...mild, tr: undefined })).toThrow(
+        new TypeError("tr is required."),
+      );
+    });
+
+    test("an unknown key throws TypeError, naming the first", () => {
+      for (const key of ["foo", "return_stress_category", "pa"])
+        expect(call({ ...mild, [key]: 1 })).toThrow(
+          new TypeError(`${key} is not an input of utci().`),
+        );
+      expect(call({ ...mild, foo: 1, bar: 2 })).toThrow(
+        new TypeError("foo is not an input of utci()."),
+      );
+    });
+
+    // Every argument was positional before v2 (ADR 0002).
+    test("anything but an inputs object throws TypeError", () => {
+      for (const bad of [25, null, undefined, [25, 25, 1, 50], "tdb"])
+        expect(call(bad)).toThrow(
+          new TypeError("utci() takes one inputs object."),
+        );
+    });
+
+    // Upstream reads a boolean as a number and broadcasts an array
+    // (deviation _shared-5, deviation _shared-6), and its message for another
+    // type names Python's types (deviation _shared-10).
+    test.each(["tdb", "tr", "v", "rh"])(
+      "%s that is not a number throws TypeError",
+      (key) => {
+        for (const bad of ["25", {}, () => 25, 25n, true, false, null, [25]])
+          expect(call({ ...mild, [key]: bad })).toThrow(
+            new TypeError(`${key} must be a finite number.`),
+          );
+      },
+    );
+
+    // Upstream computes on with NaN and ±Infinity (deviation _shared-7).
+    test.each(["tdb", "tr", "v", "rh"])(
+      "%s that is not finite throws RangeError",
+      (key) => {
+        for (const bad of [NaN, Infinity, -Infinity])
+          expect(call({ ...mild, [key]: bad })).toThrow(
+            new RangeError(`${key} must be a finite number.`),
+          );
+      },
+    );
+
+    // BaseInputs' message (classes_input.py:120), for a string outside the
+    // set and, as upstream compares str(units), any other value (deviation
+    // _shared-24).
+    test("units other than SI or IP throws upstream's message", () => {
+      const message = "Units must be either 'SI' or 'IP'";
+      for (const bad of ["XX", "", "metric"])
+        expect(call({ ...mild, units: bad })).toThrow(new RangeError(message));
+      for (const bad of [null, 5, true, ["SI"]])
+        expect(call({ ...mild, units: bad })).toThrow(new TypeError(message));
+    });
+
+    // Upstream checks units, then limit_inputs, then the quantities; the
+    // library checks in the definition's order (deviation _shared-9).
+    test("checks run in the definition's order", () => {
+      const bad = {
+        tdb: "x",
+        tr: NaN,
+        v: "x",
+        rh: "x",
+        units: "XX",
+        limit_inputs: "x",
+        round_output: "x",
+      };
+      expect(call(bad)).toThrow(new TypeError("tdb must be a finite number."));
+      expect(call({ ...bad, tdb: 25 })).toThrow(
+        new RangeError("tr must be a finite number."),
+      );
+      expect(call({ ...bad, ...mild })).toThrow(/^Units must be/);
+      expect(call({ ...bad, ...mild, units: "SI" })).toThrow(
+        new TypeError("limit_inputs must be a boolean."),
+      );
+      expect(
+        call({ ...bad, ...mild, units: "SI", limit_inputs: true }),
+      ).toThrow(new TypeError("round_output must be a boolean."));
+      // An unknown key fails first, as an unexpected keyword does in Python.
+      expect(call({ foo: 1 })).toThrow(
+        new TypeError("foo is not an input of utci()."),
+      );
+    });
+
+    test("undefined takes the default, as an omitted keyword does", () => {
+      expect(
         utci({
           ...mild,
           units: undefined,
           limit_inputs: undefined,
           round_output: undefined,
-        }).utci,
-      ).toBe(24.6);
+        }),
+      ).toEqual(utci(mild));
+      expect(utci({ ...mild, round_output: undefined }).utci).toBe(24.6);
       expect(
-        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
         utci({ tdb: 51, tr: 22, v: 16, rh: 50, limit_inputs: undefined }).utci,
       ).toBeNaN();
     });
   });
 
-  // Each bound is inclusive at both ends, and a value just outside it is NaN
-  // only while limit_inputs is on. Expected values from pythermalcomfort
-  // v4.7.0, at 30 % RH, which keeps pa under 5 kPa at 50 °C.
-  describe("applicability gate", () => {
-    const { tdb, v, tr_minus_tdb } = UTCI_LIMITS;
-
-    test.each([
-      [
-        "tdb and v at their maxima",
-        { tdb: tdb.max, tr: tdb.max, v: 0.5 },
-        52.8,
-      ],
-      [
-        "tdb and v at their extremes, tr - tdb at its minimum",
-        { tdb: tdb.min, tr: tdb.min + tr_minus_tdb.min, v: v.max },
-        -102.2,
-      ],
-      [
-        "tr - tdb at its maximum",
-        { tdb: 20, tr: 20 + tr_minus_tdb.max, v: 1 },
-        38.2,
-      ],
-      [
-        "tr - tdb at its minimum",
-        { tdb: 20, tr: 20 + tr_minus_tdb.min, v: 1 },
-        8.9,
-      ],
-    ])("returns a finite utci on the bound: %s", (_, inputs, expected) => {
-      expect(utci({ ...inputs, rh: 30 }).utci).toBe(expected);
+  describe("result", () => {
+    // As upstream's frozen dataclass (classes_return.py:690).
+    test("is frozen, its warnings and rows included", () => {
+      const result = utci({ tdb: 51, tr: 22, v: 16, rh: 50 });
+      expect(Object.isFrozen(result)).toBe(true);
+      expect(Object.isFrozen(result.warnings)).toBe(true);
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings.every((row) => Object.isFrozen(row))).toBe(true);
+      expect(() => {
+        (result as { utci: number }).utci = 1;
+      }).toThrow(TypeError);
     });
 
-    test.each([
-      ["tdb above its maximum", { tdb: tdb.max + 0.01, tr: 50, v: 1 }],
-      ["tdb below its minimum", { tdb: tdb.min - 0.01, tr: -50, v: 1 }],
-      ["v below its minimum", { tdb: 20, tr: 20, v: v.min - 0.01 }],
-      ["v above its maximum", { tdb: 20, tr: 20, v: v.max + 0.01 }],
-      [
-        "tr - tdb above its maximum",
-        { tdb: 20, tr: 20 + tr_minus_tdb.max + 0.01, v: 1 },
-      ],
-      [
-        "tr - tdb below its minimum",
-        { tdb: 20, tr: 20 + tr_minus_tdb.min - 0.01, v: 1 },
-      ],
-    ])("returns NaN outside the bound: %s", (_, inputs) => {
-      const params = { ...inputs, rh: 30 };
-      expect(utci(params).utci).toBeNaN();
-      // With limit_inputs off the same values compute, so the NaN above came
-      // from the bound and not from the arithmetic.
-      expect(
-        Number.isFinite(utci({ ...params, limit_inputs: false }).utci),
-      ).toBe(true);
+    test("has upstream's fields, then warnings", () => {
+      expect(Object.keys(utci(mild))).toEqual([
+        "utci",
+        "stress_category",
+        "warnings",
+      ]);
     });
   });
 
-  describe("warnings rows", () => {
-    const { tdb, v, tr_minus_tdb } = UTCI_LIMITS;
+  // deviation utci-1
+  describe("UTCI_INFO", () => {
+    test("names the model, with no description", () => {
+      expect(UTCI_INFO.name).toBe("utci");
+      expect(UTCI_INFO.label).toBe("UTCI");
+      expect(UTCI_INFO.standards).toEqual([]);
+      expect(UTCI_INFO).not.toHaveProperty("description");
+    });
 
+    // Upstream's limits (models/utci.py:137-141); tr has none of its own.
+    test("lists every keyword argument, with upstream's bounds and defaults", () => {
+      expect(UTCI_INFO.inputs).toEqual({
+        tdb: {
+          kind: "numeric",
+          unit: "°C",
+          applicability: { min: -50, max: 50 },
+        },
+        tr: { kind: "numeric", unit: "°C" },
+        v: {
+          kind: "numeric",
+          unit: "m/s",
+          applicability: { min: 0.5, max: 17 },
+        },
+        rh: {
+          kind: "numeric",
+          unit: "%",
+          applicability: { min: 0, max: 100 },
+        },
+        units: {
+          kind: "choice",
+          allowed: ["SI", "IP"],
+          default: "SI",
+          message: "Units must be either 'SI' or 'IP'",
+        },
+        limit_inputs: { kind: "bool", default: true },
+        round_output: { kind: "bool", default: true },
+      });
+      expect(Object.keys(UTCI_INFO.inputs)).toEqual([
+        "tdb",
+        "tr",
+        "v",
+        "rh",
+        "units",
+        "limit_inputs",
+        "round_output",
+      ]);
+    });
+
+    // BaseInputs' units field, written once (classes_input.py:95, :114-121).
+    test("units is the entry clo_tout's INFO holds", () => {
+      expect(UTCI_INFO.inputs.units).toBe(CLO_TOUT_INFO.inputs.units);
+    });
+
+    // The checks on quantities computed from the inputs, keyed by upstream's
+    // param_name (models/utci.py:138, :140).
+    test("derived holds tr - tdb and pa (kPa), in upstream's units", () => {
+      expect(UTCI_INFO.derived).toEqual({
+        "tr - tdb": { unit: "°C", applicability: { min: -30, max: 70 } },
+        "pa (kPa)": { unit: "kPa", applicability: { min: 0, max: 5 } },
+      });
+    });
+
+    // Upstream's stress_categories (models/utci.py:160-171), and _mapping's
+    // right=True.
+    test("the stress category bins are upstream's mapping, right-inclusive", () => {
+      expect(UTCI_INFO.outputs).toEqual({
+        utci: { unit: "°C" },
+        stress_category: {
+          unit: null,
+          classifier: {
+            edges: [-40, -27, -13, 0, 9, 26, 32, 38, 46, 1000],
+            labels: [
+              "extreme cold stress",
+              "very strong cold stress",
+              "strong cold stress",
+              "moderate cold stress",
+              "slight cold stress",
+              "no thermal stress",
+              "moderate heat stress",
+              "strong heat stress",
+              "very strong heat stress",
+              "extreme heat stress",
+            ],
+            right: true,
+          },
+        },
+      });
+    });
+
+    test("the bins and limits are reached through INFO only", () => {
+      expect(models).not.toHaveProperty("UTCI_STRESS_CATEGORY_BINS");
+      expect(models).not.toHaveProperty("UTCI_LIMITS");
+    });
+
+    test("is frozen deeply", () => {
+      const { inputs, outputs, derived } = UTCI_INFO;
+      expect(Object.isFrozen(UTCI_INFO)).toBe(true);
+      expect(Object.isFrozen(UTCI_INFO.standards)).toBe(true);
+      expect(Object.isFrozen(inputs.tdb.applicability)).toBe(true);
+      expect(Object.isFrozen(inputs.units.allowed)).toBe(true);
+      expect(Object.isFrozen(derived["pa (kPa)"].applicability)).toBe(true);
+      expect(Object.isFrozen(outputs.stress_category.classifier.edges)).toBe(
+        true,
+      );
+      expect(Object.isFrozen(outputs.stress_category.classifier.labels)).toBe(
+        true,
+      );
+    });
+  });
+
+  // deviation utci-2
+  describe("warnings rows", () => {
+    const { inputs, derived } = UTCI_INFO;
+
+    // At 30 % RH pa stays under 5 kPa at 50 °C.
     test.each([
-      ["tdb at its maximum", { tdb: tdb.max, tr: tdb.max, v: 1 }],
-      ["tdb at its minimum", { tdb: tdb.min, tr: tdb.min, v: 1 }],
-      ["v at its minimum", { tdb: 20, tr: 20, v: v.min }],
-      ["v at its maximum", { tdb: 20, tr: 20, v: v.max }],
-      ["tr - tdb at its maximum", { tdb: 20, tr: 20 + tr_minus_tdb.max, v: 1 }],
-      ["tr - tdb at its minimum", { tdb: 20, tr: 20 + tr_minus_tdb.min, v: 1 }],
-    ])("no row on the bound: %s", (_, inputs) => {
-      expect(utci({ ...inputs, rh: 30 }).warnings).toEqual([]);
+      ["tdb at its maximum", { tdb: 50, tr: 50, v: 1, rh: 30 }],
+      ["tdb at its minimum", { tdb: -50, tr: -50, v: 1, rh: 30 }],
+      ["v at its minimum", { tdb: 20, tr: 20, v: 0.5, rh: 30 }],
+      ["v at its maximum", { tdb: 20, tr: 20, v: 17, rh: 30 }],
+      ["tr - tdb at its maximum", { tdb: 20, tr: 90, v: 1, rh: 30 }],
+      ["tr - tdb at its minimum", { tdb: 20, tr: -10, v: 1, rh: 30 }],
+      ["rh at its minimum", { tdb: 20, tr: 20, v: 1, rh: 0 }],
+      ["rh at its maximum", { tdb: 20, tr: 20, v: 1, rh: 100 }],
+    ])("no row on the bound: %s", (_, call_inputs) => {
+      const result = utci(call_inputs);
+      expect(result.warnings).toEqual([]);
+      expect(Number.isFinite(result.utci)).toBe(true);
     });
 
     // One step outside each bound: one row, whose bound is the object
-    // UTCI_INFO references (`toBe`), and whose tr_minus_tdb value is tr - tdb.
-    const step = 0.01;
+    // UTCI_INFO references (`toBe`).
     test.each([
       {
         name: "tdb above its maximum",
-        inputs: { tdb: tdb.max + step, tr: tdb.max, v: 1 },
-        key: "tdb",
-        role: "input",
-        value: tdb.max + step,
-        bound: UTCI_INFO.inputs.tdb!.applicability,
+        call_inputs: { tdb: 50.01, tr: 50, v: 1, rh: 30 },
+        row: { key: "tdb", role: "input", value: 50.01, unit: "°C" },
+        bound: inputs.tdb.applicability,
       },
       {
         name: "tdb below its minimum",
-        inputs: { tdb: tdb.min - step, tr: tdb.min, v: 1 },
-        key: "tdb",
-        role: "input",
-        value: tdb.min - step,
-        bound: UTCI_INFO.inputs.tdb!.applicability,
-      },
-      {
-        name: "v below its minimum",
-        inputs: { tdb: 20, tr: 20, v: v.min - step },
-        key: "v",
-        role: "input",
-        value: v.min - step,
-        bound: UTCI_INFO.inputs.v!.applicability,
-      },
-      {
-        name: "v above its maximum",
-        inputs: { tdb: 20, tr: 20, v: v.max + step },
-        key: "v",
-        role: "input",
-        value: v.max + step,
-        bound: UTCI_INFO.inputs.v!.applicability,
+        call_inputs: { tdb: -50.01, tr: -50, v: 1, rh: 30 },
+        row: { key: "tdb", role: "input", value: -50.01, unit: "°C" },
+        bound: inputs.tdb.applicability,
       },
       {
         name: "tr - tdb above its maximum",
-        inputs: { tdb: 20, tr: 20 + tr_minus_tdb.max + step, v: 1 },
-        key: "tr_minus_tdb",
-        role: "derived",
-        value: 20 + tr_minus_tdb.max + step - 20,
-        bound: UTCI_INFO.derived!.tr_minus_tdb!.applicability,
+        call_inputs: { tdb: 20, tr: 90.5, v: 1, rh: 30 },
+        row: { key: "tr - tdb", role: "derived", value: 70.5, unit: "°C" },
+        bound: derived["tr - tdb"].applicability,
       },
       {
         name: "tr - tdb below its minimum",
-        inputs: { tdb: 20, tr: 20 + tr_minus_tdb.min - step, v: 1 },
-        key: "tr_minus_tdb",
-        role: "derived",
-        value: 20 + tr_minus_tdb.min - step - 20,
-        bound: UTCI_INFO.derived!.tr_minus_tdb!.applicability,
+        call_inputs: { tdb: 20, tr: -10.5, v: 1, rh: 30 },
+        row: { key: "tr - tdb", role: "derived", value: -30.5, unit: "°C" },
+        bound: derived["tr - tdb"].applicability,
       },
-    ])(
-      "one row one step outside: $name",
-      ({ inputs, key, role, value, bound }) => {
-        const on = utci({ ...inputs, rh: 30 });
-        expect(on.warnings).toEqual([{ key, role, value, bound }]);
-        expect(on.warnings[0]!.bound).toBe(bound);
-        expect(on.utci).toBeNaN();
-        // The same rows with the gate off, beside a finite utci.
-        const off = utci({ ...inputs, rh: 30, limit_inputs: false });
-        expect(off.warnings).toEqual(on.warnings);
-        expect(Number.isFinite(off.utci)).toBe(true);
+      {
+        name: "v below its minimum",
+        call_inputs: { tdb: 20, tr: 20, v: 0.49, rh: 30 },
+        row: { key: "v", role: "input", value: 0.49, unit: "m/s" },
+        bound: inputs.v.applicability,
       },
-    );
+      {
+        name: "v above its maximum",
+        call_inputs: { tdb: 20, tr: 20, v: 17.01, rh: 30 },
+        row: { key: "v", role: "input", value: 17.01, unit: "m/s" },
+        bound: inputs.v.applicability,
+      },
+      {
+        name: "pa above its maximum",
+        call_inputs: { tdb: 40, tr: 40, v: 1, rh: 70 },
+        row: {
+          key: "pa (kPa)",
+          role: "derived",
+          value: 5.169709351430658,
+          unit: "kPa",
+        },
+        bound: derived["pa (kPa)"].applicability,
+      },
+      {
+        name: "rh above its maximum",
+        call_inputs: { tdb: 20, tr: 20, v: 1, rh: 100.1 },
+        row: { key: "rh", role: "input", value: 100.1, unit: "%" },
+        bound: inputs.rh.applicability,
+      },
+    ])("one row one step outside: $name", ({ call_inputs, row, bound }) => {
+      const on = utci(call_inputs);
+      expect(on.warnings).toEqual([{ kind: "range", ...row, bound }]);
+      const [first] = on.warnings;
+      expect(first?.kind === "range" && first.bound).toBe(bound);
+      expect(on.utci).toBeNaN();
+      expect(on.stress_category).toBeNaN();
+      // deviation utci-3
+      const off = utci({ ...call_inputs, limit_inputs: false });
+      expect(off.warnings).toEqual(on.warnings);
+      expect(Number.isFinite(off.utci)).toBe(true);
+    });
 
-    test("rows come in upstream's order: tdb, tr - tdb, v, pa, rh", () => {
+    // Measured on 4.7.0: utci(tdb=20, tr=20, v=1, rh=-0.1) warns
+    // 'pa (kPa)' at -0.0023392623958624946, then 'rh'.
+    test("rh below its minimum makes pa negative too: two rows", () => {
+      const { warnings } = utci({ tdb: 20, tr: 20, v: 1, rh: -0.1 });
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          key: "pa (kPa)",
+          value: -0.0023392623958624946,
+        }),
+        {
+          kind: "range",
+          key: "rh",
+          role: "input",
+          value: -0.1,
+          unit: "%",
+          bound: UTCI_INFO.inputs.rh.applicability,
+        },
+      ]);
+    });
+
+    // Measured on 4.7.0: utci(tdb=60, tr=140, v=20, rh=100) warns 'tdb',
+    // 'tr - tdb', 'v' and 'pa (kPa)', in that order.
+    test("rows come in upstream's order: tdb, tr - tdb, v, pa (kPa), rh", () => {
       const { warnings } = utci({ tdb: 60, tr: 140, v: 20, rh: 101 });
-      expect(warnings.map((w) => w.key)).toEqual([
+      expect(warnings.map((row) => row.kind === "range" && row.key)).toEqual([
         "tdb",
-        "tr_minus_tdb",
+        "tr - tdb",
         "v",
         "pa (kPa)",
         "rh",
       ]);
     });
 
-    // Row values are SI, as ApplicabilityWarning says: 68 °F is 20 °C and
-    // 212 °F is 100 °C, so tr - tdb is 80 K, not 144 °F.
-    test("under IP the row values are SI", () => {
+    // Upstream checks the converted values: 68 °F is 20 °C and 212 °F is
+    // 100 °C, so tr - tdb is 80 °C, not 144 °F.
+    test("under IP the rows hold the SI values upstream compares", () => {
       const { warnings } = utci({
         tdb: 68,
         tr: 212,
@@ -547,31 +716,42 @@ describe("utci (JS-only)", () => {
         rh: 50,
         units: "IP",
       });
-      expect(warnings.map((w) => w.key)).toEqual(["tr_minus_tdb"]);
-      expect(warnings[0]!.value).toBeCloseTo(80, 6);
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          key: "tr - tdb",
+          value: 80,
+          unit: "°C",
+        }),
+      ]);
     });
 
-    test("a NaN under the gate never comes without a row", () => {
+    // Upstream calls warnings.warn only in _valid_range, so no notice row.
+    test("a NaN under the gate never comes without a row, and no notice", () => {
       for (const t of [-60, -50, 0, 30, 50, 55])
         for (const dt of [-40, -30, 0, 70, 80])
-          for (const speed of [0.2, 0.5, 5, 17, 20]) {
-            const { utci: value, warnings } = utci({
-              tdb: t,
-              tr: t + dt,
-              v: speed,
-              rh: 50,
-            });
-            expect({ t, dt, speed, gated: warnings.length > 0 }).toEqual({
-              t,
-              dt,
-              speed,
-              gated: Number.isNaN(value),
-            });
-          }
+          for (const speed of [0.2, 0.5, 5, 17, 20])
+            for (const rh of [-1, 0, 50, 100, 101]) {
+              const { utci: value, warnings } = utci({
+                tdb: t,
+                tr: t + dt,
+                v: speed,
+                rh,
+              });
+              expect({ t, dt, speed, rh, gated: warnings.length > 0 }).toEqual({
+                t,
+                dt,
+                speed,
+                rh,
+                gated: Number.isNaN(value),
+              });
+              expect(warnings.every((row) => row.kind === "range")).toBe(true);
+            }
     });
   });
 
   describe("stress-category bins (Issue #147)", () => {
+    const bins = UTCI_INFO.outputs.stress_category.classifier;
+
     // Boundary values belong to the lower category (right-inclusive convention).
     test.each([
       // exact boundaries
@@ -602,10 +782,8 @@ describe("utci (JS-only)", () => {
       [47, "extreme heat stress"],
       [100, "extreme heat stress"],
       [0.001, "slight cold stress"],
-    ])("UTCI %p should map to %p", (utciValue, expectedCategory) => {
-      expect(classifyFromBins(utciValue, UTCI_STRESS_CATEGORY_BINS)).toBe(
-        expectedCategory,
-      );
+    ])("UTCI %p should map to %p", (utci_value, expected_category) => {
+      expect(classifyFromBins(utci_value, bins)).toBe(expected_category);
     });
 
     // just above each finite boundary bumps to the next category
@@ -619,35 +797,27 @@ describe("utci (JS-only)", () => {
       [32.0001, "strong heat stress"],
       [38.0001, "very strong heat stress"],
       [46.0001, "extreme heat stress"],
-    ])("UTCI %p should map to %p", (utciValue, expectedCategory) => {
-      expect(classifyFromBins(utciValue, UTCI_STRESS_CATEGORY_BINS)).toBe(
-        expectedCategory,
-      );
+    ])("UTCI %p should map to %p", (utci_value, expected_category) => {
+      expect(classifyFromBins(utci_value, bins)).toBe(expected_category);
     });
 
     // Upstream's last edge is 1000, so np.digitize leaves anything above it,
     // and NaN, unlabelled.
     test.each([[NaN], [Infinity], [1000.1]])(
       "UTCI %p should map to NaN",
-      (utciValue) => {
-        expect(
-          classifyFromBins(utciValue, UTCI_STRESS_CATEGORY_BINS),
-        ).toBeNaN();
+      (utci_value) => {
+        expect(classifyFromBins(utci_value, bins)).toBeNaN();
       },
     );
 
     // np.digitize puts -inf in the first bin; the removed `mapping` returned
     // NaN here.
     test("UTCI -Infinity maps to the first category, as np.digitize does", () => {
-      expect(classifyFromBins(-Infinity, UTCI_STRESS_CATEGORY_BINS)).toBe(
-        "extreme cold stress",
-      );
+      expect(classifyFromBins(-Infinity, bins)).toBe("extreme cold stress");
     });
   });
 
-  describe("exports", () => {
-    test("utci is exported from package root (src/index.ts)", () => {
-      expect(utci_from_root).toBe(utci);
-    });
+  test("is exported from the package root as from its subpath", () => {
+    expect(utci_from_root).toBe(utci);
   });
 });

@@ -454,9 +454,7 @@ const MODELS: readonly ParityModel[] = [
     }),
     // Upstream rounds utci with np.round (models/utci.py:173-175).
     rounded: ({ round_output }) => (round_output === true ? ["utci"] : []),
-    // The library returns its older rows; warnings are compared once the
-    // model returns ModelWarning rows (ADR 0024).
-    warnings: false,
+    warnings: true,
   },
 ];
 

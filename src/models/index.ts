@@ -26,7 +26,7 @@ import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
-import { utci, UTCI_INFO, UTCI_STRESS_CATEGORY_BINS } from "./utci.ts";
+import { utci, UTCI_INFO } from "./utci.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import {
@@ -71,7 +71,7 @@ export type {
 } from "./pmv_ppd_ashrae.ts";
 export type { PmvPpdIsoParams, PmvPpdIsoResult } from "./pmv_ppd_iso.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
-export type { UtciParams, UtciResult } from "./utci.ts";
+export type { UTCI, UTCIInputs } from "./utci.ts";
 
 /**
  * @public
@@ -114,7 +114,6 @@ export {
   two_nodes,
   utci,
   UTCI_INFO,
-  UTCI_STRESS_CATEGORY_BINS,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
   wbgt,
@@ -158,7 +157,6 @@ export default {
   two_nodes,
   utci,
   UTCI_INFO,
-  UTCI_STRESS_CATEGORY_BINS,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
   wbgt,

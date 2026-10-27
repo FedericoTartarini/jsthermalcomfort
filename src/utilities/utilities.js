@@ -2,6 +2,7 @@ import { p_sat } from "../psychrometrics/p_sat.js";
 import { t_o } from "../psychrometrics/t_o.js";
 import { round } from "../_internal/round.ts";
 import { Standard } from "./options.ts";
+import { units_converter } from "./units_converter.ts";
 
 /**
  * Converts degrees to radians
@@ -529,110 +530,6 @@ function _v_relative_single(v, met) {
   return round(v + 0.3 * (met - 1), 3);
 }
 
-/**
- * Converts IP values to SI units
- *
- * @memberof utilities
- * @docname Units converter
- * @public
- *
- * @template {Object.<string, number>} T
- * @param {T} kwargs - [t, v] units to convert
- * @param {"IP" | "SI"} [from_units="IP"] - specify system to convert from
- * @returns {T} converted values in SI units
- *
- */
-export function units_converter(kwargs, from_units = "IP") {
-  let result = { ...kwargs };
-  if (from_units === "IP") {
-    for (const [key, value] of Object.entries(result)) {
-      if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = _temp_ip_to_si(value);
-      else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = _vel_ip_to_si(value);
-      else if (key === "area") result[key] = _area_ip_to_si(value);
-      else if (key === "pressure") result[key] = _pressure_ip_to_si(value);
-    }
-  } else if (from_units === "SI") {
-    for (const [key, value] of Object.entries(result)) {
-      if (key.includes("tmp") || key === "tr" || key === "tdb")
-        result[key] = _temp_si_to_ip(value);
-      else if (key === "v" || key === "vr" || key === "vel")
-        result[key] = _vel_si_to_ip(value);
-      else if (key === "area") result[key] = _area_si_to_ip(value);
-      else if (key === "pressure") result[key] = _pressure_si_to_ip(value);
-    }
-  } else {
-    throw new Error(`Unknown system ${from_units}`);
-  }
-
-  return result;
-}
-
-/**
- * @param {number} pressure
- * @returns {number}
- */
-function _pressure_ip_to_si(pressure) {
-  return pressure * 101325;
-}
-
-/**
- * @param {number} pressure
- * @returns {number}
- */
-function _pressure_si_to_ip(pressure) {
-  return pressure / 101325;
-}
-
-/**
- * @param {number} area
- * @returns {number}
- */
-function _area_ip_to_si(area) {
-  return area / 10.764;
-}
-
-/**
- * @param {number} area
- * @returns {number}
- */
-function _area_si_to_ip(area) {
-  return area * 10.764;
-}
-
-/**
- * @param {number} vel
- * @returns {number}
- */
-function _vel_ip_to_si(vel) {
-  return vel / 3.281;
-}
-
-/**
- * @param {number} vel
- * @returns {number}
- */
-function _vel_si_to_ip(vel) {
-  return vel * 3.281;
-}
-
-/**
- * @param {number} temp
- * @returns {number}
- */
-function _temp_ip_to_si(temp) {
-  return ((temp - 32) * 5) / 9;
-}
-
-/**
- * @param {number} temp
- * @returns {number}
- */
-function _temp_si_to_ip(temp) {
-  return (temp * 9) / 5 + 32;
-}
-
 // FIXME: find how to write math notation inside JSDocs
 
 /**
@@ -664,7 +561,7 @@ export function running_mean_outdoor_temperature(
   units = "SI",
 ) {
   if (units === "IP")
-    temp_array = temp_array.map((tdb) => units_converter({ tdb }).tdb);
+    temp_array = temp_array.map((tdb) => units_converter("IP", { tdb }).tdb);
 
   let coeff = temp_array.map((_tdb, index) => Math.pow(alpha, index));
   let summ_t_rm = temp_array.reduce(
@@ -672,7 +569,7 @@ export function running_mean_outdoor_temperature(
   );
   let summ_coeff = coeff.reduce((acum, curr) => acum + curr);
   let t_rm = summ_t_rm / summ_coeff;
-  if (units === "IP") t_rm = units_converter({ tmp: t_rm }, "SI").tmp;
+  if (units === "IP") t_rm = units_converter("SI", { tmp: t_rm }).tmp;
 
   return Math.round(t_rm * 10 + Number.EPSILON) / 10;
 }

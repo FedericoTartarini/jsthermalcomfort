@@ -1,9 +1,6 @@
 import { t_o } from "../psychrometrics/t_o.js";
-import {
-  units_converter,
-  validateInputs,
-  ASHRAE_55_LIMITS,
-} from "../utilities/utilities.js";
+import { validateInputs, ASHRAE_55_LIMITS } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
@@ -224,7 +221,7 @@ export function adaptive_ashrae(
       tr,
       tmp_running_mean: t_running_mean,
       v,
-    } = units_converter({
+    } = units_converter("IP", {
       tdb,
       tr,
       tmp_running_mean: t_running_mean,
@@ -273,16 +270,13 @@ export function adaptive_ashrae(
       tmp_cmf_80_up,
       tmp_cmf_90_low,
       tmp_cmf_90_up,
-    } = units_converter(
-      {
-        tmp_cmf: t_cmf,
-        tmp_cmf_80_low,
-        tmp_cmf_80_up,
-        tmp_cmf_90_low,
-        tmp_cmf_90_up,
-      },
-      "SI",
-    ));
+    } = units_converter("SI", {
+      tmp_cmf: t_cmf,
+      tmp_cmf_80_low,
+      tmp_cmf_80_up,
+      tmp_cmf_90_low,
+      tmp_cmf_90_up,
+    }));
   }
 
   return {

@@ -34,6 +34,34 @@ export function missingArguments(
 }
 
 /**
+ * Python's `TypeError` for surplus positional arguments, as for `f(1, 2, 3)`
+ * with `def f(a, b=1)`: "f() takes from 1 to 2 positional arguments but 3
+ * were given".
+ */
+export function surplusArguments(
+  name: string,
+  required: number,
+  max: number,
+  given: number,
+): TypeError {
+  const takes =
+    required === max
+      ? `${max} positional ${max === 1 ? "argument" : "arguments"}`
+      : `from ${required} to ${max} positional arguments`;
+  const were = given === 1 ? "was" : "were";
+  return new TypeError(`${name}() takes ${takes} but ${given} ${were} given`);
+}
+
+/**
+ * `BaseInputs`' error for `units` other than `'SI'` or `'IP'`
+ * (`classes_input.py:120` at v4.6.2), a `TypeError` for a value that is not a
+ * string and a `RangeError` for one that is.
+ */
+export function notUnits(error: typeof TypeError | typeof RangeError): Error {
+  return new error("Units must be either 'SI' or 'IP'");
+}
+
+/**
  * `BaseInputs`' `TypeError` for a numeric field given a value of another type:
  * `validate_type` (`_internal/validation.py:229` at v4.6.2) with
  * `numeric_field`'s types (`classes_input.py:16, :20`).
@@ -62,6 +90,14 @@ export function notFiniteNumber(
   error: typeof TypeError | typeof RangeError,
 ): Error {
   return new error(`${key} must be a finite number.`);
+}
+
+/**
+ * The library's message for a helper's argument of the wrong type, such as a
+ * string for a number, where Python raises with its interpreter's text.
+ */
+export function notOfType(key: string, expected: string): TypeError {
+  return new TypeError(`${key} must be ${expected}.`);
 }
 
 /** The library's message for a model called with no inputs object. */

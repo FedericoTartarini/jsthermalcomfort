@@ -1,4 +1,5 @@
-import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { round } from "../_internal/round.ts";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
@@ -191,7 +192,7 @@ export function utci(params: UtciParams): UtciResult {
 
   const ip = units.toUpperCase() === "IP";
   if (ip) {
-    ({ tdb, tr, v } = units_converter({ tdb, tr, v }));
+    ({ tdb, tr, v } = units_converter("IP", { tdb, tr, v }));
   }
 
   const eh_pa = exponential(tdb) * (rh / 100.0);
@@ -221,7 +222,7 @@ export function utci(params: UtciParams): UtciResult {
   let utci_si = utci_approx;
 
   if (ip) {
-    utci_approx = units_converter({ tmp: utci_approx }, "SI").tmp;
+    utci_approx = units_converter("SI", { tmp: utci_approx }).tmp;
   }
 
   if (round_output) {

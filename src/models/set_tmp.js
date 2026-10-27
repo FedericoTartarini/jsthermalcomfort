@@ -1,9 +1,9 @@
 import { two_nodes } from "../models/two_nodes.js";
 import {
   check_standard_compliance,
-  units_converter,
   validateInputs,
 } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 
@@ -121,16 +121,13 @@ export function set_tmp(
   if (p_atm === undefined) p_atm = units === "SI" ? 101325 : 1;
 
   if (units === "IP") {
-    const unit_convert = units_converter(
-      {
-        tdb: tdb,
-        tr: tr,
-        v: v,
-        area: body_surface_area,
-        pressure: p_atm,
-      },
-      "IP",
-    );
+    const unit_convert = units_converter("IP", {
+      tdb: tdb,
+      tr: tr,
+      v: v,
+      area: body_surface_area,
+      pressure: p_atm,
+    });
     tdb = unit_convert.tdb;
     tr = unit_convert.tr;
     v = unit_convert.v;
@@ -154,7 +151,7 @@ export function set_tmp(
   ).set;
 
   if (units === "IP") {
-    ({ tmp: set_tmp } = units_converter({ tmp: set_tmp }, "SI"));
+    ({ tmp: set_tmp } = units_converter("SI", { tmp: set_tmp }));
   }
 
   if (limit_inputs) {

@@ -1,4 +1,5 @@
-import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { round } from "../_internal/round.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
 import { _check_params_object } from "../_internal/validation.ts";
@@ -96,7 +97,7 @@ export function clo_tout(params: CloToutParams): CloToutResult {
   const { tout, units = "SI" } = params;
   validateInputs({ tout, units: units.toUpperCase() }, CLO_TOUT_SCHEMA);
   const ip = units.toUpperCase() === "IP";
-  const t = ip ? units_converter({ tmp: tout }).tmp : tout;
+  const t = ip ? units_converter("IP", { tmp: tout }).tmp : tout;
 
   let clo = t < 26 ? 10 ** (-0.1635 - 0.0066 * t) : 0.46;
   clo = t < 5 ? 0.818 - 0.0364 * t : clo;

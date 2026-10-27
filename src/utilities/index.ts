@@ -1,7 +1,6 @@
 import {
   body_surface_area,
   v_relative,
-  units_converter,
   running_mean_outdoor_temperature,
   f_svv,
   met_typical_tasks,
@@ -12,6 +11,7 @@ import {
   is_iso_7730,
   LimitSet,
 } from "./utilities.js";
+import { units_converter } from "./units_converter.ts";
 import { Standard, Units } from "./options.ts";
 import {
   clo_area_factor,

@@ -114,7 +114,7 @@ export interface OutputInfo {
  * a short display name.
  *
  * `inputs` describes the model's inputs: every keyword argument, in
- * upstream's order, with its kind (`numeric` or `bool`), unit, applicability
+ * upstream's order, with its kind (`numeric`, `bool` or `choice`), unit, applicability
  * and default. The model validates its inputs against it, and its inputs type
  * is derived from it. `outputs` are the returned values. `derived` covers quantities
  * computed from the inputs rather than supplied by the caller, keyed by

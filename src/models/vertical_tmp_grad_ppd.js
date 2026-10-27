@@ -1,9 +1,9 @@
 import { pmv } from "../models/pmv.js";
 import {
   check_standard_compliance,
-  units_converter,
   validateInputs,
 } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 
@@ -82,7 +82,7 @@ export function vertical_tmp_grad_ppd(
       tdb: tdb,
       tr: tr,
       vr: vr,
-    } = units_converter({ tdb: tdb, tr: tr, vr: vr }, "IP"));
+    } = units_converter("IP", { tdb: tdb, tr: tr, vr: vr }));
 
     vertical_tmp_grad = (vertical_tmp_grad / 1.8) * 3.28;
   }

@@ -1,5 +1,6 @@
 import { t_o } from "../psychrometrics/t_o.js";
-import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { adaptive_cooling_effect } from "./adaptive_cooling_effect.ts";
@@ -108,7 +109,12 @@ export function adaptive_en(
       tr,
       tmp_running_mean: t_running_mean,
       v,
-    } = units_converter({ tdb, tr, tmp_running_mean: t_running_mean, v }));
+    } = units_converter("IP", {
+      tdb,
+      tr,
+      tmp_running_mean: t_running_mean,
+      v,
+    }));
   }
 
   const to = t_o(tdb, tr, v, standard);
@@ -139,27 +145,21 @@ export function adaptive_en(
       tmp_cmf_cat_i_up: t_cmf_i_upper,
       tmp_cmf_cat_ii_up: t_cmf_ii_upper,
       tmp_cmf_cat_iii_up: t_cmf_iii_upper,
-    } = units_converter(
-      {
-        tmp_cmf: t_cmf,
-        tmp_cmf_cat_i_up: t_cmf_i_upper,
-        tmp_cmf_cat_ii_up: t_cmf_ii_upper,
-        tmp_cmf_cat_iii_up: t_cmf_iii_upper,
-      },
-      "SI",
-    ));
+    } = units_converter("SI", {
+      tmp_cmf: t_cmf,
+      tmp_cmf_cat_i_up: t_cmf_i_upper,
+      tmp_cmf_cat_ii_up: t_cmf_ii_upper,
+      tmp_cmf_cat_iii_up: t_cmf_iii_upper,
+    }));
     ({
       tmp_cmf_cat_i_low: t_cmf_i_lower,
       tmp_cmf_cat_ii_low: t_cmf_ii_lower,
       tmp_cmf_cat_iii_low: t_cmf_iii_lower,
-    } = units_converter(
-      {
-        tmp_cmf_cat_i_low: t_cmf_i_lower,
-        tmp_cmf_cat_ii_low: t_cmf_ii_lower,
-        tmp_cmf_cat_iii_low: t_cmf_iii_lower,
-      },
-      "SI",
-    ));
+    } = units_converter("SI", {
+      tmp_cmf_cat_i_low: t_cmf_i_lower,
+      tmp_cmf_cat_ii_low: t_cmf_ii_lower,
+      tmp_cmf_cat_iii_low: t_cmf_iii_lower,
+    }));
   }
 
   if (round_output) {

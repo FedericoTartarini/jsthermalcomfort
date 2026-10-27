@@ -1,5 +1,5 @@
+import { units_converter } from "../utilities/units_converter.ts";
 import {
-  units_converter,
   check_standard_compliance,
   validateInputs,
   LimitSet,
@@ -169,16 +169,13 @@ export function use_fans_heatwaves(
   if (p_atm === undefined) p_atm = units === "SI" ? 101325 : 1;
 
   if (units === "IP") {
-    const unit_convert = units_converter(
-      {
-        tdb: tdb,
-        tr: tr,
-        v: v,
-        area: body_surface_area,
-        pressure: p_atm,
-      },
-      "IP",
-    );
+    const unit_convert = units_converter("IP", {
+      tdb: tdb,
+      tr: tr,
+      v: v,
+      area: body_surface_area,
+      pressure: p_atm,
+    });
     tdb = unit_convert.tdb;
     tr = unit_convert.tr;
     v = unit_convert.v;

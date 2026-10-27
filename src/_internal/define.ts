@@ -4,6 +4,7 @@ import {
   notFiniteNumber,
   notNumericType,
   notInputsObject,
+  notUnits,
   unexpectedKeyword,
 } from "./errors.ts";
 import type { Bound, UnitSymbol } from "./modelDocs.ts";
@@ -29,16 +30,31 @@ export interface BoolField {
 }
 
 /**
+ * A string option, upstream's `choice_field`, which takes one of `allowed` in
+ * any case. The one so far is `units`, which `BaseInputs` checks by its name
+ * with a message of its own (`classes_input.py:114-120`).
+ */
+export interface ChoiceField {
+  readonly kind: "choice";
+  readonly allowed: readonly string[];
+  readonly default?: string;
+}
+
+/**
  * A model's `INFO.inputs`: upstream's keyword arguments, in its order, each
  * with its kind, unit, applicability and default.
  */
-export type InputsInfo = Readonly<Record<string, NumericField | BoolField>>;
+export type InputsInfo = Readonly<
+  Record<string, NumericField | BoolField | ChoiceField>
+>;
 
 type ValueOf<E> = E extends NumericField
   ? number
   : E extends BoolField
     ? boolean
-    : never;
+    : E extends ChoiceField
+      ? E["allowed"][number]
+      : never;
 type Values<I> = { -readonly [K in keyof I]: ValueOf<I[K]> };
 type OptionalKey<I> = {
   [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
@@ -73,6 +89,19 @@ function parseNumeric(key: string, value: unknown): number {
 }
 
 /**
+ * Checks one string option, as given or defaulted, and returns it as given:
+ * upstream's model reads its own argument, not the inputs class's upper-cased
+ * copy.
+ */
+function parseChoice(value: unknown, allowed: readonly string[]): string {
+  // Upstream compares `str(value).upper()`, so it raises the same error for
+  // any value that is not a string (deviation _shared-24).
+  if (typeof value !== "string") throw notUnits(TypeError);
+  if (!allowed.includes(value.toUpperCase())) throw notUnits(RangeError);
+  return value;
+}
+
+/**
  * Validates `args`, the inputs a model was called with, against the model's
  * `INFO.inputs`; returns the values with the defaults applied.
  *
@@ -86,7 +115,10 @@ function parseNumeric(key: string, value: unknown): number {
  *   type, a `TypeError` for a boolean, `null` or an array, and a `RangeError`
  *   for NaN or ±Infinity;
  * - a switch must be a boolean, with `BaseInputs`' `TypeError`, whether or not
- *   upstream checks it (deviation _shared-8).
+ *   upstream checks it (deviation _shared-8);
+ * - a string option must be one of its `allowed` values, in any case, with
+ *   `BaseInputs`' message: a `TypeError` for a value that is not a string,
+ *   a `RangeError` for one that is.
  *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.
@@ -108,7 +140,7 @@ export function parseInputs<const I extends InputsInfo>(
 
   const read = (key: string) =>
     Object.hasOwn(given, key) ? given[key] : undefined;
-  const values: Record<string, number | boolean> = {};
+  const values: Record<string, number | boolean | string> = {};
   for (const [key, entry] of Object.entries(inputs)) {
     let value = read(key);
     if (value === undefined) {
@@ -125,6 +157,8 @@ export function parseInputs<const I extends InputsInfo>(
       value = entry.default;
     }
     if (entry.kind === "numeric") values[key] = parseNumeric(key, value);
+    else if (entry.kind === "choice")
+      values[key] = parseChoice(value, entry.allowed);
     else if (typeof value === "boolean") values[key] = value;
     else throw notBoolean(key);
   }

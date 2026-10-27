@@ -40,6 +40,7 @@ import { classifyFromBins } from "../_internal/classifierBins.ts";
 
 export type {
   BoolField,
+  ChoiceField,
   InputsInfo,
   NumericField,
 } from "../_internal/define.ts";

@@ -1,4 +1,5 @@
-import { units_converter, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { round } from "../_internal/round.ts";
 import { set_tmp } from "./set_tmp.js";
 import { _check_params_object } from "../_internal/validation.ts";
@@ -119,7 +120,7 @@ export function cooling_effect(
   );
 
   if (units.toUpperCase() === "IP") {
-    const result = units_converter({ tdb, tr, vr }, "IP");
+    const result = units_converter("IP", { tdb, tr, vr });
     tdb = result.tdb;
     tr = result.tr;
     vr = result.vr;

@@ -1,8 +1,5 @@
-import {
-  units_converter,
-  validateInputs,
-  ISO_7730_LIMITS,
-} from "../utilities/utilities.js";
+import { validateInputs, ISO_7730_LIMITS } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { cooling_effect } from "./cooling_effect.ts";
@@ -405,7 +402,7 @@ export function pmv_ppd(params: PmvPpdParams): Pmv_ppdReturns {
 
   if (units.toUpperCase() === "IP") {
     // Conversion from IP to SI units
-    ({ tdb, tr, vr } = units_converter({ tdb, tr, vr }, "IP"));
+    ({ tdb, tr, vr } = units_converter("IP", { tdb, tr, vr }));
   }
 
   // Computed from the SI inputs before the ASHRAE cooling effect shifts tdb.

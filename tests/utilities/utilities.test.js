@@ -2,7 +2,6 @@ import { describe, expect, it, test } from "vitest";
 import {
   body_surface_area,
   v_relative,
-  units_converter,
   running_mean_outdoor_temperature,
   f_svv,
   valid_range,
@@ -15,7 +14,7 @@ import {
   check_standard_compliance,
 } from "../../src/utilities/utilities";
 import { round } from "../../src/_internal/round.ts";
-import { deep_close_to_array, deep_close_to_obj } from "../test_utilities";
+import { deep_close_to_array } from "../test_utilities";
 import { LimitSet } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
 
@@ -113,85 +112,6 @@ describe("v_relative", () => {
     "rounds as numpy does: $expected when v is $v and met is $met",
     ({ v, met, expected }) => {
       expect(v_relative(v, met)).toBe(expected);
-    },
-  );
-});
-
-describe("units_converter", () => {
-  it.each([
-    {
-      args: {
-        tdb: 77,
-        tr: 77,
-        v: 3.2,
-      },
-      from_units: "IP",
-      expected: {
-        tdb: 25.0,
-        tr: 25.0,
-        v: 0.975312,
-      },
-    },
-    {
-      args: {
-        pressure: 1,
-        area: 1 / 0.09,
-      },
-      from_units: "IP",
-      expected: {
-        pressure: 101325,
-        area: 1.03224,
-      },
-    },
-    {
-      args: {
-        tdb: 77,
-        v: 10,
-      },
-      from_units: "IP",
-      expected: {
-        tdb: 25.0,
-        v: 3.047,
-      },
-    },
-    {
-      args: {
-        tdb: 20,
-        v: 2,
-      },
-      from_units: "SI",
-      expected: {
-        tdb: 68,
-        v: 6.562,
-      },
-    },
-    {
-      args: {
-        area: 100,
-        pressure: 14.7,
-      },
-      from_units: "IP",
-      expected: {
-        area: 9.29,
-        pressure: 1489477.5,
-      },
-    },
-    {
-      args: {
-        area: 50,
-        pressure: 101325,
-      },
-      from_units: "SI",
-      expected: {
-        area: 538.199,
-        pressure: 1,
-      },
-    },
-  ])(
-    "returns $expected when args are $args and from_units is $from_units",
-    ({ args, from_units, expected }) => {
-      const result = units_converter(args, from_units);
-      deep_close_to_obj(result, expected, DEFAULT_TOLERANCE);
     },
   );
 });

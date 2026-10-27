@@ -1,8 +1,8 @@
 import {
   check_standard_compliance,
-  units_converter,
   validateInputs,
 } from "../utilities/utilities.js";
+import { units_converter } from "../utilities/units_converter.ts";
 import { Standard } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { pmv } from "./pmv.js";
@@ -82,7 +82,7 @@ export function ankle_draft(tdb, tr, vr, rh, met, clo, v_ankle, units = "SI") {
       v: vr,
       vel: v_ankle,
     };
-    ret = units_converter(kwargs);
+    ret = units_converter("IP", kwargs);
     tdb = ret["tdb"];
     tr = ret["tr"];
     vr = ret["v"];

@@ -50,6 +50,8 @@ const results = pmv_ppd_iso({
 console.log(`PMV: ${results.pmv}, PPD: ${results.ppd}%`);
 ```
 
+A helper takes positional arguments, and like every JavaScript function it ignores surplus ones. To pass one as a callback, wrap it: `hrs.map((hr) => hr_to_rh(hr, tdb))`, since `hrs.map(hr_to_rh)` would pass each element's index as `tdb`.
+
 ## Support jsthermalcomfort
 
 You can support the development of `jsthermalcomfort` by:

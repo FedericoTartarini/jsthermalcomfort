@@ -11,10 +11,11 @@ import type { Bound } from "./modelDocs.ts";
 // The input definition (ADR 0022): each model declares its inputs once, as
 // its `*_INFO.inputs`, and its params type and its validation are derived from
 // it. It stands in for upstream's input dataclass (`classes_input.py`) and its
-// checks (ADR 0019, whitelist item 2). The kinds take the names of upstream's
-// field helpers there.
+// checks (ADR 0019, whitelist item 2). The kinds take upstream's names there:
+// the `numeric_field` and `choice_field` helpers (`classes_input.py:19, :23`)
+// and the `is_bool` metadata key (`classes_input.py:66, :125`).
 
-/** A number, upstream's `numeric_field`: a finite number in the library. */
+/** A number, upstream's `numeric_field`, which the parse requires finite. */
 export interface NumericField {
   readonly kind: "numeric";
   readonly unit: string | null;
@@ -22,7 +23,7 @@ export interface NumericField {
   readonly default?: number;
 }
 
-/** A switch, upstream's `is_bool`, such as `round_output` or `limit_inputs`. */
+/** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
 export interface BoolField {
   readonly kind: "bool";
   readonly default: boolean;

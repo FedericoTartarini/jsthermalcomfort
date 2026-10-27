@@ -124,7 +124,8 @@ describe("_valid_range (JS-only)", () => {
 describe("_mapping (JS-only)", () => {
   // The example in _mapping's TSDoc. Upstream's docstring prints
   // ['low', 'medium', 'high'] (_internal/validation.py:206-207); pythermalcomfort
-  // 4.6.2 returns ['medium', 'medium', 'high'] in the parity image.
+  // 4.6.2 with numpy 2.5.4 returns ['medium', 'medium', 'high'] in the parity
+  // image (scripts/parity/Dockerfile, linux/amd64).
   test("the TSDoc example gives what upstream returns", () => {
     const bins = {
       edges: [15, 25, 35],

@@ -11,27 +11,13 @@ import type {
   LegacyModelInfo,
 } from "../_internal/modelDocs.ts";
 
-// avoid reallocating these arrays accross function calls
-const _ALT_RANGE = [0, 15, 30, 45, 60, 75, 90];
-const _AZ_RANGE = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180];
-
-// avoid reallocating these table across function calls
-const _FP_TABLE_SITTING = [
-  [0.29, 0.324, 0.305, 0.303, 0.262, 0.224, 0.177],
-  [0.292, 0.328, 0.294, 0.288, 0.268, 0.227, 0.177],
-  [0.288, 0.332, 0.298, 0.29, 0.264, 0.222, 0.177],
-  [0.274, 0.326, 0.294, 0.289, 0.252, 0.214, 0.177],
-  [0.254, 0.308, 0.28, 0.276, 0.241, 0.202, 0.177],
-  [0.23, 0.282, 0.262, 0.26, 0.233, 0.193, 0.177],
-  [0.216, 0.26, 0.248, 0.244, 0.22, 0.186, 0.177],
-  [0.234, 0.258, 0.236, 0.227, 0.208, 0.18, 0.177],
-  [0.262, 0.26, 0.224, 0.208, 0.196, 0.176, 0.177],
-  [0.28, 0.26, 0.21, 0.192, 0.184, 0.17, 0.177],
-  [0.298, 0.256, 0.194, 0.174, 0.168, 0.168, 0.177],
-  [0.306, 0.25, 0.18, 0.156, 0.156, 0.166, 0.177],
-  [0.3, 0.24, 0.168, 0.152, 0.152, 0.164, 0.177],
+const _ALT_RANGE = [0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0];
+const _AZ_RANGE = [
+  0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0, 120.0, 135.0, 150.0, 165.0,
+  180.0,
 ];
 
+// fp is the projected area factor, standing/supine
 const _FP_TABLE_STANDING = [
   [0.35, 0.35, 0.314, 0.258, 0.206, 0.144, 0.082],
   [0.342, 0.342, 0.31, 0.252, 0.2, 0.14, 0.082],
@@ -46,6 +32,23 @@ const _FP_TABLE_STANDING = [
   [0.328, 0.328, 0.29, 0.234, 0.183, 0.125, 0.082],
   [0.344, 0.344, 0.304, 0.244, 0.19, 0.128, 0.082],
   [0.347, 0.347, 0.308, 0.246, 0.191, 0.128, 0.082],
+];
+
+// fp table, sitting
+const _FP_TABLE_SITTING = [
+  [0.29, 0.324, 0.305, 0.303, 0.262, 0.224, 0.177],
+  [0.292, 0.328, 0.294, 0.288, 0.268, 0.227, 0.177],
+  [0.288, 0.332, 0.298, 0.29, 0.264, 0.222, 0.177],
+  [0.274, 0.326, 0.294, 0.289, 0.252, 0.214, 0.177],
+  [0.254, 0.308, 0.28, 0.276, 0.241, 0.202, 0.177],
+  [0.23, 0.282, 0.262, 0.26, 0.233, 0.193, 0.177],
+  [0.216, 0.26, 0.248, 0.244, 0.22, 0.186, 0.177],
+  [0.234, 0.258, 0.236, 0.227, 0.208, 0.18, 0.177],
+  [0.262, 0.26, 0.224, 0.208, 0.196, 0.176, 0.177],
+  [0.28, 0.26, 0.21, 0.192, 0.184, 0.17, 0.177],
+  [0.298, 0.256, 0.194, 0.174, 0.168, 0.168, 0.177],
+  [0.306, 0.25, 0.18, 0.156, 0.156, 0.166, 0.177],
+  [0.3, 0.24, 0.168, 0.152, 0.152, 0.164, 0.177],
 ];
 
 // Renamed from SolarGainReturnType to <Model>Result, the name every converted
@@ -232,8 +235,6 @@ const SOLAR_GAIN_SCHEMA = {
   floor_reflectance: { type: "number" },
 };
 
-const _POSTURES = ["standing", "supine", "sitting"];
-
 export function solar_gain(params: SolarGainParams): SolarGainResult {
   // Every argument was positional before v2 (ADR 0002); a call still written
   // that way fails here, naming the shape it should have.
@@ -241,7 +242,13 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   let { sol_altitude, sharp } = params;
   const { sol_radiation_dir, sol_transmittance, f_svv, f_bes } = params;
   // Destructuring defaults also apply to a default passed as undefined.
-  const { asw = 0.7, floor_reflectance = 0.6, round_output = true } = params;
+  const {
+    asw = 0.7,
+    posture = "sitting",
+    floor_reflectance = 0.6,
+    round_output = true,
+  } = params;
+  // Validate inputs using the SolarGainInputs class
   validateInputs(
     {
       sol_altitude,
@@ -256,25 +263,32 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
     SOLAR_GAIN_SCHEMA,
   );
 
-  // The rows are the channel for upstream's UserWarning, which JavaScript has
-  // no warnings filter for (ADR 0001). sol_altitude and sharp are what
-  // upstream sets to NaN; sol_radiation_dir and asw are Table C-2's ranges,
-  // reported and not gated (see SOLAR_GAIN_LIMITS).
   const warnings: ApplicabilityWarning[] = [];
-  const sol_altitude_in_table = _legacy_valid_range(
-    warnings,
-    "sol_altitude",
-    "input",
-    sol_altitude,
-    SOLAR_GAIN_LIMITS.sol_altitude,
-  );
-  const sharp_in_table = _legacy_valid_range(
-    warnings,
-    "sharp",
-    "input",
-    sharp,
-    SOLAR_GAIN_LIMITS.sharp,
-  );
+  // the fp lookup table only covers 0-90/0-180; outside that, _find_span
+  // can't return a valid span at all, so clip to NaN (with a warning) here
+  // rather than let the numba kernel silently wrap a -1 index
+  if (
+    !_legacy_valid_range(
+      warnings,
+      "sol_altitude",
+      "input",
+      sol_altitude,
+      SOLAR_GAIN_LIMITS.sol_altitude,
+    )
+  ) {
+    sol_altitude = NaN;
+  }
+  if (
+    !_legacy_valid_range(
+      warnings,
+      "sharp",
+      "input",
+      sharp,
+      SOLAR_GAIN_LIMITS.sharp,
+    )
+  ) {
+    sharp = NaN;
+  }
   _legacy_valid_range(
     warnings,
     "sol_radiation_dir",
@@ -284,22 +298,68 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   );
   _legacy_valid_range(warnings, "asw", "input", asw, SOLAR_GAIN_LIMITS.asw);
 
-  const posture = (params.posture ?? "sitting").toLowerCase();
-  if (!_POSTURES.includes(posture)) {
-    throw new Error(
-      "Posture has to be either 'standing', 'supine' or 'sitting'.",
-    );
+  const posture_lower = posture.toLowerCase();
+  if (!["standing", "sitting", "supine"].includes(posture_lower)) {
+    const error_msg_posture =
+      "Posture has to be either 'standing', 'supine' or 'sitting'.";
+    throw new Error(error_msg_posture);
   }
 
-  if (!sol_altitude_in_table || !sharp_in_table) {
-    return { erf: NaN, delta_mrt: NaN, warnings };
+  let [erf, d_mrt] = _solar_gain_scalar(
+    sol_altitude,
+    sharp,
+    sol_radiation_dir,
+    sol_transmittance,
+    f_svv,
+    f_bes,
+    asw,
+    floor_reflectance,
+    posture_lower,
+  );
+
+  if (round_output) {
+    erf = round(erf, 1);
+    d_mrt = round(d_mrt, 1);
   }
 
+  return { erf, delta_mrt: d_mrt, warnings };
+}
+
+function _find_span(arr: readonly number[], x: number): number {
+  // range(n - 1), not range(n): the original pure Python loop iterated
+  // range(len(arr)) and relied on valid (in-range) inputs always matching
+  // before the last iteration read arr[i + 1] one past the end - out of
+  // range inputs would raise IndexError there. In the numba version this
+  // is called from a prange-parallelized loop (_solar_gain_array), and
+  // numba does not propagate exceptions raised inside prange loops, so an
+  // out-of-bounds read there would silently return garbage rather than a
+  // clean error. Stopping one iteration early avoids the out-of-bounds
+  // read entirely; out-of-range inputs now return -1 (same as any other
+  // unmatched span) instead of raising.
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++) {
+    if (arr[i + 1]! >= x && x >= arr[i]!) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function _solar_gain_scalar(
+  sol_altitude: number,
+  sharp: number,
+  sol_radiation_dir: number,
+  sol_transmittance: number,
+  f_svv: number,
+  f_bes: number,
+  asw: number,
+  floor_reflectance: number,
+  posture: string,
+): [number, number] {
   const deg_to_rad = 0.0174532925;
   const hr = 6;
   const i_diff = 0.2 * sol_radiation_dir;
 
-  // fp is the projected area factor
   const fp_table =
     posture === "sitting" ? _FP_TABLE_SITTING : _FP_TABLE_STANDING;
 
@@ -310,8 +370,11 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   const alt_i = _find_span(_ALT_RANGE, sol_altitude);
   const az_i = _find_span(_AZ_RANGE, sharp);
   if (alt_i === -1 || az_i === -1) {
-    // As upstream: a -1 span must not index the table.
-    return { erf: NaN, delta_mrt: NaN, warnings };
+    // sol_altitude/sharp out of the table's domain (0-90/0-180), or NaN
+    // (e.g. from _valid_range clipping upstream): -1 would otherwise wrap
+    // around to the last row/column instead of failing, so bail out
+    // explicitly rather than returning a plausible-looking wrong value.
+    return [NaN, NaN];
   }
   const fp11 = fp_table[az_i]![alt_i]!;
   const fp12 = fp_table[az_i]![alt_i + 1]!;
@@ -327,7 +390,10 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   fp += fp22 * (sharp - az1) * (sol_altitude - alt1);
   fp /= (az2 - az1) * (alt2 - alt1);
 
-  const f_eff = posture === "sitting" ? 0.696 : 0.725; // fraction of the body surface exposed to environmental radiation
+  let f_eff = 0.725; // fraction of the body surface exposed to environmental radiation
+  if (posture === "sitting") {
+    f_eff = 0.696;
+  }
 
   const sw_abs = asw;
   const lw_abs = 0.95;
@@ -346,20 +412,5 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
   const erf = e_solar * (sw_abs / lw_abs);
   const d_mrt = erf / (hr * f_eff);
 
-  return {
-    erf: round_output ? round(erf, 1) : erf,
-    delta_mrt: round_output ? round(d_mrt, 1) : d_mrt,
-    warnings,
-  };
-}
-
-// Upstream's _find_span: the first span [arr[i], arr[i + 1]] that holds x,
-// inclusive at both ends, or -1 for a value outside the table or NaN.
-function _find_span(arr: readonly number[], x: number): number {
-  for (let i = 0; i < arr.length - 1; i++) {
-    if (arr[i + 1]! >= x && x >= arr[i]!) {
-      return i;
-    }
-  }
-  return -1;
+  return [erf, d_mrt];
 }

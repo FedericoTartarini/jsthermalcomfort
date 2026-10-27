@@ -4,6 +4,7 @@ import {
   adaptive_ashrae,
   clo_tout,
   heat_index_rothfusz,
+  solar_gain,
 } from "../src/models/index.ts";
 import type { AdaptiveAshraeParams } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
@@ -432,6 +433,19 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
+  },
+  {
+    name: "solar_gain",
+    run: (inputs) => ({
+      ...solar_gain(inputs as unknown as Parameters<typeof solar_gain>[0]),
+    }),
+    // Upstream rounds erf and delta_mrt with np.round (solar_gain.py:252-254).
+    rounded: ({ round_output }) =>
+      round_output === true ? ["erf", "delta_mrt"] : [],
+    // The library returns its older rows, plus ASHRAE 55 Table C-2's, which
+    // upstream does not check; warnings are compared once the model returns
+    // ModelWarning rows (ADR 0024).
+    warnings: false,
   },
 ];
 

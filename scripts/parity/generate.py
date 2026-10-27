@@ -91,12 +91,35 @@ def _heat_index_rothfusz(rng):
     }
 
 
+def _solar_gain(rng):
+    # sol_altitude and sharp reach past the fp table's 0-90 and 0-180 degrees,
+    # so NaN positions and their warnings are compared too, and
+    # sol_radiation_dir and asw past ASHRAE 55 Table C-2's 200-1000 W/m2 and
+    # 0.2-0.9. posture comes in any case, as upstream lower-cases it.
+    posture = str(
+        rng.choice(["standing", "sitting", "supine", "Standing", "SITTING", "Supine"])
+    )
+    return {
+        "sol_altitude": _value(rng, -10.0, 100.0),
+        "sharp": _value(rng, -10.0, 190.0),
+        "sol_radiation_dir": _value(rng, 100.0, 1100.0),
+        "sol_transmittance": _value(rng, 0.0, 1.0),
+        "f_svv": _value(rng, 0.0, 1.0),
+        "f_bes": _value(rng, 0.0, 1.0),
+        "asw": _value(rng, 0.1, 1.0),
+        "posture": posture,
+        "floor_reflectance": _value(rng, 0.0, 1.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 # Each model: upstream's function and the generator of one case's keyword
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
     "clo_tout": (models.clo_tout, _clo_tout),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
+    "solar_gain": (models.solar_gain, _solar_gain),
 }
 
 

@@ -1,39 +1,42 @@
 import { describe, expect, test } from "vitest";
-import { solar_gain, SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
+import { solar_gain } from "../../src/models/index.ts";
+import { SOLAR_GAIN_LIMITS } from "../../src/models/solar_gain.ts";
 import type { SolarGainParams } from "../../src/models/solar_gain.ts";
 import { testDataUrls } from "./comftest.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
-let { testData, tolerances } = await loadTestData(testDataUrls.solarGain);
+type Inputs = Parameters<typeof solar_gain>[0];
 
-// Mirrors pythermalcomfort v4.6.1 tests/test_solar_gain.py.
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.solarGain,
+);
+
+/** numpy's `isclose(a, b, atol=atol)`, whose `rtol` defaults to 1e-5. */
+function isclose(a: number, b: number, atol: number): boolean {
+  return Math.abs(a - b) <= atol + 1e-5 * Math.abs(b);
+}
+
+// Mirrors pythermalcomfort v4.6.2 tests/test_solar_gain.py.
 describe("test_solar_gain", () => {
-  test.each(testData.data)("test_solar_gain: fixture case %#", (row) => {
-    const { inputs, outputs } = row;
-    // As upstream, `solar_gain(**inputs)`.
-    const result = solar_gain(inputs as unknown as SolarGainParams);
+  test.each(reference_table.data)(
+    "test_solar_gain: fixture case %#",
+    (entry) => {
+      const { inputs, outputs } = entry;
+      // As upstream, `solar_gain(**inputs)`.
+      const result = solar_gain(inputs as unknown as Inputs);
 
-    validateResult(result, outputs, tolerances, inputs);
-  });
+      validateResult(result, outputs, tolerance, inputs);
+    },
+  );
 
   test("test_solar_gain_regression_values", () => {
-    const cases: [
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      string,
-      number,
-      number,
-    ][] = [
+    const cases = [
       [0, 120, 800, 0.5, 0.5, 0.5, "sitting", 43.2839, 10.3649],
       [30, 60, 600, 0.6, 0.4, 0.6, "standing", 52.8099, 12.1402],
       [45, 90, 500, 0.7, 0.3, 0.7, "supine", 49.548, 11.3904],
       [90, 0, 1000, 1.0, 1.0, 1.0, "sitting", 326.6804, 78.2281],
       [15, 165, 250, 0.2, 0.1, 0.9, "standing", 8.9043, 2.047],
-    ];
+    ] as const;
     for (const [
       alt,
       sharp,
@@ -52,12 +55,11 @@ describe("test_solar_gain", () => {
         sol_transmittance: trans,
         f_svv: svv,
         f_bes: bes,
-        posture: posture as NonNullable<SolarGainParams["posture"]>,
+        posture,
         round_output: false,
       });
-      // np.isclose(..., atol=1e-3)
-      expect(Math.abs(result.erf - exp_erf)).toBeLessThanOrEqual(1e-3);
-      expect(Math.abs(result.delta_mrt - exp_d_mrt)).toBeLessThanOrEqual(1e-3);
+      expect(isclose(result.erf, exp_erf, 1e-3)).toBe(true);
+      expect(isclose(result.delta_mrt, exp_d_mrt, 1e-3)).toBe(true);
     }
   });
 
@@ -70,27 +72,64 @@ describe("test_solar_gain", () => {
     };
     // pytest.warns(UserWarning, match="sol_altitude") becomes the row.
     let result = solar_gain({ sol_altitude: 200, sharp: 90, ...common });
-    expect(result.warnings.map(({ key }) => key)).toEqual(["sol_altitude"]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        key: "sol_altitude",
+        value: 200,
+        bound: { min: 0.0, max: 90.0 },
+      }),
+    ]);
     expect(result.erf).toBeNaN();
     expect(result.delta_mrt).toBeNaN();
 
     result = solar_gain({ sol_altitude: 45, sharp: 300, ...common });
-    expect(result.warnings.map(({ key }) => key)).toEqual(["sharp"]);
+    expect(result.warnings).toEqual([
+      expect.objectContaining({
+        key: "sharp",
+        value: 300,
+        bound: { min: 0.0, max: 180.0 },
+      }),
+    ]);
     expect(result.erf).toBeNaN();
     expect(result.delta_mrt).toBeNaN();
 
-    // mixed valid/invalid array, element-wise: only the invalid element
-    // becomes NaN
-    const valid = solar_gain({ sol_altitude: 45, sharp: 90, ...common });
-    const invalid = solar_gain({ sol_altitude: 200, sharp: 90, ...common });
-    expect(valid.erf).not.toBeNaN();
-    expect(invalid.warnings.map(({ key }) => key)).toEqual(["sol_altitude"]);
-    expect(invalid.erf).toBeNaN();
+    // mixed valid/invalid array: only the invalid element becomes NaN,
+    // element-wise
+    const [valid, invalid] = [45, 200].map((sol_altitude) =>
+      solar_gain({ sol_altitude, sharp: 90, ...common }),
+    );
+    expect(valid?.erf).not.toBeNaN();
+    expect(invalid?.warnings).toEqual([
+      expect.objectContaining({ key: "sol_altitude", value: 200 }),
+    ]);
+    expect(invalid?.erf).toBeNaN();
   });
 
-  test.todo(
-    "test_solar_gain_array: upstream's np.allclose is never asserted, and its expected erf [46.4, 52.8] is not what solar_gain returns for those inputs (43.3 and 53.9; upstream's own regression test pins 43.2839 for the first), so a mirror with the same values would fail",
-  );
+  test("test_solar_gain_array", () => {
+    // The array call, element-wise.
+    const inputs = [
+      [0, 120, 800, 0.5, 0.5, 0.5],
+      [90, 0, 1000, 1.0, 1.0, 1.0],
+    ] as const;
+    const results = inputs.map(([alt, sharp, rad, trans, svv, bes]) =>
+      solar_gain({
+        sol_altitude: alt,
+        sharp,
+        sol_radiation_dir: rad,
+        sol_transmittance: trans,
+        f_svv: svv,
+        f_bes: bes,
+        posture: "sitting",
+        round_output: false,
+      }),
+    );
+    const erf = [43.2839, 326.6804];
+    const delta_mrt = [10.3649, 78.2281];
+    results.forEach((result, i) => {
+      expect(isclose(result.erf, erf[i] ?? NaN, 1e-3)).toBe(true);
+      expect(isclose(result.delta_mrt, delta_mrt[i] ?? NaN, 1e-3)).toBe(true);
+    });
+  });
 });
 
 describe("solar_gain (JS-only)", () => {

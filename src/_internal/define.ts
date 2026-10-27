@@ -9,31 +9,31 @@ import {
 import type { Bound, VariableInfo } from "./modelDocs.ts";
 
 // The input definition (ADR 0022): each model declares its inputs once, as
-// `*_PARAMS` (`as const satisfies Definition`), and its Params type, its
-// validation and its `INFO.inputs` are derived from it. It stands in for
-// upstream's input dataclass (`classes_input.py`) and its checks (ADR 0019,
-// whitelist item 2).
+// its `*_INFO.inputs`, and its params type and its validation are derived from
+// it. It stands in for upstream's input dataclass (`classes_input.py`) and its
+// checks (ADR 0019, whitelist item 2). The kinds take the names of upstream's
+// field helpers there.
 
-/** A physical quantity: a finite number, listed in `INFO.inputs`. */
-export interface Quantity {
-  readonly kind: "quantity";
+/** A number, upstream's `numeric_field`: a finite number in the library. */
+export interface NumericField {
+  readonly kind: "numeric";
   readonly unit: string | null;
   readonly applicability?: Bound;
   readonly default?: number;
 }
 
-/** A boolean switch, such as `round_output` or `limit_inputs`. */
-export interface Flag {
-  readonly kind: "flag";
+/** A switch, upstream's `is_bool`, such as `round_output` or `limit_inputs`. */
+export interface BoolField {
+  readonly kind: "bool";
   readonly default: boolean;
 }
 
 /** A model's input definition: upstream's keyword arguments, in its order. */
-export type Definition = Readonly<Record<string, Quantity | Flag>>;
+export type Definition = Readonly<Record<string, NumericField | BoolField>>;
 
-type ValueOf<E> = E extends Quantity
+type ValueOf<E> = E extends NumericField
   ? number
-  : E extends Flag
+  : E extends BoolField
     ? boolean
     : never;
 type Values<D> = { -readonly [K in keyof D]: ValueOf<D[K]> };
@@ -45,7 +45,7 @@ type Flatten<T> = { [K in keyof T]: T[K] } & {};
 /**
  * The params object a definition accepts. A key with a default is optional,
  * and `undefined` takes the default, as an omitted keyword does (ADR 0019,
- * whitelist item 6). Each key keeps its comment from the definition.
+ * whitelist item 6).
  */
 export type ParamsOf<D extends Definition> = Flatten<
   Pick<Values<D>, Exclude<keyof D, OptionalKey<D>>> & {
@@ -62,7 +62,7 @@ export function inputsInfo(
 ): Record<string, VariableInfo> {
   const info: Record<string, VariableInfo> = {};
   for (const [key, entry] of Object.entries(definition)) {
-    if (entry.kind !== "quantity") continue;
+    if (entry.kind !== "numeric") continue;
     info[key] =
       entry.applicability === undefined
         ? { unit: entry.unit }
@@ -71,8 +71,8 @@ export function inputsInfo(
   return info;
 }
 
-/** Checks one quantity, as given or defaulted, in the order below. */
-function parseQuantity(key: string, value: unknown): number {
+/** Checks one number, as given or defaulted, in the order below. */
+function parseNumeric(key: string, value: unknown): number {
   // A boolean or null (deviation _shared-6), or an array (deviation _shared-5),
   // which upstream accepts, is a TypeError.
   if (typeof value === "boolean" || value === null || Array.isArray(value)) {
@@ -94,14 +94,14 @@ function parseQuantity(key: string, value: unknown): number {
  *
  * - a missing required key throws Python's `TypeError`, naming every missing
  *   key, as Python does;
- * - a quantity must be a finite number: upstream's `TypeError` for another
+ * - a number must be finite: upstream's `TypeError` for another
  *   type, a `TypeError` for a boolean, `null` or an array, and a `RangeError`
  *   for NaN or ±Infinity;
  * - a switch must be a boolean, with `BaseInputs`' `TypeError`, whether or not
  *   upstream checks it (deviation _shared-8).
  *
  * @param name - The model's function name, for the messages.
- * @param definition - The model's `*_PARAMS`.
+ * @param definition - The model's `*_INFO.inputs`.
  * @param params - What the model was called with.
  * @returns The params, with each default applied.
  * @throws `TypeError` or `RangeError`, as above.
@@ -138,7 +138,7 @@ export function parseParams<const D extends Definition>(
       }
       value = entry.default;
     }
-    if (entry.kind === "quantity") values[key] = parseQuantity(key, value);
+    if (entry.kind === "numeric") values[key] = parseNumeric(key, value);
     else if (typeof value === "boolean") values[key] = value;
     else throw notBoolean(key);
   }

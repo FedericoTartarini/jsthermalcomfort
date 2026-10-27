@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 import * as validation from "../src/_internal/validation.ts";
-import { _mapping, _valid_range } from "../src/_internal/validation.ts";
+import {
+  _mapping,
+  _valid_range,
+  HEAT_INDEX_STRESS_CATEGORIES,
+} from "../src/_internal/validation.ts";
 import type { ModelWarning } from "../src/_internal/modelDocs.ts";
 
 // Mirrors pythermalcomfort v4.6.2 tests/test_internal.py, which tests
@@ -114,5 +118,37 @@ describe("_valid_range (JS-only)", () => {
     _valid_range(6, valid, "pa (kPa)", "derived", "kPa", warnings);
     const [row] = warnings;
     expect(row?.kind === "range" && row.bound).toBe(valid);
+  });
+});
+
+describe("_mapping (JS-only)", () => {
+  // The example in _mapping's TSDoc. Upstream's docstring prints
+  // ['low', 'medium', 'high'] (_internal/validation.py:206-207); pythermalcomfort
+  // 4.6.2 returns ['medium', 'medium', 'high'] in the parity image.
+  test("the TSDoc example gives what upstream returns", () => {
+    const bins = {
+      edges: [15, 25, 35],
+      labels: ["low", "medium", "high"],
+      right: true,
+    };
+    expect([20, 25, 30].map((t) => _mapping(t, bins))).toEqual([
+      "medium",
+      "medium",
+      "high",
+    ]);
+  });
+});
+
+// Upstream's dict (_internal/validation.py:172), its keys as edges and its
+// values as labels.
+describe("HEAT_INDEX_STRESS_CATEGORIES", () => {
+  test("holds upstream's thresholds and categories, frozen", () => {
+    expect(HEAT_INDEX_STRESS_CATEGORIES).toEqual({
+      edges: [32.0, 41.0, 54.0, 1000.0],
+      labels: ["caution", "extreme caution", "danger", "extreme danger"],
+    });
+    expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES)).toBe(true);
+    expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES.edges)).toBe(true);
+    expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES.labels)).toBe(true);
   });
 });

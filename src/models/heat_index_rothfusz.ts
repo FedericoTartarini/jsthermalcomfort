@@ -33,17 +33,17 @@ export const HEAT_INDEX_STRESS_CATEGORY_BINS: Readonly<ClassifierBins> =
 const HEAT_INDEX_ROTHFUSZ_PARAMS = {
   /** Dry bulb air temperature, [°C]. */
   tdb: {
-    kind: "quantity",
+    kind: "numeric",
     unit: "°C",
     applicability: HEAT_INDEX_ROTHFUSZ_LIMITS.tdb,
   },
   /** Relative humidity, [%]. */
-  rh: { kind: "quantity", unit: "%" },
+  rh: { kind: "numeric", unit: "%" },
   /**
    * If True, rounds output value. If False, it does not round it. Defaults to True.
    * Stress categories are always determined from the unrounded heat index.
    */
-  round_output: { kind: "flag", default: true },
+  round_output: { kind: "bool", default: true },
   /**
    * If True, limits the inputs to the standard applicability limits. Defaults to True.
    *
@@ -53,7 +53,7 @@ const HEAT_INDEX_ROTHFUSZ_PARAMS = {
    *
    * The applicability limit is tdb \>= 27°C.
    */
-  limit_inputs: { kind: "flag", default: true },
+  limit_inputs: { kind: "bool", default: true },
 } as const satisfies Definition;
 
 // deviation heat_index_rothfusz-1

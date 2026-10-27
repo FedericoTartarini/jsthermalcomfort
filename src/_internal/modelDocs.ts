@@ -1,8 +1,9 @@
 import type { ClassifierBins } from "./classifierBins.ts";
 import type { Standard } from "../utilities/options.ts";
 
-// The types of the model info every model publishes (`*_INFO`) and of the
-// warnings rows it returns (ADR 0024), plus `deepFreeze`, which locks both.
+// The types of the model info every model publishes (`*_INFO`), of the result
+// every model returns and of its warnings rows (ADRs 0023, 0024), plus
+// `deepFreeze`, which locks them.
 // The old forms that the models not yet migrated still return,
 // `ApplicabilityWarning` and `LegacyModelInfo`, sit at the end of the file
 // until the contract ticket removes them.
@@ -57,6 +58,15 @@ export type ModelWarning =
       readonly bound: Bound;
     }
   | { readonly kind: "notice"; readonly message: string };
+
+/**
+ * What every model's result extends, as upstream's result dataclasses extend
+ * `AutoStrMixin` (ADR 0023). A result is frozen, its rows included.
+ */
+export interface ModelResult {
+  /** Added: the call's {@link ModelWarning} rows, in the order of its checks. */
+  readonly warnings: readonly ModelWarning[];
+}
 
 export type { ClassifierBins };
 
@@ -164,9 +174,16 @@ export interface ApplicabilityWarning {
 }
 
 /**
- * The old form of model info, with a `description`, which the models not yet
- * migrated publish; {@link ModelInfo} replaces it.
+ * The old form of model info, which the models not yet migrated publish;
+ * {@link ModelInfo} replaces it. `inputs` lists physical quantities only, and
+ * `description` is a sentence about the model.
  */
-export interface LegacyModelInfo extends ModelInfo {
+export interface LegacyModelInfo {
+  readonly name: string;
+  readonly label: string;
   readonly description: string;
+  readonly standards: readonly StandardId[];
+  readonly inputs: Readonly<Record<string, VariableInfo>>;
+  readonly outputs: Readonly<Record<string, VariableInfo>>;
+  readonly derived?: Readonly<Record<string, VariableInfo>>;
 }

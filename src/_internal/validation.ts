@@ -1,11 +1,12 @@
 import { classifyFromBins } from "./classifierBins.ts";
 import type { ClassifierBins } from "./classifierBins.ts";
+import { deepFreeze } from "./modelDocs.ts";
 import type { ApplicabilityWarning, Bound, ModelWarning } from "./modelDocs.ts";
 
-// The counterparts of upstream's `_internal/validation.py`. The old forms the
-// models not yet migrated call, `_legacy_valid_range` and
-// `_check_params_object`, sit at the end of the file until the contract ticket
-// removes them.
+// The counterparts of upstream's `_internal/validation.py`, with upstream's
+// docstrings. The old forms the models not yet migrated call,
+// `_legacy_valid_range` and `_check_params_object`, sit at the end of the file
+// until the contract ticket removes them.
 
 /** Where a range row's quantity comes from (see {@link ModelWarning}). */
 type Role = Extract<ModelWarning, { kind: "range" }>["role"];
@@ -13,21 +14,17 @@ type Role = Extract<ModelWarning, { kind: "range" }>["role"];
 /**
  * Filter values based on a valid range, warning on out-of-range entries.
  *
- * Upstream's `_valid_range`. Where upstream emits a `UserWarning`, this
- * appends a `range` row to `warnings`, the channel a result carries instead
- * (deviation _shared-3). Upstream's frame inspection, which reads the name
- * from the caller's source, has no counterpart, so `param_name` is required.
- *
  * @param x - Value to validate.
- * @param valid - Inclusive lower and upper bounds of the applicability range;
- * a missing side is unbounded, as upstream's `np.inf`.
- * @param param_name - Label for the parameter: the row's `key`, the name
- * upstream gives the check.
- * @param role - The row's `role`.
- * @param unit - The row's `unit`, the unit upstream compares in.
- * @param warnings - The call's rows, appended to.
- * @returns `x`, or NaN where it is out of range. NaN is not out of range, as
- * upstream's comparisons are false for it.
+ * @param valid - Inclusive lower and upper bounds of the applicability range.
+ * @param param_name - Label for the parameter, the range row's `key`.
+ * @param role - The range row's `role`.
+ * @param unit - The range row's `unit`, the unit upstream compares in.
+ * @param warnings - The call's rows.
+ * @returns `x`, or NaN where it is out of range.
+ *
+ * @remarks
+ * Appends a `range` row to `warnings` where `x` falls outside `valid`, in
+ * place of upstream's `UserWarning`.
  */
 export function _valid_range(
   x: number,
@@ -53,16 +50,34 @@ export function _valid_range(
   return NaN;
 }
 
+// Stress category thresholds shared by the Heat Index models (e.g. Rothfusz, Schoen).
+// Each model prepends its own "no risk" floor, since that lower bound depends on the
+// model's applicability range, e.g. {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}.
+export const HEAT_INDEX_STRESS_CATEGORIES: Readonly<
+  Pick<ClassifierBins, "edges" | "labels">
+> = deepFreeze({
+  edges: [32.0, 41.0, 54.0, 1000.0],
+  labels: ["caution", "extreme caution", "danger", "extreme danger"],
+});
+
 /**
- * Map a temperature array to stress categories.
- *
- * Upstream's `_mapping`, built on {@link classifyFromBins}, which is
- * `np.digitize` (ADR 0026): the bins hold the dictionary's keys as `edges`,
- * its values as `labels`, and upstream's `right`.
+ * Map a temperature to stress categories.
  *
  * @param value - Temperature to map.
- * @param bins - The bin edges, the categories and `right`.
+ * @param bins - Bin edges, the categories they map to, and `right`: if true,
+ * intervals include the right bin edge.
  * @returns Stress category for the input temperature. NaN for unmapped.
+ * @throws `RangeError` if the edges are not strictly increasing.
+ *
+ * @example
+ * ```ts
+ * const bins = {
+ *   edges: [15, 25, 35],
+ *   labels: ["low", "medium", "high"],
+ *   right: true,
+ * };
+ * [20, 25, 30].map((t) => _mapping(t, bins)); // ["medium", "medium", "high"]
+ * ```
  */
 export function _mapping(
   value: number,

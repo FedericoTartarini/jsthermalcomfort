@@ -45,6 +45,7 @@ export type {
   Bound,
   ClassifierBins,
   ModelInfo,
+  ModelResult,
   ModelWarning,
   VariableInfo,
 } from "../_internal/modelDocs.ts";

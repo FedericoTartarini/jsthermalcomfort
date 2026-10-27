@@ -442,10 +442,9 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds erf and delta_mrt with np.round (solar_gain.py:252-254).
     rounded: ({ round_output }) =>
       round_output === true ? ["erf", "delta_mrt"] : [],
-    // The library returns its older rows, plus ASHRAE 55 Table C-2's, which
-    // upstream does not check; warnings are compared once the model returns
-    // ModelWarning rows (ADR 0024).
-    warnings: false,
+    // ASHRAE 55 Table C-2's rows, which upstream does not check, are exempt
+    // by the register (deviation solar_gain-3, deviation solar_gain-4).
+    warnings: true,
   },
 ];
 

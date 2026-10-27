@@ -20,11 +20,13 @@ export const LINTED = [
   "src/utilities/units_converter.ts",
   "src/models/clo_tout.ts",
   "src/models/heat_index_rothfusz.ts",
+  "src/models/solar_gain.ts",
   "tests/call_sites.test.ts",
   "tests/environment/transpose_sharp_altitude.test.ts",
   "tests/internal.test.ts",
   "tests/models/clo_tout.test.ts",
   "tests/models/heat_index_rothfusz.test.ts",
+  "tests/models/solar_gain.test.ts",
   "tests/utilities/units_converter.test.ts",
 ];
 

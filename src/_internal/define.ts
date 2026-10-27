@@ -94,7 +94,8 @@ function parseNumeric(key: string, value: unknown): number {
 function parseChoice(value: unknown, entry: ChoiceField): string {
   const { allowed, message } = entry;
   // Upstream compares `str(value).upper()` for `units`, so it raises the same
-  // error for any value that is not a string (deviation _shared-24).
+  // error for any value that is not a string (deviation _shared-24), and
+  // `posture.lower()` raises `AttributeError` for one (deviation solar_gain-6).
   if (typeof value !== "string") throw new TypeError(message);
   // Upstream upper-cases `units` and lower-cases `posture`, and `allowed` is
   // written in the case upstream compares in.

@@ -35,8 +35,8 @@ import type {
   PmvPpdAshraeResult,
   PmvPpdIsoParams,
   PmvPpdIsoResult,
-  SolarGainParams,
-  SolarGainResult,
+  SolarGain,
+  SolarGainInputs,
   UtciParams,
   UtciResult,
   OutputInfo,
@@ -55,6 +55,7 @@ import {
   PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   SOLAR_GAIN_INFO,
   Standard,
+  Postures,
   Units,
   UTCI_INFO,
   UTCI_STRESS_CATEGORY_BINS,
@@ -494,22 +495,25 @@ CLO_TOUT_INFO.inputs.tout = { kind: "numeric", unit: "°C" };
 // @ts-expect-error the result is readonly, as upstream's frozen dataclass.
 cloToutResult.clo_tout = 1;
 
-// solar_gain takes one params object too (ADR 0002), with its params and
-// result types exported by name; the lines below are errors only while the
-// published signature is typed.
-const solarGainParams: SolarGainParams = {
+// solar_gain takes one inputs object too (ADR 0002), with its inputs and
+// result types named after upstream's classes; the lines below are errors
+// only while the published signature is typed. posture takes the constant or
+// the literal (deviation _shared-29).
+const solarGainParams: SolarGainInputs = {
   sol_altitude: 0,
   sharp: 120,
   sol_radiation_dir: 800,
   sol_transmittance: 0.5,
   f_svv: 0.5,
   f_bes: 0.5,
-  posture: "supine",
+  posture: Postures.supine,
   round_output: false,
 };
-const solarGainResult: SolarGainResult = solar_gain(solarGainParams);
+const solarGainResult: SolarGain = solar_gain(solarGainParams);
 const deltaMrt: number = solarGainResult.delta_mrt;
-const solarGainWarnings: ApplicabilityWarning[] = solarGainResult.warnings;
+const solarGainWarnings: readonly ModelWarning[] = solarGainResult.warnings;
+const solarGainPostureDefault: "sitting" =
+  SOLAR_GAIN_INFO.inputs.posture.default;
 const solRadiationDirMax: number | undefined =
   SOLAR_GAIN_INFO.inputs.sol_radiation_dir.applicability?.max;
 // @ts-expect-error `altitude` is not a param; the angle is `sol_altitude`.
@@ -528,8 +532,12 @@ solar_gain({ ...solarGainParams, sharp: "120" });
 solar_gain({ ...solarGainParams, posture: "lying" });
 // @ts-expect-error round_output is a boolean.
 solar_gain({ ...solarGainParams, round_output: "false" });
+// @ts-expect-error `limit_inputs` is not an input; upstream's solar_gain has none.
+solar_gain({ ...solarGainParams, limit_inputs: true });
 // @ts-expect-error the solar gain metadata is readonly.
-SOLAR_GAIN_INFO.inputs.asw = { unit: null };
+SOLAR_GAIN_INFO.inputs.asw = { kind: "numeric", unit: null };
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+solarGainResult.erf = 1;
 
 // The shared PMV module is not part of the package, as upstream has no public
 // pmv_ppd: a consumer calls pmv_ppd_iso or pmv_ppd_ashrae.
@@ -582,6 +590,7 @@ export {
   solarGainInfo,
   deltaMrt,
   solarGainWarnings,
+  solarGainPostureDefault,
   solRadiationDirMax,
   utciCategory,
   coolingEffect,

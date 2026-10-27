@@ -1,15 +1,15 @@
 import { transpose_sharp_altitude } from "../environment/transpose_sharp_altitude.ts";
-import { validateInputs } from "../utilities/utilities.js";
-import { round } from "../_internal/round.ts";
+import { parseInputs } from "../_internal/define.ts";
+import type { InputsOf } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelDocs.ts";
-import {
-  _check_params_object,
-  _legacy_valid_range,
-} from "../_internal/validation.ts";
 import type {
-  ApplicabilityWarning,
-  LegacyModelInfo,
+  ModelInfo,
+  ModelResult,
+  ModelWarning,
 } from "../_internal/modelDocs.ts";
+import { round } from "../_internal/round.ts";
+import { _valid_range } from "../_internal/validation.ts";
+import { Postures } from "../utilities/options.ts";
 
 const _ALT_RANGE = [0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0];
 const _AZ_RANGE = [
@@ -51,259 +51,200 @@ const _FP_TABLE_SITTING = [
   [0.3, 0.24, 0.168, 0.152, 0.152, 0.164, 0.177],
 ];
 
-// Renamed from SolarGainReturnType to <Model>Result, the name every converted
-// model's result has. A type alias, as the JSDoc typedef it replaces emitted,
-// so documentation.js keeps naming it from the typedef line.
-/**
- * @typedef {object} SolarGainResult
- * @property {number} erf - Solar gain to the human body using the Effective Radiant Field [W/m2]
- * @property {number} delta_mrt - Delta mean radiant temperature. The amount by which the mean radiant
- * temperature of the space should be increased if no solar radiation is present.
- * @property { ApplicabilityWarning[] } warnings - Applicability bounds the call broke; see `ApplicabilityWarning`.
- * @public
- */
-export type SolarGainResult = {
-  erf: number;
-  delta_mrt: number;
-  readonly warnings: ApplicabilityWarning[];
-};
-
-/**
- * The params of `solar_gain`: upstream's keyword parameters, quantities and
- * switches alike, with upstream's defaults (ADR 0002). Documented on the
- * function's `params`.
- */
-export interface SolarGainParams {
-  sol_altitude: number;
-  sharp: number;
-  sol_radiation_dir: number;
-  sol_transmittance: number;
-  f_svv: number;
-  f_bes: number;
-  asw?: number;
-  posture?: "sitting" | "standing" | "supine";
-  floor_reflectance?: number;
-  round_output?: boolean;
-}
-
-/**
- * Applicability limits of `solar_gain`, in SI units, inclusive at both ends
- * as upstream's `_valid_range`.
- *
- * `sol_altitude` and `sharp` are the ranges upstream's code checks: outside
- * them the fp table has no span, and upstream returns NaN for both outputs.
- *
- * `sol_radiation_dir` and `asw` are the "Range of Inputs, Min to Max" of
- * ASHRAE 55-2020 Normative Appendix C Table C-2, as Addendum d to 55-2020
- * prints it; Table C2-1 of Addendum g to 55-2013, which introduced the
- * procedure, gives the same ranges. Upstream's code does not check them. Its
- * docstring gives 200 to 1000 W/m² for `sol_radiation_dir` ("Ranges between
- * 200 and 1000" under Parameters, "should typically range" under
- * Applicability) and 0.57 to 0.84 as typical for `asw`. They are the
- * library's first published ranges that upstream does not enforce. They are
- * published because Table C-2 gives them as the procedure's range of inputs,
- * and because the app treats applicability as a gate.
- * Outside them the result is still upstream's number, with a `warnings` row
- * (ADR 0001): there is no `limit_inputs` until upstream has one.
- *
- * The three fractions carry no limit: their 0 to 1 is definitional (Table
- * C-2 also gives 0 to 1 for them).
- *
- * Same arrangement as `UTCI_LIMITS`: frozen, referenced by identity from
- * `SOLAR_GAIN_INFO` and read by `solar_gain`, so the metadata and the rows
- * cannot disagree. Exported for that identity test, deliberately not added
- * to `src/models/index.ts`.
- */
-export const SOLAR_GAIN_LIMITS = Object.freeze({
-  sol_altitude: Object.freeze({ min: 0, max: 90 }),
-  sharp: Object.freeze({ min: 0, max: 180 }),
-  sol_radiation_dir: Object.freeze({ min: 200, max: 1000 }),
-  asw: Object.freeze({ min: 0.2, max: 0.9 }),
-});
-
-/**
- * Model metadata for the solar gain on people.
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- *
- * `posture` is a choice, not a quantity, so it is not an input here, as
- * switches are not. `floor_reflectance` is ASHRAE 55's fixed 0.6 and carries
- * no applicability, nor do the three fractions, whose 0 to 1 is
- * definitional.
- *
- * @public
- */
-export const SOLAR_GAIN_INFO: LegacyModelInfo = deepFreeze({
+export const SOLAR_GAIN_INFO = deepFreeze({
   name: "solar_gain",
   label: "Solar gain on people",
-  description:
-    "Solar gain on an occupant as the Effective Radiant Field, and the mean radiant temperature increase it is equivalent to (ASHRAE 55 Normative Appendix C).",
   standards: [],
   inputs: {
     sol_altitude: {
+      kind: "numeric",
       unit: "°",
-      applicability: SOLAR_GAIN_LIMITS.sol_altitude,
+      applicability: { min: 0.0, max: 90.0 },
     },
-    sharp: { unit: "°", applicability: SOLAR_GAIN_LIMITS.sharp },
+    sharp: {
+      kind: "numeric",
+      unit: "°",
+      applicability: { min: 0.0, max: 180.0 },
+    },
     sol_radiation_dir: {
+      kind: "numeric",
       unit: "W/m²",
-      applicability: SOLAR_GAIN_LIMITS.sol_radiation_dir,
+      applicability: { min: 200, max: 1000 },
     },
-    sol_transmittance: { unit: null },
-    f_svv: { unit: null },
-    f_bes: { unit: null },
-    asw: { unit: null, applicability: SOLAR_GAIN_LIMITS.asw },
-    floor_reflectance: { unit: null },
+    sol_transmittance: { kind: "numeric", unit: null },
+    f_svv: { kind: "numeric", unit: null },
+    f_bes: { kind: "numeric", unit: null },
+    asw: {
+      kind: "numeric",
+      unit: null,
+      applicability: { min: 0.2, max: 0.9 },
+      default: 0.7,
+    },
+    posture: {
+      kind: "choice",
+      allowed: [Postures.standing, Postures.supine, Postures.sitting],
+      default: Postures.sitting,
+      message: "Posture has to be either 'standing', 'supine' or 'sitting'.",
+    },
+    floor_reflectance: { kind: "numeric", unit: null, default: 0.6 },
+    round_output: { kind: "bool", default: true },
   },
   outputs: {
     erf: { unit: "W/m²" },
     delta_mrt: { unit: "°C" },
   },
-});
+} as const satisfies ModelInfo);
 
-// Three @param entries depart from upstream's docstring, whose citations
-// do not hold against the standard's text: it cites Table C2-3 for the
-// sol_radiation_dir range (Table C2-3 is the cloudless-atmosphere data; the
-// range is in Table C-2), Table C2-2 and equation C-7 for f_bes (both are
-// f_svv's; f_bes is Figure C2-1), and lists two of Addendum g's three
-// sol_transmittance methods.
+/** @interface */
+export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO.inputs>;
+
+/** Dataclass to represent the solar gain to the human body. */
+export interface SolarGain extends ModelResult {
+  /** Solar gain to the human body using the Effective Radiant Field [W/m2]. */
+  readonly erf: number;
+  /**
+   * Delta mean radiant temperature. The amount by which the mean radiant
+   * temperature of the space should be increased if no solar radiation is present.
+   */
+  readonly delta_mrt: number;
+}
+
 /**
- * Calculates the solar gain to the human body using the Effective Radiant
- * Field ( ERF) {@link #ref_1|[1]}. The ERF is a measure of the net energy flux to or from
- * the human body. ERF is expressed in W over human body surface area [w/m2].
+ * Calculate the solar gain to the human body using the Effective Radiant Field
+ * (ERF) [55ASHRAE2023](../../docs/references.md#55ashrae2023). The ERF is a measure of the net energy flux to or from the
+ * human body. ERF is expressed in W over human body surface area [W/m2]. In addition,
+ * it calculates the delta mean radiant temperature. Which is the amount by which the
+ * mean radiant temperature of the space should be increased if no solar radiation is
+ * present.
  *
- * In addition, it calculates the delta mean radiant temperature. Which is the
- * amount by which the mean radiant temperature of the space should be
- * increased if no solar radiation is present.
- *
- * More information on the calculation procedure can be found in Appendix C of {@link #ref_1|[1]}.
- *
- * @memberof models
- * @public
- * @docname Solar gain on people
- *
- * @param {Object} params - the model's parameters, named as in pythermalcomfort.
- * @param {number} params.sol_altitude - Solar altitude, degrees from horizontal [deg]. Ranges between 0 and 90.
- * @param {number} params.sharp - Solar horizontal angle relative to the front of the person (SHARP) [deg].
+ * @param inputs
+ * @param inputs.sol_altitude - Solar altitude, degrees from horizontal [deg]. Ranges between 0 and 90.
+ * @param inputs.sharp - Solar horizontal angle relative to the front of the person (SHARP) [deg].
  * Ranges between 0 and 180 and is symmetrical on either side. Zero (0) degrees
  * represents direct-beam radiation from the front, 90 degrees represents
- * direct-beam radiation from the side, and 180 degrees rep- resent direct-beam
+ * direct-beam radiation from the side, and 180 degrees represents direct-beam
  * radiation from the back. SHARP is the angle between the sun and the person
  * only. Orientation relative to compass or to room is not included in SHARP.
- * @param {number} params.sol_radiation_dir - Direct-beam solar radiation, [W/m2]. Ranges between 200 and 1000 (Table C-2 of ASHRAE 55-2020 {@link #ref_1|[1]}). Values for a standard cloudless atmosphere are in Table C2-3 of Addendum g to ASHRAE 55-2013.
- * @param {number} params.sol_transmittance - Total solar transmittance, ranges from 0 to 1. The total solar
+ * @param inputs.sol_radiation_dir - Direct-beam solar radiation, [W/m2]. Ranges between 200 and 1000. See Table
+ * C2-3 of ASHRAE 55 2020 [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ * @param inputs.sol_transmittance - Total solar transmittance, ranges from 0 to 1. The total solar
  * transmittance of window systems, including glazing unit, blinds, and other
  * façade treatments, shall be determined using one of the following methods:
- * - i) Glazing unit Tsol provided by manufacturer or from the National Fenestration Rating Council approved Lawrence Berkeley National Lab International Glazing Database.
- * - ii) Glazing unit plus interior fabric shade shall be calculated as the product of glazing unit Tsol multiplied by the shade openness factor.
- * - iii) Glazing unit plus venetian blinds or other complex or unique shades shall be calculated using National Fenestration Rating Council approved software or Lawrence Berkeley National Lab Complex Glazing Database.
+ * i) Provided by manufacturer or from the National Fenestration Rating
+ * Council approved Lawrence Berkeley National Lab International Glazing
+ * Database.
+ * ii) Glazing unit plus venetian blinds or other complex or unique shades
+ * shall be calculated using National Fenestration Rating Council approved
+ * software or Lawrence Berkeley National Lab Complex Glazing Database.
+ * @param inputs.f_svv - Fraction of sky-vault view fraction exposed to body, ranges from 0 to 1.
+ * It can be calculated using the function
+ * `f_svv`.
+ * @param inputs.f_bes - Fraction of the possible body surface exposed to sun, ranges from 0 to 1.
+ * See Table C2-2 and equation C-7 ASHRAE 55 2020 [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ * @param inputs.asw - The average short-wave absorptivity of the occupant. It will range widely,
+ * depending on the color of the skin of the occupant as well as the color and
+ * amount of clothing covering the body. Defaults to 0.7.
  *
- * (Addendum g to ASHRAE 55-2013, Section C2(c).)
- * @param {number} params.f_svv - Fraction of sky-vault view fraction exposed to body, ranges from 0 to 1. It can be calculated using the function {@link #f_svv|f_svv} in utilities.
- * @param {number} params.f_bes - Fraction of the possible body surface exposed to sun, ranges from 0 to 1. See Figure C2-1 of Addendum g to ASHRAE 55-2013.
- * @param {number} [params.asw=0.7] - The average short-wave absorptivity of the occupant. It will range widely,
- * depending on the color of the occupant’s skin as well as the color and
- * amount of clothing covering the body.
+ * > [!NOTE]
+ * > Short-wave absorptivity typically ranges from 0.57 to 0.84, depending
+ * > on skin and clothing color. More information is available in Blum (1945).
  *
- * A value of 0.7 shall be used unless more specific information about the
- * clothing or skin color of the occupants is available.
- * Note: Short-wave absorptivity typically ranges from 0.57 to 0.84, depending
- * on skin and clothing color. More information is available in Blum (1945).
- * @param {"standing" | "supine" | "sitting"} [params.posture="sitting"] - Default 'sitting' list of available options 'standing', 'supine' or 'sitting'
- * @param {number} [params.floor_reflectance=0.6] - Floor refectance. It is assumed to be constant and equal to 0.6.
- * @param {boolean} [params.round_output=true] - If True, rounds output value. If False, it does not round it.
+ * @param inputs.posture - Default 'sitting' list of available options 'standing', 'supine' or 'sitting'.
+ * @param inputs.floor_reflectance - Floor reflectance. It is assumed to be constant and equal to 0.6. Defaults to 0.6.
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
  *
- * @returns {SolarGainResult}
+ * @returns A dataclass containing the solar gain to the human body and delta mean radiant temperature.
+ * See {@link SolarGain} for more details.
+ * To access the `erf` and `delta_mrt` values, use the corresponding attributes of the returned `SolarGain` instance, e.g., `result.erf`.
+ *
+ * @throws `TypeError` If the posture is not a string.
+ * @throws `RangeError` If the posture is not one of 'standing', 'supine', or 'sitting'.
  *
  * @example
- * import { solar_gain } from "jsthermalcomfort";
- * const results = solar_gain({ sol_altitude: 0, sharp: 120, sol_radiation_dir: 800, sol_transmittance: 0.5, f_svv: 0.5, f_bes: 0.5, asw: 0.7, posture: "sitting" });
- * console.log(results); // {erf: 43.3, delta_mrt: 10.4, warnings: []}
+ * ```ts
+ * import { solar_gain } from "jsthermalcomfort/models";
+ *
+ * const result = solar_gain({
+ *   sol_altitude: 0,
+ *   sharp: 120,
+ *   sol_radiation_dir: 800,
+ *   sol_transmittance: 0.5,
+ *   f_svv: 0.5,
+ *   f_bes: 0.5,
+ *   asw: 0.7,
+ *   posture: "sitting",
+ * });
+ * console.log(result.erf); // 43.3
+ * console.log(result.delta_mrt); // 10.4
+ * ```
+ *
+ * @remarks
+ * This model is applicable under the following conditions:
+ *
+ * - Solar altitude (sol_altitude) must be between 0° and 90°.
+ * - Solar horizontal angle (sharp) must be between 0° and 180°.
+ * - Direct-beam solar radiation (sol_radiation_dir) should typically range from 200 to 1000 W/m², as per ASHRAE 55 Table C2-3.
+ * - Solar transmittance (sol_transmittance) must be between 0 and 1.
+ * - Sky-vault view fraction (f_svv) and body surface exposure fraction (f_bes) must be between 0 and 1.
+ * - Average short-wave absorptivity (asw) typically ranges from 0.57 to 0.84, depending on skin and clothing color.
+ * - Posture must be one of 'standing', 'supine', or 'sitting'.
+ * - Floor reflectance (floor_reflectance) is assumed constant at 0.6, but can vary.
+ * - All inputs are in SI units (e.g., angles in degrees, radiation in W/m²).
  */
-// A non-finite number throws a TypeError here (ADR 0001, reason three);
-// upstream returns NaN or ±Infinity for it. round_output is not validated, as
-// upstream's SolarGainInputs is not given it; posture is checked below with
-// upstream's message.
-const SOLAR_GAIN_SCHEMA = {
-  sol_altitude: { type: "number" },
-  sharp: { type: "number" },
-  sol_radiation_dir: { type: "number" },
-  sol_transmittance: { type: "number" },
-  f_svv: { type: "number" },
-  f_bes: { type: "number" },
-  asw: { type: "number" },
-  floor_reflectance: { type: "number" },
-};
-
-export function solar_gain(params: SolarGainParams): SolarGainResult {
-  // Every argument was positional before v2 (ADR 0002); a call still written
-  // that way fails here, naming the shape it should have.
-  _check_params_object(params, "solar_gain");
-  let { sol_altitude, sharp } = params;
-  const { sol_radiation_dir, sol_transmittance, f_svv, f_bes } = params;
-  // Destructuring defaults also apply to a default passed as undefined.
-  const {
-    asw = 0.7,
-    posture = "sitting",
-    floor_reflectance = 0.6,
-    round_output = true,
-  } = params;
+export function solar_gain(inputs: SolarGainInputs): SolarGain {
   // Validate inputs using the SolarGainInputs class
-  validateInputs(
-    {
-      sol_altitude,
-      sharp,
-      sol_radiation_dir,
-      sol_transmittance,
-      f_svv,
-      f_bes,
-      asw,
-      floor_reflectance,
-    },
-    SOLAR_GAIN_SCHEMA,
-  );
+  let {
+    sol_altitude,
+    sharp,
+    sol_radiation_dir,
+    sol_transmittance,
+    f_svv,
+    f_bes,
+    asw,
+    posture,
+    floor_reflectance,
+    round_output,
+  } = parseInputs(SOLAR_GAIN_INFO, inputs);
 
-  const warnings: ApplicabilityWarning[] = [];
+  const warnings: ModelWarning[] = [];
   // the fp lookup table only covers 0-90/0-180; outside that, _find_span
   // can't return a valid span at all, so clip to NaN (with a warning) here
   // rather than let the numba kernel silently wrap a -1 index
-  if (
-    !_legacy_valid_range(
-      warnings,
-      "sol_altitude",
-      "input",
-      sol_altitude,
-      SOLAR_GAIN_LIMITS.sol_altitude,
-    )
-  ) {
-    sol_altitude = NaN;
-  }
-  if (
-    !_legacy_valid_range(
-      warnings,
-      "sharp",
-      "input",
-      sharp,
-      SOLAR_GAIN_LIMITS.sharp,
-    )
-  ) {
-    sharp = NaN;
-  }
-  _legacy_valid_range(
+  sol_altitude = _valid_range(
+    sol_altitude,
+    SOLAR_GAIN_INFO.inputs.sol_altitude.applicability,
+    "sol_altitude",
+    "input",
+    SOLAR_GAIN_INFO.inputs.sol_altitude.unit,
     warnings,
+  );
+  sharp = _valid_range(
+    sharp,
+    SOLAR_GAIN_INFO.inputs.sharp.applicability,
+    "sharp",
+    "input",
+    SOLAR_GAIN_INFO.inputs.sharp.unit,
+    warnings,
+  );
+  // ASHRAE 55 Table C-2's ranges, which upstream does not check (deviation solar_gain-3, deviation solar_gain-4).
+  _valid_range(
+    sol_radiation_dir,
+    SOLAR_GAIN_INFO.inputs.sol_radiation_dir.applicability,
     "sol_radiation_dir",
     "input",
-    sol_radiation_dir,
-    SOLAR_GAIN_LIMITS.sol_radiation_dir,
+    SOLAR_GAIN_INFO.inputs.sol_radiation_dir.unit,
+    warnings,
   );
-  _legacy_valid_range(warnings, "asw", "input", asw, SOLAR_GAIN_LIMITS.asw);
+  _valid_range(
+    asw,
+    SOLAR_GAIN_INFO.inputs.asw.applicability,
+    "asw",
+    "input",
+    SOLAR_GAIN_INFO.inputs.asw.unit,
+    warnings,
+  );
 
-  const posture_lower = posture.toLowerCase();
-  if (!["standing", "sitting", "supine"].includes(posture_lower)) {
-    const error_msg_posture =
-      "Posture has to be either 'standing', 'supine' or 'sitting'.";
-    throw new Error(error_msg_posture);
-  }
+  posture = posture.toLowerCase() as typeof posture;
 
   let [erf, d_mrt] = _solar_gain_scalar(
     sol_altitude,
@@ -314,7 +255,7 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
     f_bes,
     asw,
     floor_reflectance,
-    posture_lower,
+    posture,
   );
 
   if (round_output) {
@@ -322,7 +263,11 @@ export function solar_gain(params: SolarGainParams): SolarGainResult {
     d_mrt = round(d_mrt, 1);
   }
 
-  return { erf, delta_mrt: d_mrt, warnings };
+  return Object.freeze({
+    erf,
+    delta_mrt: d_mrt,
+    warnings: Object.freeze(warnings),
+  });
 }
 
 function _find_span(arr: readonly number[], x: number): number {
@@ -338,7 +283,7 @@ function _find_span(arr: readonly number[], x: number): number {
   // unmatched span) instead of raising.
   const n = arr.length;
   for (let i = 0; i < n - 1; i++) {
-    if (arr[i + 1]! >= x && x >= arr[i]!) {
+    if ((arr[i + 1] ?? NaN) >= x && x >= (arr[i] ?? NaN)) {
       return i;
     }
   }
@@ -361,9 +306,9 @@ function _solar_gain_scalar(
   const i_diff = 0.2 * sol_radiation_dir;
 
   const fp_table =
-    posture === "sitting" ? _FP_TABLE_SITTING : _FP_TABLE_STANDING;
+    posture === Postures.sitting ? _FP_TABLE_SITTING : _FP_TABLE_STANDING;
 
-  if (posture === "supine") {
+  if (posture === Postures.supine) {
     [sharp, sol_altitude] = transpose_sharp_altitude(sharp, sol_altitude);
   }
 
@@ -376,14 +321,14 @@ function _solar_gain_scalar(
     // explicitly rather than returning a plausible-looking wrong value.
     return [NaN, NaN];
   }
-  const fp11 = fp_table[az_i]![alt_i]!;
-  const fp12 = fp_table[az_i]![alt_i + 1]!;
-  const fp21 = fp_table[az_i + 1]![alt_i]!;
-  const fp22 = fp_table[az_i + 1]![alt_i + 1]!;
-  const az1 = _AZ_RANGE[az_i]!;
-  const az2 = _AZ_RANGE[az_i + 1]!;
-  const alt1 = _ALT_RANGE[alt_i]!;
-  const alt2 = _ALT_RANGE[alt_i + 1]!;
+  const fp11 = fp_table[az_i]?.[alt_i] ?? NaN;
+  const fp12 = fp_table[az_i]?.[alt_i + 1] ?? NaN;
+  const fp21 = fp_table[az_i + 1]?.[alt_i] ?? NaN;
+  const fp22 = fp_table[az_i + 1]?.[alt_i + 1] ?? NaN;
+  const az1 = _AZ_RANGE[az_i] ?? NaN;
+  const az2 = _AZ_RANGE[az_i + 1] ?? NaN;
+  const alt1 = _ALT_RANGE[alt_i] ?? NaN;
+  const alt2 = _ALT_RANGE[alt_i + 1] ?? NaN;
   let fp = fp11 * (az2 - sharp) * (alt2 - sol_altitude);
   fp += fp21 * (sharp - az1) * (alt2 - sol_altitude);
   fp += fp12 * (az2 - sharp) * (sol_altitude - alt1);
@@ -391,7 +336,7 @@ function _solar_gain_scalar(
   fp /= (az2 - az1) * (alt2 - alt1);
 
   let f_eff = 0.725; // fraction of the body surface exposed to environmental radiation
-  if (posture === "sitting") {
+  if (posture === Postures.sitting) {
     f_eff = 0.696;
   }
 

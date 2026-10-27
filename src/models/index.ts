@@ -70,7 +70,7 @@ export type {
   PmvPpdAshraeResult,
 } from "./pmv_ppd_ashrae.ts";
 export type { PmvPpdIsoParams, PmvPpdIsoResult } from "./pmv_ppd_iso.ts";
-export type { SolarGainParams, SolarGainResult } from "./solar_gain.ts";
+export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type { UtciParams, UtciResult } from "./utci.ts";
 
 /**

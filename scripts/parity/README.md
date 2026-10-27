@@ -8,7 +8,7 @@ The parity suite compares every migrated model with pinned pythermalcomfort on s
 | ---------------- | ------------------------------------------------------------------------------------------ |
 | platform         | `x86_64` (`linux/amd64`)                                                                   |
 | Python           | 3.12.15, image `python:3.12.15-slim-trixie` pinned by digest in `Dockerfile`               |
-| pythermalcomfort | 4.6.2                                                                                      |
+| pythermalcomfort | 4.7.0                                                                                      |
 | numpy            | 2.5.4                                                                                      |
 | scipy            | 1.18.1                                                                                     |
 | numba            | 0.68.0                                                                                     |

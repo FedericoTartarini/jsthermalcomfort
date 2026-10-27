@@ -345,7 +345,7 @@ describe("exemptions", () => {
 
 const PINS = {
   python: "3.12.15",
-  packages: { numpy: "2.5.4", pythermalcomfort: "4.6.2" },
+  packages: { numpy: "2.5.4", pythermalcomfort: "4.7.0" },
 };
 
 function header(overrides: Partial<Header> = {}): Header {
@@ -382,7 +382,7 @@ describe("check_header", () => {
       'header: machine "arm64", expected "x86_64"',
       'header: python "3.13.1", expected the pinned "3.12.15"',
       'header: numpy "2.4.0", expected the pinned "2.5.4"',
-      'header: pythermalcomfort missing, expected the pinned "4.6.2"',
+      'header: pythermalcomfort missing, expected the pinned "4.7.0"',
       'header: scipy "1.18.1" is not pinned',
     ]);
   });
@@ -393,7 +393,7 @@ describe("read_pins", () => {
     const pins = read_pins(root);
     expect(pins.python).toMatch(/^3\.12\.\d+$/);
     expect(pins.packages).toMatchObject({
-      pythermalcomfort: "4.6.2",
+      pythermalcomfort: "4.7.0",
       scipy: "1.18.1",
     });
   });

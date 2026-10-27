@@ -290,6 +290,50 @@ function _find_span(arr: readonly number[], x: number): number {
   return -1;
 }
 
+/**
+ * Return the projected area factor fp, interpolated from the posture's table.
+ *
+ * For a supine person the table is read with angles relative to the body. The rotated
+ * angles stay inside this function, so callers only use the solar angles. Returns NaN
+ * if the angles are outside the table's domain.
+ */
+function _projected_area_factor(
+  sol_altitude: number,
+  sharp: number,
+  posture: NonNullable<SolarGainInputs["posture"]>,
+): number {
+  const fp_table =
+    posture === Postures.sitting ? _FP_TABLE_SITTING : _FP_TABLE_STANDING;
+
+  if (posture === Postures.supine) {
+    [sharp, sol_altitude] = transpose_sharp_altitude(sharp, sol_altitude);
+  }
+
+  const alt_i = _find_span(_ALT_RANGE, sol_altitude);
+  const az_i = _find_span(_AZ_RANGE, sharp);
+  if (alt_i === -1 || az_i === -1) {
+    // angles out of the table's domain (0-90/0-180), or NaN (e.g. from
+    // _valid_range clipping upstream); for supine these are the rotated
+    // angles. -1 would otherwise wrap around to the last row/column instead
+    // of failing, so bail out explicitly rather than returning a
+    // plausible-looking wrong value.
+    return NaN;
+  }
+  const fp11 = fp_table[az_i]?.[alt_i] ?? NaN;
+  const fp12 = fp_table[az_i]?.[alt_i + 1] ?? NaN;
+  const fp21 = fp_table[az_i + 1]?.[alt_i] ?? NaN;
+  const fp22 = fp_table[az_i + 1]?.[alt_i + 1] ?? NaN;
+  const az1 = _AZ_RANGE[az_i] ?? NaN;
+  const az2 = _AZ_RANGE[az_i + 1] ?? NaN;
+  const alt1 = _ALT_RANGE[alt_i] ?? NaN;
+  const alt2 = _ALT_RANGE[alt_i + 1] ?? NaN;
+  let fp = fp11 * (az2 - sharp) * (alt2 - sol_altitude);
+  fp += fp21 * (sharp - az1) * (alt2 - sol_altitude);
+  fp += fp12 * (az2 - sharp) * (sol_altitude - alt1);
+  fp += fp22 * (sharp - az1) * (sol_altitude - alt1);
+  return fp / ((az2 - az1) * (alt2 - alt1));
+}
+
 function _solar_gain_scalar(
   sol_altitude: number,
   sharp: number,
@@ -305,35 +349,10 @@ function _solar_gain_scalar(
   const hr = 6;
   const i_diff = 0.2 * sol_radiation_dir;
 
-  const fp_table =
-    posture === Postures.sitting ? _FP_TABLE_SITTING : _FP_TABLE_STANDING;
-
-  if (posture === Postures.supine) {
-    [sharp, sol_altitude] = transpose_sharp_altitude(sharp, sol_altitude);
-  }
-
-  const alt_i = _find_span(_ALT_RANGE, sol_altitude);
-  const az_i = _find_span(_AZ_RANGE, sharp);
-  if (alt_i === -1 || az_i === -1) {
-    // sol_altitude/sharp out of the table's domain (0-90/0-180), or NaN
-    // (e.g. from _valid_range clipping upstream): -1 would otherwise wrap
-    // around to the last row/column instead of failing, so bail out
-    // explicitly rather than returning a plausible-looking wrong value.
+  const fp = _projected_area_factor(sol_altitude, sharp, posture);
+  if (Number.isNaN(fp)) {
     return [NaN, NaN];
   }
-  const fp11 = fp_table[az_i]?.[alt_i] ?? NaN;
-  const fp12 = fp_table[az_i]?.[alt_i + 1] ?? NaN;
-  const fp21 = fp_table[az_i + 1]?.[alt_i] ?? NaN;
-  const fp22 = fp_table[az_i + 1]?.[alt_i + 1] ?? NaN;
-  const az1 = _AZ_RANGE[az_i] ?? NaN;
-  const az2 = _AZ_RANGE[az_i + 1] ?? NaN;
-  const alt1 = _ALT_RANGE[alt_i] ?? NaN;
-  const alt2 = _ALT_RANGE[alt_i + 1] ?? NaN;
-  let fp = fp11 * (az2 - sharp) * (alt2 - sol_altitude);
-  fp += fp21 * (sharp - az1) * (alt2 - sol_altitude);
-  fp += fp12 * (az2 - sharp) * (sol_altitude - alt1);
-  fp += fp22 * (sharp - az1) * (sol_altitude - alt1);
-  fp /= (az2 - az1) * (alt2 - alt1);
 
   let f_eff = 0.725; // fraction of the body surface exposed to environmental radiation
   if (posture === Postures.sitting) {

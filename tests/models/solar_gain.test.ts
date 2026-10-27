@@ -16,7 +16,7 @@ function isclose(a: number, b: number, atol: number): boolean {
   return Math.abs(a - b) <= atol + 1e-5 * Math.abs(b);
 }
 
-// Mirrors pythermalcomfort v4.6.2 tests/test_solar_gain.py.
+// Mirrors pythermalcomfort v4.7.0 tests/test_solar_gain.py.
 describe("test_solar_gain", () => {
   test.each(reference_table.data)(
     "test_solar_gain: fixture case %#",
@@ -33,7 +33,7 @@ describe("test_solar_gain", () => {
     const cases = [
       [0, 120, 800, 0.5, 0.5, 0.5, "sitting", 43.2839, 10.3649],
       [30, 60, 600, 0.6, 0.4, 0.6, "standing", 52.8099, 12.1402],
-      [45, 90, 500, 0.7, 0.3, 0.7, "supine", 49.548, 11.3904],
+      [45, 90, 500, 0.7, 0.3, 0.7, "supine", 61.447, 14.1257],
       [90, 0, 1000, 1.0, 1.0, 1.0, "sitting", 326.6804, 78.2281],
       [15, 165, 250, 0.2, 0.1, 0.9, "standing", 8.9043, 2.047],
     ] as const;
@@ -56,6 +56,53 @@ describe("test_solar_gain", () => {
         f_svv: svv,
         f_bes: bes,
         posture,
+        round_output: false,
+      });
+      expect(isclose(result.erf, exp_erf, 1e-3)).toBe(true);
+      expect(isclose(result.delta_mrt, exp_d_mrt, 1e-3)).toBe(true);
+    }
+  });
+
+  // Upstream's docstring (tests/test_solar_gain.py:59-67):
+  //
+  // Supine: the rotated angles are used only for the fp lookup.
+  //
+  // The floor-reflected term depends on the irradiance on the horizontal floor,
+  // sol_radiation_dir * sin(sol_altitude) + i_diff, so it must use the solar altitude
+  // and not the rotated altitude used to read the fp table. In every case the two
+  // altitudes differ, so each case fails if the rotated altitude is used. The expected
+  // values agree within 2e-4 with the ERF function of the CBE Thermal Comfort Tool
+  // (static/js/erf.js); the first two cases are the supine cases of its tests
+  // (erf.test.js: 65.8 / 15.1 and 70.9 / 16.3).
+  test("test_solar_gain_supine_reflected_uses_solar_altitude", () => {
+    const cases = [
+      // sol_altitude, sharp, sol_radiation_dir, sol_transmittance, f_svv, f_bes,
+      // expected erf, expected delta_mrt
+      [45, 45, 700, 0.8, 0.2, 0.5, 65.8266, 15.1326], // rotated altitude 30
+      [45, 45, 800, 0.5, 0.5, 0.5, 70.8746, 16.293], // rotated altitude 30
+      [30, 0, 700, 0.8, 0.2, 0.5, 49.3611, 11.3474], // rotated altitude 60
+      [0, 60, 800, 0.5, 0.5, 0.5, 39.9589, 9.186], // horizon, rotated 30
+      [90, 0, 800, 0.5, 0.5, 0.5, 86.5421, 19.8947], // overhead, rotated 0
+    ] as const;
+    for (const [
+      alt,
+      sharp,
+      rad,
+      trans,
+      svv,
+      bes,
+      exp_erf,
+      exp_d_mrt,
+    ] of cases) {
+      const result = solar_gain({
+        sol_altitude: alt,
+        sharp,
+        sol_radiation_dir: rad,
+        sol_transmittance: trans,
+        f_svv: svv,
+        f_bes: bes,
+        asw: 0.7,
+        posture: "supine",
         round_output: false,
       });
       expect(isclose(result.erf, exp_erf, 1e-3)).toBe(true);
@@ -133,8 +180,8 @@ describe("test_solar_gain", () => {
 });
 
 // The per-model checks of the template (ADRs 0022-0024), through the public
-// entry: what upstream's tests leave out, measured on pythermalcomfort 4.6.2,
-// and what only the library adds.
+// entry: what upstream's tests leave out, measured on pythermalcomfort 4.6.2
+// (the supine values on 4.7.0), and what only the library adds.
 describe("solar_gain (JS-only)", () => {
   const base = {
     sol_altitude: 0,
@@ -156,7 +203,7 @@ describe("solar_gain (JS-only)", () => {
     });
 
     // Upstream lower-cases posture (models/solar_gain.py:207): "Supine"
-    // gives 56.0 and 12.9.
+    // gives 40.0 and 9.2 on pythermalcomfort 4.7.0.
     test("posture is case-insensitive, as upstream", () => {
       for (const posture of ["standing", "supine", "sitting"] as const)
         for (const given of [
@@ -167,8 +214,8 @@ describe("solar_gain (JS-only)", () => {
             solar_gain({ ...base, posture }),
           );
       expect(call({ ...base, posture: "Supine" })()).toMatchObject({
-        erf: 56.0,
-        delta_mrt: 12.9,
+        erf: 40.0,
+        delta_mrt: 9.2,
       });
     });
 
@@ -214,14 +261,14 @@ describe("solar_gain (JS-only)", () => {
       expect(solar_gain(base)).toMatchObject({ erf: 43.3, delta_mrt: 10.4 });
     });
 
-    // The supine path transposes sharp and sol_altitude
-    // (models/solar_gain.py:299-300); measured on pythermalcomfort 4.6.2.
+    // The supine path transposes sharp and sol_altitude for the fp lookup
+    // (models/solar_gain.py:291-292); measured on pythermalcomfort 4.7.0.
     test("supine gives upstream's values at the table's corners", () => {
       for (const [sol_altitude, sharp, erf, delta_mrt] of [
-        [0, 0, 57.91, 13.31],
-        [90, 0, 54.49, 12.53],
-        [90, 180, 54.49, 12.53],
-        [0, 180, 57.91, 13.31],
+        [0, 0, 25.86, 5.94],
+        [90, 0, 86.54, 19.89],
+        [90, 180, 86.54, 19.89],
+        [0, 180, 25.86, 5.94],
       ] as const) {
         const result = solar_gain({
           ...base,

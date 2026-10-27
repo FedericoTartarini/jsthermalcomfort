@@ -439,7 +439,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => ({
       ...solar_gain(inputs as unknown as Parameters<typeof solar_gain>[0]),
     }),
-    // Upstream rounds erf and delta_mrt with np.round (solar_gain.py:252-254).
+    // Upstream rounds erf and delta_mrt with np.round (models/solar_gain.py:252-254).
     rounded: ({ round_output }) =>
       round_output === true ? ["erf", "delta_mrt"] : [],
     // ASHRAE 55 Table C-2's rows, which upstream does not check, are exempt

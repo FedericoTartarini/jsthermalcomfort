@@ -29,7 +29,7 @@ export const Units = Object.freeze({
 /**
  * Postures options.
  *
- * Upstream's `Postures` (`utilities.py`); a parameter accepts either
+ * Upstream's `Postures` (`utilities.py:48-57`); a parameter accepts either
  * `Postures.sitting` or `"sitting"` (deviation _shared-29).
  */
 export const Postures = Object.freeze({

@@ -299,7 +299,7 @@ function _solar_gain_scalar(
   f_bes: number,
   asw: number,
   floor_reflectance: number,
-  posture: string,
+  posture: NonNullable<SolarGainInputs["posture"]>,
 ): [number, number] {
   const deg_to_rad = 0.0174532925;
   const hr = 6;

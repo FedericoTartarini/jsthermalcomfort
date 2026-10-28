@@ -35,6 +35,8 @@ import type {
   HIInputs,
   ModelInfo,
   ModelWarning,
+  PHS,
+  PHSInputs,
   PMVPPDAshrae,
   PMVPPDAshraeInputs,
   PMVPPD,
@@ -54,6 +56,8 @@ import {
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
+  PHS_INFO,
+  PHS_LIMITS_ISO_7933,
   PMV_CATEGORY_BINS_ISO_7730,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -70,6 +74,7 @@ import {
   clo_typical_ensembles,
   cooling_effect,
   heat_index_rothfusz,
+  phs,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
@@ -102,6 +107,7 @@ const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 const twoNodesGaggeInfo: ModelInfo = TWO_NODES_GAGGE_INFO;
+const phsInfo: ModelInfo = PHS_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -645,3 +651,25 @@ const twoNodesCe: SET &
 two_nodes_gagge({ ...twoNodesInputs, position: "lying" });
 // @ts-expect-error w_max is a number; upstream's False is 0 here.
 two_nodes_gagge({ ...twoNodesInputs, w_max: false });
+
+// phs takes posture, a choice_field with no default, and standard, one of ISO
+// 7933's editions; the edition's p_a and met bounds are PHS_LIMITS_ISO_7933's.
+const phsInputs: PHSInputs = {
+  tdb: 40,
+  tr: 40,
+  v: 0.3,
+  rh: 33.85,
+  met: 2.5,
+  clo: 0.5,
+  posture: "standing",
+  standard: "7933-2004",
+};
+const phsResult: PHS = phs(phsInputs);
+const phsTre: number = phsResult.t_re;
+const phsMet2004: Bound = PHS_LIMITS_ISO_7933["7933-2004"].met;
+// @ts-expect-error posture is required.
+phs({ tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 2.5, clo: 0.5 });
+// @ts-expect-error posture is one of choice_field's three values.
+phs({ ...phsInputs, posture: "lying" });
+// @ts-expect-error standard is one of ISO 7933's two editions.
+phs({ ...phsInputs, standard: "7730-2025" });

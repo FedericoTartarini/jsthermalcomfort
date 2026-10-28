@@ -6,6 +6,7 @@ import {
   cooling_effect,
   heat_index_rothfusz,
   phs,
+  PHS_INFO,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
@@ -456,26 +457,12 @@ const MODELS: readonly ParityModel[] = [
       >[0]),
     // Upstream rounds every output with np.around (models/phs.py:448-453).
     rounded: ({ round_output }) =>
-      round_output === true
-        ? [
-            "t_re",
-            "t_sk",
-            "t_cr",
-            "t_cr_eq",
-            "t_sk_t_cr_wg",
-            "d_lim_loss_50",
-            "d_lim_loss_95",
-            "d_lim_t_re",
-            "sweat_loss_g",
-            "sweat_rate_watt",
-            "evap_load_wm2_min",
-          ]
-        : [],
+      round_output === true ? Object.keys(PHS_INFO.outputs) : [],
     // V8's Math.exp differs from glibc's exp by an ulp on some arguments, and
     // the kernel's convergence tests carry it to 3.3e-9 relative over 480
     // minutes (the register's Notes).
     tolerance: { rel: 1e-8, abs: 1e-12 },
-    warnings: false,
+    warnings: true,
   },
   {
     name: "pmv_ppd_ashrae",

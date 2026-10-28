@@ -153,6 +153,156 @@ export type PHSInputs = InputsOf<typeof PHS_INFO>;
  */
 export type PHS = OutputsOf<typeof PHS_INFO>;
 
+/**
+ * Calculate the Predicted Heat Strain (PHS).
+ *
+ * The PHS is calculated in compliance with the ISO 7933:2004 [7933ISO2004](../../docs/references.md#7933iso2004) or
+ * 2023 Standard [7933ISO2023](../../docs/references.md#7933iso2023). The ISO 7933 provides a method for the analytical evaluation
+ * and interpretation of the thermal stress experienced by a subject in a hot environment.
+ * It describes a method for predicting the sweat rate and the internal core temperature that
+ * the human body will develop in response to the working conditions.
+ *
+ * The PHS model can be used to predict the: heat by respiratory convection, heat flow
+ * by respiratory evaporation, steady state mean skin temperature, instantaneous value
+ * of skin temperature, heat accumulation associated with the metabolic rate, maximum
+ * evaporative heat flow at the skin surface, predicted sweat rate, predicted evaporative
+ * heat flow, and rectal temperature.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.v - Air speed, [m/s].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.posture - a string value presenting posture of person "sitting", "standing", or "crouching"
+ * @param inputs.wme - external work, [met] default 0
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.standard - Select the model you want to use to calculate the PHS. The default option is
+ * "7933-2023", and the other option is "7933-2004".
+ * @param inputs.limit_inputs - If True, limits the input parameters to the standard's applicability limits. Defaults to True.
+ *
+ * > [!NOTE]
+ * > By default, if the inputs are outside the standard applicability limits the
+ * > function returns nan. If False returns values even if input values are
+ * > outside the applicability limits of the model.
+ * >
+ * > The 7933 limits are 15 <= tdb [°C] <= 50, 0 <= (tr - tdb) [°C] <= 60,
+ * > 0 <= v [m/s] <= 3, and 0.1 <= clo [clo] <= 1. The metabolic rate limit is
+ * > standard-specific: 1.7 <= met [met] <= 7.7 (100-450 W/m2) in the 2004
+ * > standard, and 0.96 <= met [met] <= 4.3 (56-250 W/m2) in the 2023 standard.
+ * @param inputs.i_mst - Static moisture permeability index, [dimensionless]. Defaults to 0.38.
+ * @param inputs.a_p - Fraction of the body surface covered by the reflective clothing, [dimensionless]. Defaults to 0.54.
+ * @param inputs.drink - 1 if workers can drink freely, 0 otherwise. Defaults to 1.
+ * @param inputs.weight - Body weight, [kg]. Defaults to 75.
+ * @param inputs.height - Height, [m]. Defaults to 1.8.
+ * @param inputs.walk_sp - Walking speed, [m/s]. Defaults to 0.
+ * @param inputs.theta - Angle between walking direction and wind direction, [degrees]. Defaults to 0.
+ * @param inputs.acclimatized - 100 if acclimatized subject, 0 otherwise. Defaults to 100.
+ * @param inputs.duration - Duration of the work sequence, [minutes]. Defaults to 480.
+ * @param inputs.f_r - Emissivity of the reflective clothing, [dimensionless]. Defaults to 0.97 in the 2004 standard and
+ * 0.42 in the 2023 standard.
+ * @param inputs.t_sk - Mean skin temperature when worker starts working, [°C]. Defaults to 34.1.
+ * @param inputs.t_cr - Mean core temperature when worker starts working, [°C]. Defaults to 36.8.
+ * @param inputs.t_re - Mean rectal temperature when worker starts working, [°C]. If None in the 2004 standard,
+ * then t_re = t_cr, whereas in the 2023 standard t_re = 36.8 °C
+ * @param inputs.t_cr_eq - Mean core temperature as a function of met when worker starts working, [°C]. If None in the 2004
+ * standard, then t_cr_eq = t_cr, whereas in the 2023 standard t_cr_eq = 36.8 °C.
+ * @param inputs.t_sk_t_cr_wg - Initial weighting fraction for skin/core temperature coupling, dimensionless.
+ * @param inputs.sweat_rate_watt - Initial instantaneous regulatory sweat (evaporative) rate at the skin, per unit area,
+ * [W·m⁻²]. This is an instantaneous rate (W/m²) used at each simulation time step.
+ * @param inputs.evap_load_wm2_min - Initial accumulated evaporative load per unit area. Input value is expected as an
+ * instantaneous rate in [W·m⁻²]; during the simulation the value is updated by adding
+ * instantaneous rates each minute and therefore the accumulated quantity represents the
+ * sum over minutes (units W·min·m⁻²). It is intended for carry over between consecutive
+ * simulation segments.
+ *
+ * @returns A dataclass containing the Predicted Heat Strain. See {@link PHS} for more details.
+ * To access the individual attributes, use the corresponding attribute of the returned `PHS` instance, e.g., `result.t_re`.
+ *
+ * - `t_re` - Rectal temperature, [°C].
+ * - `t_sk` - Skin temperature, [°C].
+ * - `t_cr` - Core temperature, [°C].
+ * - `t_cr_eq` - Core temperature as a function of the metabolic rate, [°C].
+ * - `t_sk_t_cr_wg` - Fraction of the body mass at the skin temperature.
+ * - `d_lim_loss_50` - Maximum allowable exposure time limited by cumulative sweat mass loss
+ *   for a mean worker (dehydration constraint), [minutes].
+ * - `d_lim_loss_95` - Maximum allowable exposure time limited by cumulative sweat mass loss
+ *   for 95% of the working population (dehydration constraint), [minutes].
+ * - `d_lim_t_re` - Maximum allowable exposure time for heat storage, [minutes].
+ * - `sweat_loss_g` - Cumulative evaporated sweat mass for the whole person over the simulated duration, [grams (g)].
+ *   This is a total mass per person (not per unit area).
+ * - `sweat_rate_watt` - Instantaneous evaporative heat flux due to regulatory sweating at the skin,
+ *   per unit area, [W·m⁻²]. Used at each simulation time step.
+ * - `evap_load_wm2_min` - Accumulated evaporative load per unit area over the simulated duration, [W·min·m⁻²].
+ *   Computed as the running sum of the instantaneous evaporative heat flux (W·m⁻²)
+ *   at each 1 minute step. Intended for chaining simulation segments.
+ *
+ * @example
+ * ```ts
+ * import { phs } from "jsthermalcomfort/models";
+ *
+ * let result = phs({
+ *   tdb: 40,
+ *   tr: 40,
+ *   rh: 33.85,
+ *   v: 0.3,
+ *   met: 2.5,
+ *   clo: 0.5,
+ *   posture: "standing",
+ *   wme: 0,
+ *   duration: 480,
+ * });
+ * console.log(result.t_re); // 37.5
+ *
+ * const results = [
+ *   { tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 2.5, clo: 0.5 },
+ *   { tdb: 45, tr: 45, v: 0.4, rh: 40, met: 2.6, clo: 0.6 },
+ * ].map((inputs) =>
+ *   phs({ ...inputs, posture: "standing", wme: 0, duration: 480 }),
+ * );
+ * console.log(results.map(({ t_re }) => t_re)); // [37.5, 42.5]
+ *
+ * // example: pass previous results as initial values to chain simulations
+ *
+ * // first simulation
+ * result = phs({
+ *   tdb: 40,
+ *   tr: 40,
+ *   v: 0.3,
+ *   rh: 50,
+ *   met: 2.5,
+ *   clo: 0.5,
+ *   posture: "standing",
+ *   wme: 0,
+ *   round_output: false,
+ *   duration: 60,
+ * });
+ * console.log(result.t_re); // 37.843744854847046
+ * // second simulation - using previous results as initial values
+ * // NOTE: when chaining runs, prefer round_output=False to avoid rounding drift.
+ * result = phs({
+ *   tdb: 40,
+ *   tr: 40,
+ *   v: 0.3,
+ *   rh: 50,
+ *   met: 2.5,
+ *   clo: 0.5,
+ *   posture: "standing",
+ *   wme: 0,
+ *   round_output: false,
+ *   duration: 60,
+ *   t_sk: result.t_sk,
+ *   t_cr: result.t_cr,
+ *   t_re: result.t_re,
+ *   t_cr_eq: result.t_cr_eq,
+ *   t_sk_t_cr_wg: result.t_sk_t_cr_wg,
+ *   sweat_rate_watt: result.sweat_rate_watt,
+ *   evap_load_wm2_min: result.evap_load_wm2_min,
+ * });
+ * console.log(result.t_re); // 38.52809746939635
+ * ```
+ */
 export function phs(inputs: PHSInputs): PHS {
   let {
     tdb,
@@ -227,12 +377,8 @@ export function phs(inputs: PHSInputs): PHS {
   }
 
   // Use explicit None sentinel for missing t_re and t_cr_eq
-  if (t_re === null) {
-    t_re = t_cr;
-  }
-  if (t_cr_eq === null) {
-    t_cr_eq = t_cr;
-  }
+  t_re ??= t_cr;
+  t_cr_eq ??= t_cr;
 
   const posture_code = _posture_to_code(posture);
   const model_code =
@@ -388,6 +534,24 @@ export function phs(inputs: PHSInputs): PHS {
   return Object.freeze({ ...output, warnings: Object.freeze(warnings) });
 }
 
+/**
+ * Map posture string(s) to integer code(s) for PHS calculations.
+ *
+ * Accepts either a scalar string or an array of strings representing posture.
+ * Valid values are Postures.standing.value, Postures.sitting.value, and Postures.crouching.value.
+ * Comparisons are vectorized using numpy for array inputs.
+ *
+ * @param posture - Scalar or array of posture strings. Valid values are
+ * Postures.standing.value, Postures.sitting.value, Postures.crouching.value.
+ * @returns If input is scalar, returns the corresponding integer code:
+ * _POSTURE_STANDING, _POSTURE_SITTING, or _POSTURE_CROUCHING.
+ * If input is array-like, returns a np.ndarray of dtype int64 with mapped codes.
+ * @throws `RangeError` If any supplied posture is not one of the valid values.
+ *
+ * @remarks
+ * - Scalar input returns an int code; array input returns a np.ndarray of codes.
+ * - Comparisons are vectorized for array inputs using numpy.
+ */
 function _posture_to_code(posture: string | null): number {
   if (posture === Postures.standing) {
     return _POSTURE_STANDING;

@@ -19,6 +19,7 @@ const expectedMetadataExports = [
   "classifyFromBins",
   "CLO_TOUT_INFO",
   "HEAT_INDEX_ROTHFUSZ_INFO",
+  "PHS_LIMITS_ISO_7933",
   "PMV_CATEGORY_BINS_ISO_7730",
   "PMV_PPD_ASHRAE_INFO",
   "PMV_PPD_ISO_INFO",
@@ -85,7 +86,9 @@ describe("standards — the standards each model takes", () => {
 
 describe("Deep freezing — objects are immutable", () => {
   test.each(
-    expectedMetadataExports.filter((name) => /_INFO$|_BINS_/.test(name)),
+    expectedMetadataExports.filter((name) =>
+      /_INFO$|_BINS_|_LIMITS_/.test(name),
+    ),
   )("%s is frozen deeply", (name) => {
     expect(isDeepFrozen((pkg as Record<string, unknown>)[name])).toBe(true);
   });
@@ -99,6 +102,15 @@ const v2Calls: Record<string, object> = {
   clo_tout: { tout: 20 },
   cooling_effect: { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 },
   heat_index_rothfusz: { tdb: 28, rh: 60 },
+  phs: {
+    tdb: 40,
+    tr: 40,
+    rh: 33.85,
+    v: 0.3,
+    met: 2.5,
+    clo: 0.5,
+    posture: "standing",
+  },
   pmv_ppd_ashrae: { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   pmv_ppd_iso: { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   solar_gain: {

@@ -2,7 +2,7 @@ import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "./heat_index_rothfusz.ts";
-import { phs } from "./phs.ts";
+import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
@@ -60,6 +60,7 @@ export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type { PMVPPDAshrae, PMVPPDAshraeInputs } from "./pmv_ppd_ashrae.ts";
+export type { PHS, PHSInputs } from "./phs.ts";
 export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type {
@@ -89,6 +90,8 @@ export {
   humidex,
   net,
   phs,
+  PHS_INFO,
+  PHS_LIMITS_ISO_7933,
   pet_steady,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
@@ -130,6 +133,8 @@ export default {
   humidex,
   net,
   phs,
+  PHS_INFO,
+  PHS_LIMITS_ISO_7933,
   pet_steady,
   pmv_ppd_ashrae,
   pmv_ppd_iso,

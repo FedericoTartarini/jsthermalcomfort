@@ -38,7 +38,7 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
 /**
  * Calculate the humidex (short for "humidity index"). It has been developed by the
  * Canadian Meteorological service. It was introduced in 1965 and then it was revised
- * by Masterson and Richardson (1979) [Masterson1979](../../docs/references.md#masterson1979). It aims to describe how hot,
+ * by Masterton and Richardson (1979) [Masterson1979](../../docs/references.md#masterson1979). It aims to describe how hot,
  * humid weather is felt by the average person. The Humidex differs from the heat index
  * in being related to the dew point rather than relative humidity [Havenith2016](../../docs/references.md#havenith2016).
  *
@@ -49,7 +49,7 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  *
  * > [!NOTE]
  * > The 'rana' model is the Humidex model proposed by [Rana et al. (2013)](https://doi.org/10.1016/j.enbuild.2013.04.019).
- * > The 'masterson' model is the Humidex model proposed by Masterson and Richardson (1979) [Masterson1979](../../docs/references.md#masterson1979).
+ * > The 'masterson' model is the Humidex model proposed by Masterton and Richardson (1979) [Masterson1979](../../docs/references.md#masterson1979).
  *
  * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
  *

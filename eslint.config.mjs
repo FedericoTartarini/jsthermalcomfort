@@ -36,6 +36,7 @@ export const LINTED = [
   "src/models/humidex.ts",
   "src/models/phs.ts",
   "src/models/pmv_a.ts",
+  "src/models/pmv_athb.ts",
   "src/models/pmv_e.ts",
   "src/models/pmv_ppd_ashrae.ts",
   "src/models/pmv_ppd_iso.ts",

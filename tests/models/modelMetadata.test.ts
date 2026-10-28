@@ -131,6 +131,14 @@ const v2Calls: Record<string, object> = {
     clo: 0.5,
     a_coefficient: 0.293,
   },
+  pmv_athb: {
+    tdb: 25,
+    tr: 25,
+    vr: 0.1,
+    rh: 50,
+    met: 1.2,
+    t_running_mean: 20,
+  },
   pmv_e: {
     tdb: 24,
     tr: 30,

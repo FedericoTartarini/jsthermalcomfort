@@ -34,6 +34,65 @@ export type ATHBInputs = InputsOf<typeof PMV_ATHB_INFO>;
  */
 export type ATHB = OutputsOf<typeof PMV_ATHB_INFO>;
 
+/**
+ * Return the PMV value calculated with the Adaptive Thermal Heat Balance Framework
+ * [Schweiker2022](../../docs/references.md#schweiker2022). The adaptive thermal heat balance (ATHB) framework introduced a
+ * method to account for the three adaptive principles, namely physiological,
+ * behavioral, and psychological adaptation, individually within existing heat balance
+ * models. The objective is a predictive model of thermal sensation applicable during
+ * the design stage or in international standards without knowing characteristics of
+ * future occupants.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, in [°C].
+ * @param inputs.tr - Mean radiant temperature, in [°C].
+ * @param inputs.vr - Relative air speed, in [m/s].
+ *
+ * > [!NOTE]
+ * > vr is the relative air speed caused by body movement and not the air
+ * > speed measured by the air speed sensor. The relative air speed is the sum of the
+ * > average air speed measured by the sensor plus the activity-generated air speed
+ * > (Vag). Where Vag is the activity-generated air speed caused by motion of
+ * > individual body parts. vr can be calculated using the function
+ * > `v_relative`.
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, in [clo]. If `clo` is set to False, the clothing insulation
+ * value will be calculated using the equation provided in the paper. Defaults to False.
+ * @param inputs.t_running_mean - Running mean temperature, in [°C].
+ *
+ * > [!NOTE]
+ * > The running mean temperature can be calculated using the function
+ * > `running_mean_outdoor_temperature`.
+ *
+ * @returns Dataclass containing the results of the ATHB calculation. See {@link ATHB} for more details.
+ *
+ * - `athb_pmv` - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework.
+ *
+ * @example
+ * ```ts
+ * import { pmv_athb } from "jsthermalcomfort/models";
+ *
+ * // calculate the predicted mean vote (PMV) using the Adaptive Thermal Heat Balance model
+ * const results = pmv_athb({
+ *   tdb: 25,
+ *   tr: 25,
+ *   vr: 0.1,
+ *   rh: 50,
+ *   met: 1.2,
+ *   t_running_mean: 20,
+ * });
+ * console.log(results.athb_pmv); // returns the PMV value
+ *
+ * // for multiple points
+ * const points = [
+ *   { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, t_running_mean: 20 },
+ *   { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, t_running_mean: 20 },
+ *   { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, t_running_mean: 20 },
+ * ].map((inputs) => pmv_athb(inputs));
+ * console.log(points.map((result) => result.athb_pmv));
+ * ```
+ */
 export function pmv_athb(inputs: ATHBInputs): ATHB {
   // Validate inputs using the ATHBInputs class
   const { tdb, tr, vr, rh, met, t_running_mean, clo } = parseInputs(

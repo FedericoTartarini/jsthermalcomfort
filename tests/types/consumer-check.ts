@@ -65,6 +65,8 @@ import type {
   APMVInputs,
   EPMV,
   EPMVInputs,
+  ATHB,
+  ATHBInputs,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -96,6 +98,7 @@ import {
   WIND_CHILL_TEMPERATURE_INFO,
   PMV_A_INFO,
   PMV_E_INFO,
+  PMV_ATHB_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -119,6 +122,7 @@ import {
   wind_chill_temperature,
   pmv_a,
   pmv_e,
+  pmv_athb,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 // One set of category bins per ISO 7730 edition replaced the one for both, so
@@ -157,6 +161,7 @@ const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
 const setTmpInfo: ModelInfo = SET_TMP_INFO;
 const pmvAInfo: ModelInfo = PMV_A_INFO;
 const pmvEInfo: ModelInfo = PMV_E_INFO;
+const pmvAthbInfo: ModelInfo = PMV_ATHB_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -888,3 +893,25 @@ const pmvEValue: number = pmvEResult.e_pmv;
 pmvEResult.e_pmv = 1;
 // @ts-expect-error e_coefficient is required.
 pmv_e({ tdb: 24, tr: 30, vr: 0.22, rh: 50, met: 1.4, clo: 0.5 });
+
+// pmv_athb takes one inputs object (ADR 0002), with its inputs and result
+// types named after upstream's ATHBInputs and ATHB, and returns a readonly
+// result; clo takes upstream's False or a number (decision 244).
+const pmvAthbInputs: ATHBInputs = {
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  t_running_mean: 20,
+  clo: false,
+};
+const pmvAthbResult: ATHB = pmv_athb(pmvAthbInputs);
+const pmvAthbValue: number = pmvAthbResult.athb_pmv;
+pmv_athb({ ...pmvAthbInputs, clo: 0.5 });
+// @ts-expect-error clo takes false or a number, not true.
+pmv_athb({ ...pmvAthbInputs, clo: true });
+// @ts-expect-error the result is readonly.
+pmvAthbResult.athb_pmv = 1;
+// @ts-expect-error t_running_mean is required.
+pmv_athb({ tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2 });

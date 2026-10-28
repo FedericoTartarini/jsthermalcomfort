@@ -35,7 +35,7 @@ import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
-import { two_nodes_gagge } from "./two_nodes_gagge.ts";
+import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -72,6 +72,11 @@ export type {
 } from "./pmv_ppd_ashrae.ts";
 export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
+export type {
+  GaggeTwoNodes,
+  GaggeTwoNodesInputs,
+  SET,
+} from "./two_nodes_gagge.ts";
 export type { UTCI, UTCIInputs } from "./utci.ts";
 
 export {
@@ -106,6 +111,7 @@ export {
   SOLAR_GAIN_INFO,
   set_tmp,
   two_nodes_gagge,
+  TWO_NODES_GAGGE_INFO,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,
@@ -147,6 +153,7 @@ export default {
   SOLAR_GAIN_INFO,
   set_tmp,
   two_nodes_gagge,
+  TWO_NODES_GAGGE_INFO,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,

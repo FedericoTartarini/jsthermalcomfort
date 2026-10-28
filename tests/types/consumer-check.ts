@@ -29,6 +29,8 @@ import type {
   CoolingEffectParams,
   CoolingEffectResult,
   DerivedField,
+  GaggeTwoNodes,
+  GaggeTwoNodesInputs,
   HI,
   HIInputs,
   ModelInfo,
@@ -37,6 +39,7 @@ import type {
   PmvPpdAshraeResult,
   PMVPPD,
   PMVPPDInputs,
+  SET,
   SolarGain,
   SolarGainInputs,
   UTCI,
@@ -56,6 +59,7 @@ import {
   PMV_PPD_ISO_INFO,
   SOLAR_GAIN_INFO,
   Standard,
+  TWO_NODES_GAGGE_INFO,
   Postures,
   Units,
   UTCI_INFO,
@@ -69,6 +73,7 @@ import {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
+  two_nodes_gagge,
   utci,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
@@ -97,6 +102,7 @@ const ashrae = PMV_PPD_ASHRAE_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
+const twoNodesGaggeInfo: ModelInfo = TWO_NODES_GAGGE_INFO;
 // @ts-expect-error the old form's inputs carry no kind.
 const ashraeAsModelInfo: ModelInfo = PMV_PPD_ASHRAE_INFO;
 
@@ -601,3 +607,23 @@ CLO_INDIVIDUAL_GARMENT_GROUPS[0].garments.push("Bra");
 const sameUtci: typeof utci = utciFromModels;
 const samePSat: typeof jsthermalcomfort.p_sat = p_sat;
 const sameStandard: typeof Standard = standardFromUtilities;
+
+// two_nodes_gagge returns upstream's union, SET | GaggeTwoNodes; position is a
+// choice_field, which takes null as upstream's takes None, and w_max a number.
+const twoNodesInputs: GaggeTwoNodesInputs = {
+  tdb: 25,
+  tr: 25,
+  v: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  position: null,
+};
+const twoNodes: SET | GaggeTwoNodes = two_nodes_gagge(twoNodesInputs);
+const twoNodesSet: number = twoNodes.set;
+// @ts-expect-error position is one of choice_field's three values.
+two_nodes_gagge({ ...twoNodesInputs, position: "lying" });
+// @ts-expect-error w_max is a number; upstream's False is 0 here.
+two_nodes_gagge({ ...twoNodesInputs, w_max: false });
+// @ts-expect-error the union narrows before a GaggeTwoNodes field is read.
+twoNodes.e_skin;

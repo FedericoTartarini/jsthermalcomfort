@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { two_nodes_gagge } from "../../src/models/index.ts";
+import {
+  two_nodes_gagge,
+  TWO_NODES_GAGGE_INFO,
+} from "../../src/models/index.ts";
+import { two_nodes_gagge as from_root } from "../../src/index.ts";
+import { Postures } from "../../src/utilities/index.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof two_nodes_gagge>[0];
@@ -59,4 +65,104 @@ describe("test_two_nodes_gagge", () => {
       });
     },
   );
+});
+
+const base = { tdb: 30, tr: 35, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+const position_message =
+  "position must be one of ['sitting', 'standing', 'standing, forced convection']";
+const call = (inputs: unknown) =>
+  two_nodes_gagge(inputs as Parameters<typeof two_nodes_gagge>[0]);
+
+// Mirrors the position cases of pythermalcomfort v4.7.0
+// tests/test_choice_field.py through the model, whose inputs class receives
+// position (models/two_nodes_gagge.py:115). Measured on 4.7.0, 'sitting'
+// gives a set of 31.39 here and 'standing' 31.52.
+describe("test_choice_field", () => {
+  const allowed = ["sitting", "standing", "standing, forced convection"];
+  const set = (position: unknown) => call({ ...base, position }).set;
+
+  // BaseInputs skips None, and the kernel computes it as standing.
+  test("test_choice_fields_metadata_and_none[position]", () => {
+    expect(TWO_NODES_GAGGE_INFO.inputs.position.allowed).toEqual(allowed);
+    expect(set(null)).toBe(set("standing"));
+    expect(set(undefined)).toBe(set("standing"));
+  });
+
+  // Kept as given, so "SITTING" computes as standing; arrays throw (deviation two_nodes_gagge-6).
+  test.each([
+    ["scalar", allowed[0], 31.39],
+    ["uppercase", "SITTING", 31.52],
+    ["enum", Postures.sitting, 31.39],
+  ])(
+    "test_choice_fields_preserve_valid_values[position-%s]",
+    (_, value, expected) => {
+      expect(set(value)).toBe(expected);
+    },
+  );
+
+  test.each([
+    ["scalar", "invalid", RangeError],
+    ["list", [allowed[0], "invalid"], TypeError],
+  ])(
+    "test_choice_fields_reject_invalid_values[position-%s]",
+    (_, value, error) => {
+      expect(() => set(value)).toThrow(new error(position_message));
+    },
+  );
+});
+
+describeModelContract(two_nodes_gagge, TWO_NODES_GAGGE_INFO, base);
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("two_nodes_gagge (JS-only)", () => {
+  // Upstream computes w_max for False and None (deviation two_nodes_gagge-3).
+  test("a w_max of false or null throws TypeError", () => {
+    for (const w_max of [false, null])
+      expect(() => call({ ...base, w_max })).toThrow(
+        new TypeError("w_max must be a finite number."),
+      );
+  });
+
+  // classes_input.py:740 (deviation two_nodes_gagge-4).
+  test("a w_max out of (0.06, 1] other than 0 throws upstream's message, a RangeError", () => {
+    for (const w_max of [0.06, 0.01, -0.5, 1.2, 1.0000000000000002])
+      expect(() => call({ ...base, w_max })).toThrow(
+        new RangeError(
+          "w_max must be greater than 0.06 and at most 1 (False or 0 means the model computes it).",
+        ),
+      );
+    expect(call({ ...base, w_max: -0 })).toHaveProperty("w_max", 0.71);
+  });
+
+  // Deviation two_nodes_gagge-5.
+  test("a position that is not a string throws upstream's message, a TypeError", () => {
+    for (const position of [5, true, {}])
+      expect(() => call({ ...base, position })).toThrow(
+        new TypeError(position_message),
+      );
+  });
+
+  // Upstream returns SET(set=result) unrounded (models/two_nodes_gagge.py:133-146).
+  test("calculate_ce returns the SET path's set, as upstream's SET, frozen", () => {
+    for (const changed of [
+      {},
+      { position: "sitting" },
+      { max_skin_blood_flow: 10, max_sweating: 1, w_max: 0.2 },
+      { round_output: false },
+    ]) {
+      const result = call({ ...base, ...changed, calculate_ce: true });
+      expect(result).toEqual({ set: 32.316713448080286, warnings: [] });
+      expect(isDeepFrozen(result)).toBe(true);
+    }
+  });
+
+  // Deviation two_nodes_gagge-2.
+  test("returns no warnings, as upstream emits none", () => {
+    expect(call(base).warnings).toEqual([]);
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(from_root).toBe(two_nodes_gagge);
+  });
 });

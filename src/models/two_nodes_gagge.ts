@@ -86,6 +86,88 @@ export type GaggeTwoNodes = OutputsOf<typeof TWO_NODES_GAGGE_INFO>;
  */
 export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
 
+/**
+ * Gagge Two-node model of human temperature regulation Gagge et al (1986)
+ * [Gagge1986](../../docs/references.md#gagge1986).
+ *
+ * [Gagge1986](../../docs/references.md#gagge1986) This model can be used to calculate a variety of indices, including:
+ *
+ * * Gagge's version of Fanger's Predicted Mean Vote (PMV). This function uses the Fanger's PMV equations but it replaces the heat loss and gain terms with those calculated by the two-node model developed by Gagge et al. (1986) [Gagge1986](../../docs/references.md#gagge1986).
+ * * PMV SET and the predicted thermal sensation based on SET [Gagge1986](../../docs/references.md#gagge1986). This function is similar in all aspects to the `pmv_gagge` however, it uses the `set` equation to calculate the dry heat loss by convection.
+ * * Thermal discomfort (DISC) as the relative thermoregulatory strain necessary to restore a state of comfort and thermal equilibrium by sweating [Gagge1986](../../docs/references.md#gagge1986). DISC is described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1), uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (5). The range of each category is ± 0.5 numerically. In the cold, the classical negative category descriptions used for Fanger's PMV apply [Gagge1986](../../docs/references.md#gagge1986).
+ * * Heat gains and losses via convection, radiation, and conduction.
+ * * The Standard Effective Temperature (SET).
+ * * The New Effective Temperature (ET).
+ * * The Predicted Thermal Sensation (TSENS).
+ * * The Predicted Percent Dissatisfied Due to Draft (PD).
+ * * Predicted Percent Satisfied With the Level of Air Movement (PS).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.v - Air speed, [m/s].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ * @param inputs.body_surface_area - Body surface area, default value 1.8258 [m2]. Defaults to 1.8258.
+ *
+ * > [!NOTE]
+ * > The body surface area can be calculated using the function
+ * > `body_surface_area`.
+ * @param inputs.p_atm - Atmospheric pressure, default value 101325 [Pa]. Defaults to 101325.
+ * @param inputs.position - Select either "sitting" or "standing". Defaults to "standing".
+ * @param inputs.max_skin_blood_flow - Maximum blood flow from the core to the skin, [kg/h/m2]. Defaults to 90.
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [kg/h/m2]. Defaults to 500.
+ * @param inputs.w_max - Maximum skin wettedness (w) adimensional, greater than 0.06 and at most 1. 0.06
+ * is the wettedness from skin diffusion alone, without sweating, so it is
+ * excluded. Defaults to False, which computes it from `v` and `clo`. False and 0
+ * both mean the value is computed; True and NaN are rejected.
+ *
+ * @returns A dataclass containing the results of the two-node model of human temperature regulation.
+ * See {@link GaggeTwoNodes} for more details.
+ * To access the results, use the corresponding attributes of the returned `GaggeTwoNodes` instance, e.g., `result.e_skin`.
+ *
+ * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.
+ * - `e_rsw` - Rate of evaporative heat loss from sweat evaporation, [W/m2].
+ * - `e_max` - Maximum rate of evaporative heat loss from skin, [W/m2].
+ * - `q_sensible` - Sensible heat loss from skin, [W/m2].
+ * - `q_skin` - Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin.
+ * - `q_res` - Total rate of heat loss through respiration, [W/m2].
+ * - `t_core` - Core temperature, [°C].
+ * - `t_skin` - Skin temperature, [°C].
+ * - `m_bl` - Skin blood flow, [kg/h/m2].
+ * - `m_rsw` - Rate at which regulatory sweat is generated, [mL/h/m2].
+ * - `w` - Skin wettedness, adimensional. Ranges from 0 to 1.
+ * - `w_max` - Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 to 1.
+ * - `set` - Standard Effective Temperature (SET).
+ * - `et` - New Effective Temperature (ET).
+ * - `pmv_gagge` - PMV Gagge.
+ * - `pmv_set` - PMV SET.
+ * - `disc` - Thermal discomfort.
+ * - `t_sens` - Predicted Thermal Sensation.
+ *
+ * @example
+ * ```ts
+ * import { two_nodes_gagge } from "jsthermalcomfort/models";
+ *
+ * const result = two_nodes_gagge({
+ *   tdb: 25,
+ *   tr: 25,
+ *   v: 0.1,
+ *   rh: 50,
+ *   clo: 0.5,
+ *   met: 1.2,
+ * });
+ * console.log(result.w); // 0.12
+ *
+ * const results = [25, 25].map((tdb) =>
+ *   two_nodes_gagge({ tdb, tr: 25, v: 0.3, rh: 50, met: 1.2, clo: 0.5 }),
+ * );
+ * console.log(results.map(({ e_skin }) => e_skin)); // [16.17, 16.17]
+ * ```
+ */
 export function two_nodes_gagge(
   inputs: GaggeTwoNodesInputs,
 ): SET | GaggeTwoNodes {

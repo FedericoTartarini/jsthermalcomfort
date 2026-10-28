@@ -27,10 +27,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   testDataUrls.pmvPpd,
 );
 
-// Upstream keeps the rows without a standard and those labelled "iso", which
-// matches none of the fixture's uppercase "ISO" labels, so its fixture test
-// runs only the two rows without one. This runs what it means to run: those
-// two and every ISO row, SI and IP, arrays included.
+// As upstream, the rows without a standard and those whose label lower-cases to "iso" (tests/test_pmv_ppd_iso.py:25-27).
 const iso_rows = assertNonEmptyRows(
   reference_table.data.filter(
     ({ inputs }) => (inputs.standard ?? "ISO") === "ISO",

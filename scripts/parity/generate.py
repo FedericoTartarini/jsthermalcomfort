@@ -290,9 +290,9 @@ def _set_tmp(rng):
     # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
     # warning are compared too, and reach the hot, radiant, windy cases where
     # the library's SET once drifted from upstream's by up to 6.4 °C
-    # (tdb 42-49 °C, tr 57-66 °C). position comes in any case, as
-    # two_nodes_gagge's check accepts. calculate_ce takes the SET path, which
-    # ignores position.
+    # (tdb 42-49 °C, tr 57-66 °C; docs/deviations/set_tmp.md, Notes).
+    # position comes in any case, as two_nodes_gagge's check accepts.
+    # calculate_ce takes the SET path, which ignores position.
     return {
         "tdb": _value(rng, 5.0, 50.0),
         "tr": _value(rng, 5.0, 67.0),

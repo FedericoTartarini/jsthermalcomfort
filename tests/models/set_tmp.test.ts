@@ -93,7 +93,7 @@ describe("set_tmp (JS-only)", () => {
     );
   });
 
-  // models/two_nodes_gagge.py:133-146: the SET path computes as standing.
+  // models/two_nodes_gagge.py:133-146, :337-342: the SET path passes 1 as position, which computes as standing.
   test.each(["sitting", "standing"])(
     "calculate_ce takes the SET path, whatever the position, %s",
     (position) => {

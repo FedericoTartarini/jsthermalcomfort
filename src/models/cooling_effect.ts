@@ -9,7 +9,6 @@ import { _check_params_object } from "../_internal/validation.ts";
 /**
  * @typedef {object} CoolingEffectResult
  * @property {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
- * @public
  */
 export type CoolingEffectResult = {
   ce: number;
@@ -40,10 +39,6 @@ export interface CoolingEffectParams {
  * the same {@link https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature|SET} under still air
  * as in the first {@link https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature|SET} calculation
  * under elevated air speed. The cooling effect is calculated only for air speed higher than 0.1 m/s.
- *
- * @public
- * @memberof models
- * @docname Cooling Effect (CE)
  *
  * @param {Object} params - the model's parameters, named as in pythermalcomfort.
  * @param {number} params.tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'

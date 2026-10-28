@@ -22,11 +22,6 @@ import {
   clo_total_insulation,
 } from "./clothing.ts";
 
-/**
- * @public
- * @name utilities
- * @docname Utilities
- */
 export {
   body_surface_area,
   v_relative,
@@ -74,9 +69,3 @@ export default {
   Units,
   Postures,
 };
-
-/**
- * @public
- * @name reference_values
- * @docname Reference values clo and met
- */

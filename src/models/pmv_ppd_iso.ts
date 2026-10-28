@@ -23,7 +23,6 @@ import type {
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses left-inclusive bins (pythermalcomfort#382).
  * @property {string|number} category - ISO 7730 category of thermal environment: under 7730-2025 "I", "II", "III", "IV" or "none", the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO_7730_2025`; under 7730-2005 "A", "B", "C" or "none", by `PMV_CATEGORY_BINS_ISO_7730_2005`; NaN when `limit_inputs` returns NaN for the inputs.
  * @property {import("../_internal/modelInfo.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- * @public
  */
 export type PmvPpdIsoResult = {
   pmv: number;
@@ -55,8 +54,6 @@ export interface PmvPpdIsoParams extends Omit<
  * by `PMV_CATEGORY_BINS_ISO_7730_2005` instead.
  *
  * Experimental — the shape of `ModelInfo` may change before release.
- *
- * @public
  */
 export const PMV_PPD_ISO_INFO: LegacyModelInfo = deepFreeze({
   name: "pmv_ppd_iso",
@@ -157,10 +154,6 @@ const PMV_PPD_ISO_SCHEMA = {
  * const r = pmv_ppd_iso({ tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 });
  * console.log(r.pmv); // 0.08
  * console.log(r.ppd); // 5.1
- *
- * @public
- * @memberof models
- * @docname PMV/PPD (ISO 7730)
  */
 export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
   // The quantities and the standard were positional before v2 (ADR 0002); a

@@ -7,9 +7,6 @@ import { p_sat } from "./p_sat.js";
  * with the same {@link p_sat}. The result is not clamped, so a `p_vap` above
  * saturation reads above 100 %.
  *
- * @public
- * @memberof psychrometrics
- *
  * @param {number} p_vap - partial pressure of water vapour in moist air, [Pa]
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @returns {number} - relative humidity, [%]

@@ -10,9 +10,6 @@
  * a wet-bulb at or above the fit's value at 100 % reads 100, and one at or
  * below the fit's minimum reads 0.
  *
- * @public
- * @memberof psychrometrics
- *
  * @param {number} t_wb - wet-bulb temperature, [°C]
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @returns {number} - relative humidity, [%]

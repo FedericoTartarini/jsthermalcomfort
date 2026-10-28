@@ -5,9 +5,6 @@
  * coefficients, before its 0.1 °C rounding. The result is not clamped, so a
  * dew point above `tdb` reads above 100 %.
  *
- * @public
- * @memberof psychrometrics
- *
  * @param {number} t_dp - dew point temperature, [°C]
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @returns {number} - relative humidity, [%]

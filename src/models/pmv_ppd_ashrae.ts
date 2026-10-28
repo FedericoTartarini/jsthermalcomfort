@@ -20,7 +20,6 @@ import type {
  * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses right-inclusive bins (pythermalcomfort#382).
  * @property {boolean|number} compliance - True if -0.5 < pmv < 0.5 (`PMV_COMPLIANCE_INTERVAL_ASHRAE`), read from the unrounded pmv; NaN when `limit_inputs` returns NaN for the inputs.
  * @property {import("../_internal/modelInfo.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- * @public
  */
 export type PmvPpdAshraeResult = {
   pmv: number;
@@ -52,8 +51,6 @@ export interface PmvPpdAshraeParams extends Omit<PmvPpdParams, "standard"> {
  * airspeed depend on the call (operative temperature, met and clo), so they
  * have no fixed `Bound` here; a call that breaks one reports it in
  * `warnings` with a bound built for that call.
- *
- * @public
  */
 export const PMV_PPD_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
   name: "pmv_ppd_ashrae",
@@ -115,10 +112,6 @@ export const PMV_PPD_ASHRAE_INFO: LegacyModelInfo = deepFreeze({
  * console.log(r.pmv); // 0.08
  * console.log(r.ppd); // 5.1
  * console.log(r.compliance); // true
- *
- * @public
- * @memberof models
- * @docname PMV/PPD (ASHRAE 55)
  */
 // A non-finite number throws a TypeError here, where upstream lets it
 // propagate (ADR 0001, reason three).

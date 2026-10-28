@@ -8,9 +8,6 @@ import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
  * `rh = 100 · p_vap / p_sat(tdb)`. Same name and signature as
  * pythermalcomfort's `hr_to_rh`. The result is not clamped.
  *
- * @public
- * @memberof psychrometrics
- *
  * @param {number} hr - humidity ratio, [kg water/kg dry air]
  * @param {number} tdb - dry bulb air temperature, [°C]
  * @param {number} [p_atm = 101325] - atmospheric pressure, [Pa]

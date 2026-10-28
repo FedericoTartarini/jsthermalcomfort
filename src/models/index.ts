@@ -71,11 +71,6 @@ export type { PmvPpdIsoParams, PmvPpdIsoResult } from "./pmv_ppd_iso.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type { UTCI, UTCIInputs } from "./utci.ts";
 
-/**
- * @public
- * @name models
- * @docname Comfort Models
- */
 export {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,

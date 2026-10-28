@@ -46,10 +46,6 @@ function _correction_normal_clothing(_vr: number, _vw: number): number {
  * Same name, parameters and values as pythermalcomfort's
  * `clothing.clo_area_factor`.
  *
- * @public
- * @memberof utilities
- * @docname Clothing area factor
- *
  * @param {number} i_cl - intrinsic insulation of the clothing ensemble, [clo]
  * @returns {number} area factor of the clothing ensemble, [m2]
  *
@@ -71,10 +67,6 @@ export function clo_area_factor(i_cl: number): number {
  *
  * Same name, parameters and values as pythermalcomfort's
  * `clothing.clo_insulation_air_layer`.
- *
- * @public
- * @memberof utilities
- * @docname Boundary air layer insulation
  *
  * @param {number} vr - relative air speed, [m/s]
  * @param {number} v_walk - walking speed, [m/s]
@@ -111,10 +103,6 @@ export function clo_insulation_air_layer(
  *
  * Same name, parameters and values as pythermalcomfort's
  * `clothing.clo_total_insulation`.
- *
- * @public
- * @memberof utilities
- * @docname Total clothing insulation
  *
  * @param {number} i_t - total thermal insulation of clothing under static reference conditions, [clo]
  * @param {number} vr - relative air speed, [m/s]
@@ -154,10 +142,6 @@ export function clo_total_insulation(
  * {@link #pmv_ppd_ashrae|pmv_ppd_ashrae} and the other ASHRAE 55 models take.
  * For ISO 7730 use {@link #clo_dynamic_iso|clo_dynamic_iso}. Same name,
  * parameters and values as pythermalcomfort's `clothing.clo_dynamic_ashrae`.
- *
- * @public
- * @memberof utilities
- * @docname Dynamic clothing (ASHRAE 55)
  *
  * @param {number} clo - clothing insulation, [clo]. This is the basic insulation (I_cl), also known
  * as the intrinsic clothing insulation value under reference conditions
@@ -206,10 +190,6 @@ export function clo_dynamic_ashrae(
  * values as pythermalcomfort's `clothing.clo_dynamic_iso`: `v` is the air
  * speed, and the relative air speed is derived from it with `v_relative`.
  *
- * @public
- * @memberof utilities
- * @docname Dynamic clothing (ISO 7730)
- *
  * @param {number} clo - clothing insulation, [clo]
  * @param {number} met - metabolic rate, [met]
  * @param {number} v - air speed, [m/s]
@@ -247,10 +227,6 @@ export function clo_dynamic_iso(
  * derives `vr` inside. This is everything that function does after that step,
  * exported because the CBE Thermal Comfort Tool lets a person enter `vr`
  * (ADR 0001: a deviation may add an export).
- *
- * @public
- * @memberof utilities
- * @docname Dynamic clothing (ISO 7730) from the relative air speed
  *
  * @param {number} clo - clothing insulation, [clo]
  * @param {number} met - metabolic rate, [met]

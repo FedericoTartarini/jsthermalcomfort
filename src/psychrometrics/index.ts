@@ -10,11 +10,6 @@ import { rh_from_dew_point } from "./rh_from_dew_point.ts";
 import { rh_from_wet_bulb } from "./rh_from_wet_bulb.ts";
 import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
 
-/**
- * @public
- * @name psychrometrics
- * @docname Psychrometrics
- */
 export {
   p_sat,
   p_sat_torr,

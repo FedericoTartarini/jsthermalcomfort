@@ -9,6 +9,7 @@ import tseslint from "typescript-eslint";
 export const LINTED = [
   "vitest.config.ts",
   "src/_internal/adaptive_cooling_effect.ts",
+  "src/_internal/brentq.ts",
   "src/_internal/ashrae55.ts",
   "src/_internal/classifierBins.ts",
   "src/_internal/define.ts",
@@ -35,6 +36,7 @@ export const LINTED = [
   "tests/environment/operative_tmp.test.ts",
   "tests/environment/transpose_sharp_altitude.test.ts",
   "tests/internal.test.ts",
+  "tests/internal/brentq.test.ts",
   "tests/models/adaptive_ashrae.test.ts",
   "tests/models/clo_tout.test.ts",
   "tests/models/heat_index_rothfusz.test.ts",

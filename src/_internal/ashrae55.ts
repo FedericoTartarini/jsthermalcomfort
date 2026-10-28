@@ -32,6 +32,14 @@ export const ASHRAE_55_COMPLIANCE_STANDARDS = deepFreeze([
 ] as const);
 
 /**
+ * ASHRAE 55's still-air speed, 0.1 m/s: `cooling_effect` calculates the
+ * cooling effect only above it and computes the still-air SET at it
+ * (`models/cooling_effect.py:35-40, :141, :187`), and `pmv_ppd_ashrae`
+ * applies the cooling effect above it (`models/pmv_ppd_ashrae.py:173-182`).
+ */
+export const ASHRAE_55_STILL_AIR_THRESHOLD = 0.1;
+
+/**
  * The fixed airspeed bounds of the §7.2.1.2 `airspeed_control` rules: `any`
  * at every operative temperature, `cool` when the operative temperature is at
  * or below 23 °C.

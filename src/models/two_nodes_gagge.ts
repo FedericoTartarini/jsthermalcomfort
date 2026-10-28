@@ -93,7 +93,7 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * [Gagge1986](../../docs/references.md#gagge1986) This model can be used to calculate a variety of indices, including:
  *
  * * Gagge's version of Fanger's Predicted Mean Vote (PMV). This function uses the Fanger's PMV equations but it replaces the heat loss and gain terms with those calculated by the two-node model developed by Gagge et al. (1986) [Gagge1986](../../docs/references.md#gagge1986).
- * * PMV SET and the predicted thermal sensation based on SET [Gagge1986](../../docs/references.md#gagge1986). This function is similar in all aspects to the `pmv_gagge` however, it uses the `set` equation to calculate the dry heat loss by convection.
+ * * PMV SET and the predicted thermal sensation based on SET [Gagge1986](../../docs/references.md#gagge1986). This function is similar in all aspects to the PMV Gagge above however, it uses the `set_tmp` equation to calculate the dry heat loss by convection.
  * * Thermal discomfort (DISC) as the relative thermoregulatory strain necessary to restore a state of comfort and thermal equilibrium by sweating [Gagge1986](../../docs/references.md#gagge1986). DISC is described numerically as: comfortable and pleasant (0), slightly uncomfortable but acceptable (1), uncomfortable and unpleasant (2), very uncomfortable (3), limited tolerance (4), and intolerable (5). The range of each category is ± 0.5 numerically. In the cold, the classical negative category descriptions used for Fanger's PMV apply [Gagge1986](../../docs/references.md#gagge1986).
  * * Heat gains and losses via convection, radiation, and conduction.
  * * The Standard Effective Temperature (SET).

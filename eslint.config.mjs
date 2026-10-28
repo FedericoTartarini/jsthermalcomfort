@@ -19,6 +19,7 @@ export const LINTED = [
   "src/environment/index.ts",
   "src/environment/operative_tmp.ts",
   "src/environment/transpose_sharp_altitude.ts",
+  "src/utilities/met_to_w_m2.ts",
   "src/utilities/options.ts",
   "src/utilities/units_converter.ts",
   "src/models/adaptive_ashrae.ts",

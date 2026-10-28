@@ -428,8 +428,8 @@ def _vertical_tmp_grad_ppd(rng):
 
 def _wci(rng):
     # v reaches past 25 m/s (90 km/h), where the index peaks and then
-    # declines (models/wci.py:25-26), and tdb past 33 °C, where it turns
-    # negative.
+    # declines (models/wci.py:25-26), and tdb past 33 °C, where its
+    # (33 - tdb) turns it negative (models/wci.py:68).
     return {
         "tdb": _value(rng, -50.0, 40.0),
         "v": _value(rng, 0.0, 40.0),

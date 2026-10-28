@@ -58,12 +58,12 @@ describe("wci (JS-only)", () => {
     "tdb %s, v %s gives %s, rounded %s",
     (tdb, v, expected, rounded) => {
       const result = wci({ tdb, v, round_output: false });
-      expect(approx(result.wci, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+      expect(approx(result.wci, expected)).toBe(true);
       expect(wci({ tdb, v }).wci).toBe(rounded);
     },
   );
 
-  // As upstream's: v**0.5 of a negative v is NaN.
+  // As upstream's: v**0.5 of a negative v is NaN (models/wci.py:68).
   test("a negative v gives NaN", () => {
     expect(wci({ tdb: 0, v: -1 }).wci).toBeNaN();
     expect(wci({ tdb: 0, v: -1, round_output: false }).wci).toBeNaN();

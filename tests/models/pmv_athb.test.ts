@@ -38,7 +38,6 @@ describeModelContract(pmv_athb, PMV_ATHB_INFO, neutral);
 describe("pmv_athb (JS-only)", () => {
   // models/pmv_athb.py:98: False computes the adapted clothing, a number is used.
   test.each([
-    [neutral, 0.206],
     [{ ...neutral, clo: false }, 0.206],
     [{ ...neutral, clo: 0 }, -0.626],
     [{ ...neutral, clo: 0.5 }, 0.105],

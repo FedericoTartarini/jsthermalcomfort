@@ -296,6 +296,7 @@ def _pmv_athb(rng):
         "clo": False if rng.random() < 0.5 else _value(rng, 0.0, 2.2),
     }
 
+
 def _pmv_ppd_ashrae(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, vr 0-2
     # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's

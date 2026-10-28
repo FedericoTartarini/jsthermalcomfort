@@ -125,7 +125,7 @@ const tdbBound: Bound | undefined = PMV_PPD_ISO_INFO.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
 
 // Every model lists the standards whose values it takes as Standard values,
-// the old form and ModelInfo alike, typed by the exported `StandardId`.
+// typed by the exported `StandardId`.
 const isoStandards: readonly (typeof Standard)[keyof typeof Standard][] =
   iso.standards;
 const heatIndexStandards: readonly StandardId[] = heatIndex.standards;

@@ -3,7 +3,7 @@ import type { Standard } from "../utilities/options.ts";
 
 // The model info every model publishes (`*_INFO`), the inputs and outputs types
 // derived from it, the warnings rows (ADRs 0022-0024) and `deepFreeze`, with
-// the old forms the models not yet migrated use at the end.
+// the old range row, `ApplicabilityWarning`, at the end.
 
 /** One of the identifiers in `Standard`, e.g. `"7730-2025"` or `"55-2023"`. */
 export type StandardId = (typeof Standard)[keyof typeof Standard];
@@ -341,33 +341,4 @@ export interface ApplicabilityWarning {
   readonly role: "input" | "derived" | "output";
   readonly value: number;
   readonly bound: Bound;
-}
-
-/**
- * The old form of model info, which the models not yet migrated publish;
- * {@link ModelInfo} replaces it. `inputs` lists physical quantities only, and
- * `description` is a sentence about the model.
- */
-export interface LegacyModelInfo {
-  readonly name: string;
-  readonly label: string;
-  readonly description: string;
-  readonly standards: readonly StandardId[];
-  readonly inputs: Readonly<
-    Record<
-      string,
-      { readonly unit: UnitSymbol | null; readonly applicability?: Bound }
-    >
-  >;
-  readonly outputs: Readonly<
-    Record<
-      string,
-      {
-        readonly unit: UnitSymbol | null;
-        readonly applicability?: Bound;
-        readonly classifier?: ClassifierBins;
-      }
-    >
-  >;
-  readonly derived?: LegacyModelInfo["outputs"];
 }

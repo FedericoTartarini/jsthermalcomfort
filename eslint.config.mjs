@@ -20,6 +20,7 @@ export const LINTED = [
   "src/environment/index.ts",
   "src/environment/operative_tmp.ts",
   "src/environment/transpose_sharp_altitude.ts",
+  "src/psychrometrics/p_sat.ts",
   "src/psychrometrics/p_sat_torr.ts",
   "src/utilities/met_to_w_m2.ts",
   "src/utilities/options.ts",
@@ -52,6 +53,7 @@ export const LINTED = [
   "tests/models/solar_gain.test.ts",
   "tests/models/two_nodes_gagge.test.ts",
   "tests/models/utci.test.ts",
+  "tests/psychrometrics/p_sat.test.ts",
   "tests/psychrometrics/p_sat_torr.test.ts",
   "tests/utilities/units_converter.test.ts",
 ];

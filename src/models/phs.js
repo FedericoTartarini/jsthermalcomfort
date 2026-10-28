@@ -1,4 +1,4 @@
-import { p_sat } from "../psychrometrics/p_sat.js";
+import { p_sat } from "../psychrometrics/p_sat.ts";
 import {
   body_surface_area,
   check_standard_compliance,

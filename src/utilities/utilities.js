@@ -1,4 +1,4 @@
-import { p_sat } from "../psychrometrics/p_sat.js";
+import { p_sat } from "../psychrometrics/p_sat.ts";
 import { operative_tmp } from "../environment/operative_tmp.ts";
 import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
 import { PMV_PPD_ISO_INFO } from "../models/pmv_ppd_iso.ts";

@@ -16,7 +16,7 @@ import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
  * @example
  * import { hr_to_rh } from "jsthermalcomfort";
  * const rh = hr_to_rh(0.00867078386190402, 21);
- * console.log(rh); // 56
+ * console.log(rh); // 56.00074032652902
  */
 export function hr_to_rh(hr: number, tdb: number, p_atm = 101325): number {
   const p_vap = (hr * p_atm) / (0.62198 + hr);

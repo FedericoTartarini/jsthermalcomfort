@@ -1,4 +1,4 @@
-import { p_sat } from "./p_sat.js";
+import { p_sat } from "./p_sat.ts";
 
 /**
  * Calculates the relative humidity from the partial pressure of water vapour.
@@ -14,7 +14,7 @@ import { p_sat } from "./p_sat.js";
  * @example
  * import { rh_from_vapour_pressure } from "jsthermalcomfort";
  * const rh = rh_from_vapour_pressure(1393.112, 21);
- * console.log(rh); // 56
+ * console.log(rh); // 56.00074032652902
  */
 export function rh_from_vapour_pressure(p_vap: number, tdb: number): number {
   return (100 * p_vap) / p_sat(tdb);

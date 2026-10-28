@@ -10,8 +10,8 @@ const grid = TDB.flatMap((tdb) =>
 );
 
 describe("hr_to_rh", () => {
-  // The same rounded p_sat(tdb) sits on both sides of the round trip and
-  // cancels, so the inverse is exact to floating point.
+  // The same p_sat(tdb) sits on both sides of the round trip and cancels,
+  // so the inverse is exact to floating point.
   it.each(grid)(
     "round-trips psy_ta_rh's hr when tdb is $tdb, rh is $rh, p_atm is $p_atm",
     ({ tdb, rh, p_atm }) => {
@@ -20,9 +20,8 @@ describe("hr_to_rh", () => {
     },
   );
 
-  // Reference values from pythermalcomfort.utilities.hr_to_rh. The formula is
-  // identical; the only difference is that this port rounds p_sat to 0.1 Pa,
-  // which is worth under 1e-3 % rh here.
+  // Reference values from pythermalcomfort.utilities.hr_to_rh, which they
+  // equal within 1.5e-14 % rh.
   it.each([
     { hr: 0.01, tdb: 25, p_atm: 101325, expected: 50.58961491444707 },
     { hr: 0.005, tdb: 20, p_atm: 101325, expected: 34.54929239449113 },
@@ -33,7 +32,7 @@ describe("hr_to_rh", () => {
     "returns $expected when hr is $hr, tdb is $tdb, p_atm is $p_atm",
     ({ hr, tdb, p_atm, expected }) => {
       expect(Math.abs(hr_to_rh(hr, tdb, p_atm) - expected)).toBeLessThanOrEqual(
-        1e-3,
+        1e-12,
       );
     },
   );

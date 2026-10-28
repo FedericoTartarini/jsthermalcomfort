@@ -1,4 +1,4 @@
-import { p_sat } from "./p_sat.js";
+import { p_sat } from "./p_sat.ts";
 import { p_sat_torr } from "./p_sat_torr.ts";
 import { enthalpy } from "./enthalpy.js";
 import { t_wb } from "./t_wb.js";

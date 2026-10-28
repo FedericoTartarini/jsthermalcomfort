@@ -48,6 +48,7 @@ import type {
   PMVPPD,
   PMVPPDInputs,
   SET,
+  SETInputs,
   SolarGain,
   SolarGainInputs,
   UseFansHeatwaves,
@@ -78,6 +79,7 @@ import {
   PMV_CATEGORY_BINS_ISO_7730,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
+  SET_TMP_INFO,
   SOLAR_GAIN_INFO,
   Standard,
   TWO_NODES_GAGGE_INFO,
@@ -101,6 +103,7 @@ import {
   phs,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  set_tmp,
   solar_gain,
   two_nodes_gagge,
   use_fans_heatwaves,
@@ -143,6 +146,7 @@ const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 const humidexInfo: ModelInfo = HUMIDEX_INFO;
 const wciInfo: ModelInfo = WCI_INFO;
 const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
+const setTmpInfo: ModelInfo = SET_TMP_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -708,6 +712,27 @@ phs({ tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 2.5, clo: 0.5 });
 phs({ ...phsInputs, posture: "lying" });
 // @ts-expect-error standard is one of ISO 7933's two editions.
 phs({ ...phsInputs, standard: "7730-2025" });
+
+// set_tmp takes position as two_nodes_gagge does and no units, as upstream's
+// signature does, and returns upstream's SET, which two_nodes_gagge declares.
+const setInputs: SETInputs = {
+  tdb: 25,
+  tr: 25,
+  v: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  position: null,
+  calculate_ce: true,
+};
+const setResult: SET = set_tmp(setInputs);
+const setValue: number = setResult.set;
+// @ts-expect-error the result is readonly.
+setResult.set = 1;
+// @ts-expect-error position is one of choice_field's three values.
+set_tmp({ ...setInputs, position: "lying" });
+// @ts-expect-error set_tmp takes no units.
+set_tmp({ ...setInputs, units: "SI" });
 
 // use_fans_heatwaves takes position as two_nodes_gagge does, and returns the
 // heat strain flags as masked booleans, NaN where the gate masks them.

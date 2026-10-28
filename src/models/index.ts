@@ -7,7 +7,7 @@ import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
-import { set_tmp } from "./set_tmp.ts";
+import { set_tmp, SET_TMP_INFO } from "./set_tmp.ts";
 import { wci, WCI_INFO } from "./wci.ts";
 import {
   wind_chill_temperature,
@@ -74,6 +74,7 @@ export type { Humidex, HumidexInputs } from "./humidex.ts";
 export type { PMVPPDAshrae, PMVPPDAshraeInputs } from "./pmv_ppd_ashrae.ts";
 export type { PHS, PHSInputs } from "./phs.ts";
 export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
+export type { SETInputs } from "./set_tmp.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type {
   GaggeTwoNodes,
@@ -127,6 +128,7 @@ export {
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
+  SET_TMP_INFO,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   utci,
@@ -177,6 +179,7 @@ export default {
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
+  SET_TMP_INFO,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   utci,

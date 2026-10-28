@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { set_tmp } from "../../src/models/index.ts";
+import { set_tmp, SET_TMP_INFO } from "../../src/models/index.ts";
+import { set_tmp as from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof set_tmp>[0];
@@ -58,5 +60,84 @@ describe("test_set", () => {
     expect(max_step).toBeLessThan(0.01);
     // monotonic, so cooling_effect has a single root
     expect(diff.every((step) => step > 0)).toBe(true);
+  });
+});
+
+const valid = { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+
+describeModelContract(set_tmp, SET_TMP_INFO, valid, { ...valid, tdb: 50 });
+
+const call = (inputs: unknown) =>
+  set_tmp(inputs as Parameters<typeof set_tmp>[0]);
+const out = { tdb: 50, tr: 5, v: 2.5, met: 5, clo: 2 };
+const out_rows = (["tdb", "tr", "v", "met", "clo"] as const).map(
+  (key): unknown =>
+    expect.objectContaining({
+      key,
+      value: out[key],
+      bound: SET_TMP_INFO.inputs[key].applicability,
+    }),
+);
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("set_tmp (JS-only)", () => {
+  // models/set_tmp.py:86-87.
+  test("the docstring's example gives its output", () => {
+    expect(call(valid)).toEqual({ set: 24.3, warnings: [] });
+  });
+
+  test("round_output false returns the unrounded set", () => {
+    expect(call({ ...valid, round_output: false }).set).toBe(
+      24.314907736364308,
+    );
+  });
+
+  // models/two_nodes_gagge.py:133-146: the SET path computes as standing.
+  test.each(["sitting", "standing"])(
+    "calculate_ce takes the SET path, whatever the position, %s",
+    (position) => {
+      expect(
+        call({ ...valid, position, calculate_ce: true, round_output: false })
+          .set,
+      ).toBe(24.662342565066787);
+    },
+  );
+
+  // Deviation set_tmp-4: upstream returns a value on each bound.
+  test.each([
+    ["tdb", 10.0, 16.9],
+    ["tdb", 40.0, 35.2],
+    ["tr", 10.0, 16.8],
+    ["tr", 40.0, 31.1],
+    ["v", 0.0, 24.3],
+    ["v", 2.0, 20.2],
+    ["met", 1.0, 24.0],
+    ["met", 4.0, 30.5],
+    ["clo", 0.0, 19.8],
+    ["clo", 1.5, 31.2],
+  ])("%s %s, on a bound, gives %s and no row", (key, value, expected) => {
+    expect(call({ ...valid, [key]: value })).toEqual({
+      set: expected,
+      warnings: [],
+    });
+  });
+
+  // Deviation set_tmp-2.
+  test("each bound broken gives a row, in upstream's order, and masks set with the gate on", () => {
+    const result = call({ ...out, rh: 50 });
+    expect(result.warnings).toEqual(out_rows);
+    expect(result.set).toBeNaN();
+  });
+
+  // Deviation set_tmp-3: upstream warns nothing with the gate off.
+  test("each bound broken gives a row, and set its value, with the gate off", () => {
+    const result = call({ ...out, rh: 50, limit_inputs: false });
+    expect(result.warnings).toEqual(out_rows);
+    expect(result.set).toBe(50.5);
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(from_root).toBe(set_tmp);
   });
 });

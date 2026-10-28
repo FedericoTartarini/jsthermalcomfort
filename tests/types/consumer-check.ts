@@ -63,6 +63,8 @@ import type {
   WCTInputs,
   APMV,
   APMVInputs,
+  EPMV,
+  EPMVInputs,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -93,6 +95,7 @@ import {
   WCI_INFO,
   WIND_CHILL_TEMPERATURE_INFO,
   PMV_A_INFO,
+  PMV_E_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -115,6 +118,7 @@ import {
   wci,
   wind_chill_temperature,
   pmv_a,
+  pmv_e,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 // One set of category bins per ISO 7730 edition replaced the one for both, so
@@ -152,6 +156,7 @@ const wciInfo: ModelInfo = WCI_INFO;
 const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
 const setTmpInfo: ModelInfo = SET_TMP_INFO;
 const pmvAInfo: ModelInfo = PMV_A_INFO;
+const pmvEInfo: ModelInfo = PMV_E_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -864,3 +869,22 @@ const pmvAValue: number = pmvAResult.a_pmv;
 pmvAResult.a_pmv = 1;
 // @ts-expect-error a_coefficient is required.
 pmv_a({ tdb: 24, tr: 30, vr: 0.22, rh: 50, met: 1.4, clo: 0.5 });
+
+// pmv_e takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's EPMVInputs and EPMV, and returns a readonly result.
+const pmvEInputs: EPMVInputs = {
+  tdb: 24,
+  tr: 30,
+  vr: 0.22,
+  rh: 50,
+  met: 1.4,
+  clo: 0.5,
+  e_coefficient: 0.6,
+  units: "SI",
+};
+const pmvEResult: EPMV = pmv_e(pmvEInputs);
+const pmvEValue: number = pmvEResult.e_pmv;
+// @ts-expect-error the result is readonly.
+pmvEResult.e_pmv = 1;
+// @ts-expect-error e_coefficient is required.
+pmv_e({ tdb: 24, tr: 30, vr: 0.22, rh: 50, met: 1.4, clo: 0.5 });

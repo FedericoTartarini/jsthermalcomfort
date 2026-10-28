@@ -68,6 +68,7 @@ export const LINTED = [
   "tests/models/utci.test.ts",
   "tests/models/vertical_tmp_grad_ppd.test.ts",
   "tests/models/wci.test.ts",
+  "tests/models/wind_chill_temperature.test.ts",
   "tests/psychrometrics/dew_point_tmp.test.ts",
   "tests/psychrometrics/p_sat.test.ts",
   "tests/psychrometrics/p_sat_torr.test.ts",

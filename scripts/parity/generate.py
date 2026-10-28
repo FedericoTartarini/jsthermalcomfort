@@ -437,6 +437,17 @@ def _wci(rng):
     }
 
 
+def _wind_chill_temperature(rng):
+    # Upstream checks no range; tdb reaches past 10 °C and v up to 120 km/h,
+    # past the formula's cold-weather use, and v starts at 0 km/h, where its
+    # v**0.16 is 0 (models/wind_chill_temperature.py:59).
+    return {
+        "tdb": _value(rng, -50.0, 20.0),
+        "v": _value(rng, 0.0, 120.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
@@ -461,6 +472,7 @@ MODELS = {
     "utci": (models.utci, _utci),
     "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),
     "wci": (models.wci, _wci),
+    "wind_chill_temperature": (models.wind_chill_temperature, _wind_chill_temperature),
 }
 
 

@@ -21,6 +21,7 @@ import {
   utci,
   vertical_tmp_grad_ppd,
   wci,
+  wind_chill_temperature,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -595,6 +596,16 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds wci with np.around (models/wci.py:73-74).
     rounded: ({ round_output }) => (round_output === true ? ["wci"] : []),
     warnings: true,
+  },
+  {
+    name: "wind_chill_temperature",
+    run: (inputs) =>
+      wind_chill_temperature(
+        inputs as unknown as Parameters<typeof wind_chill_temperature>[0],
+      ),
+    // Upstream rounds wct with np.around (models/wind_chill_temperature.py:61-62).
+    rounded: ({ round_output }) => (round_output === true ? ["wct"] : []),
+    warnings: false,
   },
 ];
 

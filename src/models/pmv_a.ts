@@ -70,6 +70,71 @@ export type APMVInputs = InputsOf<typeof PMV_A_INFO>;
  */
 export type APMV = OutputsOf<typeof PMV_A_INFO>;
 
+/**
+ * Return Adaptive Predicted Mean Vote (aPMV) [Yao2009](../../docs/references.md#yao2009). This index was developed
+ * by Yao, R. et al. (2009). The model takes into account factors such as culture,
+ * climate, social, psychological, and behavioral adaptations, which have an impact on
+ * the senses used to detect thermal comfort. This model uses an adaptive coefficient
+ * (λ) representing the adaptive factors that affect the sense of thermal comfort.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.tr - Mean radiant temperature, default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.vr - Relative air speed, default in [m/s] or [fps] if `units` = 'IP'.
+ *
+ * > [!NOTE]
+ * > vr is the sum of the average air speed measured by the sensor and the activity-generated air speed (Vag).
+ * > Calculate vr using `v_relative`.
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ *
+ * > [!NOTE]
+ * > Correct for body movement effects using `clo_dynamic_iso`.
+ * @param inputs.a_coefficient - Adaptive coefficient.
+ * @param inputs.wme - External work, [met], default is 0.
+ * @param inputs.units - Units system, 'SI' or 'IP'. Defaults to 'SI'.
+ * @param inputs.limit_inputs - If True, returns nan for inputs outside standard limits. Defaults to True.
+ *
+ * > [!NOTE]
+ * > ISO 7730 [7730ISO2005](../../docs/references.md#7730iso2005) [7730ISO2025](../../docs/references.md#7730iso2025) limits: 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40, 0 <= vr [m/s] <= 1,
+ * > 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, -2 <= PMV <= 2.
+ *
+ * @returns A dataclass containing the Predicted Mean Vote (a_pmv). See
+ * {@link APMV} for more details.
+ * To access the `a_pmv` value, use the `a_pmv` attribute of the returned `APMV` instance,
+ * e.g., `result.a_pmv`.
+ *
+ * - `a_pmv` - Predicted Mean Vote.
+ *
+ * @example
+ * ```ts
+ * import { pmv_a } from "jsthermalcomfort/models";
+ * import { clo_dynamic_iso, v_relative } from "jsthermalcomfort/utilities";
+ *
+ * const v = 0.1;
+ * const met = 1.4;
+ * const clo = 0.5;
+ *
+ * // Calculate relative air speed
+ * const v_r = v_relative(v, met);
+ *
+ * // Calculate dynamic clothing
+ * const clo_d = clo_dynamic_iso(clo, met, v);
+ *
+ * const results = pmv_a({
+ *   tdb: 28,
+ *   tr: 28,
+ *   vr: v_r,
+ *   rh: 50,
+ *   met,
+ *   clo: clo_d,
+ *   a_coefficient: 0.293,
+ * });
+ * console.log(results); // { a_pmv: 0.71, warnings: [] }
+ * console.log(results.a_pmv); // 0.71
+ * ```
+ */
 export function pmv_a(inputs: APMVInputs): APMV {
   // Validate inputs using the APMVInputs class
   const { tdb, tr, vr, rh, met, clo, a_coefficient, wme, units, limit_inputs } =

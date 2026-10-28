@@ -26,7 +26,7 @@ import { solar_gain, SOLAR_GAIN_INFO } from "./solar_gain.ts";
 import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
-import { pmv_a } from "./pmv_a.ts";
+import { pmv_a, PMV_A_INFO } from "./pmv_a.ts";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
 import { e_pmv } from "./e_pmv.js";
 import {
@@ -71,6 +71,7 @@ export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type { Humidex, HumidexInputs } from "./humidex.ts";
+export type { APMV, APMVInputs } from "./pmv_a.ts";
 export type { PMVPPDAshrae, PMVPPDAshraeInputs } from "./pmv_ppd_ashrae.ts";
 export type { PHS, PHSInputs } from "./phs.ts";
 export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
@@ -125,6 +126,7 @@ export {
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   pmv_a,
+  PMV_A_INFO,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
@@ -176,6 +178,7 @@ export default {
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   pmv_a,
+  PMV_A_INFO,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,

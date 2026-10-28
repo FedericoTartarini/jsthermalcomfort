@@ -192,7 +192,7 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
   const { rh, met, clo } = params;
   // Destructuring defaults also apply to a switch passed as undefined.
   // suppress_warnings has no pythermalcomfort counterpart: it stands in for
-  // Python's warnings filter, which JavaScript lacks (see cooling_effect).
+  // Python's warnings filter, which JavaScript lacks.
   const {
     wme = 0,
     standard = Standard.ashrae_55_2023,
@@ -240,9 +240,7 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
   });
 
   //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-  // The inputs are SI by now, hence "SI" rather than units. cooling_effect
-  // returns its warning as a notice row, which this model writes to the
-  // console unless suppress_warnings is set.
+  // The inputs are SI by now, hence "SI" rather than units.
   let ce = 0;
   if (vr > 0.1) {
     const result = cooling_effect({
@@ -256,6 +254,7 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
       units: "SI",
     });
     ce = result.ce;
+    // cooling_effect's notice row goes to the console unless suppress_warnings is set.
     for (const row of result.warnings) {
       if (row.kind === "notice" && !suppress_warnings)
         console.warn(row.message);

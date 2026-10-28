@@ -265,4 +265,11 @@ describe("brentq", () => {
       );
     },
   );
+
+  // scipy's operator.index raises "'float' object cannot be interpreted as an integer".
+  test.each([2.5, NaN])("maxiter %s: scipy's TypeError", (maxiter) => {
+    expect(() =>
+      brentq((x) => x - 0.3, 0, 1, 2e-12, 4 * Number.EPSILON, maxiter),
+    ).toThrow(new TypeError("maxiter must be an integer."));
+  });
 });

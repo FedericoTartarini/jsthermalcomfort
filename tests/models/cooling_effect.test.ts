@@ -68,19 +68,19 @@ describe("test_cooling_effect", () => {
     });
   });
 
-  test.each([
-    [25, 25, 0.05, 50, 1.2, 0.5, 0.0], // vr <= 0.1 -> 0
-    [25, 25, 0.1, 50, 1.2, 0.5, 0.0], // boundary
-    [25, 25, 0.3, 50, 1.2, 0.5, 1.68],
-    [35, 35, 1.5, 90, 2.5, 0.2, 5.11], // 5.14 before #489
-    [15, 15, 0.5, 10, 1.0, 1.2, 2.61],
-  ])(
-    "test_cooling_effect_regression_values[%s, %s, %s, %s, %s, %s]",
-    (tdb, tr, vr, rh, met, clo, expected) => {
+  test("test_cooling_effect_regression_values", () => {
+    const cases = [
+      [25, 25, 0.05, 50, 1.2, 0.5, 0.0], // vr <= 0.1 -> 0
+      [25, 25, 0.1, 50, 1.2, 0.5, 0.0], // boundary
+      [25, 25, 0.3, 50, 1.2, 0.5, 1.68],
+      [35, 35, 1.5, 90, 2.5, 0.2, 5.11], // 5.14 before #489
+      [15, 15, 0.5, 10, 1.0, 1.2, 2.61],
+    ] as const;
+    for (const [tdb, tr, vr, rh, met, clo, expected] of cases) {
       const { ce } = cooling_effect({ tdb, tr, vr, rh, met, clo });
       expect(approx(ce, expected, { rel: 1e-5, abs: 0.01 })).toBe(true);
-    },
-  );
+    }
+  });
 
   test.each(reference_table.data)(
     "test_cooling_effect: fixture case %#",

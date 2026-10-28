@@ -63,6 +63,7 @@ export const LINTED = [
   "tests/models/modelContract.ts",
   "tests/models/phs.test.ts",
   "tests/models/pmv_a.test.ts",
+  "tests/models/pmv_athb.test.ts",
   "tests/models/pmv_e.test.ts",
   "tests/models/pmv_ppd_ashrae.test.ts",
   "tests/models/pmv_ppd_iso.test.ts",

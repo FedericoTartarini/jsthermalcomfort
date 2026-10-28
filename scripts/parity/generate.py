@@ -281,6 +281,21 @@ def _pmv_e(rng):
     }
 
 
+def _pmv_athb(rng):
+    # pmv_athb checks no range, so the ranges span the kernel's usual inputs
+    # and t_running_mean's outdoor climates; vr goes below 0, which the kernel
+    # computes on. clo is upstream's False half the time, which computes the
+    # adapted clothing (models/pmv_athb.py:98), and a number otherwise.
+    return {
+        "tdb": _value(rng, 5.0, 40.0),
+        "tr": _value(rng, 5.0, 50.0),
+        "vr": _value(rng, -0.2, 1.5),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.2),
+        "t_running_mean": _value(rng, -10.0, 35.0),
+        "clo": False if rng.random() < 0.5 else _value(rng, 0.0, 2.2),
+    }
+
 def _pmv_ppd_ashrae(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, vr 0-2
     # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
@@ -559,6 +574,7 @@ MODELS = {
     "humidex": (models.humidex, _humidex),
     "phs": (models.phs, _phs),
     "pmv_a": (models.pmv_a, _pmv_a),
+    "pmv_athb": (models.pmv_athb, _pmv_athb),
     "pmv_e": (models.pmv_e, _pmv_e),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),

@@ -24,9 +24,9 @@ import {
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain, SOLAR_GAIN_INFO } from "./solar_gain.ts";
 import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
-import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { pmv_a, PMV_A_INFO } from "./pmv_a.ts";
+import { pmv_athb } from "./pmv_athb.ts";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
 import { pmv_e, PMV_E_INFO } from "./pmv_e.ts";
 import {
@@ -100,7 +100,6 @@ export {
   ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
   ADAPTIVE_EN_INFO,
-  athb,
   at,
   ankle_draft,
   ANKLE_DRAFT_INFO,
@@ -127,6 +126,7 @@ export {
   PMV_PPD_ISO_INFO,
   pmv_a,
   PMV_A_INFO,
+  pmv_athb,
   pmv_e,
   PMV_E_INFO,
   solar_gain,
@@ -153,7 +153,6 @@ export default {
   ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
   ADAPTIVE_EN_INFO,
-  athb,
   at,
   ankle_draft,
   ANKLE_DRAFT_INFO,
@@ -180,6 +179,7 @@ export default {
   PMV_PPD_ISO_INFO,
   pmv_a,
   PMV_A_INFO,
+  pmv_athb,
   pmv_e,
   PMV_E_INFO,
   solar_gain,

@@ -71,7 +71,7 @@ describe("NPM Package", () => {
   });
 
   // Upstream has no public pmv_ppd, only its two wrappers; the module stays,
-  // holding the kernel and the logic the wrappers, athb and pmv share.
+  // holding the kernel and the logic the wrappers, pmv_athb and pmv share.
   it("should not have models.pmv_ppd", () => {
     expect(jsthermalcomfort.models).not.toHaveProperty("pmv_ppd");
     expect(namedExports).not.toHaveProperty("pmv_ppd");
@@ -94,8 +94,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("solar_gain");
   });
 
-  it("should have models.athb", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("athb");
+  it("should have models.pmv_athb", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_athb");
   });
 
   it("should have models.pmv", () => {

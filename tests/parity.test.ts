@@ -12,6 +12,7 @@ import {
   phs,
   PHS_INFO,
   pmv_a,
+  pmv_athb,
   pmv_e,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
@@ -514,6 +515,14 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => pmv_a(inputs as unknown as Parameters<typeof pmv_a>[0]),
     // Upstream rounds a_pmv with np.around (models/pmv_a.py:132).
     rounded: () => ["a_pmv"],
+    warnings: true,
+  },
+  {
+    name: "pmv_athb",
+    run: (inputs) =>
+      pmv_athb(inputs as unknown as Parameters<typeof pmv_athb>[0]),
+    // Upstream rounds athb_pmv with np.around (models/pmv_athb.py:115-124).
+    rounded: () => ["athb_pmv"],
     warnings: true,
   },
   {

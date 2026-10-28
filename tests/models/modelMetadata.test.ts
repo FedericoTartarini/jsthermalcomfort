@@ -19,6 +19,7 @@ import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
 import type { ModelInfo } from "../../src/_internal/modelInfo.ts";
 import { isDeepFrozen } from "./modelContract.ts";
+import { v2Infos } from "./testUtils.ts";
 
 // The list catches a constant missing from src/models/index.ts or
 // src/index.ts, which a scan of the package cannot.
@@ -455,9 +456,6 @@ const v2Calls: Record<string, object> = {
   },
   utci: { tdb: 25, tr: 25, v: 1, rh: 50 },
 };
-const v2Infos = exportedInfos.filter(({ info }) =>
-  Object.values(info.inputs).every((entry) => "kind" in entry),
-);
 
 describe("Outputs staleness — each v2 model's result matches its INFO.outputs", () => {
   test("every v2 model info has a call here", () => {

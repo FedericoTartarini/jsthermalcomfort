@@ -45,6 +45,19 @@
  *   same inputs is deleted.
  */
 import { expect } from "vitest";
+import * as pkg from "../../src/index.ts";
+import type { ModelInfo } from "../../src/index.ts";
+
+/**
+ * Each v2 model info the package exports: a `*_INFO` export whose every input
+ * has a `kind`.
+ */
+export const v2Infos = Object.entries(pkg as Record<string, unknown>)
+  .filter(([exportName]) => exportName.endsWith("_INFO"))
+  .map(([exportName, info]) => ({ exportName, info: info as ModelInfo }))
+  .filter(({ info }) =>
+    Object.values(info.inputs).every((entry) => "kind" in entry),
+  );
 
 /**
  * Whether `actual` is within `abs + rel * |expected|` of `expected`, numpy's

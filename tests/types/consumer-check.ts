@@ -608,8 +608,10 @@ const sameUtci: typeof utci = utciFromModels;
 const samePSat: typeof jsthermalcomfort.p_sat = p_sat;
 const sameStandard: typeof Standard = standardFromUtilities;
 
-// two_nodes_gagge returns upstream's union, SET | GaggeTwoNodes; position is a
-// choice_field, which takes null as upstream's takes None, and w_max a number.
+// two_nodes_gagge returns SET for calculate_ce: true, GaggeTwoNodes for false or
+// left out, and upstream's union, SET | GaggeTwoNodes, for a boolean; position
+// is a choice_field, which takes null as upstream's takes None, and w_max a
+// number.
 const twoNodesInputs: GaggeTwoNodesInputs = {
   tdb: 25,
   tr: 25,
@@ -621,9 +623,25 @@ const twoNodesInputs: GaggeTwoNodesInputs = {
 };
 const twoNodes: SET | GaggeTwoNodes = two_nodes_gagge(twoNodesInputs);
 const twoNodesSet: number = twoNodes.set;
+// @ts-expect-error a boolean calculate_ce returns the union, not GaggeTwoNodes.
+const twoNodesUnion: GaggeTwoNodes = two_nodes_gagge(twoNodesInputs);
+const twoNodesW: number = two_nodes_gagge({
+  tdb: 25,
+  tr: 25,
+  v: 0.1,
+  rh: 50,
+  clo: 0.5,
+  met: 1.2,
+}).w;
+const twoNodesSkin: number = two_nodes_gagge({
+  ...twoNodesInputs,
+  calculate_ce: false,
+}).e_skin;
+// calculate_ce: true returns SET, which has none of GaggeTwoNodes' other fields.
+const twoNodesCe: SET &
+  Partial<Record<Exclude<keyof GaggeTwoNodes, keyof SET>, never>> =
+  two_nodes_gagge({ ...twoNodesInputs, calculate_ce: true });
 // @ts-expect-error position is one of choice_field's three values.
 two_nodes_gagge({ ...twoNodesInputs, position: "lying" });
 // @ts-expect-error w_max is a number; upstream's False is 0 here.
 two_nodes_gagge({ ...twoNodesInputs, w_max: false });
-// @ts-expect-error the union narrows before a GaggeTwoNodes field is read.
-twoNodes.e_skin;

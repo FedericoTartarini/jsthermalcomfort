@@ -169,6 +169,15 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * ```
  */
 export function two_nodes_gagge(
+  inputs: GaggeTwoNodesInputs & { calculate_ce: true },
+): SET;
+export function two_nodes_gagge(
+  inputs: GaggeTwoNodesInputs & { calculate_ce?: false | undefined },
+): GaggeTwoNodes;
+export function two_nodes_gagge(
+  inputs: GaggeTwoNodesInputs,
+): SET | GaggeTwoNodes;
+export function two_nodes_gagge(
   inputs: GaggeTwoNodesInputs,
 ): SET | GaggeTwoNodes {
   // Validate inputs using the GaggeTwoNodesInputs class

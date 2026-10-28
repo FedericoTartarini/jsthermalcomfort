@@ -82,6 +82,28 @@ def _clo_tout(rng):
     return {"tout": _value(rng, *tout), "units": units}
 
 
+def _cooling_effect(rng):
+    # vr reaches the 0.1 m/s still-air cut-off from both sides, and the hot,
+    # humid cases where the still-air SET root is not bracketed, which return 0
+    # with upstream's warning; units comes in either case, as upstream
+    # upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        tdb, tr, vr = (5.0, 50.0), (5.0, 60.0), (0.0, 3.0)
+    else:
+        tdb, tr, vr = (41.0, 122.0), (41.0, 140.0), (0.0, 9.8)
+    return {
+        "tdb": _value(rng, *tdb),
+        "tr": _value(rng, *tr),
+        "vr": _value(rng, vr[0], vr[1] / 10) if rng.random() < 0.2 else _value(rng, *vr),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.0),
+        "clo": _value(rng, 0.0, 2.0),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.3 else 0.0,
+        "units": units,
+    }
+
+
 def _heat_index_rothfusz(rng):
     # tdb reaches below the 27 °C gate, so NaN positions and the tdb warning
     # are compared too.
@@ -206,6 +228,7 @@ def _utci(rng):
 MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
     "clo_tout": (models.clo_tout, _clo_tout),
+    "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "solar_gain": (models.solar_gain, _solar_gain),

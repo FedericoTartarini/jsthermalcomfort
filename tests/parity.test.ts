@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   adaptive_ashrae,
   clo_tout,
+  cooling_effect,
   heat_index_rothfusz,
   pmv_ppd_iso,
   solar_gain,
@@ -425,6 +426,17 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds clo_tout with np.around (models/clo_tout.py:79).
     rounded: () => ["clo_tout"],
     warnings: true,
+  },
+  {
+    name: "cooling_effect",
+    run: (inputs) =>
+      cooling_effect({
+        ...(inputs as unknown as Parameters<typeof cooling_effect>[0]),
+        suppress_warnings: true,
+      }),
+    // Upstream always rounds ce with np.around (models/cooling_effect.py:157).
+    rounded: () => ["ce"],
+    warnings: false,
   },
   {
     name: "heat_index_rothfusz",

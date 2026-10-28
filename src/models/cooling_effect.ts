@@ -1,8 +1,23 @@
-import { validateInputs } from "../utilities/utilities.js";
-import { units_converter } from "../utilities/units_converter.ts";
+import { ASHRAE_55_STILL_AIR_THRESHOLD } from "../_internal/ashrae55.ts";
+import { brentq } from "../_internal/brentq.ts";
 import { round } from "../_internal/round.ts";
-import { set_tmp } from "./set_tmp.js";
 import { _check_params_object } from "../_internal/validation.ts";
+import { Units } from "../utilities/options.ts";
+import { units_converter } from "../utilities/units_converter.ts";
+import { validateInputs } from "../utilities/utilities.js";
+import {
+  _gagge_two_nodes_optimized,
+  TWO_NODES_GAGGE_INFO,
+} from "./two_nodes_gagge.ts";
+
+// set_tmp()/two_nodes_gagge() defaults that cooling_effect() relies on but never
+// exposes as parameters itself
+const _BODY_SURFACE_AREA =
+  TWO_NODES_GAGGE_INFO.inputs.body_surface_area.default;
+const _P_ATM = TWO_NODES_GAGGE_INFO.inputs.p_atm.default;
+// two_nodes_gagge()'s calculate_ce=True path hardcodes position=1 (forces the
+// "standing" branch) regardless of the position argument, so this matches it
+const _POSITION_STANDING_CODE = 1;
 
 // A type alias, as the JSDoc typedef it replaces emitted, so the result stays
 // assignable to Record<string, unknown>; an interface is not.
@@ -114,18 +129,76 @@ export function cooling_effect(
     COOLING_EFFECT_SCHEMA,
   );
 
-  if (units.toUpperCase() === "IP") {
-    const result = units_converter("IP", { tdb, tr, vr });
-    tdb = result.tdb;
-    tr = result.tr;
-    vr = result.vr;
+  if (units.toUpperCase() === Units.IP) {
+    ({ tdb, tr, v: vr } = units_converter(Units.IP, { tdb, tr, v: vr }));
   }
 
-  if (vr <= 0.1) {
-    return { ce: 0 };
+  const still_air_threshold = ASHRAE_55_STILL_AIR_THRESHOLD;
+
+  let _ce = _cooling_effect_vectorised(
+    tdb,
+    tr,
+    still_air_threshold,
+    rh,
+    met,
+    clo,
+    wme,
+    vr,
+    suppress_warnings,
+  );
+
+  if (units.toUpperCase() === Units.IP) {
+    _ce = _ce * 1.8;
   }
 
-  const still_air_threshold = 0.1;
+  return { ce: round(_ce, 2) };
+}
+
+function _p_sat_torr(tdb: number): number {
+  return Math.exp(18.6686 - 4030.183 / (tdb + 235.0));
+}
+
+function _set_for_cooling_effect(
+  tdb: number,
+  tr: number,
+  v: number,
+  rh: number,
+  met: number,
+  clo: number,
+  wme: number,
+): number {
+  // mirrors set_tmp(..., calculate_ce=True, limit_inputs=False).set, without
+  // the per-call input validation/dataclass overhead of the public API stack
+  const vapor_pressure = (rh * _p_sat_torr(tdb)) / 100.0;
+  return _gagge_two_nodes_optimized(
+    tdb,
+    tr,
+    v,
+    met,
+    clo,
+    vapor_pressure,
+    wme,
+    _BODY_SURFACE_AREA,
+    _P_ATM,
+    _POSITION_STANDING_CODE,
+    true,
+  )[0];
+}
+
+function _cooling_effect_vectorised(
+  tdb: number,
+  tr: number,
+  still_air_threshold: number,
+  rh: number,
+  met: number,
+  clo: number,
+  wme: number,
+  vr: number,
+  suppress_warnings: boolean,
+): number {
+  if (vr <= ASHRAE_55_STILL_AIR_THRESHOLD) {
+    return 0.0;
+  }
 
   const initial_set_tmp = _set_for_cooling_effect(
     tdb,
@@ -153,158 +226,16 @@ export function cooling_effect(
 
   let ce;
   try {
-    // Find a root of a function in a bracketing interval
-    ce = brent(func, 0, 40);
+    ce = brentq(func, 0.0, 40);
   } catch (error) {
-    // Only the not-bracketed failure falls back to 0, as upstream catches only
-    // the ValueError brentq raises for it; anything else propagates.
-    if (!(error instanceof RootNotBracketedError)) throw error;
-    ce = 0;
+    // scipy's ValueError is brentq's RangeError (deviation _shared-45).
+    if (!(error instanceof RangeError)) throw error;
+    ce = 0.0;
   }
 
-  // pythermalcomfort raises a Python warning here, which its callers silence
-  // with the warnings module; JavaScript has no such facility, so
-  // suppress_warnings is the port of it rather than a new behaviour.
-  if (ce === 0 && !suppress_warnings) {
+  if (ce === 0.0 && !suppress_warnings) {
     console.warn("Cooling effect could not be calculated. Returning 0.");
   }
 
-  if (units.toUpperCase() === "IP") {
-    ce = (ce / 1.8) * 3.28;
-  }
-
-  ce = round(ce, 2);
-
-  return { ce: ce };
-}
-
-// Upstream's `_set_for_cooling_effect` (`cooling_effect.py`): the unrounded
-// SET with `calculate_ce`, inputs unlimited, in SI. Upstream calls the
-// two-node model directly, to skip the public stack's validation, and says it
-// mirrors `set_tmp(..., calculate_ce=True, limit_inputs=False).set`; this
-// makes that set_tmp call.
-function _set_for_cooling_effect(
-  tdb: number,
-  tr: number,
-  v: number,
-  rh: number,
-  met: number,
-  clo: number,
-  wme: number,
-): number {
-  return set_tmp(
-    tdb,
-    tr,
-    v,
-    rh,
-    met,
-    clo,
-    wme,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    false,
-    {
-      round: false,
-      calculate_ce: true,
-    },
-  ).set;
-}
-
-// Brent's one recoverable failure, a class of its own so that cooling_effect
-// can catch it and nothing else, as upstream catches brentq's ValueError.
-class RootNotBracketedError extends Error {
-  name = "RootNotBracketedError";
-}
-
-// https://gist.github.com/ryanspradlin/18c1010b7dd2d875284933d018c5c908
-// Derived from: https://en.wikipedia.org/wiki/Brent%27s_method#Algorithm
-// Brent's method is a hybrid root-finding algorithm that combines the
-// faster/less-reliable inverse quadradic interpolation and secant methods with
-// the slower/more-reliable bisection method.
-export function brent(
-  f: (x: number) => number,
-  lowerBound: number,
-  upperBound: number,
-  tolerance = 1e-6,
-  maxIterations = 100,
-): number {
-  let a = lowerBound;
-  let b = upperBound;
-  let fa = f(a);
-  let fb = f(b);
-
-  if (fa * fb > 0) {
-    // Root is not bracketed.
-    throw new RootNotBracketedError(`Root is not bracketed: [${fa}, ${fb}].`);
-  }
-
-  if (Math.abs(fa) < Math.abs(fb)) {
-    [a, b] = [b, a];
-    [fa, fb] = [fb, fa];
-  }
-
-  let c = a;
-  let fc = fa;
-  let s = 0;
-  let d = 0;
-  let mflag = true;
-  for (let i = 0; i < maxIterations; i++) {
-    // Check if we have succeeded...
-    if (fb === 0 || Math.abs(b - a) <= tolerance) {
-      // Root found!
-      return b;
-    }
-
-    // Try to use fast/less-reliable methods first...
-    if (fa !== fc && fb !== fc) {
-      // Inverse quadratic interpolation.
-      s =
-        (a * fb * fc) / ((fa - fb) * (fa - fc)) +
-        (b * fa * fc) / ((fb - fa) * (fb - fc)) +
-        (c * fa * fb) / ((fc - fa) * (fc - fb));
-    } else {
-      // Secant method.
-      s = b - fb * ((b - a) / (fb - fa));
-    }
-
-    // If necessary, fallback to slow/more-reliable method...
-    if (
-      (s - (3 * a + b) / 4) * (s - b) >= 0 ||
-      (mflag && Math.abs(s - b) >= Math.abs(b - c) / 2) ||
-      (!mflag && Math.abs(s - b) >= Math.abs(c - d) / 2) ||
-      (mflag && Math.abs(b - c) < Math.abs(tolerance)) ||
-      (!mflag && Math.abs(c - d) < Math.abs(tolerance))
-    ) {
-      // Bisection method.
-      s = (a + b) / 2;
-      mflag = true;
-    } else {
-      mflag = false;
-    }
-
-    d = c;
-    c = b;
-    fc = fb;
-
-    const fs = f(s);
-    if (fa * fs < 0) {
-      b = s;
-      fb = fs;
-    } else {
-      a = s;
-      fa = fs;
-    }
-
-    if (Math.abs(fa) < Math.abs(fb)) {
-      [a, b] = [b, a];
-      [fa, fb] = [fb, fa];
-    }
-  }
-
-  // Could not achieve required tolerance within iteration limit.
-  throw new Error(
-    "Could not achieve required tolerance within iteration limit.",
-  );
+  return ce;
 }

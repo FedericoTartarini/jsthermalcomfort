@@ -1,41 +1,98 @@
 import { afterEach, describe, expect, vi, test } from "vitest";
 import { cooling_effect } from "../../src/models/index.ts";
-import type { CoolingEffectParams } from "../../src/models/cooling_effect.ts";
 import { testDataUrls } from "./comftest.ts";
-import { loadTestData, validateResult } from "./testUtils.ts";
+import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
-let { testData, tolerances } = await loadTestData(testDataUrls.coolingEffect);
+type Inputs = Parameters<typeof cooling_effect>[0];
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_cooling_effect.py.
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.coolingEffect,
+);
+
+// Mirrors pythermalcomfort v4.7.0 tests/test_cooling_effect.py.
 describe("test_cooling_effect", () => {
-  test("test_cooling_effect_regression_values", () => {
-    const cases: [number, number, number, number, number, number, number][] = [
-      [25, 25, 0.05, 50, 1.2, 0.5, 0.0], // vr <= 0.1 -> 0
-      [25, 25, 0.1, 50, 1.2, 0.5, 0.0], // boundary
-      [25, 25, 0.3, 50, 1.2, 0.5, 1.68],
-      [35, 35, 1.5, 90, 2.5, 0.2, 5.11], // 5.14 before #489
-      [15, 15, 0.5, 10, 1.0, 1.2, 2.61],
-    ];
-    for (const [tdb, tr, vr, rh, met, clo, expected] of cases) {
+  test.each([0.05, 0.3, 1.0])(
+    "test_cooling_effect_ip_is_a_temperature_difference[%s]",
+    (vr) => {
+      const si = cooling_effect({
+        tdb: 30,
+        tr: 30,
+        vr,
+        rh: 50,
+        met: 1.2,
+        clo: 0.5,
+      }).ce;
+      const ip = cooling_effect({
+        tdb: 86,
+        tr: 86,
+        vr: vr * 3.281,
+        rh: 50,
+        met: 1.2,
+        clo: 0.5,
+        units: "IP",
+      }).ce;
+
+      // Both public results are rounded to two decimals independently.
+      expect(approx(ip, si * 1.8, { rel: 0, abs: 0.014 })).toBe(true);
+    },
+  );
+
+  test("test_cooling_effect_ip_array_temperature_differences", () => {
+    const tdb = [25.0, 30.0, 35.0];
+    const si = tdb.map(
+      (t) =>
+        cooling_effect({ tdb: t, tr: t, vr: 1.0, rh: 50, met: 1.2, clo: 0.5 })
+          .ce,
+    );
+    const ip = tdb.map(
+      (t) =>
+        cooling_effect({
+          tdb: t * 1.8 + 32,
+          tr: t * 1.8 + 32,
+          vr: 3.281,
+          rh: 50,
+          met: 1.2,
+          clo: 0.5,
+          units: "IP",
+        }).ce,
+    );
+
+    ip.forEach((value, i) => {
+      expect(approx(value, (si[i] ?? NaN) * 1.8, { rel: 0, abs: 0.014 })).toBe(
+        true,
+      );
+    });
+  });
+
+  test.each([
+    [25, 25, 0.05, 50, 1.2, 0.5, 0.0], // vr <= 0.1 -> 0
+    [25, 25, 0.1, 50, 1.2, 0.5, 0.0], // boundary
+    [25, 25, 0.3, 50, 1.2, 0.5, 1.68],
+    [35, 35, 1.5, 90, 2.5, 0.2, 5.11], // 5.14 before #489
+    [15, 15, 0.5, 10, 1.0, 1.2, 2.61],
+  ])(
+    "test_cooling_effect_regression_values[%s, %s, %s, %s, %s, %s]",
+    (tdb, tr, vr, rh, met, clo, expected) => {
       const { ce } = cooling_effect({ tdb, tr, vr, rh, met, clo });
-      expect(Math.abs(ce - expected)).toBeLessThanOrEqual(0.01);
-    }
-  });
+      expect(approx(ce, expected, { rel: 1e-5, abs: 0.01 })).toBe(true);
+    },
+  );
 
-  test.each(testData.data)("test_cooling_effect: fixture case %#", (row) => {
-    const { inputs, outputs } = row;
-    // The row goes in unchanged, as upstream's cooling_effect(**inputs); a
-    // row without units runs on the "SI" default.
-    const result = cooling_effect(inputs as unknown as CoolingEffectParams);
+  test.each(reference_table.data)(
+    "test_cooling_effect: fixture case %#",
+    (entry) => {
+      const { inputs, outputs } = entry;
+      const result = cooling_effect(inputs as unknown as Inputs);
 
-    validateResult(result, outputs, tolerances, inputs);
-  });
+      validateResult(result, outputs, tolerance, inputs);
+    },
+  );
 });
 
 describe("cooling_effect (JS-only)", () => {
   const still = { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 };
   // At 45 °C and 90 % RH the still-air SET root is not bracketed; upstream
-  // 4.6.0 returns 0 and warns.
+  // 4.7.0 returns 0 and warns.
   const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
 
   afterEach(() => {
@@ -46,7 +103,7 @@ describe("cooling_effect (JS-only)", () => {
   const silenceConsoleWarn = () =>
     vi.spyOn(console, "warn").mockImplementation(() => {});
 
-  // Expected value from pythermalcomfort 4.6.0, cooling_effect(..., wme=0.1).
+  // Expected value from pythermalcomfort 4.7.0, cooling_effect(..., wme=0.1).
   test("wme reaches the SET calculation", () => {
     expect(cooling_effect({ ...still, wme: 0.1 }).ce).toBe(1.47);
   });
@@ -88,7 +145,7 @@ describe("cooling_effect (JS-only)", () => {
         const params = {
           ...still,
           [key]: "25",
-        } as unknown as CoolingEffectParams;
+        } as unknown as Inputs;
         expect(() => cooling_effect(params)).toThrow(TypeError);
       },
     );
@@ -96,7 +153,7 @@ describe("cooling_effect (JS-only)", () => {
     // A missing quantity is a TypeError, as a missing keyword argument is in
     // Python.
     test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<CoolingEffectParams> = { ...still };
+      const params: Partial<Inputs> = { ...still };
       delete params[key];
       // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
       expect(() => cooling_effect(params)).toThrow(TypeError);

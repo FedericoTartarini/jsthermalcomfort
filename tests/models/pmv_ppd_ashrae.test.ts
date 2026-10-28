@@ -1,22 +1,34 @@
-import { afterEach, describe, expect, vi, test } from "vitest";
+import { fileURLToPath } from "node:url";
+import { describe, expect, test } from "vitest";
 import {
-  PMV_COMPLIANCE_INTERVAL_ASHRAE,
+  classifyFromBins,
   pmv_ppd_ashrae,
+  PMV_PPD_ASHRAE_INFO,
   pmv_ppd_iso,
   PMV_PPD_ISO_INFO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
+  UTCI_INFO,
 } from "../../src/models/index.ts";
-import type { PmvPpdAshraeParams } from "../../src/models/pmv_ppd_ashrae.ts";
-import { classifyFromBins } from "../../src/_internal/classifierBins.ts";
-import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
-import { check_standard_compliance } from "../../src/utilities/utilities.js";
-import { Standard } from "../../src/utilities/options.ts";
-import { testDataUrls } from "./comftest.ts";
+import { THERMAL_SENSATION } from "../../src/models/_pmv_ppd_optimized.ts";
 import {
+  check_standard_compliance,
+  clo_dynamic_ashrae,
+  Standard,
+  Units,
+  v_relative,
+} from "../../src/utilities/index.ts";
+import { pmv_ppd_ashrae as from_root } from "../../src/index.ts";
+import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
+import { read_data } from "../parity/harness.ts";
+import { testDataUrls } from "./comftest.ts";
+import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
+import {
+  approx,
   assertNonEmptyRows,
   loadTestData,
   validateResult,
 } from "./testUtils.ts";
+
+type Inputs = Parameters<typeof pmv_ppd_ashrae>[0];
 
 // Array rows run element-wise.
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
@@ -285,39 +297,180 @@ describe("test_pmv_ppd_ashrae", () => {
   });
 });
 
-describe("pmv_ppd_ashrae (JS-only)", () => {
-  const neutral = { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+const neutral = { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+const notice = {
+  kind: "notice",
+  message: "Cooling effect could not be calculated. Returning 0.",
+};
+// At 45 °C and 90 % RH the still-air SET root is not bracketed, so the cooling effect falls back to 0.
+const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
+const range = (key: string, value: number, bound: object) => ({
+  kind: "range",
+  key,
+  role: "input",
+  value,
+  unit: PMV_PPD_ASHRAE_INFO.inputs[key as "tdb"].unit,
+  bound,
+});
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+describeModelContract(pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO, neutral, {
+  ...neutral,
+  tdb: 45,
+});
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("pmv_ppd_ashrae (JS-only)", () => {
+  // A JS-only test passes an invalid input through here (decision 175).
+  const call = (inputs: unknown) => () => pmv_ppd_ashrae(inputs as Inputs);
+
+  describe("values", () => {
+    // The docstring's examples (models/pmv_ppd_ashrae.py:108-138).
+    test("the examples print upstream's values", () => {
+      const met = 1.4;
+      const results = pmv_ppd_ashrae({
+        tdb: 25,
+        tr: 25,
+        vr: v_relative(0.1, met),
+        rh: 50,
+        met,
+        clo: clo_dynamic_ashrae(0.5, met),
+        standard: "55-2023",
+      });
+      expect(results.pmv).toBe(-0);
+      expect(results.ppd).toBe(5);
+      expect(results.compliance).toBe(true);
+
+      const result = [22, 25, 28].map((tdb) =>
+        pmv_ppd_ashrae({
+          tdb,
+          tr: 25,
+          vr: 0.1,
+          rh: 50,
+          met: 1.4,
+          clo: 0.5,
+          standard: "55-2023",
+        }),
+      );
+      expect(result.map(({ pmv }) => pmv)).toEqual([-0, 0.41, 0.81]);
+      expect(result.map(({ ppd }) => ppd)).toEqual([5, 8.5, 19]);
+      expect(result.map(({ tsv }) => tsv)).toEqual([
+        "Neutral",
+        "Neutral",
+        "Slightly Warm",
+      ]);
+      expect(result.map(({ compliance }) => compliance)).toEqual([
+        true,
+        true,
+        false,
+      ]);
+    });
+
+    test("takes units in any case, and the constant, as upstream", () => {
+      const ip = { tdb: 77, tr: 77, vr: 0.328, rh: 50, met: 1.2, clo: 0.5 };
+      const upper = pmv_ppd_ashrae({ ...ip, units: "IP" });
+      expect(upper).toMatchObject({
+        pmv: 0.08,
+        ppd: 5.1,
+        tsv: "Neutral",
+        compliance: true,
+      });
+      expect(pmv_ppd_ashrae({ ...ip, units: Units.IP })).toEqual(upper);
+      expect(call({ ...ip, units: "ip" })()).toEqual(upper);
+    });
+
+    test("is exported from the package root as from its subpath", () => {
+      expect(from_root).toBe(pmv_ppd_ashrae);
+    });
+  });
+
+  describe("errors", () => {
+    const message = (model: string) =>
+      `Model '${model}' is not supported. Supported models are: 55-2023.`;
+
+    // models/pmv_ppd_ashrae.py:165-171, which lower-cases the value before its message.
+    test.each([
+      ["random", "random"],
+      ["RANDOM", "random"],
+      ["55-2020", "55-2020"],
+      [Standard.iso_7730_2025, "7730-2025"],
+      [Standard.iso_7933_2023, "7933-2023"],
+    ])("standard %s throws upstream's message", (standard, lowered) => {
+      expect(call({ ...neutral, standard })).toThrow(
+        new RangeError(message(lowered)),
+      );
+    });
+
+    // Deviation pmv_ppd_ashrae-9: upstream's model.lower() raises AttributeError here.
+    test("a standard that is not a string throws upstream's message for it", () => {
+      expect(call({ ...neutral, standard: 7730 })).toThrow(
+        new TypeError(message("7730")),
+      );
+    });
+  });
+
+  // Deviation pmv_ppd_ashrae-1.
+  describe("PMV_PPD_ASHRAE_INFO", () => {
+    // models/pmv_ppd_ashrae.py:22, :166.
+    test("standards are the one ASHRAE 55 edition upstream supports", () => {
+      expect(PMV_PPD_ASHRAE_INFO.standards).toEqual(["55-2023"]);
+      expect(PMV_PPD_ASHRAE_INFO.inputs.standard.allowed).toBe(
+        PMV_PPD_ASHRAE_INFO.standards,
+      );
+    });
+
+    test("shares ASHRAE 55's bounds and BaseInputs' units, not copies", () => {
+      const { inputs } = PMV_PPD_ASHRAE_INFO;
+      expect(inputs.tdb.applicability).toBe(ASHRAE_55_LIMITS.tdb);
+      expect(inputs.tr.applicability).toBe(ASHRAE_55_LIMITS.tr);
+      expect(inputs.vr.applicability).toBe(ASHRAE_55_LIMITS.v);
+      expect(inputs.met.applicability).toBe(ASHRAE_55_LIMITS.met);
+      expect(inputs.clo.applicability).toBe(ASHRAE_55_LIMITS.clo);
+      expect(inputs.units).toBe(UTCI_INFO.inputs.units);
+    });
+
+    // models/pmv_ppd_ashrae.py:227-240.
+    test("tsv's classifier is the shared thermal sensation table, right-inclusive", () => {
+      const { classifier } = PMV_PPD_ASHRAE_INFO.outputs.tsv;
+      expect(classifier.edges).toBe(THERMAL_SENSATION.edges);
+      expect(classifier.labels).toBe(THERMAL_SENSATION.labels);
+      expect(classifier.right).toBe(true);
+    });
   });
 
   describe("compliance", () => {
-    test("the interval is the open (-0.5, 0.5), frozen", () => {
-      expect(PMV_COMPLIANCE_INTERVAL_ASHRAE).toEqual({ min: -0.5, max: 0.5 });
-      expect(Object.isFrozen(PMV_COMPLIANCE_INTERVAL_ASHRAE)).toBe(true);
-    });
+    const at = (t: number, round_output = true) =>
+      pmv_ppd_ashrae({
+        tdb: t,
+        tr: t,
+        vr: 0.1,
+        rh: 50,
+        met: 1.0,
+        clo: 0.5,
+        round_output,
+      });
 
-    // Both pmvs round to 0.5, so the rounded value cannot tell them apart;
-    // upstream reads the unrounded one. Expected values from pythermalcomfort
-    // 4.6.0: 0.49960946928969807 and 0.5033653770344304.
+    // Both pmvs round to 0.5; upstream gives 0.49960946928969807 and 0.5033653770344304.
     test("is read from the unrounded pmv", () => {
-      const at = (t: number) =>
-        pmv_ppd_ashrae({ tdb: t, tr: t, vr: 0.1, rh: 50, met: 1.0, clo: 0.5 });
       expect(at(27.42).pmv).toBe(0.5);
       expect(at(27.42).compliance).toBe(true);
       expect(at(27.43).pmv).toBe(0.5);
       expect(at(27.43).compliance).toBe(false);
     });
 
-    test("is NaN when the applicability gate fails", () => {
+    test("is the same whether round_output is on or off", () => {
+      expect(approx(at(25, false).pmv, -0.40087108864648396)).toBe(true);
+      expect(at(25, false).compliance).toBe(true);
+      expect(at(25).compliance).toBe(true);
+    });
+
+    // ADR 0006: upstream masks it with np.nan.
+    test("is NaN where the gate makes pmv NaN", () => {
       const result = pmv_ppd_ashrae({ ...neutral, tdb: 45 });
       expect(result.pmv).toBeNaN();
       expect(result.compliance).toBeNaN();
     });
 
-    // Upstream 4.6.0 returns False here: the gate is off, so the pmv of 6.6
-    // is judged like any other.
     test("is a boolean with limit_inputs off, even out of range", () => {
       const result = pmv_ppd_ashrae({
         ...neutral,
@@ -329,304 +482,154 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result.compliance).toBe(false);
     });
 
-    // Expected values from pythermalcomfort 4.6.0 with round_output=False.
-    test("is the same whether round_output is on or off", () => {
-      const at = (round_output: boolean) =>
-        pmv_ppd_ashrae({
-          tdb: 25,
-          tr: 25,
-          vr: 0.1,
-          rh: 50,
-          met: 1.0,
-          clo: 0.5,
-          round_output,
-        });
-      expect(
-        Math.abs(at(false).pmv - -0.40087108864648396),
-      ).toBeLessThanOrEqual(1e-6);
-      expect(at(false).compliance).toBe(true);
-      expect(at(true).compliance).toBe(true);
-    });
-  });
-
-  describe("input validation", () => {
-    const quantities = ["tdb", "tr", "vr", "rh", "met", "clo"] as const;
-
-    // A numeric string is not coerced, unlike in arithmetic.
-    test.each([...quantities, "wme"] as const)(
-      "throws TypeError if %s is not a number",
-      (key) => {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = {
-          ...neutral,
-          [key]: "25",
-        } as unknown as PmvPpdAshraeParams;
-        expect(() => pmv_ppd_ashrae(params)).toThrow(TypeError);
-      },
-    );
-
-    // A missing quantity is a TypeError, as a missing keyword argument is in
-    // Python.
-    test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<PmvPpdAshraeParams> = { ...neutral };
-      delete params[key];
-      // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
-      expect(() => pmv_ppd_ashrae(params)).toThrow(TypeError);
-    });
-
-    // ADR 0001: a non-finite number throws rather than propagating as NaN.
-    test.each([...quantities, "wme"] as const)(
-      "throws TypeError if %s is not finite",
-      (key) => {
-        for (const bad of [NaN, Infinity, -Infinity]) {
-          expect(() => pmv_ppd_ashrae({ ...neutral, [key]: bad })).toThrow(
-            TypeError,
-          );
-        }
-      },
-    );
-
-    // The quantities were positional before v2 (ADR 0002). A call still
-    // written that way throws rather than running on anything else.
-    test("throws TypeError if called positionally", () => {
-      // @ts-expect-error the model takes one params object
-      expect(() => pmv_ppd_ashrae(25, 25, 0.1, 50, 1.2, 0.5)).toThrow(
-        TypeError,
-      );
-      // @ts-expect-error null is not a params object
-      expect(() => pmv_ppd_ashrae(null)).toThrow(TypeError);
-      // @ts-expect-error the params object is required
-      expect(() => pmv_ppd_ashrae()).toThrow(TypeError);
-    });
-
-    // The shared PMV module accepts the ISO 7730 standards too; this wrapper
-    // must not hand one through and compute the ISO equation under its name.
-    test("throws Error if standard is an ISO 7730 standard", () => {
-      for (const standard of [Standard.iso_7730_2005, Standard.iso_7730_2025]) {
-        expect(() =>
-          pmv_ppd_ashrae({
-            ...neutral,
-            // @ts-expect-error standard is "55-2023"; the runtime check is under test
-            standard,
-          }),
-        ).toThrow(Error);
-      }
-    });
-
-    test("throws Error if units is not a valid enum", () => {
-      expect(() =>
-        pmv_ppd_ashrae({
-          ...neutral,
-          // @ts-expect-error units is "SI" or "IP"; the runtime check is under test
-          units: "INVALID",
-        }),
-      ).toThrow(Error);
-    });
-
-    test.each([
-      "limit_inputs",
-      "airspeed_control",
-      "round_output",
-      "suppress_warnings",
-    ] as const)("throws TypeError if %s is not a boolean", (key) => {
-      // Cast: deliberately passing a string to test the runtime TypeError.
-      const params = {
-        ...neutral,
-        [key]: "true",
-      } as unknown as PmvPpdAshraeParams;
-      expect(() => pmv_ppd_ashrae(params)).toThrow(TypeError);
-    });
-
-    test("a switch passed as undefined takes its default", () => {
-      expect(
-        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
-        pmv_ppd_ashrae({
-          ...neutral,
-          wme: undefined,
-          standard: undefined,
-          units: undefined,
-          limit_inputs: undefined,
-          airspeed_control: undefined,
-          round_output: undefined,
-          suppress_warnings: undefined,
-        }),
-      ).toEqual(pmv_ppd_ashrae(neutral));
-    });
-  });
-
-  // At 45 °C and 90 % RH the cooling effect falls back to 0 with a warning.
-  test("suppress_warnings passes through to the cooling effect", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const hot = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
-    pmv_ppd_ashrae({ ...hot, suppress_warnings: true });
-    expect(warn).not.toHaveBeenCalled();
-    pmv_ppd_ashrae(hot);
-    expect(warn).toHaveBeenCalledTimes(1);
-  });
-
-  describe("tsv classification (right-inclusive)", () => {
-    // ASHRAE has more lenient range than ISO, so try an extreme case
-    test("tsv is NaN when pmv is NaN (out of range)", () => {
+    // A clo below 0 overflows the kernel; upstream compares the NaN pmv as False.
+    test("is false where the kernel's pmv is NaN and the gate is off", () => {
       const result = pmv_ppd_ashrae({
-        tdb: 50,
-        tr: 50,
-        vr: 0.5,
-        rh: 80,
-        met: 2.0,
-        clo: 0.3,
-        limit_inputs: true,
+        tdb: 45,
+        tr: 5,
+        vr: 2.5,
+        rh: 50,
+        met: 0.9,
+        clo: -0.1,
+        airspeed_control: false,
+        limit_inputs: false,
       });
       expect(result.pmv).toBeNaN();
-      expect(result.tsv).toBeNaN();
-    });
-
-    // This test used to assert the opposite: tsv from the unrounded pmv whatever
-    // round_output was. Upstream classifies the pmv it returns, after rounding
-    // (pmv_ppd_ashrae.py in 4.6.0), so the label never disagrees with the number
-    // shown. Expected values from pythermalcomfort 4.6.0 at these inputs.
-    test("tsv is classified from the pmv returned, rounded or not", () => {
-      // pmv ≈ 0.5044, just above the 0.5 edge. ASHRAE is right-inclusive, so
-      // the rounded 0.5 closes (-0.5, 0.5] = "Neutral", while the unrounded
-      // value falls in (0.5, 1.5] = "Slightly Warm".
-      const warm = { ...neutral, tdb: 26.4, tr: 26.4, limit_inputs: false };
-      const result_rounded = pmv_ppd_ashrae({ ...warm, round_output: true });
-      const result_unrounded = pmv_ppd_ashrae({ ...warm, round_output: false });
-      expect(result_rounded.pmv).toBe(0.5);
-      expect(result_rounded.tsv).toBe("Neutral");
-      expect(result_unrounded.pmv).toBeGreaterThan(0.5);
-      expect(result_unrounded.tsv).toBe("Slightly Warm");
-    });
-
-    // At comfortable neutral conditions (25°C, symmetric), pmv should be ~0, so tsv should be "Neutral"
-    test("neutral comfort (pmv ~0) -> Neutral", () => {
-      expect(pmv_ppd_ashrae(neutral).tsv).toBe("Neutral");
-    });
-
-    test("warm comfort (pmv ~1) -> Slightly Warm", () => {
-      // tdb=26.4 used to be asserted "Slightly Warm" here from its unrounded
-      // pmv ≈ 0.5044; rounded by default to 0.5, it is "Neutral" (the test
-      // above), as upstream classifies the rounded pmv. tdb=27 gives pmv ≈ 0.68,
-      // inside the right-inclusive interval (0.5, 1.5] = "Slightly Warm" (ASHRAE).
-      // This test verifies the exact classification, not a set of possibilities,
-      // so that rounding errors or classification bugs are caught.
-      const result = pmv_ppd_ashrae({
-        ...neutral,
-        tdb: 27,
-        tr: 27,
-        limit_inputs: false,
-      });
-      // Must be exactly "Slightly Warm", not one of three options
-      expect(result.tsv).toBe("Slightly Warm");
+      expect(result.compliance).toBe(false);
     });
   });
 
-  // -------------------------------------------------------------------------
-  // Intentional divergence between ISO and ASHRAE (pythermalcomfort#382)
-  // -------------------------------------------------------------------------
-  describe("ISO vs ASHRAE TSV interval convention (pythermalcomfort#382)", () => {
-    // The two models share identical bin edges and labels but opposite interval
-    // conventions: ISO is left-inclusive, ASHRAE is right-inclusive. Classify the
-    // SAME value under both bin sets so the convention is the only variable —
-    // going through the models instead would confound this with the fact that
-    // ASHRAE applies a cooling effect and therefore computes a different PMV.
-    test.each([-2.5, -1.5, -0.5, 0.5, 1.5, 2.5])(
-      "pmv = %s is labelled differently by the two conventions",
-      (pmv) => {
-        const iso = classifyFromBins(
-          pmv,
-          PMV_PPD_ISO_INFO.outputs.tsv.classifier,
-        );
-        const ashrae = classifyFromBins(
-          pmv,
-          PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-        );
-        expect(iso).not.toBe(ashrae);
+  describe("warnings rows", () => {
+    test("empty at the neutral inputs", () => {
+      expect(pmv_ppd_ashrae(neutral).warnings).toEqual([]);
+    });
+
+    test("an input outside its bound gives a range row with INFO's bound", () => {
+      const { warnings } = pmv_ppd_ashrae({ ...neutral, tdb: 45 });
+      expect(warnings).toEqual([range("tdb", 45, { min: 10.0, max: 40.0 })]);
+      expect(warnings[0]).toHaveProperty(
+        "bound",
+        PMV_PPD_ASHRAE_INFO.inputs.tdb.applicability,
+      );
+    });
+
+    // Deviation pmv_ppd_ashrae-3.
+    test("every check gives its row, in upstream's order, with the gate on and off", () => {
+      const inputs = {
+        tdb: 45,
+        tr: 5,
+        vr: 2.5,
+        rh: 50,
+        met: 0.9,
+        clo: -0.1,
+        airspeed_control: false,
+      };
+      const on = pmv_ppd_ashrae(inputs);
+      const off = pmv_ppd_ashrae({ ...inputs, limit_inputs: false });
+      expect(on.warnings).toEqual([
+        notice,
+        range("tdb", 45, ASHRAE_55_LIMITS.tdb),
+        range("tr", 5, ASHRAE_55_LIMITS.tr),
+        range("vr", 2.5, ASHRAE_55_LIMITS.v),
+        range("vr", 2.5, { max: 0.8 }),
+        range("met", 0.9, ASHRAE_55_LIMITS.met),
+        range("clo", -0.1, ASHRAE_55_LIMITS.clo),
+      ]);
+      expect(off.warnings).toEqual(on.warnings);
+    });
+
+    test("under IP the rows hold the SI values upstream compares", () => {
+      // 113 °F is 45 °C.
+      const { warnings } = pmv_ppd_ashrae({
+        tdb: 113,
+        tr: 77,
+        vr: 0.328,
+        rh: 30,
+        met: 1.2,
+        clo: 0.5,
+        units: "IP",
+      });
+      expect(warnings).toEqual([range("tdb", 45, ASHRAE_55_LIMITS.tdb)]);
+    });
+
+    // Deviation pmv_ppd_ashrae-2: cooling_effect's notice row passes through.
+    test("a cooling effect that falls back to 0 gives upstream's notice, once", () => {
+      const result = pmv_ppd_ashrae({ ...unbracketed, limit_inputs: false });
+      expect(result.warnings).toEqual([
+        notice,
+        range("tdb", 45, ASHRAE_55_LIMITS.tdb),
+        range("tr", 45, ASHRAE_55_LIMITS.tr),
+      ]);
+      expect(isDeepFrozen(result)).toBe(true);
+    });
+
+    // Deviation pmv_ppd_ashrae-4: upstream warns twice where the library returns one row.
+    test("gives one notice where upstream warns, over the parity data", () => {
+      const root = fileURLToPath(new URL("../..", import.meta.url));
+      const { cases } = read_data(root, "pmv_ppd_ashrae");
+      const counts = cases.map(({ inputs: { model, ...inputs }, warnings }) => [
+        pmv_ppd_ashrae({
+          ...inputs,
+          standard: model,
+        } as Inputs).warnings.filter(({ kind }) => kind === "notice").length,
+        warnings.some(({ message }) => message === notice.message) ? 1 : 0,
+      ]);
+      expect(counts.filter(([, upstream]) => upstream === 1)).toHaveLength(88);
+      for (const [library, upstream] of counts) expect(library).toBe(upstream);
+    });
+
+    test.each(ashrae_rows)(
+      "a NaN under the gate never comes without a row (fixture #%#)",
+      ({ inputs }) => {
+        const run = (limit_inputs: boolean) =>
+          pmv_ppd_ashrae({
+            ...inputs,
+            standard: Standard.ashrae_55_2023,
+            limit_inputs,
+          } as unknown as Inputs);
+        const limited = run(true);
+        const caused_by_limits =
+          Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
+        const rows = limited.warnings.filter(({ kind }) => kind === "range");
+        expect(rows.length > 0).toBe(caused_by_limits);
       },
     );
 
-    test("at pmv = -1.5 exactly, ISO says Slightly Cool and ASHRAE says Cool", () => {
-      // ISO is left-inclusive, so -1.5 opens the [-1.5, -0.5) bin -> "Slightly Cool".
-      // ASHRAE is right-inclusive, so -1.5 closes the (-2.5, -1.5] bin -> "Cool".
-      expect(
-        classifyFromBins(-1.5, PMV_PPD_ISO_INFO.outputs.tsv.classifier),
-      ).toBe("Slightly Cool");
-      expect(
-        classifyFromBins(-1.5, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE),
-      ).toBe("Cool");
-    });
-
-    test("the two models can also disagree end-to-end, for a separate reason", () => {
-      // Here the pmvs differ because ASHRAE's cooling effect (vr = 0.5) makes it
-      // compute a DIFFERENT pmv from ISO -- not because of the interval convention.
-      // Recorded so the two causes of divergence are not conflated. The labels
-      // used to differ too, while ASHRAE classified its unrounded pmv (just above
-      // -1.5); classified from the rounded -1.5, as upstream does, the
-      // right-inclusive (-2.5, -1.5] bin makes it "Cool" like ISO's -1.52.
-      const iso = pmv_ppd_iso({
-        tdb: 22.5,
-        tr: 22.5,
-        vr: 0.5,
-        rh: 50,
-        met: 1.2,
-        clo: 0.5,
-        wme: 0,
-        standard: Standard.iso_7730_2025,
-        limit_inputs: false,
-      });
-      const ashrae = pmv_ppd_ashrae({
-        tdb: 22.5,
-        tr: 22.5,
-        vr: 0.5,
-        rh: 50,
-        met: 1.2,
-        clo: 0.5,
-        limit_inputs: false,
-      });
-      expect(iso.pmv).toBe(-1.52);
-      expect(iso.tsv).toBe("Cool");
-      expect(ashrae.pmv).toBe(-1.5);
-      expect(ashrae.tsv).toBe("Cool");
+    // check_standard_compliance keeps its own copy of these bounds and of the
+    // airspeed rules, so this pins the two copies together on every branch.
+    test("the input rows break exactly when check_standard_compliance warns", () => {
+      for (const airspeed_control of [true, false])
+        for (const tdb of [5, 10, 20, 24, 30, 35, 40, 45])
+          for (const vr of [0, 0.1, 0.25, 0.5, 0.9, 1.5, 2, 2.5])
+            for (const met of [0.7, 0.8, 1, 1.2, 4, 4.5])
+              for (const clo of [0, 0.5, 1, 1.5, 2, 2.5]) {
+                const rows = pmv_ppd_ashrae({
+                  tdb,
+                  tr: tdb,
+                  vr,
+                  rh: 50,
+                  met,
+                  clo,
+                  airspeed_control,
+                }).warnings.filter(({ kind }) => kind === "range");
+                const strings = check_standard_compliance(
+                  Standard.ashrae_55_2023,
+                  { tdb, tr: tdb, v: vr, met, clo, airspeed_control },
+                );
+                expect({ tdb, vr, met, clo, broke: rows.length > 0 }).toEqual({
+                  tdb,
+                  vr,
+                  met,
+                  clo,
+                  broke: strings.length > 0,
+                });
+              }
     });
   });
-});
 
-// Moved from the shared PMV module's tests when ticket 12 split it.
-describe("pmv_ppd_ashrae warnings rows (JS-only)", () => {
-  test("input rows against the ASHRAE 55 bounds, never pa or pmv", () => {
-    const { warnings } = pmv_ppd_ashrae({
-      tdb: 45,
-      tr: 30,
-      vr: 0.1,
-      rh: 95,
-      met: 3,
-      clo: 1.6,
-      limit_inputs: false,
-    });
-    expect(warnings).toEqual([
-      { key: "tdb", role: "input", value: 45, bound: ASHRAE_55_LIMITS.tdb },
-      { key: "clo", role: "input", value: 1.6, bound: ASHRAE_55_LIMITS.clo },
-    ]);
-  });
-
-  test("no vapour pressure bound: a humid call is computed", () => {
-    const result = pmv_ppd_ashrae({
-      tdb: 30,
-      tr: 30,
-      vr: 0.1,
-      rh: 90,
-      met: 1.2,
-      clo: 0.5,
-    });
-    expect(Number.isFinite(result.pmv)).toBe(true);
-  });
-
+  // _internal/ashrae55.py:41-79; clo < 0.7 and met < 1.3, the only case these limits apply to.
   describe("airspeed limits without airspeed control", () => {
-    // clo < 0.7 and met < 1.3, the only case these limits apply to.
-    const ashrae = (
-      tdb: number,
-      vr: number,
-      params: Partial<PmvPpdAshraeParams> = {},
-    ) =>
+    const ashrae = (tdb: number, vr: number, inputs: Partial<Inputs> = {}) =>
       pmv_ppd_ashrae({
         tdb,
         tr: tdb,
@@ -635,15 +638,13 @@ describe("pmv_ppd_ashrae warnings rows (JS-only)", () => {
         met: 1.0,
         clo: 0.5,
         airspeed_control: false,
-        ...params,
+        ...inputs,
       });
 
     test("to <= 23 °C: vr above 0.2 m/s gives a vr row against 0.2", () => {
       const result = ashrae(20, 0.3);
       expect(result.pmv).toBeNaN();
-      expect(result.warnings).toEqual([
-        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
-      ]);
+      expect(result.warnings).toEqual([range("vr", 0.3, { max: 0.2 })]);
     });
 
     test("23 < to < 25.5 °C: vr above the operative-temperature limit gives a row against it", () => {
@@ -652,33 +653,13 @@ describe("pmv_ppd_ashrae warnings rows (JS-only)", () => {
       const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
       const result = ashrae(24, 0.5);
       expect(result.pmv).toBeNaN();
-      expect(result.warnings).toEqual([
-        { key: "vr", role: "input", value: 0.5, bound: { max: v_limit } },
-      ]);
+      expect(result.warnings).toEqual([range("vr", 0.5, { max: v_limit })]);
     });
 
     test("vr above 0.8 m/s gives a row against 0.8", () => {
       const result = ashrae(26, 1.0);
       expect(result.pmv).toBeNaN();
-      expect(result.warnings).toEqual([
-        { key: "vr", role: "input", value: 1.0, bound: { max: 0.8 } },
-      ]);
-    });
-
-    test("vr outside both its range and the no-control limit gives both rows", () => {
-      expect(ashrae(26, 2.5).warnings).toEqual([
-        { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.v },
-        { key: "vr", role: "input", value: 2.5, bound: { max: 0.8 } },
-      ]);
-    });
-
-    // Upstream's _check_ashrae55_compliance checks the airspeed rules before
-    // met and clo, so their rows come first.
-    test("the airspeed rows come before the met and clo rows, as upstream's", () => {
-      expect(ashrae(20, 0.3, { met: 0.9 }).warnings).toEqual([
-        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
-        { key: "met", role: "input", value: 0.9, bound: ASHRAE_55_LIMITS.met },
-      ]);
+      expect(result.warnings).toEqual([range("vr", 1.0, { max: 0.8 })]);
     });
 
     test("the same call with airspeed control gives no row", () => {
@@ -690,60 +671,82 @@ describe("pmv_ppd_ashrae warnings rows (JS-only)", () => {
       expect(Number.isFinite(off.pmv)).toBe(true);
       expect(off.warnings).toEqual(ashrae(20, 0.3).warnings);
     });
+  });
 
-    test.each([
-      { tdb: 20, vr: 0.3 },
-      { tdb: 24, vr: 0.5 },
-      { tdb: 26, vr: 1.0 },
-    ])("the row's bound is frozen (tdb=$tdb, vr=$vr)", ({ tdb, vr }) => {
-      expect(Object.isFrozen(ashrae(tdb, vr).warnings[0]!.bound)).toBe(true);
+  describe("tsv classification (right-inclusive)", () => {
+    test("tsv is NaN when pmv is NaN (out of range)", () => {
+      const result = pmv_ppd_ashrae({
+        tdb: 50,
+        tr: 50,
+        vr: 0.5,
+        rh: 80,
+        met: 2.0,
+        clo: 0.3,
+      });
+      expect(result.pmv).toBeNaN();
+      expect(result.tsv).toBeNaN();
+    });
+
+    // Upstream classifies the pmv it returns, after rounding (models/pmv_ppd_ashrae.py:223-240):
+    // 0.5043645689727003 unrounded, 0.5 rounded.
+    test("tsv is classified from the pmv returned, rounded or not", () => {
+      const warm = { ...neutral, tdb: 26.4, tr: 26.4, limit_inputs: false };
+      const rounded = pmv_ppd_ashrae({ ...warm, round_output: true });
+      const unrounded = pmv_ppd_ashrae({ ...warm, round_output: false });
+      expect(rounded.pmv).toBe(0.5);
+      expect(rounded.tsv).toBe("Neutral");
+      expect(unrounded.pmv).toBeGreaterThan(0.5);
+      expect(unrounded.tsv).toBe("Slightly Warm");
+    });
+
+    test("pmv 0.69 is Slightly Warm", () => {
+      const result = pmv_ppd_ashrae({
+        ...neutral,
+        tdb: 27,
+        tr: 27,
+        limit_inputs: false,
+      });
+      expect(result.pmv).toBe(0.69);
+      expect(result.tsv).toBe("Slightly Warm");
     });
   });
 
-  test.each(ashrae_rows)(
-    "a NaN that limit_inputs caused comes with a row (fixture #%#)",
-    ({ inputs }) => {
-      const run = (limit_inputs: boolean) =>
-        pmv_ppd_ashrae({
-          ...inputs,
-          standard: Standard.ashrae_55_2023,
-          limit_inputs,
-        } as unknown as PmvPpdAshraeParams);
-      const limited = run(true);
-      const caused_by_limits =
-        Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
-      expect(limited.warnings.length > 0).toBe(caused_by_limits);
-    },
-  );
+  // pythermalcomfort#382: the two models share edges and labels, with opposite `right`.
+  describe("ISO vs ASHRAE TSV interval convention (pythermalcomfort#382)", () => {
+    const iso = PMV_PPD_ISO_INFO.outputs.tsv.classifier;
+    const ashrae = PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier;
 
-  // check_standard_compliance keeps its own copy of these bounds and of the
-  // airspeed rules, so this pins the two copies together on every branch.
-  test("the input rows break exactly when check_standard_compliance warns", () => {
-    for (const airspeed_control of [true, false])
-      for (const tdb of [5, 10, 20, 24, 30, 35, 40, 45])
-        for (const vr of [0, 0.1, 0.25, 0.5, 0.9, 1.5, 2, 2.5])
-          for (const met of [0.7, 0.8, 1, 1.2, 4, 4.5])
-            for (const clo of [0, 0.5, 1, 1.5, 2, 2.5]) {
-              const rows = pmv_ppd_ashrae({
-                tdb,
-                tr: tdb,
-                vr,
-                rh: 50,
-                met,
-                clo,
-                airspeed_control,
-              }).warnings.filter((w) => w.role === "input");
-              const strings = check_standard_compliance(
-                Standard.ashrae_55_2023,
-                { tdb, tr: tdb, v: vr, met, clo, airspeed_control },
-              );
-              expect({ tdb, vr, met, clo, broke: rows.length > 0 }).toEqual({
-                tdb,
-                vr,
-                met,
-                clo,
-                broke: strings.length > 0,
-              });
-            }
+    test.each([-2.5, -1.5, -0.5, 0.5, 1.5, 2.5])(
+      "pmv = %s is labelled differently by the two conventions",
+      (pmv) => {
+        expect(classifyFromBins(pmv, iso)).not.toBe(
+          classifyFromBins(pmv, ashrae),
+        );
+      },
+    );
+
+    test("at pmv = -1.5 exactly, ISO says Slightly Cool and ASHRAE says Cool", () => {
+      expect(classifyFromBins(-1.5, iso)).toBe("Slightly Cool");
+      expect(classifyFromBins(-1.5, ashrae)).toBe("Cool");
+    });
+
+    // ASHRAE's cooling effect at vr 0.5 gives another pmv: -1.5 against ISO's -1.52.
+    test("the two models' pmv differ through the cooling effect, not the convention", () => {
+      const inputs = {
+        tdb: 22.5,
+        tr: 22.5,
+        vr: 0.5,
+        rh: 50,
+        met: 1.2,
+        clo: 0.5,
+        limit_inputs: false,
+      };
+      const iso_result = pmv_ppd_iso(inputs);
+      const ashrae_result = pmv_ppd_ashrae(inputs);
+      expect(iso_result.pmv).toBe(-1.52);
+      expect(iso_result.tsv).toBe("Cool");
+      expect(ashrae_result.pmv).toBe(-1.5);
+      expect(ashrae_result.tsv).toBe("Cool");
+    });
   });
 });

@@ -30,9 +30,9 @@ export function isDeepFrozen(value: unknown): boolean {
  * _shared-10). The messages are written out here, not imported from
  * `src/_internal/errors.ts`, so a changed message fails. The outputs are frozen
  * as upstream's return dataclass is (`@dataclass(frozen=True, repr=False)`:
- * `AdaptiveASHRAE`, `CloTOut`, `CE`, `HI`, `PMVPPD`, `SET`, `SolarGain`,
- * `GaggeTwoNodes` and `UTCI` at `classes_return.py:111, :227, :241, :297,
- * :415, :467, :480, :497, :689`).
+ * `AdaptiveASHRAE`, `CloTOut`, `CE`, `HI`, `PMVPPD`, `PMVPPDAshrae`, `SET`,
+ * `SolarGain`, `GaggeTwoNodes` and `UTCI` at `classes_return.py:111, :227,
+ * :241, :297, :415, :435, :467, :480, :497, :689`).
  *
  * Every case calls the model the subpath index exports, the seam of every
  * behaviour test (decision 93, S1), so the contract holds for what a consumer

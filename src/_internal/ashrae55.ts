@@ -1,12 +1,10 @@
 import { operative_tmp } from "../environment/operative_tmp.ts";
 import { Standard } from "../utilities/options.ts";
 import { deepFreeze } from "./modelInfo.ts";
-import type { ApplicabilityWarning, Bound, ModelWarning } from "./modelInfo.ts";
-import { _legacy_valid_range, _valid_range } from "./validation.ts";
+import type { Bound, ModelWarning } from "./modelInfo.ts";
+import { _valid_range } from "./validation.ts";
 
-// The counterpart of upstream's `_internal/ashrae55.py`. The old form the
-// models not yet migrated call, `_legacy_check_ashrae55_compliance`, sits at
-// the end of the file until the contract ticket removes it.
+// The counterpart of upstream's `_internal/ashrae55.py`.
 
 /**
  * ASHRAE 55's limits that `_check_ashrae55_compliance` checks, keyed as its
@@ -218,66 +216,4 @@ export function _check_ashrae55_compliance(
   }
 
   return Object.values(values_to_return);
-}
-
-/**
- * The quantities `_legacy_check_ashrae55_compliance` takes, in SI, keyed as
- * upstream's keyword arguments.
- */
-interface Ashrae55Params {
-  tdb: number;
-  tr: number;
-  v?: number;
-  met?: number;
-  clo?: number;
-  airspeed_control?: boolean;
-  v_param_name?: string;
-}
-
-/**
- * The old form of {@link _check_ashrae55_compliance}, which the models not yet
- * migrated call: it pushes {@link ApplicabilityWarning} rows onto `warnings`,
- * in the same order and with the same bounds, and the caller's gate reads the
- * rows. `v_limited` is left out, as no caller passes it.
- *
- * @param warnings - the call's rows, appended to
- * @param params - the quantities to check, in SI
- */
-export function _legacy_check_ashrae55_compliance(
-  warnings: ApplicabilityWarning[],
-  params: Ashrae55Params,
-): void {
-  const { tdb, tr, v, met, clo } = params;
-  const { airspeed_control = true, v_param_name = "v" } = params;
-
-  _legacy_valid_range(warnings, "tdb", "input", tdb, ASHRAE_55_LIMITS.tdb);
-  _legacy_valid_range(warnings, "tr", "input", tr, ASHRAE_55_LIMITS.tr);
-  if (v !== undefined) {
-    _legacy_valid_range(warnings, v_param_name, "input", v, ASHRAE_55_LIMITS.v);
-  }
-
-  if (
-    !airspeed_control &&
-    v !== undefined &&
-    met !== undefined &&
-    clo !== undefined &&
-    clo < 0.7 &&
-    met < 1.3
-  ) {
-    const pushAirspeedRow = (bound: Readonly<{ max: number }>) =>
-      warnings.push({ key: v_param_name, role: "input", value: v, bound });
-    const to = operative_tmp(tdb, tr, v);
-    const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
-    if (v > ASHRAE_55_AIRSPEED_NO_CONTROL.any.max)
-      pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.any);
-    if (to > 23 && to < 25.5 && v > v_limit)
-      pushAirspeedRow(Object.freeze({ max: v_limit }));
-    if (to <= 23 && v > ASHRAE_55_AIRSPEED_NO_CONTROL.cool.max)
-      pushAirspeedRow(ASHRAE_55_AIRSPEED_NO_CONTROL.cool);
-  }
-
-  if (met !== undefined && clo !== undefined) {
-    _legacy_valid_range(warnings, "met", "input", met, ASHRAE_55_LIMITS.met);
-    _legacy_valid_range(warnings, "clo", "input", clo, ASHRAE_55_LIMITS.clo);
-  }
 }

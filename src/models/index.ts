@@ -12,12 +12,7 @@ import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en } from "./adaptive_en.js";
 import { at } from "./at.js";
-import {
-  pmv_ppd_ashrae,
-  PMV_COMPLIANCE_INTERVAL_ASHRAE,
-  PMV_PPD_ASHRAE_INFO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-} from "./pmv_ppd_ashrae.ts";
+import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import {
   pmv_ppd_iso,
   PMV_CATEGORY_BINS_ISO_7730,
@@ -64,10 +59,7 @@ export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
-export type {
-  PmvPpdAshraeParams,
-  PmvPpdAshraeResult,
-} from "./pmv_ppd_ashrae.ts";
+export type { PMVPPDAshrae, PMVPPDAshraeInputs } from "./pmv_ppd_ashrae.ts";
 export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type {
@@ -102,10 +94,8 @@ export {
   pmv_ppd_iso,
   pmv,
   PMV_CATEGORY_BINS_ISO_7730,
-  PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
@@ -145,10 +135,8 @@ export default {
   pmv_ppd_iso,
   pmv,
   PMV_CATEGORY_BINS_ISO_7730,
-  PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,

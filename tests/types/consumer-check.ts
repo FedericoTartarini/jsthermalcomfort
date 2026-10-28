@@ -35,8 +35,8 @@ import type {
   HIInputs,
   ModelInfo,
   ModelWarning,
-  PmvPpdAshraeParams,
-  PmvPpdAshraeResult,
+  PMVPPDAshrae,
+  PMVPPDAshraeInputs,
   PMVPPD,
   PMVPPDInputs,
   SET,
@@ -55,7 +55,6 @@ import {
   COOLING_EFFECT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   PMV_CATEGORY_BINS_ISO_7730,
-  PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   SOLAR_GAIN_INFO,
@@ -93,20 +92,16 @@ import { Standard as standardFromUtilities } from "jsthermalcomfort/utilities";
 // @ts-expect-error a deep import is not exported.
 import { utci as utciDeep } from "jsthermalcomfort/lib/esm/models/utci.js";
 
-// The published metadata must satisfy the published type. The models not yet
-// migrated publish the old form, whose inputs carry no kind, until the
-// contract ticket removes it.
+// The published metadata must satisfy the published type.
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
 const coolingEffectInfo: ModelInfo = COOLING_EFFECT_INFO;
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
-const ashrae = PMV_PPD_ASHRAE_INFO;
+const ashrae: ModelInfo = PMV_PPD_ASHRAE_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 const twoNodesGaggeInfo: ModelInfo = TWO_NODES_GAGGE_INFO;
-// @ts-expect-error the old form's inputs carry no kind.
-const ashraeAsModelInfo: ModelInfo = PMV_PPD_ASHRAE_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -372,10 +367,10 @@ heat_index_rothfusz({ tdb: 30 });
 // @ts-expect-error tdb must be a number.
 heat_index_rothfusz({ tdb: "30", rh: 80 });
 
-// pmv_ppd_ashrae takes one params object too (ADR 0002), with its params and
-// result types exported by name; the lines below are errors only while the
-// published signature is typed.
-const pmvAshraeParams: PmvPpdAshraeParams = {
+// pmv_ppd_ashrae takes one inputs object too (ADR 0002), with its inputs and
+// result types named after upstream's classes; the lines below are errors only
+// while the published signature is typed.
+const pmvAshraeParams: PMVPPDAshraeInputs = {
   tdb: 77,
   tr: 77,
   vr: 0.328,
@@ -388,12 +383,17 @@ const pmvAshraeParams: PmvPpdAshraeParams = {
   limit_inputs: false,
   airspeed_control: false,
   round_output: false,
-  suppress_warnings: true,
 };
-const pmvAshrae: PmvPpdAshraeResult = pmv_ppd_ashrae(pmvAshraeParams);
+const pmvAshrae: PMVPPDAshrae = pmv_ppd_ashrae(pmvAshraeParams);
 const ashraeCompliance: boolean | number = pmvAshrae.compliance;
-// The interval compliance is read against, published once.
-const complianceMax: number = PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
+const ashraeTsv: string | number = pmvAshrae.tsv;
+// The interval compliance is read against, published once in its INFO.
+const complianceMax: number =
+  PMV_PPD_ASHRAE_INFO.outputs.compliance.interval.max;
+// @ts-expect-error suppress_warnings is gone; the notice is a row of warnings.
+pmv_ppd_ashrae({ ...pmvAshraeParams, suppress_warnings: true });
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+pmvAshrae.compliance = true;
 pmv_ppd_ashrae({
   tdb: 25,
   tr: 25,
@@ -416,8 +416,8 @@ pmv_ppd_ashrae({
   // @ts-expect-error standard is "55-2023"; an ISO 7730 standard is for pmv_ppd_iso.
   standard: Standard.iso_7730_2025,
 });
-// @ts-expect-error PMV_COMPLIANCE_INTERVAL_ASHRAE is frozen, so its type is readonly.
-PMV_COMPLIANCE_INTERVAL_ASHRAE.max = 1;
+// @ts-expect-error the interval is frozen, so its type is readonly.
+PMV_PPD_ASHRAE_INFO.outputs.compliance.interval.max = 1;
 
 // pmv_ppd_iso returns ISO 7730's category, read against bins published once,
 // keyed by edition, whose edges a front end finds by label.
@@ -433,34 +433,29 @@ const categoryBMax: number | undefined =
 // @ts-expect-error the bins are frozen, so their type is readonly.
 PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025].right = true;
 
-// pmv_ppd_iso returns ModelWarning rows, typed through to the bound once a
-// row's kind is narrowed; pmv_ppd_ashrae still returns the older rows.
+// pmv_ppd_iso and pmv_ppd_ashrae return ModelWarning rows, typed through to
+// the bound once a row's kind is narrowed.
 const isoWarnings: readonly ModelWarning[] = pmvIso.warnings;
 const isoRow = pmvIso.warnings[0];
 const isoRowMax: number | undefined =
   isoRow.kind === "range" ? isoRow.bound.max : undefined;
 // @ts-expect-error the result is readonly, as upstream's frozen dataclass.
 pmvIso.pmv = 1;
-const ashraeRowMax: number | undefined = pmv_ppd_ashrae({
+const ashraeRow = pmv_ppd_ashrae({
   tdb: 45,
   tr: 25,
   vr: 0.1,
   rh: 50,
   met: 1.2,
   clo: 0.5,
-}).warnings[0].bound.max;
+}).warnings[0];
+const ashraeRowMax: number | undefined =
+  ashraeRow.kind === "range" ? ashraeRow.bound.max : undefined;
 // @ts-expect-error role is one of three literals, not any string.
 const notARole: ApplicabilityWarning["role"] = "somewhere";
-const ashraeRows = pmv_ppd_ashrae({
-  tdb: 45,
-  tr: 25,
-  vr: 0.1,
-  rh: 50,
-  met: 1.2,
-  clo: 0.5,
-}).warnings;
-// @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
-ashraeRows[0].bound.max = 50;
+if (ashraeRow.kind === "range")
+  // @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
+  ashraeRow.bound.max = 50;
 
 // utci takes one inputs object too (ADR 0002), with its inputs and result
 // types named after upstream's classes; the lines below are errors only while

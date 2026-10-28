@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   adaptive_ashrae,
+  adaptive_en,
   ankle_draft,
   clo_tout,
   cooling_effect,
@@ -425,6 +426,26 @@ const MODELS: readonly ParityModel[] = [
         ? ["tmp_cmf"]
         : [],
     warnings: true,
+  },
+  {
+    name: "adaptive_en",
+    run: (inputs) =>
+      adaptive_en(inputs as unknown as Parameters<typeof adaptive_en>[0]),
+    // Upstream rounds t_cmf and the bounds with np.around after converting
+    // them under IP (models/adaptive_en.py:138-160).
+    rounded: ({ round_output }) =>
+      round_output === true
+        ? [
+            "tmp_cmf",
+            "tmp_cmf_cat_i_up",
+            "tmp_cmf_cat_ii_up",
+            "tmp_cmf_cat_iii_up",
+            "tmp_cmf_cat_i_low",
+            "tmp_cmf_cat_ii_low",
+            "tmp_cmf_cat_iii_low",
+          ]
+        : [],
+    warnings: false,
   },
   {
     name: "ankle_draft",

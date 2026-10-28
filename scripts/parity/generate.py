@@ -74,6 +74,27 @@ def _adaptive_ashrae(rng):
     }
 
 
+def _adaptive_en(rng):
+    # The ranges reach past the model's t_running_mean limits (10-30 °C), so
+    # NaN positions are compared too, and v goes below 0, where operative_tmp's
+    # ISO square root gives NaN. units comes in either case, as upstream
+    # upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        t, trm, v = (5.0, 45.0), (5.0, 35.0), (-0.5, 2.5)
+    else:
+        t, trm, v = (41.0, 113.0), (41.0, 95.0), (-1.6, 8.2)
+    return {
+        "tdb": _value(rng, *t),
+        "tr": _value(rng, *t),
+        "t_running_mean": _value(rng, *trm),
+        "v": _value(rng, *v),
+        "units": units,
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _ankle_draft(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, met 1-4
     # met, clo 0-1.5 clo), so NaN positions and every check's warning are
@@ -401,6 +422,7 @@ GATED_RAISES = {"ankle_draft": ValueError}
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
+    "adaptive_en": (models.adaptive_en, _adaptive_en),
     "ankle_draft": (models.ankle_draft, _ankle_draft),
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),

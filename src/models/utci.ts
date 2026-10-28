@@ -14,6 +14,7 @@ import { units_converter } from "../utilities/units_converter.ts";
 export const UTCI_INFO = deepFreeze({
   name: "utci",
   label: "UTCI",
+  standards: [],
   inputs: {
     tdb: {
       kind: "numeric",

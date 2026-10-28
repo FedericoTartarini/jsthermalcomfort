@@ -54,6 +54,7 @@ export type {
   NumericField,
   OutputField,
   OutputsInfo,
+  StandardId,
   UnitSymbol,
 } from "../_internal/modelInfo.ts";
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";

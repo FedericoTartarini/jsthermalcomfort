@@ -211,6 +211,11 @@ describe("heat_index_rothfusz (JS-only)", () => {
     );
   });
 
+  // deviation _shared-4 (models/heat_index_rothfusz.py:26)
+  test("INFO.standards is empty", () => {
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.standards).toEqual([]);
+  });
+
   // deviation heat_index_rothfusz-3
   describe("warnings rows", () => {
     const bound = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.applicability;

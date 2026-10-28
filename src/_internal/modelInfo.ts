@@ -237,13 +237,19 @@ export type OutputsOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
  * quantities computed from the inputs rather than supplied by the caller,
  * keyed by upstream's name for the check, as the `warnings` rows are.
  *
- * A model that takes a standard has a `standard` choice entry in `inputs`,
+ * A model with a `standard` input has a `standard` choice entry in `inputs`,
  * whose `allowed` lists the standards it accepts and whose `default` is
- * upstream's. A model without that entry takes no standard.
+ * upstream's. A model without that entry takes no `standard` input.
  */
 export interface ModelInfo {
   readonly name: string;
   readonly label: string;
+  /**
+   * The standards whose values (equations, limits, thresholds, tables) the
+   * model takes. A model with a `standard` input takes the one passed, from
+   * this same array, default first; `[]` where upstream names none.
+   */
+  readonly standards: readonly StandardId[];
   readonly inputs: InputsInfo;
   readonly outputs: OutputsInfo;
   readonly derived?: DerivedInfo;

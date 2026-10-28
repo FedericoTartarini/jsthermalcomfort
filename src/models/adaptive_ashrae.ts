@@ -1,6 +1,7 @@
 import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
 import {
   _check_ashrae55_compliance,
+  ASHRAE_55_COMPLIANCE_STANDARDS,
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
@@ -23,6 +24,7 @@ const INTERCEPT = 17.8;
 export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
   name: "adaptive_ashrae",
   label: "Adaptive (ASHRAE 55)",
+  standards: ASHRAE_55_COMPLIANCE_STANDARDS,
   inputs: {
     tdb: {
       kind: "numeric",

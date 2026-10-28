@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { clo_tout, CLO_TOUT_INFO } from "../../src/models/index.ts";
-import { Units } from "../../src/utilities/index.ts";
+import { Standard, Units } from "../../src/utilities/index.ts";
 import { clo_tout as clo_tout_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
@@ -77,6 +77,11 @@ describe("clo_tout (JS-only)", () => {
         for (const units of ["SI", "IP"] as const)
           expect(clo_tout({ tout, units }).warnings).toEqual([]);
     });
+  });
+
+  // deviation _shared-4 (models/clo_tout.py:44)
+  test("INFO.standards is ASHRAE 55-2023", () => {
+    expect(CLO_TOUT_INFO.standards).toEqual([Standard.ashrae_55_2023]);
   });
 
   test("is exported from the package root as from its subpath", () => {

@@ -6,7 +6,10 @@ import {
 } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { adaptive_ashrae as adaptive_ashrae_from_root } from "../../src/index.ts";
-import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
+import {
+  ASHRAE_55_COMPLIANCE_STANDARDS,
+  ASHRAE_55_LIMITS,
+} from "../../src/_internal/ashrae55.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
@@ -382,6 +385,13 @@ describe("adaptive_ashrae (JS-only)", () => {
       expect(inputs.tr.applicability).toBe(ASHRAE_55_LIMITS.tr);
       expect(inputs.v.applicability).toBe(ASHRAE_55_LIMITS.v);
       expect(inputs.units).toBe(CLO_TOUT_INFO.inputs.units);
+    });
+
+    // deviation _shared-4 (models/adaptive_ashrae.py:133, _internal/ashrae55.py:12)
+    test("standards is the array of ASHRAE 55's check, not a copy", () => {
+      expect(ADAPTIVE_ASHRAE_INFO.standards).toBe(
+        ASHRAE_55_COMPLIANCE_STANDARDS,
+      );
     });
   });
 

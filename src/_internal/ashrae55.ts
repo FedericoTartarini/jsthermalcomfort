@@ -1,4 +1,5 @@
 import { operative_tmp } from "../environment/operative_tmp.ts";
+import { Standard } from "../utilities/options.ts";
 import { deepFreeze } from "./modelInfo.ts";
 import type { ApplicabilityWarning, Bound, ModelWarning } from "./modelInfo.ts";
 import { _legacy_valid_range, _valid_range } from "./validation.ts";
@@ -20,6 +21,15 @@ export const ASHRAE_55_LIMITS = deepFreeze({
   clo: { min: 0.0, max: 1.5 },
   v_limited: { min: 0.0, max: 0.2 },
 } as const satisfies Record<string, Bound>);
+
+/**
+ * The standards `_check_ashrae55_compliance` checks against: upstream's
+ * docstring calls it the "ASHRAE 55-2023 input applicability check"
+ * (`_internal/ashrae55.py:12`).
+ */
+export const ASHRAE_55_COMPLIANCE_STANDARDS = deepFreeze([
+  Standard.ashrae_55_2023,
+] as const);
 
 /**
  * The fixed airspeed bounds of the §7.2.1.2 `airspeed_control` rules: `any`

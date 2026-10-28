@@ -17,10 +17,7 @@ import {
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import { ISO_7730_LIMITS } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
-import type {
-  LegacyModelInfo,
-  ModelInfo,
-} from "../../src/_internal/modelInfo.ts";
+import type { ModelInfo } from "../../src/_internal/modelInfo.ts";
 import { isDeepFrozen } from "./modelContract.ts";
 
 // The list catches a constant missing from src/models/index.ts or
@@ -192,15 +189,10 @@ describe("PMV_PPD_ISO_INFO structure", () => {
   });
 });
 
-describe("standards — what each model not yet migrated accepts", () => {
-  const infos: readonly LegacyModelInfo[] = [
-    PMV_PPD_ISO_INFO,
-    PMV_PPD_ASHRAE_INFO,
-  ];
-
-  test("every _INFO not yet migrated lists only Standard values", () => {
+describe("standards — the standards each model takes", () => {
+  test("every exported _INFO lists only Standard values", () => {
     const known: readonly string[] = Object.values(Standard);
-    for (const info of infos) {
+    for (const { info } of exportedInfos) {
       for (const standard of info.standards) {
         expect(known).toContain(standard);
       }

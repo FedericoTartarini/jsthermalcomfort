@@ -335,6 +335,11 @@ describe("utci (JS-only)", () => {
     test("units is the entry clo_tout's INFO holds", () => {
       expect(UTCI_INFO.inputs.units).toBe(CLO_TOUT_INFO.inputs.units);
     });
+
+    // deviation _shared-4 (models/utci.py:35)
+    test("standards is empty", () => {
+      expect(UTCI_INFO.standards).toEqual([]);
+    });
   });
 
   // deviation utci-2

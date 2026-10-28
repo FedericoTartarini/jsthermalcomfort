@@ -42,6 +42,7 @@ import type {
   UTCI,
   UTCIInputs,
   OutputField,
+  StandardId,
   UnitSymbol,
 } from "jsthermalcomfort";
 import {
@@ -122,13 +123,13 @@ const misspeltUnit: UnitSymbol = "°c";
 const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
 
-// The models not yet migrated list the editions they accept as Standard
-// values. A migrated model has no `standards`: one that takes a standard has a
-// `standard` choice entry in `inputs`.
+// Every model lists the standards whose values it takes as Standard values,
+// the old form and ModelInfo alike, typed by the exported `StandardId`.
 const isoStandards: readonly (typeof Standard)[keyof typeof Standard][] =
   iso.standards;
-// @ts-expect-error ModelInfo has no `standards`.
-const heatIndexStandards: readonly string[] = heatIndex.standards;
+const heatIndexStandards: readonly StandardId[] = heatIndex.standards;
+// @ts-expect-error "55-2020" is not a Standard value.
+const unknownStandard: StandardId = "55-2020";
 
 // Bins are reached through the metadata, and the models not yet migrated also
 // export them directly (issue #184 §3.4).
@@ -156,6 +157,7 @@ const nameNotANumber: number = PMV_PPD_ISO_INFO.name;
 // @ts-expect-error `name` is required: a ModelInfo without it is rejected.
 const nameless: ModelInfo = {
   label: "l",
+  standards: [],
   inputs: {},
   outputs: {},
 };
@@ -164,6 +166,7 @@ const described: ModelInfo = {
   label: "l",
   // @ts-expect-error ModelInfo has no `description`.
   description: "d",
+  standards: [],
   inputs: {},
   outputs: {},
 };

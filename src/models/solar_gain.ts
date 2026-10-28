@@ -9,7 +9,7 @@ import type {
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
-import { Postures } from "../utilities/options.ts";
+import { Postures, Standard } from "../utilities/options.ts";
 
 const _ALT_RANGE = [0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0];
 const _AZ_RANGE = [
@@ -54,6 +54,7 @@ const _FP_TABLE_SITTING = [
 export const SOLAR_GAIN_INFO = deepFreeze({
   name: "solar_gain",
   label: "Solar gain on people",
+  standards: [Standard.ashrae_55_2023],
   inputs: {
     sol_altitude: {
       kind: "numeric",

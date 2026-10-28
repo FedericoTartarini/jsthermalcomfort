@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { solar_gain, SOLAR_GAIN_INFO } from "../../src/models/index.ts";
-import { Postures } from "../../src/utilities/index.ts";
+import { Postures, Standard } from "../../src/utilities/index.ts";
 import { solar_gain as solar_gain_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
@@ -428,6 +428,11 @@ describe("solar_gain (JS-only)", () => {
       expect(result.warnings).toEqual([]);
       expect(Number.isFinite(result.erf)).toBe(true);
     });
+  });
+
+  // deviation _shared-4 (models/solar_gain.py:83)
+  test("INFO.standards is ASHRAE 55-2023", () => {
+    expect(SOLAR_GAIN_INFO.standards).toEqual([Standard.ashrae_55_2023]);
   });
 
   test("is exported from the package root as from its subpath", () => {

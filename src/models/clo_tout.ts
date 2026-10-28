@@ -2,12 +2,13 @@ import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
-import { Units } from "../utilities/options.ts";
+import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
 
 export const CLO_TOUT_INFO = deepFreeze({
   name: "clo_tout",
   label: "Clothing prediction",
+  standards: [Standard.ashrae_55_2023],
   inputs: {
     tout: { kind: "numeric", unit: "°C" },
     units: BASE_INPUTS_UNITS,

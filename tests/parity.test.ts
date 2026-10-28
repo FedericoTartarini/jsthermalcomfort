@@ -430,13 +430,10 @@ const MODELS: readonly ParityModel[] = [
   {
     name: "cooling_effect",
     run: (inputs) =>
-      cooling_effect({
-        ...(inputs as unknown as Parameters<typeof cooling_effect>[0]),
-        suppress_warnings: true,
-      }),
+      cooling_effect(inputs as unknown as Parameters<typeof cooling_effect>[0]),
     // Upstream always rounds ce with np.around (models/cooling_effect.py:157).
     rounded: () => ["ce"],
-    warnings: false,
+    warnings: true,
   },
   {
     name: "heat_index_rothfusz",

@@ -26,8 +26,8 @@ import type {
   ClassifierBins,
   CloTOut,
   CloTOutInputs,
-  CoolingEffectParams,
-  CoolingEffectResult,
+  CE,
+  CEInputs,
   DerivedField,
   GaggeTwoNodes,
   GaggeTwoNodesInputs,
@@ -52,6 +52,7 @@ import {
   ADAPTIVE_ASHRAE_INFO,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
+  COOLING_EFFECT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   PMV_CATEGORY_BINS_ISO_7730,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
@@ -97,6 +98,7 @@ import { utci as utciDeep } from "jsthermalcomfort/lib/esm/models/utci.js";
 // contract ticket removes it.
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
+const coolingEffectInfo: ModelInfo = COOLING_EFFECT_INFO;
 const iso: ModelInfo = PMV_PPD_ISO_INFO;
 const ashrae = PMV_PPD_ASHRAE_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
@@ -314,10 +316,11 @@ adaptive_ashrae({ tdb: "25", tr: 25, t_running_mean: 20, v: 0.1 });
 // @ts-expect-error the result is readonly, as upstream's frozen dataclass.
 adaptiveResult.tmp_cmf = 1;
 
-// cooling_effect takes one params object too (ADR 0002), with its params and
+// cooling_effect takes one inputs object (ADR 0002), with its inputs and
 // result types exported by name; the lines below are errors only while the
-// published signature is typed.
-const coolingEffectParams: CoolingEffectParams = {
+// published signature is typed. units takes the constant or the literal (ADR
+// 0019, whitelist item 5).
+const coolingEffectInputs: CEInputs = {
   tdb: 77,
   tr: 77,
   vr: 1.64,
@@ -325,13 +328,11 @@ const coolingEffectParams: CoolingEffectParams = {
   met: 1,
   clo: 0.6,
   wme: 0,
-  units: "IP",
-  suppress_warnings: true,
+  units: Units.IP,
 };
-const coolingEffectResult: CoolingEffectResult =
-  cooling_effect(coolingEffectParams);
+const coolingEffectResult: CE = cooling_effect(coolingEffectInputs);
 const coolingEffect: number = coolingEffectResult.ce;
-// @ts-expect-error `v` is not a param; the relative air speed is `vr`.
+// @ts-expect-error `v` is not an input; the relative air speed is `vr`.
 cooling_effect({ tdb: 25, tr: 25, v: 0.3, rh: 50, met: 1.2, clo: 0.5 });
 // @ts-expect-error clo is a required quantity.
 cooling_effect({ tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2 });
@@ -347,6 +348,10 @@ cooling_effect({
 });
 // @ts-expect-error vr must be a number.
 cooling_effect({ tdb: 25, tr: 25, vr: "0.3", rh: 50, met: 1.2, clo: 0.5 });
+// @ts-expect-error suppress_warnings is gone; the notice is a row of warnings.
+cooling_effect({ ...coolingEffectInputs, suppress_warnings: true });
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+coolingEffectResult.ce = 1;
 
 // heat_index_rothfusz takes one inputs object (ADR 0002), with its inputs
 // and result types exported by name; the lines below are errors only while

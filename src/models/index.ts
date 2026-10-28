@@ -25,7 +25,7 @@ import {
 } from "./pmv_ppd_iso.ts";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain, SOLAR_GAIN_INFO } from "./solar_gain.ts";
-import { cooling_effect } from "./cooling_effect.ts";
+import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { a_pmv } from "./a_pmv.js";
@@ -61,10 +61,7 @@ export type {
 } from "../_internal/modelInfo.ts";
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
-export type {
-  CoolingEffectParams,
-  CoolingEffectResult,
-} from "./cooling_effect.ts";
+export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type {
   PmvPpdAshraeParams,
@@ -92,6 +89,7 @@ export {
   clo_tout,
   CLO_TOUT_INFO,
   cooling_effect,
+  COOLING_EFFECT_INFO,
   discomfort_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
@@ -134,6 +132,7 @@ export default {
   clo_tout,
   CLO_TOUT_INFO,
   cooling_effect,
+  COOLING_EFFECT_INFO,
   discomfort_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,

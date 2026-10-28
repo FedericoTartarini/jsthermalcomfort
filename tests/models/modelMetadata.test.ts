@@ -104,6 +104,7 @@ describe("Deep freezing — objects are immutable", () => {
 const v2Calls: Record<string, object> = {
   adaptive_ashrae: { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
   clo_tout: { tout: 20 },
+  cooling_effect: { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 },
   heat_index_rothfusz: { tdb: 28, rh: 60 },
   pmv_ppd_iso: { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   solar_gain: {

@@ -1,6 +1,10 @@
-import { afterEach, describe, expect, vi, test } from "vitest";
-import { cooling_effect } from "../../src/models/index.ts";
+import { fileURLToPath } from "node:url";
+import { describe, expect, test } from "vitest";
+import { cooling_effect, COOLING_EFFECT_INFO } from "../../src/models/index.ts";
+import { cooling_effect as from_root } from "../../src/index.ts";
+import { read_data } from "../parity/harness.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof cooling_effect>[0];
@@ -89,131 +93,67 @@ describe("test_cooling_effect", () => {
   );
 });
 
+const still = { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 };
+// At 45 °C and 90 % RH the still-air SET root is not bracketed.
+const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
+const notice = {
+  kind: "notice",
+  message: "Cooling effect could not be calculated. Returning 0.",
+};
+const call = (inputs: unknown) => cooling_effect(inputs as Inputs);
+
+describeModelContract(cooling_effect, COOLING_EFFECT_INFO, still);
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
 describe("cooling_effect (JS-only)", () => {
-  const still = { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 };
-  // At 45 °C and 90 % RH the still-air SET root is not bracketed; upstream
-  // 4.7.0 returns 0 and warns.
-  const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  // Records console.warn calls without printing them; afterEach restores it.
-  const silenceConsoleWarn = () =>
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-
-  // Expected value from pythermalcomfort 4.7.0, cooling_effect(..., wme=0.1).
   test("wme reaches the SET calculation", () => {
     expect(cooling_effect({ ...still, wme: 0.1 }).ce).toBe(1.47);
   });
 
-  describe("solver fallback", () => {
-    test("an unbracketed root returns 0 with upstream's warning", () => {
-      const warn = silenceConsoleWarn();
-      expect(cooling_effect(unbracketed).ce).toBe(0);
-      expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn).toHaveBeenCalledWith(
-        "Cooling effect could not be calculated. Returning 0.",
-      );
-    });
-
-    test("suppress_warnings silences the warning, not the fallback", () => {
-      const warn = silenceConsoleWarn();
-      expect(
-        cooling_effect({ ...unbracketed, suppress_warnings: true }).ce,
-      ).toBe(0);
-      expect(warn).not.toHaveBeenCalled();
-    });
-
-    // Upstream returns before solving when vr <= 0.1, so it does not warn.
-    test("still air returns 0 without a warning", () => {
-      const warn = silenceConsoleWarn();
-      expect(cooling_effect({ ...still, vr: 0.1 }).ce).toBe(0);
-      expect(warn).not.toHaveBeenCalled();
-    });
+  // classes_input.py:120 (deviation _shared-24).
+  test("units other than SI or IP throws upstream's message", () => {
+    const message = "Units must be either 'SI' or 'IP'";
+    for (const units of ["XX", "", "metric"])
+      expect(() => call({ ...still, units })).toThrow(new RangeError(message));
   });
 
-  describe("input validation", () => {
-    const quantities = ["tdb", "tr", "vr", "rh", "met", "clo"] as const;
+  test("converts tdb, tr and vr from IP in any case, as upstream", () => {
+    const ip = { tdb: 77, tr: 77, vr: 1.64, rh: 50, met: 1, clo: 0.6 };
+    for (const units of ["IP", "ip", "Ip"])
+      expect(call({ ...ip, units }).ce).toBe(3.9);
+  });
 
-    // A numeric string is not coerced, unlike in arithmetic.
-    test.each([...quantities, "wme"] as const)(
-      "throws TypeError if %s is not a number",
-      (key) => {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = {
-          ...still,
-          [key]: "25",
-        } as unknown as Inputs;
-        expect(() => cooling_effect(params)).toThrow(TypeError);
-      },
-    );
+  // models/cooling_effect.py:208-218 (deviation cooling_effect-2, deviation cooling_effect-3).
+  test("an unbracketed root returns 0 with upstream's notice, once", () => {
+    const result = cooling_effect(unbracketed);
+    expect(result).toEqual({ ce: 0, warnings: [notice] });
+    expect(isDeepFrozen(result)).toBe(true);
+  });
 
-    // A missing quantity is a TypeError, as a missing keyword argument is in
-    // Python.
-    test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<Inputs> = { ...still };
-      delete params[key];
-      // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
-      expect(() => cooling_effect(params)).toThrow(TypeError);
-    });
+  // Upstream returns before solving when vr <= 0.1 (models/cooling_effect.py:187-188).
+  test("still air returns 0 without a notice", () => {
+    for (const vr of [0, 0.05, 0.1])
+      expect(cooling_effect({ ...still, vr })).toEqual({ ce: 0, warnings: [] });
+  });
 
-    // ADR 0001: a non-finite number throws rather than propagating as NaN.
-    test.each([...quantities, "wme"] as const)(
-      "throws TypeError if %s is not finite",
-      (key) => {
-        for (const bad of [NaN, Infinity, -Infinity]) {
-          expect(() => cooling_effect({ ...still, [key]: bad })).toThrow(
-            TypeError,
-          );
-        }
-      },
-    );
+  test("a solved cooling effect returns no warnings", () => {
+    expect(cooling_effect(still)).toEqual({ ce: 1.68, warnings: [] });
+  });
 
-    // Every argument was positional before v2 (ADR 0002). A call still
-    // written that way throws rather than running on anything else.
-    test("throws TypeError if called positionally", () => {
-      // @ts-expect-error the model takes one params object
-      expect(() => cooling_effect(25, 25, 0.3, 50, 1.2, 0.5)).toThrow(
-        TypeError,
-      );
-      // @ts-expect-error null is not a params object
-      expect(() => cooling_effect(null)).toThrow(TypeError);
-      // @ts-expect-error the params object is required
-      expect(() => cooling_effect()).toThrow(TypeError);
-    });
+  // Deviation cooling_effect-3: upstream warns twice where the library returns one row.
+  test("gives one notice where upstream warns, over the parity data", () => {
+    const root = fileURLToPath(new URL("../..", import.meta.url));
+    const { cases } = read_data(root, "cooling_effect");
+    const counts = cases.map(({ inputs, warnings }) => [
+      call(inputs).warnings.length,
+      warnings.length === 0 ? 0 : 1,
+    ]);
+    expect(counts.filter(([, upstream]) => upstream === 1)).toHaveLength(120);
+    for (const [library, upstream] of counts) expect(library).toBe(upstream);
+  });
 
-    test("throws Error if units is not a valid enum", () => {
-      expect(() =>
-        cooling_effect({
-          ...still,
-          // @ts-expect-error units is "SI" or "IP"; the runtime check is under test
-          units: "INVALID",
-        }),
-      ).toThrow(Error);
-    });
-
-    test("throws TypeError if suppress_warnings is not a boolean", () => {
-      expect(() =>
-        cooling_effect({
-          ...still,
-          // @ts-expect-error suppress_warnings is a boolean; the runtime check is under test
-          suppress_warnings: "true",
-        }),
-      ).toThrow(TypeError);
-    });
-
-    test("a switch passed as undefined takes its default", () => {
-      expect(
-        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
-        cooling_effect({
-          ...still,
-          wme: undefined,
-          units: undefined,
-          suppress_warnings: undefined,
-        }).ce,
-      ).toBe(cooling_effect(still).ce);
-    });
+  test("is exported from the package root as from its subpath", () => {
+    expect(from_root).toBe(cooling_effect);
   });
 });

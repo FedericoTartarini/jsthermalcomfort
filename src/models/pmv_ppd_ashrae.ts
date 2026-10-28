@@ -240,23 +240,27 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
   });
 
   //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-  // suppress_warnings has no pythermalcomfort counterpart: it stands in for
-  // Python's warnings filter, which JavaScript lacks (see cooling_effect).
-  // The inputs are SI by now, hence "SI" rather than units.
-  const ce =
-    vr > 0.1
-      ? cooling_effect({
-          tdb,
-          tr,
-          vr,
-          rh,
-          met,
-          clo,
-          wme,
-          units: "SI",
-          suppress_warnings,
-        }).ce
-      : 0;
+  // The inputs are SI by now, hence "SI" rather than units. cooling_effect
+  // returns its warning as a notice row, which this model writes to the
+  // console unless suppress_warnings is set.
+  let ce = 0;
+  if (vr > 0.1) {
+    const result = cooling_effect({
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      units: "SI",
+    });
+    ce = result.ce;
+    for (const row of result.warnings) {
+      if (row.kind === "notice" && !suppress_warnings)
+        console.warn(row.message);
+    }
+  }
 
   tdb = tdb - ce;
   tr = tr - ce;

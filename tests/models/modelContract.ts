@@ -30,10 +30,11 @@ export function isDeepFrozen(value: unknown): boolean {
  * _shared-10). The messages are written out here, not imported from
  * `src/_internal/errors.ts`, so a changed message fails. The outputs are frozen
  * as upstream's return dataclass is (`@dataclass(frozen=True, repr=False)`:
- * `AdaptiveASHRAE`, `AnkleDraft`, `CloTOut`, `CE`, `HI`, `PHS`, `PMVPPD`,
- * `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`, `UseFansHeatwaves`,
- * `UTCI` and `VerticalTGradPPD` at `classes_return.py:111, :184, :227, :241,
- * :297, :353, :415, :435, :467, :480, :497, :631, :689, :705`), and as
+ * `AdaptiveASHRAE`, `AnkleDraft`, `CloTOut`, `CE`, `HI`, `Humidex`, `PHS`,
+ * `PMVPPD`, `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`,
+ * `UseFansHeatwaves`, `UTCI` and `VerticalTGradPPD` at `classes_return.py:111,
+ * :184, :227, :241, :297, :311, :353, :415, :435, :467, :480, :497, :631, :689,
+ * :705`), and as
  * `AdaptiveEN` is, although upstream's is a plain `@dataclass` (`:143`,
  * deviation adaptive_en-5).
  *

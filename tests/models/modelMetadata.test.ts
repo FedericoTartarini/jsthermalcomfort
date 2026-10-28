@@ -112,6 +112,7 @@ const v2Calls: Record<string, object> = {
   clo_tout: { tout: 20 },
   cooling_effect: { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 },
   heat_index_rothfusz: { tdb: 28, rh: 60 },
+  humidex: { tdb: 25, rh: 50 },
   phs: {
     tdb: 40,
     tr: 40,

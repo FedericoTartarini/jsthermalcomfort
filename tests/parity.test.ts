@@ -486,7 +486,7 @@ const MODELS: readonly ParityModel[] = [
       humidex(inputs as unknown as Parameters<typeof humidex>[0]),
     // Upstream rounds humidex with np.around (models/humidex.py:88-89).
     rounded: ({ round_output }) => (round_output === true ? ["humidex"] : []),
-    warnings: false,
+    warnings: true,
   },
   {
     name: "phs",

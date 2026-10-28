@@ -37,6 +37,8 @@ import type {
   GaggeTwoNodesInputs,
   HI,
   HIInputs,
+  Humidex,
+  HumidexInputs,
   ModelInfo,
   ModelWarning,
   PHS,
@@ -66,6 +68,7 @@ import {
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
+  HUMIDEX_INFO,
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
   PMV_CATEGORY_BINS_ISO_7730,
@@ -88,6 +91,7 @@ import {
   clo_typical_ensembles,
   cooling_effect,
   heat_index_rothfusz,
+  humidex,
   phs,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
@@ -128,6 +132,7 @@ const useFansHeatwavesInfo: ModelInfo = USE_FANS_HEATWAVES_INFO;
 const ankleDraftInfo: ModelInfo = ANKLE_DRAFT_INFO;
 const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
+const humidexInfo: ModelInfo = HUMIDEX_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -765,3 +770,17 @@ en.tmp_cmf = 1;
 adaptive_en({ ...enInputs, units: "metric" });
 // @ts-expect-error adaptive_en takes no standard, as upstream takes no model.
 adaptive_en({ ...enInputs, standard: "16798-1-2019" });
+
+// humidex takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's HumidexInputs and Humidex, and returns a readonly
+// result whose discomfort is a label.
+const humidexInputs: HumidexInputs = { tdb: 25, rh: 50, model: "masterson" };
+const humidexResult: Humidex = humidex(humidexInputs);
+const humidexValue: number = humidexResult.humidex;
+const humidexDiscomfort: string = humidexResult.discomfort;
+// @ts-expect-error the result is readonly.
+humidexResult.humidex = 1;
+// @ts-expect-error model is 'rana' or 'masterson'.
+humidex({ tdb: 25, rh: 50, model: "lu" });
+// @ts-expect-error humidex takes upstream's model, not standard.
+humidex({ tdb: 25, rh: 50, standard: "rana" });

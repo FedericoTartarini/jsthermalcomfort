@@ -33,6 +33,7 @@ export const LINTED = [
   "src/models/clo_tout.ts",
   "src/models/cooling_effect.ts",
   "src/models/heat_index_rothfusz.ts",
+  "src/models/humidex.ts",
   "src/models/phs.ts",
   "src/models/pmv_ppd_ashrae.ts",
   "src/models/pmv_ppd_iso.ts",

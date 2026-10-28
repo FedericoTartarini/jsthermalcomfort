@@ -165,6 +165,19 @@ def _heat_index_rothfusz(rng):
     }
 
 
+def _humidex(rng):
+    # rh stays in [0, 100], outside which upstream raises
+    # (models/humidex.py:70-71), and reaches 0 now and then, where the
+    # masterson model's dew point is NaN. Both models come in, in the lower
+    # case upstream's check compares.
+    return {
+        "tdb": _value(rng, -20.0, 50.0),
+        "rh": 0.0 if rng.random() < 0.02 else _value(rng, 0.0, 100.0),
+        "model": str(rng.choice(["rana", "masterson"])),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _phs(rng):
     # The ranges reach past ISO 7933's limits (tdb 15-50 °C, tr - tdb 0-60 °C,
     # v 0-3 m/s, p_a 0.5 or 0-4.5 kPa, met 56-250 or 100-450 W/m2, clo 0.1-1
@@ -427,6 +440,7 @@ MODELS = {
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
+    "humidex": (models.humidex, _humidex),
     "phs": (models.phs, _phs),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),

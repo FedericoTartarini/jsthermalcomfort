@@ -3,7 +3,7 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "./heat_index_rothfusz.ts";
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
-import { humidex } from "./humidex.js";
+import { humidex } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";

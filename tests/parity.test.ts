@@ -8,6 +8,7 @@ import {
   clo_tout,
   cooling_effect,
   heat_index_rothfusz,
+  humidex,
   phs,
   PHS_INFO,
   pmv_ppd_ashrae,
@@ -478,6 +479,14 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
+  },
+  {
+    name: "humidex",
+    run: (inputs) =>
+      humidex(inputs as unknown as Parameters<typeof humidex>[0]),
+    // Upstream rounds humidex with np.around (models/humidex.py:88-89).
+    rounded: ({ round_output }) => (round_output === true ? ["humidex"] : []),
+    warnings: false,
   },
   {
     name: "phs",

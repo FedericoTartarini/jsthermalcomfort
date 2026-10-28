@@ -16,10 +16,11 @@
  * - A fixture row is passed to the model unchanged, `fn(inputs)`, as
  *   upstream's `fn(**inputs)`: the model takes one params object keyed like
  *   upstream's keyword arguments (ADR 0002).
- * - Same inputs, same expected values. Use upstream's tolerance where it
- *   states one (`pytest.approx(..., abs=...)`, a fixture's `tolerance`), 1e-6
- *   otherwise, which is also `validateResult`'s default for a key the
- *   fixture's `tolerance` does not name.
+ * - Same inputs, same expected values. Compare numbers with `approx`, with
+ *   upstream's tolerance where it states one (`pytest.approx(..., abs=...)`,
+ *   a fixture's `tolerance`), 1e-6 otherwise, which is also
+ *   `validateResult`'s default for a key the fixture's `tolerance` does not
+ *   name.
  * - Array or vector inputs run element-wise: one scalar case per element,
  *   the expected outputs indexed the same way. `loadTestData` does this for
  *   fixture rows (see `expandArrayRows`).
@@ -44,6 +45,29 @@
  *   same inputs is deleted.
  */
 import { expect } from "vitest";
+
+/**
+ * Whether `actual` is within `abs + rel * |expected|` of `expected`, numpy's
+ * `isclose` form; the defaults are the header's 1e-6 absolute. A mirrored
+ * test passes what upstream's comparison uses, its defaults included:
+ * `np.isclose` and `np.allclose` rtol 1e-5 and atol 1e-8,
+ * `np.testing.assert_allclose` rtol 1e-7 and atol 0, and `pytest.approx`
+ * rel 1e-6 (its absolute 1e-12 taken as 0, since it takes the larger of the
+ * two rather than their sum). A NaN or an infinity is close to nothing,
+ * where `np.isclose` takes an infinity as close to itself.
+ *
+ * @param actual - the value under test
+ * @param expected - the reference value
+ * @param tolerance - `rel`, relative to `|expected|`, and `abs`
+ * @returns whether the two are within the tolerance
+ */
+export function approx(
+  actual: number,
+  expected: number,
+  { rel = 0, abs = 1e-6 }: { rel?: number; abs?: number } = {},
+): boolean {
+  return Math.abs(actual - expected) <= abs + rel * Math.abs(expected);
+}
 
 /** One row of a validation-data fixture: the model inputs and expected outputs. */
 export interface FixtureRow {

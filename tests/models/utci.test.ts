@@ -12,7 +12,7 @@ import { p_sat } from "../../src/psychrometrics/index.ts";
 import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
-import { loadTestData, validateResult } from "./testUtils.ts";
+import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof utci>[0];
 
@@ -102,37 +102,32 @@ describe("test_utci", () => {
   test("test_utci_vapour_pressure_limit_is_inclusive", () => {
     // Hardy's equation at 40 C: this RH gives exactly 5.0 kPa in float64.
     const rh_at_limit = 67.70206528209202;
-    const rh = [rh_at_limit - 1e-10, rh_at_limit, rh_at_limit + 1e-10];
-    const limited = rh.map((value) =>
-      utci({ tdb: 40, tr: 40, v: 1, rh: value, round_output: false }),
-    );
-    const unlimited = rh.map((value) =>
-      utci({
+    const cases = [
+      [rh_at_limit - 1e-10, false],
+      [rh_at_limit, false],
+      [rh_at_limit + 1e-10, true],
+    ] as const;
+    for (const [rh, invalid] of cases) {
+      const limited = utci({ tdb: 40, tr: 40, v: 1, rh, round_output: false });
+      const unlimited = utci({
         tdb: 40,
         tr: 40,
         v: 1,
-        rh: value,
+        rh,
         limit_inputs: false,
         round_output: false,
-      }),
-    );
-    expect(limited.map((result) => result.warnings)).toEqual([
-      [],
-      [],
-      [expect.objectContaining({ key: "pa (kPa)" })],
-    ]);
-    expect(limited.map((result) => Number.isNaN(result.utci))).toEqual([
-      false,
-      false,
-      true,
-    ]);
-    expect(limited.slice(0, 2).map((result) => result.utci)).toEqual(
-      unlimited.slice(0, 2).map((result) => result.utci),
-    );
-    expect(limited.slice(0, 2).map((result) => result.stress_category)).toEqual(
-      unlimited.slice(0, 2).map((result) => result.stress_category),
-    );
-    expect(limited[2]?.stress_category).toBeNaN();
+      });
+      expect(limited.warnings).toEqual(
+        invalid ? [expect.objectContaining({ key: "pa (kPa)" })] : [],
+      );
+      expect(Number.isNaN(limited.utci)).toBe(invalid);
+      if (invalid) {
+        expect(limited.stress_category).toBeNaN();
+      } else {
+        expect(limited.utci).toBe(unlimited.utci);
+        expect(limited.stress_category).toBe(unlimited.stress_category);
+      }
+    }
   });
 
   // Upstream broadcasts a 2×1 temperature over three rh values; element-wise
@@ -141,41 +136,29 @@ describe("test_utci", () => {
   test.each(["SI", "IP"] as const)(
     "test_utci_humidity_guard_broadcasts_without_masking_valid_neighbors[%s]",
     (units) => {
-      let temperature = [25.0, 50.0];
-      if (units === "IP") {
-        temperature = temperature.map((t) => t * 1.8 + 32);
-      }
+      const cases = [
+        [25.0, 0, false],
+        [25.0, 50, false],
+        [25.0, 101, true],
+        [50.0, 0, false],
+        [50.0, 50, true],
+        [50.0, 101, true],
+      ] as const;
       const wind = units === "SI" ? 1 : 3.281;
-      const grid = (limit_inputs: boolean) =>
-        temperature.map((t) =>
-          [0, 50, 101].map((rh) =>
-            utci({ tdb: t, tr: t, v: wind, rh, units, limit_inputs }),
-          ),
-        );
-      const limited = grid(true);
-      const unlimited = grid(false);
-      const invalid = [
-        [false, false, true],
-        [false, true, true],
-      ];
-      expect(
-        limited.map((row) => row.map((result) => Number.isNaN(result.utci))),
-      ).toEqual(invalid);
-      expect(
-        limited.map((row) => row.map((result) => result.warnings.length > 0)),
-      ).toEqual(invalid);
-      limited.forEach((row, i) => {
-        row.forEach((result, j) => {
-          if (invalid[i]?.[j] === true) {
-            expect(result.stress_category).toBeNaN();
-          } else {
-            expect(result.utci).toBe(unlimited[i]?.[j]?.utci);
-            expect(result.stress_category).toBe(
-              unlimited[i]?.[j]?.stress_category,
-            );
-          }
-        });
-      });
+      for (const [temperature, rh, invalid] of cases) {
+        const t = units === "IP" ? temperature * 1.8 + 32 : temperature;
+        const inputs = { tdb: t, tr: t, v: wind, rh, units };
+        const limited = utci(inputs);
+        const unlimited = utci({ ...inputs, limit_inputs: false });
+        expect(Number.isNaN(limited.utci)).toBe(invalid);
+        expect(limited.warnings.length > 0).toBe(invalid);
+        if (invalid) {
+          expect(limited.stress_category).toBeNaN();
+        } else {
+          expect(limited.utci).toBe(unlimited.utci);
+          expect(limited.stress_category).toBe(unlimited.stress_category);
+        }
+      }
     },
   );
 
@@ -188,9 +171,8 @@ describe("test_utci", () => {
       limit_inputs: false,
       round_output: false,
     });
-    // pytest.approx's default relative tolerance, 1e-6.
-    expect(Math.abs(result.utci - -326.0792322091629)).toBeLessThanOrEqual(
-      326.0792322091629 * 1e-6,
+    expect(approx(result.utci, -326.0792322091629, { rel: 1e-6, abs: 0 })).toBe(
+      true,
     );
     expect(result.stress_category).toBe("extreme cold stress");
   });
@@ -213,20 +195,16 @@ describe("test_utci", () => {
   });
 
   test("test_utci_ip_vector_stress_category", () => {
-    const results = [77, 104].map((t) =>
-      utci({ tdb: t, tr: t, v: 3.28084, rh: 50, units: "IP" }),
-    );
+    const cases = [
+      [77, 76.3, "no thermal stress"],
+      [104, 110.5, "very strong heat stress"],
+    ] as const;
+    for (const [t, expected, stress_category] of cases) {
+      const result = utci({ tdb: t, tr: t, v: 3.28084, rh: 50, units: "IP" });
 
-    // np.testing.assert_allclose's default rtol, 1e-7.
-    [76.3, 110.5].forEach((expected, i) => {
-      expect(
-        Math.abs((results[i]?.utci ?? NaN) - expected),
-      ).toBeLessThanOrEqual(expected * 1e-7);
-    });
-    expect(results.map((result) => result.stress_category)).toEqual([
-      "no thermal stress",
-      "very strong heat stress",
-    ]);
+      expect(approx(result.utci, expected, { rel: 1e-7, abs: 0 })).toBe(true);
+      expect(result.stress_category).toBe(stress_category);
+    }
   });
 
   test("test_utci_stress_category_uses_rounded_si_value_by_default", () => {
@@ -271,16 +249,19 @@ describe("test_utci", () => {
     expect(result.utci).toBeNaN();
     expect(result.stress_category).toBeNaN();
 
-    const vector_result = [77, 1000].map((t) =>
-      utci({ tdb: t, tr: t, v: 3.28084, rh: 50, units: "IP" }),
-    );
+    const first = utci({ tdb: 77, tr: 77, v: 3.28084, rh: 50, units: "IP" });
+    const second = utci({
+      tdb: 1000,
+      tr: 1000,
+      v: 3.28084,
+      rh: 50,
+      units: "IP",
+    });
 
-    expect(
-      Math.abs((vector_result[0]?.utci ?? NaN) - 76.3),
-    ).toBeLessThanOrEqual(76.3 * 1e-7);
-    expect(vector_result[1]?.utci).toBeNaN();
-    expect(vector_result[0]?.stress_category).toBe("no thermal stress");
-    expect(vector_result[1]?.stress_category).toBeNaN();
+    expect(approx(first.utci, 76.3, { rel: 1e-7, abs: 0 })).toBe(true);
+    expect(second.utci).toBeNaN();
+    expect(first.stress_category).toBe("no thermal stress");
+    expect(second.stress_category).toBeNaN();
   });
 
   test("test_utci_saturation_vapour_pressure_matches_p_sat", () => {
@@ -299,7 +280,7 @@ describe("test_utci", () => {
       limit_inputs: false,
       round_output: false,
     }).utci;
-    expect(Math.abs(actual - expected)).toBeLessThanOrEqual(0.1);
+    expect(approx(actual, expected, { abs: 0.1 })).toBe(true);
   });
 });
 

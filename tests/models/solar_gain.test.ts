@@ -4,18 +4,13 @@ import { Postures } from "../../src/utilities/index.ts";
 import { solar_gain as solar_gain_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
-import { loadTestData, validateResult } from "./testUtils.ts";
+import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof solar_gain>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   testDataUrls.solarGain,
 );
-
-/** numpy's `isclose(a, b, atol=atol)`, whose `rtol` defaults to 1e-5. */
-function isclose(a: number, b: number, atol: number): boolean {
-  return Math.abs(a - b) <= atol + 1e-5 * Math.abs(b);
-}
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_solar_gain.py.
 describe("test_solar_gain", () => {
@@ -59,8 +54,10 @@ describe("test_solar_gain", () => {
         posture,
         round_output: false,
       });
-      expect(isclose(result.erf, exp_erf, 1e-3)).toBe(true);
-      expect(isclose(result.delta_mrt, exp_d_mrt, 1e-3)).toBe(true);
+      expect(approx(result.erf, exp_erf, { rel: 1e-5, abs: 1e-3 })).toBe(true);
+      expect(
+        approx(result.delta_mrt, exp_d_mrt, { rel: 1e-5, abs: 1e-3 }),
+      ).toBe(true);
     }
   });
 
@@ -106,8 +103,10 @@ describe("test_solar_gain", () => {
         posture: "supine",
         round_output: false,
       });
-      expect(isclose(result.erf, exp_erf, 1e-3)).toBe(true);
-      expect(isclose(result.delta_mrt, exp_d_mrt, 1e-3)).toBe(true);
+      expect(approx(result.erf, exp_erf, { rel: 1e-5, abs: 1e-3 })).toBe(true);
+      expect(
+        approx(result.delta_mrt, exp_d_mrt, { rel: 1e-5, abs: 1e-3 }),
+      ).toBe(true);
     }
   });
 
@@ -155,12 +154,21 @@ describe("test_solar_gain", () => {
 
   test("test_solar_gain_array", () => {
     // The array call, element-wise.
-    const inputs = [
-      [0, 120, 800, 0.5, 0.5, 0.5],
-      [90, 0, 1000, 1.0, 1.0, 1.0],
+    const cases = [
+      [0, 120, 800, 0.5, 0.5, 0.5, 43.2839, 10.3649],
+      [90, 0, 1000, 1.0, 1.0, 1.0, 326.6804, 78.2281],
     ] as const;
-    const results = inputs.map(([alt, sharp, rad, trans, svv, bes]) =>
-      solar_gain({
+    for (const [
+      alt,
+      sharp,
+      rad,
+      trans,
+      svv,
+      bes,
+      exp_erf,
+      exp_d_mrt,
+    ] of cases) {
+      const result = solar_gain({
         sol_altitude: alt,
         sharp,
         sol_radiation_dir: rad,
@@ -169,14 +177,12 @@ describe("test_solar_gain", () => {
         f_bes: bes,
         posture: "sitting",
         round_output: false,
-      }),
-    );
-    const erf = [43.2839, 326.6804];
-    const delta_mrt = [10.3649, 78.2281];
-    results.forEach((result, i) => {
-      expect(isclose(result.erf, erf[i] ?? NaN, 1e-3)).toBe(true);
-      expect(isclose(result.delta_mrt, delta_mrt[i] ?? NaN, 1e-3)).toBe(true);
-    });
+      });
+      expect(approx(result.erf, exp_erf, { rel: 1e-5, abs: 1e-3 })).toBe(true);
+      expect(
+        approx(result.delta_mrt, exp_d_mrt, { rel: 1e-5, abs: 1e-3 }),
+      ).toBe(true);
+    }
   });
 });
 
@@ -394,7 +400,7 @@ describe("solar_gain (JS-only)", () => {
       ]);
       // erf is linear in asw, so the number is upstream's formula unchanged.
       const at_default = solar_gain({ ...base, round_output: false });
-      expect(result.erf).toBeCloseTo((at_default.erf * 0.95) / 0.7, 10);
+      expect(approx(result.erf, (at_default.erf * 0.95) / 0.7)).toBe(true);
     });
 
     test("every broken range has its own row, in the checks' order", () => {

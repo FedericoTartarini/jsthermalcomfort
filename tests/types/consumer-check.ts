@@ -8,10 +8,11 @@
  *      `tsc` emit invalid declarations, which breaks every TypeScript
  *      consumer while the build still reports success (see issue #196).
  *
- *   2. The model metadata is actually typed. A plain exported const emits as
- *      `any` unless it carries an explicit `@type` annotation, and `any`
- *      fails silently: every assignment below would still compile. The
- *      `@ts-expect-error` lines are what make that failure loud.
+ *   2. The declarations refuse what a consumer must not do: each
+ *      `@ts-expect-error` line is a misuse (a wrong type, an unknown or
+ *      removed key, a write to readonly metadata, a non-exported path), so a
+ *      declaration that widens, to `any` or otherwise, fails `tsc` with
+ *      "Unused '@ts-expect-error' directive".
  *
  * Imports use the package name rather than a relative path into `lib/`, so
  * the `exports` map in package.json is exercised the way a consumer hits it.
@@ -586,68 +587,3 @@ CLO_INDIVIDUAL_GARMENT_GROUPS[0].garments.push("Bra");
 const sameUtci: typeof utci = utciFromModels;
 const samePSat: typeof jsthermalcomfort.p_sat = p_sat;
 const sameStandard: typeof Standard = standardFromUtilities;
-
-export {
-  iso,
-  ashrae,
-  heatIndex,
-  isoAsModelInfo,
-  tdbKind,
-  limitInputsDefault,
-  acceptabilityKind,
-  tdbUnit,
-  misspeltUnit,
-  heatIndexResult,
-  adaptive,
-  adaptiveResult,
-  utciInfo,
-  utciLabel,
-  cloToutInfo,
-  cloTout,
-  cloToutUnits,
-  cloToutUnitsDefault,
-  solarGainInfo,
-  deltaMrt,
-  solarGainWarnings,
-  solarGainPostureDefault,
-  solRadiationDirMax,
-  utciCategory,
-  coolingEffect,
-  ashraeCompliance,
-  complianceMax,
-  isoCategory,
-  categoryBMax,
-  notANumberEither,
-  minTdb,
-  isoStandards,
-  heatIndexStandards,
-  utciOutput,
-  paDerived,
-  label,
-  tsvLabel,
-  bins,
-  rightInclusive,
-  edgeCount,
-  notANumber,
-  notAKey,
-  pmvIso,
-  pmvIsoIp,
-  isoWarnings,
-  isoRowMax,
-  ashraeRowMax,
-  notARole,
-  adaptiveWarnings,
-  adaptiveRowMax,
-  heatIndexWarnings,
-  heatIndexRowMax,
-  heatIndexUnnarrowed,
-  utciWarnings,
-  utciRowMax,
-  utciPaBound,
-  winterClo,
-  garmentClo,
-  sameUtci,
-  samePSat,
-  sameStandard,
-  utciDeep,
-};

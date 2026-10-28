@@ -6,7 +6,7 @@ import {
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
-import { loadTestData, validateResult } from "./testUtils.ts";
+import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof heat_index_rothfusz>[0];
 
@@ -36,7 +36,7 @@ describe("test_heat_index_rothfusz", () => {
   test("test_single_input_caution", () => {
     // Upstream also asserts a zero-dim ndarray; a JS scalar has no shape.
     const result = heat_index_rothfusz({ tdb: 29, rh: 50, round_output: true });
-    expect(Math.abs(result.hi - 29.7)).toBeLessThanOrEqual(29.7 * 1e-3);
+    expect(approx(result.hi, 29.7, { rel: 1e-3, abs: 0 })).toBe(true);
     expect(result.stress_category).toBe("caution");
   });
 
@@ -57,20 +57,16 @@ describe("test_heat_index_rothfusz", () => {
   // Upstream's arrays, element-wise: its match r"'tdb'.*\[20\.0\].*\[1\]"
   // becomes a row on element 1 alone.
   test("test_below_threshold_warns_array", () => {
-    const tdb = [30.0, 20.0, 28.5];
-    const rh = [70.0, 90.0, 50.0];
-    const results = tdb.map((t, i) =>
-      heat_index_rothfusz({ tdb: t, rh: rh[i] ?? NaN }),
-    );
-    expect(results.map((result) => result.warnings)).toEqual([
+    const first = heat_index_rothfusz({ tdb: 30.0, rh: 70.0 });
+    const second = heat_index_rothfusz({ tdb: 20.0, rh: 90.0 });
+    const third = heat_index_rothfusz({ tdb: 28.5, rh: 50.0 });
+    expect([first, second, third].map((result) => result.warnings)).toEqual([
       [],
       [expect.objectContaining({ key: "tdb", value: 20, bound: TDB_BOUND })],
       [],
     ]);
-    expect(results[1]?.hi).toBeNaN();
-    expect(
-      Number.isFinite(results[0]?.hi) && Number.isFinite(results[2]?.hi),
-    ).toBe(true);
+    expect(second.hi).toBeNaN();
+    expect(Number.isFinite(first.hi) && Number.isFinite(third.hi)).toBe(true);
   });
 
   // Upstream asserts that no warning was recorded, since it checks only under
@@ -91,20 +87,31 @@ describe("test_heat_index_rothfusz", () => {
   // Upstream's vectors, element-wise; its `pytest.warns(UserWarning)` becomes
   // the row on the element below 27 °C.
   test("test_vector_input_no_rounding", () => {
-    const tdb = [30.0, 20.0, 28.5];
-    const rh = [70.0, 90.0, 50.0];
-    const results = tdb.map((t, i) =>
-      heat_index_rothfusz({ tdb: t, rh: rh[i] ?? NaN, round_output: false }),
-    );
-    const hi = results.map((result) => result.hi);
-    expect(results.map((result) => result.warnings.length)).toEqual([0, 1, 0]);
+    const first = heat_index_rothfusz({
+      tdb: 30.0,
+      rh: 70.0,
+      round_output: false,
+    });
+    const second = heat_index_rothfusz({
+      tdb: 20.0,
+      rh: 90.0,
+      round_output: false,
+    });
+    const third = heat_index_rothfusz({
+      tdb: 28.5,
+      rh: 50.0,
+      round_output: false,
+    });
+    expect(
+      [first, second, third].map((result) => result.warnings.length),
+    ).toEqual([0, 1, 0]);
     // First element has multiple decimals and matches expected formula
-    expect(Math.abs((hi[0] ?? NaN) - 35.33)).toBeLessThanOrEqual(35.33 * 1e-2);
+    expect(approx(first.hi, 35.33, { rel: 1e-2, abs: 0 })).toBe(true);
     // Second element below threshold ⇒ NaN
-    expect(hi[1]).toBeNaN();
+    expect(second.hi).toBeNaN();
     // Third element above threshold ⇒ finite number
-    expect(Number.isFinite(hi[2])).toBe(true);
-    expect(results[0]?.stress_category).toBe("extreme caution");
+    expect(Number.isFinite(third.hi)).toBe(true);
+    expect(first.stress_category).toBe("extreme caution");
   });
 
   // Upstream's parametrize has no ids; `id` is the one pytest generates, which

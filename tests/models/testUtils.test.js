@@ -8,6 +8,7 @@
 
 import { afterEach, beforeEach, describe, expect, vi, test } from "vitest";
 import {
+  approx,
   validateResult,
   expandArrayRows,
   assertNonEmptyRows,
@@ -310,5 +311,26 @@ describe("assertNonEmptyRows", () => {
   test("throws when input is not an array", () => {
     expect.hasAssertions();
     expect(() => assertNonEmptyRows(undefined, "label")).toThrow();
+  });
+});
+
+describe("approx", () => {
+  test("defaults to 1e-6 absolute, inclusive", () => {
+    expect(approx(1 + 1e-6, 1)).toBe(true);
+    expect(approx(1 + 1.1e-6, 1)).toBe(false);
+    expect(approx(1e6 + 1e-3, 1e6)).toBe(false);
+  });
+
+  // numpy's isclose: |actual - expected| <= atol + rtol * |expected|.
+  test("adds rel times the expected value's magnitude to abs", () => {
+    expect(approx(-110, -100, { rel: 0.1, abs: 0 })).toBe(true);
+    expect(approx(-110.5, -100, { rel: 0.1, abs: 0 })).toBe(false);
+    expect(approx(-110.5, -100, { rel: 0.1, abs: 0.5 })).toBe(true);
+    expect(approx(110, 100, { rel: 0.1 })).toBe(true);
+  });
+
+  test("a NaN is close to nothing", () => {
+    expect(approx(NaN, NaN)).toBe(false);
+    expect(approx(NaN, 1, { abs: Infinity })).toBe(false);
   });
 });

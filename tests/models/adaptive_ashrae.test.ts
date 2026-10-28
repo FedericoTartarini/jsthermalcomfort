@@ -9,17 +9,13 @@ import { adaptive_ashrae as adaptive_ashrae_from_root } from "../../src/index.ts
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import { testDataUrls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
-import { loadTestData, validateResult } from "./testUtils.ts";
+import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof adaptive_ashrae>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   testDataUrls.adaptiveAshrae,
 );
-
-const close = (actual: number, expected: number) => {
-  expect(Math.abs(actual - expected)).toBeLessThanOrEqual(1e-6);
-};
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_adaptive_ashrae.py. The
 // _check_ashrae55_compliance cases of tests/test_internal.py are in
@@ -155,8 +151,10 @@ describe("test_adaptive_ashrae", () => {
       round_output: true,
     });
 
-    close(unrounded.tmp_cmf, 24.465);
-    close(rounded.tmp_cmf, 24.5);
+    expect(approx(unrounded.tmp_cmf, 24.465, { rel: 1e-5, abs: 1e-8 })).toBe(
+      true,
+    );
+    expect(approx(rounded.tmp_cmf, 24.5, { rel: 1e-5, abs: 1e-8 })).toBe(true);
     expect(unrounded.tmp_cmf).not.toBe(rounded.tmp_cmf);
   });
 
@@ -170,10 +168,18 @@ describe("test_adaptive_ashrae", () => {
     });
 
     // tmp_cmf_80_low = t_cmf - 3.5; with unrounded t_cmf=24.465 this is 20.965.
-    close(unrounded.tmp_cmf_80_low, 24.465 - 3.5);
-    close(unrounded.tmp_cmf_90_low, 24.465 - 2.5);
-    close(unrounded.tmp_cmf_80_up, 24.465 + 3.5);
-    close(unrounded.tmp_cmf_90_up, 24.465 + 2.5);
+    expect(
+      approx(unrounded.tmp_cmf_80_low, 24.465 - 3.5, { rel: 1e-5, abs: 1e-8 }),
+    ).toBe(true);
+    expect(
+      approx(unrounded.tmp_cmf_90_low, 24.465 - 2.5, { rel: 1e-5, abs: 1e-8 }),
+    ).toBe(true);
+    expect(
+      approx(unrounded.tmp_cmf_80_up, 24.465 + 3.5, { rel: 1e-5, abs: 1e-8 }),
+    ).toBe(true);
+    expect(
+      approx(unrounded.tmp_cmf_90_up, 24.465 + 2.5, { rel: 1e-5, abs: 1e-8 }),
+    ).toBe(true);
   });
 
   test("test_round_output_invalid_type_raises", () => {
@@ -206,13 +212,6 @@ describe("adaptive_ashrae (JS-only)", () => {
   const call = (inputs: unknown) => () => adaptive_ashrae(inputs as Inputs);
 
   describe("values", () => {
-    test("neutral comfort, t_running_mean within range: comfort predicted", () => {
-      const result = adaptive_ashrae(neutral);
-      validateResult(result, { tmp_cmf: 24.0 }, tolerance, {});
-      expect(result.acceptability_80).toBe(true);
-      expect(result.acceptability_90).toBe(true);
-    });
-
     test("warm indoor exceeds the comfort zone: not acceptable", () => {
       const result = adaptive_ashrae({ ...neutral, tdb: 32, tr: 32 });
       validateResult(result, { tmp_cmf: 24.0 }, tolerance, {});
@@ -293,21 +292,6 @@ describe("adaptive_ashrae (JS-only)", () => {
       expect(off.acceptability_90).toBe(true);
     });
 
-    // t_cmf = 0.31 * 22 + 17.8 = 24.62, rounded 24.6.
-    test("round_output:false returns the unrounded comfort temperature and bounds", () => {
-      const rounded = adaptive_ashrae({ ...neutral, t_running_mean: 22 });
-      const unrounded = adaptive_ashrae({
-        ...neutral,
-        t_running_mean: 22,
-        round_output: false,
-      });
-      expect(rounded.tmp_cmf).toBe(24.6);
-      expect(Math.abs(unrounded.tmp_cmf - 24.62)).toBeLessThan(1e-10);
-      // tmp_cmf_80_low = t_cmf - 3.5: 21.12 unrounded, 21.1 from the rounded t_cmf.
-      expect(Math.abs(rounded.tmp_cmf_80_low - 21.1)).toBeLessThan(1e-10);
-      expect(Math.abs(unrounded.tmp_cmf_80_low - 21.12)).toBeLessThan(1e-10);
-    });
-
     // At v >= 0.6 and to >= 25, ce = 1.2 widens the 90% upper bound from
     // t_cmf + 2.5 to t_cmf + 2.5 + 1.2, which flips acceptability_90 from
     // false (v = 0.1) to true (v = 0.6) at (tdb=tr=28, t_running_mean=22).
@@ -340,7 +324,7 @@ describe("adaptive_ashrae (JS-only)", () => {
         };
         const rounded = adaptive_ashrae(boundary);
         const unrounded = adaptive_ashrae({ ...boundary, round_output: false });
-        close(rounded.tmp_cmf_80_up, 28.0);
+        expect(approx(rounded.tmp_cmf_80_up, 28.0)).toBe(true);
         expect(rounded.acceptability_80).toBe(true);
         expect(unrounded.acceptability_80).toBe(false);
       });
@@ -354,9 +338,13 @@ describe("adaptive_ashrae (JS-only)", () => {
           v: 0.3,
           units: "IP",
         });
-        close(result.tmp_cmf, 76.28);
-        close(result.tmp_cmf_80_low, (24.6 - 3.5) * 1.8 + 32);
-        close(result.tmp_cmf_90_up, (24.6 + 2.5) * 1.8 + 32);
+        expect(approx(result.tmp_cmf, 76.28)).toBe(true);
+        expect(approx(result.tmp_cmf_80_low, (24.6 - 3.5) * 1.8 + 32)).toBe(
+          true,
+        );
+        expect(approx(result.tmp_cmf_90_up, (24.6 + 2.5) * 1.8 + 32)).toBe(
+          true,
+        );
       });
     });
   });

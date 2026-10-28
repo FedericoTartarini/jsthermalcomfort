@@ -403,8 +403,8 @@ describe("check_standard_compliance", () => {
   // ISO 7933 (2004 and 2023)
   // ---------------------------------------------------------------------------
   describe("ISO 7933 compliance", () => {
-    // tdb=40, tr=40, v=0.3, p_a=2.5 kPa, met=272, clo=0.5 — valid for both standards
-    const base = { tdb: 40, tr: 40, v: 0.3, p_a: 2.5, met: 272, clo: 0.5 };
+    // tdb=40, tr=40, v=0.3, p_a=2.5 kPa, met=200, clo=0.5 — valid for both standards
+    const base = { tdb: 40, tr: 40, v: 0.3, p_a: 2.5, met: 200, clo: 0.5 };
 
     test("returns no warnings for valid inputs (2004)", () => {
       expect(check_standard_compliance("7933-2004", base)).toHaveLength(0);
@@ -419,8 +419,8 @@ describe("check_standard_compliance", () => {
     it.each([
       ["tdb < 15 ºC", { tdb: 10 }],
       ["tdb > 50 ºC", { tdb: 55 }],
-      ["tr < 0 ºC (fixed: was checking tr - tdb)", { tr: -5 }],
-      ["tr > 60 ºC (fixed: was checking tr - tdb)", { tr: 65 }],
+      ["tr - tdb < 0 ºC", { tr: 35 }],
+      ["tr - tdb > 60 ºC", { tr: 105 }],
       ["v > 3 m/s", { v: 4 }],
       ["met < 100 W/m²", { met: 50 }],
       ["met > 450 W/m²", { met: 500 }],
@@ -435,11 +435,27 @@ describe("check_standard_compliance", () => {
       expect(warnings.length).toBeGreaterThan(0);
     });
 
-    test("does not warn when tr < tdb but tr is within [0, 60]", () => {
-      // tr=20 < tdb=40; old buggy check (tr-tdb < 0) would have warned
+    // pythermalcomfort 4.7.0 checks tr - tdb, not tr alone (models/phs.py:432).
+    test("warns when tr - tdb < 0 although tr is within [0, 60]", () => {
       expect(
-        check_standard_compliance("7933-2004", { ...base, tr: 20 }),
-      ).toHaveLength(0);
+        check_standard_compliance("7933-2004", { ...base, tr: 10 }),
+      ).toEqual([
+        "ISO 7933:2004 tr - tdb applicability limits between 0 and 60 ºC",
+      ]);
+    });
+
+    // models/phs.py:430: 56-250 W/m² in 2023, 100-450 in 2004.
+    test("the met range is the edition's", () => {
+      const input = { ...base, met: 80 };
+      expect(check_standard_compliance("7933-2023", input)).toHaveLength(0);
+      expect(check_standard_compliance("7933-2004", input)).toEqual([
+        "ISO 7933:2004 met applicability limits between 100 and 450 met",
+      ]);
+      expect(
+        check_standard_compliance("7933-2023", { ...base, met: 272 }),
+      ).toEqual([
+        "ISO 7933:2023 met applicability limits between 56 and 250 met",
+      ]);
     });
 
     test("warns when p_a < 0.5 kPa for 2023 but not for 2004 (diverging lower bound)", () => {

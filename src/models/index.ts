@@ -2,7 +2,7 @@ import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "./heat_index_rothfusz.ts";
-import { phs } from "./phs.js";
+import { phs } from "./phs.ts";
 import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";

@@ -46,6 +46,7 @@ export const LINTED = [
   "tests/models/cooling_effect.test.ts",
   "tests/models/heat_index_rothfusz.test.ts",
   "tests/models/modelContract.ts",
+  "tests/models/phs.test.ts",
   "tests/models/pmv_ppd_ashrae.test.ts",
   "tests/models/pmv_ppd_iso.test.ts",
   "tests/models/pmv_ppd_optimised.test.ts",

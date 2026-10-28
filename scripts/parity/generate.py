@@ -115,6 +115,57 @@ def _heat_index_rothfusz(rng):
     }
 
 
+def _phs(rng):
+    # The ranges reach past ISO 7933's limits (tdb 15-50 °C, tr - tdb 0-60 °C,
+    # v 0-3 m/s, p_a 0.5 or 0-4.5 kPa, met 56-250 or 100-450 W/m2, clo 0.1-1
+    # clo), so NaN positions and every check's warning are compared too, in
+    # either edition. posture is as upstream's own check compares it, in lower
+    # case. The keyword arguments are left out half the time, so each edition's
+    # defaults run, f_r, t_re and t_cr_eq among them; duration is a whole
+    # number of minutes, a tenth of the time with a fraction, which numba's
+    # range truncates.
+    tdb = _value(rng, 10.0, 55.0)
+    case = {
+        "tdb": tdb,
+        "tr": _value(rng, tdb - 10.0, tdb + 70.0),
+        "v": _value(rng, 0.0, 3.5),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.8, 8.5),
+        "clo": _value(rng, 0.06, 1.2),
+        "posture": str(rng.choice(["standing", "sitting", "crouching"])),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.3 else 0.0,
+        "round_output": bool(rng.random() < 0.5),
+        "model": str(rng.choice(["7933-2023", "7933-2004"])),
+        "limit_inputs": bool(rng.random() < 0.5),
+    }
+    duration = float(rng.integers(1, 481))
+    if rng.random() < 0.1:
+        duration += float(rng.uniform(0.0, 1.0))
+    optional = {
+        "i_mst": lambda: _value(rng, 0.1, 0.9),
+        "a_p": lambda: _value(rng, 0.0, 1.0),
+        "drink": lambda: float(rng.choice([0.0, 1.0])),
+        "weight": lambda: _value(rng, 40.0, 130.0),
+        "height": lambda: _value(rng, 1.4, 2.1),
+        "walk_sp": lambda: _value(rng, 0.0, 2.0),
+        "theta": lambda: _value(rng, 0.0, 180.0),
+        "acclimatized": lambda: float(rng.choice([0.0, 100.0])),
+        "duration": lambda: duration,
+        "f_r": lambda: _value(rng, 0.0, 1.0),
+        "t_sk": lambda: _value(rng, 30.0, 37.0),
+        "t_cr": lambda: _value(rng, 36.0, 39.0),
+        "t_re": lambda: _value(rng, 36.0, 39.0),
+        "t_cr_eq": lambda: _value(rng, 36.0, 38.0),
+        "t_sk_t_cr_wg": lambda: _value(rng, 0.1, 0.3),
+        "sweat_rate_watt": lambda: _value(rng, 0.0, 300.0),
+        "evap_load_wm2_min": lambda: _value(rng, 0.0, 50000.0),
+    }
+    for key, draw in optional.items():
+        if rng.random() < 0.5:
+            case[key] = draw()
+    return case
+
+
 def _pmv_ppd_ashrae(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, vr 0-2
     # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
@@ -260,6 +311,7 @@ MODELS = {
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
+    "phs": (models.phs, _phs),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "solar_gain": (models.solar_gain, _solar_gain),

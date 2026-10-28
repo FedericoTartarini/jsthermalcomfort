@@ -25,7 +25,12 @@ export type UnitSymbol =
   | "kPa"
   | "m²"
   | "kg/h/m²"
-  | "mL/h/m²";
+  | "mL/h/m²"
+  | "kg"
+  | "m"
+  | "min"
+  | "g"
+  | "W·min/m²";
 
 /**
  * A bound on a variable (minimum and/or maximum), inclusive. A missing side is

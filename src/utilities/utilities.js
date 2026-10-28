@@ -2,6 +2,7 @@ import { p_sat } from "../psychrometrics/p_sat.ts";
 import { operative_tmp } from "../environment/operative_tmp.ts";
 import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
 import { PMV_PPD_ISO_INFO } from "../models/pmv_ppd_iso.ts";
+import { PHS_INFO, PHS_LIMITS_ISO_7933 } from "../models/phs.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "./options.ts";
 import { units_converter } from "./units_converter.ts";
@@ -313,48 +314,30 @@ function _iso_compliance(kwargs) {
  */
 function _iso7933_2004_compliance(kwargs) {
   // based on ISO 7933:2004 Annex A
-  if (
-    kwargs.tdb === undefined ||
-    kwargs.p_a === undefined ||
-    kwargs.tr === undefined ||
-    kwargs.v === undefined ||
-    kwargs.met === undefined ||
-    kwargs.clo === undefined
-  ) {
-    throw new Error(
-      `Missing arguments for ISO 7933:2004 compliance check, got: ${kwargs} and requires tdb, p_a, tr, v, met and clo`,
-    );
-  }
-  /** @type {string[]} */
-  let warnings = [];
-
-  if (kwargs.tdb > 50 || kwargs.tdb < 15)
-    warnings.push(
-      "ISO 7933:2004 air temperature applicability limits between 15 and 50 ºC",
-    );
-  if (kwargs.p_a > 4.5 || kwargs.p_a < 0)
-    warnings.push(
-      "ISO 7933:2004 p_a applicability limits between 0 and 4.5 kPa",
-    );
-  if (kwargs.tr > 60 || kwargs.tr < 0)
-    warnings.push("ISO 7933:2004 tr applicability limits between 0 and 60 ºC");
-  if (kwargs.v > 3 || kwargs.v < 0)
-    warnings.push(
-      "ISO 7933:2004 air speed applicability limits between 0 and 3 m/s",
-    );
-  if (kwargs.met > 450 || kwargs.met < 100)
-    warnings.push(
-      "ISO 7933:2004 met applicability limits between 100 and 450 met",
-    );
-  if (kwargs.clo > 1 || kwargs.clo < 0.1)
-    warnings.push(
-      "ISO 7933:2004 clo applicability limits between 0.1 and 1 clo",
-    );
-  return warnings;
+  return _iso7933_compliance(Standard.iso_7933_2004, "ISO 7933:2004", kwargs);
 }
 
+/**
+ * @param {ComplianceKwargs} kwargs
+ *
+ * @returns {string[]} strings with warnings emitted
+ */
 function _iso7933_2023_compliance(kwargs) {
   // based on ISO 7933:2023 Annex A
+  return _iso7933_compliance(Standard.iso_7933_2023, "ISO 7933:2023", kwargs);
+}
+
+/**
+ * The checks of `phs` (`PHS_INFO` and the edition's `PHS_LIMITS_ISO_7933`),
+ * each warning named after `label`.
+ *
+ * @param {"7933-2004"|"7933-2023"} standard
+ * @param {string} label
+ * @param {ComplianceKwargs} kwargs
+ *
+ * @returns {string[]} strings with warnings emitted
+ */
+function _iso7933_compliance(standard, label, kwargs) {
   if (
     kwargs.tdb === undefined ||
     kwargs.p_a === undefined ||
@@ -364,33 +347,41 @@ function _iso7933_2023_compliance(kwargs) {
     kwargs.clo === undefined
   ) {
     throw new Error(
-      `Missing arguments for ISO 7933:2023 compliance check, got: ${kwargs} and requires tdb, p_a, tr, v, met and clo`,
+      `Missing arguments for ${label} compliance check, got: ${kwargs} and requires tdb, p_a, tr, v, met and clo`,
     );
   }
   /** @type {string[]} */
   let warnings = [];
+  const out = (value, { min, max }) => value > max || value < min;
+  const { p_a, met } = PHS_LIMITS_ISO_7933[standard];
+  const tdb = PHS_INFO.inputs.tdb.applicability;
+  const tr_tdb = PHS_INFO.derived["tr - tdb"].applicability;
+  const v = PHS_INFO.inputs.v.applicability;
+  const clo = PHS_INFO.inputs.clo.applicability;
 
-  if (kwargs.tdb > 50 || kwargs.tdb < 15)
+  if (out(kwargs.tdb, tdb))
     warnings.push(
-      "ISO 7933:2023 air temperature applicability limits between 15 and 50 ºC",
+      `${label} air temperature applicability limits between ${tdb.min} and ${tdb.max} ºC`,
     );
-  if (kwargs.p_a > 4.5 || kwargs.p_a < 0.5)
+  if (out(kwargs.p_a, p_a))
     warnings.push(
-      "ISO 7933:2023 p_a applicability limits between 0.5 and 4.5 kPa",
+      `${label} p_a applicability limits between ${p_a.min} and ${p_a.max} kPa`,
     );
-  if (kwargs.tr > 60 || kwargs.tr < 0)
-    warnings.push("ISO 7933:2023 tr applicability limits between 0 and 60 ºC");
-  if (kwargs.v > 3 || kwargs.v < 0)
+  if (out(kwargs.tr - kwargs.tdb, tr_tdb))
     warnings.push(
-      "ISO 7933:2023 air speed applicability limits between 0 and 3 m/s",
+      `${label} tr - tdb applicability limits between ${tr_tdb.min} and ${tr_tdb.max} ºC`,
     );
-  if (kwargs.met > 450 || kwargs.met < 100)
+  if (out(kwargs.v, v))
     warnings.push(
-      "ISO 7933:2023 met applicability limits between 100 and 450 met",
+      `${label} air speed applicability limits between ${v.min} and ${v.max} m/s`,
     );
-  if (kwargs.clo > 1 || kwargs.clo < 0.1)
+  if (out(kwargs.met, met))
     warnings.push(
-      "ISO 7933:2023 clo applicability limits between 0.1 and 1 clo",
+      `${label} met applicability limits between ${met.min} and ${met.max} met`,
+    );
+  if (out(kwargs.clo, clo))
+    warnings.push(
+      `${label} clo applicability limits between ${clo.min} and ${clo.max} clo`,
     );
   return warnings;
 }

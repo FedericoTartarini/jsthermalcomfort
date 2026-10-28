@@ -744,8 +744,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
   });
 
-  // Upstream has no ISO category (ADR 0001, consumer-needed), so there is no
-  // test_pmv_ppd_iso.py counterpart to mirror.
+  // An added output with no upstream test to mirror (deviation pmv_ppd_iso-4).
   describe("category under ISO 7730:2005 (Annex A Table A.1)", () => {
     const iso2005 = { standard: Standard.iso_7730_2005 } as const;
 

@@ -28,7 +28,7 @@ import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { pmv_a, PMV_A_INFO } from "./pmv_a.ts";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
-import { e_pmv } from "./e_pmv.js";
+import { pmv_e } from "./pmv_e.ts";
 import {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
@@ -100,7 +100,6 @@ export {
   adaptive_en,
   ADAPTIVE_EN_INFO,
   athb,
-  e_pmv,
   at,
   ankle_draft,
   ANKLE_DRAFT_INFO,
@@ -127,6 +126,7 @@ export {
   PMV_PPD_ISO_INFO,
   pmv_a,
   PMV_A_INFO,
+  pmv_e,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
@@ -152,7 +152,6 @@ export default {
   adaptive_en,
   ADAPTIVE_EN_INFO,
   athb,
-  e_pmv,
   at,
   ankle_draft,
   ANKLE_DRAFT_INFO,
@@ -179,6 +178,7 @@ export default {
   PMV_PPD_ISO_INFO,
   pmv_a,
   PMV_A_INFO,
+  pmv_e,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,

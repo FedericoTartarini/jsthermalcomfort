@@ -114,8 +114,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pet_steady");
   });
 
-  it("should have models.e_pmv", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("e_pmv");
+  it("should have models.pmv_e", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("pmv_e");
   });
 
   it("should have models.vertical_tmp_grad_ppd", () => {

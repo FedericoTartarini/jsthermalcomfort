@@ -11,6 +11,7 @@ compares the library with these files (ADR 0020).
 """
 
 import dataclasses
+import importlib
 import importlib.metadata
 import json
 import math
@@ -20,6 +21,7 @@ import re
 import sys
 import warnings
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 from numpy._core._multiarray_umath import (
@@ -248,6 +250,31 @@ def _pmv_a(rng):
         "met": _value(rng, 0.6, 4.4),
         "clo": _value(rng, 0.0, 2.4),
         "a_coefficient": _value(rng, -0.6, 0.6),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0,
+        "units": units,
+        "limit_inputs": bool(rng.random() < 0.5),
+    }
+
+
+def _pmv_e(rng):
+    # The ranges reach past ISO 7730's limits, which both inner pmv_ppd_iso
+    # calls check (tdb 10-30 °C, tr 10-40 °C, vr 0-1 m/s, met 0.8-4 met, clo
+    # 0-2 clo, pa 0-2700 Pa, pmv -2-2), so NaN positions and every check's
+    # warning are compared too. e_coefficient takes either sign. units comes in
+    # either case, as upstream upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        tdb, tr, vr = (5.0, 35.0), (5.0, 45.0), (-0.2, 1.3)
+    else:
+        tdb, tr, vr = (41.0, 95.0), (41.0, 113.0), (-0.66, 4.3)
+    return {
+        "tdb": _value(rng, *tdb),
+        "tr": _value(rng, *tr),
+        "vr": _value(rng, *vr),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.6, 4.4),
+        "clo": _value(rng, 0.0, 2.4),
+        "e_coefficient": _value(rng, -1.0, 1.0),
         "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0,
         "units": units,
         "limit_inputs": bool(rng.random() < 0.5),
@@ -513,6 +540,13 @@ def _wind_chill_temperature(rng):
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
 GATED_RAISES = {"ankle_draft": ValueError}
 
+# A model whose inner public-model call takes an input that the gate changes:
+# its gate-off case records, as gated_warnings, the warnings each inner call
+# emits under the gate on the inputs it takes with the gate off. pmv_e adjusts
+# met by the first pmv_ppd_iso call's pmv (models/pmv_e.py:134), which the gate
+# masks to NaN, so the same call with the gate on checks an unadjusted met.
+GATED_INNER = {"pmv_e": ("pythermalcomfort.models.pmv_e", "pmv_ppd_iso")}
+
 # Each model: upstream's function and the generator of one case's keyword
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
@@ -525,6 +559,7 @@ MODELS = {
     "humidex": (models.humidex, _humidex),
     "phs": (models.phs, _phs),
     "pmv_a": (models.pmv_a, _pmv_a),
+    "pmv_e": (models.pmv_e, _pmv_e),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "set_tmp": (models.set_tmp, _set_tmp),
@@ -584,6 +619,7 @@ def _run(model, function, inputs):
     A case with limit_inputs False also records the warnings of the same call
     with limit_inputs True: upstream checks the ranges only under the gate, and
     the library returns those range rows whatever limit_inputs is (ADR 0024).
+    For a model in GATED_INNER, they are its inner calls' warnings instead.
     """
     result, emitted = _call(function, inputs)
     case = {
@@ -594,11 +630,26 @@ def _run(model, function, inputs):
         },
         "warnings": emitted,
     }
-    if inputs.get("limit_inputs") is False:
+    if inputs.get("limit_inputs") is False and model in GATED_INNER:
+        module, name = GATED_INNER[model]
+        module = importlib.import_module(module)
+        with mock.patch.object(module, name, _gated(getattr(module, name))):
+            case["gated_warnings"] = _call(function, inputs)[1]
+    elif inputs.get("limit_inputs") is False:
         case["gated_warnings"] = _call(
             function, {**inputs, "limit_inputs": True}, GATED_RAISES.get(model, ())
         )[1]
     return case
+
+
+def _gated(inner):
+    """`inner` run again with limit_inputs True first, for its warnings only."""
+
+    def gated(**kwargs):
+        inner(**{**kwargs, "limit_inputs": True})
+        return inner(**kwargs)
+
+    return gated
 
 
 def _pins():

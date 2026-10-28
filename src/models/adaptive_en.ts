@@ -10,7 +10,7 @@ import type {
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
 import { operative_tmp } from "../environment/operative_tmp.ts";
-import { Units } from "../utilities/options.ts";
+import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
 
 const SLOPE = 0.33;
@@ -19,7 +19,7 @@ const INTERCEPT = 18.8;
 export const ADAPTIVE_EN_INFO = deepFreeze({
   name: "adaptive_en",
   label: "Adaptive (EN 16798-1)",
-  standards: [],
+  standards: [Standard.en_16798_1_2019],
   inputs: {
     tdb: { kind: "numeric", unit: "°C" },
     tr: { kind: "numeric", unit: "°C" },

@@ -20,6 +20,7 @@ import {
   USE_FANS_HEATWAVES_INFO,
   utci,
   vertical_tmp_grad_ppd,
+  wci,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -587,6 +588,13 @@ const MODELS: readonly ParityModel[] = [
     // effect's notice, which upstream emits twice, are exempt by the register
     // (deviation vertical_tmp_grad_ppd-5, deviation vertical_tmp_grad_ppd-6).
     warnings: true,
+  },
+  {
+    name: "wci",
+    run: (inputs) => wci(inputs as unknown as Parameters<typeof wci>[0]),
+    // Upstream rounds wci with np.around (models/wci.py:73-74).
+    rounded: ({ round_output }) => (round_output === true ? ["wci"] : []),
+    warnings: false,
   },
 ];
 

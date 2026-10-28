@@ -26,8 +26,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("heat_index_rothfusz");
   });
 
-  it("should have models.wc", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("wc");
+  it("should have models.wci", () => {
+    expect(jsthermalcomfort.models).toHaveProperty("wci");
   });
 
   it("should have models.phs", () => {

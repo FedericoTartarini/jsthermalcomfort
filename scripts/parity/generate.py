@@ -426,6 +426,17 @@ def _vertical_tmp_grad_ppd(rng):
     }
 
 
+def _wci(rng):
+    # v reaches past 25 m/s (90 km/h), where the index peaks and then
+    # declines (models/wci.py:25-26), and tdb past 33 °C, where it turns
+    # negative.
+    return {
+        "tdb": _value(rng, -50.0, 40.0),
+        "v": _value(rng, 0.0, 40.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
@@ -449,6 +460,7 @@ MODELS = {
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),
     "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),
+    "wci": (models.wci, _wci),
 }
 
 

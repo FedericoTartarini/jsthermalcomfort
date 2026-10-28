@@ -8,7 +8,7 @@ import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { set_tmp } from "./set_tmp.js";
-import { wc } from "./wc.js";
+import { wci } from "./wci.ts";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
 import { adaptive_en, ADAPTIVE_EN_INFO } from "./adaptive_en.ts";
 import { at } from "./at.js";
@@ -131,7 +131,7 @@ export {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
-  wc,
+  wci,
   wind_chill_temperature,
 };
 
@@ -179,7 +179,7 @@ export default {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
-  wc,
+  wci,
   wind_chill_temperature,
   JOS3,
 };

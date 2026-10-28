@@ -9,9 +9,9 @@ import type {
 } from "./modelInfo.ts";
 
 // The counterparts of upstream's `_internal/validation.py`, with upstream's
-// docstrings. The old forms the models not yet migrated call,
-// `_legacy_valid_range` and `_check_params_object`, sit at the end of the file
-// until the contract ticket removes them.
+// docstrings. The old forms, `_legacy_valid_range` and `_check_params_object`,
+// which no model calls any more, sit at the end of the file until the
+// contract ticket removes them.
 
 /** Where a range row's quantity comes from (see {@link ModelWarning}). */
 type Role = Extract<ModelWarning, { kind: "range" }>["role"];
@@ -89,8 +89,8 @@ export function _mapping(value: number, bins: ClassifierBins): string | number {
 }
 
 /**
- * The old form of upstream's `_valid_range`, which the models not yet
- * migrated call; {@link _valid_range} replaces it. Checks one quantity against
+ * The old form of upstream's `_valid_range`, which no model calls any more;
+ * {@link _valid_range} replaces it. Checks one quantity against
  * an inclusive bound and pushes one {@link ApplicabilityWarning} row onto
  * `warnings` where it is outside, and the caller's gate reads the rows.
  *
@@ -118,8 +118,8 @@ export function _legacy_valid_range(
 }
 
 /**
- * The old params-object check, which the models not yet migrated call; the
- * input definition's parse makes it for a migrated model. Throws a
+ * The old params-object check, which no model calls any more; the input
+ * definition's parse makes it for a migrated model. Throws a
  * `TypeError` unless `params` is an object: every v1 model takes one params
  * object keyed like upstream's keyword arguments (ADR 0002), so a call still
  * written positionally fails here, naming the shape it should have.

@@ -302,7 +302,7 @@ const notice = {
   kind: "notice",
   message: "Cooling effect could not be calculated. Returning 0.",
 };
-// At 45 °C and 90 % RH the still-air SET root is not bracketed, so the cooling effect falls back to 0.
+// pythermalcomfort 4.7.0 warns "Cooling effect could not be calculated. Returning 0." here.
 const unbracketed = { tdb: 45, tr: 45, vr: 0.5, rh: 90, met: 1.2, clo: 0.5 };
 const range = (key: string, value: number, bound: object) => ({
   kind: "range",
@@ -687,8 +687,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result.tsv).toBeNaN();
     });
 
-    // Upstream classifies the pmv it returns, after rounding (models/pmv_ppd_ashrae.py:223-240):
-    // 0.5043645689727003 unrounded, 0.5 rounded.
+    // Upstream classifies the pmv it returns, 0.5043645689727003 rounded to 0.5 (models/pmv_ppd_ashrae.py:223-240).
     test("tsv is classified from the pmv returned, rounded or not", () => {
       const warm = { ...neutral, tdb: 26.4, tr: 26.4, limit_inputs: false };
       const rounded = pmv_ppd_ashrae({ ...warm, round_output: true });

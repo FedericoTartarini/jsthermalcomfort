@@ -230,8 +230,8 @@ export function pmv_ppd_ashrae(inputs: PMVPPDAshraeInputs): PMVPPDAshrae {
         -0.03353 * Math.pow(pmv_array, 4.0) - 0.2179 * Math.pow(pmv_array, 2.0),
       );
 
-  // Calculate compliance: True if -0.5 < PMV < 0.5
   const { interval } = PMV_PPD_ASHRAE_INFO.outputs.compliance;
+  // Calculate compliance: True if -0.5 < PMV < 0.5
   let compliance_array: boolean | number =
     pmv_array > interval.min && pmv_array < interval.max;
 

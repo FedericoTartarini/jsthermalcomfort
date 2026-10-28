@@ -13,6 +13,7 @@ import {
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   use_fans_heatwaves,
+  USE_FANS_HEATWAVES_INFO,
   utci,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
@@ -524,22 +525,7 @@ const MODELS: readonly ParityModel[] = [
       ),
     // Upstream rounds every output with np.around (models/use_fans_heatwaves.py:197-198).
     rounded: ({ round_output }) =>
-      round_output === true
-        ? [
-            "e_skin",
-            "e_rsw",
-            "e_max",
-            "q_sensible",
-            "q_skin",
-            "q_res",
-            "t_core",
-            "t_skin",
-            "m_bl",
-            "m_rsw",
-            "w",
-            "w_max",
-          ]
-        : [],
+      round_output === true ? Object.keys(USE_FANS_HEATWAVES_INFO.outputs) : [],
     // The four heat_strain flags, booleans where upstream's are 1.0 or 0.0, are
     // exempt by the register (deviation use_fans_heatwaves-5).
     warnings: true,

@@ -151,8 +151,7 @@ describe("use_fans_heatwaves (JS-only)", () => {
     });
   });
 
-  // classes_input.py:138-139: BaseInputs skips None, and the kernel computes
-  // it as standing.
+  // classes_input.py:138-139: BaseInputs skips None, which the kernel takes as standing.
   test("null for position computes as standing", () => {
     expect(call({ ...valid, position: null })).toEqual(call(valid));
   });

@@ -13,6 +13,7 @@ import {
   PHS_INFO,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  set_tmp,
   solar_gain,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
@@ -530,6 +531,14 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_iso.py:205-207).
     rounded: ({ round_output }) =>
       round_output === true ? ["pmv", "ppd"] : [],
+    warnings: true,
+  },
+  {
+    name: "set_tmp",
+    run: (inputs) =>
+      set_tmp(inputs as unknown as Parameters<typeof set_tmp>[0]),
+    // Upstream rounds set with np.around (models/set_tmp.py:153-154).
+    rounded: ({ round_output }) => (round_output === true ? ["set"] : []),
     warnings: true,
   },
   {

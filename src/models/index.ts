@@ -7,7 +7,7 @@ import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
-import { set_tmp } from "./set_tmp.js";
+import { set_tmp } from "./set_tmp.ts";
 import { wci, WCI_INFO } from "./wci.ts";
 import {
   wind_chill_temperature,

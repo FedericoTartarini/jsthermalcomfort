@@ -60,7 +60,7 @@ describe("eslint config", () => {
   test("lint covers the listed files only", async () => {
     const eslint = new ESLint({ cwd });
     expect(await eslint.isPathIgnored("vitest.config.ts")).toBe(false);
-    expect(await eslint.isPathIgnored("src/models/set_tmp.js")).toBe(true);
+    expect(await eslint.isPathIgnored("src/models/JOS3.js")).toBe(true);
     expect(await eslint.isPathIgnored(FIXTURE)).toBe(true);
   });
 });

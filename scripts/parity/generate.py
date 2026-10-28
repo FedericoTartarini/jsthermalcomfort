@@ -285,6 +285,41 @@ def _pmv_ppd_iso(rng):
     }
 
 
+def _set_tmp(rng):
+    # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, v 0-2
+    # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
+    # warning are compared too, and reach the hot, radiant, windy cases where
+    # the library's SET once drifted from upstream's by up to 6.4 °C
+    # (tdb 42-49 °C, tr 57-66 °C). position comes in any case, as
+    # two_nodes_gagge's check accepts. calculate_ce takes the SET path, which
+    # ignores position.
+    return {
+        "tdb": _value(rng, 5.0, 50.0),
+        "tr": _value(rng, 5.0, 67.0),
+        "v": _value(rng, -0.1, 4.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.5),
+        "clo": _value(rng, 0.0, 2.0),
+        "wme": _value(rng, 0.0, 0.5) if rng.random() < 0.3 else 0.0,
+        "body_surface_area": _value(rng, 1.4, 2.2) if rng.random() < 0.3 else 1.8258,
+        "p_atm": _value(rng, 60000.0, 110000.0) if rng.random() < 0.3 else 101325.0,
+        "position": str(
+            rng.choice(
+                [
+                    "sitting",
+                    "standing",
+                    "standing, forced convection",
+                    "Sitting",
+                    "STANDING",
+                ]
+            )
+        ),
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+        "calculate_ce": bool(rng.random() < 0.3),
+    }
+
+
 def _solar_gain(rng):
     # sol_altitude and sharp reach past the fp table's 0-90 and 0-180 degrees,
     # so NaN positions and their warnings are compared too, and
@@ -466,6 +501,7 @@ MODELS = {
     "phs": (models.phs, _phs),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
+    "set_tmp": (models.set_tmp, _set_tmp),
     "solar_gain": (models.solar_gain, _solar_gain),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),

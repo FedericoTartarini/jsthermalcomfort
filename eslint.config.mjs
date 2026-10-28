@@ -35,6 +35,7 @@ export const LINTED = [
   "src/models/two_nodes_gagge.ts",
   "src/models/utci.ts",
   "tests/call_sites.test.ts",
+  "tests/check_mirrored.test.ts",
   "tests/environment/operative_tmp.test.ts",
   "tests/environment/transpose_sharp_altitude.test.ts",
   "tests/internal.test.ts",

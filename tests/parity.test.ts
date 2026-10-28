@@ -540,7 +540,9 @@ const MODELS: readonly ParityModel[] = [
             "w_max",
           ]
         : [],
-    warnings: false,
+    // The four heat_strain flags, booleans where upstream's are 1.0 or 0.0, are
+    // exempt by the register (deviation use_fans_heatwaves-5).
+    warnings: true,
   },
   {
     name: "utci",

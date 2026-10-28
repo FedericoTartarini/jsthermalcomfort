@@ -78,6 +78,76 @@ export type UseFansHeatwavesInputs = InputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  */
 export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
 
+/**
+ * Estimate if the conditions you have selected would cause heat strain.
+ *
+ * This occurs when either the following variables reaches its
+ * maximum value:
+ *
+ * * m_rsw Rate at which regulatory sweat is generated, [mL/h/m2]
+ * * w : Skin wettedness, adimensional. Ranges from 0 and 1.
+ * * m_bl : Skin blood flow [kg/h/m2]
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.v - Air speed, [m/s].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ * @param inputs.body_surface_area - Body surface area, default value 1.8258 [m2]. Defaults to 1.8258.
+ *
+ * > [!NOTE]
+ * > The body surface area can be calculated using the function
+ * > `body_surface_area`.
+ * @param inputs.p_atm - Atmospheric pressure, default value 101325 [Pa]. Defaults to 101325.
+ * @param inputs.position - Select either "sitting" or "standing". Defaults to "standing".
+ * @param inputs.max_skin_blood_flow - Maximum blood flow from the core to the skin. Defaults to 80.
+ * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
+ * function returns nan. If False, returns values even if input values are
+ * outside the applicability limits of the model. Defaults to True. The
+ * applicability limits are 20 <= tdb [°C] <= 50, 20 <= tr [°C] <= 50,
+ * 0.1 <= v [m/s] <= 4.5, 0.7 <= met [met] <= 2, and 0 <= clo [clo] <= 1.
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [mL/h/m2]. Defaults to 500.
+ *
+ * @returns A dataclass containing the results of using fans during heatwaves.
+ * See {@link UseFansHeatwaves} for more details.
+ * To access the results, use the corresponding attributes of the returned `UseFansHeatwaves` instance, e.g., `result.e_skin`.
+ *
+ * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.
+ * - `e_rsw` - Rate of evaporative heat loss from sweat evaporation, [W/m2].
+ * - `e_max` - Maximum rate of evaporative heat loss from skin, [W/m2].
+ * - `q_sensible` - Sensible heat loss from skin, [W/m2].
+ * - `q_skin` - Total rate of heat loss from skin, [W/m2]. Equal to q_sensible + e_skin.
+ * - `q_res` - Total rate of heat loss through respiration, [W/m2].
+ * - `t_core` - Core temperature, [°C].
+ * - `t_skin` - Skin temperature, [°C].
+ * - `m_bl` - Skin blood flow, [kg/h/m2].
+ * - `m_rsw` - Rate at which regulatory sweat is generated, [mL/h/m2].
+ * - `w` - Skin wettedness, adimensional. Ranges from 0 to 1.
+ * - `w_max` - Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 to 1.
+ * - `heat_strain` - True if the model predicts that the person may be experiencing heat strain.
+ * - `heat_strain_blood_flow` - True if heat strain is caused by skin blood flow (m_bl) reaching its maximum value.
+ * - `heat_strain_w` - True if heat strain is caused by skin wettedness (w) reaching its maximum value.
+ * - `heat_strain_sweating` - True if heat strain is caused by regulatory sweating (m_rsw) reaching its maximum value.
+ *
+ * @example
+ * ```ts
+ * import { use_fans_heatwaves } from "jsthermalcomfort/models";
+ *
+ * const result = use_fans_heatwaves({
+ *   tdb: 35,
+ *   tr: 35,
+ *   v: 1.0,
+ *   rh: 50,
+ *   met: 1.2,
+ *   clo: 0.5,
+ * });
+ * console.log(result.e_skin); // 63
+ * ```
+ */
 export function use_fans_heatwaves(
   inputs: UseFansHeatwavesInputs,
 ): UseFansHeatwaves {

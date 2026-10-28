@@ -35,6 +35,7 @@ export const LINTED = [
   "src/models/pmv_ppd_iso.ts",
   "src/models/solar_gain.ts",
   "src/models/two_nodes_gagge.ts",
+  "src/models/use_fans_heatwaves.ts",
   "src/models/utci.ts",
   "tests/call_sites.test.ts",
   "tests/check_mirrored.test.ts",

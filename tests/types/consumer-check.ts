@@ -44,6 +44,8 @@ import type {
   SET,
   SolarGain,
   SolarGainInputs,
+  UseFansHeatwaves,
+  UseFansHeatwavesInputs,
   UTCI,
   UTCIInputs,
   OutputField,
@@ -66,6 +68,7 @@ import {
   TWO_NODES_GAGGE_INFO,
   Postures,
   Units,
+  USE_FANS_HEATWAVES_INFO,
   UTCI_INFO,
   adaptive_ashrae,
   classifyFromBins,
@@ -79,6 +82,7 @@ import {
   pmv_ppd_iso,
   solar_gain,
   two_nodes_gagge,
+  use_fans_heatwaves,
   utci,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
@@ -108,6 +112,7 @@ const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 const twoNodesGaggeInfo: ModelInfo = TWO_NODES_GAGGE_INFO;
 const phsInfo: ModelInfo = PHS_INFO;
+const useFansHeatwavesInfo: ModelInfo = USE_FANS_HEATWAVES_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -673,3 +678,22 @@ phs({ tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 2.5, clo: 0.5 });
 phs({ ...phsInputs, posture: "lying" });
 // @ts-expect-error standard is one of ISO 7933's two editions.
 phs({ ...phsInputs, standard: "7730-2025" });
+
+// use_fans_heatwaves takes position as two_nodes_gagge does, and returns the
+// heat strain flags as masked booleans, NaN where the gate masks them.
+const useFansInputs: UseFansHeatwavesInputs = {
+  tdb: 35,
+  tr: 35,
+  v: 1.0,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  position: "sitting",
+};
+const useFans: UseFansHeatwaves = use_fans_heatwaves(useFansInputs);
+const useFansSkin: number = useFans.e_skin;
+const useFansStrain: boolean | number = useFans.heat_strain;
+// @ts-expect-error a masked boolean may be NaN, a number.
+const useFansStrainBool: boolean = useFans.heat_strain;
+// @ts-expect-error position is one of choice_field's three values.
+use_fans_heatwaves({ ...useFansInputs, position: "lying" });

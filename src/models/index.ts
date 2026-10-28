@@ -27,7 +27,10 @@ import { a_pmv } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
-import { use_fans_heatwaves } from "./use_fans_heatwaves.ts";
+import {
+  use_fans_heatwaves,
+  USE_FANS_HEATWAVES_INFO,
+} from "./use_fans_heatwaves.ts";
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
 import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";
@@ -68,6 +71,10 @@ export type {
   GaggeTwoNodesInputs,
   SET,
 } from "./two_nodes_gagge.ts";
+export type {
+  UseFansHeatwaves,
+  UseFansHeatwavesInputs,
+} from "./use_fans_heatwaves.ts";
 export type { UTCI, UTCIInputs } from "./utci.ts";
 
 export {
@@ -107,6 +114,7 @@ export {
   utci,
   UTCI_INFO,
   use_fans_heatwaves,
+  USE_FANS_HEATWAVES_INFO,
   vertical_tmp_grad_ppd,
   wbgt,
   wc,
@@ -150,6 +158,7 @@ export default {
   utci,
   UTCI_INFO,
   use_fans_heatwaves,
+  USE_FANS_HEATWAVES_INFO,
   vertical_tmp_grad_ppd,
   wbgt,
   wc,

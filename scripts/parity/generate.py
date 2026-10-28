@@ -115,6 +115,36 @@ def _heat_index_rothfusz(rng):
     }
 
 
+def _pmv_ppd_ashrae(rng):
+    # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, vr 0-2
+    # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
+    # warning are compared too; vr reaches the 0.1 m/s still-air cut-off from
+    # both sides and goes below 0, and the hot, humid cases return the cooling
+    # effect's warning. A third of the cases have the met < 1.3 and clo < 0.7
+    # that the airspeed_control=False rules need. units comes in either case,
+    # as upstream upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        tdb, tr, vr = (5.0, 45.0), (5.0, 50.0), (-0.2, 2.5)
+    else:
+        tdb, tr, vr = (41.0, 113.0), (41.0, 122.0), (-0.66, 8.2)
+    low_activity = rng.random() < 0.3
+    return {
+        "tdb": _value(rng, *tdb),
+        "tr": _value(rng, *tr),
+        "vr": _value(rng, vr[0], vr[1] / 5) if rng.random() < 0.3 else _value(rng, *vr),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 1.3) if low_activity else _value(rng, 0.7, 4.4),
+        "clo": _value(rng, 0.0, 0.7) if low_activity else _value(rng, 0.0, 2.0),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.3 else 0.0,
+        "model": "55-2023",
+        "units": units,
+        "limit_inputs": bool(rng.random() < 0.5),
+        "airspeed_control": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _pmv_ppd_iso(rng):
     # The ranges reach past ISO 7730's limits (tdb 10-30 °C, tr 10-40 °C,
     # vr 0-1 m/s, met 0.8-4 met, clo 0-2 clo, pa 0-2700 Pa, pmv -2-2), so NaN
@@ -230,6 +260,7 @@ MODELS = {
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
+    "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "solar_gain": (models.solar_gain, _solar_gain),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
@@ -250,6 +281,9 @@ def _encode(model, name, value):
     if array.ndim != 0:
         raise TypeError(f"{model}: output {name} is not a scalar")
     item = array.item()
+    # An object array holds a numpy scalar, such as pmv_ppd_ashrae's compliance.
+    if isinstance(item, np.generic):
+        item = item.item()
     if isinstance(item, float) and not math.isfinite(item):
         return {"float": "nan" if math.isnan(item) else ("inf" if item > 0 else "-inf")}
     if item is not None and not isinstance(item, (bool, int, float, str)):

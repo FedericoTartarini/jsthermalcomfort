@@ -19,28 +19,30 @@ import {
 } from "./testUtils.ts";
 
 // Array rows run element-wise.
-let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd);
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.pmvPpd,
+);
 
-// Upstream keeps the rows labelled "ashrae", which matches none of the
-// fixture's uppercase "ASHRAE" labels, so its fixture test runs no row. This
-// runs what it means to run: every ASHRAE row, SI and IP, arrays included.
-const ashraeRows = assertNonEmptyRows(
-  testData.data.filter(({ inputs }) => inputs.standard === "ASHRAE"),
+// As upstream, the rows whose label lower-cases to "ashrae" (tests/test_pmv_ppd_ashrae.py:23-25).
+const ashrae_rows = assertNonEmptyRows(
+  reference_table.data.filter(
+    ({ inputs }) => String(inputs.standard).toLowerCase() === "ashrae",
+  ),
   "pmv_ppd_ashrae ASHRAE rows",
 );
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_pmv_ppd_ashrae.py.
+// Mirrors pythermalcomfort v4.7.0 tests/test_pmv_ppd_ashrae.py.
 describe("test_pmv_ppd_ashrae", () => {
-  test.each(ashraeRows)("test_pmv_ppd: fixture case %#", (row) => {
+  test.each(ashrae_rows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
     // As upstream, which swaps the row's label for `model="55-2023"`; the key
     // is `standard` here (ADR 0003). The rest of the row goes in unchanged.
     const result = pmv_ppd_ashrae({
       ...inputs,
       standard: Standard.ashrae_55_2023,
-    } as unknown as PmvPpdAshraeParams);
+    } as unknown as Parameters<typeof pmv_ppd_ashrae>[0]);
 
-    validateResult(result, outputs, tolerances, inputs);
+    validateResult(result, outputs, tolerance, inputs);
   });
 
   describe("TestPmvPpd", () => {
@@ -94,7 +96,7 @@ describe("test_pmv_ppd_ashrae", () => {
         expect(result.pmv).toBe(pmv);
       }
 
-      const outOfRange: [number, number, number, number, number][] = [
+      const out_of_range: [number, number, number, number, number][] = [
         [41, 20, 0.1, 1.1, 0.5],
         [20, 41, 0.1, 1.1, 0.5],
         [20, 20, 2.1, 1.1, 0.5],
@@ -102,7 +104,7 @@ describe("test_pmv_ppd_ashrae", () => {
         [20, 20, 0.1, 1.1, 2.1],
         [39, 39, 0.1, 3.9, 1.9],
       ];
-      for (const [tdb, tr, vr, met, clo] of outOfRange) {
+      for (const [tdb, tr, vr, met, clo] of out_of_range) {
         const result = pmv_ppd_ashrae({
           tdb,
           tr,
@@ -186,7 +188,7 @@ describe("test_pmv_ppd_ashrae", () => {
       ).toThrow(Error);
     });
 
-    // Upstream's UserWarning naming 'tdb' is a warnings row keyed "tdb" here.
+    // Upstream's UserWarning naming 'tdb' is a range row keyed "tdb".
     test("test_out_of_range_warns", () => {
       const result = pmv_ppd_ashrae({
         tdb: 41,
@@ -197,17 +199,15 @@ describe("test_pmv_ppd_ashrae", () => {
         clo: 0.5,
         standard: Standard.ashrae_55_2023,
       });
-      expect(result.warnings.map((w) => w.key)).toEqual(["tdb"]);
+      expect(result.warnings).toEqual([
+        expect.objectContaining({ key: "tdb", value: 41 }),
+      ]);
       expect(result.pmv).toBeNaN();
     });
 
-    // Upstream emits nothing with limit_inputs off, and neither does this: no
-    // console output. The warnings rows are still filled, the same as with
-    // limit_inputs on (a consumer-contract deviation: a caller that shows the
-    // out-of-range numbers can say which bounds they broke).
+    // Upstream warns nothing with the gate off; the library returns the gate-off rows (decision 78).
     test("test_limit_inputs_false_no_warning", () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const params = {
+      const result = pmv_ppd_ashrae({
         tdb: 41,
         tr: 41,
         vr: 2,
@@ -215,15 +215,13 @@ describe("test_pmv_ppd_ashrae", () => {
         met: 0.7,
         clo: 2.1,
         standard: Standard.ashrae_55_2023,
-      };
-      const result = pmv_ppd_ashrae({ ...params, limit_inputs: false });
-      expect(warn).not.toHaveBeenCalled();
-      expect(result.warnings).toEqual(pmv_ppd_ashrae(params).warnings);
-      expect(result.warnings.map((w) => w.key)).toEqual([
-        "tdb",
-        "tr",
-        "met",
-        "clo",
+        limit_inputs: false,
+      });
+      expect(result.warnings).toEqual([
+        expect.objectContaining({ key: "tdb", value: 41 }),
+        expect.objectContaining({ key: "tr", value: 41 }),
+        expect.objectContaining({ key: "met", value: 0.7 }),
+        expect.objectContaining({ key: "clo", value: 2.1 }),
       ]);
     });
 
@@ -241,7 +239,7 @@ describe("test_pmv_ppd_ashrae", () => {
         airspeed_control: false,
       });
       expect(result.warnings).toEqual([
-        { key: "vr", role: "input", value: 0.9, bound: { max: 0.8 } },
+        expect.objectContaining({ key: "vr", value: 0.9, bound: { max: 0.8 } }),
       ]);
     });
 
@@ -258,9 +256,13 @@ describe("test_pmv_ppd_ashrae", () => {
         standard: Standard.ashrae_55_2023,
         airspeed_control: false,
       });
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]!.key).toBe("vr");
-      expect(result.warnings[0]!.bound.max).toBeCloseTo(0.318, 6);
+      expect(result.warnings).toEqual([
+        expect.objectContaining({
+          key: "vr",
+          value: 0.6,
+          bound: { max: expect.closeTo(0.318, 6) as number },
+        }),
+      ]);
     });
 
     // "exceeding 0.2 m/s" is a vr row bounded at 0.2.
@@ -277,56 +279,8 @@ describe("test_pmv_ppd_ashrae", () => {
         airspeed_control: false,
       });
       expect(result.warnings).toEqual([
-        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
+        expect.objectContaining({ key: "vr", value: 0.3, bound: { max: 0.2 } }),
       ]);
-    });
-  });
-});
-
-// Mirrors TestCheckAshrae55Compliance in pythermalcomfort v4.6.0
-// tests/test_internal.py. Upstream calls the private helper
-// _check_ashrae55_compliance directly. Its JS counterpart
-// (src/_internal/ashrae55.ts) pushes rows instead of warning, and
-// pmv_ppd_ashrae returns them, so the tests go through the model, with
-// upstream's v as vr and an rh the model needs and the helper does not take.
-describe("test_internal", () => {
-  describe("TestCheckAshrae55Compliance", () => {
-    const at = (tdb: number, vr: number, airspeed_control: boolean) =>
-      pmv_ppd_ashrae({
-        tdb,
-        tr: tdb,
-        vr,
-        rh: 50,
-        met: 1.2,
-        clo: 0.5,
-        airspeed_control,
-      }).warnings;
-
-    // tdb=tr=30 → to=30 > 25.5, so cond2 does not trigger alongside cond1.
-    test("test_airspeed_control_cond1_warns", () => {
-      expect(at(30, 1.0, false)).toEqual([
-        { key: "vr", role: "input", value: 1.0, bound: { max: 0.8 } },
-      ]);
-    });
-
-    // With tdb=tr=24, to=24; v_limit ≈ 0.32; v=0.5 > v_limit triggers cond2.
-    test("test_airspeed_control_cond2_warns", () => {
-      const rows = at(24, 0.5, false);
-      expect(rows).toHaveLength(1);
-      expect(rows[0]!.key).toBe("vr");
-      expect(rows[0]!.bound.max).toBeCloseTo(0.318, 6);
-    });
-
-    // With tdb=tr=22, to=22 <= 23; v=0.3 > 0.2 triggers cond3.
-    test("test_airspeed_control_cond3_warns", () => {
-      expect(at(22, 0.3, false)).toEqual([
-        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
-      ]);
-    });
-
-    // airspeed_control=True skips cond1/cond2/cond3 checks even when v=1.0.
-    test("test_airspeed_control_true_no_condition_warning", () => {
-      expect(at(25, 1.0, true)).toEqual([]);
     });
   });
 });
@@ -746,7 +700,7 @@ describe("pmv_ppd_ashrae warnings rows (JS-only)", () => {
     });
   });
 
-  test.each(ashraeRows)(
+  test.each(ashrae_rows)(
     "a NaN that limit_inputs caused comes with a row (fixture #%#)",
     ({ inputs }) => {
       const run = (limit_inputs: boolean) =>

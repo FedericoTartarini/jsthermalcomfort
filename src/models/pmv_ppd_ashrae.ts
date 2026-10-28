@@ -5,8 +5,9 @@ import { units_converter } from "../utilities/units_converter.ts";
 import {
   _legacy_check_ashrae55_compliance,
   ASHRAE_55_LIMITS,
+  ASHRAE_55_STILL_AIR_THRESHOLD,
 } from "../_internal/ashrae55.ts";
-import { Standard } from "../utilities/options.ts";
+import { Standard, Units } from "../utilities/options.ts";
 import { round } from "../_internal/round.ts";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 import type { ClassifierBins } from "../_internal/classifierBins.ts";
@@ -220,14 +221,38 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
     },
     PMV_PPD_ASHRAE_SCHEMA,
   );
-  if (units.toUpperCase() === "IP") {
-    // Conversion from IP to SI units
-    ({ tdb, tr, vr } = units_converter("IP", { tdb, tr, vr }));
+  if (units.toUpperCase() === Units.IP) {
+    ({ tdb, tr, v: vr } = units_converter(Units.IP, { tdb, tr, v: vr }));
   }
 
+  // if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
+  const ce_result = cooling_effect({ tdb, tr, vr, rh, met, clo, wme });
+  const ce = vr > ASHRAE_55_STILL_AIR_THRESHOLD ? ce_result.ce : 0.0;
+  // cooling_effect's notice row goes to the console unless suppress_warnings is set.
+  for (const row of ce_result.warnings) {
+    if (row.kind === "notice" && !suppress_warnings) console.warn(row.message);
+  }
+
+  const tdb_ce = tdb - ce;
+  const tr_ce = tr - ce;
+  const vr_ce = ce > 0 ? ASHRAE_55_STILL_AIR_THRESHOLD : vr;
+
+  let pmv_array = _pmv_ppd_optimized(tdb_ce, tr_ce, vr_ce, rh, met, clo, wme);
+
+  let ppd_array =
+    100.0 -
+    95.0 *
+      Math.exp(
+        -0.03353 * Math.pow(pmv_array, 4.0) - 0.2179 * Math.pow(pmv_array, 2.0),
+      );
+
+  // Calculate compliance: True if -0.5 < PMV < 0.5
+  let compliance_array: boolean | number =
+    pmv_array > PMV_COMPLIANCE_INTERVAL_ASHRAE.min &&
+    pmv_array < PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
+
   // The rows a call broke (#199), built on every call whatever limit_inputs
-  // is, from the inputs before the cooling effect shifts them, through the
-  // shared helper, as in upstream's pmv_ppd_ashrae.
+  // is, as in upstream's pmv_ppd_ashrae.
   const warnings: ApplicabilityWarning[] = [];
   _legacy_check_ashrae55_compliance(warnings, {
     tdb,
@@ -238,65 +263,22 @@ export function pmv_ppd_ashrae(params: PmvPpdAshraeParams): PmvPpdAshraeResult {
     airspeed_control,
     v_param_name: "vr",
   });
-
-  //if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-  // The inputs are SI by now, hence "SI" rather than units.
-  let ce = 0;
-  if (vr > 0.1) {
-    const result = cooling_effect({
-      tdb,
-      tr,
-      vr,
-      rh,
-      met,
-      clo,
-      wme,
-      units: "SI",
-    });
-    ce = result.ce;
-    // cooling_effect's notice row goes to the console unless suppress_warnings is set.
-    for (const row of result.warnings) {
-      if (row.kind === "notice" && !suppress_warnings)
-        console.warn(row.message);
-    }
-  }
-
-  tdb = tdb - ce;
-  tr = tr - ce;
-  vr = ce > 0 ? 0.1 : vr;
-
-  let pmv = _pmv_ppd_optimized(tdb, tr, vr, rh, met, clo, wme);
-  let ppd =
-    100.0 -
-    95.0 *
-      Math.exp(-0.03353 * Math.pow(pmv, 4.0) - 0.2179 * Math.pow(pmv, 2.0));
-
-  // Checks that inputs are within the bounds accepted by the model if not return NaN
-  const gated = limit_inputs && (isNaN(pmv) || warnings.length > 0);
-
-  // As upstream's pmv_ppd_ashrae computes it: from the unrounded pmv, and NaN
-  // where limit_inputs finds an input out of bounds. Upstream masks on the
-  // inputs alone, not on a NaN pmv, so neither does this.
-  const compliance =
-    limit_inputs && warnings.length > 0
-      ? NaN
-      : pmv > PMV_COMPLIANCE_INTERVAL_ASHRAE.min &&
-        pmv < PMV_COMPLIANCE_INTERVAL_ASHRAE.max;
-
-  if (gated) {
-    pmv = NaN;
-    ppd = NaN;
+  if (limit_inputs) {
+    const all_valid = warnings.length === 0;
+    pmv_array = all_valid ? pmv_array : NaN;
+    ppd_array = all_valid ? ppd_array : NaN;
+    compliance_array = all_valid ? compliance_array : NaN;
   }
 
   if (round_output) {
-    pmv = round(pmv, 2);
-    ppd = round(ppd, 1);
+    pmv_array = round(pmv_array, 2);
+    ppd_array = round(ppd_array, 1);
   }
 
-  // Classified from the pmv returned, so after rounding, as upstream does: the
-  // label never disagrees with the number shown. Right-inclusive, where ISO's
-  // is left-inclusive (intentional divergence per pythermalcomfort#382).
+  const pmv = pmv_array;
+  const ppd = ppd_array;
   const tsv = classifyFromBins(pmv, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE);
+  const compliance = compliance_array;
 
   return { pmv, ppd, tsv, compliance, warnings };
 }

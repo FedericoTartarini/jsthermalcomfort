@@ -5,6 +5,7 @@ import {
   clo_tout,
   cooling_effect,
   heat_index_rothfusz,
+  pmv_ppd_ashrae,
   pmv_ppd_iso,
   solar_gain,
   two_nodes_gagge,
@@ -444,6 +445,22 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
+  },
+  {
+    name: "pmv_ppd_ashrae",
+    // Upstream's `model` is the library's `standard` (ADR 0019, whitelist item 3).
+    run: ({ model, ...inputs }) =>
+      pmv_ppd_ashrae({
+        ...inputs,
+        standard: model,
+        suppress_warnings: true,
+      } as unknown as Parameters<typeof pmv_ppd_ashrae>[0]),
+    // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_ashrae.py:223-225).
+    rounded: ({ round_output }) =>
+      round_output === true ? ["pmv", "ppd"] : [],
+    // The library returns its older rows; warnings are compared once the
+    // model returns ModelWarning rows (ADR 0024).
+    warnings: false,
   },
   {
     name: "pmv_ppd_iso",

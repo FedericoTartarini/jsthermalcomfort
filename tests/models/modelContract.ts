@@ -32,9 +32,9 @@ export function isDeepFrozen(value: unknown): boolean {
  * as upstream's return dataclass is (`@dataclass(frozen=True, repr=False)`:
  * `AdaptiveASHRAE`, `AnkleDraft`, `CloTOut`, `CE`, `HI`, `Humidex`, `PHS`,
  * `PMVPPD`, `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`,
- * `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD` and `WCI` at
+ * `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WCI` and `WCT` at
  * `classes_return.py:111, :184, :227, :241, :297, :311, :353, :415, :435, :467,
- * :480, :497, :631, :689, :705, :735`), and as
+ * :480, :497, :631, :689, :705, :735, :748`), and as
  * `AdaptiveEN` is, although upstream's is a plain `@dataclass` (`:143`,
  * deviation adaptive_en-5).
  *

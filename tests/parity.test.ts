@@ -605,7 +605,7 @@ const MODELS: readonly ParityModel[] = [
       ),
     // Upstream rounds wct with np.around (models/wind_chill_temperature.py:61-62).
     rounded: ({ round_output }) => (round_output === true ? ["wct"] : []),
-    warnings: false,
+    warnings: true,
   },
 ];
 

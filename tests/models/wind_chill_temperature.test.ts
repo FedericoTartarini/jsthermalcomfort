@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { wind_chill_temperature } from "../../src/models/index.ts";
+import {
+  wind_chill_temperature,
+  WIND_CHILL_TEMPERATURE_INFO,
+} from "../../src/models/index.ts";
+import { wind_chill_temperature as wind_chill_temperature_from_root } from "../../src/index.ts";
 import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof wind_chill_temperature>[0];
@@ -91,5 +96,56 @@ describe("test_wind_chill_temperature", () => {
         } as unknown as Inputs),
       ).toThrow(TypeError);
     });
+  });
+});
+
+describeModelContract(wind_chill_temperature, WIND_CHILL_TEMPERATURE_INFO, {
+  tdb: -5,
+  v: 5.5,
+});
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("wind_chill_temperature (JS-only)", () => {
+  test.each([
+    [-5, 5.5, -7.527137645688018, -7.5],
+    [-10, 10, -15.2608188843888, -15.3],
+    [-40, 30, -58.663137362187676, -58.7],
+    [-20, 60, -36.468785330827345, -36.5],
+    [0, 0, 13.12, 13.1],
+    [0, 0.1, 5.253881860651691, 5.3],
+    [10, 120, 3.4057964379880303, 3.4],
+    [20, 1, 22.110000000000003, 22.1],
+  ] as const)(
+    "tdb %s, v %s gives %s, rounded %s",
+    (tdb, v, expected, rounded) => {
+      const result = wind_chill_temperature({ tdb, v, round_output: false });
+      expect(approx(result.wct, expected)).toBe(true);
+      expect(wind_chill_temperature({ tdb, v }).wct).toBe(rounded);
+    },
+  );
+
+  // As upstream's: v**0.16 of a negative v is NaN (models/wind_chill_temperature.py:59).
+  test("a negative v gives NaN", () => {
+    expect(wind_chill_temperature({ tdb: 0, v: -1 }).wct).toBeNaN();
+    expect(
+      wind_chill_temperature({ tdb: 0, v: -1, round_output: false }).wct,
+    ).toBeNaN();
+  });
+
+  // Deviation wind_chill_temperature-2.
+  test("returns no rows", () => {
+    for (const [tdb, v] of [
+      [-50, 0],
+      [-5, 5.5],
+      [20, 120],
+      [0, -1],
+    ] as const) {
+      expect(wind_chill_temperature({ tdb, v }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(wind_chill_temperature_from_root).toBe(wind_chill_temperature);
   });
 });

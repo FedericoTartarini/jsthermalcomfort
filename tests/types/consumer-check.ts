@@ -58,6 +58,8 @@ import type {
   VerticalTGradPPDInputs,
   WCI,
   WCIInputs,
+  WCT,
+  WCTInputs,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -85,6 +87,7 @@ import {
   UTCI_INFO,
   VERTICAL_TMP_GRAD_PPD_INFO,
   WCI_INFO,
+  WIND_CHILL_TEMPERATURE_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -104,6 +107,7 @@ import {
   utci,
   vertical_tmp_grad_ppd,
   wci,
+  wind_chill_temperature,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 // One set of category bins per ISO 7730 edition replaced the one for both, so
@@ -138,6 +142,7 @@ const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 const humidexInfo: ModelInfo = HUMIDEX_INFO;
 const wciInfo: ModelInfo = WCI_INFO;
+const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -799,3 +804,14 @@ const wciValue: number = wciResult.wci;
 wciResult.wci = 1;
 // @ts-expect-error v is required.
 wci({ tdb: -5 });
+
+// wind_chill_temperature takes one inputs object (ADR 0002), with its inputs
+// and result types named after upstream's WCTInputs and WCT, and returns a
+// readonly result.
+const wctInputs: WCTInputs = { tdb: -5, v: 5.5, round_output: false };
+const wctResult: WCT = wind_chill_temperature(wctInputs);
+const wctValue: number = wctResult.wct;
+// @ts-expect-error the result is readonly.
+wctResult.wct = 1;
+// @ts-expect-error v is required.
+wind_chill_temperature({ tdb: -5 });

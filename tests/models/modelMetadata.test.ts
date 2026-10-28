@@ -145,6 +145,7 @@ const v2Calls: Record<string, object> = {
     vertical_tmp_grad: 7,
   },
   wci: { tdb: -5, v: 5.5 },
+  wind_chill_temperature: { tdb: -5, v: 5.5 },
 };
 
 describe("Outputs staleness — each v2 model's result matches its INFO.outputs", () => {

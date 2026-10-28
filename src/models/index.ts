@@ -9,7 +9,10 @@ import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { set_tmp } from "./set_tmp.js";
 import { wci, WCI_INFO } from "./wci.ts";
-import { wind_chill_temperature } from "./wind_chill_temperature.ts";
+import {
+  wind_chill_temperature,
+  WIND_CHILL_TEMPERATURE_INFO,
+} from "./wind_chill_temperature.ts";
 import { adaptive_en, ADAPTIVE_EN_INFO } from "./adaptive_en.ts";
 import { at } from "./at.js";
 import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
@@ -87,6 +90,7 @@ export type {
   VerticalTGradPPDInputs,
 } from "./vertical_tmp_grad_ppd.ts";
 export type { WCI, WCIInputs } from "./wci.ts";
+export type { WCT, WCTInputs } from "./wind_chill_temperature.ts";
 
 export {
   adaptive_ashrae,
@@ -135,6 +139,7 @@ export {
   wci,
   WCI_INFO,
   wind_chill_temperature,
+  WIND_CHILL_TEMPERATURE_INFO,
 };
 
 export default {
@@ -184,5 +189,6 @@ export default {
   wci,
   WCI_INFO,
   wind_chill_temperature,
+  WIND_CHILL_TEMPERATURE_INFO,
   JOS3,
 };

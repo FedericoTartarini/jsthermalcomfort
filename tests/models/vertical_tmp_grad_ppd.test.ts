@@ -29,7 +29,7 @@ describe("test_vertical_tmp_grad_ppd", () => {
     },
   );
 
-  // Upstream calls np.isclose without asserting its result; this asserts it.
+  // tests/test_vertical_tmp_grad_ppd.py:27-31 calls np.isclose without asserting its result; this asserts it.
   test("test_vertical_tmp_grad_ppd: vr 0.3", () => {
     // Test for ValueError
     expect(
@@ -177,7 +177,7 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
     },
   );
 
-  // Deviations vertical_tmp_grad_ppd-2 to -4: upstream's gated call warns the notice twice, then each bound.
+  // Deviation vertical_tmp_grad_ppd-2, deviation vertical_tmp_grad_ppd-3, deviation vertical_tmp_grad_ppd-4: upstream's gated call warns the notice twice, then each bound.
   test("each bound broken gives a row, in upstream's order, after the inner call's notice alone, with the gate off", () => {
     const result = call({
       ...out,

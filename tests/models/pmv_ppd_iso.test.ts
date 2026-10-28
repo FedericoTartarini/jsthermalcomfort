@@ -4,67 +4,62 @@ import {
   PMV_CATEGORY_BINS_ISO_7730_2005,
   PMV_CATEGORY_BINS_ISO_7730_2025,
 } from "../../src/models/index.ts";
-import type {
-  PmvPpdIsoParams,
-  PmvPpdIsoResult,
-} from "../../src/models/pmv_ppd_iso.ts";
 import { Standard } from "../../src/utilities/options.ts";
 import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
 import {
+  approx,
   assertNonEmptyRows,
   loadTestData,
   validateResult,
 } from "./testUtils.ts";
 
+type Inputs = Parameters<typeof pmv_ppd_iso>[0];
+type Outputs = ReturnType<typeof pmv_ppd_iso>;
+
 // Array rows run element-wise.
-let { testData, tolerances } = await loadTestData(testDataUrls.pmvPpd);
+const { testData: reference_table, tolerances: tolerance } = await loadTestData(
+  testDataUrls.pmvPpd,
+);
 
 // Upstream keeps the rows without a standard and those labelled "iso", which
 // matches none of the fixture's uppercase "ISO" labels, so its fixture test
 // runs only the two rows without one. This runs what it means to run: those
 // two and every ISO row, SI and IP, arrays included.
-const isoRows = assertNonEmptyRows(
-  testData.data.filter(({ inputs }) => (inputs.standard ?? "ISO") === "ISO"),
+const iso_rows = assertNonEmptyRows(
+  reference_table.data.filter(
+    ({ inputs }) => (inputs.standard ?? "ISO") === "ISO",
+  ),
   "pmv_ppd_iso ISO rows",
 );
 
-// Mirrors pythermalcomfort v4.6.0 tests/test_pmv_ppd_iso.py.
+// Mirrors pythermalcomfort v4.7.0 tests/test_pmv_ppd_iso.py.
 describe("test_pmv_ppd_iso", () => {
-  test.each(isoRows)("test_pmv_ppd: fixture case %#", (row) => {
+  test.each(iso_rows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
     // As upstream, which swaps the row's label for `model="7730-2005"`; the
     // key is `standard` here (ADR 0003). The rest of the row goes in unchanged.
     const result = pmv_ppd_iso({
       ...inputs,
       standard: Standard.iso_7730_2005,
-    } as unknown as PmvPpdIsoParams);
+    } as unknown as Inputs);
 
-    validateResult(result, outputs, tolerances, inputs);
+    validateResult(result, outputs, tolerance, inputs);
   });
 
   describe("TestPmvPpd", () => {
     test("test_returns_nan_for_invalid_input_values", () => {
-      // Upstream's arrays, element-wise; it asserts element 1 only.
-      const tdb = [25, 50];
-      const tr = [23, 45];
-      const vr = [0.5, 3];
-      const rh = [50, 80];
-      const met = [1.2, 2.5];
-      const clo = [0.5, 1.8];
-      const results = tdb.map((_, i) =>
-        pmv_ppd_iso({
-          tdb: tdb[i]!,
-          tr: tr[i]!,
-          vr: vr[i]!,
-          rh: rh[i]!,
-          met: met[i]!,
-          clo: clo[i]!,
-          standard: Standard.iso_7730_2005,
-        }),
+      // Upstream's arrays, one case per element; it asserts element 1 only.
+      const results = (
+        [
+          { tdb: 25, tr: 23, vr: 0.5, rh: 50, met: 1.2, clo: 0.5 },
+          { tdb: 50, tr: 45, vr: 3, rh: 80, met: 2.5, clo: 1.8 },
+        ] as const
+      ).map((inputs) =>
+        pmv_ppd_iso({ ...inputs, standard: Standard.iso_7730_2005 }),
       );
-      expect(results[1]!.pmv).toBeNaN();
-      expect(results[1]!.ppd).toBeNaN();
+      expect(results[1]?.pmv).toBeNaN();
+      expect(results[1]?.ppd).toBeNaN();
 
       expect(
         round(
@@ -102,7 +97,7 @@ describe("test_pmv_ppd_iso", () => {
 
       // checking that returns NaN when outside standard applicability limits,
       // one input out of range per case
-      const outOfRange: [number, number, number, number, number][] = [
+      const out_of_range: [number, number, number, number, number][] = [
         [31, 20, 0.1, 1.1, 0.5],
         [20, 41, 0.1, 1.1, 0.5],
         [20, 20, 2, 1.1, 0.5],
@@ -110,7 +105,7 @@ describe("test_pmv_ppd_iso", () => {
         [20, 20, 0.1, 1.1, 2.1],
         [30, 20, 0.1, 4.1, 0.1],
       ];
-      for (const [tdb, tr, vr, met, clo] of outOfRange) {
+      for (const [tdb, tr, vr, met, clo] of out_of_range) {
         const result = pmv_ppd_iso({
           tdb,
           tr,
@@ -184,7 +179,11 @@ describe("test_pmv_ppd_iso", () => {
       // Upstream's result has no category, an addition here (ADR 0001) that
       // each edition classifies by its own bins (see the category blocks
       // below), so the editions are compared on the fields upstream returns.
-      const upstreamFields = ({ category, ...rest }: PmvPpdIsoResult) => rest;
+      const upstreamFields = ({ pmv, ppd, tsv }: Outputs) => ({
+        pmv,
+        ppd,
+        tsv,
+      });
       expect(upstreamFields(result_2005)).toEqual(upstreamFields(result_2025));
       expect(result_2025).toEqual(result_default);
     });
@@ -203,9 +202,8 @@ describe("test_pmv_ppd_iso", () => {
       expect(result.ppd).toBeNaN();
     });
 
-    // Upstream calls np.isclose without asserting its result, so its test
-    // cannot fail; this one asserts it, at upstream's atol. pythermalcomfort
-    // 4.6.0 gives -0.13214292024284827.
+    // Upstream calls np.isclose without asserting its result; this asserts it,
+    // at upstream's atol.
     test("test_no_rounding", () => {
       const result = pmv_ppd_iso({
         tdb: 25,
@@ -217,10 +215,170 @@ describe("test_pmv_ppd_iso", () => {
         round_output: false,
         standard: Standard.iso_7730_2005,
       });
-      expect(Math.abs(result.pmv - -0.13201636)).toBeLessThanOrEqual(0.01);
+      expect(approx(result.pmv, -0.13201636, { abs: 0.01 })).toBe(true);
     });
   });
 });
+
+// The category edges: at each met (and rh), the tdb = tr whose unrounded pmv
+// is exactly the edge, and the adjacent double one step toward pmv = 0, each
+// with the category of both editions. pythermalcomfort 4.7.0 gives the same
+// unrounded pmv at every row.
+const EDGES = [
+  {
+    id: "0",
+    rh: 50,
+    met: 1.01,
+    t: 26.014491696246804,
+    pmv: 0,
+    iso2005: "A",
+    iso2025: "I",
+  },
+  {
+    id: "just below 0.2",
+    rh: 40,
+    met: 1.23,
+    t: 25.44654272872879,
+    pmv: 0.1999999999999993,
+    iso2005: "A",
+    iso2025: "I",
+  },
+  {
+    id: "just above -0.2",
+    rh: 50,
+    met: 1.23,
+    t: 23.82031658710553,
+    pmv: -0.1999999999999993,
+    iso2005: "A",
+    iso2025: "I",
+  },
+  {
+    id: "0.2",
+    rh: 40,
+    met: 1.23,
+    t: 25.446542728728794,
+    pmv: 0.2,
+    iso2005: "B",
+    iso2025: "II",
+  },
+  {
+    id: "-0.2",
+    rh: 50,
+    met: 1.23,
+    t: 23.820316587105527,
+    pmv: -0.2,
+    iso2005: "B",
+    iso2025: "II",
+  },
+  {
+    id: "just below 0.5",
+    rh: 50,
+    met: 1.08,
+    t: 27.00538109763518,
+    pmv: 0.49999999999999917,
+    iso2005: "B",
+    iso2025: "II",
+  },
+  {
+    id: "just above -0.5",
+    rh: 50,
+    met: 1.27,
+    t: 22.434637579856535,
+    pmv: -0.49999999999999933,
+    iso2005: "B",
+    iso2025: "II",
+  },
+  {
+    id: "0.5",
+    rh: 50,
+    met: 1.08,
+    t: 27.005381097635183,
+    pmv: 0.5,
+    iso2005: "C",
+    iso2025: "III",
+  },
+  {
+    id: "-0.5",
+    rh: 50,
+    met: 1.27,
+    t: 22.43463757985653,
+    pmv: -0.5,
+    iso2005: "C",
+    iso2025: "III",
+  },
+  {
+    id: "just below 0.7",
+    rh: 50,
+    met: 1.05,
+    t: 27.72440262767248,
+    pmv: 0.699999999999999,
+    iso2005: "C",
+    iso2025: "III",
+  },
+  {
+    id: "just above -0.7",
+    rh: 50,
+    met: 1.02,
+    t: 24.002992653080213,
+    pmv: -0.6999999999999933,
+    iso2005: "C",
+    iso2025: "III",
+  },
+  {
+    id: "0.7",
+    rh: 50,
+    met: 1.05,
+    t: 27.724402627672482,
+    pmv: 0.7,
+    iso2005: "none",
+    iso2025: "IV",
+  },
+  {
+    id: "-0.7",
+    rh: 50,
+    met: 1.02,
+    t: 24.00299265308021,
+    pmv: -0.7,
+    iso2005: "none",
+    iso2025: "IV",
+  },
+  {
+    id: "just below 1.0",
+    rh: 50,
+    met: 1.04,
+    t: 28.60089392706653,
+    pmv: 0.999999999999999,
+    iso2005: "none",
+    iso2025: "IV",
+  },
+  {
+    id: "just above -1.0",
+    rh: 50,
+    met: 1.02,
+    t: 23.161718454726806,
+    pmv: -0.9999999999999991,
+    iso2005: "none",
+    iso2025: "IV",
+  },
+  {
+    id: "1.0",
+    rh: 50,
+    met: 1.04,
+    t: 28.600893927066533,
+    pmv: 1,
+    iso2005: "none",
+    iso2025: "none",
+  },
+  {
+    id: "-1.0",
+    rh: 50,
+    met: 1.02,
+    t: 23.161718454726802,
+    pmv: -1,
+    iso2005: "none",
+    iso2025: "none",
+  },
+];
 
 describe("pmv_ppd_iso (JS-only)", () => {
   const neutral = { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
@@ -264,6 +422,151 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
   });
 
+  // Issue #195: upstream's ISO 7730 Clause 4 limit on the partial water vapour
+  // pressure, 0-2700 Pa.
+  describe("vapour pressure limit (#195)", () => {
+    // rh solved for pa = 2700 Pa, landing a few parts in 1e-6 below it.
+    const NEAR_LIMIT = [
+      { tdb: 25, rh: 85.244688 },
+      { tdb: 28, rh: 71.429553 },
+      { tdb: 30, rh: 63.628386 },
+    ];
+    // About 3e-4 Pa above 2700 Pa: dpa/drh is about 32 Pa per %rh here.
+    const STEP_OVER = 1e-5;
+    const call = (tdb: number, rh: number) =>
+      pmv_ppd_iso({ tdb, tr: tdb, vr: 0.1, rh, met: 1.2, clo: 0.5 });
+
+    test.each(NEAR_LIMIT)(
+      "pa just below 2700 Pa is valid (tdb=$tdb, rh=$rh)",
+      ({ tdb, rh }) => {
+        const result = call(tdb, rh);
+        expect(Number.isFinite(result.pmv)).toBe(true);
+        expect(Number.isFinite(result.ppd)).toBe(true);
+      },
+    );
+
+    test.each(NEAR_LIMIT)(
+      "pa just above 2700 Pa NaNs pmv, ppd and tsv (tdb=$tdb)",
+      ({ tdb, rh }) => {
+        const result = call(tdb, rh + STEP_OVER);
+        expect(result.pmv).toBeNaN();
+        expect(result.ppd).toBeNaN();
+        expect(result.tsv).toBeNaN();
+      },
+    );
+
+    // Every input is inside its limit, and the ungated pmv inside [-2, 2].
+    test("the NaN comes from the vapour pressure bound, not the PMV output gate", () => {
+      const params = { tdb: 30, tr: 30, vr: 0.1, rh: 90, met: 1.2, clo: 0.5 };
+      const unlimited = pmv_ppd_iso({ ...params, limit_inputs: false });
+      expect(Math.abs(unlimited.pmv)).toBeLessThan(2);
+      expect(pmv_ppd_iso(params).pmv).toBeNaN();
+    });
+  });
+
+  // Issue #199: the rows a call broke, whatever limit_inputs is.
+  describe("warnings rows", () => {
+    // The kernel's Antoine relation, restated so the test pins the value.
+    const kernelPa = (tdb: number, rh: number) =>
+      rh * 10 * Math.exp(16.6536 - 4030.183 / (tdb + 235));
+
+    test("empty at the neutral inputs", () => {
+      expect(pmv_ppd_iso(neutral).warnings).toEqual([]);
+    });
+
+    test("an input outside its bound gives an input row", () => {
+      // rh 30 keeps pa inside its bound at 35 °C, so tdb is the only row.
+      const { warnings } = pmv_ppd_iso({ ...neutral, tdb: 35, rh: 30 });
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          key: "tdb",
+          role: "input",
+          value: 35,
+          bound: { min: 10, max: 30 },
+        }),
+      ]);
+    });
+
+    test("a humid call gives a derived pa row with the kernel's value", () => {
+      // met 1.0 keeps the PMV under 2, so pa is the only row.
+      const { warnings } = pmv_ppd_iso({
+        tdb: 30,
+        tr: 30,
+        vr: 0.1,
+        rh: 95,
+        met: 1.0,
+        clo: 0.5,
+      });
+      expect(warnings).toEqual([
+        expect.objectContaining({
+          key: "pa",
+          role: "derived",
+          value: kernelPa(30, 95),
+          bound: { min: 0, max: 2700 },
+        }),
+      ]);
+    });
+
+    test("a PMV beyond ±2 gives an output row with the unrounded pmv", () => {
+      const params = { tdb: 30, tr: 30, vr: 0.1, rh: 50, met: 3, clo: 1.5 };
+      const raw = pmv_ppd_iso({
+        ...params,
+        limit_inputs: false,
+        round_output: false,
+      });
+      expect(raw.pmv).toBeGreaterThan(2);
+      expect(pmv_ppd_iso(params).warnings).toEqual([
+        expect.objectContaining({
+          key: "pmv",
+          role: "output",
+          value: raw.pmv,
+          bound: { min: -2, max: 2 },
+        }),
+      ]);
+    });
+
+    test("every check gives its row, in upstream's order, with the gate on and off", () => {
+      const params = {
+        tdb: 35,
+        tr: 45,
+        vr: 1.5,
+        rh: 95,
+        met: 0.5,
+        clo: 2.5,
+      };
+      const on = pmv_ppd_iso({ ...params, limit_inputs: true });
+      const off = pmv_ppd_iso({ ...params, limit_inputs: false });
+      expect(on.pmv).toBeNaN();
+      expect(Number.isFinite(off.pmv)).toBe(true);
+      expect(off.warnings).toEqual(on.warnings);
+      expect(on.warnings.map((w) => [w.key, w.role])).toEqual([
+        ["tdb", "input"],
+        ["tr", "input"],
+        ["vr", "input"],
+        ["met", "input"],
+        ["clo", "input"],
+        ["pa", "derived"],
+        ["pmv", "output"],
+      ]);
+    });
+
+    test.each(iso_rows)(
+      "a NaN that limit_inputs caused comes with a row (fixture #%#)",
+      ({ inputs }) => {
+        const run = (limit_inputs: boolean) =>
+          pmv_ppd_iso({
+            ...inputs,
+            standard: Standard.iso_7730_2005,
+            limit_inputs,
+          } as unknown as Inputs);
+        const limited = run(true);
+        const caused_by_limits =
+          Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
+        expect(limited.warnings.length > 0).toBe(caused_by_limits);
+      },
+    );
+  });
+
   describe("input validation", () => {
     const quantities = ["tdb", "tr", "vr", "rh", "met", "clo"] as const;
 
@@ -275,7 +578,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         const params = {
           ...neutral,
           [key]: "25",
-        } as unknown as PmvPpdIsoParams;
+        } as unknown as Inputs;
         expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
       },
     );
@@ -283,7 +586,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     // A missing quantity is a TypeError, as a missing keyword argument is in
     // Python.
     test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<PmvPpdIsoParams> = { ...neutral };
+      const params: Partial<Inputs> = { ...neutral };
       delete params[key];
       // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
       expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
@@ -345,7 +648,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         const params = {
           ...neutral,
           [key]: "true",
-        } as unknown as PmvPpdIsoParams;
+        } as unknown as Inputs;
         expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
       },
     );
@@ -442,15 +745,16 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
 
     // No fixture row puts pmv on an edge, so the inputs are built around the
-    // model's own roots: at each met, the tdb whose pmv is exactly the edge,
-    // and the adjacent double one step toward pmv = 0. The pmv is asserted
-    // too, so each row proves where it lands.
-    const at = (met: number, t: number) =>
+    // model's own roots: the tdb whose pmv is exactly the edge, and the
+    // adjacent double one step toward pmv = 0. pythermalcomfort 4.7.0 gives
+    // the same pmv at each, and the pmv is asserted too, so each row proves
+    // where it lands.
+    const at = (rh: number, met: number, t: number) =>
       pmv_ppd_iso({
         tdb: t,
         tr: t,
         vr: 0.1,
-        rh: 50,
+        rh,
         met,
         clo: 0.5,
         round_output: false,
@@ -458,85 +762,20 @@ describe("pmv_ppd_iso (JS-only)", () => {
         ...iso2005,
       });
 
-    test.each([
-      { id: "0", met: 1.01, t: 26.014491696246818, pmv: 0, category: "A" },
-      {
-        id: "just below 0.2",
-        met: 1.25,
-        t: 25.080080304866186,
-        pmv: 0.1999999999999993,
-        category: "A",
+    test.each(EDGES)(
+      "pmv $id is category $iso2005",
+      ({ rh, met, t, pmv, iso2005: category }) => {
+        const result = at(rh, met, t);
+        expect(result.pmv).toBe(pmv);
+        expect(result.category).toBe(category);
       },
-      {
-        id: "just above -0.2",
-        met: 1.23,
-        t: 23.82031658710553,
-        pmv: -0.1999999999999993,
-        category: "A",
-      },
-      { id: "0.2", met: 1.25, t: 25.08008030486619, pmv: 0.2, category: "B" },
-      {
-        id: "-0.2",
-        met: 1.23,
-        t: 23.820316587105527,
-        pmv: -0.2,
-        category: "B",
-      },
-      {
-        id: "just below 0.5",
-        met: 1.08,
-        t: 27.00538109763518,
-        pmv: 0.49999999999999917,
-        category: "B",
-      },
-      {
-        id: "just above -0.5",
-        met: 1.08,
-        t: 24.050806906501293,
-        pmv: -0.49999999999999917,
-        category: "B",
-      },
-      { id: "0.5", met: 1.08, t: 27.005381097635183, pmv: 0.5, category: "C" },
-      { id: "-0.5", met: 1.08, t: 24.05080690650129, pmv: -0.5, category: "C" },
-      {
-        id: "just below 0.7",
-        met: 1.02,
-        t: 27.861012559832268,
-        pmv: 0.699999999999999,
-        category: "C",
-      },
-      {
-        id: "just above -0.7",
-        met: 1.12,
-        t: 23.083997101537506,
-        pmv: -0.6999999999999837,
-        category: "C",
-      },
-      {
-        id: "0.7",
-        met: 1.02,
-        t: 27.86101255983227,
-        pmv: 0.7,
-        category: "none",
-      },
-      {
-        id: "-0.7",
-        met: 1.12,
-        t: 23.083997101537502,
-        pmv: -0.7,
-        category: "none",
-      },
-    ])("pmv $id is category $category", ({ met, t, pmv, category }) => {
-      const result = at(met, t);
-      expect(result.pmv).toBe(pmv);
-      expect(result.category).toBe(category);
-    });
+    );
 
     test("is none well past 0.7, on both signs", () => {
-      const warm = at(1.2, 29);
+      const warm = at(50, 1.2, 29);
       expect(warm.pmv).toBeCloseTo(1.3, 2);
       expect(warm.category).toBe("none");
-      const cool = at(1.2, 18);
+      const cool = at(50, 1.2, 18);
       expect(cool.pmv).toBeCloseTo(-2.06, 2);
       expect(cool.category).toBe("none");
     });
@@ -586,14 +825,13 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
 
     // The roots of the 2005 block, whose pmv the edition does not change,
-    // and at ±1.0 the same construction: the tdb whose pmv is exactly the
-    // edge, and the adjacent double one step toward pmv = 0.
-    const at = (met: number, t: number) =>
+    // and the same construction at ±1.0.
+    const at = (rh: number, met: number, t: number) =>
       pmv_ppd_iso({
         tdb: t,
         tr: t,
         vr: 0.1,
-        rh: 50,
+        rh,
         met,
         clo: 0.5,
         round_output: false,
@@ -601,119 +839,20 @@ describe("pmv_ppd_iso (JS-only)", () => {
         ...iso2025,
       });
 
-    test.each([
-      { id: "0", met: 1.01, t: 26.014491696246818, pmv: 0, category: "I" },
-      {
-        id: "just below 0.2",
-        met: 1.25,
-        t: 25.080080304866186,
-        pmv: 0.1999999999999993,
-        category: "I",
+    test.each(EDGES)(
+      "pmv $id is category $iso2025",
+      ({ rh, met, t, pmv, iso2025: category }) => {
+        const result = at(rh, met, t);
+        expect(result.pmv).toBe(pmv);
+        expect(result.category).toBe(category);
       },
-      {
-        id: "just above -0.2",
-        met: 1.23,
-        t: 23.82031658710553,
-        pmv: -0.1999999999999993,
-        category: "I",
-      },
-      { id: "0.2", met: 1.25, t: 25.08008030486619, pmv: 0.2, category: "II" },
-      {
-        id: "-0.2",
-        met: 1.23,
-        t: 23.820316587105527,
-        pmv: -0.2,
-        category: "II",
-      },
-      {
-        id: "just below 0.5",
-        met: 1.08,
-        t: 27.00538109763518,
-        pmv: 0.49999999999999917,
-        category: "II",
-      },
-      {
-        id: "just above -0.5",
-        met: 1.08,
-        t: 24.050806906501293,
-        pmv: -0.49999999999999917,
-        category: "II",
-      },
-      {
-        id: "0.5",
-        met: 1.08,
-        t: 27.005381097635183,
-        pmv: 0.5,
-        category: "III",
-      },
-      {
-        id: "-0.5",
-        met: 1.08,
-        t: 24.05080690650129,
-        pmv: -0.5,
-        category: "III",
-      },
-      {
-        id: "just below 0.7",
-        met: 1.02,
-        t: 27.861012559832268,
-        pmv: 0.699999999999999,
-        category: "III",
-      },
-      {
-        id: "just above -0.7",
-        met: 1.12,
-        t: 23.083997101537506,
-        pmv: -0.6999999999999837,
-        category: "III",
-      },
-      { id: "0.7", met: 1.02, t: 27.86101255983227, pmv: 0.7, category: "IV" },
-      {
-        id: "-0.7",
-        met: 1.12,
-        t: 23.083997101537502,
-        pmv: -0.7,
-        category: "IV",
-      },
-      {
-        id: "just below 1.0",
-        met: 1.01,
-        t: 28.709120106514213,
-        pmv: 0.999999999999999,
-        category: "IV",
-      },
-      {
-        id: "just above -1.0",
-        met: 1.04,
-        t: 22.957876105377597,
-        pmv: -0.999999999999999,
-        category: "IV",
-      },
-      {
-        id: "1.0",
-        met: 1.01,
-        t: 28.709120106514217,
-        pmv: 1,
-        category: "none",
-      },
-      {
-        id: "-1.0",
-        met: 1.04,
-        t: 22.957876105377593,
-        pmv: -1,
-        category: "none",
-      },
-    ])("pmv $id is category $category", ({ met, t, pmv, category }) => {
-      const result = at(met, t);
-      expect(result.pmv).toBe(pmv);
-      expect(result.category).toBe(category);
-    });
+    );
 
     test("is none well past 1.0, on both signs", () => {
-      const warm = at(1.2, 29);
+      const warm = at(50, 1.2, 29);
       expect(warm.pmv).toBeCloseTo(1.3, 2);
       expect(warm.category).toBe("none");
-      const cool = at(1.2, 18);
+      const cool = at(50, 1.2, 18);
       expect(cool.pmv).toBeCloseTo(-2.06, 2);
       expect(cool.category).toBe("none");
     });

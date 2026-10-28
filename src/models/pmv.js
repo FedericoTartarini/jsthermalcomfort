@@ -1,4 +1,5 @@
-import { pmv_ppd } from "./pmv_ppd.ts";
+import { pmv_ppd_iso } from "./pmv_ppd_iso.ts";
+import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.ts";
 import { validateInputs } from "../utilities/utilities.js";
 import { Standard } from "../utilities/options.ts";
 
@@ -149,17 +150,19 @@ export function pmv(
     PMV_SCHEMA,
   );
 
-  const pmv_ppdValue = pmv_ppd({
-    ...kwargs,
-    tdb,
-    tr,
-    vr,
-    rh,
-    met,
-    clo,
-    wme,
-    standard,
-  });
+  // ISO 7730 and ASHRAE 55 are upstream's two models, each with its own
+  // switches; any other standard throws in pmv_ppd_iso, as upstream's does.
+  const { units, limit_inputs, airspeed_control, round_output } = kwargs;
+  const quantities = { tdb, tr, vr, rh, met, clo, wme, standard, units };
+  const pmv_ppdValue =
+    standard === Standard.ashrae_55_2023
+      ? pmv_ppd_ashrae({
+          ...quantities,
+          limit_inputs,
+          airspeed_control,
+          round_output,
+        })
+      : pmv_ppd_iso({ ...quantities, limit_inputs, round_output });
 
   if (!pmv_ppdValue.hasOwnProperty("pmv")) {
     throw new Error("pmv property not found in pmv_ppdValue");

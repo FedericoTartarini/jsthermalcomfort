@@ -1,6 +1,6 @@
 import { validateInputs } from "../utilities/utilities.js";
 import { round } from "../_internal/round.ts";
-import { _pmv_ppd_optimized } from "./pmv_ppd.ts";
+import { _pmv_ppd_optimized } from "./_pmv_ppd_optimized.ts";
 
 /**
  * @typedef {Object} AthbResult

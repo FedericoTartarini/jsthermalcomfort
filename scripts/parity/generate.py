@@ -93,6 +93,32 @@ def _heat_index_rothfusz(rng):
     }
 
 
+def _pmv_ppd_iso(rng):
+    # The ranges reach past ISO 7730's limits (tdb 10-30 °C, tr 10-40 °C,
+    # vr 0-1 m/s, met 0.8-4 met, clo 0-2 clo, pa 0-2700 Pa, pmv -2-2), so NaN
+    # positions and every check's warning are compared too, and vr goes below
+    # 0, which the kernel computes on. units comes in either case, as upstream
+    # upper-cases it, and model in either edition.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        tdb, tr, vr = (5.0, 35.0), (5.0, 45.0), (-0.2, 1.3)
+    else:
+        tdb, tr, vr = (41.0, 95.0), (41.0, 113.0), (-0.66, 4.3)
+    return {
+        "tdb": _value(rng, *tdb),
+        "tr": _value(rng, *tr),
+        "vr": _value(rng, *vr),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.6, 4.4),
+        "clo": _value(rng, 0.0, 2.4),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0,
+        "model": str(rng.choice(["7730-2025", "7730-2005"])),
+        "units": units,
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _solar_gain(rng):
     # sol_altitude and sharp reach past the fp table's 0-90 and 0-180 degrees,
     # so NaN positions and their warnings are compared too, and
@@ -143,6 +169,7 @@ MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
     "clo_tout": (models.clo_tout, _clo_tout),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
+    "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "solar_gain": (models.solar_gain, _solar_gain),
     "utci": (models.utci, _utci),
 }

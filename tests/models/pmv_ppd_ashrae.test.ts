@@ -3,13 +3,13 @@ import {
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "../../src/models/index.ts";
 import type { PmvPpdAshraeParams } from "../../src/models/pmv_ppd_ashrae.ts";
 import { classifyFromBins } from "../../src/_internal/classifierBins.ts";
-import {
-  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-} from "../../src/models/pmv_ppd.ts";
+import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
+import { check_standard_compliance } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
 import { testDataUrls } from "./comftest.ts";
 import {
@@ -630,5 +630,163 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(ashrae.pmv).toBe(-1.5);
       expect(ashrae.tsv).toBe("Cool");
     });
+  });
+});
+
+// Moved from the shared PMV module's tests when ticket 12 split it.
+describe("pmv_ppd_ashrae warnings rows (JS-only)", () => {
+  test("input rows against the ASHRAE 55 bounds, never pa or pmv", () => {
+    const { warnings } = pmv_ppd_ashrae({
+      tdb: 45,
+      tr: 30,
+      vr: 0.1,
+      rh: 95,
+      met: 3,
+      clo: 1.6,
+      limit_inputs: false,
+    });
+    expect(warnings).toEqual([
+      { key: "tdb", role: "input", value: 45, bound: ASHRAE_55_LIMITS.tdb },
+      { key: "clo", role: "input", value: 1.6, bound: ASHRAE_55_LIMITS.clo },
+    ]);
+  });
+
+  test("no vapour pressure bound: a humid call is computed", () => {
+    const result = pmv_ppd_ashrae({
+      tdb: 30,
+      tr: 30,
+      vr: 0.1,
+      rh: 90,
+      met: 1.2,
+      clo: 0.5,
+    });
+    expect(Number.isFinite(result.pmv)).toBe(true);
+  });
+
+  describe("airspeed limits without airspeed control", () => {
+    // clo < 0.7 and met < 1.3, the only case these limits apply to.
+    const ashrae = (
+      tdb: number,
+      vr: number,
+      params: Partial<PmvPpdAshraeParams> = {},
+    ) =>
+      pmv_ppd_ashrae({
+        tdb,
+        tr: tdb,
+        vr,
+        rh: 50,
+        met: 1.0,
+        clo: 0.5,
+        airspeed_control: false,
+        ...params,
+      });
+
+    test("to <= 23 °C: vr above 0.2 m/s gives a vr row against 0.2", () => {
+      const result = ashrae(20, 0.3);
+      expect(result.pmv).toBeNaN();
+      expect(result.warnings).toEqual([
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
+      ]);
+    });
+
+    test("23 < to < 25.5 °C: vr above the operative-temperature limit gives a row against it", () => {
+      // v_limit = 50.49 - 4.4047 to + 0.096425 to², about 0.318 m/s at 24 °C.
+      const to = 24;
+      const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
+      const result = ashrae(24, 0.5);
+      expect(result.pmv).toBeNaN();
+      expect(result.warnings).toEqual([
+        { key: "vr", role: "input", value: 0.5, bound: { max: v_limit } },
+      ]);
+    });
+
+    test("vr above 0.8 m/s gives a row against 0.8", () => {
+      const result = ashrae(26, 1.0);
+      expect(result.pmv).toBeNaN();
+      expect(result.warnings).toEqual([
+        { key: "vr", role: "input", value: 1.0, bound: { max: 0.8 } },
+      ]);
+    });
+
+    test("vr outside both its range and the no-control limit gives both rows", () => {
+      expect(ashrae(26, 2.5).warnings).toEqual([
+        { key: "vr", role: "input", value: 2.5, bound: ASHRAE_55_LIMITS.v },
+        { key: "vr", role: "input", value: 2.5, bound: { max: 0.8 } },
+      ]);
+    });
+
+    // Upstream's _check_ashrae55_compliance checks the airspeed rules before
+    // met and clo, so their rows come first.
+    test("the airspeed rows come before the met and clo rows, as upstream's", () => {
+      expect(ashrae(20, 0.3, { met: 0.9 }).warnings).toEqual([
+        { key: "vr", role: "input", value: 0.3, bound: { max: 0.2 } },
+        { key: "met", role: "input", value: 0.9, bound: ASHRAE_55_LIMITS.met },
+      ]);
+    });
+
+    test("the same call with airspeed control gives no row", () => {
+      expect(ashrae(20, 0.3, { airspeed_control: true }).warnings).toEqual([]);
+    });
+
+    test("the rows are the same with limit_inputs off", () => {
+      const off = ashrae(20, 0.3, { limit_inputs: false });
+      expect(Number.isFinite(off.pmv)).toBe(true);
+      expect(off.warnings).toEqual(ashrae(20, 0.3).warnings);
+    });
+
+    test.each([
+      { tdb: 20, vr: 0.3 },
+      { tdb: 24, vr: 0.5 },
+      { tdb: 26, vr: 1.0 },
+    ])("the row's bound is frozen (tdb=$tdb, vr=$vr)", ({ tdb, vr }) => {
+      expect(Object.isFrozen(ashrae(tdb, vr).warnings[0]!.bound)).toBe(true);
+    });
+  });
+
+  test.each(ashraeRows)(
+    "a NaN that limit_inputs caused comes with a row (fixture #%#)",
+    ({ inputs }) => {
+      const run = (limit_inputs: boolean) =>
+        pmv_ppd_ashrae({
+          ...inputs,
+          standard: Standard.ashrae_55_2023,
+          limit_inputs,
+        } as unknown as PmvPpdAshraeParams);
+      const limited = run(true);
+      const caused_by_limits =
+        Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
+      expect(limited.warnings.length > 0).toBe(caused_by_limits);
+    },
+  );
+
+  // check_standard_compliance keeps its own copy of these bounds and of the
+  // airspeed rules, so this pins the two copies together on every branch.
+  test("the input rows break exactly when check_standard_compliance warns", () => {
+    for (const airspeed_control of [true, false])
+      for (const tdb of [5, 10, 20, 24, 30, 35, 40, 45])
+        for (const vr of [0, 0.1, 0.25, 0.5, 0.9, 1.5, 2, 2.5])
+          for (const met of [0.7, 0.8, 1, 1.2, 4, 4.5])
+            for (const clo of [0, 0.5, 1, 1.5, 2, 2.5]) {
+              const rows = pmv_ppd_ashrae({
+                tdb,
+                tr: tdb,
+                vr,
+                rh: 50,
+                met,
+                clo,
+                airspeed_control,
+              }).warnings.filter((w) => w.role === "input");
+              const strings = check_standard_compliance(
+                Standard.ashrae_55_2023,
+                { tdb, tr: tdb, v: vr, met, clo, airspeed_control },
+              );
+              expect({ tdb, vr, met, clo, broke: rows.length > 0 }).toEqual({
+                tdb,
+                vr,
+                met,
+                clo,
+                broke: strings.length > 0,
+              });
+            }
   });
 });

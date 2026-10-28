@@ -4,6 +4,7 @@ import {
   adaptive_ashrae,
   clo_tout,
   heat_index_rothfusz,
+  pmv_ppd_iso,
   solar_gain,
   utci,
 } from "../src/models/index.ts";
@@ -432,6 +433,20 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
+  },
+  {
+    name: "pmv_ppd_iso",
+    // Upstream's `model` is the library's `standard` (ADR 0019, whitelist item 3).
+    run: ({ model, ...inputs }) =>
+      pmv_ppd_iso({ ...inputs, standard: model } as unknown as Parameters<
+        typeof pmv_ppd_iso
+      >[0]),
+    // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_iso.py:205-207).
+    rounded: ({ round_output }) =>
+      round_output === true ? ["pmv", "ppd"] : [],
+    // The library returns its older rows; warnings are compared once the
+    // model returns ModelWarning rows (ADR 0024).
+    warnings: false,
   },
   {
     name: "solar_gain",

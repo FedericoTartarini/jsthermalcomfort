@@ -24,7 +24,7 @@ import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { a_pmv } from "./a_pmv.js";
-import { ankle_draft } from "./ankle_draft.ts";
+import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import {
@@ -59,6 +59,7 @@ export type {
   UnitSymbol,
 } from "../_internal/modelInfo.ts";
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
+export type { AnkleDraft, AnkleDraftInputs } from "./ankle_draft.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
@@ -86,6 +87,7 @@ export {
   e_pmv,
   at,
   ankle_draft,
+  ANKLE_DRAFT_INFO,
   classifyFromBins,
   clo_tout,
   CLO_TOUT_INFO,
@@ -130,6 +132,7 @@ export default {
   e_pmv,
   at,
   ankle_draft,
+  ANKLE_DRAFT_INFO,
   classifyFromBins,
   clo_tout,
   CLO_TOUT_INFO,

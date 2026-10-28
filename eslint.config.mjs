@@ -27,6 +27,7 @@ export const LINTED = [
   "src/utilities/units_converter.ts",
   "src/models/_pmv_ppd_optimized.ts",
   "src/models/adaptive_ashrae.ts",
+  "src/models/ankle_draft.ts",
   "src/models/clo_tout.ts",
   "src/models/cooling_effect.ts",
   "src/models/heat_index_rothfusz.ts",

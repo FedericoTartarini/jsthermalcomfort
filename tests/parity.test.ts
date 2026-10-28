@@ -431,7 +431,10 @@ const MODELS: readonly ParityModel[] = [
       ankle_draft(inputs as unknown as Parameters<typeof ankle_draft>[0]),
     // Upstream always rounds ppd_ad with np.around (models/ankle_draft.py:130-135).
     rounded: () => ["ppd_ad"],
-    warnings: false,
+    // acceptability, a boolean where upstream's is 1.0 or 0.0, and the cooling
+    // effect's notice, which upstream emits twice, are exempt by the register
+    // (deviation ankle_draft-5, deviation ankle_draft-6).
+    warnings: true,
   },
   {
     name: "clo_tout",

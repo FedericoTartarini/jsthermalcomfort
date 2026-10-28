@@ -20,6 +20,8 @@
 
 import type {
   AdaptiveASHRAE,
+  AnkleDraft,
+  AnkleDraftInputs,
   ASHRAEInputs,
   ApplicabilityWarning,
   Bound,
@@ -54,6 +56,7 @@ import type {
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
+  ANKLE_DRAFT_INFO,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
@@ -71,6 +74,7 @@ import {
   USE_FANS_HEATWAVES_INFO,
   UTCI_INFO,
   adaptive_ashrae,
+  ankle_draft,
   classifyFromBins,
   clo_individual_garments,
   clo_tout,
@@ -113,6 +117,7 @@ const solarGainInfo = SOLAR_GAIN_INFO;
 const twoNodesGaggeInfo: ModelInfo = TWO_NODES_GAGGE_INFO;
 const phsInfo: ModelInfo = PHS_INFO;
 const useFansHeatwavesInfo: ModelInfo = USE_FANS_HEATWAVES_INFO;
+const ankleDraftInfo: ModelInfo = ANKLE_DRAFT_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -697,3 +702,23 @@ const useFansStrain: boolean | number = useFans.heat_strain;
 const useFansStrainBool: boolean = useFans.heat_strain;
 // @ts-expect-error position is one of choice_field's three values.
 use_fans_heatwaves({ ...useFansInputs, position: "lying" });
+
+// ankle_draft takes units as BaseInputs does, and returns acceptability as a
+// masked boolean, NaN where the gate masks it.
+const ankleInputs: AnkleDraftInputs = {
+  tdb: 25,
+  tr: 25,
+  vr: 0.2,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  v_ankle: 0.3,
+  units: "SI",
+};
+const ankle: AnkleDraft = ankle_draft(ankleInputs);
+const anklePpd: number = ankle.ppd_ad;
+const ankleAcceptability: boolean | number = ankle.acceptability;
+// @ts-expect-error a masked boolean may be NaN, a number.
+const ankleAcceptabilityBool: boolean = ankle.acceptability;
+// @ts-expect-error units is 'SI' or 'IP'.
+ankle_draft({ ...ankleInputs, units: "metric" });

@@ -1,7 +1,11 @@
+import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { ankle_draft } from "../../src/models/index.ts";
+import { ankle_draft, ANKLE_DRAFT_INFO } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
+import { ankle_draft as from_root } from "../../src/index.ts";
+import { decode, read_data } from "../parity/harness.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof ankle_draft>[0];
@@ -156,5 +160,181 @@ describe("test_ankle_draft", () => {
       expect.objectContaining({ key: "tdb", value: 50 }),
     ]);
     expect(result.ppd_ad).toBeNaN();
+  });
+});
+
+const valid = {
+  tdb: 25,
+  tr: 25,
+  vr: 0.2,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  v_ankle: 0.3,
+};
+
+describeModelContract(ankle_draft, ANKLE_DRAFT_INFO, valid, {
+  ...valid,
+  tdb: 50,
+});
+
+const call = (inputs: unknown) =>
+  ankle_draft(inputs as Parameters<typeof ankle_draft>[0]);
+const v_limited_message =
+  "This equation is only applicable for air speed lower than 0.2 m/s";
+const notice = {
+  kind: "notice",
+  message: "Cooling effect could not be calculated. Returning 0.",
+};
+const parity_cases = () =>
+  read_data(fileURLToPath(new URL("../..", import.meta.url)), "ankle_draft")
+    .cases;
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("ankle_draft (JS-only)", () => {
+  // models/ankle_draft.py:89-93.
+  test("the docstring's example gives its outputs", () => {
+    expect(call(valid)).toEqual({
+      ppd_ad: 18.5,
+      acceptability: true,
+      warnings: [],
+    });
+  });
+
+  test("IP inputs are converted, vr before its 0.2 m/s check", () => {
+    const ip = { ...valid, tdb: 77, tr: 77, v_ankle: 1.0, units: "IP" };
+    expect(call({ ...ip, vr: 0.6 }).ppd_ad).toBe(17.7);
+    expect(() => call({ ...ip, vr: 0.7 })).toThrow(
+      new RangeError(v_limited_message),
+    );
+  });
+
+  // Deviation ankle_draft-7.
+  test.each([0.3, -0.1])(
+    "vr %s, outside 0-0.2 m/s, throws upstream's message with the gate on",
+    (vr) => {
+      expect(() => call({ ...valid, vr })).toThrow(
+        new RangeError(v_limited_message),
+      );
+    },
+  );
+
+  test("an acceptability above 20 % is false", () => {
+    const result = call({
+      tdb: 20,
+      tr: 20,
+      vr: 0.1,
+      rh: 50,
+      met: 1.0,
+      clo: 0.5,
+      v_ankle: 0.4,
+    });
+    expect(result.ppd_ad).toBe(74.4);
+    expect(result.acceptability).toBe(false);
+  });
+
+  // Deviation ankle_draft-2, deviation ankle_draft-4: upstream warns the notice, then each bound.
+  test("each bound broken gives a row, in upstream's order, with the gate off", () => {
+    const out = { tdb: 50, tr: 5, vr: 2.5, met: 5, clo: 2 };
+    const result = call({ ...out, rh: 50, v_ankle: 0.1, limit_inputs: false });
+    expect(result.warnings).toEqual([
+      notice,
+      expect.objectContaining({
+        key: "tdb",
+        value: 50,
+        bound: { min: 10, max: 40 },
+      }),
+      expect.objectContaining({
+        key: "tr",
+        value: 5,
+        bound: { min: 10, max: 40 },
+      }),
+      expect.objectContaining({
+        key: "vr",
+        value: 2.5,
+        bound: { min: 0, max: 2 },
+      }),
+      expect.objectContaining({
+        key: "met",
+        value: 5,
+        bound: { min: 1, max: 4 },
+      }),
+      expect.objectContaining({
+        key: "clo",
+        value: 2,
+        bound: { min: 0, max: 1.5 },
+      }),
+      expect.objectContaining({
+        key: "v_limited",
+        role: "input",
+        value: 2.5,
+        bound: ANKLE_DRAFT_INFO.inputs.vr.applicability,
+      }),
+    ]);
+    expect(result.ppd_ad).not.toBeNaN();
+    expect(typeof result.acceptability).toBe("boolean");
+  });
+
+  // Deviation ankle_draft-2.
+  test("each bound broken gives a row and masks both outputs with the gate on", () => {
+    const out = { tdb: 50, tr: 5, met: 5, clo: 2 };
+    const result = call({ ...out, vr: 0.1, rh: 50, v_ankle: 0.1 });
+    expect(result.warnings).toEqual(
+      (["tdb", "tr", "met", "clo"] as const).map((key): unknown =>
+        expect.objectContaining({
+          key,
+          value: out[key],
+          bound: ANKLE_DRAFT_INFO.inputs[key].applicability,
+        }),
+      ),
+    );
+    expect(result.ppd_ad).toBeNaN();
+    expect(result.acceptability).toBeNaN();
+  });
+
+  // Deviation ankle_draft-3: upstream warns the notice twice, then 'tdb' and 'v_limited'.
+  test("the inner pmv_ppd_ashrae call gives its notice, not its range rows", () => {
+    const result = call({
+      tdb: 50,
+      tr: 25,
+      vr: 0.3,
+      rh: 50,
+      met: 1.2,
+      clo: 0.5,
+      v_ankle: 0.1,
+      limit_inputs: false,
+    });
+    expect(result.warnings).toEqual([
+      notice,
+      expect.objectContaining({ key: "tdb", value: 50 }),
+      expect.objectContaining({ key: "v_limited", value: 0.3 }),
+    ]);
+  });
+
+  // Deviation ankle_draft-5.
+  test("one notice wherever upstream warned it, none elsewhere, over the parity data", () => {
+    for (const { inputs, warnings } of parity_cases()) {
+      const warned = warnings.some(({ message }) => message === notice.message);
+      const notices = call(inputs).warnings.filter(
+        ({ kind }) => kind === "notice",
+      );
+      expect(notices).toEqual(warned ? [notice] : []);
+    }
+  });
+
+  // Deviation ankle_draft-6.
+  test("acceptability is upstream's over the parity data, read as a boolean", () => {
+    for (const { inputs, outputs } of parity_cases()) {
+      const expected = decode(outputs.acceptability ?? null);
+      const actual = call(inputs).acceptability;
+      if (typeof expected === "number" && !Number.isNaN(expected))
+        expect(actual).toBe(expected === 1);
+      else expect(actual).toEqual(expected);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(from_root).toBe(ankle_draft);
   });
 });

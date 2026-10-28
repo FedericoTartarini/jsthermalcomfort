@@ -365,7 +365,7 @@ describe("adaptive_en (JS-only)", () => {
             key: "t_running_mean",
             role: "input",
             value,
-            unit: "°C",
+            unit: t_running_mean.unit,
             bound: t_running_mean.applicability,
           },
         ]);
@@ -399,7 +399,7 @@ describe("adaptive_en (JS-only)", () => {
         expect.objectContaining({
           key: "t_running_mean",
           value: 30.100000000000005,
-          unit: "°C",
+          unit: ADAPTIVE_EN_INFO.inputs.t_running_mean.unit,
         }),
       ]);
     });

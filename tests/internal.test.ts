@@ -11,11 +11,12 @@ import {
   _check_ashrae55_compliance,
 } from "../src/_internal/ashrae55.ts";
 import {
+  BASE_INPUTS_POSITION,
   BASE_INPUTS_UNITS,
   choiceFieldMessage,
   parseInputs,
 } from "../src/_internal/define.ts";
-import { CLO_TOUT_INFO } from "../src/models/index.ts";
+import { CLO_TOUT_INFO, TWO_NODES_GAGGE_INFO } from "../src/models/index.ts";
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
 // _internal directly, so it imports the kernels' own file (seam S2). A
@@ -465,21 +466,38 @@ describe("parseInputs, choice with a message of the value (JS-only)", () => {
   });
 });
 
+// BaseInputs' position field (classes_input.py:71-73), defined once.
+describe("BASE_INPUTS_POSITION (JS-only)", () => {
+  test("holds upstream's allowed and message, with no default, frozen", () => {
+    expect(BASE_INPUTS_POSITION).toEqual({
+      kind: "choice",
+      allowed: ["sitting", "standing", "standing, forced convection"],
+      message:
+        "position must be one of ['sitting', 'standing', 'standing, forced convection']",
+      nullable: true,
+    });
+    expect(Object.isFrozen(BASE_INPUTS_POSITION)).toBe(true);
+    expect(Object.isFrozen(BASE_INPUTS_POSITION.allowed)).toBe(true);
+  });
+
+  test("a model's INFO references it with the model's default", () => {
+    expect(TWO_NODES_GAGGE_INFO.inputs.position).toEqual({
+      ...BASE_INPUTS_POSITION,
+      default: "standing",
+    });
+    expect(TWO_NODES_GAGGE_INFO.inputs.position.allowed).toBe(
+      BASE_INPUTS_POSITION.allowed,
+    );
+  });
+});
+
 // A choice_field (classes_input.py:23), which BaseInputs checks against its
 // allowed and skips when None (classes_input.py:138-139, :155-159).
 describe("parseInputs, choice_field (JS-only)", () => {
-  const allowed = ["sitting", "standing", "standing, forced convection"];
+  const { allowed } = BASE_INPUTS_POSITION;
   const info = {
     name: "f",
-    inputs: {
-      position: {
-        kind: "choice",
-        allowed,
-        default: "standing",
-        message: choiceFieldMessage("position", allowed),
-        nullable: true,
-      },
-    },
+    inputs: { position: { ...BASE_INPUTS_POSITION, default: "standing" } },
   } as const;
   const parse = (position: unknown) => () => parseInputs(info, { position });
 

@@ -7,11 +7,11 @@ import {
 } from "./errors.ts";
 import { deepFreeze } from "./modelInfo.ts";
 import type { ChoiceField, InputsInfo, ResolvedOf } from "./modelInfo.ts";
-import { Units } from "../utilities/options.ts";
+import { Postures, Units } from "../utilities/options.ts";
 
 // The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing
 // in for upstream's input dataclass checks (`classes_input.py`; ADR 0019,
-// whitelist item 2), and `BASE_INPUTS_UNITS`.
+// whitelist item 2), and `BASE_INPUTS_UNITS` and `BASE_INPUTS_POSITION`.
 
 /**
  * Upstream's `BaseInputs.units`: defaults to 'SI' and raises "Units must be
@@ -24,6 +24,25 @@ export const BASE_INPUTS_UNITS = deepFreeze({
   allowed: [Units.SI, Units.IP],
   default: Units.SI,
   message: "Units must be either 'SI' or 'IP'",
+} as const satisfies ChoiceField);
+
+const POSITIONS = deepFreeze([
+  Postures.sitting,
+  Postures.standing,
+  "standing, forced convection",
+] as const);
+
+/**
+ * Upstream's `BaseInputs.position`, a `choice_field` of 'sitting', 'standing'
+ * and 'standing, forced convection' (`classes_input.py:71-73`), with its
+ * message and `None` skipped (`classes_input.py:138-139, :183`). Its default is
+ * `None`, so each model's INFO references it with the model's own default.
+ */
+export const BASE_INPUTS_POSITION = deepFreeze({
+  kind: "choice",
+  allowed: POSITIONS,
+  message: choiceFieldMessage("position", POSITIONS),
+  nullable: true,
 } as const satisfies ChoiceField);
 
 /**

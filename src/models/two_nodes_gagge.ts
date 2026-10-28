@@ -1,4 +1,4 @@
-import { choiceFieldMessage, parseInputs } from "../_internal/define.ts";
+import { BASE_INPUTS_POSITION, parseInputs } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
@@ -10,12 +10,6 @@ import { round } from "../_internal/round.ts";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.ts";
 import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
 import { Postures } from "../utilities/options.ts";
-
-const POSITIONS = deepFreeze([
-  Postures.sitting,
-  Postures.standing,
-  "standing, forced convection",
-] as const);
 
 export const TWO_NODES_GAGGE_INFO = deepFreeze({
   name: "two_nodes_gagge",
@@ -31,13 +25,7 @@ export const TWO_NODES_GAGGE_INFO = deepFreeze({
     wme: { kind: "numeric", unit: "met", default: 0 },
     body_surface_area: { kind: "numeric", unit: "m²", default: 1.8258 },
     p_atm: { kind: "numeric", unit: "Pa", default: 101325 },
-    position: {
-      kind: "choice",
-      allowed: POSITIONS,
-      default: Postures.standing,
-      message: choiceFieldMessage("position", POSITIONS),
-      nullable: true,
-    },
+    position: { ...BASE_INPUTS_POSITION, default: Postures.standing },
     max_skin_blood_flow: { kind: "numeric", unit: "kg/h/m²", default: 90 },
     round_output: { kind: "bool", default: true },
     max_sweating: { kind: "numeric", unit: "kg/h/m²", default: 500 },

@@ -24,7 +24,7 @@ import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import { athb } from "./athb.js";
 import { pmv } from "./pmv.js";
 import { a_pmv } from "./a_pmv.js";
-import { ankle_draft } from "./ankle_draft.js";
+import { ankle_draft } from "./ankle_draft.ts";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import {

@@ -44,6 +44,7 @@ export const LINTED = [
   "tests/internal.test.ts",
   "tests/internal/brentq.test.ts",
   "tests/models/adaptive_ashrae.test.ts",
+  "tests/models/ankle_draft.test.ts",
   "tests/models/clo_tout.test.ts",
   "tests/models/cooling_effect.test.ts",
   "tests/models/heat_index_rothfusz.test.ts",

@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   adaptive_ashrae,
+  ankle_draft,
   clo_tout,
   cooling_effect,
   heat_index_rothfusz,
@@ -423,6 +424,14 @@ const MODELS: readonly ParityModel[] = [
         ? ["tmp_cmf"]
         : [],
     warnings: true,
+  },
+  {
+    name: "ankle_draft",
+    run: (inputs) =>
+      ankle_draft(inputs as unknown as Parameters<typeof ankle_draft>[0]),
+    // Upstream always rounds ppd_ad with np.around (models/ankle_draft.py:130-135).
+    rounded: () => ["ppd_ad"],
+    warnings: false,
   },
   {
     name: "clo_tout",

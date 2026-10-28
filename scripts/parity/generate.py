@@ -74,6 +74,35 @@ def _adaptive_ashrae(rng):
     }
 
 
+def _ankle_draft(rng):
+    # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, met 1-4
+    # met, clo 0-1.5 clo), so NaN positions and every check's warning are
+    # compared too, and the hot, humid cases return the cooling effect's
+    # warning. With limit_inputs on, vr stays within 0-0.2 m/s, outside which
+    # upstream raises (models/ankle_draft.py:151-154); with it off, vr reaches
+    # past 0.2 and 2 m/s and below 0. units comes in either case, as upstream
+    # upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    limit_inputs = bool(rng.random() < 0.5)
+    if units.upper() == "SI":
+        t, v_ankle = (5.0, 45.0), (0.0, 0.6)
+        vr = (0.0, 0.2) if limit_inputs else (-0.2, 2.5)
+    else:
+        t, v_ankle = (41.0, 113.0), (0.0, 2.0)
+        vr = (0.0, 0.65) if limit_inputs else (-0.66, 8.2)
+    return {
+        "tdb": _value(rng, *t),
+        "tr": _value(rng, *t),
+        "vr": _value(rng, *vr),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.4),
+        "clo": _value(rng, 0.0, 2.0),
+        "v_ankle": _value(rng, *v_ankle),
+        "units": units,
+        "limit_inputs": limit_inputs,
+    }
+
+
 def _clo_tout(rng):
     # tout spans the breakpoints at -5, 5 and 26 °C (23, 41 and 78.8 °F), and
     # units comes in either case, as upstream upper-cases it.
@@ -345,6 +374,7 @@ def _utci(rng):
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
+    "ankle_draft": (models.ankle_draft, _ankle_draft),
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
@@ -381,11 +411,18 @@ def _encode(model, name, value):
     return item
 
 
-def _call(function, inputs):
-    """Upstream's result for one call and every warning it emitted."""
+def _call(function, inputs, expected=()):
+    """Upstream's result for one call and every warning it emitted.
+
+    Where the call raises one of the `expected` exceptions, the result is None
+    and the warnings are those emitted before the raise.
+    """
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        result = function(**inputs)
+        try:
+            result = function(**inputs)
+        except expected:
+            result = None
     return result, [
         {"category": w.category.__name__, "message": str(w.message)} for w in caught
     ]
@@ -408,7 +445,11 @@ def _run(model, function, inputs):
         "warnings": emitted,
     }
     if inputs.get("limit_inputs") is False:
-        case["gated_warnings"] = _call(function, {**inputs, "limit_inputs": True})[1]
+        # ankle_draft raises after its warnings where vr is outside 0-0.2 m/s
+        # (models/ankle_draft.py:151-154).
+        case["gated_warnings"] = _call(
+            function, {**inputs, "limit_inputs": True}, ValueError
+        )[1]
     return case
 
 

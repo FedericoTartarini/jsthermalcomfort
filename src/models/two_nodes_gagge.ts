@@ -28,7 +28,7 @@ export const TWO_NODES_GAGGE_INFO = deepFreeze({
     position: { ...BASE_INPUTS_POSITION, default: Postures.standing },
     max_skin_blood_flow: { kind: "numeric", unit: "kg/h/m²", default: 90 },
     round_output: { kind: "bool", default: true },
-    max_sweating: { kind: "numeric", unit: "kg/h/m²", default: 500 },
+    max_sweating: { kind: "numeric", unit: "mL/h/m²", default: 500 },
     w_max: { kind: "numeric", unit: null, default: 0 },
     calculate_ce: { kind: "bool", default: false },
   },
@@ -107,7 +107,7 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * @param inputs.position - Select either "sitting" or "standing". Defaults to "standing".
  * @param inputs.max_skin_blood_flow - Maximum blood flow from the core to the skin, [kg/h/m2]. Defaults to 90.
  * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
- * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [kg/h/m2]. Defaults to 500.
+ * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [mL/h/m2]. Defaults to 500.
  * @param inputs.w_max - Maximum skin wettedness (w) adimensional, greater than 0.06 and at most 1. 0.06
  * is the wettedness from skin diffusion alone, without sweating, so it is
  * excluded. Defaults to False, which computes it from `v` and `clo`. False and 0

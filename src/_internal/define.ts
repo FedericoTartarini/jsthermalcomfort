@@ -6,7 +6,12 @@ import {
   notOfType,
 } from "./errors.ts";
 import { deepFreeze } from "./modelInfo.ts";
-import type { ChoiceField, InputsInfo, ResolvedOf } from "./modelInfo.ts";
+import type {
+  ChoiceField,
+  InputsInfo,
+  NumericField,
+  ResolvedOf,
+} from "./modelInfo.ts";
 import { Postures, Units } from "../utilities/options.ts";
 
 // The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing
@@ -62,8 +67,16 @@ export function choiceFieldMessage(
   return `${name} must be one of [${allowed.map((value) => `'${value}'`).join(", ")}]`;
 }
 
-/** Checks one number, as given or defaulted. */
-function parseNumeric(key: string, value: unknown): number {
+/**
+ * Checks one number, as given or defaulted, or `false` where the entry's
+ * default is `false`, upstream's sentinel.
+ */
+function parseNumeric(
+  key: string,
+  value: unknown,
+  entry: NumericField,
+): number | false {
+  if (value === false && entry.default === false) return false;
   // Any other type is a TypeError, a boolean or null (deviation _shared-6) and
   // an array (deviation _shared-5) included, which upstream accepts.
   if (typeof value !== "number") throw notFiniteNumber(key, TypeError);
@@ -109,6 +122,7 @@ function parseChoice(value: unknown, entry: ChoiceField): string | null {
  * - a required key must be given, or a `TypeError` names it;
  * - a number must be finite: a `TypeError` for any other type, a boolean,
  *   `null` or an array included, and a `RangeError` for NaN or ±Infinity;
+ *   one whose default is `false` takes `false` too;
  * - a switch must be a boolean, or a `TypeError` names it, whether or not
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, or its
@@ -140,7 +154,7 @@ export function parseInputs<I extends InputsInfo>(
       if (entry.default === undefined) throw missingInput(key);
       value = entry.default;
     }
-    if (entry.kind === "numeric") values[key] = parseNumeric(key, value);
+    if (entry.kind === "numeric") values[key] = parseNumeric(key, value, entry);
     else if (entry.kind === "choice") values[key] = parseChoice(value, entry);
     else if (typeof value === "boolean") values[key] = value;
     else throw notOfType(key, "a boolean");

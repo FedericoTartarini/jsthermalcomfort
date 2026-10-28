@@ -532,3 +532,35 @@ describe("parseInputs, choice_field (JS-only)", () => {
     ).toThrow(new TypeError("Units must be either 'SI' or 'IP'"));
   });
 });
+
+// A number whose default is upstream's False, as pmv_athb's clo is
+// (models/pmv_athb.py:18, :98).
+describe("parseInputs, numeric with a false default (JS-only)", () => {
+  const info = {
+    name: "f",
+    inputs: { clo: { kind: "numeric", unit: "clo", default: false } },
+  } as const;
+  const parse = (clo: unknown) => () => parseInputs(info, { clo });
+
+  test("takes false or a finite number, and false for undefined", () => {
+    expect(parse(false)()).toEqual({ clo: false });
+    expect(parse(undefined)()).toEqual({ clo: false });
+    expect(parse(0)()).toEqual({ clo: 0 });
+    expect(parse(0.5)()).toEqual({ clo: 0.5 });
+  });
+
+  test("throws for true, null and any other type, and for a non-finite number", () => {
+    for (const bad of [true, null, "0.5", [0.5]])
+      expect(parse(bad)).toThrow(new TypeError("clo must be a finite number."));
+    expect(parse(NaN)).toThrow(new RangeError("clo must be a finite number."));
+  });
+
+  test("throws for false where the default is not false", () => {
+    expect(() =>
+      parseInputs(
+        { name: "g", inputs: { clo: { kind: "numeric", unit: "clo" } } },
+        { clo: false },
+      ),
+    ).toThrow(new TypeError("clo must be a finite number."));
+  });
+});

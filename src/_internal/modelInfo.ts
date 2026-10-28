@@ -145,12 +145,18 @@ export interface DerivedField {
   readonly applicability?: Bound;
 }
 
-/** A number, upstream's `numeric_field`, which the parse requires finite. */
+/**
+ * A number, upstream's `numeric_field`, which the parse requires finite.
+ *
+ * A `default` of `false` is upstream's `False` for a number the model computes
+ * when it is not given, `pmv_athb`'s `clo` (`models/pmv_athb.py:18, :98`):
+ * the key then takes `false` too, and only `false`, of the booleans.
+ */
 export interface NumericField {
   readonly kind: "numeric";
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
-  readonly default?: number;
+  readonly default?: number | false;
 }
 
 /** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
@@ -220,16 +226,18 @@ type OptionalKey<I extends InputsInfo> = {
   [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
 }[keyof I];
 type NullOf<F> = F extends { readonly nullable: true } ? null : never;
+type FalseOf<F> = F extends { readonly default: false } ? false : never;
 type InputValue<F extends InputsInfo[string]> = F extends ChoiceField
   ? F["allowed"][number] | NullOf<F>
-  : KindValues[F["kind"]];
+  : KindValues[F["kind"]] | FalseOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
 
 /**
  * The inputs object a model's `INFO` accepts, upstream's input dataclass. A
  * key with a default is optional, and `undefined` takes the default, as an
  * omitted keyword does (ADR 0019, whitelist item 6); a `choice` takes one of
- * its `allowed`, or `null` where it is `nullable`.
+ * its `allowed`, or `null` where it is `nullable`; a `numeric` whose default
+ * is `false` takes `false` too.
  */
 export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
   {
@@ -245,7 +253,8 @@ export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
 
 /** The inputs after the parse, each default applied. */
 export type ResolvedOf<I extends InputsInfo> = {
-  -readonly [K in keyof I]: KindValues[I[K]["kind"]] | NullOf<I[K]>;
+  -readonly [K in keyof I]:
+    KindValues[I[K]["kind"]] | NullOf<I[K]> | FalseOf<I[K]>;
 };
 
 /**

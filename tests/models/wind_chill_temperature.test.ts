@@ -43,7 +43,8 @@ describe("test_wind_chill_temperature", () => {
       ).toEqual([]);
     });
 
-    // Upstream's lists, element-wise.
+    // Upstream's lists, element-wise. Upstream also asserts an ndarray; the
+    // element-wise results have no array of their own.
     test("test_wct_list_inputs", () => {
       const results = (
         [
@@ -55,7 +56,6 @@ describe("test_wind_chill_temperature", () => {
         expected,
       }));
 
-      expect(Array.isArray(results)).toBe(true);
       for (const { wct, expected } of results) {
         expect(approx(wct, expected, { rel: 1e-5, abs: 0.1 })).toBe(true);
       }

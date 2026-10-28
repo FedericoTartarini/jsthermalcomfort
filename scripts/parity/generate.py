@@ -438,9 +438,9 @@ def _wci(rng):
 
 
 def _wind_chill_temperature(rng):
-    # Upstream checks no range; tdb reaches past 10 °C and v up to 120 km/h,
-    # past the formula's cold-weather use, and v starts at 0 km/h, where its
-    # v**0.16 is 0 (models/wind_chill_temperature.py:59).
+    # Upstream checks no range (models/wind_chill_temperature.py:49-62), so
+    # tdb and v reach past the validation table's -40 to 0 °C and 0.1 to
+    # 60 km/h (ts_wind_chill_temperature.json at validation data v1.0.1).
     return {
         "tdb": _value(rng, -50.0, 20.0),
         "v": _value(rng, 0.0, 120.0),

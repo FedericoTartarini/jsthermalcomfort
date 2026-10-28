@@ -12,6 +12,7 @@ import {
   solar_gain,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
+  use_fans_heatwaves,
   utci,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
@@ -514,6 +515,32 @@ const MODELS: readonly ParityModel[] = [
         ? Object.keys(TWO_NODES_GAGGE_INFO.outputs)
         : [],
     warnings: true,
+  },
+  {
+    name: "use_fans_heatwaves",
+    run: (inputs) =>
+      use_fans_heatwaves(
+        inputs as unknown as Parameters<typeof use_fans_heatwaves>[0],
+      ),
+    // Upstream rounds every output with np.around (models/use_fans_heatwaves.py:197-198).
+    rounded: ({ round_output }) =>
+      round_output === true
+        ? [
+            "e_skin",
+            "e_rsw",
+            "e_max",
+            "q_sensible",
+            "q_skin",
+            "q_res",
+            "t_core",
+            "t_skin",
+            "m_bl",
+            "m_rsw",
+            "w",
+            "w_max",
+          ]
+        : [],
+    warnings: false,
   },
   {
     name: "utci",

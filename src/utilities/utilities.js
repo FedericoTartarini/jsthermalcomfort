@@ -3,6 +3,7 @@ import { operative_tmp } from "../environment/operative_tmp.ts";
 import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
 import { PMV_PPD_ISO_INFO } from "../models/pmv_ppd_iso.ts";
 import { PHS_INFO, PHS_LIMITS_ISO_7933 } from "../models/phs.ts";
+import { USE_FANS_HEATWAVES_INFO } from "../models/use_fans_heatwaves.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "./options.ts";
 import { units_converter } from "./units_converter.ts";
@@ -210,48 +211,62 @@ function _ashrae_compliance(kwargs) {
 }
 
 /**
+ * The checks of `use_fans_heatwaves`, on the bounds in
+ * `USE_FANS_HEATWAVES_INFO`.
+ *
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted
  */
 function _fan_heatwaves_compliance(kwargs) {
+  const { inputs } = USE_FANS_HEATWAVES_INFO;
   /** @type {string[]} */
   let warnings = [];
   for (const [key, value] of Object.entries(kwargs)) {
     if (value === undefined) continue;
     switch (key) {
       case "tdb":
-      case "tr":
+      case "tr": {
+        const { min, max } = inputs[key].applicability;
         let parameter = key === "tdb" ? "dry-bulb" : "mean radiant";
-        if (value > 50 || value < 20)
+        if (value > max || value < min)
           warnings.push(
-            `Fan use during heatwaves ${parameter} temperature applicability limits between 20 and 50 ºC`,
+            `Fan use during heatwaves ${parameter} temperature applicability limits between ${min} and ${max} ºC`,
           );
         break;
-      case "v":
-        if (value > 4.5 || value < 0.1)
+      }
+      case "v": {
+        const { min, max } = inputs.v.applicability;
+        if (value > max || value < min)
           warnings.push(
-            "Fan use during heatwaves air speed applicability limits between 0.1 and 4.5 m/s",
+            `Fan use during heatwaves air speed applicability limits between ${min} and ${max} m/s`,
           );
         break;
-      case "rh":
-        if (value > 100 || value < 0)
+      }
+      case "rh": {
+        const { min, max } = inputs.rh.applicability;
+        if (value > max || value < min)
           warnings.push(
-            "Fan use during heatwaves rh applicability limits between 0 and 100 %",
+            `Fan use during heatwaves rh applicability limits between ${min} and ${max} %`,
           );
         break;
-      case "met":
-        if (value > 2 || value < 0.7)
+      }
+      case "met": {
+        const { min, max } = inputs.met.applicability;
+        if (value > max || value < min)
           warnings.push(
-            "Fan use during heatwaves met applicability limits between 0.7 and 2 met",
+            `Fan use during heatwaves met applicability limits between ${min} and ${max} met`,
           );
         break;
-      case "clo":
-        if (value > 1 || value < 0)
+      }
+      case "clo": {
+        const { min, max } = inputs.clo.applicability;
+        if (value > max || value < min)
           warnings.push(
-            "Fan use during heatwaves clo applicability limits between 0 and 1 clo",
+            `Fan use during heatwaves clo applicability limits between ${min} and ${max} clo`,
           );
         break;
+      }
     }
   }
   return warnings;

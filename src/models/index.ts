@@ -27,7 +27,7 @@ import { a_pmv } from "./a_pmv.js";
 import { ankle_draft } from "./ankle_draft.js";
 import { e_pmv } from "./e_pmv.js";
 import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
-import { use_fans_heatwaves } from "./use_fans_heatwave.js";
+import { use_fans_heatwaves } from "./use_fans_heatwaves.ts";
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
 import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";

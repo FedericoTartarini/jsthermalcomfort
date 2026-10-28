@@ -282,6 +282,43 @@ def _two_nodes_gagge(rng):
     return case
 
 
+def _use_fans_heatwaves(rng):
+    # The ranges reach past the limits (tdb and tr 20-50 °C, v 0.1-4.5 m/s,
+    # rh 0-100 %, met 0.7-2 met, clo 0-1 clo), so NaN positions and every
+    # check's warning are compared too, and reach the heat strain each maximum
+    # gives: skin blood flow, skin wettedness and regulatory sweating. position
+    # comes in any case, as two_nodes_gagge's check accepts. With limit_inputs
+    # off, round_output is off too: np.around raises on the boolean outputs
+    # there (decision 224).
+    limit_inputs = bool(rng.random() < 0.5)
+    return {
+        "tdb": _value(rng, 15.0, 55.0),
+        "tr": _value(rng, 15.0, 60.0),
+        "v": _value(rng, 0.0, 5.0),
+        "rh": _value(rng, -5.0, 105.0),
+        "met": _value(rng, 0.5, 2.5),
+        "clo": _value(rng, 0.0, 1.3),
+        "wme": _value(rng, 0.0, 0.5) if rng.random() < 0.3 else 0.0,
+        "body_surface_area": _value(rng, 1.4, 2.2) if rng.random() < 0.3 else 1.8258,
+        "p_atm": _value(rng, 60000.0, 110000.0) if rng.random() < 0.3 else 101325.0,
+        "position": str(
+            rng.choice(
+                [
+                    "sitting",
+                    "standing",
+                    "standing, forced convection",
+                    "Sitting",
+                    "STANDING",
+                ]
+            )
+        ),
+        "max_skin_blood_flow": _value(rng, 30.0, 150.0) if rng.random() < 0.5 else 80.0,
+        "max_sweating": _value(rng, 50.0, 800.0) if rng.random() < 0.5 else 500.0,
+        "limit_inputs": limit_inputs,
+        "round_output": bool(rng.random() < 0.5) if limit_inputs else False,
+    }
+
+
 def _utci(rng):
     # The ranges reach past the limits (tdb -50-50 °C, tr - tdb -30-70 °C,
     # v 0.5-17 m/s, rh 0-100 %, pa 0-5 kPa), so NaN positions and every
@@ -316,6 +353,7 @@ MODELS = {
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "solar_gain": (models.solar_gain, _solar_gain),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
+    "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),
 }
 

@@ -11,6 +11,7 @@ import {
   humidex,
   phs,
   PHS_INFO,
+  pmv_a,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   set_tmp,
@@ -505,6 +506,13 @@ const MODELS: readonly ParityModel[] = [
     // the kernel's convergence tests carry it to 3.3e-9 relative over 480
     // minutes (the register's Notes).
     tolerance: { rel: 1e-8, abs: 1e-12 },
+    warnings: true,
+  },
+  {
+    name: "pmv_a",
+    run: (inputs) => pmv_a(inputs as unknown as Parameters<typeof pmv_a>[0]),
+    // Upstream rounds a_pmv with np.around (models/pmv_a.py:132).
+    rounded: () => ["a_pmv"],
     warnings: true,
   },
   {

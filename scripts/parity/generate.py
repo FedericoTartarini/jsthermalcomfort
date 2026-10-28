@@ -229,6 +229,31 @@ def _phs(rng):
     return case
 
 
+def _pmv_a(rng):
+    # The ranges reach past ISO 7730's limits, which the inner pmv_ppd_iso call
+    # checks (tdb 10-30 °C, tr 10-40 °C, vr 0-1 m/s, met 0.8-4 met, clo 0-2
+    # clo, pa 0-2700 Pa, pmv -2-2), so NaN positions and every check's warning
+    # are compared too. a_coefficient takes either sign. units comes in either
+    # case, as upstream upper-cases it.
+    units = str(rng.choice(["SI", "IP", "si", "ip"]))
+    if units.upper() == "SI":
+        tdb, tr, vr = (5.0, 35.0), (5.0, 45.0), (-0.2, 1.3)
+    else:
+        tdb, tr, vr = (41.0, 95.0), (41.0, 113.0), (-0.66, 4.3)
+    return {
+        "tdb": _value(rng, *tdb),
+        "tr": _value(rng, *tr),
+        "vr": _value(rng, *vr),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.6, 4.4),
+        "clo": _value(rng, 0.0, 2.4),
+        "a_coefficient": _value(rng, -0.6, 0.6),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0,
+        "units": units,
+        "limit_inputs": bool(rng.random() < 0.5),
+    }
+
+
 def _pmv_ppd_ashrae(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, vr 0-2
     # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
@@ -499,6 +524,7 @@ MODELS = {
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "humidex": (models.humidex, _humidex),
     "phs": (models.phs, _phs),
+    "pmv_a": (models.pmv_a, _pmv_a),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "set_tmp": (models.set_tmp, _set_tmp),

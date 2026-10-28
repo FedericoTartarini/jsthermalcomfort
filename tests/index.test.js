@@ -209,8 +209,8 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_wb");
   });
 
-  it("should have psychrometrics.t_dp", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_dp");
+  it("should have psychrometrics.dew_point_tmp", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("dew_point_tmp");
   });
 
   it("should have psychrometrics.hr_to_rh", () => {

@@ -1,5 +1,5 @@
 import { p_sat } from "./p_sat.ts";
-import { t_dp } from "./t_dp.js";
+import { dew_point_tmp } from "./dew_point_tmp.ts";
 import { t_wb } from "./t_wb.js";
 import { enthalpy } from "./enthalpy.js";
 
@@ -29,13 +29,13 @@ import { enthalpy } from "./enthalpy.js";
  * @example
  * import { psy_ta_rh } from "jsthermalcomfort";
  * const results = psy_ta_rh(21, 56);
- * console.log(results); // { p_sat: 2487.6671127507334, p_vap: 1393.0935831404108, hr: -2.2041754048718936, t_wb: 15.4, t_dp: 11.9, h: -5575107.96 }
+ * console.log(results); // { p_sat: 2487.6671127507334, p_vap: 1393.0935831404108, hr: -2.2041754048718936, t_wb: 15.4, t_dp: 11.883808722406506, h: -5575107.96 }
  */
 export function psy_ta_rh(tdb, rh, p_atm = 101325) {
   const p_saturation = p_sat(tdb);
   const p_vap = (rh / 100) * p_saturation;
   const hr = (0.62198 * p_vap) / (p_atm - p_vap);
-  const tdp = t_dp(tdb, rh);
+  const tdp = dew_point_tmp(tdb, rh);
   const twb = t_wb(tdb, rh);
   const h = enthalpy(tdb, hr);
 

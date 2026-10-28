@@ -3,8 +3,8 @@ import { deep_close_to_obj } from "../test_utilities";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh";
 
 describe("psy_ta_rh", () => {
-  // p_sat, p_vap, hr and h are pythermalcomfort 4.7.0's psy_ta_rh, measured in
-  // the parity image.
+  // p_sat, p_vap, hr, t_dp and h are pythermalcomfort 4.7.0's psy_ta_rh,
+  // measured in the parity image.
   it.each([
     {
       tdb: 0,
@@ -15,7 +15,7 @@ describe("psy_ta_rh", () => {
         p_vap: 6.11212867451187,
         hr: 3.752135335122248e-5,
         t_wb: -3.3,
-        t_dp: -50.9,
+        t_dp: -50.37572114175687,
         h: 93.84090473140742,
       },
     },
@@ -28,7 +28,7 @@ describe("psy_ta_rh", () => {
         p_vap: 0.0,
         hr: 0.0,
         t_wb: -124.2,
-        t_dp: -272.2,
+        t_dp: -273.99165262341927,
         h: -274092.0,
       },
     },
@@ -41,7 +41,7 @@ describe("psy_ta_rh", () => {
         p_vap: 6.570717179813816,
         hr: 4.033673538397002e-5,
         t_wb: -2.5,
-        t_dp: -50.2,
+        t_dp: -49.747732719681224,
         h: 1104.9549830026772,
       },
     },
@@ -54,7 +54,7 @@ describe("psy_ta_rh", () => {
         p_vap: 1393.0935831404106,
         hr: 0.008670667636692745,
         t_wb: 15.4,
-        t_dp: 11.9,
+        t_dp: 11.883808722406506,
         h: 43098.0014161374,
       },
     },
@@ -67,7 +67,7 @@ describe("psy_ta_rh", () => {
         p_vap: 1393.0935831404106,
         hr: -2.204249532438113,
         t_wb: 15.4,
-        t_dp: 11.9,
+        t_dp: 11.883808722406506,
         h: -5575296.159154788,
       },
     },

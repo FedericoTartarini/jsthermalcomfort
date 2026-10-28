@@ -1,4 +1,4 @@
-import { p_sat_torr } from "../psychrometrics/p_sat_torr.js";
+import { p_sat_torr } from "../psychrometrics/p_sat_torr.ts";
 import { validateInputs } from "../utilities/utilities.js";
 import { round } from "../_internal/round.ts";
 

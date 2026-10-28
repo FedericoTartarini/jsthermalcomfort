@@ -26,6 +26,23 @@ export const BASE_INPUTS_UNITS = deepFreeze({
   message: "Units must be either 'SI' or 'IP'",
 } as const satisfies ChoiceField);
 
+/**
+ * Upstream's message for a `choice_field` given a value outside `allowed`,
+ * `f"{name} must be one of {allowed!r}"` (`classes_input.py:183`): the list
+ * written as Python's `repr` writes a list of strings with no quote or
+ * backslash in them, each in single quotes.
+ *
+ * @param name - The field's name.
+ * @param allowed - Its `allowed`, in upstream's order.
+ * @returns The message, byte for byte as upstream's.
+ */
+export function choiceFieldMessage(
+  name: string,
+  allowed: readonly string[],
+): string {
+  return `${name} must be one of [${allowed.map((value) => `'${value}'`).join(", ")}]`;
+}
+
 /** Checks one number, as given or defaulted. */
 function parseNumeric(key: string, value: unknown): number {
   // Any other type is a TypeError, a boolean or null (deviation _shared-6) and
@@ -39,10 +56,12 @@ function parseNumeric(key: string, value: unknown): number {
 /**
  * Checks one string option, as given or defaulted, and returns it as given:
  * upstream's model reads its own argument, not the inputs class's upper-cased
- * copy.
+ * copy. A `nullable` entry returns `null` unchecked, as `BaseInputs` skips a
+ * `choice_field` that is `None`.
  */
-function parseChoice(value: unknown, entry: ChoiceField): string {
+function parseChoice(value: unknown, entry: ChoiceField): string | null {
   const { allowed, message } = entry;
+  if (value === null && entry.nullable) return null;
   // Upstream compares `str(value).upper()` for `units`, so it raises the same
   // error for any value that is not a string (deviation _shared-24), and
   // `posture.lower()` raises `AttributeError` for one (deviation solar_gain-6).
@@ -73,7 +92,7 @@ function parseChoice(value: unknown, entry: ChoiceField): string {
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, or its
  *   entry's `message` is thrown: a `TypeError` for a value that is not a
- *   string, a `RangeError` for one that is.
+ *   string, a `RangeError` for one that is; a `nullable` one may be `null`.
  *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.
@@ -93,7 +112,7 @@ export function parseInputs<I extends InputsInfo>(
   const unknown = Object.keys(given).find((key) => !Object.hasOwn(inputs, key));
   if (unknown !== undefined) throw notAnInput(unknown, name);
 
-  const values: Record<string, number | boolean | string> = {};
+  const values: Record<string, number | boolean | string | null> = {};
   for (const [key, entry] of Object.entries(inputs)) {
     let value = Object.hasOwn(given, key) ? given[key] : undefined;
     if (value === undefined) {

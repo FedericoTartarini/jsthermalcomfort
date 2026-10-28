@@ -131,14 +131,19 @@ export interface BoolField {
  * A string option, which takes one of `allowed` in any case, and fails with
  * `message`, upstream's own text for that check (ADR 0022): `units`, a plain
  * field that `BaseInputs` checks by its name (`classes_input.py:95, :114-121`),
- * and `solar_gain`'s `posture`, which the model checks itself
- * (`models/solar_gain.py:207-212`).
+ * `solar_gain`'s `posture`, which the model checks itself
+ * (`models/solar_gain.py:207-212`), and a `choice_field`, which `BaseInputs`
+ * checks against its `allowed` (`classes_input.py:23, :155-159`).
+ *
+ * `nullable` marks a `choice_field`: `BaseInputs` skips one that is `None`
+ * (`classes_input.py:138-139`), so `null` passes the parse unchanged.
  */
 export interface ChoiceField {
   readonly kind: "choice";
   readonly allowed: readonly string[];
   readonly default?: string;
   readonly message: string;
+  readonly nullable?: true;
 }
 
 /**
@@ -177,8 +182,9 @@ interface KindValues {
 type OptionalKey<I extends InputsInfo> = {
   [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
 }[keyof I];
+type NullOf<F> = F extends { readonly nullable: true } ? null : never;
 type InputValue<F extends InputsInfo[string]> = F extends ChoiceField
-  ? F["allowed"][number]
+  ? F["allowed"][number] | NullOf<F>
   : KindValues[F["kind"]];
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
 
@@ -186,7 +192,7 @@ type Flatten<T> = { [K in keyof T]: T[K] } & {};
  * The inputs object a model's `INFO` accepts, upstream's input dataclass. A
  * key with a default is optional, and `undefined` takes the default, as an
  * omitted keyword does (ADR 0019, whitelist item 6); a `choice` takes one of
- * its `allowed`.
+ * its `allowed`, or `null` where it is `nullable`.
  */
 export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
   {
@@ -202,7 +208,7 @@ export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
 
 /** The inputs after the parse, each default applied. */
 export type ResolvedOf<I extends InputsInfo> = {
-  -readonly [K in keyof I]: KindValues[I[K]["kind"]];
+  -readonly [K in keyof I]: KindValues[I[K]["kind"]] | NullOf<I[K]>;
 };
 
 /**

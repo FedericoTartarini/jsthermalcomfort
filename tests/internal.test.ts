@@ -10,7 +10,11 @@ import {
   ASHRAE_55_LIMITS,
   _check_ashrae55_compliance,
 } from "../src/_internal/ashrae55.ts";
-import { BASE_INPUTS_UNITS, parseInputs } from "../src/_internal/define.ts";
+import {
+  BASE_INPUTS_UNITS,
+  choiceFieldMessage,
+  parseInputs,
+} from "../src/_internal/define.ts";
 import { CLO_TOUT_INFO } from "../src/models/index.ts";
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
@@ -428,5 +432,55 @@ describe("parseInputs, choice (JS-only)", () => {
     expect(() => parseInputs(info, { units: "sitting" })).toThrow(
       new RangeError("Units must be either 'SI' or 'IP'"),
     );
+  });
+});
+
+// A choice_field (classes_input.py:23), which BaseInputs checks against its
+// allowed and skips when None (classes_input.py:138-139, :155-159).
+describe("parseInputs, choice_field (JS-only)", () => {
+  const allowed = ["sitting", "standing", "standing, forced convection"];
+  const info = {
+    name: "f",
+    inputs: {
+      position: {
+        kind: "choice",
+        allowed,
+        default: "standing",
+        message: choiceFieldMessage("position", allowed),
+        nullable: true,
+      },
+    },
+  } as const;
+  const parse = (position: unknown) => () => parseInputs(info, { position });
+
+  // tests/test_choice_field.py:74 asserts the whole text.
+  test("builds upstream's message, the list as Python's repr writes it", () => {
+    expect(choiceFieldMessage("position", allowed)).toBe(
+      "position must be one of ['sitting', 'standing', 'standing, forced convection']",
+    );
+  });
+
+  test("passes null unchanged, and takes the default for undefined", () => {
+    expect(parse(null)()).toEqual({ position: null });
+    expect(parse(undefined)()).toEqual({ position: "standing" });
+  });
+
+  test("throws the message for any other value", () => {
+    expect(parse("STANDING, Forced Convection")()).toEqual({
+      position: "STANDING, Forced Convection",
+    });
+    expect(parse("lying")).toThrow(
+      new RangeError(info.inputs.position.message),
+    );
+    expect(parse(5)).toThrow(new TypeError(info.inputs.position.message));
+  });
+
+  test("throws for null where the entry is not nullable", () => {
+    expect(() =>
+      parseInputs(
+        { name: "g", inputs: { units: BASE_INPUTS_UNITS } },
+        { units: null },
+      ),
+    ).toThrow(new TypeError("Units must be either 'SI' or 'IP'"));
   });
 });

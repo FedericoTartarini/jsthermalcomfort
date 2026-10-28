@@ -35,8 +35,8 @@ import type {
   ModelWarning,
   PmvPpdAshraeParams,
   PmvPpdAshraeResult,
-  PmvPpdIsoParams,
-  PmvPpdIsoResult,
+  PMVPPD,
+  PMVPPDInputs,
   SolarGain,
   SolarGainInputs,
   UTCI,
@@ -50,12 +50,10 @@ import {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
-  PMV_CATEGORY_BINS_ISO_7730_2005,
-  PMV_CATEGORY_BINS_ISO_7730_2025,
+  PMV_CATEGORY_BINS_ISO_7730,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   SOLAR_GAIN_INFO,
   Standard,
   Postures,
@@ -94,13 +92,13 @@ import { utci as utciDeep } from "jsthermalcomfort/lib/esm/models/utci.js";
 // contract ticket removes it.
 const heatIndex: ModelInfo = HEAT_INDEX_ROTHFUSZ_INFO;
 const cloToutInfo: ModelInfo = CLO_TOUT_INFO;
-const iso = PMV_PPD_ISO_INFO;
+const iso: ModelInfo = PMV_PPD_ISO_INFO;
 const ashrae = PMV_PPD_ASHRAE_INFO;
 const adaptive: ModelInfo = ADAPTIVE_ASHRAE_INFO;
 const utciInfo: ModelInfo = UTCI_INFO;
 const solarGainInfo = SOLAR_GAIN_INFO;
 // @ts-expect-error the old form's inputs carry no kind.
-const isoAsModelInfo: ModelInfo = PMV_PPD_ISO_INFO;
+const ashraeAsModelInfo: ModelInfo = PMV_PPD_ASHRAE_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -120,7 +118,7 @@ const tdbUnit: UnitSymbol = HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb.unit;
 const misspeltUnit: UnitSymbol = "°c";
 
 // The shape a front end actually reaches for: a per-model applicability limit.
-const tdbBound: Bound | undefined = iso.inputs.tdb.applicability;
+const tdbBound: Bound | undefined = PMV_PPD_ISO_INFO.inputs.tdb.applicability;
 const minTdb: number | undefined = tdbBound?.min;
 
 // Every model lists the standards whose values it takes as Standard values,
@@ -137,7 +135,7 @@ const label = classifyFromBins(
   28.5,
   HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier,
 );
-const tsvLabel = classifyFromBins(0.4, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
+const tsvLabel = classifyFromBins(0.4, PMV_PPD_ISO_INFO.outputs.tsv.classifier);
 const utciLabel = classifyFromBins(
   24.6,
   UTCI_INFO.outputs.stress_category.classifier,
@@ -199,7 +197,7 @@ ADAPTIVE_ASHRAE_INFO.inputs.t_running_mean.applicability.max = 40;
 // @ts-expect-error the ASHRAE PMV metadata is readonly.
 PMV_PPD_ASHRAE_INFO.outputs.pmv = { unit: null };
 // @ts-expect-error classifier bin edges are a readonly array.
-PMV_THERMAL_SENSATION_VOTE_BINS_ISO.edges[0] = 0;
+PMV_PPD_ISO_INFO.outputs.tsv.classifier.edges[0] = 0;
 // @ts-expect-error push mutates, and the array is readonly.
 HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier.labels.push(
   "new label",
@@ -207,10 +205,10 @@ HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier.labels.push(
 // @ts-expect-error the UTCI metadata is readonly, its derived bound included.
 UTCI_INFO.derived["tr - tdb"].applicability.max = 80;
 
-// pmv_ppd_iso takes one params object too (ADR 0002), with its params and
-// result types exported by name; the lines below are errors only while the
-// published signature is typed.
-const pmvIsoParams: PmvPpdIsoParams = {
+// pmv_ppd_iso takes one inputs object too (ADR 0002), with its inputs and
+// result types named after upstream's classes; the lines below are errors only
+// while the published signature is typed.
+const pmvIsoParams: PMVPPDInputs = {
   tdb: 77,
   tr: 77,
   vr: 0.328,
@@ -223,7 +221,7 @@ const pmvIsoParams: PmvPpdIsoParams = {
   limit_inputs: false,
   round_output: false,
 };
-const pmvIsoIp: PmvPpdIsoResult = pmv_ppd_iso(pmvIsoParams);
+const pmvIsoIp: PMVPPD = pmv_ppd_iso(pmvIsoParams);
 const pmvIso = pmv_ppd_iso({
   tdb: 25,
   tr: 25,
@@ -275,7 +273,7 @@ pmv_ppd_iso({
   rh: 50,
   met: 1.2,
   clo: 0.5,
-  // @ts-expect-error airspeed_control does not exist on PmvPpdIsoParams.
+  // @ts-expect-error airspeed_control does not exist on PMVPPDInputs.
   airspeed_control: true,
 });
 
@@ -410,23 +408,28 @@ pmv_ppd_ashrae({
 // @ts-expect-error PMV_COMPLIANCE_INTERVAL_ASHRAE is frozen, so its type is readonly.
 PMV_COMPLIANCE_INTERVAL_ASHRAE.max = 1;
 
-// pmv_ppd_iso returns ISO 7730's category, read against bins published once
-// per edition, whose edges a front end finds by label.
+// pmv_ppd_iso returns ISO 7730's category, read against bins published once,
+// keyed by edition, whose edges a front end finds by label.
 const isoCategory: string | number = pmvIso.category;
-const categoryIIMax: number =
-  PMV_CATEGORY_BINS_ISO_7730_2025.edges[
-    PMV_CATEGORY_BINS_ISO_7730_2025.labels.indexOf("II")
+const categoryIIMax: number | undefined =
+  PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025].edges[
+    PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025].labels.indexOf("II")
   ];
-const categoryBMax: number =
-  PMV_CATEGORY_BINS_ISO_7730_2005.edges[
-    PMV_CATEGORY_BINS_ISO_7730_2005.labels.indexOf("B")
+const categoryBMax: number | undefined =
+  PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2005].edges[
+    PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2005].labels.indexOf("B")
   ];
+// @ts-expect-error the bins are frozen, so their type is readonly.
+PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025].right = true;
 
-// Both wrappers return the applicability rows a call broke (issue #199), typed
-// through to the bound, so a front end can phrase "35 °C is above 30 °C"
-// without casting.
-const isoWarnings: ApplicabilityWarning[] = pmvIso.warnings;
-const isoRowMax: number | undefined = pmvIso.warnings[0].bound.max;
+// pmv_ppd_iso returns ModelWarning rows, typed through to the bound once a
+// row's kind is narrowed; pmv_ppd_ashrae still returns the older rows.
+const isoWarnings: readonly ModelWarning[] = pmvIso.warnings;
+const isoRow = pmvIso.warnings[0];
+const isoRowMax: number | undefined =
+  isoRow.kind === "range" ? isoRow.bound.max : undefined;
+// @ts-expect-error the result is readonly, as upstream's frozen dataclass.
+pmvIso.pmv = 1;
 const ashraeRowMax: number | undefined = pmv_ppd_ashrae({
   tdb: 45,
   tr: 25,
@@ -437,8 +440,16 @@ const ashraeRowMax: number | undefined = pmv_ppd_ashrae({
 }).warnings[0].bound.max;
 // @ts-expect-error role is one of three literals, not any string.
 const notARole: ApplicabilityWarning["role"] = "somewhere";
+const ashraeRows = pmv_ppd_ashrae({
+  tdb: 45,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+}).warnings;
 // @ts-expect-error the rows share the metadata's frozen bounds, so writes are rejected.
-pmvIso.warnings[0].bound.max = 50;
+ashraeRows[0].bound.max = 50;
 
 // utci takes one inputs object too (ADR 0002), with its inputs and result
 // types named after upstream's classes; the lines below are errors only while

@@ -444,9 +444,7 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_iso.py:205-207).
     rounded: ({ round_output }) =>
       round_output === true ? ["pmv", "ppd"] : [],
-    // The library returns its older rows; warnings are compared once the
-    // model returns ModelWarning rows (ADR 0024).
-    warnings: false,
+    warnings: true,
   },
   {
     name: "solar_gain",

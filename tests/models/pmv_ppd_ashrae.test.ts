@@ -3,7 +3,7 @@ import {
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
+  PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
 } from "../../src/models/index.ts";
 import type { PmvPpdAshraeParams } from "../../src/models/pmv_ppd_ashrae.ts";
@@ -578,7 +578,10 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     test.each([-2.5, -1.5, -0.5, 0.5, 1.5, 2.5])(
       "pmv = %s is labelled differently by the two conventions",
       (pmv) => {
-        const iso = classifyFromBins(pmv, PMV_THERMAL_SENSATION_VOTE_BINS_ISO);
+        const iso = classifyFromBins(
+          pmv,
+          PMV_PPD_ISO_INFO.outputs.tsv.classifier,
+        );
         const ashrae = classifyFromBins(
           pmv,
           PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
@@ -590,9 +593,9 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     test("at pmv = -1.5 exactly, ISO says Slightly Cool and ASHRAE says Cool", () => {
       // ISO is left-inclusive, so -1.5 opens the [-1.5, -0.5) bin -> "Slightly Cool".
       // ASHRAE is right-inclusive, so -1.5 closes the (-2.5, -1.5] bin -> "Cool".
-      expect(classifyFromBins(-1.5, PMV_THERMAL_SENSATION_VOTE_BINS_ISO)).toBe(
-        "Slightly Cool",
-      );
+      expect(
+        classifyFromBins(-1.5, PMV_PPD_ISO_INFO.outputs.tsv.classifier),
+      ).toBe("Slightly Cool");
       expect(
         classifyFromBins(-1.5, PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE),
       ).toBe("Cool");

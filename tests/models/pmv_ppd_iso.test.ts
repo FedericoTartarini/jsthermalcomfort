@@ -1,12 +1,17 @@
 import { describe, expect, test } from "vitest";
 import {
   pmv_ppd_iso,
-  PMV_CATEGORY_BINS_ISO_7730_2005,
-  PMV_CATEGORY_BINS_ISO_7730_2025,
+  PMV_CATEGORY_BINS_ISO_7730,
+  PMV_PPD_ISO_INFO,
+  UTCI_INFO,
 } from "../../src/models/index.ts";
-import { Standard } from "../../src/utilities/options.ts";
+import { THERMAL_SENSATION } from "../../src/models/_pmv_ppd_optimized.ts";
+import { Standard, Units } from "../../src/utilities/index.ts";
+import { v_relative } from "../../src/utilities/index.ts";
+import { pmv_ppd_iso as pmv_ppd_iso_from_root } from "../../src/index.ts";
 import { round } from "../../src/_internal/round.ts";
 import { testDataUrls } from "./comftest.ts";
+import { describeModelContract } from "./modelContract.ts";
 import {
   approx,
   assertNonEmptyRows,
@@ -220,10 +225,8 @@ describe("test_pmv_ppd_iso", () => {
   });
 });
 
-// The category edges: at each met (and rh), the tdb = tr whose unrounded pmv
-// is exactly the edge, and the adjacent double one step toward pmv = 0, each
-// with the category of both editions. pythermalcomfort 4.7.0 gives the same
-// unrounded pmv at every row.
+// Each category edge's tdb = tr whose unrounded pmv is the edge, and the next double toward 0;
+// pythermalcomfort 4.7.0 gives the same pmv at every row (register, pmv_ppd_iso's Notes).
 const EDGES = [
   {
     id: "0",
@@ -380,12 +383,115 @@ const EDGES = [
   },
 ];
 
+const neutral = { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+
+describeModelContract(pmv_ppd_iso, PMV_PPD_ISO_INFO, neutral, {
+  ...neutral,
+  tdb: 35,
+  rh: 30,
+});
+
 describe("pmv_ppd_iso (JS-only)", () => {
-  const neutral = { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+  // A JS-only test passes an invalid input through here (decision 175).
+  const call = (inputs: unknown) => () => pmv_ppd_iso(inputs as Inputs);
+
+  describe("values", () => {
+    // The docstring's examples (models/pmv_ppd_iso.py:107-140), measured on pythermalcomfort 4.7.0.
+    test("the examples print upstream's values", () => {
+      const results = pmv_ppd_iso({
+        tdb: 25,
+        tr: 25,
+        vr: v_relative(0.1, 1.4),
+        rh: 50,
+        met: 1.4,
+        clo: 0.5,
+        standard: "7730-2025",
+      });
+      expect(results.pmv).toBe(0.17);
+      expect(results.ppd).toBe(5.6);
+
+      const result = [22, 25].map((tdb) =>
+        pmv_ppd_iso({
+          tdb,
+          tr: 25,
+          vr: 0.1,
+          rh: 50,
+          met: 1.4,
+          clo: 0.5,
+          standard: "7730-2025",
+        }),
+      );
+      expect(result.map(({ pmv }) => pmv)).toEqual([-0, 0.41]);
+      expect(result.map(({ ppd }) => ppd)).toEqual([5, 8.5]);
+    });
+
+    test("takes units in any case, and the constant, as upstream", () => {
+      const ip = { tdb: 77, tr: 77, vr: 0.328, rh: 50, met: 1.2, clo: 0.5 };
+      const upper = pmv_ppd_iso({ ...ip, units: "IP" });
+      expect(pmv_ppd_iso({ ...ip, units: Units.IP })).toEqual(upper);
+      expect(call({ ...ip, units: "ip" })()).toEqual(upper);
+    });
+  });
+
+  describe("errors", () => {
+    const message =
+      "PMV calculations can only be performed in compliance with ISO 7730-2005 or ISO 7730-2025";
+
+    // models/pmv_ppd_iso.py:166-172; a value that is not a string raises AttributeError there.
+    test.each(["random", Standard.ashrae_55_2023, Standard.iso_7933_2023])(
+      "standard %s throws upstream's message",
+      (standard) => {
+        expect(call({ ...neutral, standard })).toThrow(new RangeError(message));
+      },
+    );
+
+    test("a standard that is not a string throws upstream's message", () => {
+      expect(call({ ...neutral, standard: 7730 })).toThrow(
+        new TypeError(message),
+      );
+    });
+
+    // pythermalcomfort 4.7.0 raises StopIteration("Max iterations exceeded") here (decision 69).
+    test.each([true, false])(
+      "a loop that does not converge throws upstream's message (limit_inputs %s)",
+      (limit_inputs) => {
+        expect(
+          call({ ...neutral, vr: 0, met: 1, clo: 20, limit_inputs }),
+        ).toThrow(new Error("Max iterations exceeded"));
+      },
+    );
+  });
+
+  describe("PMV_PPD_ISO_INFO", () => {
+    // models/pmv_ppd_iso.py:24, :167.
+    test("standards are ISO 7730's two editions, the default first", () => {
+      expect(PMV_PPD_ISO_INFO.standards).toEqual(["7730-2025", "7730-2005"]);
+      expect(PMV_PPD_ISO_INFO.inputs.standard.allowed).toBe(
+        PMV_PPD_ISO_INFO.standards,
+      );
+    });
+
+    test("units is the entry the other models' INFO holds", () => {
+      expect(PMV_PPD_ISO_INFO.inputs.units).toBe(UTCI_INFO.inputs.units);
+    });
+
+    // models/pmv_ppd_iso.py:209-222.
+    test("tsv's classifier is the shared thermal sensation table, left-inclusive", () => {
+      const { classifier } = PMV_PPD_ISO_INFO.outputs.tsv;
+      expect(classifier.edges).toBe(THERMAL_SENSATION.edges);
+      expect(classifier.labels).toBe(THERMAL_SENSATION.labels);
+      expect(classifier.right).toBe(false);
+    });
+
+    test("category's classifier is the default edition's bins", () => {
+      expect(PMV_PPD_ISO_INFO.outputs.category.classifier).toBe(
+        PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025],
+      );
+    });
+  });
 
   describe("applicability limits", () => {
-    // Supplementary boundary test — not present in the shared validation data.
-    // tdb=35°C exceeds the ISO 7730 valid range (10–30°C), so NaN is expected.
+    // tdb 35 °C is outside ISO 7730's 10-30 °C.
     test("out-of-range inputs should return NaN under ISO standard", () => {
       const result = pmv_ppd_iso({
         tdb: 35,
@@ -399,22 +505,19 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(result.ppd).toBeNaN();
     });
 
-    // Tests for ISO met lower bound fix (issue #180)
-    // met=0.7 is below the ISO 7730 lower bound of 0.8, so should return NaN with limit_inputs enabled
+    // Issue #180: ISO 7730's met lower bound, 0.8, inclusive.
     test("met=0.7 (below lower bound) returns NaN when limit_inputs is enabled", () => {
       const result = pmv_ppd_iso({ ...neutral, met: 0.7, limit_inputs: true });
       expect(result.pmv).toBeNaN();
       expect(result.ppd).toBeNaN();
     });
 
-    // met=0.8 is the inclusive lower bound of ISO 7730, so should return valid numbers
     test("met=0.8 (inclusive lower bound) returns valid numbers when limit_inputs is enabled", () => {
       const result = pmv_ppd_iso({ ...neutral, met: 0.8, limit_inputs: true });
       expect(Number.isFinite(result.pmv)).toBe(true);
       expect(Number.isFinite(result.ppd)).toBe(true);
     });
 
-    // met=0.7 with limit_inputs=false should return valid numbers (opt-out works)
     test("met=0.7 returns valid numbers when limit_inputs is disabled (opt-out)", () => {
       const result = pmv_ppd_iso({ ...neutral, met: 0.7, limit_inputs: false });
       expect(Number.isFinite(result.pmv)).toBe(true);
@@ -422,8 +525,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
   });
 
-  // Issue #195: upstream's ISO 7730 Clause 4 limit on the partial water vapour
-  // pressure, 0-2700 Pa.
+  // Issue #195: ISO 7730 Clause 4's 0-2700 Pa vapour pressure limit (models/pmv_ppd_iso.py:182-190).
   describe("vapour pressure limit (#195)", () => {
     // rh solved for pa = 2700 Pa, landing a few parts in 1e-6 below it.
     const NEAR_LIMIT = [
@@ -474,17 +576,23 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(pmv_ppd_iso(neutral).warnings).toEqual([]);
     });
 
-    test("an input outside its bound gives an input row", () => {
+    test("an input outside its bound gives an input row with INFO's bound", () => {
       // rh 30 keeps pa inside its bound at 35 °C, so tdb is the only row.
       const { warnings } = pmv_ppd_iso({ ...neutral, tdb: 35, rh: 30 });
       expect(warnings).toEqual([
-        expect.objectContaining({
+        {
+          kind: "range",
           key: "tdb",
           role: "input",
           value: 35,
-          bound: { min: 10, max: 30 },
-        }),
+          unit: "°C",
+          bound: { min: 10.0, max: 30.0 },
+        },
       ]);
+      expect(warnings[0]).toHaveProperty(
+        "bound",
+        PMV_PPD_ISO_INFO.inputs.tdb.applicability,
+      );
     });
 
     test("a humid call gives a derived pa row with the kernel's value", () => {
@@ -498,12 +606,14 @@ describe("pmv_ppd_iso (JS-only)", () => {
         clo: 0.5,
       });
       expect(warnings).toEqual([
-        expect.objectContaining({
+        {
+          kind: "range",
           key: "pa",
           role: "derived",
           value: kernelPa(30, 95),
-          bound: { min: 0, max: 2700 },
-        }),
+          unit: "Pa",
+          bound: { min: 0.0, max: 2700.0 },
+        },
       ]);
     });
 
@@ -516,12 +626,14 @@ describe("pmv_ppd_iso (JS-only)", () => {
       });
       expect(raw.pmv).toBeGreaterThan(2);
       expect(pmv_ppd_iso(params).warnings).toEqual([
-        expect.objectContaining({
+        {
+          kind: "range",
           key: "pmv",
           role: "output",
           value: raw.pmv,
+          unit: null,
           bound: { min: -2, max: 2 },
-        }),
+        },
       ]);
     });
 
@@ -539,7 +651,9 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(on.pmv).toBeNaN();
       expect(Number.isFinite(off.pmv)).toBe(true);
       expect(off.warnings).toEqual(on.warnings);
-      expect(on.warnings.map((w) => [w.key, w.role])).toEqual([
+      expect(
+        on.warnings.map((w) => w.kind === "range" && [w.key, w.role]),
+      ).toEqual([
         ["tdb", "input"],
         ["tr", "input"],
         ["vr", "input"],
@@ -550,8 +664,24 @@ describe("pmv_ppd_iso (JS-only)", () => {
       ]);
     });
 
+    test("under IP the rows hold the SI values upstream compares", () => {
+      // 95 °F is 35 °C, and 0.328 fps 0.0999695... m/s.
+      const { warnings } = pmv_ppd_iso({
+        tdb: 95,
+        tr: 77,
+        vr: 0.328,
+        rh: 30,
+        met: 1.2,
+        clo: 0.5,
+        units: "IP",
+      });
+      expect(warnings).toEqual([
+        expect.objectContaining({ key: "tdb", value: 35, unit: "°C" }),
+      ]);
+    });
+
     test.each(iso_rows)(
-      "a NaN that limit_inputs caused comes with a row (fixture #%#)",
+      "a NaN under the gate never comes without a row, and no notice (fixture #%#)",
       ({ inputs }) => {
         const run = (limit_inputs: boolean) =>
           pmv_ppd_iso({
@@ -563,113 +693,12 @@ describe("pmv_ppd_iso (JS-only)", () => {
         const caused_by_limits =
           Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
         expect(limited.warnings.length > 0).toBe(caused_by_limits);
+        expect(limited.warnings.every((w) => w.kind === "range")).toBe(true);
       },
     );
-  });
-
-  describe("input validation", () => {
-    const quantities = ["tdb", "tr", "vr", "rh", "met", "clo"] as const;
-
-    // A numeric string is not coerced, unlike in arithmetic.
-    test.each([...quantities, "wme"] as const)(
-      "throws TypeError if %s is not a number",
-      (key) => {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = {
-          ...neutral,
-          [key]: "25",
-        } as unknown as Inputs;
-        expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
-      },
-    );
-
-    // A missing quantity is a TypeError, as a missing keyword argument is in
-    // Python.
-    test.each(quantities)("throws TypeError if %s is missing", (key) => {
-      const params: Partial<Inputs> = { ...neutral };
-      delete params[key];
-      // @ts-expect-error deliberately omitting a quantity to test the runtime TypeError
-      expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
-    });
-
-    // ADR 0001: a non-finite number throws rather than propagating as NaN.
-    test.each([...quantities, "wme"] as const)(
-      "throws TypeError if %s is not finite",
-      (key) => {
-        for (const bad of [NaN, Infinity, -Infinity]) {
-          expect(() => pmv_ppd_iso({ ...neutral, [key]: bad })).toThrow(
-            TypeError,
-          );
-        }
-      },
-    );
-
-    // The quantities and the standard were positional before v2 (ADR 0002). A
-    // call still written that way throws rather than running on anything else.
-    test("throws TypeError if called positionally", () => {
-      // @ts-expect-error the model takes one params object
-      expect(() => pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5)).toThrow(TypeError);
-      expect(() =>
-        // @ts-expect-error the model takes one params object
-        pmv_ppd_iso(25, 25, 0.1, 50, 1.2, 0.5, 0, Standard.iso_7730_2025),
-      ).toThrow(TypeError);
-      // @ts-expect-error null is not a params object
-      expect(() => pmv_ppd_iso(null)).toThrow(TypeError);
-      // @ts-expect-error the params object is required
-      expect(() => pmv_ppd_iso()).toThrow(TypeError);
-    });
-
-    // The shared PMV module accepts ASHRAE 55 too; this wrapper must not hand
-    // it through and compute the ASHRAE equation under its name.
-    test("throws Error if standard is the ASHRAE 55 standard", () => {
-      expect(() =>
-        pmv_ppd_iso({
-          ...neutral,
-          // @ts-expect-error standard is "7730-2005" or "7730-2025"; the runtime check is under test
-          standard: Standard.ashrae_55_2023,
-        }),
-      ).toThrow(Error);
-    });
-
-    test("throws Error if units is not a valid enum", () => {
-      expect(() =>
-        pmv_ppd_iso({
-          ...neutral,
-          // @ts-expect-error units is "SI" or "IP"; the runtime check is under test
-          units: "INVALID",
-        }),
-      ).toThrow(Error);
-    });
-
-    test.each(["limit_inputs", "round_output"] as const)(
-      "throws TypeError if %s is not a boolean",
-      (key) => {
-        // Cast: deliberately passing a string to test the runtime TypeError.
-        const params = {
-          ...neutral,
-          [key]: "true",
-        } as unknown as Inputs;
-        expect(() => pmv_ppd_iso(params)).toThrow(TypeError);
-      },
-    );
-
-    test("a switch passed as undefined takes its default", () => {
-      expect(
-        // @ts-expect-error the Params type lacks ADR 0019's `?: T | undefined`; the runtime default is under test
-        pmv_ppd_iso({
-          ...neutral,
-          wme: undefined,
-          standard: undefined,
-          units: undefined,
-          limit_inputs: undefined,
-          round_output: undefined,
-        }),
-      ).toEqual(pmv_ppd_iso(neutral));
-    });
   });
 
   describe("tsv classification (left-inclusive)", () => {
-    // At comfortable neutral conditions (25°C, symmetric), pmv should be ~0, so tsv should be "Neutral"
     test("returns tsv field with correct value", () => {
       expect(pmv_ppd_iso(neutral).tsv).toBe("Neutral");
     });
@@ -687,16 +716,9 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(result.tsv).toBeNaN();
     });
 
-    // This test used to assert the opposite: tsv from the unrounded pmv whatever
-    // round_output was (at tdb=26.4, whose pmv ≈ 0.5044 gives "Slightly Warm"
-    // either way, so it could not tell the two rules apart). Upstream classifies
-    // the pmv it returns, after rounding (pmv_ppd_iso.py in 4.6.0), so the label
-    // never disagrees with the number shown. Expected values from
-    // pythermalcomfort 4.6.0 at these inputs.
+    // models/pmv_ppd_iso.py:205-222: tsv classifies the pmv returned, after rounding.
     test("tsv is classified from the pmv returned, rounded or not", () => {
-      // pmv ≈ 0.4983, just below the 0.5 edge. ISO is left-inclusive, so the
-      // rounded 0.5 opens [0.5, 1.5) = "Slightly Warm", while the unrounded
-      // value stays in [-0.5, 0.5) = "Neutral".
+      // pmv ≈ 0.4983 rounds to 0.5, which opens the left-inclusive [0.5, 1.5).
       const edge = { ...neutral, tdb: 26.38, tr: 26.38, limit_inputs: false };
       const result_rounded = pmv_ppd_iso({ ...edge, round_output: true });
       const result_unrounded = pmv_ppd_iso({ ...edge, round_output: false });
@@ -711,17 +733,13 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
 
     test("warm comfort (pmv ~1) -> Slightly Warm", () => {
-      // Using tdb=26.4, rh=50 produces pmv ≈ 0.5044, classifying into
-      // the left-inclusive interval [0.5, 1.5) = "Slightly Warm".
-      // This test verifies the exact classification, not a set of possibilities,
-      // so that rounding errors or classification bugs are caught.
+      // pmv ≈ 0.5044 is in the left-inclusive [0.5, 1.5).
       const result = pmv_ppd_iso({
         ...neutral,
         tdb: 26.4,
         tr: 26.4,
         limit_inputs: false,
       });
-      // Must be exactly "Slightly Warm", not one of three options
       expect(result.tsv).toBe("Slightly Warm");
     });
   });
@@ -731,24 +749,6 @@ describe("pmv_ppd_iso (JS-only)", () => {
   describe("category under ISO 7730:2005 (Annex A Table A.1)", () => {
     const iso2005 = { standard: Standard.iso_7730_2005 } as const;
 
-    test("the bins cut |pmv| at 0.2, 0.5 and 0.7, left-inclusive, frozen", () => {
-      expect(PMV_CATEGORY_BINS_ISO_7730_2005).toEqual({
-        edges: [0.2, 0.5, 0.7, 10],
-        labels: ["A", "B", "C", "none"],
-        right: false,
-      });
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2005)).toBe(true);
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2005.edges)).toBe(true);
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2005.labels)).toBe(
-        true,
-      );
-    });
-
-    // No fixture row puts pmv on an edge, so the inputs are built around the
-    // model's own roots: the tdb whose pmv is exactly the edge, and the
-    // adjacent double one step toward pmv = 0. pythermalcomfort 4.7.0 gives
-    // the same pmv at each, and the pmv is asserted too, so each row proves
-    // where it lands.
     const at = (rh: number, met: number, t: number) =>
       pmv_ppd_iso({
         tdb: t,
@@ -783,19 +783,17 @@ describe("pmv_ppd_iso (JS-only)", () => {
     test("is NaN when the applicability gate fails", () => {
       // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
       // is otherwise category B.
-      const outOfRange = { ...neutral, tdb: 28, tr: 28, vr: 1.2, ...iso2005 };
-      const result = pmv_ppd_iso(outOfRange);
+      const out_of_range = { ...neutral, tdb: 28, tr: 28, vr: 1.2, ...iso2005 };
+      const result = pmv_ppd_iso(out_of_range);
       expect(result.pmv).toBeNaN();
       expect(result.category).toBeNaN();
       // The same call with the gate off is classified.
       expect(
-        pmv_ppd_iso({ ...outOfRange, limit_inputs: false }),
+        pmv_ppd_iso({ ...out_of_range, limit_inputs: false }),
       ).toHaveProperty("category", "B");
     });
 
-    // Both pmvs print 0.5, so the rounded value cannot tell them apart; the
-    // category reads the unrounded one. pythermalcomfort 4.6.0 gives the same
-    // unrounded pmvs: 0.4983292256773187 and 0.5013467793369747.
+    // Both pmvs print 0.5; the category reads the unrounded ones, about 0.4983 and 0.5013.
     test("is read from the unrounded pmv", () => {
       const printed = (t: number) =>
         pmv_ppd_iso({ ...neutral, tdb: t, tr: t, ...iso2005 });
@@ -811,21 +809,6 @@ describe("pmv_ppd_iso (JS-only)", () => {
   describe("category under ISO 7730:2025 (Annex A Table A.1)", () => {
     const iso2025 = { standard: Standard.iso_7730_2025 } as const;
 
-    test("the bins cut |pmv| at 0.2, 0.5, 0.7 and 1.0, left-inclusive, frozen", () => {
-      expect(PMV_CATEGORY_BINS_ISO_7730_2025).toEqual({
-        edges: [0.2, 0.5, 0.7, 1.0, 10],
-        labels: ["I", "II", "III", "IV", "none"],
-        right: false,
-      });
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2025)).toBe(true);
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2025.edges)).toBe(true);
-      expect(Object.isFrozen(PMV_CATEGORY_BINS_ISO_7730_2025.labels)).toBe(
-        true,
-      );
-    });
-
-    // The roots of the 2005 block, whose pmv the edition does not change,
-    // and the same construction at ±1.0.
     const at = (rh: number, met: number, t: number) =>
       pmv_ppd_iso({
         tdb: t,
@@ -873,20 +856,24 @@ describe("pmv_ppd_iso (JS-only)", () => {
     test("is NaN when the applicability gate fails", () => {
       // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
       // is otherwise category II.
-      const outOfRange = {
+      const out_of_range = {
         ...neutral,
         tdb: 28,
         tr: 28,
         vr: 1.2,
         ...iso2025,
       };
-      const result = pmv_ppd_iso(outOfRange);
+      const result = pmv_ppd_iso(out_of_range);
       expect(result.pmv).toBeNaN();
       expect(result.category).toBeNaN();
       // The same call with the gate off is classified.
       expect(
-        pmv_ppd_iso({ ...outOfRange, limit_inputs: false }),
+        pmv_ppd_iso({ ...out_of_range, limit_inputs: false }),
       ).toHaveProperty("category", "II");
     });
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(pmv_ppd_iso_from_root).toBe(pmv_ppd_iso);
   });
 });

@@ -21,10 +21,8 @@ import {
 } from "./pmv_ppd_ashrae.ts";
 import {
   pmv_ppd_iso,
-  PMV_CATEGORY_BINS_ISO_7730_2005,
-  PMV_CATEGORY_BINS_ISO_7730_2025,
+  PMV_CATEGORY_BINS_ISO_7730,
   PMV_PPD_ISO_INFO,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
 } from "./pmv_ppd_iso.ts";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain, SOLAR_GAIN_INFO } from "./solar_gain.ts";
@@ -72,7 +70,7 @@ export type {
   PmvPpdAshraeParams,
   PmvPpdAshraeResult,
 } from "./pmv_ppd_ashrae.ts";
-export type { PmvPpdIsoParams, PmvPpdIsoResult } from "./pmv_ppd_iso.ts";
+export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type { UTCI, UTCIInputs } from "./utci.ts";
 
@@ -99,13 +97,11 @@ export {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
-  PMV_CATEGORY_BINS_ISO_7730_2005,
-  PMV_CATEGORY_BINS_ISO_7730_2025,
+  PMV_CATEGORY_BINS_ISO_7730,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
@@ -142,13 +138,11 @@ export default {
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
-  PMV_CATEGORY_BINS_ISO_7730_2005,
-  PMV_CATEGORY_BINS_ISO_7730_2025,
+  PMV_CATEGORY_BINS_ISO_7730,
   PMV_COMPLIANCE_INTERVAL_ASHRAE,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
   PMV_THERMAL_SENSATION_VOTE_BINS_ASHRAE,
-  PMV_THERMAL_SENSATION_VOTE_BINS_ISO,
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,

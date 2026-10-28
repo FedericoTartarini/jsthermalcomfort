@@ -1,281 +1,233 @@
-import { _pmv_ppd_optimized } from "./_pmv_ppd_optimized.ts";
-import { validateInputs, ISO_7730_LIMITS } from "../utilities/utilities.js";
-import { units_converter } from "../utilities/units_converter.ts";
-import { Standard, Units } from "../utilities/options.ts";
-import { round } from "../_internal/round.ts";
-import { classifyFromBins } from "../_internal/classifierBins.ts";
+import { _pmv_ppd_optimized, THERMAL_SENSATION } from "./_pmv_ppd_optimized.ts";
 import type { ClassifierBins } from "../_internal/classifierBins.ts";
+import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelInfo.ts";
-import {
-  _check_params_object,
-  _legacy_valid_range,
-} from "../_internal/validation.ts";
 import type {
-  ApplicabilityWarning,
-  LegacyModelInfo,
+  InputsOf,
+  ModelInfo,
+  ModelWarning,
+  OutputsOf,
 } from "../_internal/modelInfo.ts";
+import { round } from "../_internal/round.ts";
+import { _mapping, _valid_range } from "../_internal/validation.ts";
+import { Standard, Units } from "../utilities/options.ts";
+import { units_converter } from "../utilities/units_converter.ts";
 
-/**
- * Thermal Sensation Vote bins used by pmv_ppd_iso (left-inclusive).
- * Note: pmv_ppd_ashrae uses right-inclusive; see pythermalcomfort#382.
- */
-export const PMV_THERMAL_SENSATION_VOTE_BINS_ISO: ClassifierBins =
-  Object.freeze({
-    edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
-    labels: [
-      "Cold",
-      "Cool",
-      "Slightly Cool",
-      "Neutral",
-      "Slightly Warm",
-      "Warm",
-      "Hot",
-    ],
+export const PMV_CATEGORY_BINS_ISO_7730 = deepFreeze({
+  [Standard.iso_7730_2025]: {
+    edges: [0.2, 0.5, 0.7, 1.0, 10],
+    labels: ["I", "II", "III", "IV", "none"],
     right: false,
-  });
+  },
+  [Standard.iso_7730_2005]: {
+    edges: [0.2, 0.5, 0.7, 10],
+    labels: ["A", "B", "C", "none"],
+    right: false,
+  },
+} as const satisfies Readonly<Record<string, ClassifierBins>>);
 
-/**
- * The categories of thermal environment of ISO 7730:2025, the edition
- * pmv_ppd_iso defaults to, which classifies its `category` with them under
- * that edition. Like `PMV_CATEGORY_BINS_ISO_7730_2005` they cut |pmv|, not
- * pmv, and are read from the unrounded PMV.
- *
- * ISO 7730:2025 Annex A Table A.1 names four categories, I to IV, at |PMV|
- * 0.2, 0.5, 0.7 and 1.0. Left-inclusive bins on |pmv| make each strict at
- * both ends, as the 2005 bins are: a PMV of exactly ±0.2 is category II, not
- * I, and a PMV of exactly ±1.0 is "none". The top edge, 10, is the thermal
- * sensation vote bins' sentinel, as in the 2005 bins.
- *
- * Upstream has no ISO 7730 category anywhere. The category and these bins are
- * a consumer-needed addition (ADR 0001): the app draws a model's categories
- * and prints the room's category from the bins of the edition it runs,
- * instead of keeping its own edges.
- */
-export const PMV_CATEGORY_BINS_ISO_7730_2025: ClassifierBins = deepFreeze({
-  edges: [0.2, 0.5, 0.7, 1.0, 10],
-  labels: ["I", "II", "III", "IV", "none"],
-  right: false,
-});
+const STANDARDS = deepFreeze([
+  Standard.iso_7730_2025,
+  Standard.iso_7730_2005,
+] as const);
 
-/**
- * The categories of thermal environment of ISO 7730:2005, which pmv_ppd_iso
- * classifies its `category` with under that edition. These bins cut |pmv|,
- * not pmv: pair them with the absolute PMV, never with the signed PMV axis as
- * chart bands. pmv_ppd_iso reads them from the unrounded PMV.
- *
- * ISO 7730:2005 Annex A Table A.1 defines the categories of thermal
- * environment by open intervals: A is -0.2 < PMV < 0.2, B is -0.5 < PMV < 0.5,
- * C is -0.7 < PMV < 0.7. Left-inclusive bins on |pmv| give exactly those open
- * ends, so a PMV of exactly ±0.5 is category C, not B. Beyond C the label is
- * "none"; the top edge, 10, is the thermal sensation vote bins' sentinel, so
- * |pmv| above it is NaN, as the vote is.
- *
- * The table also lists PPD limits (6, 10 and 15 %). They are not exported:
- * they are rounded readings of the PPD curve at 0.2, 0.5 and 0.7 (5.8, 10.2
- * and 15.3 %), so a category read from the PPD disagrees with the one read
- * from the PMV in a thin band at every edge.
- *
- * CEN/TR 16798-2 Table B.1 gives the same intervals for EN 16798-1 categories
- * I to III.
- *
- * Upstream has no ISO 7730 category anywhere: these bins are a consumer-needed
- * addition (ADR 0001), as `PMV_CATEGORY_BINS_ISO_7730_2025` is.
- *
- * Frozen deep, not with Object.freeze as the vote bins are: no model info
- * holds these bins, so no info's deepFreeze reaches their arrays.
- */
-export const PMV_CATEGORY_BINS_ISO_7730_2005: ClassifierBins = deepFreeze({
-  edges: [0.2, 0.5, 0.7, 10],
-  labels: ["A", "B", "C", "none"],
-  right: false,
-});
-
-// A type alias, as the JSDoc typedef it replaces emitted, so the result stays
-// assignable to Record<string, unknown>; an interface is not. Renamed from
-// PmvPpdIso to <Model>Result, the name every converted model's result has.
-/**
- * @typedef {Object} PmvPpdIsoResult
- * @property {number} pmv - Predicted Mean Vote on the ISO 7730 scale [-3, +3]
- * @property {number} ppd - Predicted Percentage of Dissatisfied [%]
- * @property {string|number} tsv - Thermal Sensation Vote category, or NaN if pmv is NaN. Uses left-inclusive bins (pythermalcomfort#382).
- * @property {string|number} category - ISO 7730 category of thermal environment: under 7730-2025 "I", "II", "III", "IV" or "none", the unrounded |pmv| classified by `PMV_CATEGORY_BINS_ISO_7730_2025`; under 7730-2005 "A", "B", "C" or "none", by `PMV_CATEGORY_BINS_ISO_7730_2005`; NaN when `limit_inputs` returns NaN for the inputs.
- * @property {import("../_internal/modelInfo.ts").ApplicabilityWarning[]} warnings - Applicability bounds the call broke, whatever `limit_inputs` is; see `ApplicabilityWarning`.
- */
-export type PmvPpdIsoResult = {
-  pmv: number;
-  ppd: number;
-  tsv: string | number;
-  category: string | number;
-  readonly warnings: ApplicabilityWarning[];
-};
-
-/**
- * The params of `pmv_ppd_iso`: upstream's keyword parameters, quantities and
- * switches alike, with upstream's defaults (ADR 0002), `standard` being one of
- * the two ISO 7730 editions upstream accepts. Documented on the function's
- * `params`.
- */
-export interface PmvPpdIsoParams {
-  tdb: number;
-  tr: number;
-  vr: number;
-  rh: number;
-  met: number;
-  clo: number;
-  wme?: number;
-  standard?: typeof Standard.iso_7730_2005 | typeof Standard.iso_7730_2025;
-  units?: "SI" | "IP";
-  limit_inputs?: boolean;
-  round_output?: boolean;
-}
-
-/**
- * Model metadata for PMV / PPD (ISO 7730).
- *
- * The `category` classifier is `PMV_CATEGORY_BINS_ISO_7730_2025`, the bins of
- * the default and first edition. A call under 7730-2005 classifies `category`
- * by `PMV_CATEGORY_BINS_ISO_7730_2005` instead.
- *
- * Experimental — the shape of `ModelInfo` may change before release.
- */
-export const PMV_PPD_ISO_INFO: LegacyModelInfo = deepFreeze({
+export const PMV_PPD_ISO_INFO = deepFreeze({
   name: "pmv_ppd_iso",
   label: "PMV / PPD (ISO 7730)",
-  description: "Predicted Mean Vote and Predicted Percentage Dissatisfied.",
-  standards: [Standard.iso_7730_2025, Standard.iso_7730_2005],
+  standards: STANDARDS,
   inputs: {
-    tdb: { unit: "°C", applicability: ISO_7730_LIMITS.tdb! },
-    tr: { unit: "°C", applicability: ISO_7730_LIMITS.tr! },
-    vr: { unit: "m/s", applicability: ISO_7730_LIMITS.vr! },
-    met: { unit: "met", applicability: ISO_7730_LIMITS.met! },
-    clo: { unit: "clo", applicability: ISO_7730_LIMITS.clo! },
-    rh: { unit: "%" },
-    wme: { unit: "met" },
+    tdb: {
+      kind: "numeric",
+      unit: "°C",
+      applicability: { min: 10.0, max: 30.0 },
+    },
+    tr: {
+      kind: "numeric",
+      unit: "°C",
+      applicability: { min: 10.0, max: 40.0 },
+    },
+    vr: {
+      kind: "numeric",
+      unit: "m/s",
+      applicability: { min: 0.0, max: 1.0 },
+    },
+    rh: { kind: "numeric", unit: "%" },
+    met: {
+      kind: "numeric",
+      unit: "met",
+      applicability: { min: 0.8, max: 4.0 },
+    },
+    clo: {
+      kind: "numeric",
+      unit: "clo",
+      applicability: { min: 0.0, max: 2.0 },
+    },
+    wme: { kind: "numeric", unit: "met", default: 0 },
+    standard: {
+      kind: "choice",
+      allowed: STANDARDS,
+      default: Standard.iso_7730_2025,
+      message: `PMV calculations can only be performed in compliance with ISO ${Standard.iso_7730_2005} or ISO ${Standard.iso_7730_2025}`,
+    },
+    units: BASE_INPUTS_UNITS,
+    limit_inputs: { kind: "bool", default: true },
+    round_output: { kind: "bool", default: true },
   },
   outputs: {
-    pmv: { unit: null, applicability: ISO_7730_LIMITS.pmv! },
-    ppd: { unit: "%" },
-    tsv: { unit: null, classifier: PMV_THERMAL_SENSATION_VOTE_BINS_ISO },
-    category: { unit: null, classifier: PMV_CATEGORY_BINS_ISO_7730_2025 },
+    pmv: { kind: "numeric", unit: null, applicability: { min: -2, max: 2 } },
+    ppd: { kind: "numeric", unit: "%" },
+    tsv: {
+      kind: "label",
+      masked: true,
+      unit: null,
+      classifier: { ...THERMAL_SENSATION, right: false },
+    },
+    category: {
+      kind: "label",
+      masked: true,
+      unit: null,
+      classifier: PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025],
+    },
   },
   derived: {
-    // Computed from tdb and rh, not supplied by the caller. Exposed so a
-    // front end can explain why a warm, humid combination that looks inside
-    // every input limit still returns NaN.
-    pa: { unit: "Pa", applicability: ISO_7730_LIMITS.pa! },
+    pa: { unit: "Pa", applicability: { min: 0.0, max: 2700.0 } },
   },
-});
+} as const satisfies ModelInfo);
 
-// A non-finite number throws a TypeError here, where upstream lets it
-// propagate (ADR 0001, reason three).
-const PMV_PPD_ISO_SCHEMA = {
-  tdb: { type: "number" },
-  tr: { type: "number" },
-  vr: { type: "number" },
-  rh: { type: "number" },
-  met: { type: "number" },
-  clo: { type: "number" },
-  wme: { type: "number" },
-  // Upstream raises a ValueError for any `model=` but the two ISO 7730
-  // editions.
-  standard: { enum: [Standard.iso_7730_2005, Standard.iso_7730_2025] },
-  units: { enum: ["SI", "IP"] },
-  limit_inputs: { type: "boolean" },
-  round_output: { type: "boolean" },
-};
-
-/** The category bins of each ISO 7730 edition. */
-const PMV_CATEGORY_BINS: Readonly<
-  Record<NonNullable<PmvPpdIsoParams["standard"]>, ClassifierBins>
-> = {
-  [Standard.iso_7730_2005]: PMV_CATEGORY_BINS_ISO_7730_2005,
-  [Standard.iso_7730_2025]: PMV_CATEGORY_BINS_ISO_7730_2025,
-};
+/** @interface */
+export type PMVPPDInputs = InputsOf<typeof PMV_PPD_ISO_INFO>;
 
 /**
- * Calculate PMV and PPD in accordance with ISO 7730.
+ * Dataclass to represent the Predicted Mean Vote (PMV) and Predicted Percentage of
+ * Dissatisfied (PPD).
  *
- * The ISO equation uses Fanger's original PMV formulation without the
- * ASHRAE cooling-effect adjustment.
+ * @interface
+ */
+export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
+
+/**
+ * Return Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
+ * calculated in accordance with the ISO 7730.
  *
- * ISO 7730 applies stricter input limits than ASHRAE 55. When
- * `limit_inputs` is true (the default), inputs outside the following
- * ranges cause the function to return NaN:
- * - 10 < tdb [°C] < 30
- * - 10 < tr  [°C] < 40
- * -  0 < vr  [m/s] < 1
- * - 0.8 < met [met] < 4
- * -  0 < clo [clo] < 2
- * -  0 < pa  [Pa] < 2700
- * - -2 < PMV < 2 (result is clamped to NaN outside this range)
+ * The ISO uses the same formulation of the PMV as published by Fanger [Fanger1970](../../docs/references.md#fanger1970).
  *
- * @param {Object} params - the model's parameters, named as in pythermalcomfort.
- * @param {number} params.tdb - Dry-bulb air temperature [°C] (or [°F] if units = 'IP')
- * @param {number} params.tr  - Mean radiant temperature [°C] (or [°F] if units = 'IP')
- * @param {number} params.vr  - Relative air speed [m/s] (or [fps] if units = 'IP')
- * @param {number} params.rh  - Relative humidity [%]
- * @param {number} params.met - Metabolic rate [met]
- * @param {number} params.clo - Clothing insulation [clo]. This is the dynamic clothing insulation,
- *    which can be calculated using the function `clo_dynamic_iso`.
- * @param {number} [params.wme=0] - External work [met]
- * @param {"7730-2005"|"7730-2025"} [params.standard="7730-2025"] - which edition of ISO 7730
- *    the calculation is being performed against. Accepts `"7730-2005"` or
- *    `"7730-2025"`.
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C] in [°F] if `units` = 'IP'
+ * @param inputs.tr - Mean radiant temperature, [°C] in [°F] if `units` = 'IP'
+ * @param inputs.vr - Relative air speed, [m/s] in [fps] if `units` = 'IP'
  *
- *    **The two editions specify identical equations and applicability limits**,
- *    so this argument changes only `category`, which each edition's Annex A
- *    Table A.1 bounds and names differently. It also lets a caller record which edition
- *    they are working to, and the library confirm it implements it — passing
- *    an unsupported edition throws rather than silently computing something
- *    else.
+ * > [!NOTE]
+ * > vr is the relative air speed caused by body movement and not the air
+ * > speed measured by the air speed sensor. The relative air speed is the sum of the
+ * > average air speed measured by the sensor plus the activity-generated air speed
+ * > (Vag). Where Vag is the activity-generated air speed caused by motion of
+ * > individual body parts. vr can be calculated using the function
+ * > `v_relative`.
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
  *
- *    Mirrors the `model` argument on `pythermalcomfort`'s `pmv_ppd_iso`,
- *    including the default.
- * @param {'SI'|'IP'} [params.units='SI'] - Unit system
- * @param {boolean}   [params.limit_inputs=true] - Return NaN for out-of-range inputs
- * @param {boolean}   [params.round_output=true] - Round pmv to 2 decimal places and ppd to 1
- * @returns {PmvPpdIsoResult} PMV and PPD values
+ * > [!NOTE]
+ * > this is the basic insulation also known as the intrinsic clothing insulation value of the
+ * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > surface to the outer clothing surface, including enclosed air layers, under actual
+ * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > The dynamic clothing insulation, clo, can be calculated using the function
+ * > `clo_dynamic_iso`.
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ * @param inputs.standard - The ISO 7730 edition to reference. Supported values are "7730-2005"
+ * and "7730-2025"; any other value raises a ``ValueError``. The two
+ * editions currently use identical PMV/PPD equations and applicability
+ * limits, so this parameter does not affect the numerical result. It is
+ * retained to record the intended edition, reject unsupported edition
+ * values, and allow future differentiation if the editions diverge. The
+ * selected edition is not stored on the returned ``PMVPPD`` object.
+ * Defaults to "7730-2025", the current edition of the standard.
+ * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
+ * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ *
+ * > [!NOTE]
+ * > By default, if the inputs are outside the standard applicability limits the
+ * > function returns nan. If False returns pmv and ppd values even if input values are
+ * > outside the applicability limits of the model.
+ * >
+ * > The ISO 7730 limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
+ * > 0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700,
+ * > and -2 <= PMV <= 2.
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ *
+ * @returns A dataclass containing the Predicted Mean Vote and Predicted Percentage of
+ * Dissatisfied. See {@link PMVPPD} for
+ * more details. To access the `pmv`, `ppd`, `tsv` values, use the corresponding
+ * attributes of the returned `PMVPPD` instance, e.g., `result.pmv`.
+ *
+ * - `pmv` - Predicted Mean Vote.
+ * - `ppd` - Predicted Percentage of Dissatisfied.
+ * - `tsv` - Predicted thermal sensation vote.
+ * - `category`
  *
  * @example
- * const r = pmv_ppd_iso({ tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 });
- * console.log(r.pmv); // 0.08
- * console.log(r.ppd); // 5.1
+ * ```ts
+ * import { pmv_ppd_iso } from "jsthermalcomfort/models";
+ * import { v_relative } from "jsthermalcomfort/utilities";
+ *
+ * const tdb = 25;
+ * const tr = 25;
+ * const rh = 50;
+ * const v = 0.1;
+ * const met = 1.4;
+ * const clo_dynamic = 0.5;
+ * // calculate relative air speed
+ * const v_r = v_relative(v, met);
+ * const results = pmv_ppd_iso({
+ *   tdb,
+ *   tr,
+ *   vr: v_r,
+ *   rh,
+ *   met,
+ *   clo: clo_dynamic,
+ *   standard: "7730-2025",
+ * });
+ * console.log(results.pmv); // 0.17
+ * console.log(results.ppd); // 5.6
+ *
+ * const result = [22, 25].map((tdb) =>
+ *   pmv_ppd_iso({
+ *     tdb,
+ *     tr: 25,
+ *     vr: 0.1,
+ *     rh: 50,
+ *     met: 1.4,
+ *     clo: 0.5,
+ *     standard: "7730-2025",
+ *   }),
+ * );
+ * console.log(result.map(({ pmv }) => pmv)); // [-0, 0.41]
+ * console.log(result.map(({ ppd }) => ppd)); // [5, 8.5]
+ * ```
  */
-export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
-  // The quantities and the standard were positional before v2 (ADR 0002); a
-  // call still written that way fails here, naming the shape it should have.
-  _check_params_object(params, "pmv_ppd_iso");
-  let { tdb, tr, vr } = params;
-  const { rh, met, clo } = params;
-  // Destructuring defaults also apply to a switch passed as undefined.
-  const {
-    wme = 0,
-    standard = Standard.iso_7730_2025,
-    units = "SI",
-    limit_inputs = true,
-    round_output = true,
-  } = params;
+export function pmv_ppd_iso(inputs: PMVPPDInputs): PMVPPD {
   // Validate inputs using the PMVPPDInputs class
-  validateInputs(
-    {
-      tdb,
-      tr,
-      vr,
-      rh,
-      met,
-      clo,
-      wme,
-      standard,
-      units: units.toUpperCase(),
-      limit_inputs,
-      round_output,
-    },
-    PMV_PPD_ISO_SCHEMA,
-  );
+  let {
+    tdb,
+    tr,
+    vr,
+    rh,
+    met,
+    clo,
+    wme,
+    standard,
+    units,
+    limit_inputs,
+    round_output,
+  } = parseInputs(PMV_PPD_ISO_INFO, inputs);
 
   if (units.toUpperCase() === Units.IP) {
     ({ tdb, tr, v: vr } = units_converter(Units.IP, { tdb, tr, v: vr }));
   }
+
+  standard = standard.toLowerCase();
 
   let pmv = _pmv_ppd_optimized(tdb, tr, vr, rh, met, clo, wme);
 
@@ -288,30 +240,91 @@ export function pmv_ppd_iso(params: PmvPpdIsoParams): PmvPpdIsoResult {
   // ISO 7730 Clause 4 applicability limits
   const pa = rh * 10.0 * Math.exp(16.6536 - 4030.183 / (tdb + 235.0));
 
-  const warnings: ApplicabilityWarning[] = [];
-  for (const [key, value] of Object.entries({ tdb, tr, vr, met, clo })) {
-    _legacy_valid_range(warnings, key, "input", value, ISO_7730_LIMITS[key]!);
-  }
-  _legacy_valid_range(warnings, "pa", "derived", pa, ISO_7730_LIMITS.pa!);
-  _legacy_valid_range(warnings, "pmv", "output", pmv, ISO_7730_LIMITS.pmv!);
+  const warnings: ModelWarning[] = [];
+  const tdb_valid = _valid_range(
+    tdb,
+    PMV_PPD_ISO_INFO.inputs.tdb.applicability,
+    "tdb",
+    "input",
+    PMV_PPD_ISO_INFO.inputs.tdb.unit,
+    warnings,
+  );
+  const tr_valid = _valid_range(
+    tr,
+    PMV_PPD_ISO_INFO.inputs.tr.applicability,
+    "tr",
+    "input",
+    PMV_PPD_ISO_INFO.inputs.tr.unit,
+    warnings,
+  );
+  const v_valid = _valid_range(
+    vr,
+    PMV_PPD_ISO_INFO.inputs.vr.applicability,
+    "vr",
+    "input",
+    PMV_PPD_ISO_INFO.inputs.vr.unit,
+    warnings,
+  );
+  const met_valid = _valid_range(
+    met,
+    PMV_PPD_ISO_INFO.inputs.met.applicability,
+    "met",
+    "input",
+    PMV_PPD_ISO_INFO.inputs.met.unit,
+    warnings,
+  );
+  const clo_valid = _valid_range(
+    clo,
+    PMV_PPD_ISO_INFO.inputs.clo.applicability,
+    "clo",
+    "input",
+    PMV_PPD_ISO_INFO.inputs.clo.unit,
+    warnings,
+  );
+  const pa_valid = _valid_range(
+    pa,
+    PMV_PPD_ISO_INFO.derived.pa.applicability,
+    "pa",
+    "derived",
+    PMV_PPD_ISO_INFO.derived.pa.unit,
+    warnings,
+  );
+  const pmv_valid = _valid_range(
+    pmv,
+    PMV_PPD_ISO_INFO.outputs.pmv.applicability,
+    "pmv",
+    "output",
+    PMV_PPD_ISO_INFO.outputs.pmv.unit,
+    warnings,
+  );
 
-  if (limit_inputs && (Number.isNaN(pmv) || warnings.length > 0)) {
-    pmv = NaN;
-    ppd_array = NaN;
-  }
+  const all_valid = !(
+    Number.isNaN(tdb_valid) ||
+    Number.isNaN(tr_valid) ||
+    Number.isNaN(v_valid) ||
+    Number.isNaN(met_valid) ||
+    Number.isNaN(clo_valid) ||
+    Number.isNaN(pa_valid) ||
+    Number.isNaN(pmv_valid)
+  );
+  pmv = limit_inputs && !all_valid ? NaN : pmv;
+  ppd_array = limit_inputs && !all_valid ? NaN : ppd_array;
 
-  const category = classifyFromBins(Math.abs(pmv), PMV_CATEGORY_BINS[standard]);
+  const category = _mapping(
+    Math.abs(pmv),
+    PMV_CATEGORY_BINS_ISO_7730[standard as (typeof STANDARDS)[number]],
+  );
 
   if (round_output) {
     pmv = round(pmv, 2);
     ppd_array = round(ppd_array, 1);
   }
 
-  return {
+  return Object.freeze({
     pmv,
     ppd: ppd_array,
-    tsv: classifyFromBins(pmv, PMV_THERMAL_SENSATION_VOTE_BINS_ISO),
+    tsv: _mapping(pmv, PMV_PPD_ISO_INFO.outputs.tsv.classifier),
     category,
-    warnings,
-  };
+    warnings: Object.freeze(warnings),
+  });
 }

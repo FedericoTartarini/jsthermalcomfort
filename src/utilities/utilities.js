@@ -1,6 +1,7 @@
 import { p_sat } from "../psychrometrics/p_sat.js";
 import { operative_tmp } from "../environment/operative_tmp.ts";
 import { ASHRAE_55_LIMITS } from "../_internal/ashrae55.ts";
+import { PMV_PPD_ISO_INFO } from "../models/pmv_ppd_iso.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "./options.ts";
 import { units_converter } from "./units_converter.ts";
@@ -49,32 +50,6 @@ export const LimitSet = Object.freeze({
 /**
  * @typedef {(typeof LimitSet)[keyof typeof LimitSet]} LimitSet
  */
-
-/**
- * ISO 7730 compliance limits for all variables.
- * Each variable has `min` and `max` inclusive bounds.
- * Used by `_iso_compliance` and exported for model metadata.
- * The shape matches the output of #182 (limits.json generation).
- *
- * @type {Readonly<Record<string, Readonly<{ min: number, max: number }>>>}
- * @public
- */
-export const ISO_7730_LIMITS = Object.freeze({
-  tdb: Object.freeze({ min: 10, max: 30 }),
-  tr: Object.freeze({ min: 10, max: 40 }),
-  vr: Object.freeze({ min: 0, max: 1 }),
-  met: Object.freeze({ min: 0.8, max: 4 }),
-  clo: Object.freeze({ min: 0, max: 2 }),
-  // Partial water vapour pressure [Pa]. Derived from tdb and rh rather than
-  // supplied directly, so it is checked in pmv_ppd rather than in
-  // `_iso_compliance`, which only iterates over supplied inputs.
-  pa: Object.freeze({ min: 0, max: 2700 }),
-  // The PMV output gate. Grouped here rather than kept separate because
-  // pythermalcomfort applies it in the same `valid_range` block as the input
-  // limits above (pmv_ppd_iso.py:181-187), and because #182 will generate the
-  // whole object from one place.
-  pmv: Object.freeze({ min: -2, max: 2 }),
-});
 
 /**
  * True when `standard` is one of the ISO 7730 editions.
@@ -292,36 +267,36 @@ function _iso_compliance(kwargs) {
   let warnings = [];
   for (const [key, value] of Object.entries(kwargs)) {
     if (value === undefined) continue;
-    if (key === "tdb" && ISO_7730_LIMITS.tdb) {
-      const { min, max } = ISO_7730_LIMITS.tdb;
+    if (key === "tdb") {
+      const { min, max } = PMV_PPD_ISO_INFO.inputs.tdb.applicability;
       if (value > max || value < min)
         warnings.push(
           `ISO air temperature applicability limits between ${min} and ${max} ºC`,
         );
     }
-    if (key === "tr" && ISO_7730_LIMITS.tr) {
-      const { min, max } = ISO_7730_LIMITS.tr;
+    if (key === "tr") {
+      const { min, max } = PMV_PPD_ISO_INFO.inputs.tr.applicability;
       if (value > max || value < min)
         warnings.push(
           `ISO mean radiant temperature applicability limits between ${min} and ${max} ºC`,
         );
     }
-    if ((key === "v" || key === "vr") && ISO_7730_LIMITS.vr) {
-      const { min, max } = ISO_7730_LIMITS.vr;
+    if (key === "v" || key === "vr") {
+      const { min, max } = PMV_PPD_ISO_INFO.inputs.vr.applicability;
       if (value > max || value < min)
         warnings.push(
           `ISO air speed applicability limits between ${min} and ${max} m/s`,
         );
     }
-    if (key === "met" && ISO_7730_LIMITS.met) {
-      const { min, max } = ISO_7730_LIMITS.met;
+    if (key === "met") {
+      const { min, max } = PMV_PPD_ISO_INFO.inputs.met.applicability;
       if (value > max || value < min)
         warnings.push(
           `ISO met applicability limits between ${min} and ${max} met`,
         );
     }
-    if (key === "clo" && ISO_7730_LIMITS.clo) {
-      const { min, max } = ISO_7730_LIMITS.clo;
+    if (key === "clo") {
+      const { min, max } = PMV_PPD_ISO_INFO.inputs.clo.applicability;
       if (value > max || value < min)
         warnings.push(
           `ISO clo applicability limits between ${min} and ${max} clo`,

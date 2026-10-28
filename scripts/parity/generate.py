@@ -141,6 +141,44 @@ def _solar_gain(rng):
     }
 
 
+def _two_nodes_gagge(rng):
+    # The ranges reach skin wettedness at w_max, shivering and the 0.1 m/s air
+    # speed floor; position comes in any case, which upstream's check accepts
+    # and its kernel compares as given. w_max is left out half the time, as
+    # its default computes it, and is otherwise 0.0, which also computes it,
+    # or a cap in (0.06, 1]. calculate_ce takes the SET path, which ignores
+    # position, the two maxima, w_max and round_output.
+    case = {
+        "tdb": _value(rng, 0.0, 50.0),
+        "tr": _value(rng, 0.0, 60.0),
+        "v": _value(rng, 0.0, 4.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.0),
+        "clo": _value(rng, 0.0, 2.5),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.3 else 0.0,
+        "body_surface_area": _value(rng, 1.4, 2.2) if rng.random() < 0.3 else 1.8258,
+        "p_atm": _value(rng, 60000.0, 110000.0) if rng.random() < 0.3 else 101325.0,
+        "position": str(
+            rng.choice(
+                [
+                    "sitting",
+                    "standing",
+                    "standing, forced convection",
+                    "Sitting",
+                    "STANDING",
+                ]
+            )
+        ),
+        "max_skin_blood_flow": _value(rng, 30.0, 150.0),
+        "round_output": bool(rng.random() < 0.5),
+        "max_sweating": _value(rng, 100.0, 800.0),
+        "calculate_ce": bool(rng.random() < 0.2),
+    }
+    if rng.random() < 0.5:
+        case["w_max"] = 0.0 if rng.random() < 0.2 else _value(rng, 0.07, 1.0)
+    return case
+
+
 def _utci(rng):
     # The ranges reach past the limits (tdb -50-50 °C, tr - tdb -30-70 °C,
     # v 0.5-17 m/s, rh 0-100 %, pa 0-5 kPa), so NaN positions and every
@@ -171,6 +209,7 @@ MODELS = {
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "solar_gain": (models.solar_gain, _solar_gain),
+    "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
     "utci": (models.utci, _utci),
 }
 

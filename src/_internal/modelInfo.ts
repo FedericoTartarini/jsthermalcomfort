@@ -14,7 +14,18 @@ export type StandardId = (typeof Standard)[keyof typeof Standard];
  * compile.
  */
 export type UnitSymbol =
-  "°C" | "%" | "m/s" | "met" | "clo" | "W/m²" | "°" | "Pa" | "kPa";
+  | "°C"
+  | "%"
+  | "m/s"
+  | "met"
+  | "clo"
+  | "W/m²"
+  | "°"
+  | "Pa"
+  | "kPa"
+  | "m²"
+  | "kg/h/m²"
+  | "mL/h/m²";
 
 /**
  * A bound on a variable (minimum and/or maximum), inclusive. A missing side is

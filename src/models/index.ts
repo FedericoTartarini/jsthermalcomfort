@@ -7,7 +7,6 @@ import { humidex } from "./humidex.js";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index } from "./discomfort_index.js";
-import { two_nodes } from "./two_nodes.js";
 import { set_tmp } from "./set_tmp.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
@@ -36,6 +35,7 @@ import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.js";
 import { use_fans_heatwaves } from "./use_fans_heatwave.js";
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
+import { two_nodes_gagge } from "./two_nodes_gagge.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -105,7 +105,7 @@ export {
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,
@@ -146,7 +146,7 @@ export default {
   solar_gain,
   SOLAR_GAIN_INFO,
   set_tmp,
-  two_nodes,
+  two_nodes_gagge,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,

@@ -11,23 +11,10 @@ let { testData, tolerances } = await loadTestData(
   returnArray,
 );
 
-// Known gap, reported rather than fixed: validation data v1.0.1 recomputes
-// case #0's e_skin at 41 °C with pythermalcomfort 4.7.0's
-// p_rsw = (w_max - 0.06) / 0.94 (`models/two_nodes_gagge.py:410`,
-// pythermalcomfort#489); two_nodes.js, which this model calls, still uses
-// w_max / 0.94. `test.fails` turns red once two_nodes follows 4.7.0.
 const cases = testData.data.map((testCase, index) => ({ ...testCase, index }));
-const isWMaxCapCase = ({ index }) => index === 0;
 
 describe("use_fans_heatwaves", () => {
-  test.each(cases.filter((c) => !isWMaxCapCase(c)))(
-    "Test case #$index",
-    checkCase,
-  );
-  test.fails.each(cases.filter(isWMaxCapCase))(
-    "Test case #$index (known gap: w_max / 0.94, pythermalcomfort#489)",
-    checkCase,
-  );
+  test.each(cases)("Test case #$index", checkCase);
 });
 
 function checkCase(testCase) {

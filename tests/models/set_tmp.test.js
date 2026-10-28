@@ -27,7 +27,8 @@ describe("set_tmp", () => {
       body_position,
       units,
       limit_inputs = false,
-      round,
+      // As upstream's test_set_url, inputs["round_output"] = True (tests/test_set.py:28).
+      round = true,
       calculate_ce,
     } = inputs;
 

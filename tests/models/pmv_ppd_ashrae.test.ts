@@ -127,7 +127,7 @@ describe("test_pmv_ppd_ashrae", () => {
         standard: Standard.ashrae_55_2023,
         limit_inputs: false,
       });
-      expect(result.pmv).toBe(4.48);
+      expect(result.pmv).toBe(4.51); // 4.48 before #489
       expect(result.ppd).toBe(100.0);
       expect(result.tsv).toBe("Hot");
       expect(result.compliance).toBe(false);

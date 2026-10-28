@@ -1,6 +1,222 @@
+import { choiceFieldMessage, parseInputs } from "../_internal/define.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
+import type {
+  InputsOf,
+  ModelInfo,
+  ModelWarning,
+  OutputsOf,
+} from "../_internal/modelInfo.ts";
+import { round } from "../_internal/round.ts";
+import { p_sat_torr } from "../psychrometrics/p_sat_torr.ts";
 import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
 import { Postures } from "../utilities/options.ts";
-import { round } from "../_internal/round.ts";
+
+const POSITIONS = deepFreeze([
+  Postures.sitting,
+  Postures.standing,
+  "standing, forced convection",
+] as const);
+
+export const TWO_NODES_GAGGE_INFO = deepFreeze({
+  name: "two_nodes_gagge",
+  label: "Gagge et al. two-node model",
+  standards: [],
+  inputs: {
+    tdb: { kind: "numeric", unit: "°C" },
+    tr: { kind: "numeric", unit: "°C" },
+    v: { kind: "numeric", unit: "m/s" },
+    rh: { kind: "numeric", unit: "%" },
+    met: { kind: "numeric", unit: "met" },
+    clo: { kind: "numeric", unit: "clo" },
+    wme: { kind: "numeric", unit: "met", default: 0 },
+    body_surface_area: { kind: "numeric", unit: "m²", default: 1.8258 },
+    p_atm: { kind: "numeric", unit: "Pa", default: 101325 },
+    position: {
+      kind: "choice",
+      allowed: POSITIONS,
+      default: Postures.standing,
+      message: choiceFieldMessage("position", POSITIONS),
+      nullable: true,
+    },
+    max_skin_blood_flow: { kind: "numeric", unit: "kg/h/m²", default: 90 },
+    round_output: { kind: "bool", default: true },
+    max_sweating: { kind: "numeric", unit: "kg/h/m²", default: 500 },
+    w_max: { kind: "numeric", unit: null, default: 0 },
+    calculate_ce: { kind: "bool", default: false },
+  },
+  outputs: {
+    e_skin: { kind: "numeric", unit: "W/m²" },
+    e_rsw: { kind: "numeric", unit: "W/m²" },
+    e_max: { kind: "numeric", unit: "W/m²" },
+    q_sensible: { kind: "numeric", unit: "W/m²" },
+    q_skin: { kind: "numeric", unit: "W/m²" },
+    q_res: { kind: "numeric", unit: "W/m²" },
+    t_core: { kind: "numeric", unit: "°C" },
+    t_skin: { kind: "numeric", unit: "°C" },
+    m_bl: { kind: "numeric", unit: "kg/h/m²" },
+    m_rsw: { kind: "numeric", unit: "mL/h/m²" },
+    w: { kind: "numeric", unit: null },
+    w_max: { kind: "numeric", unit: null },
+    set: { kind: "numeric", unit: "°C" },
+    et: { kind: "numeric", unit: "°C" },
+    pmv_gagge: { kind: "numeric", unit: null },
+    pmv_set: { kind: "numeric", unit: null },
+    disc: { kind: "numeric", unit: null },
+    t_sens: { kind: "numeric", unit: null },
+  },
+} as const satisfies ModelInfo);
+
+/** @interface */
+export type GaggeTwoNodesInputs = InputsOf<typeof TWO_NODES_GAGGE_INFO>;
+
+/**
+ * Dataclass to represent the results of the two-node model of human temperature
+ * regulation.
+ *
+ * @interface
+ */
+export type GaggeTwoNodes = OutputsOf<typeof TWO_NODES_GAGGE_INFO>;
+
+/**
+ * Dataclass to represent the Standard Effective Temperature (SET).
+ *
+ * - `set` - Standard effective temperature, [°C].
+ *
+ * @interface
+ */
+export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
+
+export function two_nodes_gagge(
+  inputs: GaggeTwoNodesInputs,
+): SET | GaggeTwoNodes {
+  // Validate inputs using the GaggeTwoNodesInputs class
+  let {
+    tdb,
+    tr,
+    v,
+    rh,
+    met,
+    clo,
+    wme,
+    body_surface_area,
+    p_atm,
+    position,
+    max_skin_blood_flow,
+    round_output,
+    max_sweating,
+    w_max,
+    calculate_ce,
+  } = parseInputs(TWO_NODES_GAGGE_INFO, inputs);
+  // At 0.06 no regulatory sweat is left at the cap, so disc divides by zero
+  if (w_max !== 0 && (w_max <= 0.06 || w_max > 1)) {
+    const message =
+      "w_max must be greater than 0.06 and at most 1 " +
+      "(False or 0 means the model computes it).";
+    throw new RangeError(message);
+  }
+
+  const warnings: ModelWarning[] = [];
+
+  const vapor_pressure = (rh * p_sat_torr(tdb)) / 100;
+
+  if (calculate_ce) {
+    const result = _gagge_two_nodes_optimized_return_set(
+      tdb,
+      tr,
+      v,
+      met,
+      clo,
+      vapor_pressure,
+      wme,
+      body_surface_area,
+      p_atm,
+      1,
+    );
+    return Object.freeze({ set: result, warnings: Object.freeze(warnings) });
+  }
+
+  let _set,
+    e_skin,
+    e_rsw,
+    e_max,
+    q_sensible,
+    q_skin,
+    q_res,
+    t_core,
+    t_skin,
+    m_bl,
+    m_rsw,
+    w,
+    et,
+    pmv_gagge,
+    pmv_set,
+    disc,
+    t_sens;
+  [
+    _set,
+    e_skin,
+    e_rsw,
+    e_max,
+    q_sensible,
+    q_skin,
+    q_res,
+    t_core,
+    t_skin,
+    m_bl,
+    m_rsw,
+    w,
+    w_max,
+    et,
+    pmv_gagge,
+    pmv_set,
+    disc,
+    t_sens,
+  ] = _gagge_two_nodes_optimized(
+    tdb,
+    tr,
+    v,
+    met,
+    clo,
+    vapor_pressure,
+    wme,
+    body_surface_area,
+    p_atm,
+    position,
+    calculate_ce,
+    max_skin_blood_flow,
+    max_sweating,
+    w_max,
+  );
+
+  const output = {
+    e_skin: e_skin,
+    e_rsw: e_rsw,
+    e_max: e_max,
+    q_sensible: q_sensible,
+    q_skin: q_skin,
+    q_res: q_res,
+    t_core: t_core,
+    t_skin: t_skin,
+    m_bl: m_bl,
+    m_rsw: m_rsw,
+    w: w,
+    w_max: w_max,
+    set: _set,
+    et: et,
+    pmv_gagge: pmv_gagge,
+    pmv_set: pmv_set,
+    disc: disc,
+    t_sens: t_sens,
+  };
+
+  if (round_output) {
+    for (const key of Object.keys(output) as (keyof typeof output)[]) {
+      output[key] = round(output[key], 2);
+    }
+  }
+
+  return Object.freeze({ ...output, warnings: Object.freeze(warnings) });
+}
 
 export function _gagge_two_nodes_optimized(
   tdb: number,
@@ -176,7 +392,7 @@ export function _gagge_two_nodes_optimized(
     const sk_sig = t_skin - temp_skin_neutral;
     const warm_sk = Number(sk_sig > 0) * sk_sig; // vasodilation signal
     const colds = Number(-1.0 * sk_sig > 0) * (-1.0 * sk_sig); // vasoconstriction signal
-    // c_reg_sig thermoregulatory control signal from the skin, °C
+    // c_reg_sig thermoregulatory control signal from the core, °C
     const c_reg_sig = t_core - temp_core_neutral;
     // c_warm vasodilation signal
     const c_warm = Number(c_reg_sig > 0) * c_reg_sig;
@@ -357,4 +573,31 @@ export function _gagge_two_nodes_optimized(
     disc,
     t_sens,
   ];
+}
+
+function _gagge_two_nodes_optimized_return_set(
+  tdb: number,
+  tr: number,
+  v: number,
+  met: number,
+  clo: number,
+  vapor_pressure: number,
+  wme: number,
+  body_surface_area: number,
+  p_atm: number,
+  position: number,
+): number {
+  return _gagge_two_nodes_optimized(
+    tdb,
+    tr,
+    v,
+    met,
+    clo,
+    vapor_pressure,
+    wme,
+    body_surface_area,
+    p_atm,
+    position,
+    true,
+  )[0];
 }

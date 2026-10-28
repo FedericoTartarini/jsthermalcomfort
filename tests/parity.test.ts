@@ -6,8 +6,10 @@ import {
   heat_index_rothfusz,
   pmv_ppd_iso,
   solar_gain,
+  two_nodes_gagge,
   utci,
 } from "../src/models/index.ts";
+import { TWO_NODES_GAGGE_INFO } from "../src/models/two_nodes_gagge.ts";
 import type { Row } from "./deviations/register.ts";
 import {
   check_header,
@@ -456,6 +458,20 @@ const MODELS: readonly ParityModel[] = [
     // ASHRAE 55 Table C-2's rows, which upstream does not check, are exempt
     // by the register (deviation solar_gain-3, deviation solar_gain-4).
     warnings: true,
+  },
+  {
+    name: "two_nodes_gagge",
+    run: (inputs) =>
+      two_nodes_gagge(
+        inputs as unknown as Parameters<typeof two_nodes_gagge>[0],
+      ),
+    // Upstream rounds every output with np.around (models/two_nodes_gagge.py:205-207),
+    // but not the SET that calculate_ce returns (:146).
+    rounded: ({ round_output, calculate_ce }) =>
+      round_output === true && calculate_ce !== true
+        ? Object.keys(TWO_NODES_GAGGE_INFO.outputs)
+        : [],
+    warnings: false,
   },
   {
     name: "utci",

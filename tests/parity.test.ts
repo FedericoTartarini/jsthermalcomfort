@@ -403,11 +403,10 @@ describe("read_pins", () => {
 const MODELS: readonly ParityModel[] = [
   {
     name: "adaptive_ashrae",
-    run: (inputs) => ({
-      ...adaptive_ashrae(
+    run: (inputs) =>
+      adaptive_ashrae(
         inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
       ),
-    }),
     // Upstream rounds t_cmf in SI before deriving the bounds
     // (adaptive_ashrae.py:147-148), and converts it afterwards under IP.
     rounded: ({ units, round_output }) =>
@@ -418,30 +417,26 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "clo_tout",
-    run: (inputs) => ({
-      ...clo_tout(inputs as unknown as Parameters<typeof clo_tout>[0]),
-    }),
+    run: (inputs) =>
+      clo_tout(inputs as unknown as Parameters<typeof clo_tout>[0]),
     // Upstream rounds clo_tout with np.around (models/clo_tout.py:79).
     rounded: () => ["clo_tout"],
     warnings: true,
   },
   {
     name: "heat_index_rothfusz",
-    // A Result is an interface, so it is spread into a record (ADR 0023).
-    run: (inputs) => ({
-      ...heat_index_rothfusz(
+    run: (inputs) =>
+      heat_index_rothfusz(
         inputs as unknown as Parameters<typeof heat_index_rothfusz>[0],
       ),
-    }),
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
   },
   {
     name: "solar_gain",
-    run: (inputs) => ({
-      ...solar_gain(inputs as unknown as Parameters<typeof solar_gain>[0]),
-    }),
+    run: (inputs) =>
+      solar_gain(inputs as unknown as Parameters<typeof solar_gain>[0]),
     // Upstream rounds erf and delta_mrt with np.round (models/solar_gain.py:252-254).
     rounded: ({ round_output }) =>
       round_output === true ? ["erf", "delta_mrt"] : [],
@@ -451,9 +446,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "utci",
-    run: (inputs) => ({
-      ...utci(inputs as unknown as Parameters<typeof utci>[0]),
-    }),
+    run: (inputs) => utci(inputs as unknown as Parameters<typeof utci>[0]),
     // Upstream rounds utci with np.round (models/utci.py:173-175).
     rounded: ({ round_output }) => (round_output === true ? ["utci"] : []),
     warnings: true,

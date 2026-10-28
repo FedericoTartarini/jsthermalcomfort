@@ -105,6 +105,10 @@ export interface ModelOutputs {
  * `classifier`, if present, holds the bins used to turn this continuous output
  * into a categorical label. Pass it to `classifyFromBins` rather than
  * reimplementing the edge handling.
+ *
+ * `interval`, on a `bool` output, is the {@link Interval} of the quantity it
+ * tests inside which it is true: `pmv_ppd_ashrae`'s `compliance` is true for
+ * -0.5 < pmv < 0.5. Unlike `applicability`, it gates nothing.
  */
 export interface OutputField {
   readonly kind: "numeric" | "bool" | "label";
@@ -112,6 +116,16 @@ export interface OutputField {
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly classifier?: ClassifierBins;
+  readonly interval?: Interval;
+}
+
+/**
+ * An open interval: the values strictly between `min` and `max`, both ends
+ * excluded, where a {@link Bound} includes them.
+ */
+export interface Interval {
+  readonly min: number;
+  readonly max: number;
 }
 
 /**
@@ -146,6 +160,11 @@ export interface BoolField {
  * (`models/solar_gain.py:207-212`), and a `choice_field`, which `BaseInputs`
  * checks against its `allowed` (`classes_input.py:23, :155-159`).
  *
+ * Where upstream's text embeds the value given, `message` is a function of
+ * that value, which the parse calls with `String(value)`:
+ * `pmv_ppd_ashrae`'s `standard` reads "Model 'random' is not supported. …"
+ * (`models/pmv_ppd_ashrae.py:165-171`).
+ *
  * `nullable` marks a `choice_field`: `BaseInputs` skips one that is `None`
  * (`classes_input.py:138-139`), so `null` passes the parse unchanged.
  */
@@ -153,7 +172,7 @@ export interface ChoiceField {
   readonly kind: "choice";
   readonly allowed: readonly string[];
   readonly default?: string;
-  readonly message: string;
+  readonly message: string | ((value: string) => string);
   readonly nullable?: true;
 }
 

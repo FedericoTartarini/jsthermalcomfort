@@ -50,6 +50,7 @@ export type {
   DerivedField,
   DerivedInfo,
   InputsInfo,
+  Interval,
   ModelInfo,
   ModelOutputs,
   ModelWarning,

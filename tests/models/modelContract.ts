@@ -67,7 +67,11 @@ export function describeModelContract(
       return ["x", new TypeError(finiteMessage(key))];
     if (entry?.kind === "bool")
       return ["x", new TypeError(booleanMessage(key))];
-    return [1, new TypeError(entry?.message)];
+    const message = entry?.message;
+    return [
+      1,
+      new TypeError(typeof message === "function" ? message("1") : message),
+    ];
   };
 
   describe(`${info.name} contract (JS-only)`, () => {

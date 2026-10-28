@@ -62,17 +62,19 @@ function parseNumeric(key: string, value: unknown): number {
 function parseChoice(value: unknown, entry: ChoiceField): string | null {
   const { allowed, message } = entry;
   if (value === null && entry.nullable) return null;
+  const text = () =>
+    typeof message === "string" ? message : message(String(value));
   // Upstream compares `str(value).upper()` for `units`, so it raises the same
   // error for any value that is not a string (deviation _shared-24), and
   // `posture.lower()` raises `AttributeError` for one (deviation solar_gain-6).
-  if (typeof value !== "string") throw new TypeError(message);
+  if (typeof value !== "string") throw new TypeError(text());
   // Upstream upper-cases `units` and lower-cases `posture`, and `allowed` is
   // written in the case upstream compares in.
   if (
     !allowed.includes(value.toUpperCase()) &&
     !allowed.includes(value.toLowerCase())
   )
-    throw new RangeError(message);
+    throw new RangeError(text());
   return value;
 }
 

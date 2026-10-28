@@ -435,6 +435,36 @@ describe("parseInputs, choice (JS-only)", () => {
   });
 });
 
+// A message that embeds the value given, as pmv_ppd_ashrae's own check on model does (models/pmv_ppd_ashrae.py:165-171).
+describe("parseInputs, choice with a message of the value (JS-only)", () => {
+  const info = {
+    name: "f",
+    inputs: {
+      model: {
+        kind: "choice",
+        allowed: ["55-2023"],
+        default: "55-2023",
+        message: (model: string) =>
+          `Model '${model.toLowerCase()}' is not supported.`,
+      },
+    },
+  } as const;
+  const parse = (model: unknown) => () => parseInputs(info, { model });
+
+  test("throws the text for the value, RangeError for a string, TypeError otherwise", () => {
+    expect(parse("55-2023")()).toEqual({ model: "55-2023" });
+    expect(parse("RANDOM")).toThrow(
+      new RangeError("Model 'random' is not supported."),
+    );
+    expect(parse(7730)).toThrow(
+      new TypeError("Model '7730' is not supported."),
+    );
+    expect(parse(null)).toThrow(
+      new TypeError("Model 'null' is not supported."),
+    );
+  });
+});
+
 // A choice_field (classes_input.py:23), which BaseInputs checks against its
 // allowed and skips when None (classes_input.py:138-139, :155-159).
 describe("parseInputs, choice_field (JS-only)", () => {

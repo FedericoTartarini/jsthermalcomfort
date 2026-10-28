@@ -630,15 +630,16 @@ def _run(model, function, inputs):
         },
         "warnings": emitted,
     }
-    if inputs.get("limit_inputs") is False and model in GATED_INNER:
-        module, name = GATED_INNER[model]
-        module = importlib.import_module(module)
-        with mock.patch.object(module, name, _gated(getattr(module, name))):
-            case["gated_warnings"] = _call(function, inputs)[1]
-    elif inputs.get("limit_inputs") is False:
-        case["gated_warnings"] = _call(
-            function, {**inputs, "limit_inputs": True}, GATED_RAISES.get(model, ())
-        )[1]
+    if inputs.get("limit_inputs") is False:
+        if model in GATED_INNER:
+            path, name = GATED_INNER[model]
+            module = importlib.import_module(path)
+            with mock.patch.object(module, name, _gated(getattr(module, name))):
+                case["gated_warnings"] = _call(function, inputs)[1]
+        else:
+            case["gated_warnings"] = _call(
+                function, {**inputs, "limit_inputs": True}, GATED_RAISES.get(model, ())
+            )[1]
     return case
 
 

@@ -370,6 +370,11 @@ def _utci(rng):
     }
 
 
+# The exception a model's call with limit_inputs True raises after its
+# warnings: ankle_draft's where vr is outside 0-0.2 m/s
+# (models/ankle_draft.py:151-154). Any other raise stops the generator.
+GATED_RAISES = {"ankle_draft": ValueError}
+
 # Each model: upstream's function and the generator of one case's keyword
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
@@ -445,10 +450,8 @@ def _run(model, function, inputs):
         "warnings": emitted,
     }
     if inputs.get("limit_inputs") is False:
-        # ankle_draft raises after its warnings where vr is outside 0-0.2 m/s
-        # (models/ankle_draft.py:151-154).
         case["gated_warnings"] = _call(
-            function, {**inputs, "limit_inputs": True}, ValueError
+            function, {**inputs, "limit_inputs": True}, GATED_RAISES.get(model, ())
         )[1]
     return case
 

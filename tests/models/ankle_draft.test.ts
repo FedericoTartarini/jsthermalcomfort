@@ -220,7 +220,7 @@ describe("ankle_draft (JS-only)", () => {
     },
   );
 
-  test("an acceptability above 20 % is false", () => {
+  test("a ppd_ad above 20 % makes acceptability false", () => {
     const result = call({
       tdb: 20,
       tr: 20,
@@ -234,7 +234,7 @@ describe("ankle_draft (JS-only)", () => {
     expect(result.acceptability).toBe(false);
   });
 
-  // Deviation ankle_draft-2, deviation ankle_draft-4: upstream warns the notice, then each bound.
+  // Deviation ankle_draft-2, deviation ankle_draft-4: upstream's gated call warns the notice, then each bound.
   test("each bound broken gives a row, in upstream's order, with the gate off", () => {
     const out = { tdb: 50, tr: 5, vr: 2.5, met: 5, clo: 2 };
     const result = call({ ...out, rh: 50, v_ankle: 0.1, limit_inputs: false });

@@ -61,10 +61,76 @@ export type VerticalTGradPPDInputs = InputsOf<
  */
 export type VerticalTGradPPD = OutputsOf<typeof VERTICAL_TMP_GRAD_PPD_INFO>;
 
+/**
+ * Calculate the percentage of thermally dissatisfied people with a vertical
+ * temperature gradient between feet and head [55ASHRAE2023](../../docs/references.md#55ashrae2023). This equation is only
+ * applicable for vr < 0.2 m/s (40 fpm). The model subtracts a baseline of 34.5 % of
+ * dissatisfied occupants; when the result would be negative, ppd_vg is 0.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ *
+ * > [!NOTE]
+ * > The air temperature is the average value over two heights: 0.6 m (24 in.)
+ * > and 1.1 m (43 in.) for seated occupants
+ * > and 1.1 m (43 in.) and 1.7 m (67 in.) for standing occupants.
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.vr - Relative air speed, [m/s].
+ *
+ * > [!NOTE]
+ * > vr is the relative air speed caused by body movement and not the air
+ * > speed measured by the air speed sensor. The relative air speed is the sum of the
+ * > average air speed measured by the sensor plus the activity-generated air speed
+ * > (Vag). Where Vag is the activity-generated air speed caused by motion of
+ * > individual body parts. vr can be calculated using the function
+ * > `v_relative`.
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ *
+ * > [!NOTE]
+ * > this is the basic insulation also known as the intrinsic clothing insulation value of the
+ * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > surface to the outer clothing surface, including enclosed air layers, under actual
+ * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > The dynamic clothing insulation, clo, can be calculated using the function
+ * > `clo_dynamic_ashrae`.
+ * @param inputs.vertical_tmp_grad - Vertical temperature gradient between the feet and the head, [°C/m].
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
+ * function returns nan. If False, returns values even if input values are
+ * outside the applicability limits of the model. Defaults to True. The
+ * applicability limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
+ * 0 <= vr [m/s] <= 0.2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
+ *
+ * @returns A dataclass containing the Predicted Percentage of Dissatisfied occupants with vertical temperature gradient and acceptability.
+ * See {@link VerticalTGradPPD} for more details.
+ * To access the `ppd_vg` and `acceptability` values, use the corresponding attributes of the returned `VerticalTGradPPD` instance, e.g., `result.ppd_vg`.
+ *
+ * - `ppd_vg` - Predicted Percentage of Dissatisfied occupants with vertical temperature gradient.
+ * - `acceptability` - True if the vertical temperature gradient between the feet and the head is acceptable (PPD_vg <= 5%).
+ *
+ * @example
+ * ```ts
+ * import { vertical_tmp_grad_ppd } from "jsthermalcomfort/models";
+ *
+ * const result = vertical_tmp_grad_ppd({
+ *   tdb: 25,
+ *   tr: 25,
+ *   vr: 0.1,
+ *   rh: 50,
+ *   met: 1.2,
+ *   clo: 0.5,
+ *   vertical_tmp_grad: 7,
+ * });
+ * console.log(result.ppd_vg); // 12.6
+ * console.log(result.acceptability); // false
+ * ```
+ */
 export function vertical_tmp_grad_ppd(
   inputs: VerticalTGradPPDInputs,
 ): VerticalTGradPPD {
-  // Validate inputs using the VerticalTmpGradPPDInputs class
+  // Validate inputs using the VerticalTGradPPDInputs class
   const {
     tdb,
     tr,

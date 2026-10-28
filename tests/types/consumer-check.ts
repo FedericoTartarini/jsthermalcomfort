@@ -50,6 +50,8 @@ import type {
   UseFansHeatwavesInputs,
   UTCI,
   UTCIInputs,
+  VerticalTGradPPD,
+  VerticalTGradPPDInputs,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -73,6 +75,7 @@ import {
   Units,
   USE_FANS_HEATWAVES_INFO,
   UTCI_INFO,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   adaptive_ashrae,
   ankle_draft,
   classifyFromBins,
@@ -88,6 +91,7 @@ import {
   two_nodes_gagge,
   use_fans_heatwaves,
   utci,
+  vertical_tmp_grad_ppd,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 // One set of category bins per ISO 7730 edition replaced the one for both, so
@@ -118,6 +122,7 @@ const twoNodesGaggeInfo: ModelInfo = TWO_NODES_GAGGE_INFO;
 const phsInfo: ModelInfo = PHS_INFO;
 const useFansHeatwavesInfo: ModelInfo = USE_FANS_HEATWAVES_INFO;
 const ankleDraftInfo: ModelInfo = ANKLE_DRAFT_INFO;
+const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -722,3 +727,22 @@ const ankleAcceptability: boolean | number = ankle.acceptability;
 const ankleAcceptabilityBool: boolean = ankle.acceptability;
 // @ts-expect-error units is 'SI' or 'IP'.
 ankle_draft({ ...ankleInputs, units: "metric" });
+
+// vertical_tmp_grad_ppd takes no units, as upstream's signature does, and
+// returns acceptability as a masked boolean, NaN where the gate masks it.
+const verticalInputs: VerticalTGradPPDInputs = {
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+  vertical_tmp_grad: 7,
+};
+const vertical: VerticalTGradPPD = vertical_tmp_grad_ppd(verticalInputs);
+const verticalPpd: number = vertical.ppd_vg;
+const verticalAcceptability: boolean | number = vertical.acceptability;
+// @ts-expect-error a masked boolean may be NaN, a number.
+const verticalAcceptabilityBool: boolean = vertical.acceptability;
+// @ts-expect-error vertical_tmp_grad_ppd takes no units.
+vertical_tmp_grad_ppd({ ...verticalInputs, units: "SI" });

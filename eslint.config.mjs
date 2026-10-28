@@ -38,6 +38,7 @@ export const LINTED = [
   "src/models/two_nodes_gagge.ts",
   "src/models/use_fans_heatwaves.ts",
   "src/models/utci.ts",
+  "src/models/vertical_tmp_grad_ppd.ts",
   "tests/call_sites.test.ts",
   "tests/check_mirrored.test.ts",
   "tests/environment/operative_tmp.test.ts",

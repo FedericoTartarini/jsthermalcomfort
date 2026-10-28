@@ -133,6 +133,15 @@ const v2Calls: Record<string, object> = {
   two_nodes_gagge: { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   use_fans_heatwaves: { tdb: 35, tr: 35, v: 1.0, rh: 50, met: 1.2, clo: 0.5 },
   utci: { tdb: 25, tr: 25, v: 1, rh: 50 },
+  vertical_tmp_grad_ppd: {
+    tdb: 25,
+    tr: 25,
+    vr: 0.1,
+    rh: 50,
+    met: 1.2,
+    clo: 0.5,
+    vertical_tmp_grad: 7,
+  },
 };
 
 describe("Outputs staleness — each v2 model's result matches its INFO.outputs", () => {

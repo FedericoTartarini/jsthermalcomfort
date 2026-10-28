@@ -558,7 +558,10 @@ const MODELS: readonly ParityModel[] = [
       ),
     // Upstream rounds ppd_vg with np.round (models/vertical_tmp_grad_ppd.py:130-131).
     rounded: ({ round_output }) => (round_output === true ? ["ppd_vg"] : []),
-    warnings: false,
+    // acceptability, a boolean where upstream's is 1.0 or 0.0, and the cooling
+    // effect's notice, which upstream emits twice, are exempt by the register
+    // (deviation vertical_tmp_grad_ppd-5, deviation vertical_tmp_grad_ppd-6).
+    warnings: true,
   },
 ];
 

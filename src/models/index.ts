@@ -26,7 +26,10 @@ import { pmv } from "./pmv.js";
 import { a_pmv } from "./a_pmv.js";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
 import { e_pmv } from "./e_pmv.js";
-import { vertical_tmp_grad_ppd } from "./vertical_tmp_grad_ppd.ts";
+import {
+  vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
+} from "./vertical_tmp_grad_ppd.ts";
 import {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
@@ -77,6 +80,10 @@ export type {
   UseFansHeatwavesInputs,
 } from "./use_fans_heatwaves.ts";
 export type { UTCI, UTCIInputs } from "./utci.ts";
+export type {
+  VerticalTGradPPD,
+  VerticalTGradPPDInputs,
+} from "./vertical_tmp_grad_ppd.ts";
 
 export {
   adaptive_ashrae,
@@ -118,6 +125,7 @@ export {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
   vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
   wc,
   wind_chill_temperature,
@@ -163,6 +171,7 @@ export default {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
   vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
   wc,
   wind_chill_temperature,

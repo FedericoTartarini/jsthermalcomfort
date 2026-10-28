@@ -75,8 +75,7 @@ const call = (inputs: unknown) =>
 
 // Mirrors the position cases of pythermalcomfort v4.7.0
 // tests/test_choice_field.py through the model, whose inputs class receives
-// position (models/two_nodes_gagge.py:115). Measured on 4.7.0, 'sitting'
-// gives a set of 31.39 here and 'standing' 31.52.
+// position (models/two_nodes_gagge.py:115).
 describe("test_choice_field", () => {
   const allowed = ["sitting", "standing", "standing, forced convection"];
   const set = (position: unknown) => call({ ...base, position }).set;
@@ -88,7 +87,7 @@ describe("test_choice_field", () => {
     expect(set(undefined)).toBe(set("standing"));
   });
 
-  // Kept as given, so "SITTING" computes as standing; arrays throw (deviation two_nodes_gagge-6).
+  // Kept as given, so "SITTING" computes as standing.
   test.each([
     ["scalar", allowed[0], 31.39],
     ["uppercase", "SITTING", 31.52],
@@ -100,9 +99,22 @@ describe("test_choice_field", () => {
     },
   );
 
+  // Deviation two_nodes_gagge-6.
+  test.each([["list"], ["array"]])(
+    "test_choice_fields_preserve_valid_values[position-%s]",
+    () => {
+      expect(() => set(allowed)).toThrow(new TypeError(position_message));
+    },
+  );
+
+  test.todo(
+    "test_choice_fields_preserve_valid_values[position-series]: a pandas Series has no JavaScript counterpart",
+  );
+
   test.each([
     ["scalar", "invalid", RangeError],
     ["list", [allowed[0], "invalid"], TypeError],
+    ["array", [allowed[0], "invalid"], TypeError],
   ])(
     "test_choice_fields_reject_invalid_values[position-%s]",
     (_, value, error) => {

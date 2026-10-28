@@ -10,7 +10,7 @@ import { discomfort_index } from "./discomfort_index.js";
 import { set_tmp } from "./set_tmp.js";
 import { wc } from "./wc.js";
 import { wind_chill_temperature } from "./wind_chill_temperature.js";
-import { adaptive_en } from "./adaptive_en.ts";
+import { adaptive_en, ADAPTIVE_EN_INFO } from "./adaptive_en.ts";
 import { at } from "./at.js";
 import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import {
@@ -62,6 +62,7 @@ export type {
   UnitSymbol,
 } from "../_internal/modelInfo.ts";
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
+export type { AdaptiveEN, ENInputs } from "./adaptive_en.ts";
 export type { AnkleDraft, AnkleDraftInputs } from "./ankle_draft.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
@@ -89,6 +90,7 @@ export {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
+  ADAPTIVE_EN_INFO,
   a_pmv,
   athb,
   e_pmv,
@@ -135,6 +137,7 @@ export default {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
+  ADAPTIVE_EN_INFO,
   a_pmv,
   athb,
   e_pmv,

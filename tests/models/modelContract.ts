@@ -33,7 +33,9 @@ export function isDeepFrozen(value: unknown): boolean {
  * `AdaptiveASHRAE`, `AnkleDraft`, `CloTOut`, `CE`, `HI`, `PHS`, `PMVPPD`,
  * `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`, `UseFansHeatwaves`,
  * `UTCI` and `VerticalTGradPPD` at `classes_return.py:111, :184, :227, :241,
- * :297, :353, :415, :435, :467, :480, :497, :631, :689, :705`).
+ * :297, :353, :415, :435, :467, :480, :497, :631, :689, :705`), and as
+ * `AdaptiveEN` is, although upstream's is a plain `@dataclass` (`:143`,
+ * deviation adaptive_en-5).
  *
  * Every case calls the model the subpath index exports, the seam of every
  * behaviour test (decision 93, S1), so the contract holds for what a consumer

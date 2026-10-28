@@ -58,6 +58,71 @@ export type ENInputs = InputsOf<typeof ADAPTIVE_EN_INFO>;
  */
 export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
 
+/**
+ * Calculate the adaptive thermal comfort based on EN 16798-1 2019 [16798EN2019](../../docs/references.md#16798en2019).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.tr - Mean radiant temperature, default in [°C] or [°F] if `units` = 'IP'.
+ * @param inputs.t_running_mean - Running mean temperature, default in [°C] or [°F] if `units` = 'IP'.
+ *
+ * > [!NOTE]
+ * > The running mean temperature can be calculated using the function `running_mean_outdoor_temperature`.
+ *
+ * @param inputs.v - Air speed, default in [m/s] or [fps] if `units` = 'IP'.
+ *
+ * > [!NOTE]
+ * > Indoor operative temperature correction is applicable for buildings equipped
+ * > with fans or personal systems providing building occupants with personal
+ * > control over air speed at occupant level.
+ * > For operative temperatures at or above 25°C the comfort zone upper limit can be
+ * > increased by 1.2 °C (0.6 <= v < 0.9 m/s), 1.8 °C (0.9 <= v < 1.2 m/s), 2.2 °C (v
+ * > \>= 1.2 m/s).
+ *
+ * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @param inputs.limit_inputs - If True, returns NaN for inputs outside the standard applicability limits.
+ * The applicability limits are 10 <= t_running_mean [°C] <= 30.
+ * @param inputs.round_output - If True, rounds the returned comfort temperature and category bounds to one decimal
+ * place in the output unit (rounding is applied after any IP unit conversion).
+ * If False, returns the unrounded values.
+ *
+ * @returns A dataclass containing the results. See {@link AdaptiveEN} for more details.
+ *
+ * - `tmp_cmf` - Comfort temperature at that specific running mean temperature, default in [°C] or in [°F].
+ * - `acceptability_cat_i` - If the indoor conditions comply with comfort category I.
+ * - `acceptability_cat_ii` - If the indoor conditions comply with comfort category II.
+ * - `acceptability_cat_iii` - If the indoor conditions comply with comfort category III.
+ * - `tmp_cmf_cat_i_up` - Upper acceptable comfort temperature for category I, default in [°C] or in [°F].
+ * - `tmp_cmf_cat_ii_up` - Upper acceptable comfort temperature for category II, default in [°C] or in [°F].
+ * - `tmp_cmf_cat_iii_up` - Upper acceptable comfort temperature for category III, default in [°C] or in [°F].
+ * - `tmp_cmf_cat_i_low` - Lower acceptable comfort temperature for category I, default in [°C] or in [°F].
+ * - `tmp_cmf_cat_ii_low` - Lower acceptable comfort temperature for category II, default in [°C] or in [°F].
+ * - `tmp_cmf_cat_iii_low` - Lower acceptable comfort temperature for category III, default in [°C] or in [°F].
+ *
+ * @example
+ * ```ts
+ * import { adaptive_en } from "jsthermalcomfort/models";
+ *
+ * let results = adaptive_en({ tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 });
+ * console.log(results);
+ * // { tmp_cmf: 25.4, acceptability_cat_i: true, acceptability_cat_ii: true, ... }
+ *
+ * console.log(results.acceptability_cat_i); // or console.log(results["acceptability_cat_i"])
+ * // true
+ * // The conditions you entered are considered to comply with Category I
+ *
+ * // For users who want to use the IP system, units: "IP" or "ip" are both valid
+ * results = adaptive_en({ tdb: 77, tr: 77, t_running_mean: 68, v: 0.3, units: "IP" });
+ * console.log(results);
+ * // { tmp_cmf: 77.7, acceptability_cat_i: true, ... }
+ *
+ * results = adaptive_en({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
+ * console.log(results);
+ * // { tmp_cmf: NaN, acceptability_cat_i: false, ... }
+ * // The adaptive thermal comfort model can only be used
+ * // if the running mean temperature is between 10 °C and 30 °C.
+ * ```
+ */
 export function adaptive_en(inputs: ENInputs): AdaptiveEN {
   // Validate inputs using the ENInputs class
   let { tdb, tr, t_running_mean, v, units, limit_inputs, round_output } =

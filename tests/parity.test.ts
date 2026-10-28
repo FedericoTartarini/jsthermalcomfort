@@ -445,7 +445,7 @@ const MODELS: readonly ParityModel[] = [
             "tmp_cmf_cat_iii_low",
           ]
         : [],
-    warnings: false,
+    warnings: true,
   },
   {
     name: "ankle_draft",

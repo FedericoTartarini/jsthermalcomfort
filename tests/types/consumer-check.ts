@@ -20,9 +20,11 @@
 
 import type {
   AdaptiveASHRAE,
+  AdaptiveEN,
   AnkleDraft,
   AnkleDraftInputs,
   ASHRAEInputs,
+  ENInputs,
   ApplicabilityWarning,
   Bound,
   ClassifierBins,
@@ -58,6 +60,7 @@ import type {
 } from "jsthermalcomfort";
 import {
   ADAPTIVE_ASHRAE_INFO,
+  ADAPTIVE_EN_INFO,
   ANKLE_DRAFT_INFO,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
@@ -77,6 +80,7 @@ import {
   UTCI_INFO,
   VERTICAL_TMP_GRAD_PPD_INFO,
   adaptive_ashrae,
+  adaptive_en,
   ankle_draft,
   classifyFromBins,
   clo_individual_garments,
@@ -123,6 +127,7 @@ const phsInfo: ModelInfo = PHS_INFO;
 const useFansHeatwavesInfo: ModelInfo = USE_FANS_HEATWAVES_INFO;
 const ankleDraftInfo: ModelInfo = ANKLE_DRAFT_INFO;
 const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
+const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -746,3 +751,17 @@ const verticalAcceptability: boolean | number = vertical.acceptability;
 const verticalAcceptabilityBool: boolean = vertical.acceptability;
 // @ts-expect-error vertical_tmp_grad_ppd takes no units.
 vertical_tmp_grad_ppd({ ...verticalInputs, units: "SI" });
+
+// adaptive_en takes one inputs object (ADR 0002), with its inputs and result
+// types named after upstream's ENInputs and AdaptiveEN, and returns a readonly
+// result, frozen although upstream's dataclass is not (deviation adaptive_en-5).
+const enInputs: ENInputs = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
+const en: AdaptiveEN = adaptive_en(enInputs);
+const enCmf: number = en.tmp_cmf;
+const enAcceptability: boolean = en.acceptability_cat_i;
+// @ts-expect-error the result is readonly.
+en.tmp_cmf = 1;
+// @ts-expect-error units is 'SI' or 'IP'.
+adaptive_en({ ...enInputs, units: "metric" });
+// @ts-expect-error adaptive_en takes no standard, as upstream takes no model.
+adaptive_en({ ...enInputs, standard: "16798-1-2019" });

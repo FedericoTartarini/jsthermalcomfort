@@ -99,6 +99,7 @@ describe("Deep freezing — objects are immutable", () => {
 // below until it has a call here.
 const v2Calls: Record<string, object> = {
   adaptive_ashrae: { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
+  adaptive_en: { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
   ankle_draft: {
     tdb: 25,
     tr: 25,

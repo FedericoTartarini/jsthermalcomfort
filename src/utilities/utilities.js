@@ -92,9 +92,8 @@ export function check_standard_compliance(standard, kwargs) {
     case Standard.iso_7730_2025:
       return _iso_compliance(kwargs);
     case Standard.iso_7933_2004:
-      return _iso7933_2004_compliance(kwargs);
     case Standard.iso_7933_2023:
-      return _iso7933_2023_compliance(kwargs);
+      return _iso7933_compliance(standard, kwargs);
     default:
       throw new Error(
         `Unknown standard "${standard}". Expected one of: ` +
@@ -308,36 +307,16 @@ function _iso_compliance(kwargs) {
 }
 
 /**
- * @param {ComplianceKwargs} kwargs
- *
- * @returns {string[]} strings with warnings emitted
- */
-function _iso7933_2004_compliance(kwargs) {
-  // based on ISO 7933:2004 Annex A
-  return _iso7933_compliance(Standard.iso_7933_2004, "ISO 7933:2004", kwargs);
-}
-
-/**
- * @param {ComplianceKwargs} kwargs
- *
- * @returns {string[]} strings with warnings emitted
- */
-function _iso7933_2023_compliance(kwargs) {
-  // based on ISO 7933:2023 Annex A
-  return _iso7933_compliance(Standard.iso_7933_2023, "ISO 7933:2023", kwargs);
-}
-
-/**
  * The checks of `phs` (`PHS_INFO` and the edition's `PHS_LIMITS_ISO_7933`),
- * each warning named after `label`.
+ * based on ISO 7933 Annex A, each warning naming the edition.
  *
  * @param {"7933-2004"|"7933-2023"} standard
- * @param {string} label
  * @param {ComplianceKwargs} kwargs
  *
  * @returns {string[]} strings with warnings emitted
  */
-function _iso7933_compliance(standard, label, kwargs) {
+function _iso7933_compliance(standard, kwargs) {
+  const label = `ISO ${standard.replace("-", ":")}`;
   if (
     kwargs.tdb === undefined ||
     kwargs.p_a === undefined ||
@@ -352,36 +331,36 @@ function _iso7933_compliance(standard, label, kwargs) {
   }
   /** @type {string[]} */
   let warnings = [];
-  const out = (value, { min, max }) => value > max || value < min;
+  const outside = (value, { min, max }) => value > max || value < min;
   const { p_a, met } = PHS_LIMITS_ISO_7933[standard];
-  const tdb = PHS_INFO.inputs.tdb.applicability;
-  const tr_tdb = PHS_INFO.derived["tr - tdb"].applicability;
-  const v = PHS_INFO.inputs.v.applicability;
-  const clo = PHS_INFO.inputs.clo.applicability;
+  const tdb_bound = PHS_INFO.inputs.tdb.applicability;
+  const tr_tdb_bound = PHS_INFO.derived["tr - tdb"].applicability;
+  const v_bound = PHS_INFO.inputs.v.applicability;
+  const clo_bound = PHS_INFO.inputs.clo.applicability;
 
-  if (out(kwargs.tdb, tdb))
+  if (outside(kwargs.tdb, tdb_bound))
     warnings.push(
-      `${label} air temperature applicability limits between ${tdb.min} and ${tdb.max} ºC`,
+      `${label} air temperature applicability limits between ${tdb_bound.min} and ${tdb_bound.max} ºC`,
     );
-  if (out(kwargs.p_a, p_a))
+  if (outside(kwargs.p_a, p_a))
     warnings.push(
       `${label} p_a applicability limits between ${p_a.min} and ${p_a.max} kPa`,
     );
-  if (out(kwargs.tr - kwargs.tdb, tr_tdb))
+  if (outside(kwargs.tr - kwargs.tdb, tr_tdb_bound))
     warnings.push(
-      `${label} tr - tdb applicability limits between ${tr_tdb.min} and ${tr_tdb.max} ºC`,
+      `${label} tr - tdb applicability limits between ${tr_tdb_bound.min} and ${tr_tdb_bound.max} ºC`,
     );
-  if (out(kwargs.v, v))
+  if (outside(kwargs.v, v_bound))
     warnings.push(
-      `${label} air speed applicability limits between ${v.min} and ${v.max} m/s`,
+      `${label} air speed applicability limits between ${v_bound.min} and ${v_bound.max} m/s`,
     );
-  if (out(kwargs.met, met))
+  if (outside(kwargs.met, met))
     warnings.push(
       `${label} met applicability limits between ${met.min} and ${met.max} met`,
     );
-  if (out(kwargs.clo, clo))
+  if (outside(kwargs.clo, clo_bound))
     warnings.push(
-      `${label} clo applicability limits between ${clo.min} and ${clo.max} clo`,
+      `${label} clo applicability limits between ${clo_bound.min} and ${clo_bound.max} clo`,
     );
   return warnings;
 }

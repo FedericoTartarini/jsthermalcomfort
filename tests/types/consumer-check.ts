@@ -56,6 +56,8 @@ import type {
   UTCIInputs,
   VerticalTGradPPD,
   VerticalTGradPPDInputs,
+  WCI,
+  WCIInputs,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -82,6 +84,7 @@ import {
   USE_FANS_HEATWAVES_INFO,
   UTCI_INFO,
   VERTICAL_TMP_GRAD_PPD_INFO,
+  WCI_INFO,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -100,6 +103,7 @@ import {
   use_fans_heatwaves,
   utci,
   vertical_tmp_grad_ppd,
+  wci,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 // One set of category bins per ISO 7730 edition replaced the one for both, so
@@ -133,6 +137,7 @@ const ankleDraftInfo: ModelInfo = ANKLE_DRAFT_INFO;
 const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 const humidexInfo: ModelInfo = HUMIDEX_INFO;
+const wciInfo: ModelInfo = WCI_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -784,3 +789,13 @@ humidexResult.humidex = 1;
 humidex({ tdb: 25, rh: 50, model: "lu" });
 // @ts-expect-error humidex takes upstream's model, not standard.
 humidex({ tdb: 25, rh: 50, standard: "rana" });
+
+// wci takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's WCIInputs and WCI, and returns a readonly result.
+const wciInputs: WCIInputs = { tdb: -5, v: 5.5, round_output: false };
+const wciResult: WCI = wci(wciInputs);
+const wciValue: number = wciResult.wci;
+// @ts-expect-error the result is readonly.
+wciResult.wci = 1;
+// @ts-expect-error v is required.
+wci({ tdb: -5 });

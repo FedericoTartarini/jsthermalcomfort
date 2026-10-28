@@ -594,7 +594,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => wci(inputs as unknown as Parameters<typeof wci>[0]),
     // Upstream rounds wci with np.around (models/wci.py:73-74).
     rounded: ({ round_output }) => (round_output === true ? ["wci"] : []),
-    warnings: false,
+    warnings: true,
   },
 ];
 

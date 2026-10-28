@@ -42,6 +42,7 @@ export const LINTED = [
   "src/models/use_fans_heatwaves.ts",
   "src/models/utci.ts",
   "src/models/vertical_tmp_grad_ppd.ts",
+  "src/models/wci.ts",
   "tests/call_sites.test.ts",
   "tests/check_mirrored.test.ts",
   "tests/environment/operative_tmp.test.ts",

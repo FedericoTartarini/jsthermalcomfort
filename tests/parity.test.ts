@@ -16,6 +16,7 @@ import {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
   utci,
+  vertical_tmp_grad_ppd,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -548,6 +549,16 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds utci with np.round (models/utci.py:173-175).
     rounded: ({ round_output }) => (round_output === true ? ["utci"] : []),
     warnings: true,
+  },
+  {
+    name: "vertical_tmp_grad_ppd",
+    run: (inputs) =>
+      vertical_tmp_grad_ppd(
+        inputs as unknown as Parameters<typeof vertical_tmp_grad_ppd>[0],
+      ),
+    // Upstream rounds ppd_vg with np.round (models/vertical_tmp_grad_ppd.py:130-131).
+    rounded: ({ round_output }) => (round_output === true ? ["ppd_vg"] : []),
+    warnings: false,
   },
 ];
 

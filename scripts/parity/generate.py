@@ -370,6 +370,28 @@ def _utci(rng):
     }
 
 
+def _vertical_tmp_grad_ppd(rng):
+    # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, vr 0-0.2
+    # m/s as v_limited, met 1-4 met, clo 0-1.5 clo), so NaN positions and
+    # every check's warning are compared too, and the hot, humid cases return
+    # the cooling effect's warning. vr goes below 0 and past 0.2 m/s with
+    # either gate, more often with it off, and vertical_tmp_grad reaches the
+    # gradients whose ppd_vg the 34.5 % baseline clamps to 0
+    # (models/vertical_tmp_grad_ppd.py:125-127).
+    limit_inputs = bool(rng.random() < 0.5)
+    return {
+        "tdb": _value(rng, 5.0, 45.0),
+        "tr": _value(rng, 5.0, 45.0),
+        "vr": _value(rng, -0.05, 0.3) if limit_inputs else _value(rng, -0.2, 2.5),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.4),
+        "clo": _value(rng, 0.0, 2.0),
+        "vertical_tmp_grad": _value(rng, -2.0, 12.0),
+        "round_output": bool(rng.random() < 0.5),
+        "limit_inputs": limit_inputs,
+    }
+
+
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
@@ -390,6 +412,7 @@ MODELS = {
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),
+    "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),
 }
 
 

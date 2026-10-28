@@ -59,6 +59,7 @@ export const LINTED = [
   "tests/models/two_nodes_gagge.test.ts",
   "tests/models/use_fans_heatwaves.test.ts",
   "tests/models/utci.test.ts",
+  "tests/models/vertical_tmp_grad_ppd.test.ts",
   "tests/psychrometrics/p_sat.test.ts",
   "tests/psychrometrics/p_sat_torr.test.ts",
   "tests/utilities/units_converter.test.ts",

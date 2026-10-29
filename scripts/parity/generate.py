@@ -412,7 +412,9 @@ def _solar_gain(rng):
 
 
 # Every sport upstream predefines, by its name in Sports, in upstream's order.
-_SPORTS = [name for name, value in vars(models.Sports).items() if isinstance(value, _SportsValues)]
+_SPORTS = [
+    name for name, value in vars(models.Sports).items() if isinstance(value, _SportsValues)
+]
 
 
 def _sports_heat_stress_risk(rng):
@@ -585,7 +587,6 @@ GATED_RAISES = {"ankle_draft": ValueError}
 # met by the first pmv_ppd_iso call's pmv (models/pmv_e.py:134), which the gate
 # masks to NaN, so the same call with the gate on checks an unadjusted met.
 GATED_INNER = {"pmv_e": ("pythermalcomfort.models.pmv_e", "pmv_ppd_iso")}
-
 
 
 def _sports_by_name(**inputs):

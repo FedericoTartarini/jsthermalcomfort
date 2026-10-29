@@ -28,9 +28,7 @@ function expect_valid_risk(result: ReturnType<typeof sports_heat_stress_risk>) {
   expect(result.risk_level_interpolated).toBeLessThanOrEqual(4.9);
 }
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_sports_heat_stress_risk.py. A
-// list or array input runs element-wise, as the model takes scalars
-// (deviation _shared-5), and a ValueError is a RangeError.
+// Mirrors pythermalcomfort v4.7.0 tests/test_sports_heat_stress_risk.py.
 describe("test_sports_heat_stress_risk", () => {
   test.each([
     // Moderate temperature
@@ -780,8 +778,7 @@ describe("test_sports_heat_stress_risk", () => {
     );
   });
 
-  // Upstream's arrays raise for any negative element; element-wise, each
-  // negative vr throws.
+  // Deviation _shared-5.
   test("test_sports_heat_stress_risk_array_with_negative_wind_speeds", () => {
     for (const [tdb, rh, vr, sport] of [
       [35, 50, -1.0, Sports.RUNNING],
@@ -793,8 +790,7 @@ describe("test_sports_heat_stress_risk", () => {
       ).toThrow(new RangeError(air_speed_message));
   });
 
-  // Upstream's arrays raise for any element outside [0, 100]; element-wise,
-  // each such rh throws.
+  // Deviation _shared-5.
   test("test_sports_heat_stress_risk_array_with_invalid_humidity", () => {
     for (const [tdb, rh, sport] of [
       [35, 101, Sports.TENNIS],
@@ -819,8 +815,7 @@ describe("test_sports_heat_stress_risk", () => {
     ).toBe(true);
   });
 
-  // Upstream accepts a result or a raise for an infinite tdb; the library
-  // throws RangeError (deviation _shared-7).
+  // Deviation _shared-7.
   test("test_sports_heat_stress_risk_inf_values", () => {
     for (const [tdb, sport] of [
       [Infinity, Sports.RUNNING],
@@ -965,7 +960,7 @@ describe("test_sports_heat_stress_risk", () => {
 });
 
 const running = { tdb: 35, tr: 35, rh: 40, vr: 2.0, sport: Sports.RUNNING };
-const build =
+const construct_sport =
   (...args: unknown[]) =>
   () =>
     new (_SportsValues as unknown as new (...a: unknown[]) => _SportsValues)(
@@ -1006,6 +1001,18 @@ describe("sports_heat_stress_risk (JS-only)", () => {
     ]);
   });
 
+  // Deviation sports_heat_stress_risk-14.
+  test("a zero duration throws upstream's ZeroDivisionError message at or above 23 °C", () => {
+    const sport = new _SportsValues(0.5, 5.0, 0.5, 0);
+    expect(() =>
+      sports_heat_stress_risk({ tdb: 30, tr: 30, rh: 50, vr: 0.5, sport }),
+    ).toThrow(new RangeError("float division by zero"));
+    expect(
+      sports_heat_stress_risk({ tdb: 20, tr: 30, rh: 50, vr: 0.5, sport })
+        .t_medium,
+    ).toBe(23);
+  });
+
   test("returns no rows where both thresholds solve", () => {
     expect(sports_heat_stress_risk(running).warnings).toEqual([]);
   });
@@ -1040,7 +1047,7 @@ describe("sports_heat_stress_risk (JS-only)", () => {
       [[0.5, 5, 0.5, 60.5], "duration must be an integer."],
       [[0.5, 5, 0.5, true], "duration must be an integer."],
     ] as const)
-      expect(build(...args)).toThrow(new TypeError(message));
+      expect(construct_sport(...args)).toThrow(new TypeError(message));
   });
 
   // Deviation sports_heat_stress_risk-7.
@@ -1055,7 +1062,7 @@ describe("sports_heat_stress_risk (JS-only)", () => {
         "duration must be a non-negative integer >= 0, got -1",
       ],
     ] as const)
-      expect(build(...args)).toThrow(new RangeError(message));
+      expect(construct_sport(...args)).toThrow(new RangeError(message));
   });
 
   // Deviation sports_heat_stress_risk-8.

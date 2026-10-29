@@ -402,6 +402,8 @@ export function _calc_risk_single_value(
 
   function calculate_threshold_water_loss(x: number): number {
     const sl = _phs_scalar(x, tr, rh, vr, sport)[_PHS_IDX_SWEAT_LOSS_G];
+    // Python raises ZeroDivisionError here (deviation sports_heat_stress_risk-14).
+    if (sport.duration === 0) throw new RangeError("float division by zero");
     return (sl / sport.duration) * 45.0 - sweat_loss_g;
   }
 
@@ -414,8 +416,12 @@ export function _calc_risk_single_value(
       t_medium = brentq(calculate_threshold_water_loss, min_t, max_t);
       break;
     } catch (error) {
-      // scipy's ValueError is brentq's RangeError (deviation _shared-45).
-      if (!(error instanceof RangeError)) throw error;
+      // scipy's ValueError is brentq's RangeError (deviation _shared-45), and a ZeroDivisionError is not one.
+      if (
+        !(error instanceof RangeError) ||
+        error.message.includes("division by zero")
+      )
+        throw error;
       continue;
     }
   }
@@ -441,8 +447,12 @@ export function _calc_risk_single_value(
       t_extreme = brentq(calculate_threshold_core, min_t, max_t);
       break;
     } catch (error) {
-      // scipy's ValueError is brentq's RangeError (deviation _shared-45).
-      if (!(error instanceof RangeError)) throw error;
+      // scipy's ValueError is brentq's RangeError (deviation _shared-45), and a ZeroDivisionError is not one.
+      if (
+        !(error instanceof RangeError) ||
+        error.message.includes("division by zero")
+      )
+        throw error;
       continue;
     }
   }

@@ -31,6 +31,7 @@ from numpy._core._multiarray_umath import (
 )
 
 import pythermalcomfort.models as models
+from pythermalcomfort.models.sports_heat_stress_risk import _SportsValues
 
 HERE = Path(__file__).resolve().parent
 
@@ -410,6 +411,28 @@ def _solar_gain(rng):
     }
 
 
+# Every sport upstream predefines, by its name in Sports, in upstream's order.
+_SPORTS = [name for name, value in vars(models.Sports).items() if isinstance(value, _SportsValues)]
+
+
+def _sports_heat_stress_risk(rng):
+    # sport is named by its Sports attribute, since a case's inputs are JSON,
+    # and _sports_by_name passes upstream the instance. tdb reaches below the
+    # 23 °C under which upstream returns its default thresholds, and tr the
+    # cold and hot surroundings where both brentq brackets of a threshold fail,
+    # which warns and falls back to its maximum; vr reaches below every
+    # sport's minimum, which upstream raises it to. rh stays in [0, 100] and vr
+    # at or above 0, outside which upstream raises (classes_input.py:1284-1289).
+    tdb = _value(rng, 15.0, 55.0)
+    return {
+        "tdb": tdb,
+        "tr": _value(rng, tdb - 40.0, tdb + 40.0),
+        "rh": 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 100.0),
+        "vr": _value(rng, 0.0, 4.0),
+        "sport": str(rng.choice(_SPORTS)),
+    }
+
+
 def _two_nodes_gagge(rng):
     # The ranges reach skin wettedness at w_max, shivering and the 0.1 m/s air
     # speed floor; position comes in any case, which upstream's check accepts
@@ -563,6 +586,15 @@ GATED_RAISES = {"ankle_draft": ValueError}
 # masks to NaN, so the same call with the gate on checks an unadjusted met.
 GATED_INNER = {"pmv_e": ("pythermalcomfort.models.pmv_e", "pmv_ppd_iso")}
 
+
+
+def _sports_by_name(**inputs):
+    """sports_heat_stress_risk with sport given by its name in Sports."""
+    return models.sports_heat_stress_risk(
+        **{**inputs, "sport": getattr(models.Sports, inputs["sport"])}
+    )
+
+
 # Each model: upstream's function and the generator of one case's keyword
 # arguments. A model joins the suite when its ticket migrates it.
 MODELS = {
@@ -581,6 +613,7 @@ MODELS = {
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
     "set_tmp": (models.set_tmp, _set_tmp),
     "solar_gain": (models.solar_gain, _solar_gain),
+    "sports_heat_stress_risk": (_sports_by_name, _sports_heat_stress_risk),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),

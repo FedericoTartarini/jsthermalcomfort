@@ -18,6 +18,8 @@ import {
   pmv_ppd_iso,
   set_tmp,
   solar_gain,
+  Sports,
+  sports_heat_stress_risk,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   use_fans_heatwaves,
@@ -575,6 +577,24 @@ const MODELS: readonly ParityModel[] = [
       round_output === true ? ["erf", "delta_mrt"] : [],
     // ASHRAE 55 Table C-2's rows, which upstream does not check, are exempt
     // by the register (deviation solar_gain-3, deviation solar_gain-4).
+    warnings: true,
+  },
+  {
+    name: "sports_heat_stress_risk",
+    // The generator names sport by its attribute in Sports (_sports_by_name).
+    run: (inputs) =>
+      sports_heat_stress_risk({
+        ...(inputs as unknown as Parameters<typeof sports_heat_stress_risk>[0]),
+        sport: Sports[inputs.sport as keyof typeof Sports],
+      }),
+    // Upstream floors the risk level to one decimal and rounds the thresholds
+    // with Python's round (models/sports_heat_stress_risk.py:425-437).
+    rounded: () => [
+      "risk_level_interpolated",
+      "t_medium",
+      "t_high",
+      "t_extreme",
+    ],
     warnings: true,
   },
   {

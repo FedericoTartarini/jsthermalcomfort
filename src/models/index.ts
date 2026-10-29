@@ -23,6 +23,11 @@ import {
 } from "./pmv_ppd_iso.ts";
 import { adaptive_ashrae, ADAPTIVE_ASHRAE_INFO } from "./adaptive_ashrae.ts";
 import { solar_gain, SOLAR_GAIN_INFO } from "./solar_gain.ts";
+import {
+  _SportsValues,
+  Sports,
+  sports_heat_stress_risk,
+} from "./sports_heat_stress_risk.ts";
 import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import { pmv } from "./pmv.js";
 import { pmv_a, PMV_A_INFO } from "./pmv_a.ts";
@@ -134,6 +139,9 @@ export {
   PMV_E_INFO,
   solar_gain,
   SOLAR_GAIN_INFO,
+  _SportsValues,
+  Sports,
+  sports_heat_stress_risk,
   set_tmp,
   SET_TMP_INFO,
   two_nodes_gagge,
@@ -188,6 +196,9 @@ export default {
   PMV_E_INFO,
   solar_gain,
   SOLAR_GAIN_INFO,
+  _SportsValues,
+  Sports,
+  sports_heat_stress_risk,
   set_tmp,
   SET_TMP_INFO,
   two_nodes_gagge,

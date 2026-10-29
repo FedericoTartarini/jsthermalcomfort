@@ -73,6 +73,7 @@ export const LINTED = [
   "tests/models/returnsList.test.ts",
   "tests/models/set_tmp.test.ts",
   "tests/models/solar_gain.test.ts",
+  "tests/models/sports_heat_stress_risk.test.ts",
   "tests/models/two_nodes_gagge.test.ts",
   "tests/models/use_fans_heatwaves.test.ts",
   "tests/models/utci.test.ts",

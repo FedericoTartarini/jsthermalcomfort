@@ -3,6 +3,7 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "./heat_index_rothfusz.ts";
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
+import { heat_index_schoen } from "./heat_index_schoen.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
@@ -123,6 +124,7 @@ export {
   discomfort_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
+  heat_index_schoen,
   humidex,
   HUMIDEX_INFO,
   net,
@@ -181,6 +183,7 @@ export default {
   discomfort_index,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
+  heat_index_schoen,
   humidex,
   HUMIDEX_INFO,
   net,

@@ -8,6 +8,7 @@ import {
   clo_tout,
   cooling_effect,
   heat_index_rothfusz,
+  heat_index_schoen,
   humidex,
   phs,
   PHS_INFO,
@@ -485,6 +486,16 @@ const MODELS: readonly ParityModel[] = [
         inputs as unknown as Parameters<typeof heat_index_rothfusz>[0],
       ),
     // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
+    rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
+    warnings: true,
+  },
+  {
+    name: "heat_index_schoen",
+    run: (inputs) =>
+      heat_index_schoen(
+        inputs as unknown as Parameters<typeof heat_index_schoen>[0],
+      ),
+    // Upstream rounds hi with np.around (models/heat_index_schoen.py:73-74).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
   },

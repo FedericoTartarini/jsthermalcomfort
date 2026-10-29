@@ -168,6 +168,18 @@ def _heat_index_rothfusz(rng):
     }
 
 
+def _heat_index_schoen(rng):
+    # rh stays in [0, 100], outside which upstream's dew_point_tmp raises
+    # (psychrometrics/dew_point_tmp.py:46-47), and reaches 0 now and then,
+    # where the dew point is NaN. tdb reaches 70 °C, where hi passes the
+    # 1000 °C edge and the category is NaN.
+    return {
+        "tdb": _value(rng, -20.0, 70.0),
+        "rh": 0.0 if rng.random() < 0.02 else _value(rng, 0.0, 100.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _humidex(rng):
     # rh stays in [0, 100], outside which upstream raises
     # (models/humidex.py:70-71), and reaches 0 now and then, where the
@@ -605,6 +617,7 @@ MODELS = {
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
+    "heat_index_schoen": (models.heat_index_schoen, _heat_index_schoen),
     "humidex": (models.humidex, _humidex),
     "phs": (models.phs, _phs),
     "pmv_a": (models.pmv_a, _pmv_a),

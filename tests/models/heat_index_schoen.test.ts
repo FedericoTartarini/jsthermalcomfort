@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { heat_index_schoen } from "../../src/models/index.ts";
+import {
+  heat_index_schoen,
+  HEAT_INDEX_SCHOEN_INFO,
+} from "../../src/models/index.ts";
+import { heat_index_schoen as heat_index_schoen_from_root } from "../../src/index.ts";
 import { psy_ta_rh } from "../../src/psychrometrics/index.ts";
 import { round } from "../../src/_internal/round.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof heat_index_schoen>[0];
@@ -144,4 +149,91 @@ describe("test_heat_index_schoen", () => {
       );
     },
   );
+});
+
+describeModelContract(heat_index_schoen, HEAT_INDEX_SCHOEN_INFO, {
+  tdb: 29,
+  rh: 50,
+});
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("heat_index_schoen (JS-only)", () => {
+  // A call with inputs the type rejects, to test the runtime.
+  const call = (inputs: unknown) => () => heat_index_schoen(inputs as Inputs);
+
+  test.each([
+    [10, 50, 8.941855034981682, "no risk"],
+    [29, 50, 30.04629295772395, "caution"],
+    [35, 60, 41.551584343965835, "danger"],
+    [45, 70, 79.96403779495269, "extreme danger"],
+    [25, 100, 28.902919828894223, "caution"],
+    [-40, 50, -40.2385812798619, "no risk"],
+  ])("tdb %s, rh %s gives %s, %s", (tdb, rh, expected, category) => {
+    const result = heat_index_schoen({ tdb, rh, round_output: false });
+    expect(approx(result.hi, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+    expect(result.stress_category).toBe(category);
+  });
+
+  // deviation heat_index_schoen-1 (heat_index_schoen.py:70, _internal/validation.py:172)
+  test("the stress category bins are the model's 27.0 floor and the shared categories, right-inclusive", () => {
+    expect(HEAT_INDEX_SCHOEN_INFO.outputs.stress_category.classifier).toEqual({
+      edges: [27, 32, 41, 54, 1000],
+      labels: [
+        "no risk",
+        "caution",
+        "extreme caution",
+        "danger",
+        "extreme danger",
+      ],
+      right: true,
+    });
+  });
+
+  // As upstream's _mapping: no category above the 1000 edge.
+  test("an hi above 1000 has a NaN category", () => {
+    const result = heat_index_schoen({ tdb: 70, rh: 100, round_output: false });
+    expect(approx(result.hi, 1382.4282571690032, { rel: 1e-12, abs: 0 })).toBe(
+      true,
+    );
+    expect(result.stress_category).toBeNaN();
+  });
+
+  // As upstream's: dew_point_tmp takes log(0).
+  test("rh 0 gives a NaN hi and category", () => {
+    const result = heat_index_schoen({ tdb: 25, rh: 0 });
+    expect(result.hi).toBeNaN();
+    expect(result.stress_category).toBeNaN();
+  });
+
+  // Deviation _shared-57, through psy_ta_rh's dew_point_tmp.
+  test("an rh outside [0, 100] throws dew_point_tmp's message as a RangeError", () => {
+    for (const rh of [-0.1, 100.1]) {
+      expect(call({ tdb: 29, rh })).toThrow(
+        new RangeError("Relative humidity must be between 0 and 100%."),
+      );
+    }
+  });
+
+  // Upstream's signature has no limit_inputs, though HIInputs takes one.
+  test("limit_inputs is not an input", () => {
+    expect(call({ tdb: 29, rh: 50, limit_inputs: false })).toThrow(
+      new TypeError("limit_inputs is not an input of heat_index_schoen()."),
+    );
+  });
+
+  // Deviation heat_index_schoen-2.
+  test("returns no rows", () => {
+    for (const [tdb, rh] of [
+      [-20, 0],
+      [29, 50],
+      [70, 100],
+    ] as const) {
+      expect(heat_index_schoen({ tdb, rh }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(heat_index_schoen_from_root).toBe(heat_index_schoen);
+  });
 });

@@ -37,6 +37,7 @@ import type {
   GaggeTwoNodesInputs,
   HI,
   HIInputs,
+  HISchoenInputs,
   Humidex,
   HumidexInputs,
   ModelInfo,
@@ -81,6 +82,7 @@ import {
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
+  HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
@@ -113,6 +115,7 @@ import {
   clo_typical_ensembles,
   cooling_effect,
   heat_index_rothfusz,
+  heat_index_schoen,
   humidex,
   phs,
   pmv_ppd_ashrae,
@@ -162,6 +165,7 @@ const ankleDraftInfo: ModelInfo = ANKLE_DRAFT_INFO;
 const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 const humidexInfo: ModelInfo = HUMIDEX_INFO;
+const heatIndexSchoenInfo: ModelInfo = HEAT_INDEX_SCHOEN_INFO;
 const wciInfo: ModelInfo = WCI_INFO;
 const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
 const setTmpInfo: ModelInfo = SET_TMP_INFO;
@@ -950,3 +954,15 @@ Sports.RUNNING.clo = 1;
 sportsResult.t_medium = 1;
 // @ts-expect-error sport is required.
 sports_heat_stress_risk({ tdb: 35, tr: 35, rh: 40, vr: 2.0 });
+
+// heat_index_schoen takes one inputs object (ADR 0002), with its inputs type
+// HISchoenInputs (decision 251), and returns upstream's HI, readonly.
+const schoenInputs: HISchoenInputs = { tdb: 29, rh: 50, round_output: false };
+const schoenResult: HI = heat_index_schoen(schoenInputs);
+const schoenHi: number = schoenResult.hi;
+// @ts-expect-error the result is readonly.
+schoenResult.hi = 1;
+// @ts-expect-error heat_index_schoen takes no limit_inputs, as upstream's.
+heat_index_schoen({ tdb: 29, rh: 50, limit_inputs: false });
+// @ts-expect-error rh is a required quantity.
+heat_index_schoen({ tdb: 29 });

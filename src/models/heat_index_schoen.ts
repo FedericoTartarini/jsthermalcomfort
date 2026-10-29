@@ -36,8 +36,37 @@ export const HEAT_INDEX_SCHOEN_INFO = deepFreeze({
 /** @interface */
 export type HISchoenInputs = InputsOf<typeof HEAT_INDEX_SCHOEN_INFO>;
 
+/**
+ * Calculate the Temperature Humidity Index (THI), also known as Heat Index Schoen,
+ * in accordance with the Schoen (2005) model [Schoen2005](../../docs/references.md#schoen2005).
+ *
+ * The temperature-humidity index (THI) is a simplified scale of apparent
+ * temperature, considering only dry-bulb temperature and humidity. It is another
+ * formulation of the heat index.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * Stress categories are always determined from the unrounded heat index.
+ *
+ * @returns A dataclass containing the Heat Index. See {@link HI} for more details.
+ * To access the `hi` value, use the `hi` attribute of the returned `HI` instance, e.g., `result.hi`.
+ *
+ * - `hi` - Heat Index, [°C].
+ * - `stress_category`
+ *
+ * @example
+ * ```ts
+ * import { heat_index_schoen } from "jsthermalcomfort/models";
+ *
+ * const result = heat_index_schoen({ tdb: 29, rh: 50 });
+ * console.log(result.hi); // 30
+ * console.log(result.stress_category); // "caution"
+ * ```
+ */
 export function heat_index_schoen(inputs: HISchoenInputs): HI {
-  // Validate inputs using the HeatIndexInputs class
+  // Validate inputs using the HIInputs class
   const { tdb, rh, round_output } = parseInputs(HEAT_INDEX_SCHOEN_INFO, inputs);
 
   // Calculate dew point temperature

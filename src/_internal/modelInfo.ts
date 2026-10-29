@@ -190,11 +190,25 @@ export interface ChoiceField {
 }
 
 /**
+ * An instance of a class, which the parse checks with `instanceof`, as
+ * upstream checks `isinstance`, and fails with `message`, upstream's own text
+ * for that check, as a `TypeError`: `sports_heat_stress_risk`'s `sport`, a
+ * `_SportsValues` (`classes_input.py:1262-1265`). It takes no default, as
+ * `sport` has none.
+ */
+export interface InstanceField {
+  readonly kind: "instance";
+  readonly of: abstract new (...args: never) => object;
+  readonly default?: never;
+  readonly message: string;
+}
+
+/**
  * A model's `INFO.inputs`: upstream's keyword arguments, in its order, each
  * with its kind, unit, applicability and default.
  */
 export type InputsInfo = Readonly<
-  Record<string, NumericField | BoolField | ChoiceField>
+  Record<string, NumericField | BoolField | ChoiceField | InstanceField>
 >;
 
 /**
@@ -211,14 +225,17 @@ export type DerivedInfo = Readonly<Record<string, DerivedField>>;
 
 /**
  * The value type of each kind. The input kinds take upstream's names: the
- * `numeric_field` and `choice_field` helpers (`classes_input.py:19, :23`) and
- * the `is_bool` metadata key (`classes_input.py:66, :125`). A `choice` is a
- * `string`: the parse accepts it in any case and returns it as given.
+ * `numeric_field` and `choice_field` helpers (`classes_input.py:19, :23`),
+ * the `is_bool` metadata key (`classes_input.py:66, :125`) and the
+ * `isinstance` check (`classes_input.py:1262`). A `choice` is a `string`: the
+ * parse accepts it in any case and returns it as given. An `instance` is an
+ * instance of its entry's class (`KindValue`).
  */
 interface KindValues {
   numeric: number;
   bool: boolean;
   choice: string;
+  instance: object;
   label: string;
 }
 
@@ -227,9 +244,12 @@ type OptionalKey<I extends InputsInfo> = {
 }[keyof I];
 type NullOf<F> = F extends { readonly nullable: true } ? null : never;
 type FalseOf<F> = F extends { readonly default: false } ? false : never;
+type KindValue<F extends InputsInfo[string]> = F extends InstanceField
+  ? InstanceType<F["of"]>
+  : KindValues[F["kind"]];
 type InputValue<F extends InputsInfo[string]> = F extends ChoiceField
   ? F["allowed"][number] | NullOf<F>
-  : KindValues[F["kind"]] | FalseOf<F>;
+  : KindValue<F> | FalseOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
 
 /**
@@ -237,7 +257,7 @@ type Flatten<T> = { [K in keyof T]: T[K] } & {};
  * key with a default is optional, and `undefined` takes the default, as an
  * omitted keyword does (ADR 0019, whitelist item 6); a `choice` takes one of
  * its `allowed`, or `null` where it is `nullable`; a `numeric` whose default
- * is `false` takes `false` too.
+ * is `false` takes `false` too; an `instance` takes an instance of its `of`.
  */
 export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
   {
@@ -253,8 +273,7 @@ export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
 
 /** The inputs after the parse, each default applied. */
 export type ResolvedOf<I extends InputsInfo> = {
-  -readonly [K in keyof I]:
-    KindValues[I[K]["kind"]] | NullOf<I[K]> | FalseOf<I[K]>;
+  -readonly [K in keyof I]: KindValue<I[K]> | NullOf<I[K]> | FalseOf<I[K]>;
 };
 
 /**
@@ -281,8 +300,8 @@ export type OutputsOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
  * a short display name.
  *
  * `inputs` describes the model's inputs: every keyword argument, in
- * upstream's order, with its kind (`numeric`, `bool` or `choice`), unit, applicability
- * and default. The model validates its inputs against it, and its inputs type
+ * upstream's order, with its kind (`numeric`, `bool`, `choice` or `instance`),
+ * unit, applicability and default. The model validates its inputs against it, and its inputs type
  * is derived from it. `outputs` are the returned values, in the order of
  * upstream's return dataclass, each with its kind (`numeric`, `bool` or
  * `label`) and unit, and the outputs type is derived from it. `derived` covers

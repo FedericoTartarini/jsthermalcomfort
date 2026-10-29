@@ -9,6 +9,7 @@ import { deepFreeze } from "./modelInfo.ts";
 import type {
   ChoiceField,
   InputsInfo,
+  InstanceField,
   NumericField,
   ResolvedOf,
 } from "./modelInfo.ts";
@@ -111,6 +112,15 @@ function parseChoice(value: unknown, entry: ChoiceField): string | null {
 }
 
 /**
+ * Checks one instance, as upstream's `isinstance` does, and returns it as
+ * given.
+ */
+function parseInstance(value: unknown, entry: InstanceField): object {
+  if (!(value instanceof entry.of)) throw new TypeError(entry.message);
+  return value;
+}
+
+/**
  * Validates `args`, the inputs a model was called with, against the model's
  * `INFO.inputs`; returns the values with the defaults applied.
  *
@@ -127,7 +137,9 @@ function parseChoice(value: unknown, entry: ChoiceField): string | null {
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, or its
  *   entry's `message` is thrown: a `TypeError` for a value that is not a
- *   string, a `RangeError` for one that is; a `nullable` one may be `null`.
+ *   string, a `RangeError` for one that is; a `nullable` one may be `null`;
+ * - an instance must be one of its entry's class, `of`, or its entry's
+ *   `message` is thrown as a `TypeError`.
  *
  * @param info - The model's `*_INFO`: its `name` for the messages, its
  * `inputs` for the checks.
@@ -147,7 +159,7 @@ export function parseInputs<I extends InputsInfo>(
   const unknown = Object.keys(given).find((key) => !Object.hasOwn(inputs, key));
   if (unknown !== undefined) throw notAnInput(unknown, name);
 
-  const values: Record<string, number | boolean | string | null> = {};
+  const values: Record<string, number | boolean | string | object | null> = {};
   for (const [key, entry] of Object.entries(inputs)) {
     let value = Object.hasOwn(given, key) ? given[key] : undefined;
     if (value === undefined) {
@@ -156,6 +168,8 @@ export function parseInputs<I extends InputsInfo>(
     }
     if (entry.kind === "numeric") values[key] = parseNumeric(key, value, entry);
     else if (entry.kind === "choice") values[key] = parseChoice(value, entry);
+    else if (entry.kind === "instance")
+      values[key] = parseInstance(value, entry);
     else if (typeof value === "boolean") values[key] = value;
     else throw notOfType(key, "a boolean");
   }

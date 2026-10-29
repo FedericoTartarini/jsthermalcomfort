@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import * as validation from "../src/_internal/validation.ts";
 import {
   _mapping,
@@ -16,6 +16,9 @@ import {
   choiceFieldMessage,
   parseInputs,
 } from "../src/_internal/define.ts";
+import type { InputsOf } from "../src/_internal/modelInfo.ts";
+import { floatRepr } from "../src/_internal/floatRepr.ts";
+import { pythonRound, round } from "../src/_internal/round.ts";
 import { CLO_TOUT_INFO, TWO_NODES_GAGGE_INFO } from "../src/models/index.ts";
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
@@ -562,5 +565,91 @@ describe("parseInputs, numeric with a false default (JS-only)", () => {
         { clo: false },
       ),
     ).toThrow(new TypeError("clo must be a finite number."));
+  });
+});
+
+// An instance of a class, as sports_heat_stress_risk's sport is
+// (classes_input.py:1262-1265).
+describe("parseInputs, instance (JS-only)", () => {
+  class Values {
+    readonly clo: number;
+    constructor(clo: number) {
+      this.clo = clo;
+    }
+  }
+  const info = {
+    name: "f",
+    inputs: {
+      sport: { kind: "instance", of: Values, message: "sport must be Values." },
+    },
+  } as const;
+  const parse = (sport: unknown) => () => parseInputs(info, { sport });
+
+  test("returns an instance of its class as given", () => {
+    const sport = new Values(0.5);
+    expect(parse(sport)().sport).toBe(sport);
+    expectTypeOf(parse(sport)().sport).toEqualTypeOf<Values>();
+    expectTypeOf<InputsOf<typeof info>>().toEqualTypeOf<{ sport: Values }>();
+  });
+
+  test("throws its message as a TypeError for anything else", () => {
+    for (const bad of [{ clo: 0.5 }, "RUNNING", 1, null, [new Values(0.5)]])
+      expect(parse(bad)).toThrow(new TypeError("sport must be Values."));
+    expect(parse(undefined)).toThrow(new TypeError("sport is required."));
+  });
+});
+
+// Python's builtin round(x, n), measured on Python 3.12.15 in the parity image
+// (decision 83).
+describe("pythonRound (JS-only)", () => {
+  test.each([
+    [2.675, 2, 2.67],
+    [29.95, 1, 29.9],
+    [0.15, 1, 0.1],
+    [0.25, 1, 0.2],
+    [0.35, 1, 0.3],
+    [-0.04, 1, -0],
+    [2.5, 0, 2],
+    [3.5, 0, 4],
+    [-2.5, 0, -2],
+    [34.44999999, 1, 34.4],
+    [0, 1, 0],
+    [-0, 1, -0],
+    [1e21, 1, 1e21],
+    [Infinity, 1, Infinity],
+    [NaN, 1, NaN],
+  ])("round(%s, %s) is %s", (x, ndigits, expected) => {
+    expect(pythonRound(x, ndigits)).toBe(expected);
+  });
+
+  test("differs from numpy's round, the library's round", () => {
+    expect([round(2.675, 2), round(29.95, 1), round(0.15, 1)]).toEqual([
+      2.68, 30, 0.2,
+    ]);
+  });
+});
+
+// Python's repr() of a float, measured on Python 3.12.15 in the parity image
+// (decision 135).
+describe("floatRepr (JS-only)", () => {
+  test.each([
+    [23, "23.0"],
+    [0, "0.0"],
+    [-0, "-0.0"],
+    [34.5, "34.5"],
+    [-1.5, "-1.5"],
+    [1e-5, "1e-05"],
+    [1e-4, "0.0001"],
+    [1e16, "1e+16"],
+    [9999999999999998, "9999999999999998.0"],
+    [1.5e-7, "1.5e-07"],
+    [1e300, "1e+300"],
+    [5e-324, "5e-324"],
+    [0.1 + 0.2, "0.30000000000000004"],
+    [Infinity, "inf"],
+    [-Infinity, "-inf"],
+    [NaN, "nan"],
+  ])("repr(%s) is %s", (x, expected) => {
+    expect(floatRepr(x)).toBe(expected);
   });
 });

@@ -14,6 +14,7 @@ export const LINTED = [
   "src/_internal/classifierBins.ts",
   "src/_internal/define.ts",
   "src/_internal/errors.ts",
+  "src/_internal/floatRepr.ts",
   "src/_internal/modelInfo.ts",
   "src/_internal/round.ts",
   "src/_internal/validation.ts",

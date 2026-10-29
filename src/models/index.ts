@@ -54,6 +54,7 @@ export type {
   DerivedField,
   DerivedInfo,
   InputsInfo,
+  InstanceField,
   Interval,
   ModelInfo,
   ModelOutputs,

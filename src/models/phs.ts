@@ -19,8 +19,8 @@ const const_t_sk = Math.exp(-1 / 3);
 const const_sw = Math.exp(-1 / 10);
 
 const _MODEL_2004 = 0;
-const _MODEL_2023 = 1;
-const _POSTURE_STANDING = 0;
+export const _MODEL_2023 = 1;
+export const _POSTURE_STANDING = 0;
 const _POSTURE_SITTING = 1;
 const _POSTURE_CROUCHING = 2;
 
@@ -567,7 +567,7 @@ function _posture_to_code(posture: string | null): number {
   throw new RangeError(error_msg);
 }
 
-function _phs_optimized_scalar(
+export function _phs_optimized_scalar(
   tdb: number,
   tr: number,
   v: number,

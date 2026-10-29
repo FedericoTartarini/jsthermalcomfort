@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.js";
+import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
 import { rh_from_wet_bulb } from "../../src/psychrometrics/rh_from_wet_bulb.ts";
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];
@@ -8,20 +8,15 @@ const grid = (tdbs: number[]) =>
   tdbs.flatMap((tdb) => RH.map((rh) => ({ tdb, rh })));
 
 describe("rh_from_wet_bulb", () => {
-  // psy_ta_rh rounds t_wb to 0.1 °C, so the best the inverse can do is land
-  // in the band of rh that rounds to the same wet bulb. Stull's fit is only
-  // worth inverting from about 10 °C up: below that its slope in rh collapses
-  // and at 0 °C it dips a full degree over the first 10 % rh. On this grid the
-  // shallowest slope is 0.085 °C per % rh, at 10 °C, so half a rounding band
-  // is at most 0.6 % rh.
+  // wet_bulb_tmp does not round, so the inverse is exact to floating point.
+  // Stull's fit is only worth inverting from about 10 °C up: below that its
+  // slope in rh collapses and at 0 °C it dips a full degree over the first
+  // 10 % rh.
   it.each(grid(TDB.filter((tdb) => tdb >= 10)))(
-    "round-trips psy_ta_rh's t_wb when tdb is $tdb, rh is $rh",
+    "round-trips psy_ta_rh's wet_bulb_tmp when tdb is $tdb, rh is $rh",
     ({ tdb, rh }) => {
-      const forward = psy_ta_rh(tdb, rh).t_wb;
-      const back = rh_from_wet_bulb(forward, tdb);
-      expect(Math.abs(back - rh)).toBeLessThanOrEqual(0.6);
-      // Inside the band means the forward function cannot tell them apart.
-      expect(Math.abs(psy_ta_rh(tdb, back).t_wb - forward)).toBe(0);
+      const back = rh_from_wet_bulb(psy_ta_rh(tdb, rh).wet_bulb_tmp, tdb);
+      expect(Math.abs(back - rh)).toBeLessThanOrEqual(1e-12);
     },
   );
 

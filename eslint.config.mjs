@@ -22,8 +22,11 @@ export const LINTED = [
   "src/environment/operative_tmp.ts",
   "src/environment/transpose_sharp_altitude.ts",
   "src/psychrometrics/dew_point_tmp.ts",
+  "src/psychrometrics/enthalpy_air.ts",
   "src/psychrometrics/p_sat.ts",
   "src/psychrometrics/p_sat_torr.ts",
+  "src/psychrometrics/psy_ta_rh.ts",
+  "src/psychrometrics/wet_bulb_tmp.ts",
   "src/utilities/met_to_w_m2.ts",
   "src/utilities/options.ts",
   "src/utilities/units_converter.ts",
@@ -82,8 +85,11 @@ export const LINTED = [
   "tests/models/wci.test.ts",
   "tests/models/wind_chill_temperature.test.ts",
   "tests/psychrometrics/dew_point_tmp.test.ts",
+  "tests/psychrometrics/enthalpy_air.test.ts",
   "tests/psychrometrics/p_sat.test.ts",
   "tests/psychrometrics/p_sat_torr.test.ts",
+  "tests/psychrometrics/psy_ta_rh.test.ts",
+  "tests/psychrometrics/wet_bulb_tmp.test.ts",
   "tests/utilities/units_converter.test.ts",
 ];
 

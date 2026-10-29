@@ -1,4 +1,4 @@
-import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.js";
+import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.ts";
 import { validateInputs } from "../utilities/utilities.js";
 import { round } from "../_internal/round.ts";
 

@@ -201,12 +201,12 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.environment).toHaveProperty("operative_tmp");
   });
 
-  it("should have psychrometrics.enthalpy", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("enthalpy");
+  it("should have psychrometrics.enthalpy_air", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("enthalpy_air");
   });
 
-  it("should have psychrometrics.t_wb", () => {
-    expect(jsthermalcomfort.psychrometrics).toHaveProperty("t_wb");
+  it("should have psychrometrics.wet_bulb_tmp", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("wet_bulb_tmp");
   });
 
   it("should have psychrometrics.dew_point_tmp", () => {

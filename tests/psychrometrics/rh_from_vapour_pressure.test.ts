@@ -1,6 +1,6 @@
 import { expect, describe, it } from "vitest";
 import { p_sat } from "../../src/psychrometrics/p_sat.ts";
-import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.js";
+import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
 import { rh_from_vapour_pressure } from "../../src/psychrometrics/rh_from_vapour_pressure.ts";
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];

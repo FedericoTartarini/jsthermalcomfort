@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.js";
+import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
 import { rh_from_dew_point } from "../../src/psychrometrics/rh_from_dew_point.ts";
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];
@@ -9,9 +9,9 @@ const grid = TDB.flatMap((tdb) => RH.map((rh) => ({ tdb, rh })));
 describe("rh_from_dew_point", () => {
   // dew_point_tmp does not round, so the inverse is exact to floating point.
   it.each(grid)(
-    "round-trips psy_ta_rh's t_dp when tdb is $tdb, rh is $rh",
+    "round-trips psy_ta_rh's dew_point_tmp when tdb is $tdb, rh is $rh",
     ({ tdb, rh }) => {
-      const back = rh_from_dew_point(psy_ta_rh(tdb, rh).t_dp, tdb);
+      const back = rh_from_dew_point(psy_ta_rh(tdb, rh).dew_point_tmp, tdb);
       expect(Math.abs(back - rh)).toBeLessThanOrEqual(1e-12);
     },
   );

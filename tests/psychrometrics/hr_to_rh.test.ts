@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.js";
+import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
 import { hr_to_rh } from "../../src/psychrometrics/hr_to_rh.ts";
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];

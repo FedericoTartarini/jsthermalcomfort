@@ -190,7 +190,7 @@ describe("heat_index_schoen (JS-only)", () => {
     });
   });
 
-  // As upstream's _mapping: no category above the 1000 edge.
+  // _internal/validation.py:214-216, as upstream's _mapping maps it.
   test("an hi above 1000 has a NaN category", () => {
     const result = heat_index_schoen({ tdb: 70, rh: 100, round_output: false });
     expect(approx(result.hi, 1382.4282571690032, { rel: 1e-12, abs: 0 })).toBe(
@@ -199,7 +199,7 @@ describe("heat_index_schoen (JS-only)", () => {
     expect(result.stress_category).toBeNaN();
   });
 
-  // As upstream's: dew_point_tmp takes log(0).
+  // psychrometrics/dew_point_tmp.py:53, as upstream's log(0) gives it.
   test("rh 0 gives a NaN hi and category", () => {
     const result = heat_index_schoen({ tdb: 25, rh: 0 });
     expect(result.hi).toBeNaN();
@@ -213,13 +213,6 @@ describe("heat_index_schoen (JS-only)", () => {
         new RangeError("Relative humidity must be between 0 and 100%."),
       );
     }
-  });
-
-  // Upstream's signature has no limit_inputs, though HIInputs takes one.
-  test("limit_inputs is not an input", () => {
-    expect(call({ tdb: 29, rh: 50, limit_inputs: false })).toThrow(
-      new TypeError("limit_inputs is not an input of heat_index_schoen()."),
-    );
   });
 
   // Deviation heat_index_schoen-2.

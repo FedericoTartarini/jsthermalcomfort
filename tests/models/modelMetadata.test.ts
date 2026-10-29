@@ -159,6 +159,13 @@ const v2Calls: Record<string, object> = {
     f_svv: 0.5,
     f_bes: 0.5,
   },
+  sports_heat_stress_risk: {
+    tdb: 35,
+    tr: 35,
+    rh: 40,
+    vr: 2.0,
+    sport: pkg.Sports.RUNNING,
+  },
   two_nodes_gagge: { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   use_fans_heatwaves: { tdb: 35, tr: 35, v: 1.0, rh: 50, met: 1.2, clo: 0.5 },
   utci: { tdb: 25, tr: 25, v: 1, rh: 50 },

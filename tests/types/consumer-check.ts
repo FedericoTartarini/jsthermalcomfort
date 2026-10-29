@@ -67,6 +67,8 @@ import type {
   EPMVInputs,
   ATHB,
   ATHBInputs,
+  SportsHeatStressInputs,
+  SportsHeatStressRisk,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -99,6 +101,9 @@ import {
   PMV_A_INFO,
   PMV_E_INFO,
   PMV_ATHB_INFO,
+  SPORTS_HEAT_STRESS_RISK_INFO,
+  Sports,
+  _SportsValues,
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
@@ -123,6 +128,7 @@ import {
   pmv_a,
   pmv_e,
   pmv_athb,
+  sports_heat_stress_risk,
 } from "jsthermalcomfort";
 import * as jsthermalcomfort from "jsthermalcomfort";
 // One set of category bins per ISO 7730 edition replaced the one for both, so
@@ -162,6 +168,7 @@ const setTmpInfo: ModelInfo = SET_TMP_INFO;
 const pmvAInfo: ModelInfo = PMV_A_INFO;
 const pmvEInfo: ModelInfo = PMV_E_INFO;
 const pmvAthbInfo: ModelInfo = PMV_ATHB_INFO;
+const sportsHeatStressRiskInfo: ModelInfo = SPORTS_HEAT_STRESS_RISK_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -915,3 +922,31 @@ pmv_athb({ ...pmvAthbInputs, clo: true });
 pmvAthbResult.athb_pmv = 1;
 // @ts-expect-error t_running_mean is required.
 pmv_athb({ tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2 });
+
+// sports_heat_stress_risk takes one inputs object (ADR 0002), with its inputs
+// and result types named after upstream's SportsHeatStressInputs and
+// SportsHeatStressRisk; sport is a _SportsValues, a Sports entry or one a
+// consumer builds (decisions 246, 247), and the result is readonly.
+const sportsInputs: SportsHeatStressInputs = {
+  tdb: 35,
+  tr: 35,
+  rh: 40,
+  vr: 2.0,
+  sport: Sports.RUNNING,
+};
+const sportsResult: SportsHeatStressRisk =
+  sports_heat_stress_risk(sportsInputs);
+const sportsRisk: number = sportsResult.risk_level_interpolated;
+const sportsRecommendation: string = sportsResult.recommendation;
+sports_heat_stress_risk({
+  ...sportsInputs,
+  sport: new _SportsValues(0.5, 6.0, 1.0, 60),
+});
+// @ts-expect-error sport is a _SportsValues, not a sport's name.
+sports_heat_stress_risk({ ...sportsInputs, sport: "RUNNING" });
+// @ts-expect-error a Sports entry is readonly.
+Sports.RUNNING.clo = 1;
+// @ts-expect-error the result is readonly.
+sportsResult.t_medium = 1;
+// @ts-expect-error sport is required.
+sports_heat_stress_risk({ tdb: 35, tr: 35, rh: 40, vr: 2.0 });

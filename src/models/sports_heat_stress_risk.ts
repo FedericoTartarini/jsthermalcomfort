@@ -46,6 +46,7 @@ const _PHS_FIXED_INPUTS = deepFreeze({
 export const _PHS_IDX_T_CR = 2;
 export const _PHS_IDX_SWEAT_LOSS_G = 7;
 
+/** Class to hold sport values. */
 export class _SportsValues {
   readonly clo: number;
   readonly met: number;
@@ -83,6 +84,13 @@ export class _SportsValues {
   }
 }
 
+/**
+ * Namespace of predefined sport values.
+ *
+ * Use attributes like `Sports.RUNNING` to obtain a `_SportsValues` instance. This
+ * class uses a frozen dataclass decorator to prevent modification of the namespace.
+ * Attributes are class-level constants, not instance fields.
+ */
 export const Sports = deepFreeze({
   ABSEILING: new _SportsValues(0.6, 6.0, 0.5, 120),
   ARCHERY: new _SportsValues(0.75, 4.5, 0.5, 180),
@@ -159,6 +167,104 @@ export type SportsHeatStressRisk = OutputsOf<
   typeof SPORTS_HEAT_STRESS_RISK_INFO
 >;
 
+/**
+ * Calculate sports heat stress risk levels based on environmental conditions and
+ * sport-specific parameters.
+ *
+ * This function assesses heat stress risk for athletes during outdoor sports by
+ * combining environmental conditions with sport-specific metabolic rates and clothing
+ * insulation. It uses the Predicted Heat Strain (PHS) model to determine threshold
+ * temperatures for different risk categories (Low, Medium, High, Extreme). The method
+ * is based on the Sports Medicine Australia heat policy framework [SportsHeatStress2025](../../docs/references.md#sportsheatstress2025),
+ * with detailed guidelines [SportsHeatPolicy2025](../../docs/references.md#sportsheatpolicy2025) and an online implementation available
+ * at the Sports Heat Tool [SportsHeatTool](../../docs/references.md#sportsheattool).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature [°C].
+ * @param inputs.tr - Mean radiant temperature [°C].
+ * @param inputs.rh - Relative humidity [%].
+ * @param inputs.vr - Relative air speed [m/s]. If the input `vr`
+ * is lower than the minimum relative air speed defined for the selected
+ * sport (`sport.vr`), then `sport.vr` will be used for the calculation.
+ * @param inputs.sport - Sport-specific activity dataclass with fields `clo` (clothing insulation),
+ * `met` (metabolic rate), `vr` (minimum relative air speed),
+ * and `duration` (activity duration). Use one of the predefined entries from
+ * the {@link Sports} class, e.g., `Sports.RUNNING`, `Sports.SOCCER`,
+ * `Sports.TENNIS`, etc.
+ *
+ * @returns A dataclass containing the heat stress risk assessment results.
+ * See {@link SportsHeatStressRisk} for
+ * more details. To access individual values, use the corresponding attributes
+ * of the returned instance, e.g., `result.risk_level_interpolated`.
+ *
+ * - `risk_level_interpolated` - Interpolated risk level (1.0-4.9), [dimensionless].
+ *   Risk levels: 1-<2 = low, 2-<3 = moderate, 3-<4 = high,
+ *   4-4.9 = extreme.
+ * - `t_medium` - Temperature threshold for medium risk level, [°C].
+ * - `t_high` - Temperature threshold for high risk level, [°C].
+ * - `t_extreme` - Temperature threshold for extreme risk level, [°C].
+ * - `recommendation` - Heat stress management recommendations for the calculated risk level.
+ *
+ * @throws `RangeError` If the risk level could not be determined due to NaN thresholds or if the internal
+ * solver fails to produce thresholds that allow a risk determination.
+ * @throws `TypeError` If sport is not a valid _SportsValues instance.
+ *
+ * @example
+ * ```ts
+ * import { sports_heat_stress_risk, Sports } from "jsthermalcomfort/models";
+ *
+ * // Example 1: Single condition for running
+ * const result = sports_heat_stress_risk({
+ *   tdb: 35,
+ *   tr: 35,
+ *   rh: 40,
+ *   vr: 2.0,
+ *   sport: Sports.RUNNING,
+ * });
+ * console.log(result.risk_level_interpolated); // 2.1 (Medium risk)
+ * console.log(result.t_medium); // 34.5 (Temperature threshold for medium risk)
+ * console.log(result.t_high); // 39 (Temperature threshold for high risk)
+ * console.log(result.t_extreme); // 41.6 (Temperature threshold for extreme risk)
+ * console.log(result.recommendation); // "Increase frequency and/or duration of rest breaks"
+ *
+ * // Example 2: Array inputs for multiple conditions
+ * const results = [
+ *   { tdb: 30, tr: 30, rh: 50, vr: 1.0 },
+ *   { tdb: 35, tr: 35, rh: 50, vr: 1.0 },
+ *   { tdb: 40, tr: 40, rh: 50, vr: 1.5 },
+ * ].map((inputs) => sports_heat_stress_risk({ ...inputs, sport: Sports.SOCCER }));
+ * console.log(results.map((r) => r.risk_level_interpolated)); // Array of risk levels
+ *
+ * // Example 3: vr clamping — input vr (0.5 m/s) is below Sports.RUNNING.vr
+ * // (2.0 m/s), so the calculation uses sport.vr=2.0 m/s as the effective wind speed.
+ * const result_clamped = sports_heat_stress_risk({
+ *   tdb: 35,
+ *   tr: 35,
+ *   rh: 40,
+ *   vr: 0.5,
+ *   sport: Sports.RUNNING,
+ * });
+ * // Because vr is clamped to 2.0 m/s (same as Example 1), the output matches:
+ * console.log(result_clamped.risk_level_interpolated); // same as Example 1
+ * console.log(result_clamped.t_medium); // same as Example 1
+ *
+ * // Example 4: Different sports
+ * const result_tennis = sports_heat_stress_risk({
+ *   tdb: 33,
+ *   tr: 70,
+ *   rh: 60,
+ *   vr: 0.75,
+ *   sport: Sports.TENNIS,
+ * });
+ * const result_cycling = sports_heat_stress_risk({
+ *   tdb: 33,
+ *   tr: 70,
+ *   rh: 60,
+ *   vr: 3.0,
+ *   sport: Sports.CYCLING,
+ * });
+ * ```
+ */
 export function sports_heat_stress_risk(
   inputs: SportsHeatStressInputs,
 ): SportsHeatStressRisk {
@@ -193,6 +299,24 @@ export function sports_heat_stress_risk(
   });
 }
 
+/**
+ * Run the PHS scalar kernel for a single condition.
+ *
+ * Equivalent to `phs(..., posture="standing", acclimatized=100, i_mst=0.4,
+ * limit_inputs=False, round_output=False)` but skips input validation and the
+ * parallel array wrapper, which dominate the runtime for a single condition. Used
+ * by the `brentq` objectives in `_calc_risk_single_value`, which call PHS many
+ * times per condition.
+ *
+ * @param tdb - Dry bulb air temperature, [°C].
+ * @param tr - Mean radiant temperature, [°C].
+ * @param rh - Relative humidity, [%].
+ * @param vr - Relative air speed, [m/s].
+ * @param sport - Sport-specific parameters; `met`, `clo` and `duration` are used.
+ *
+ * @returns The raw 11-element tuple returned by `_phs_optimized_scalar`. Index with
+ * `_PHS_IDX_T_CR` / `_PHS_IDX_SWEAT_LOSS_G`.
+ */
 export function _phs_scalar(
   tdb: number,
   tr: number,
@@ -231,6 +355,17 @@ export function _phs_scalar(
   );
 }
 
+/**
+ * Calculate the risk level and threshold temperatures for a single set of inputs.
+ *
+ * @param tdb - Dry bulb air temperature, [°C].
+ * @param tr - Mean radiant temperature, [°C].
+ * @param rh - Relative humidity, [%].
+ * @param vr - Relative air speed, [m/s].
+ * @param sport - Sport-specific parameters (clo, met, vr, duration).
+ *
+ * @returns Tuple containing (risk_level_interpolated, t_medium, t_high, t_extreme, recommendation).
+ */
 export function _calc_risk_single_value(
   tdb: number,
   tr: number,
@@ -240,7 +375,7 @@ export function _calc_risk_single_value(
   warnings: ModelWarning[],
 ): readonly [number, number, number, number, string] {
   // set the max and min thresholds for the risk levels
-  const sweat_loss_g = 850; // 850 g per hour
+  const sweat_loss_g = 850; // 850 g per 45 minutes
 
   const max_t_low = 34.5; // maximum tdb for low risk
   const max_t_medium = 39; // maximum tdb for medium risk
@@ -388,6 +523,14 @@ export function _calc_risk_single_value(
   ];
 }
 
+/**
+ * Get heat stress management recommendations based on risk level.
+ *
+ * @param risk_level - Interpolated risk level (1.0-4.9).
+ *
+ * @returns Evidence-based recommendation text for managing heat stress at the given
+ * risk level.
+ */
 function _get_recommendation(risk_level: number): string {
   if (risk_level < 2.0) {
     return "Increase hydration & modify clothing";

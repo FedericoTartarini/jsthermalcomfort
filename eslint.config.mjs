@@ -43,6 +43,7 @@ export const LINTED = [
   "src/models/pmv_ppd_iso.ts",
   "src/models/set_tmp.ts",
   "src/models/solar_gain.ts",
+  "src/models/sports_heat_stress_risk.ts",
   "src/models/two_nodes_gagge.ts",
   "src/models/use_fans_heatwaves.ts",
   "src/models/utci.ts",
@@ -167,6 +168,12 @@ export default defineConfig(
           leadingUnderscore: "allow",
         },
         { selector: "typeLike", format: ["PascalCase", "UPPER_CASE"] },
+        // A class keeps upstream's private name (`_SportsValues`).
+        {
+          selector: "class",
+          format: ["PascalCase"],
+          leadingUnderscore: "allow",
+        },
         // A default or namespace import takes the name its module uses.
         {
           selector: "import",

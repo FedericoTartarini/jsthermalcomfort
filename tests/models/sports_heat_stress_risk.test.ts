@@ -1,18 +1,21 @@
 import { describe, expect, test } from "vitest";
 import {
+  _SportsValues,
   phs,
   Sports,
   sports_heat_stress_risk,
+  SPORTS_HEAT_STRESS_RISK_INFO,
 } from "../../src/models/index.ts";
+import { sports_heat_stress_risk as from_root } from "../../src/index.ts";
 import {
   _calc_risk_single_value,
   _PHS_IDX_SWEAT_LOSS_G,
   _PHS_IDX_T_CR,
   _phs_scalar,
 } from "../../src/models/sports_heat_stress_risk.ts";
-import type { _SportsValues } from "../../src/models/index.ts";
 import { brentq } from "../../src/_internal/brentq.ts";
 import { pythonRound } from "../../src/_internal/round.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof sports_heat_stress_risk>[0];
@@ -959,4 +962,110 @@ describe("test_sports_heat_stress_risk", () => {
       ).toBe(true);
     },
   );
+});
+
+const running = { tdb: 35, tr: 35, rh: 40, vr: 2.0, sport: Sports.RUNNING };
+const build =
+  (...args: unknown[]) =>
+  () =>
+    new (_SportsValues as unknown as new (...a: unknown[]) => _SportsValues)(
+      ...args,
+    );
+
+describeModelContract(
+  sports_heat_stress_risk,
+  SPORTS_HEAT_STRESS_RISK_INFO,
+  running,
+);
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("sports_heat_stress_risk (JS-only)", () => {
+  // Deviation sports_heat_stress_risk-2.
+  test.each([
+    [
+      { tdb: 23, tr: -20, rh: 0, vr: 0.1, sport: Sports.RUNNING },
+      [
+        "Solver did not find a solution for high-extreme threshold for tdb=23.0 and rh=0.0: all bracket ranges failed. Setting t_extreme to max threshold of 43.5°C.",
+      ],
+    ],
+    [
+      { tdb: 29.7, tr: 25.7, rh: 0, vr: 0.1, sport: Sports.FISHING },
+      [
+        "Solver did not find a solution for low-medium threshold for tdb=29.7 and rh=0.0: all bracket ranges failed. Setting t_medium to max threshold of 34.5°C.",
+        "Solver did not find a solution for high-extreme threshold for tdb=29.7 and rh=0.0: all bracket ranges failed. Setting t_extreme to max threshold of 43.5°C.",
+      ],
+    ],
+  ])("%o returns upstream's notices", (inputs, messages) => {
+    const result = sports_heat_stress_risk(inputs);
+    expect(result.warnings).toEqual(
+      messages.map((message) => ({ kind: "notice", message })),
+    );
+    expect([result.t_medium, result.t_high, result.t_extreme]).toEqual([
+      34.5, 39, 43.5,
+    ]);
+  });
+
+  test("returns no rows where both thresholds solve", () => {
+    expect(sports_heat_stress_risk(running).warnings).toEqual([]);
+  });
+
+  test("a sport a caller builds gives what the Sports entry with its values gives", () => {
+    const own = new _SportsValues(0.37, 7.5, 2.0, 60);
+    expect(sports_heat_stress_risk({ ...running, sport: own })).toEqual(
+      sports_heat_stress_risk(running),
+    );
+  });
+
+  test("sport that is not a _SportsValues throws upstream's message, a plain object of its fields included", () => {
+    expect(() =>
+      sports_heat_stress_risk({
+        ...running,
+        sport: { clo: 0.37, met: 7.5, vr: 2.0, duration: 60 },
+      }),
+    ).toThrow(
+      new TypeError(
+        "sport must be a _SportsValues instance from the Sports dataclass.",
+      ),
+    );
+  });
+
+  // Deviation sports_heat_stress_risk-5, deviation sports_heat_stress_risk-6.
+  test("_SportsValues throws the library's TypeError for a value of another type, a boolean included", () => {
+    for (const [args, message] of [
+      [["0.5", 5, 0.5, 60], "clo must be a number."],
+      [[true, 5, 0.5, 60], "clo must be a number."],
+      [[0.5, null, 0.5, 60], "met must be a number."],
+      [[0.5, 5, "0.5", 60], "vr must be a number."],
+      [[0.5, 5, 0.5, 60.5], "duration must be an integer."],
+      [[0.5, 5, 0.5, true], "duration must be an integer."],
+    ] as const)
+      expect(build(...args)).toThrow(new TypeError(message));
+  });
+
+  // Deviation sports_heat_stress_risk-7.
+  test("_SportsValues throws upstream's messages as a RangeError for a value out of range", () => {
+    for (const [args, message] of [
+      [[0, 5, 0.5, 60], "clo must be a positive number > 0, got 0"],
+      [[-1.0, 5, 0.5, 60], "clo must be a positive number > 0, got -1"],
+      [[0.5, 0, 0.5, 60], "met must be a positive number > 0, got 0"],
+      [[0.5, 5, -0.5, 60], "vr must be a positive number > 0, got -0.5"],
+      [
+        [0.5, 5, 0.5, -1],
+        "duration must be a non-negative integer >= 0, got -1",
+      ],
+    ] as const)
+      expect(build(...args)).toThrow(new RangeError(message));
+  });
+
+  // Deviation sports_heat_stress_risk-8.
+  test("Sports and its entries are frozen, and a _SportsValues a caller builds is not", () => {
+    expect(Object.isFrozen(Sports)).toBe(true);
+    expect(Object.values(Sports).every(Object.isFrozen)).toBe(true);
+    expect(Object.isFrozen(new _SportsValues(0.5, 5, 0.5, 60))).toBe(false);
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(from_root).toBe(sports_heat_stress_risk);
+  });
 });

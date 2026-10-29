@@ -27,6 +27,7 @@ import {
   _SportsValues,
   Sports,
   sports_heat_stress_risk,
+  SPORTS_HEAT_STRESS_RISK_INFO,
 } from "./sports_heat_stress_risk.ts";
 import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import { pmv } from "./pmv.js";
@@ -86,6 +87,10 @@ export type { PMVPPD, PMVPPDInputs } from "./pmv_ppd_iso.ts";
 export type { SETInputs } from "./set_tmp.ts";
 export type { SolarGain, SolarGainInputs } from "./solar_gain.ts";
 export type {
+  SportsHeatStressInputs,
+  SportsHeatStressRisk,
+} from "./sports_heat_stress_risk.ts";
+export type {
   GaggeTwoNodes,
   GaggeTwoNodesInputs,
   SET,
@@ -142,6 +147,7 @@ export {
   _SportsValues,
   Sports,
   sports_heat_stress_risk,
+  SPORTS_HEAT_STRESS_RISK_INFO,
   set_tmp,
   SET_TMP_INFO,
   two_nodes_gagge,
@@ -199,6 +205,7 @@ export default {
   _SportsValues,
   Sports,
   sports_heat_stress_risk,
+  SPORTS_HEAT_STRESS_RISK_INFO,
   set_tmp,
   SET_TMP_INFO,
   two_nodes_gagge,

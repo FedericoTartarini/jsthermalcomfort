@@ -8,9 +8,9 @@ import {
 /**
  * @typedef {object} AdaptiveEnResult - a result set containing the results for {@link #adative_en|adaptive_en}
  * @property {number} tmp_cmf - Comfort temperature at that specific running mean temperature, default in [°C] or in [°F]
- * @property {boolean} acceptability_cat_i - If the indoor conditions comply with comfort category I
- * @property {boolean} acceptability_cat_ii - If the indoor conditions comply with comfort category II
- * @property {boolean} acceptability_cat_iii - If the indoor conditions comply with comfort category III
+ * @property {boolean|number} acceptability_cat_i - If the indoor conditions comply with comfort category I. NaN when the inputs are outside the applicability limits and `limit_inputs` is true
+ * @property {boolean|number} acceptability_cat_ii - If the indoor conditions comply with comfort category II. NaN when the inputs are outside the applicability limits and `limit_inputs` is true
+ * @property {boolean|number} acceptability_cat_iii - If the indoor conditions comply with comfort category III. NaN when the inputs are outside the applicability limits and `limit_inputs` is true
  * @property {number} tmp_cmf_cat_i_up - Upper acceptable comfort temperature for category I, default in [°C] or in [°F]
  * @property {number} tmp_cmf_cat_ii_up - Upper acceptable comfort temperature for category II, default in [°C] or in [°F]
  * @property {number} tmp_cmf_cat_iii_up - Upper acceptable comfort temperature for category III, default in [°C] or in [°F]
@@ -65,7 +65,7 @@ import {
  *
  * @example
  * const results = adaptive_en(25, 25, 9, 0.1);
- * console.log(results); // {tmp_cmf: NaN, acceptability_cat_i: true, acceptability_cat_ii: true, ... }
+ * console.log(results); // {tmp_cmf: NaN, acceptability_cat_i: NaN, acceptability_cat_ii: NaN, ... }
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is between 10 °C and 30 °C
  */
@@ -119,7 +119,7 @@ export function adaptive_en(
   let t_cmf = 0.33 * t_running_mean + 18.8;
 
   if (limit_inputs) {
-    const trm_valid = t_running_mean >= 10.0 && t_running_mean <= 33.5;
+    const trm_valid = t_running_mean >= 10.0 && t_running_mean <= 30.0;
     if (!trm_valid) t_cmf = NaN;
   }
 
@@ -130,9 +130,18 @@ export function adaptive_en(
   let t_cmf_ii_upper = t_cmf + 3.0 + ce;
   let t_cmf_iii_upper = t_cmf + 4.0 + ce;
 
-  const acceptability_i = t_cmf_i_lower <= to && to <= t_cmf_i_upper;
-  const acceptability_ii = t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
-  const acceptability_iii = t_cmf_iii_lower <= to && to <= t_cmf_iii_upper;
+  // outside the applicability limits there is no comfort zone, so the
+  // acceptability is unknown (NaN) rather than false
+  const outside_limits = isNaN(t_cmf);
+  const acceptability_i = outside_limits
+    ? NaN
+    : t_cmf_i_lower <= to && to <= t_cmf_i_upper;
+  const acceptability_ii = outside_limits
+    ? NaN
+    : t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
+  const acceptability_iii = outside_limits
+    ? NaN
+    : t_cmf_iii_lower <= to && to <= t_cmf_iii_upper;
 
   if (units.toLocaleLowerCase() === "ip") {
     ({

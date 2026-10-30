@@ -14,8 +14,8 @@ import { get_ce } from "./adaptive_en.js";
  * @property {number} tmp_cmf_80_up - Upper acceptable comfort temperature for 80% occupants, default in [°C] or in [°F]
  * @property {number} tmp_cmf_90_low - Lower acceptable comfort temperature for 90% occupants, default in [°C] or in [°F]
  * @property {number} tmp_cmf_90_up - Upper acceptable comfort temperature for 90% occupants, default in [°C] or in [°F]
- * @property {boolean} acceptability_80 - Acceptability for 80% occupants
- * @property {boolean} acceptability_90 - Acceptability for 90% occupants
+ * @property {boolean|number} acceptability_80 - Acceptability for 80% occupants. NaN when the inputs are outside the applicability limits and `limit_inputs` is true
+ * @property {boolean|number} acceptability_90 - Acceptability for 90% occupants. NaN when the inputs are outside the applicability limits and `limit_inputs` is true
  * @public
  */
 
@@ -78,7 +78,7 @@ import { get_ce } from "./adaptive_en.js";
  * import { adaptive_ashrae } from "jsthermalcomfort/models";
  * const results = adaptive_ashrae(25, 25, 9, 0.1);
  * console.log(results);
- * // {tmp_cmf: NaN, tmp_cmf_80_low: NaN, ...}
+ * // {tmp_cmf: NaN, tmp_cmf_80_low: NaN, ..., acceptability_80: NaN, acceptability_90: NaN}
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is higher than 10°C
  */
@@ -145,8 +145,15 @@ export function adaptive_ashrae(
   let tmp_cmf_80_up = t_cmf + 3.5 + ce;
   let tmp_cmf_90_up = t_cmf + 2.5 + ce;
 
-  const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
-  const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
+  // outside the applicability limits there is no comfort zone, so the
+  // acceptability is unknown (NaN) rather than false
+  const outside_limits = isNaN(t_cmf);
+  const acceptability_80 = outside_limits
+    ? NaN
+    : tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
+  const acceptability_90 = outside_limits
+    ? NaN
+    : tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
 
   if (units.toUpperCase() === "IP") {
     ({

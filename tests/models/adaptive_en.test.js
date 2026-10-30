@@ -28,7 +28,7 @@ describe("adaptive_en", () => {
 //   SC-1  Neutral comfort, t_running_mean within range → all categories acceptable
 //   SC-2  Warm indoor exceeds comfort zone → not acceptable in any category
 //   SC-3  Cool indoor below comfort zone → not acceptable in any category
-//   SC-4  Out-of-range t_running_mean → tmp_cmf is NaN
+//   SC-4  Out-of-range t_running_mean → tmp_cmf and acceptability are NaN
 //   SC-5  Higher air speed → wider comfort range
 // ---------------------------------------------------------------------------
 describe("adaptive_en scalar tests (hardcoded)", () => {
@@ -56,12 +56,24 @@ describe("adaptive_en scalar tests (hardcoded)", () => {
     expect(result.acceptability_cat_iii).toBe(false);
   });
 
-  test("SC-4 Out-of-range t_running_mean → tmp_cmf is NaN", () => {
+  test("SC-4 Out-of-range t_running_mean → tmp_cmf and acceptability are NaN", () => {
     const result = adaptive_en(25, 25, 8, 0.1, "SI", true);
     expect(result.tmp_cmf).toBeNaN();
-    expect(result.acceptability_cat_i).toBe(false);
-    expect(result.acceptability_cat_ii).toBe(false);
-    expect(result.acceptability_cat_iii).toBe(false);
+    expect(result.acceptability_cat_i).toBeNaN();
+    expect(result.acceptability_cat_ii).toBeNaN();
+    expect(result.acceptability_cat_iii).toBeNaN();
+  });
+
+  test("SC-4b t_running_mean above 30 °C is outside the EN 16798-1 limits", () => {
+    const result = adaptive_en(25, 25, 31, 0.1, "SI", true);
+    expect(result.tmp_cmf).toBeNaN();
+    expect(result.acceptability_cat_i).toBeNaN();
+  });
+
+  test("SC-4c limit_inputs:false still returns booleans", () => {
+    const result = adaptive_en(22, 22, 8, 0.1, "SI", false);
+    expect(result.tmp_cmf).toBeCloseTo(21.4, 1);
+    expect(result.acceptability_cat_i).toBe(true);
   });
 
   test("SC-5 Higher air speed → wider comfort range", () => {

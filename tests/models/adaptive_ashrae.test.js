@@ -28,7 +28,7 @@ describe("adaptive_ashrae", () => {
 //   SC-1  Neutral comfort, t_running_mean within range → comfort predicted
 //   SC-2  Warm indoor exceeds comfort zone → not acceptable
 //   SC-3  Cool indoor below comfort zone → not acceptable
-//   SC-4  Out-of-range t_running_mean → tmp_cmf is NaN
+//   SC-4  Out-of-range t_running_mean → tmp_cmf and acceptability are NaN
 //   SC-5  IP units conversion
 // ---------------------------------------------------------------------------
 describe("adaptive_ashrae scalar tests (hardcoded)", () => {
@@ -53,9 +53,16 @@ describe("adaptive_ashrae scalar tests (hardcoded)", () => {
     expect(result.acceptability_90).toBe(false);
   });
 
-  test("SC-4 Out-of-range t_running_mean → tmp_cmf is NaN", () => {
+  test("SC-4 Out-of-range t_running_mean → tmp_cmf and acceptability are NaN", () => {
     const result = adaptive_ashrae(25, 25, 5, 0.1, "SI", true);
     expect(result.tmp_cmf).toBeNaN();
+    expect(result.acceptability_80).toBeNaN();
+    expect(result.acceptability_90).toBeNaN();
+  });
+
+  test("SC-4b limit_inputs:false still returns booleans", () => {
+    const result = adaptive_ashrae(25, 25, 5, 0.1, "SI", false);
+    expect(result.tmp_cmf).toBeCloseTo(19.4, 1);
     expect(result.acceptability_80).toBe(false);
     expect(result.acceptability_90).toBe(false);
   });

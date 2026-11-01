@@ -13,6 +13,7 @@ import {
 import {
   BASE_INPUTS_POSITION,
   BASE_INPUTS_UNITS,
+  BASE_INPUTS_WORK_INTENSITY,
   choiceFieldMessage,
   parseInputs,
 } from "../src/_internal/define.ts";
@@ -491,6 +492,19 @@ describe("BASE_INPUTS_POSITION (JS-only)", () => {
     expect(TWO_NODES_GAGGE_INFO.inputs.position.allowed).toBe(
       BASE_INPUTS_POSITION.allowed,
     );
+  });
+});
+
+// BaseInputs' work_intensity field (classes_input.py:106), defined once.
+describe("BASE_INPUTS_WORK_INTENSITY (JS-only)", () => {
+  test("holds upstream's allowed and message, with no default, frozen", () => {
+    expect(BASE_INPUTS_WORK_INTENSITY).toEqual({
+      kind: "choice",
+      allowed: ["heavy", "moderate", "light"],
+      message: "work_intensity must be one of ['heavy', 'moderate', 'light']",
+    });
+    expect(Object.isFrozen(BASE_INPUTS_WORK_INTENSITY)).toBe(true);
+    expect(Object.isFrozen(BASE_INPUTS_WORK_INTENSITY.allowed)).toBe(true);
   });
 });
 

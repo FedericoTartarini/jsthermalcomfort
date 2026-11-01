@@ -129,6 +129,19 @@ describe("Postures mirrors pythermalcomfort's Postures enum", () => {
   });
 });
 
+// Upstream's `WorkIntensity` enum (classes_input.py:41-46), added as a
+// constant (deviation _shared-77).
+describe("WorkIntensity mirrors pythermalcomfort's WorkIntensity enum", () => {
+  test("has upstream's members and values, in its order, frozen, from the package root", () => {
+    expect(Object.entries(pkg.WorkIntensity)).toEqual([
+      ["HEAVY", "heavy"],
+      ["MODERATE", "moderate"],
+      ["LIGHT", "light"],
+    ]);
+    expect(Object.isFrozen(pkg.WorkIntensity)).toBe(true);
+  });
+});
+
 describe("is_iso_7730", () => {
   test("accepts both editions and nothing else", () => {
     expect(is_iso_7730(Standard.iso_7730_2005)).toBe(true);

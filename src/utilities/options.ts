@@ -43,3 +43,15 @@ export const Postures = Object.freeze({
   supine: "supine",
   crouching: "crouching",
 } as const);
+
+/**
+ * Work intensity options.
+ *
+ * Upstream's `WorkIntensity` (`classes_input.py:41-46`); a parameter accepts
+ * either `WorkIntensity.HEAVY` or `"heavy"` (deviation _shared-77).
+ */
+export const WorkIntensity = Object.freeze({
+  HEAVY: "heavy",
+  MODERATE: "moderate",
+  LIGHT: "light",
+} as const);

@@ -13,11 +13,12 @@ import type {
   NumericField,
   ResolvedOf,
 } from "./modelInfo.ts";
-import { Postures, Units } from "../utilities/options.ts";
+import { Postures, Units, WorkIntensity } from "../utilities/options.ts";
 
 // The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing
 // in for upstream's input dataclass checks (`classes_input.py`; ADR 0019,
-// whitelist item 2), and `BASE_INPUTS_UNITS` and `BASE_INPUTS_POSITION`.
+// whitelist item 2), and `BASE_INPUTS_UNITS`, `BASE_INPUTS_POSITION` and
+// `BASE_INPUTS_WORK_INTENSITY`.
 
 /**
  * Upstream's `BaseInputs.units`: defaults to 'SI' and raises "Units must be
@@ -49,6 +50,26 @@ export const BASE_INPUTS_POSITION = deepFreeze({
   allowed: POSITIONS,
   message: choiceFieldMessage("position", POSITIONS),
   nullable: true,
+} as const satisfies ChoiceField);
+
+const WORK_INTENSITIES = deepFreeze([
+  WorkIntensity.HEAVY,
+  WorkIntensity.MODERATE,
+  WorkIntensity.LIGHT,
+] as const);
+
+/**
+ * Upstream's `BaseInputs.work_intensity`, a `choice_field` of
+ * `WorkIntensity`'s values (`classes_input.py:106`), with its message
+ * (`classes_input.py:183`). Its default is `None`, so each model's INFO
+ * references it with the model's own default. `BaseInputs` skips `None`, but
+ * the models that take it call `work_intensity.lower()` after it, which raises,
+ * so it is not `nullable`.
+ */
+export const BASE_INPUTS_WORK_INTENSITY = deepFreeze({
+  kind: "choice",
+  allowed: WORK_INTENSITIES,
+  message: choiceFieldMessage("work_intensity", WORK_INTENSITIES),
 } as const satisfies ChoiceField);
 
 /**

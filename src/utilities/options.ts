@@ -45,7 +45,7 @@ export const Postures = Object.freeze({
 } as const);
 
 /**
- * Work intensity options.
+ * Enumeration for work intensity levels.
  *
  * Upstream's `WorkIntensity` (`classes_input.py:41-46`); a parameter accepts
  * either `WorkIntensity.HEAVY` or `"heavy"` (deviation _shared-77).

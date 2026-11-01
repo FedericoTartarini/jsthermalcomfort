@@ -20,7 +20,11 @@ import {
 import type { InputsOf } from "../src/_internal/modelInfo.ts";
 import { floatRepr } from "../src/_internal/floatRepr.ts";
 import { pythonRound, round } from "../src/_internal/round.ts";
-import { CLO_TOUT_INFO, TWO_NODES_GAGGE_INFO } from "../src/models/index.ts";
+import {
+  CLO_TOUT_INFO,
+  TWO_NODES_GAGGE_INFO,
+  WORK_CAPACITY_DUNNE_INFO,
+} from "../src/models/index.ts";
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
 // _internal directly, so it imports the kernels' own file (seam S2). A
@@ -505,6 +509,16 @@ describe("BASE_INPUTS_WORK_INTENSITY (JS-only)", () => {
     });
     expect(Object.isFrozen(BASE_INPUTS_WORK_INTENSITY)).toBe(true);
     expect(Object.isFrozen(BASE_INPUTS_WORK_INTENSITY.allowed)).toBe(true);
+  });
+
+  test("a model's INFO references it with the model's default", () => {
+    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity).toEqual({
+      ...BASE_INPUTS_WORK_INTENSITY,
+      default: "heavy",
+    });
+    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity.allowed).toBe(
+      BASE_INPUTS_WORK_INTENSITY.allowed,
+    );
   });
 });
 

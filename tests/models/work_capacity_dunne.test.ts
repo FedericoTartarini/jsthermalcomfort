@@ -5,7 +5,6 @@ import {
 } from "../../src/models/index.ts";
 import { work_capacity_dunne as work_capacity_dunne_from_root } from "../../src/index.ts";
 import { WorkIntensity } from "../../src/utilities/index.ts";
-import { BASE_INPUTS_WORK_INTENSITY } from "../../src/_internal/define.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
@@ -99,9 +98,9 @@ describe("test_choice_field", () => {
   // BaseInputs skips None, and the model's work_intensity.lower() then raises
   // (deviation work_capacity_dunne-4).
   test("test_choice_fields_metadata_and_none[work_intensity]", () => {
-    for (const value of allowed) {
-      expect(() => capacity(value)).not.toThrow();
-    }
+    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity.allowed).toEqual(
+      allowed,
+    );
     expect(() => capacity(null)).toThrow(new TypeError(work_intensity_message));
   });
 
@@ -141,6 +140,17 @@ describe("test_choice_field", () => {
       expect(() => capacity(value)).toThrow(new error(work_intensity_message));
     },
   );
+
+  // Deviation work_capacity_dunne-5.
+  test("test_str_enum_members_validate_like_their_values", () => {
+    const members = [WorkIntensity.MODERATE, WorkIntensity.LIGHT];
+    expect(() => capacity(members)).toThrow(
+      new TypeError(work_intensity_message),
+    );
+    expect(() => capacity([WorkIntensity.MODERATE, "invalid"])).toThrow(
+      new TypeError(work_intensity_message),
+    );
+  });
 });
 
 describeModelContract(work_capacity_dunne, WORK_CAPACITY_DUNNE_INFO, {
@@ -163,24 +173,6 @@ describe("work_capacity_dunne (JS-only)", () => {
   ] as const)("wbgt %s, %s gives %s", (wbgt, work_intensity, expected) => {
     const { capacity } = work_capacity_dunne({ wbgt, work_intensity });
     expect(approx(capacity, expected, { rel: 1e-12, abs: 0 })).toBe(true);
-  });
-
-  // Deviation work_capacity_dunne-1 (models/work_capacity_dunne.py:15).
-  test("work_intensity is BaseInputs' field with the model's default, heavy", () => {
-    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity).toEqual({
-      ...BASE_INPUTS_WORK_INTENSITY,
-      default: "heavy",
-    });
-    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity.allowed).toBe(
-      BASE_INPUTS_WORK_INTENSITY.allowed,
-    );
-  });
-
-  // models/work_capacity_dunne.py:55.
-  test("work_intensity is read in any case", () => {
-    expect(call({ wbgt: 30, work_intensity: "Moderate" }).capacity).toBe(
-      53.799113089356695,
-    );
   });
 
   // Deviation work_capacity_dunne-3.

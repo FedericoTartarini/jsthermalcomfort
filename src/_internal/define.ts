@@ -52,11 +52,7 @@ export const BASE_INPUTS_POSITION = deepFreeze({
   nullable: true,
 } as const satisfies ChoiceField);
 
-const WORK_INTENSITIES = deepFreeze([
-  WorkIntensity.HEAVY,
-  WorkIntensity.MODERATE,
-  WorkIntensity.LIGHT,
-] as const);
+const WORK_INTENSITIES = deepFreeze(Object.values(WorkIntensity));
 
 /**
  * Upstream's `BaseInputs.work_intensity`, a `choice_field` of

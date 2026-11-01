@@ -11,9 +11,9 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   testDataUrls.at,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_at.py. Its is_equal is
-// np.isclose or np.allclose with the given atol and the default rtol, 1e-5,
-// and its list call runs element-wise.
+// Mirrors pythermalcomfort v4.7.0 tests/test_at.py. Its is_equal
+// (tests/conftest.py:101-116) is np.isclose or np.allclose with the given atol
+// and the default rtol, 1e-5, and its list call runs element-wise.
 describe("test_at", () => {
   test.each(reference_table.data)("test_at: fixture case %#", (entry) => {
     const { inputs, outputs } = entry;
@@ -34,8 +34,7 @@ describe("test_at", () => {
     });
   });
 
-  // tests/test_at.py:31 calls is_equal without asserting its result, and its
-  // 25.3 is not what 4.7.0 returns, 30.9 (upstream draft 46); this asserts 30.9.
+  // tests/test_at.py:31 never asserts its 25.3; 4.7.0 returns 30.9 (decision 253, upstream draft 46).
   test("test_at_q", () => {
     const result = at({ tdb: 25, rh: 30, v: 0.1, q: 100 });
     expect(approx(result.at, 30.9, { rel: 1e-5, abs: 0.1 })).toBe(true);

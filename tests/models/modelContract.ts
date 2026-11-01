@@ -106,8 +106,8 @@ export function describeModelContract(
     );
 
     test.each(keysOf("numeric"))("%s that is not a number", (key) => {
-      const sentinel = info.inputs[key]?.default;
-      for (const bad of not_a_number.filter((v) => v !== sentinel))
+      const fallback = info.inputs[key]?.default;
+      for (const bad of not_a_number.filter((v) => v !== fallback))
         expect(call({ ...valid, [key]: bad })).toThrow(
           new TypeError(finiteMessage(key)),
         );

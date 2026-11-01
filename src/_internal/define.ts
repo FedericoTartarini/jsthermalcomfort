@@ -69,15 +69,16 @@ export function choiceFieldMessage(
 }
 
 /**
- * Checks one number, as given or defaulted, or `false` where the entry's
- * default is `false`, upstream's sentinel.
+ * Checks one number, as given or defaulted, or `false` or `null` where the
+ * entry's default is that value, upstream's `False` or `None`.
  */
 function parseNumeric(
   key: string,
   value: unknown,
   entry: NumericField,
-): number | false {
+): number | false | null {
   if (value === false && entry.default === false) return false;
+  if (value === null && entry.default === null) return null;
   // Any other type is a TypeError, a boolean or null (deviation _shared-6) and
   // an array (deviation _shared-5) included, which upstream accepts.
   if (typeof value !== "number") throw notFiniteNumber(key, TypeError);
@@ -132,7 +133,7 @@ function parseInstance(value: unknown, entry: InstanceField): object {
  * - a required key must be given, or a `TypeError` names it;
  * - a number must be finite: a `TypeError` for any other type, a boolean,
  *   `null` or an array included, and a `RangeError` for NaN or ±Infinity;
- *   one whose default is `false` takes `false` too;
+ *   one whose default is `false` or `null` takes that value too;
  * - a switch must be a boolean, or a `TypeError` names it, whether or not
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, or its

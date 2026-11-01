@@ -23,7 +23,8 @@ export function isDeepFrozen(value: unknown): boolean {
  *
  * The parse's checks are the library's: an array (deviation _shared-5), a
  * boolean or `null` (deviation _shared-6) for a quantity throws `TypeError`,
- * except `false` for one whose default is `false`, upstream's sentinel, and
+ * except `false` or `null` for one whose default is that value, upstream's
+ * `False` or `None`, and
  * NaN or ±Infinity `RangeError` (deviation _shared-7); every switch is
  * checked to be a boolean (deviation _shared-8); the keys are checked in
  * `INFO.inputs`' order, a missing key at its place too (deviation _shared-9);
@@ -104,8 +105,8 @@ export function describeModelContract(
     );
 
     test.each(keysOf("numeric"))("%s that is not a number", (key) => {
-      const sentinel = info.inputs[key]?.default === false;
-      for (const bad of not_a_number.filter((v) => !(sentinel && v === false)))
+      const sentinel = info.inputs[key]?.default;
+      for (const bad of not_a_number.filter((v) => v !== sentinel))
         expect(call({ ...valid, [key]: bad })).toThrow(
           new TypeError(finiteMessage(key)),
         );

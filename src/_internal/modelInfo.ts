@@ -150,13 +150,16 @@ export interface DerivedField {
  *
  * A `default` of `false` is upstream's `False` for a number the model computes
  * when it is not given, `pmv_athb`'s `clo` (`models/pmv_athb.py:18, :98`):
- * the key then takes `false` too, and only `false`, of the booleans.
+ * the key then takes `false` too, and only `false`, of the booleans. A
+ * `default` of `null` is upstream's `None` for a number the model may go
+ * without, `at`'s `q` (`models/at.py:14, :71-75`): the key then takes `null`
+ * too.
  */
 export interface NumericField {
   readonly kind: "numeric";
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
-  readonly default?: number | false;
+  readonly default?: number | false | null;
 }
 
 /** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
@@ -242,14 +245,17 @@ interface KindValues {
 type OptionalKey<I extends InputsInfo> = {
   [K in keyof I]: I[K] extends { readonly default: unknown } ? K : never;
 }[keyof I];
-type NullOf<F> = F extends { readonly nullable: true } ? null : never;
+type NullOf<F> = F extends
+  { readonly nullable: true } | { readonly default: null }
+  ? null
+  : never;
 type FalseOf<F> = F extends { readonly default: false } ? false : never;
 type KindValue<F extends InputsInfo[string]> = F extends InstanceField
   ? InstanceType<F["of"]>
   : KindValues[F["kind"]];
 type InputValue<F extends InputsInfo[string]> = F extends ChoiceField
   ? F["allowed"][number] | NullOf<F>
-  : KindValue<F> | FalseOf<F>;
+  : KindValue<F> | FalseOf<F> | NullOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
 
 /**
@@ -257,7 +263,8 @@ type Flatten<T> = { [K in keyof T]: T[K] } & {};
  * key with a default is optional, and `undefined` takes the default, as an
  * omitted keyword does (ADR 0019, whitelist item 6); a `choice` takes one of
  * its `allowed`, or `null` where it is `nullable`; a `numeric` whose default
- * is `false` takes `false` too; an `instance` takes an instance of its `of`.
+ * is `false` or `null` takes that value too; an `instance` takes an instance
+ * of its `of`.
  */
 export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
   {

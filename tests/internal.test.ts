@@ -653,3 +653,35 @@ describe("floatRepr (JS-only)", () => {
     expect(floatRepr(x)).toBe(expected);
   });
 });
+
+// A number whose default is upstream's None, as at's q is (models/at.py:14,
+// :71-75).
+describe("parseInputs, numeric with a null default (JS-only)", () => {
+  const info = {
+    name: "f",
+    inputs: { q: { kind: "numeric", unit: "W/m²", default: null } },
+  } as const;
+  const parse = (q: unknown) => () => parseInputs(info, { q });
+
+  test("takes null or a finite number, and null for undefined", () => {
+    expect(parse(null)()).toEqual({ q: null });
+    expect(parse(undefined)()).toEqual({ q: null });
+    expect(parse(0)()).toEqual({ q: 0 });
+    expect(parse(100)()).toEqual({ q: 100 });
+  });
+
+  test("throws for a boolean and any other type, and for a non-finite number", () => {
+    for (const bad of [true, false, "100", [100]])
+      expect(parse(bad)).toThrow(new TypeError("q must be a finite number."));
+    expect(parse(NaN)).toThrow(new RangeError("q must be a finite number."));
+  });
+
+  test("throws for null where the default is not null", () => {
+    expect(() =>
+      parseInputs(
+        { name: "g", inputs: { q: { kind: "numeric", unit: "W/m²" } } },
+        { q: null },
+      ),
+    ).toThrow(new TypeError("q must be a finite number."));
+  });
+});

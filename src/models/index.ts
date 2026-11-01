@@ -50,6 +50,7 @@ import {
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
 import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";
+import { work_capacity_dunne } from "./work_capacity_dunne.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -172,6 +173,7 @@ export {
   WCI_INFO,
   wind_chill_temperature,
   WIND_CHILL_TEMPERATURE_INFO,
+  work_capacity_dunne,
 };
 
 export default {
@@ -233,5 +235,6 @@ export default {
   WCI_INFO,
   wind_chill_temperature,
   WIND_CHILL_TEMPERATURE_INFO,
+  work_capacity_dunne,
   JOS3,
 };

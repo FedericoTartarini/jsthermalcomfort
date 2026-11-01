@@ -604,6 +604,19 @@ def _wind_chill_temperature(rng):
     }
 
 
+def _work_capacity_dunne(rng):
+    # wbgt reaches below 25 °C, where capacity is 100, and past 33 °C, where
+    # every intensity's capacity clips to 0, and stays mostly between, where
+    # it is computed (models/work_capacity_dunne.py:58, :66). work_intensity
+    # comes in either case, as upstream lower-cases it (:55).
+    return {
+        "wbgt": _value(rng, 23.0, 35.0),
+        "work_intensity": str(
+            rng.choice(["heavy", "moderate", "light", "HEAVY", "Moderate", "LIGHT"])
+        ),
+    }
+
+
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
@@ -651,6 +664,7 @@ MODELS = {
     "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),
     "wci": (models.wci, _wci),
     "wind_chill_temperature": (models.wind_chill_temperature, _wind_chill_temperature),
+    "work_capacity_dunne": (models.work_capacity_dunne, _work_capacity_dunne),
 }
 
 

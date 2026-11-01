@@ -30,6 +30,7 @@ import {
   vertical_tmp_grad_ppd,
   wci,
   wind_chill_temperature,
+  work_capacity_dunne,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -678,6 +679,16 @@ const MODELS: readonly ParityModel[] = [
       ),
     // Upstream rounds wct with np.around (models/wind_chill_temperature.py:61-62).
     rounded: ({ round_output }) => (round_output === true ? ["wct"] : []),
+    warnings: true,
+  },
+  {
+    name: "work_capacity_dunne",
+    run: (inputs) =>
+      work_capacity_dunne(
+        inputs as unknown as Parameters<typeof work_capacity_dunne>[0],
+      ),
+    // Upstream rounds nothing (models/work_capacity_dunne.py:58-68).
+    rounded: () => [],
     warnings: true,
   },
 ];

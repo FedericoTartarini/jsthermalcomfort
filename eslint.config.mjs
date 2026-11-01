@@ -56,6 +56,7 @@ export const LINTED = [
   "src/models/wci.ts",
   "src/models/wind_chill_temperature.ts",
   "src/models/work_capacity_dunne.ts",
+  "src/models/work_capacity_hothaps.ts",
   "tests/call_sites.test.ts",
   "tests/check_mirrored.test.ts",
   "tests/environment/operative_tmp.test.ts",

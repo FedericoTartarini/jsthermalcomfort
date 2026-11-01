@@ -54,7 +54,10 @@ import {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
 } from "./work_capacity_dunne.ts";
-import { work_capacity_hothaps } from "./work_capacity_hothaps.ts";
+import {
+  work_capacity_hothaps,
+  WORK_CAPACITY_HOTHAPS_INFO,
+} from "./work_capacity_hothaps.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -121,6 +124,7 @@ export type {
   WorkCapacity,
   WorkCapacityDunneInputs,
 } from "./work_capacity_dunne.ts";
+export type { WorkCapacityHothapsInputs } from "./work_capacity_hothaps.ts";
 
 export {
   adaptive_ashrae,
@@ -184,6 +188,7 @@ export {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
   work_capacity_hothaps,
+  WORK_CAPACITY_HOTHAPS_INFO,
 };
 
 export default {
@@ -248,5 +253,6 @@ export default {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
   work_capacity_hothaps,
+  WORK_CAPACITY_HOTHAPS_INFO,
   JOS3,
 };

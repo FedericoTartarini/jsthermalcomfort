@@ -66,6 +66,7 @@ import type {
   WCTInputs,
   WorkCapacity,
   WorkCapacityDunneInputs,
+  WorkCapacityHothapsInputs,
   APMV,
   APMVInputs,
   EPMV,
@@ -106,6 +107,7 @@ import {
   WCI_INFO,
   WIND_CHILL_TEMPERATURE_INFO,
   WORK_CAPACITY_DUNNE_INFO,
+  WORK_CAPACITY_HOTHAPS_INFO,
   WorkIntensity,
   PMV_A_INFO,
   PMV_E_INFO,
@@ -137,6 +139,7 @@ import {
   wci,
   wind_chill_temperature,
   work_capacity_dunne,
+  work_capacity_hothaps,
   pmv_a,
   pmv_e,
   pmv_athb,
@@ -184,6 +187,7 @@ const pmvEInfo: ModelInfo = PMV_E_INFO;
 const pmvAthbInfo: ModelInfo = PMV_ATHB_INFO;
 const sportsHeatStressRiskInfo: ModelInfo = SPORTS_HEAT_STRESS_RISK_INFO;
 const workCapacityDunneInfo: ModelInfo = WORK_CAPACITY_DUNNE_INFO;
+const workCapacityHothapsInfo: ModelInfo = WORK_CAPACITY_HOTHAPS_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1013,3 +1017,24 @@ workCapacityDunneResult.capacity = 1;
 work_capacity_dunne({ wbgt: 30, work_intensity: "extreme" });
 // @ts-expect-error wbgt is a required quantity.
 work_capacity_dunne({ work_intensity: "heavy" });
+
+// work_capacity_hothaps takes one inputs object (ADR 0002), with upstream's
+// inputs type name WorkCapacityHothapsInputs, work_intensity taking the
+// WorkIntensity constant or its literal (deviation _shared-77), and returns
+// upstream's WorkCapacity, readonly.
+const workCapacityHothapsInputs: WorkCapacityHothapsInputs = {
+  wbgt: 30,
+  work_intensity: WorkIntensity.LIGHT,
+};
+const workCapacityHothapsResult: WorkCapacity = work_capacity_hothaps(
+  workCapacityHothapsInputs,
+);
+const workCapacityHothaps: number = workCapacityHothapsResult.capacity;
+work_capacity_hothaps({ wbgt: 30, work_intensity: "moderate" });
+work_capacity_hothaps({ wbgt: 30 });
+// @ts-expect-error the result is readonly.
+workCapacityHothapsResult.capacity = 1;
+// @ts-expect-error work_intensity is one of upstream's three.
+work_capacity_hothaps({ wbgt: 30, work_intensity: "extreme" });
+// @ts-expect-error wbgt is a required quantity.
+work_capacity_hothaps({ work_intensity: "heavy" });

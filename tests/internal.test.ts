@@ -24,6 +24,7 @@ import {
   CLO_TOUT_INFO,
   TWO_NODES_GAGGE_INFO,
   WORK_CAPACITY_DUNNE_INFO,
+  WORK_CAPACITY_HOTHAPS_INFO,
 } from "../src/models/index.ts";
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
@@ -511,12 +512,15 @@ describe("BASE_INPUTS_WORK_INTENSITY (JS-only)", () => {
     expect(Object.isFrozen(BASE_INPUTS_WORK_INTENSITY.allowed)).toBe(true);
   });
 
-  test("a model's INFO references it with the model's default", () => {
-    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity).toEqual({
+  test.each([
+    ["work_capacity_dunne", WORK_CAPACITY_DUNNE_INFO],
+    ["work_capacity_hothaps", WORK_CAPACITY_HOTHAPS_INFO],
+  ])("%s's INFO references it with the model's default", (_, info) => {
+    expect(info.inputs.work_intensity).toEqual({
       ...BASE_INPUTS_WORK_INTENSITY,
       default: "heavy",
     });
-    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity.allowed).toBe(
+    expect(info.inputs.work_intensity.allowed).toBe(
       BASE_INPUTS_WORK_INTENSITY.allowed,
     );
   });

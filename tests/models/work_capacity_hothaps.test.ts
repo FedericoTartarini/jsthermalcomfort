@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { work_capacity_hothaps } from "../../src/models/index.ts";
+import {
+  work_capacity_hothaps,
+  WORK_CAPACITY_HOTHAPS_INFO,
+} from "../../src/models/index.ts";
+import { work_capacity_hothaps as work_capacity_hothaps_from_root } from "../../src/index.ts";
 import { WorkIntensity } from "../../src/utilities/index.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 const call = (inputs: unknown) =>
@@ -91,5 +96,60 @@ describe("test_work_capacity_hothaps", () => {
     ).toBe(
       work_capacity_hothaps({ wbgt: 30, work_intensity: "moderate" }).capacity,
     );
+  });
+});
+
+describeModelContract(work_capacity_hothaps, WORK_CAPACITY_HOTHAPS_INFO, {
+  wbgt: 30,
+});
+
+const work_intensity_message =
+  "work_intensity must be one of ['heavy', 'moderate', 'light']";
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("work_capacity_hothaps (JS-only)", () => {
+  test.each([
+    [20, "heavy", 99.93678523325094],
+    [25.5, "heavy", 96.53454572629144],
+    [28, "moderate", 95.25438460639754],
+    [30, "HEAVY", 66.30396938573278],
+    [31.4, "light", 91.270941835105],
+    [35, "heavy", 20.249425229307455],
+    [40, "light", 13.299353450358598],
+    [45, "moderate", 10.344485432347462],
+  ] as const)("wbgt %s, %s gives %s", (wbgt, work_intensity, expected) => {
+    const { capacity } = call({ wbgt, work_intensity });
+    expect(approx(capacity, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+  });
+
+  test("a negative wbgt gives NaN, as upstream's does", () => {
+    expect(work_capacity_hothaps({ wbgt: -5 }).capacity).toBeNaN();
+  });
+
+  // Deviations work_capacity_hothaps-3 to -5.
+  test.each([
+    ["", RangeError],
+    ["extreme", RangeError],
+    [5, TypeError],
+    [true, TypeError],
+    [null, TypeError],
+    [["heavy", "light"], TypeError],
+    [["heavy", "invalid"], TypeError],
+  ])("work_intensity %j throws upstream's message as a %O", (value, error) => {
+    expect(() => call({ wbgt: 30, work_intensity: value })).toThrow(
+      new error(work_intensity_message),
+    );
+  });
+
+  // Deviation work_capacity_hothaps-2.
+  test("returns no rows", () => {
+    for (const wbgt of [-5, 0, 30, 100]) {
+      expect(work_capacity_hothaps({ wbgt }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(work_capacity_hothaps_from_root).toBe(work_capacity_hothaps);
   });
 });

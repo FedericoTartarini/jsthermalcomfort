@@ -54,6 +54,7 @@ import {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
 } from "./work_capacity_dunne.ts";
+import { work_capacity_hothaps } from "./work_capacity_hothaps.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -182,6 +183,7 @@ export {
   WIND_CHILL_TEMPERATURE_INFO,
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
+  work_capacity_hothaps,
 };
 
 export default {
@@ -245,5 +247,6 @@ export default {
   WIND_CHILL_TEMPERATURE_INFO,
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
+  work_capacity_hothaps,
   JOS3,
 };

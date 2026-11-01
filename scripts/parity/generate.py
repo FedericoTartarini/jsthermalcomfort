@@ -617,6 +617,20 @@ def _work_capacity_dunne(rng):
     }
 
 
+def _work_capacity_hothaps(rng):
+    # wbgt reaches below 0 °C, where (wbgt / divisor) ** exponent is NaN, and
+    # past 50 °C, where every intensity's capacity nears its 10 % floor, and
+    # stays mostly between, where the sigmoid falls
+    # (models/work_capacity_hothaps.py:83). work_intensity comes in either
+    # case, as upstream lower-cases it (:73).
+    return {
+        "wbgt": _value(rng, -2.0, 55.0),
+        "work_intensity": str(
+            rng.choice(["heavy", "moderate", "light", "HEAVY", "Moderate", "LIGHT"])
+        ),
+    }
+
+
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
@@ -665,6 +679,7 @@ MODELS = {
     "wci": (models.wci, _wci),
     "wind_chill_temperature": (models.wind_chill_temperature, _wind_chill_temperature),
     "work_capacity_dunne": (models.work_capacity_dunne, _work_capacity_dunne),
+    "work_capacity_hothaps": (models.work_capacity_hothaps, _work_capacity_hothaps),
 }
 
 

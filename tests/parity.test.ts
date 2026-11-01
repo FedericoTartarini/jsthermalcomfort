@@ -31,6 +31,7 @@ import {
   wci,
   wind_chill_temperature,
   work_capacity_dunne,
+  work_capacity_hothaps,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -688,6 +689,16 @@ const MODELS: readonly ParityModel[] = [
         inputs as unknown as Parameters<typeof work_capacity_dunne>[0],
       ),
     // Upstream rounds nothing (models/work_capacity_dunne.py:58-68).
+    rounded: () => [],
+    warnings: true,
+  },
+  {
+    name: "work_capacity_hothaps",
+    run: (inputs) =>
+      work_capacity_hothaps(
+        inputs as unknown as Parameters<typeof work_capacity_hothaps>[0],
+      ),
+    // Upstream rounds nothing (models/work_capacity_hothaps.py:76-85).
     rounded: () => [],
     warnings: true,
   },

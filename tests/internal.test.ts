@@ -528,7 +528,7 @@ describe("BASE_INPUTS_WORK_INTENSITY (JS-only)", () => {
 });
 
 // WorkCapacityStandardsInputs' met check (classes_input.py:1095-1099), defined
-// once for work_capacity_iso and work_capacity_niosh (decision 257).
+// once (decision 257).
 describe("checkWorkCapacityStandardsInputs (JS-only)", () => {
   test.each([0, -0, 117, 2500])("met %s passes", (met) => {
     expect(() => {

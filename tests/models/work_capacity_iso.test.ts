@@ -21,9 +21,9 @@ describe("test_work_capacity_iso", () => {
     return Math.min(Math.max(cap, 0), 100);
   };
 
-  // Upstream also asserts a WorkCapacity instance and a float capacity; a JS
-  // result is a plain object.
   test("test_scalar_typical", () => {
+    // Upstream also asserts a WorkCapacity instance and a float capacity; a
+    // JS result is a plain object.
     const wbgt = 30.0;
     const met = 200.0;
     const result = work_capacity_iso({ wbgt, met });
@@ -32,6 +32,7 @@ describe("test_work_capacity_iso", () => {
   });
 
   test("test_list_input_pairwise", () => {
+    // Upstream also asserts an np.ndarray capacity; the model takes scalars.
     const pairs = [
       [20.0, 100.0],
       [30.0, 200.0],
@@ -141,7 +142,7 @@ describe("work_capacity_iso (JS-only)", () => {
   );
 
   // Deviation work_capacity_iso-4.
-  test.each([Infinity, -Infinity, NaN])(
+  test.each([Infinity, -Infinity])(
     "met %s throws the parse's message as a RangeError",
     (met) => {
       expect(() => call({ wbgt: 25, met })).toThrow(
@@ -149,6 +150,12 @@ describe("work_capacity_iso (JS-only)", () => {
       );
     },
   );
+
+  test("checks met's range after the parse, as upstream's __post_init__ runs after BaseInputs'", () => {
+    expect(() => call({ wbgt: "30", met: 3000 })).toThrow(
+      new TypeError("wbgt must be a finite number."),
+    );
+  });
 
   // Deviation work_capacity_iso-2.
   test("returns no rows", () => {

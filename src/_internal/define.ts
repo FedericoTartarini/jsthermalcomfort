@@ -71,9 +71,9 @@ export const BASE_INPUTS_WORK_INTENSITY = deepFreeze({
 /**
  * Upstream's `WorkCapacityStandardsInputs` check, which raises "Metabolic rate
  * out of plausible range" for a `met` below 0 or above 2500
- * (`classes_input.py:1095-1099`). `work_capacity_iso` and
- * `work_capacity_niosh` call it after the parse, so the check is written once,
- * as upstream writes it.
+ * (`classes_input.py:1095-1099`). A model upstream validates with that class
+ * calls it after the parse, `work_capacity_iso` first, so the check is written
+ * once, as upstream writes it.
  *
  * @param met - The parsed `met`, [W].
  * @throws `RangeError` with upstream's message, which upstream raises as

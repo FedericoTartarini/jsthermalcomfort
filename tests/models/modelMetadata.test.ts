@@ -184,6 +184,7 @@ const v2Calls: Record<string, object> = {
   wind_chill_temperature: { tdb: -5, v: 5.5 },
   work_capacity_dunne: { wbgt: 30 },
   work_capacity_hothaps: { wbgt: 30 },
+  work_capacity_iso: { wbgt: 30, met: 300 },
 };
 
 describe("Outputs staleness — each v2 model's result matches its INFO.outputs", () => {

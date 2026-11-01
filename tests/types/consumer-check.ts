@@ -67,6 +67,7 @@ import type {
   WorkCapacity,
   WorkCapacityDunneInputs,
   WorkCapacityHothapsInputs,
+  WorkCapacityStandardsInputs,
   APMV,
   APMVInputs,
   EPMV,
@@ -108,6 +109,7 @@ import {
   WIND_CHILL_TEMPERATURE_INFO,
   WORK_CAPACITY_DUNNE_INFO,
   WORK_CAPACITY_HOTHAPS_INFO,
+  WORK_CAPACITY_ISO_INFO,
   WorkIntensity,
   PMV_A_INFO,
   PMV_E_INFO,
@@ -140,6 +142,7 @@ import {
   wind_chill_temperature,
   work_capacity_dunne,
   work_capacity_hothaps,
+  work_capacity_iso,
   pmv_a,
   pmv_e,
   pmv_athb,
@@ -188,6 +191,7 @@ const pmvAthbInfo: ModelInfo = PMV_ATHB_INFO;
 const sportsHeatStressRiskInfo: ModelInfo = SPORTS_HEAT_STRESS_RISK_INFO;
 const workCapacityDunneInfo: ModelInfo = WORK_CAPACITY_DUNNE_INFO;
 const workCapacityHothapsInfo: ModelInfo = WORK_CAPACITY_HOTHAPS_INFO;
+const workCapacityIsoInfo: ModelInfo = WORK_CAPACITY_ISO_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1038,3 +1042,21 @@ workCapacityHothapsResult.capacity = 1;
 work_capacity_hothaps({ wbgt: 30, work_intensity: "extreme" });
 // @ts-expect-error wbgt is a required quantity.
 work_capacity_hothaps({ work_intensity: "heavy" });
+
+// work_capacity_iso takes one inputs object (ADR 0002), with upstream's inputs
+// type name WorkCapacityStandardsInputs (decision 256), and returns upstream's
+// WorkCapacity, readonly.
+const workCapacityStandardsInputs: WorkCapacityStandardsInputs = {
+  wbgt: 30,
+  met: 300,
+};
+const workCapacityIsoResult: WorkCapacity = work_capacity_iso(
+  workCapacityStandardsInputs,
+);
+const workCapacityIso: number = workCapacityIsoResult.capacity;
+// @ts-expect-error the result is readonly.
+workCapacityIsoResult.capacity = 1;
+// @ts-expect-error met is a required quantity.
+work_capacity_iso({ wbgt: 30 });
+// @ts-expect-error wbgt is a required quantity.
+work_capacity_iso({ met: 300 });

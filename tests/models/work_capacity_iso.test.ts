@@ -1,6 +1,14 @@
 import { describe, expect, test } from "vitest";
-import { work_capacity_iso } from "../../src/models/index.ts";
+import {
+  work_capacity_iso,
+  WORK_CAPACITY_ISO_INFO,
+} from "../../src/models/index.ts";
+import { work_capacity_iso as work_capacity_iso_from_root } from "../../src/index.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
+
+const call = (inputs: unknown) =>
+  work_capacity_iso(inputs as Parameters<typeof work_capacity_iso>[0]);
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_work_capacity_iso.py. Its
 // pytest.approx is rel 1e-3 or abs 1e-6; its list call runs element-wise.
@@ -73,5 +81,83 @@ describe("test_work_capacity_iso", () => {
     expect(() => work_capacity_iso({ wbgt: 25.0, met: 3000.0 })).toThrow(
       RangeError,
     );
+  });
+});
+
+describeModelContract(work_capacity_iso, WORK_CAPACITY_ISO_INFO, {
+  wbgt: 30,
+  met: 300,
+});
+
+const met_message = "Metabolic rate out of plausible range";
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("work_capacity_iso (JS-only)", () => {
+  test.each([
+    [28.0, 250.0, 100.0],
+    [30.0, 300.0, 59.234972677595636],
+    [31.0, 400.0, 22.04946996466432],
+    [25.0, 1000.0, 38.323895809739525],
+    [20.0, 2500.0, 23.85228703315149],
+    [32.0, 150.0, 49.69696969696972],
+    [33.0, 50.0, 44.17910447761201],
+    [34.0, 50.0, 100.0],
+    [25.0, 0.0, 0.0],
+    [25.0, 2500.0, 14.200587494754513],
+  ] as const)("wbgt %s, met %s gives %s", (wbgt, met, expected) => {
+    const { capacity } = work_capacity_iso({ wbgt, met });
+    expect(approx(capacity, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+  });
+
+  test.each([
+    [30.0, 100.0],
+    [40.0, 0.0],
+  ] as const)(
+    "at the resting 117 W, wbgt %s gives %s, as upstream's division by zero clips",
+    (wbgt, expected) => {
+      expect(work_capacity_iso({ wbgt, met: 117 }).capacity).toBe(expected);
+    },
+  );
+
+  test("at the resting 117 W, wbgt on the resting limit gives NaN, as upstream's does", () => {
+    const wbgt = 34.9 - 117 / 46;
+    expect(work_capacity_iso({ wbgt, met: 117 }).capacity).toBeNaN();
+  });
+
+  // Deviation work_capacity_iso-3.
+  test.each([-10, -Number.MIN_VALUE, 2500.0001, 3000])(
+    "met %s throws upstream's message as a RangeError",
+    (met) => {
+      expect(() => call({ wbgt: 25, met })).toThrow(
+        new RangeError(met_message),
+      );
+    },
+  );
+
+  // Deviation work_capacity_iso-4.
+  test.each([Infinity, -Infinity, NaN])(
+    "met %s throws the parse's message as a RangeError",
+    (met) => {
+      expect(() => call({ wbgt: 25, met })).toThrow(
+        new RangeError("met must be a finite number."),
+      );
+    },
+  );
+
+  // Deviation work_capacity_iso-2.
+  test("returns no rows", () => {
+    for (const [wbgt, met] of [
+      [0, 0],
+      [30, 117],
+      [30, 300],
+      [100, 2500],
+    ] as const) {
+      expect(work_capacity_iso({ wbgt, met }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(work_capacity_iso_from_root).toBe(work_capacity_iso);
   });
 });

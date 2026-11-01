@@ -24,9 +24,9 @@ describe("test_work_capacity_hothaps", () => {
       100,
     );
 
-  // Upstream also asserts a WorkCapacity instance and a float capacity; a JS
-  // result is a plain object.
   test("test_scalar_heavy", () => {
+    // Upstream also asserts a WorkCapacity instance and a float capacity; a
+    // JS result is a plain object.
     const result = work_capacity_hothaps({
       wbgt: 30.0,
       work_intensity: WorkIntensity.HEAVY,
@@ -113,21 +113,28 @@ describe("work_capacity_hothaps (JS-only)", () => {
     [20, "heavy", 99.93678523325094],
     [25.5, "heavy", 96.53454572629144],
     [28, "moderate", 95.25438460639754],
-    [30, "HEAVY", 66.30396938573278],
     [31.4, "light", 91.270941835105],
     [35, "heavy", 20.249425229307455],
     [40, "light", 13.299353450358598],
     [45, "moderate", 10.344485432347462],
   ] as const)("wbgt %s, %s gives %s", (wbgt, work_intensity, expected) => {
-    const { capacity } = call({ wbgt, work_intensity });
+    const { capacity } = work_capacity_hothaps({ wbgt, work_intensity });
     expect(approx(capacity, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+  });
+
+  test("work_intensity in any case gives its value, as upstream lower-cases it", () => {
+    const { capacity } = call({ wbgt: 30, work_intensity: "HEAVY" });
+    expect(approx(capacity, 66.30396938573278, { rel: 1e-12, abs: 0 })).toBe(
+      true,
+    );
   });
 
   test("a negative wbgt gives NaN, as upstream's does", () => {
     expect(work_capacity_hothaps({ wbgt: -5 }).capacity).toBeNaN();
   });
 
-  // Deviations work_capacity_hothaps-3 to -5.
+  // Deviation work_capacity_hothaps-3, deviation work_capacity_hothaps-4,
+  // deviation work_capacity_hothaps-5.
   test.each([
     ["", RangeError],
     ["extreme", RangeError],

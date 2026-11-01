@@ -58,6 +58,7 @@ export const LINTED = [
   "src/models/work_capacity_dunne.ts",
   "src/models/work_capacity_hothaps.ts",
   "src/models/work_capacity_iso.ts",
+  "src/models/work_capacity_niosh.ts",
   "tests/call_sites.test.ts",
   "tests/check_mirrored.test.ts",
   "tests/environment/operative_tmp.test.ts",

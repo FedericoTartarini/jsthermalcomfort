@@ -110,6 +110,7 @@ import {
   WORK_CAPACITY_DUNNE_INFO,
   WORK_CAPACITY_HOTHAPS_INFO,
   WORK_CAPACITY_ISO_INFO,
+  WORK_CAPACITY_NIOSH_INFO,
   WorkIntensity,
   PMV_A_INFO,
   PMV_E_INFO,
@@ -143,6 +144,7 @@ import {
   work_capacity_dunne,
   work_capacity_hothaps,
   work_capacity_iso,
+  work_capacity_niosh,
   pmv_a,
   pmv_e,
   pmv_athb,
@@ -192,6 +194,7 @@ const sportsHeatStressRiskInfo: ModelInfo = SPORTS_HEAT_STRESS_RISK_INFO;
 const workCapacityDunneInfo: ModelInfo = WORK_CAPACITY_DUNNE_INFO;
 const workCapacityHothapsInfo: ModelInfo = WORK_CAPACITY_HOTHAPS_INFO;
 const workCapacityIsoInfo: ModelInfo = WORK_CAPACITY_ISO_INFO;
+const workCapacityNioshInfo: ModelInfo = WORK_CAPACITY_NIOSH_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1060,3 +1063,17 @@ workCapacityIsoResult.capacity = 1;
 work_capacity_iso({ wbgt: 30 });
 // @ts-expect-error wbgt is a required quantity.
 work_capacity_iso({ met: 300 });
+
+// work_capacity_niosh takes upstream's WorkCapacityStandardsInputs, which
+// work_capacity_iso.ts declares (decision 256), and returns upstream's
+// WorkCapacity, readonly.
+const workCapacityNioshResult: WorkCapacity = work_capacity_niosh(
+  workCapacityStandardsInputs,
+);
+const workCapacityNiosh: number = workCapacityNioshResult.capacity;
+// @ts-expect-error the result is readonly.
+workCapacityNioshResult.capacity = 1;
+// @ts-expect-error met is a required quantity.
+work_capacity_niosh({ wbgt: 30 });
+// @ts-expect-error wbgt is a required quantity.
+work_capacity_niosh({ met: 300 });

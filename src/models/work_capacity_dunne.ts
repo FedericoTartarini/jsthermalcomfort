@@ -32,6 +32,37 @@ export type WorkCapacityDunneInputs = InputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
  */
 export type WorkCapacity = OutputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
 
+/**
+ * Estimate work capacity due to heat based on Dunne et al [Dunne2013](../../docs/references.md#dunne2013).
+ *
+ * Estimates the amount of work that will be done at a given WBGT and
+ * intensity of work as a percent. 100% means work is unaffected by heat. 0%
+ * means no work is done.
+ *
+ * This is based upon NIOSH safety standards. See:
+ * Dunne JP, Stouffer RJ, John JG. Reductions in labour capacity from heat
+ * stress under climate warming. Nature Climate Change. 2013 Jun;3(6):563-6.
+ *
+ * Heavy intensity work is sometimes labelled as 400 W, but this is only
+ * nominal. Moderate work is assumed to be half as much as heavy intensity, and
+ * light half as much as moderate.
+ *
+ * @param inputs
+ * @param inputs.wbgt - Wet bulb globe temperature, [°C].
+ * @param inputs.work_intensity - Which work intensity to use for the calculation, choice of "heavy",
+ * "moderate" or "light". Default is "heavy".
+ *
+ * > [!NOTE]
+ * > Dunne et al [Dunne2013](../../docs/references.md#dunne2013) suggests that heavy intensity work is 350-500 kcal/h, moderate
+ * > is 200-350 kcal/h, and light is less than 100-200 kcal/h.
+ *
+ * @returns A dataclass containing the work capacity. See
+ * {@link WorkCapacity} for more details. To access the
+ * `capacity` value, use the `capacity` attribute of the returned `WorkCapacity` instance, e.g.,
+ * `result.capacity`.
+ *
+ * - `capacity` - Work capacity affected by heat.
+ */
 export function work_capacity_dunne(
   inputs: WorkCapacityDunneInputs,
 ): WorkCapacity {

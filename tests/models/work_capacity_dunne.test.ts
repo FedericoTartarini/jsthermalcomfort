@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { work_capacity_dunne } from "../../src/models/index.ts";
+import {
+  work_capacity_dunne,
+  WORK_CAPACITY_DUNNE_INFO,
+} from "../../src/models/index.ts";
+import { work_capacity_dunne as work_capacity_dunne_from_root } from "../../src/index.ts";
 import { WorkIntensity } from "../../src/utilities/index.ts";
+import { BASE_INPUTS_WORK_INTENSITY } from "../../src/_internal/define.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 const call = (inputs: unknown) =>
@@ -135,4 +141,68 @@ describe("test_choice_field", () => {
       expect(() => capacity(value)).toThrow(new error(work_intensity_message));
     },
   );
+});
+
+describeModelContract(work_capacity_dunne, WORK_CAPACITY_DUNNE_INFO, {
+  wbgt: 30,
+});
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("work_capacity_dunne (JS-only)", () => {
+  test.each([
+    [20, "heavy", 100],
+    [25.5, "heavy", 84.25098687631409],
+    [28, "heavy", 47.997904423702394],
+    [28, "moderate", 95.99580884740479],
+    [28, "light", 100],
+    [31.4, "heavy", 13.822612398724658],
+    [31.4, "moderate", 27.645224797449316],
+    [31.4, "light", 55.29044959489863],
+    [35, "light", 0],
+  ] as const)("wbgt %s, %s gives %s", (wbgt, work_intensity, expected) => {
+    const { capacity } = work_capacity_dunne({ wbgt, work_intensity });
+    expect(approx(capacity, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+  });
+
+  // Deviation work_capacity_dunne-1 (models/work_capacity_dunne.py:15).
+  test("work_intensity is BaseInputs' field with the model's default, heavy", () => {
+    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity).toEqual({
+      ...BASE_INPUTS_WORK_INTENSITY,
+      default: "heavy",
+    });
+    expect(WORK_CAPACITY_DUNNE_INFO.inputs.work_intensity.allowed).toBe(
+      BASE_INPUTS_WORK_INTENSITY.allowed,
+    );
+  });
+
+  // models/work_capacity_dunne.py:55.
+  test("work_intensity is read in any case", () => {
+    expect(call({ wbgt: 30, work_intensity: "Moderate" }).capacity).toBe(
+      53.799113089356695,
+    );
+  });
+
+  // Deviation work_capacity_dunne-3.
+  test.each([
+    ["", RangeError],
+    ["extreme", RangeError],
+    [5, TypeError],
+    [true, TypeError],
+  ])("work_intensity %j throws upstream's message as a %O", (value, error) => {
+    expect(() => call({ wbgt: 30, work_intensity: value })).toThrow(
+      new error(work_intensity_message),
+    );
+  });
+
+  // Deviation work_capacity_dunne-2.
+  test("returns no rows", () => {
+    for (const wbgt of [-50, 25, 30, 100]) {
+      expect(work_capacity_dunne({ wbgt }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(work_capacity_dunne_from_root).toBe(work_capacity_dunne);
+  });
 });

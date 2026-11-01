@@ -38,7 +38,7 @@ export function isDeepFrozen(value: unknown): boolean {
  * `VerticalTGradPPD`, `WCI`, `WCT` and `SportsHeatStressRisk` at
  * `classes_return.py:97, :111, :184, :200, :213, :227, :241, :270, :297,
  * :311, :353, :415, :435, :467, :480, :497, :631, :689, :705, :735, :748,
- * :1073`),
+ * :1073`, and `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
  * and as `AdaptiveEN` is, although upstream's is a plain `@dataclass`
  * (`:143`, deviation adaptive_en-5).
  *

@@ -64,6 +64,8 @@ import type {
   WCIInputs,
   WCT,
   WCTInputs,
+  WorkCapacity,
+  WorkCapacityDunneInputs,
   APMV,
   APMVInputs,
   EPMV,
@@ -103,6 +105,8 @@ import {
   VERTICAL_TMP_GRAD_PPD_INFO,
   WCI_INFO,
   WIND_CHILL_TEMPERATURE_INFO,
+  WORK_CAPACITY_DUNNE_INFO,
+  WorkIntensity,
   PMV_A_INFO,
   PMV_E_INFO,
   PMV_ATHB_INFO,
@@ -132,6 +136,7 @@ import {
   vertical_tmp_grad_ppd,
   wci,
   wind_chill_temperature,
+  work_capacity_dunne,
   pmv_a,
   pmv_e,
   pmv_athb,
@@ -178,6 +183,7 @@ const pmvAInfo: ModelInfo = PMV_A_INFO;
 const pmvEInfo: ModelInfo = PMV_E_INFO;
 const pmvAthbInfo: ModelInfo = PMV_ATHB_INFO;
 const sportsHeatStressRiskInfo: ModelInfo = SPORTS_HEAT_STRESS_RISK_INFO;
+const workCapacityDunneInfo: ModelInfo = WORK_CAPACITY_DUNNE_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -986,3 +992,24 @@ atResult.at = 1;
 at({ tdb: 25, rh: 30, v: 0.1, q: false });
 // @ts-expect-error v is a required quantity.
 at({ tdb: 25, rh: 30 });
+
+// work_capacity_dunne takes one inputs object (ADR 0002), with its inputs type
+// WorkCapacityDunneInputs (decision 254), work_intensity taking the
+// WorkIntensity constant or its literal (deviation _shared-77), and returns
+// upstream's WorkCapacity, readonly.
+const workCapacityDunneInputs: WorkCapacityDunneInputs = {
+  wbgt: 30,
+  work_intensity: WorkIntensity.MODERATE,
+};
+const workCapacityDunneResult: WorkCapacity = work_capacity_dunne(
+  workCapacityDunneInputs,
+);
+const workCapacity: number = workCapacityDunneResult.capacity;
+work_capacity_dunne({ wbgt: 30, work_intensity: "light" });
+work_capacity_dunne({ wbgt: 30 });
+// @ts-expect-error the result is readonly.
+workCapacityDunneResult.capacity = 1;
+// @ts-expect-error work_intensity is one of upstream's three.
+work_capacity_dunne({ wbgt: 30, work_intensity: "extreme" });
+// @ts-expect-error wbgt is a required quantity.
+work_capacity_dunne({ work_intensity: "heavy" });

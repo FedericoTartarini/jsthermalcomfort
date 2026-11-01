@@ -50,7 +50,10 @@ import {
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
 import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";
-import { work_capacity_dunne } from "./work_capacity_dunne.ts";
+import {
+  work_capacity_dunne,
+  WORK_CAPACITY_DUNNE_INFO,
+} from "./work_capacity_dunne.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -113,6 +116,10 @@ export type {
 } from "./vertical_tmp_grad_ppd.ts";
 export type { WCI, WCIInputs } from "./wci.ts";
 export type { WCT, WCTInputs } from "./wind_chill_temperature.ts";
+export type {
+  WorkCapacity,
+  WorkCapacityDunneInputs,
+} from "./work_capacity_dunne.ts";
 
 export {
   adaptive_ashrae,
@@ -174,6 +181,7 @@ export {
   wind_chill_temperature,
   WIND_CHILL_TEMPERATURE_INFO,
   work_capacity_dunne,
+  WORK_CAPACITY_DUNNE_INFO,
 };
 
 export default {
@@ -236,5 +244,6 @@ export default {
   wind_chill_temperature,
   WIND_CHILL_TEMPERATURE_INFO,
   work_capacity_dunne,
+  WORK_CAPACITY_DUNNE_INFO,
   JOS3,
 };

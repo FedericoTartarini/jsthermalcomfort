@@ -55,6 +55,7 @@ export const LINTED = [
   "src/models/vertical_tmp_grad_ppd.ts",
   "src/models/wci.ts",
   "src/models/wind_chill_temperature.ts",
+  "src/models/work_capacity_dunne.ts",
   "tests/call_sites.test.ts",
   "tests/check_mirrored.test.ts",
   "tests/environment/operative_tmp.test.ts",

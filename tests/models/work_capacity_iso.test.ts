@@ -125,6 +125,11 @@ describe("work_capacity_iso (JS-only)", () => {
     expect(work_capacity_iso({ wbgt, met: 117 }).capacity).toBeNaN();
   });
 
+  test("wbgt on the resting limit with met below 117 W gives -0.0, as upstream's np.clip keeps it", () => {
+    const wbgt = 34.9 - 117 / 46;
+    expect(work_capacity_iso({ wbgt, met: 46 }).capacity).toBe(-0);
+  });
+
   // Deviation work_capacity_iso-3.
   test.each([-10, -Number.MIN_VALUE, 2500.0001, 3000])(
     "met %s throws upstream's message as a RangeError",

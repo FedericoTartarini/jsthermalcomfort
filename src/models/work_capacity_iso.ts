@@ -65,7 +65,7 @@ export function work_capacity_iso(
   const wbgt_lim = 34.9 - met / 46;
   const wbgt_lim_rest = 34.9 - met_rest / 46;
   let capacity = ((wbgt_lim_rest - wbgt) / (wbgt_lim_rest - wbgt_lim)) * 100;
-  capacity = Math.min(Math.max(capacity, 0), 100);
+  capacity = capacity < 0 ? 0 : capacity > 100 ? 100 : capacity;
 
   return Object.freeze({ capacity, warnings: Object.freeze([]) });
 }

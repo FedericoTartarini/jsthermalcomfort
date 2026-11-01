@@ -8,6 +8,7 @@ import {
   at,
   clo_tout,
   cooling_effect,
+  discomfort_index,
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
@@ -490,6 +491,16 @@ const MODELS: readonly ParityModel[] = [
     // Upstream always rounds ce with np.around (models/cooling_effect.py:157).
     rounded: () => ["ce"],
     warnings: true,
+  },
+  {
+    name: "discomfort_index",
+    run: (inputs) =>
+      discomfort_index(
+        inputs as unknown as Parameters<typeof discomfort_index>[0],
+      ),
+    // Upstream always rounds di with np.around (models/discomfort_index.py:78).
+    rounded: () => ["di"],
+    warnings: false,
   },
   {
     name: "heat_index_rothfusz",

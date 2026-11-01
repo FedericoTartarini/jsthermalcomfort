@@ -173,6 +173,22 @@ def _cooling_effect(rng):
     }
 
 
+def _discomfort_index(rng):
+    # rh 100 makes di equal tdb, so a tdb on a category edge puts di on it,
+    # where _mapping's right=False picks the upper class
+    # (models/discomfort_index.py:68-79). tdb reaches past 99 °C, where the
+    # category is NaN.
+    if rng.random() < 0.05:
+        return {
+            "tdb": float(rng.choice([21.0, 24.0, 27.0, 29.0, 32.0, 99.0])),
+            "rh": 100.0,
+        }
+    return {
+        "tdb": _value(rng, -20.0, 60.0) if rng.random() < 0.9 else _value(rng, 60.0, 130.0),
+        "rh": _value(rng, 0.0, 100.0),
+    }
+
+
 def _heat_index_rothfusz(rng):
     # tdb reaches below the 27 °C gate, so NaN positions and the tdb warning
     # are compared too.
@@ -695,6 +711,7 @@ MODELS = {
     "at": (models.at, _at),
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
+    "discomfort_index": (models.discomfort_index, _discomfort_index),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "heat_index_schoen": (models.heat_index_schoen, _heat_index_schoen),
     "humidex": (models.humidex, _humidex),

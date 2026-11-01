@@ -10,7 +10,7 @@ import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
-import { discomfort_index } from "./discomfort_index.js";
+import { discomfort_index } from "./discomfort_index.ts";
 import { set_tmp, SET_TMP_INFO } from "./set_tmp.ts";
 import { wci, WCI_INFO } from "./wci.ts";
 import {

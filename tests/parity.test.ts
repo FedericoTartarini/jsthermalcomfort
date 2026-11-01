@@ -500,7 +500,7 @@ const MODELS: readonly ParityModel[] = [
       ),
     // Upstream always rounds di with np.around (models/discomfort_index.py:78).
     rounded: () => ["di"],
-    warnings: false,
+    warnings: true,
   },
   {
     name: "heat_index_rothfusz",

@@ -35,6 +35,8 @@ import type {
   CE,
   CEInputs,
   DerivedField,
+  DI,
+  DIInputs,
   GaggeTwoNodes,
   GaggeTwoNodesInputs,
   HI,
@@ -88,6 +90,7 @@ import {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
+  DISCOMFORT_INDEX_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
@@ -127,6 +130,7 @@ import {
   clo_tout,
   clo_typical_ensembles,
   cooling_effect,
+  discomfort_index,
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
@@ -195,6 +199,7 @@ const workCapacityDunneInfo: ModelInfo = WORK_CAPACITY_DUNNE_INFO;
 const workCapacityHothapsInfo: ModelInfo = WORK_CAPACITY_HOTHAPS_INFO;
 const workCapacityIsoInfo: ModelInfo = WORK_CAPACITY_ISO_INFO;
 const workCapacityNioshInfo: ModelInfo = WORK_CAPACITY_NIOSH_INFO;
+const discomfortIndexInfo: ModelInfo = DISCOMFORT_INDEX_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1077,3 +1082,19 @@ workCapacityNioshResult.capacity = 1;
 work_capacity_niosh({ wbgt: 30 });
 // @ts-expect-error wbgt is a required quantity.
 work_capacity_niosh({ met: 300 });
+
+// discomfort_index takes one inputs object (ADR 0002), with its inputs and
+// result types named after upstream's DIInputs and DI, and returns a readonly
+// result whose category is NaN where upstream's _mapping leaves it unmapped.
+const discomfortIndexInputs: DIInputs = { tdb: 25, rh: 50 };
+const discomfortIndexResult: DI = discomfort_index(discomfortIndexInputs);
+const discomfortIndexValue: number = discomfortIndexResult.di;
+const discomfortCondition: string | number =
+  discomfortIndexResult.discomfort_condition;
+// @ts-expect-error the result is readonly.
+discomfortIndexResult.di = 1;
+// @ts-expect-error the category can be NaN, so it is not only a string.
+const discomfortConditionString: string =
+  discomfortIndexResult.discomfort_condition;
+// @ts-expect-error rh is a required quantity.
+discomfort_index({ tdb: 25 });

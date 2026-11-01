@@ -10,7 +10,7 @@ import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
-import { discomfort_index } from "./discomfort_index.ts";
+import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
 import { set_tmp, SET_TMP_INFO } from "./set_tmp.ts";
 import { wci, WCI_INFO } from "./wci.ts";
 import {
@@ -97,6 +97,7 @@ export type { AnkleDraft, AnkleDraftInputs } from "./ankle_draft.ts";
 export type { AT, ATInputs } from "./at.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
+export type { DI, DIInputs } from "./discomfort_index.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type { HISchoenInputs } from "./heat_index_schoen.ts";
 export type { Humidex, HumidexInputs } from "./humidex.ts";
@@ -150,6 +151,7 @@ export {
   cooling_effect,
   COOLING_EFFECT_INFO,
   discomfort_index,
+  DISCOMFORT_INDEX_INFO,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,
@@ -219,6 +221,7 @@ export default {
   cooling_effect,
   COOLING_EFFECT_INFO,
   discomfort_index,
+  DISCOMFORT_INDEX_INFO,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,

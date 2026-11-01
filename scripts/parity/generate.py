@@ -127,6 +127,22 @@ def _ankle_draft(rng):
     }
 
 
+def _at(rng):
+    # rh stays in [0, 100], outside which upstream's dew_point_tmp raises
+    # (psychrometrics/dew_point_tmp.py:46-47), and reaches 0 now and then.
+    # q is left out half the time, so its None default picks the formula
+    # without solar load (models/at.py:71-75).
+    inputs = {
+        "tdb": _value(rng, -20.0, 50.0),
+        "rh": 0.0 if rng.random() < 0.02 else _value(rng, 0.0, 100.0),
+        "v": _value(rng, 0.0, 20.0),
+    }
+    if rng.random() < 0.5:
+        inputs["q"] = _value(rng, -100.0, 1000.0)
+    inputs["round_output"] = bool(rng.random() < 0.5)
+    return inputs
+
+
 def _clo_tout(rng):
     # tout spans the breakpoints at -5, 5 and 26 °C (23, 41 and 78.8 °F), and
     # units comes in either case, as upstream upper-cases it.
@@ -614,6 +630,7 @@ MODELS = {
     "adaptive_ashrae": (models.adaptive_ashrae, _adaptive_ashrae),
     "adaptive_en": (models.adaptive_en, _adaptive_en),
     "ankle_draft": (models.ankle_draft, _ankle_draft),
+    "at": (models.at, _at),
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),

@@ -5,6 +5,7 @@ import {
   adaptive_en,
   ADAPTIVE_EN_INFO,
   ankle_draft,
+  at,
   clo_tout,
   cooling_effect,
   heat_index_rothfusz,
@@ -462,6 +463,13 @@ const MODELS: readonly ParityModel[] = [
     // effect's notice, which upstream emits twice, are exempt by the register
     // (deviation ankle_draft-5, deviation ankle_draft-6).
     warnings: true,
+  },
+  {
+    name: "at",
+    run: (inputs) => at(inputs as unknown as Parameters<typeof at>[0]),
+    // Upstream rounds at with np.around (models/at.py:77-78).
+    rounded: ({ round_output }) => (round_output === true ? ["at"] : []),
+    warnings: false,
   },
   {
     name: "clo_tout",

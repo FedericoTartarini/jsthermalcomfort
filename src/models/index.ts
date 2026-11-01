@@ -18,7 +18,7 @@ import {
   WIND_CHILL_TEMPERATURE_INFO,
 } from "./wind_chill_temperature.ts";
 import { adaptive_en, ADAPTIVE_EN_INFO } from "./adaptive_en.ts";
-import { at } from "./at.js";
+import { at } from "./at.ts";
 import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import {
   pmv_ppd_iso,

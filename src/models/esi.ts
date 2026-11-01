@@ -28,6 +28,34 @@ export type ESIInputs = InputsOf<typeof ESI_INFO>;
  */
 export type ESI = OutputsOf<typeof ESI_INFO>;
 
+/**
+ * Calculate the Environmental Stress Index (ESI) [Moran2001](../../docs/references.md#moran2001).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.sol_radiation_global - Global solar radiation, [W/m2].
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ *
+ * @returns A dataclass containing the Environmental Stress Index. See {@link ESI} for more details.
+ * To access the `esi` value, use the `esi` attribute of the returned `ESI` instance, e.g., `result.esi`.
+ *
+ * - `esi` - Environmental Stress Index.
+ *
+ * @example
+ * ```ts
+ * import { esi } from "jsthermalcomfort/models";
+ *
+ * const result = esi({ tdb: 30.2, rh: 42.2, sol_radiation_global: 766 });
+ * console.log(result.esi); // 26.2
+ *
+ * const results = [
+ *   { tdb: 30.2, rh: 42.2, sol_radiation_global: 766 },
+ *   { tdb: 27.0, rh: 68.8, sol_radiation_global: 289 },
+ * ].map((inputs) => esi(inputs));
+ * console.log(results.map((r) => r.esi)); // [26.2, 25.6]
+ * ```
+ */
 export function esi(inputs: ESIInputs): ESI {
   const { tdb, rh, sol_radiation_global, round_output } = parseInputs(
     ESI_INFO,

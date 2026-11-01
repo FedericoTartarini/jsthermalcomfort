@@ -38,6 +38,7 @@ export const LINTED = [
   "src/models/clo_tout.ts",
   "src/models/cooling_effect.ts",
   "src/models/discomfort_index.ts",
+  "src/models/esi.ts",
   "src/models/heat_index_rothfusz.ts",
   "src/models/heat_index_schoen.ts",
   "src/models/humidex.ts",

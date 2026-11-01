@@ -37,6 +37,8 @@ import type {
   DerivedField,
   DI,
   DIInputs,
+  ESI,
+  ESIInputs,
   GaggeTwoNodes,
   GaggeTwoNodesInputs,
   HI,
@@ -91,6 +93,7 @@ import {
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
   DISCOMFORT_INDEX_INFO,
+  ESI_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
@@ -131,6 +134,7 @@ import {
   clo_typical_ensembles,
   cooling_effect,
   discomfort_index,
+  esi,
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
@@ -200,6 +204,7 @@ const workCapacityHothapsInfo: ModelInfo = WORK_CAPACITY_HOTHAPS_INFO;
 const workCapacityIsoInfo: ModelInfo = WORK_CAPACITY_ISO_INFO;
 const workCapacityNioshInfo: ModelInfo = WORK_CAPACITY_NIOSH_INFO;
 const discomfortIndexInfo: ModelInfo = DISCOMFORT_INDEX_INFO;
+const esiInfo: ModelInfo = ESI_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1098,3 +1103,14 @@ const discomfortConditionString: string =
   discomfortIndexResult.discomfort_condition;
 // @ts-expect-error rh is a required quantity.
 discomfort_index({ tdb: 25 });
+
+// esi takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's ESIInputs and ESI, and returns a readonly result.
+const esiInputs: ESIInputs = { tdb: 30.2, rh: 42.2, sol_radiation_global: 766 };
+const esiResult: ESI = esi(esiInputs);
+const esiValue: number = esiResult.esi;
+// @ts-expect-error the result is readonly.
+esiResult.esi = 1;
+esi({ ...esiInputs, round_output: false });
+// @ts-expect-error sol_radiation_global is a required quantity.
+esi({ tdb: 30.2, rh: 42.2 });

@@ -11,6 +11,7 @@ import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net } from "./net.js";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
+import { esi } from "./esi.ts";
 import { set_tmp, SET_TMP_INFO } from "./set_tmp.ts";
 import { wci, WCI_INFO } from "./wci.ts";
 import {
@@ -152,6 +153,7 @@ export {
   COOLING_EFFECT_INFO,
   discomfort_index,
   DISCOMFORT_INDEX_INFO,
+  esi,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,
@@ -222,6 +224,7 @@ export default {
   COOLING_EFFECT_INFO,
   discomfort_index,
   DISCOMFORT_INDEX_INFO,
+  esi,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,

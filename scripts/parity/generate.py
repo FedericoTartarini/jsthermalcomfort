@@ -189,6 +189,20 @@ def _discomfort_index(rng):
     }
 
 
+def _esi(rng):
+    # rh stays in [0, 100] and sol_radiation_global at or above 0 W/m2,
+    # outside which ESIInputs raises (classes_input.py:428-434), and each
+    # reaches its bound now and then; at 0 W/m2 the (0.1 + sol) ** (-1) term
+    # is largest (models/esi.py:62).
+    draw = rng.random()
+    return {
+        "tdb": _value(rng, -20.0, 50.0),
+        "rh": float(rng.choice([0.0, 100.0])) if draw < 0.05 else _value(rng, 0.0, 100.0),
+        "sol_radiation_global": 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 1400.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _heat_index_rothfusz(rng):
     # tdb reaches below the 27 °C gate, so NaN positions and the tdb warning
     # are compared too.
@@ -712,6 +726,7 @@ MODELS = {
     "clo_tout": (models.clo_tout, _clo_tout),
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "discomfort_index": (models.discomfort_index, _discomfort_index),
+    "esi": (models.esi, _esi),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "heat_index_schoen": (models.heat_index_schoen, _heat_index_schoen),
     "humidex": (models.humidex, _humidex),

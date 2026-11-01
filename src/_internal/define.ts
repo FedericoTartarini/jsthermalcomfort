@@ -17,8 +17,8 @@ import { Postures, Units, WorkIntensity } from "../utilities/options.ts";
 
 // The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing
 // in for upstream's input dataclass checks (`classes_input.py`; ADR 0019,
-// whitelist item 2), and `BASE_INPUTS_UNITS`, `BASE_INPUTS_POSITION` and
-// `BASE_INPUTS_WORK_INTENSITY`.
+// whitelist item 2), `BASE_INPUTS_UNITS`, `BASE_INPUTS_POSITION` and
+// `BASE_INPUTS_WORK_INTENSITY`, and `checkWorkCapacityStandardsInputs`.
 
 /**
  * Upstream's `BaseInputs.units`: defaults to 'SI' and raises "Units must be
@@ -67,6 +67,23 @@ export const BASE_INPUTS_WORK_INTENSITY = deepFreeze({
   allowed: WORK_INTENSITIES,
   message: choiceFieldMessage("work_intensity", WORK_INTENSITIES),
 } as const satisfies ChoiceField);
+
+/**
+ * Upstream's `WorkCapacityStandardsInputs` check, which raises "Metabolic rate
+ * out of plausible range" for a `met` below 0 or above 2500
+ * (`classes_input.py:1095-1099`). `work_capacity_iso` and
+ * `work_capacity_niosh` call it after the parse, so the check is written once,
+ * as upstream writes it.
+ *
+ * @param met - The parsed `met`, [W].
+ * @throws `RangeError` with upstream's message, which upstream raises as
+ * `ValueError`.
+ */
+export function checkWorkCapacityStandardsInputs(met: number): void {
+  if (met < 0 || met > 2500) {
+    throw new RangeError("Metabolic rate out of plausible range");
+  }
+}
 
 /**
  * Upstream's message for a `choice_field` given a value outside `allowed`,

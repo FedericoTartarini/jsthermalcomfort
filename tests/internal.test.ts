@@ -14,6 +14,7 @@ import {
   BASE_INPUTS_POSITION,
   BASE_INPUTS_UNITS,
   BASE_INPUTS_WORK_INTENSITY,
+  checkWorkCapacityStandardsInputs,
   choiceFieldMessage,
   parseInputs,
 } from "../src/_internal/define.ts";
@@ -524,6 +525,25 @@ describe("BASE_INPUTS_WORK_INTENSITY (JS-only)", () => {
       BASE_INPUTS_WORK_INTENSITY.allowed,
     );
   });
+});
+
+// WorkCapacityStandardsInputs' met check (classes_input.py:1095-1099), defined
+// once for work_capacity_iso and work_capacity_niosh (decision 257).
+describe("checkWorkCapacityStandardsInputs (JS-only)", () => {
+  test.each([0, -0, 117, 2500])("met %s passes", (met) => {
+    expect(() => {
+      checkWorkCapacityStandardsInputs(met);
+    }).not.toThrow();
+  });
+
+  test.each([-10, -Number.MIN_VALUE, 2500.0001, 3000])(
+    "met %s throws upstream's message as a RangeError",
+    (met) => {
+      expect(() => {
+        checkWorkCapacityStandardsInputs(met);
+      }).toThrow(new RangeError("Metabolic rate out of plausible range"));
+    },
+  );
 });
 
 // A choice_field (classes_input.py:23), which BaseInputs checks against its

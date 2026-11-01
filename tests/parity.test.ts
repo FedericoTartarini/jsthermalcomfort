@@ -544,7 +544,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => net(inputs as unknown as Parameters<typeof net>[0]),
     // Upstream rounds net with np.around (models/net.py:77-78).
     rounded: ({ round_output }) => (round_output === true ? ["net"] : []),
-    warnings: false,
+    warnings: true,
   },
   {
     name: "phs",

@@ -117,6 +117,7 @@ const v2Calls: Record<string, object> = {
   heat_index_rothfusz: { tdb: 28, rh: 60 },
   heat_index_schoen: { tdb: 29, rh: 50 },
   humidex: { tdb: 25, rh: 50 },
+  net: { tdb: 37, rh: 100, v: 0.1 },
   phs: {
     tdb: 40,
     tr: 40,

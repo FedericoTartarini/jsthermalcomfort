@@ -48,6 +48,8 @@ import type {
   HumidexInputs,
   ModelInfo,
   ModelWarning,
+  NET,
+  NETInputs,
   PHS,
   PHSInputs,
   PMVPPDAshrae,
@@ -97,6 +99,7 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
+  NET_INFO,
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
   PMV_CATEGORY_BINS_ISO_7730,
@@ -138,6 +141,7 @@ import {
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
+  net,
   phs,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
@@ -205,6 +209,7 @@ const workCapacityIsoInfo: ModelInfo = WORK_CAPACITY_ISO_INFO;
 const workCapacityNioshInfo: ModelInfo = WORK_CAPACITY_NIOSH_INFO;
 const discomfortIndexInfo: ModelInfo = DISCOMFORT_INDEX_INFO;
 const esiInfo: ModelInfo = ESI_INFO;
+const netInfo: ModelInfo = NET_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1114,3 +1119,14 @@ esiResult.esi = 1;
 esi({ ...esiInputs, round_output: false });
 // @ts-expect-error sol_radiation_global is a required quantity.
 esi({ tdb: 30.2, rh: 42.2 });
+
+// net takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's NETInputs and NET, and returns a readonly result.
+const netInputs: NETInputs = { tdb: 37, rh: 100, v: 0.1 };
+const netResult: NET = net(netInputs);
+const netValue: number = netResult.net;
+// @ts-expect-error the result is readonly.
+netResult.net = 1;
+net({ ...netInputs, round_output: false });
+// @ts-expect-error v is a required quantity.
+net({ tdb: 37, rh: 100 });

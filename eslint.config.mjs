@@ -34,6 +34,7 @@ export const LINTED = [
   "src/models/adaptive_ashrae.ts",
   "src/models/adaptive_en.ts",
   "src/models/ankle_draft.ts",
+  "src/models/at.ts",
   "src/models/clo_tout.ts",
   "src/models/cooling_effect.ts",
   "src/models/heat_index_rothfusz.ts",

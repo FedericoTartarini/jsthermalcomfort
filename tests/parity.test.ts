@@ -469,7 +469,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => at(inputs as unknown as Parameters<typeof at>[0]),
     // Upstream rounds at with np.around (models/at.py:77-78).
     rounded: ({ round_output }) => (round_output === true ? ["at"] : []),
-    warnings: false,
+    warnings: true,
   },
   {
     name: "clo_tout",

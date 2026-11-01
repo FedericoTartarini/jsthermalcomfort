@@ -32,12 +32,13 @@ export function isDeepFrozen(value: unknown): boolean {
  * _shared-10). The messages are written out here, not imported from
  * `src/_internal/errors.ts`, so a changed message fails. The outputs are frozen
  * as upstream's return dataclass is (`@dataclass(frozen=True, repr=False)`:
- * `APMV`, `AdaptiveASHRAE`, `AnkleDraft`, `ATHB`, `CloTOut`, `CE`, `EPMV`,
- * `HI`, `Humidex`, `PHS`, `PMVPPD`, `PMVPPDAshrae`, `SET`, `SolarGain`,
- * `GaggeTwoNodes`, `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WCI`,
- * `WCT` and `SportsHeatStressRisk` at `classes_return.py:97, :111, :184,
- * :213, :227, :241, :270, :297, :311, :353, :415, :435, :467, :480, :497,
- * :631, :689, :705, :735, :748, :1073`),
+ * `APMV`, `AdaptiveASHRAE`, `AnkleDraft`, `AT`, `ATHB`, `CloTOut`, `CE`,
+ * `EPMV`, `HI`, `Humidex`, `PHS`, `PMVPPD`, `PMVPPDAshrae`, `SET`,
+ * `SolarGain`, `GaggeTwoNodes`, `UseFansHeatwaves`, `UTCI`,
+ * `VerticalTGradPPD`, `WCI`, `WCT` and `SportsHeatStressRisk` at
+ * `classes_return.py:97, :111, :184, :200, :213, :227, :241, :270, :297,
+ * :311, :353, :415, :435, :467, :480, :497, :631, :689, :705, :735, :748,
+ * :1073`),
  * and as `AdaptiveEN` is, although upstream's is a plain `@dataclass`
  * (`:143`, deviation adaptive_en-5).
  *

@@ -18,7 +18,7 @@ import {
   WIND_CHILL_TEMPERATURE_INFO,
 } from "./wind_chill_temperature.ts";
 import { adaptive_en, ADAPTIVE_EN_INFO } from "./adaptive_en.ts";
-import { at } from "./at.ts";
+import { at, AT_INFO } from "./at.ts";
 import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import {
   pmv_ppd_iso,
@@ -78,6 +78,7 @@ export type {
 export type { AdaptiveASHRAE, ASHRAEInputs } from "./adaptive_ashrae.ts";
 export type { AdaptiveEN, ENInputs } from "./adaptive_en.ts";
 export type { AnkleDraft, AnkleDraftInputs } from "./ankle_draft.ts";
+export type { AT, ATInputs } from "./at.ts";
 export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
@@ -118,6 +119,7 @@ export {
   adaptive_en,
   ADAPTIVE_EN_INFO,
   at,
+  AT_INFO,
   ankle_draft,
   ANKLE_DRAFT_INFO,
   classifyFromBins,
@@ -178,6 +180,7 @@ export default {
   adaptive_en,
   ADAPTIVE_EN_INFO,
   at,
+  AT_INFO,
   ankle_draft,
   ANKLE_DRAFT_INFO,
   classifyFromBins,

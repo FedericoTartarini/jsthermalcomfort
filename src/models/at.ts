@@ -30,6 +30,41 @@ export type ATInputs = InputsOf<typeof AT_INFO>;
  */
 export type AT = OutputsOf<typeof AT_INFO>;
 
+/**
+ * Calculate the Apparent Temperature (AT).
+ *
+ * The AT is defined as the temperature at the reference humidity level producing the same amount of discomfort as that
+ * experienced under the current ambient temperature, humidity, and solar radiation
+ * [Steadman1984](../../docs/references.md#steadman1984). In other words, the AT is an adjustment to the dry bulb temperature
+ * based on the relative humidity value. Absolute humidity with a dew point of 14°C is
+ * chosen as a reference.
+ *
+ * It includes the chilling effect of the wind at lower temperatures. [Blazejczyk2012](../../docs/references.md#blazejczyk2012)
+ *
+ * > [!NOTE]
+ * > Two formulas for AT are in use by the Australian Bureau of Meteorology: one includes
+ * > solar radiation and the other one does not (http://www.bom.gov.au/info/thermal_stress/
+ * > , 29 Sep 2021). Please specify q if you want to estimate AT with solar load.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C]
+ * @param inputs.rh - Relative humidity, [%]
+ * @param inputs.v - Wind speed 10m above ground level, [m/s]
+ * @param inputs.q - Net radiation absorbed per unit area of body surface [W/m2]
+ * @param inputs.round_output - If True, rounds the output value; if False, does not round it.
+ *
+ * @returns Dataclass containing the apparent temperature, [°C]. See {@link AT} for more details.
+ *
+ * - `at` - Apparent temperature, [°C]
+ *
+ * @example
+ * ```ts
+ * import { at } from "jsthermalcomfort/models";
+ *
+ * const result = at({ tdb: 25, rh: 30, v: 0.1 });
+ * console.log(result.at); // 24.1
+ * ```
+ */
 export function at(inputs: ATInputs): AT {
   // Validate inputs
   const { tdb, rh, v, q, round_output } = parseInputs(AT_INFO, inputs);

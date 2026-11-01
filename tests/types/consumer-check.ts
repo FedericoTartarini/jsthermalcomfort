@@ -23,6 +23,8 @@ import type {
   AdaptiveEN,
   AnkleDraft,
   AnkleDraftInputs,
+  AT,
+  ATInputs,
   ASHRAEInputs,
   ENInputs,
   ApplicabilityWarning,
@@ -78,6 +80,7 @@ import {
   ADAPTIVE_ASHRAE_INFO,
   ADAPTIVE_EN_INFO,
   ANKLE_DRAFT_INFO,
+  AT_INFO,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   CLO_TOUT_INFO,
   COOLING_EFFECT_INFO,
@@ -109,6 +112,7 @@ import {
   adaptive_ashrae,
   adaptive_en,
   ankle_draft,
+  at,
   classifyFromBins,
   clo_individual_garments,
   clo_tout,
@@ -166,6 +170,7 @@ const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 const humidexInfo: ModelInfo = HUMIDEX_INFO;
 const heatIndexSchoenInfo: ModelInfo = HEAT_INDEX_SCHOEN_INFO;
+const atInfo: ModelInfo = AT_INFO;
 const wciInfo: ModelInfo = WCI_INFO;
 const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
 const setTmpInfo: ModelInfo = SET_TMP_INFO;
@@ -966,3 +971,18 @@ schoenResult.hi = 1;
 heat_index_schoen({ tdb: 29, rh: 50, limit_inputs: false });
 // @ts-expect-error rh is a required quantity.
 heat_index_schoen({ tdb: 29 });
+
+// at takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's ATInputs and AT, q taking null for upstream's None
+// (decision 252), and returns a readonly result.
+const atInputs: ATInputs = { tdb: 25, rh: 30, v: 0.1, q: 100 };
+const atResult: AT = at(atInputs);
+const atValue: number = atResult.at;
+at({ tdb: 25, rh: 30, v: 0.1, q: null });
+at({ tdb: 25, rh: 30, v: 0.1 });
+// @ts-expect-error the result is readonly.
+atResult.at = 1;
+// @ts-expect-error q is a quantity or null, not a boolean.
+at({ tdb: 25, rh: 30, v: 0.1, q: false });
+// @ts-expect-error v is a required quantity.
+at({ tdb: 25, rh: 30 });

@@ -33,6 +33,7 @@ import {
   work_capacity_dunne,
   work_capacity_hothaps,
   work_capacity_iso,
+  work_capacity_niosh,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -710,6 +711,16 @@ const MODELS: readonly ParityModel[] = [
         inputs as unknown as Parameters<typeof work_capacity_iso>[0],
       ),
     // Upstream rounds nothing (models/work_capacity_iso.py:48-58).
+    rounded: () => [],
+    warnings: true,
+  },
+  {
+    name: "work_capacity_niosh",
+    run: (inputs) =>
+      work_capacity_niosh(
+        inputs as unknown as Parameters<typeof work_capacity_niosh>[0],
+      ),
+    // Upstream rounds nothing (models/work_capacity_niosh.py:48-58).
     rounded: () => [],
     warnings: true,
   },

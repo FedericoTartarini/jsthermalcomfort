@@ -62,6 +62,7 @@ import {
   work_capacity_iso,
   WORK_CAPACITY_ISO_INFO,
 } from "./work_capacity_iso.ts";
+import { work_capacity_niosh } from "./work_capacity_niosh.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -196,6 +197,7 @@ export {
   WORK_CAPACITY_HOTHAPS_INFO,
   work_capacity_iso,
   WORK_CAPACITY_ISO_INFO,
+  work_capacity_niosh,
 };
 
 export default {
@@ -263,5 +265,6 @@ export default {
   WORK_CAPACITY_HOTHAPS_INFO,
   work_capacity_iso,
   WORK_CAPACITY_ISO_INFO,
+  work_capacity_niosh,
   JOS3,
 };

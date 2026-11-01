@@ -651,8 +651,9 @@ def _work_capacity_niosh(rng):
     # raises (classes_input.py:1098-1099), mostly 100-600 W, and is the
     # resting 117 W one case in twenty, where the limits coincide and the
     # division is by zero, and 0 W one case in twenty, where np.log10 gives
-    # -inf (models/work_capacity_niosh.py:51-55). wbgt reaches past each met's
-    # two limits for met above 10.4 W, where capacity clips to 0 or 100 (:56).
+    # -inf (models/work_capacity_niosh.py:51-55). wbgt, up to 45 °C, reaches
+    # past both limits for met above 10.4 W, where 56.7 - 11.5 * log10(met)
+    # (:53) falls below 45 °C, and capacity clips to 0 or 100 there (:56).
     draw = rng.random()
     if draw < 0.05:
         met = 117.0

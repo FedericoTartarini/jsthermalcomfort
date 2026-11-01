@@ -8,7 +8,7 @@ import {
 } from "./heat_index_schoen.ts";
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
-import { net } from "./net.js";
+import { net } from "./net.ts";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
 import { esi, ESI_INFO } from "./esi.ts";

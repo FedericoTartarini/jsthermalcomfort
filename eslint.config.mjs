@@ -78,6 +78,7 @@ export const LINTED = [
   "tests/models/heat_index_rothfusz.test.ts",
   "tests/models/heat_index_schoen.test.ts",
   "tests/models/humidex.test.ts",
+  "tests/models/net.test.ts",
   "tests/models/modelContract.ts",
   "tests/models/phs.test.ts",
   "tests/models/pmv_a.test.ts",

@@ -239,6 +239,18 @@ def _humidex(rng):
     }
 
 
+def _net(rng):
+    # Upstream checks no range (models/net.py:62-68, NETInputs at
+    # classes_input.py:482-496), so tdb and v reach past the validation
+    # table's 25-40 °C and 0.1-4.5 m/s (ts_net.json at validation data v1.0.1).
+    return {
+        "tdb": _value(rng, -40.0, 60.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "v": _value(rng, 0.0, 30.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _phs(rng):
     # The ranges reach past ISO 7933's limits (tdb 15-50 °C, tr - tdb 0-60 °C,
     # v 0-3 m/s, p_a 0.5 or 0-4.5 kPa, met 56-250 or 100-450 W/m2, clo 0.1-1
@@ -730,6 +742,7 @@ MODELS = {
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "heat_index_schoen": (models.heat_index_schoen, _heat_index_schoen),
     "humidex": (models.humidex, _humidex),
+    "net": (models.net, _net),
     "phs": (models.phs, _phs),
     "pmv_a": (models.pmv_a, _pmv_a),
     "pmv_athb": (models.pmv_athb, _pmv_athb),

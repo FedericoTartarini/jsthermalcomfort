@@ -13,6 +13,7 @@ import {
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
+  net,
   phs,
   PHS_INFO,
   pmv_a,
@@ -537,6 +538,13 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds humidex with np.around (models/humidex.py:88-89).
     rounded: ({ round_output }) => (round_output === true ? ["humidex"] : []),
     warnings: true,
+  },
+  {
+    name: "net",
+    run: (inputs) => net(inputs as unknown as Parameters<typeof net>[0]),
+    // Upstream rounds net with np.around (models/net.py:77-78).
+    rounded: ({ round_output }) => (round_output === true ? ["net"] : []),
+    warnings: false,
   },
   {
     name: "phs",

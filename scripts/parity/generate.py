@@ -631,6 +631,21 @@ def _work_capacity_hothaps(rng):
     }
 
 
+def _work_capacity_iso(rng):
+    # met stays in WorkCapacityStandardsInputs' 0-2500 W, outside which it
+    # raises (classes_input.py:1098-1099), mostly 100-600 W, and is the
+    # resting 117 W one case in twenty, where the limits coincide and the
+    # division is by zero (models/work_capacity_iso.py:51-55). wbgt reaches
+    # past each met's two limits, where capacity clips to 0 or 100 (:56).
+    if rng.random() < 0.05:
+        met = 117.0
+    elif rng.random() < 0.5:
+        met = _value(rng, 100.0, 600.0)
+    else:
+        met = _value(rng, 0.0, 2500.0)
+    return {"wbgt": _value(rng, 0.0, 45.0), "met": met}
+
+
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:151-154). Any other raise stops the generator.
@@ -680,6 +695,7 @@ MODELS = {
     "wind_chill_temperature": (models.wind_chill_temperature, _wind_chill_temperature),
     "work_capacity_dunne": (models.work_capacity_dunne, _work_capacity_dunne),
     "work_capacity_hothaps": (models.work_capacity_hothaps, _work_capacity_hothaps),
+    "work_capacity_iso": (models.work_capacity_iso, _work_capacity_iso),
 }
 
 

@@ -32,7 +32,8 @@ export type UnitSymbol =
   | "g"
   | "W·min/m²"
   | "°C/m"
-  | "km/h";
+  | "km/h"
+  | "W";
 
 /**
  * A bound on a variable (minimum and/or maximum), inclusive. A missing side is

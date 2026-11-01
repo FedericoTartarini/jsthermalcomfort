@@ -58,6 +58,7 @@ import {
   work_capacity_hothaps,
   WORK_CAPACITY_HOTHAPS_INFO,
 } from "./work_capacity_hothaps.ts";
+import { work_capacity_iso } from "./work_capacity_iso.ts";
 import { pet_steady } from "./pet_steady.js";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
@@ -189,6 +190,7 @@ export {
   WORK_CAPACITY_DUNNE_INFO,
   work_capacity_hothaps,
   WORK_CAPACITY_HOTHAPS_INFO,
+  work_capacity_iso,
 };
 
 export default {
@@ -254,5 +256,6 @@ export default {
   WORK_CAPACITY_DUNNE_INFO,
   work_capacity_hothaps,
   WORK_CAPACITY_HOTHAPS_INFO,
+  work_capacity_iso,
   JOS3,
 };

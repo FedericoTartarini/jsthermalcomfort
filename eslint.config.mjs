@@ -92,6 +92,7 @@ export const LINTED = [
   "tests/models/wind_chill_temperature.test.ts",
   "tests/models/work_capacity_dunne.test.ts",
   "tests/models/work_capacity_hothaps.test.ts",
+  "tests/models/work_capacity_iso.test.ts",
   "tests/psychrometrics/dew_point_tmp.test.ts",
   "tests/psychrometrics/enthalpy_air.test.ts",
   "tests/psychrometrics/p_sat.test.ts",

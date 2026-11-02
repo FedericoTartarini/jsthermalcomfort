@@ -48,6 +48,69 @@ export type GaggeTwoNodesJiInputs = InputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
  */
 export type GaggeTwoNodesJi = OutputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
 
+/**
+ * Two-node model for older people under hot and cold exposures proposed by Ji et
+ * al. [Ji2022](../../docs/references.md#ji2022).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.v - Air speed, [m/s].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.vapor_pressure - Vapor pressure, [torr].
+ *
+ * > [!NOTE]
+ * > Vapor pressure can be calculated using the relative humidity and the saturation
+ * > vapor pressure, which can be computed using the function
+ * > `p_sat_torr`.
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ * @param inputs.body_surface_area - Body surface area, [m2]. Defaults to 1.8258.
+ *
+ * > [!NOTE]
+ * > Body surface area can be calculated with weight and height using the function
+ * > `body_surface_area`.
+ * @param inputs.p_atm - Atmospheric pressure, [Pa]. Defaults to 101325.
+ * @param inputs.position - Select either "sitting" or "standing". Defaults to "sitting".
+ * @param inputs.body_weight - Body weight, [kg]. Defaults to 70 kg.
+ * @param inputs.length_time_simulation - Length of the simulation, [minutes]. Defaults to 120 minutes.
+ * @param inputs.initial_skin_temp - Initial skin temperature, [°C]. Defaults to 36.8 °C.
+ * @param inputs.initial_core_temp - Initial core temperature, [°C]. Defaults to 36.49 °C.
+ * @param inputs.acclimatized - If True, the model assumes the person is acclimatized to heat. Defaults to True.
+ *
+ * @returns A dataclass containing the simulated core and skin temperatures over time. See {@link GaggeTwoNodesJi} for more details.
+ * To access the individual attributes, use the corresponding attribute of the returned
+ * instance, e.g. `result.t_core` or `result.t_skin`.
+ *
+ * - `t_core` - Core temperature, [°C].
+ * - `t_skin` - Skin temperature, [°C].
+ *
+ * @example
+ * ```ts
+ * import { two_nodes_gagge_ji } from "jsthermalcomfort/models";
+ * import { body_surface_area } from "jsthermalcomfort/utilities";
+ * import { p_sat_torr } from "jsthermalcomfort/psychrometrics";
+ *
+ * const rh = 20;
+ * const vapor_pressure = (rh * p_sat_torr(36.5)) / 100;
+ *
+ * const result = two_nodes_gagge_ji({
+ *   tdb: 36.5,
+ *   tr: 36.5,
+ *   v: 0.25,
+ *   met: 0.95,
+ *   clo: 0.1,
+ *   vapor_pressure: vapor_pressure,
+ *   wme: 0,
+ *   body_surface_area: body_surface_area(80.1, 1.8),
+ *   p_atm: 101325,
+ *   position: "sitting",
+ *   acclimatized: true,
+ *   body_weight: 80.1,
+ *   length_time_simulation: 120,
+ * });
+ * ```
+ */
 export function two_nodes_gagge_ji(
   inputs: GaggeTwoNodesJiInputs,
 ): GaggeTwoNodesJi {
@@ -100,6 +163,12 @@ export function two_nodes_gagge_ji(
   });
 }
 
+/**
+ * Run one stateful Gagge-Ji simulation in compiled code.
+ *
+ * Returns one core-temperature array and one skin-temperature array, each with
+ * `length_time_simulation` values.
+ */
 function _two_nodes_ji_optimized_scalar(
   tdb: number,
   tr: number,
@@ -186,7 +255,7 @@ function _two_nodes_ji_optimized_scalar(
   m_rsw_max = m_rsw_max * max_sweating_rate_factor;
 
   if (!w_max) {
-    // if the user did not pass a value of w_max
+    // if w_max was not set above
     // W_max should be fixed to either 0.85 or 1 (for acclimatized people);  See ISO PHS model and other related standard
     w_max = 1;
   }

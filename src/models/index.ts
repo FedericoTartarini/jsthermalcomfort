@@ -57,7 +57,10 @@ import {
 import { clo_tout, CLO_TOUT_INFO } from "./clo_tout.ts";
 import { utci, UTCI_INFO } from "./utci.ts";
 import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";
-import { two_nodes_gagge_ji } from "./two_nodes_gagge_ji.ts";
+import {
+  two_nodes_gagge_ji,
+  TWO_NODES_GAGGE_JI_INFO,
+} from "./two_nodes_gagge_ji.ts";
 import {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
@@ -134,6 +137,10 @@ export type {
   GaggeTwoNodesInputs,
   SET,
 } from "./two_nodes_gagge.ts";
+export type {
+  GaggeTwoNodesJi,
+  GaggeTwoNodesJiInputs,
+} from "./two_nodes_gagge_ji.ts";
 export type {
   UseFansHeatwaves,
   UseFansHeatwavesInputs,
@@ -212,6 +219,7 @@ export {
   two_nodes_gagge,
   two_nodes_gagge_ji,
   TWO_NODES_GAGGE_INFO,
+  TWO_NODES_GAGGE_JI_INFO,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,
@@ -293,6 +301,7 @@ export default {
   two_nodes_gagge,
   two_nodes_gagge_ji,
   TWO_NODES_GAGGE_INFO,
+  TWO_NODES_GAGGE_JI_INFO,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,

@@ -41,6 +41,8 @@ import type {
   ESIInputs,
   GaggeTwoNodes,
   GaggeTwoNodesInputs,
+  GaggeTwoNodesJi,
+  GaggeTwoNodesJiInputs,
   HI,
   HIInputs,
   HISchoenInputs,
@@ -120,6 +122,7 @@ import {
   Standard,
   THI_INFO,
   TWO_NODES_GAGGE_INFO,
+  TWO_NODES_GAGGE_JI_INFO,
   Postures,
   Sex,
   Units,
@@ -164,6 +167,7 @@ import {
   solar_gain,
   thi,
   two_nodes_gagge,
+  two_nodes_gagge_ji,
   use_fans_heatwaves,
   utci,
   vertical_tmp_grad_ppd,
@@ -231,6 +235,7 @@ const thiInfo: ModelInfo = THI_INFO;
 const wbgtInfo: ModelInfo = WBGT_INFO;
 const ireqInfo: ModelInfo = IREQ_INFO;
 const ridgeInfo: ModelInfo = RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO;
+const twoNodesJiInfo: ModelInfo = TWO_NODES_GAGGE_JI_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1239,3 +1244,38 @@ ridge_regression_predict_t_re_t_sk({
   tdb: 35,
   rh: 60,
 });
+
+// two_nodes_gagge_ji takes one inputs object of scalars, its **kwargs
+// included, with its inputs and result types named after upstream's
+// GaggeTwoNodesJiInputs and GaggeTwoNodesJi, and returns its series as
+// readonly arrays (decision 269).
+const twoNodesJiInputs: GaggeTwoNodesJiInputs = {
+  tdb: 36.5,
+  tr: 36.5,
+  v: 0.25,
+  met: 0.95,
+  clo: 0.1,
+  vapor_pressure: 12,
+};
+const twoNodesJiResult: GaggeTwoNodesJi = two_nodes_gagge_ji(twoNodesJiInputs);
+const twoNodesJiSeries: readonly number[] = twoNodesJiResult.t_core;
+// @ts-expect-error a series is readonly.
+twoNodesJiResult.t_skin[0] = 1;
+// @ts-expect-error the result is readonly.
+twoNodesJiResult.t_core = [];
+two_nodes_gagge_ji({
+  ...twoNodesJiInputs,
+  position: Postures.standing,
+  body_weight: 80.1,
+  length_time_simulation: 60,
+  initial_skin_temp: 36.8,
+  initial_core_temp: 36.49,
+  acclimatized: false,
+});
+two_nodes_gagge_ji({ ...twoNodesJiInputs, position: null });
+// @ts-expect-error position takes one of choice_field's values.
+two_nodes_gagge_ji({ ...twoNodesJiInputs, position: "lying" });
+// @ts-expect-error acclimatized is a switch.
+two_nodes_gagge_ji({ ...twoNodesJiInputs, acclimatized: 1 });
+// @ts-expect-error vapor_pressure is a required quantity.
+two_nodes_gagge_ji({ tdb: 36.5, tr: 36.5, v: 0.25, met: 0.95, clo: 0.1 });

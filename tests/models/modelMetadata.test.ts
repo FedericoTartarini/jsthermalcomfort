@@ -192,6 +192,14 @@ const v2Calls: Record<string, object> = {
   },
   thi: { tdb: 30, rh: 70 },
   two_nodes_gagge: { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
+  two_nodes_gagge_ji: {
+    tdb: 36.5,
+    tr: 36.5,
+    v: 0.25,
+    met: 0.95,
+    clo: 0.1,
+    vapor_pressure: 12,
+  },
   use_fans_heatwaves: { tdb: 35, tr: 35, v: 1.0, rh: 50, met: 1.2, clo: 0.5 },
   utci: { tdb: 25, tr: 25, v: 1, rh: 50 },
   vertical_tmp_grad_ppd: {

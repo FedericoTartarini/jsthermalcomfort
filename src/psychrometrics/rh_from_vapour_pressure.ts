@@ -1,3 +1,4 @@
+import { notOfType } from "../_internal/errors.ts";
 import { p_sat } from "./p_sat.ts";
 
 /**
@@ -17,5 +18,9 @@ import { p_sat } from "./p_sat.ts";
  * console.log(rh); // 56.00074032652902
  */
 export function rh_from_vapour_pressure(p_vap: number, tdb: number): number {
+  for (const [key, value] of Object.entries({ p_vap, tdb })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
   return (100 * p_vap) / p_sat(tdb);
 }

@@ -1,3 +1,4 @@
+import { notOfType } from "../_internal/errors.ts";
 import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
 
 /**
@@ -19,6 +20,10 @@ import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
  * console.log(rh); // 56.00074032652902
  */
 export function hr_to_rh(hr: number, tdb: number, p_atm = 101325): number {
+  for (const [key, value] of Object.entries({ hr, tdb, p_atm })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
   const p_vap = (hr * p_atm) / (0.62198 + hr);
   return rh_from_vapour_pressure(p_vap, tdb);
 }

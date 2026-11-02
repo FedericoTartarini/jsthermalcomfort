@@ -1,3 +1,4 @@
+import { notOfType } from "../_internal/errors.ts";
 import { round } from "../_internal/round.ts";
 import { units_converter } from "./units_converter.ts";
 
@@ -16,6 +17,9 @@ import { units_converter } from "./units_converter.ts";
  * @returns {number} relative air speed, [m/s]
  */
 export function v_relative(v, met) {
+  for (const [key, value] of Object.entries({ v, met })) {
+    if (typeof value !== "number") throw notOfType(key, "a number");
+  }
   if (met <= 1) return v;
   return _v_relative_single(v, met);
 }
@@ -59,6 +63,14 @@ export function running_mean_outdoor_temperature(
   alpha = 0.8,
   units = "SI",
 ) {
+  if (!Array.isArray(temp_array)) throw notOfType("temp_array", "an array");
+  for (const tdb of temp_array) {
+    if (typeof tdb !== "number") {
+      throw notOfType("temp_array", "an array of numbers");
+    }
+  }
+  if (typeof alpha !== "number") throw notOfType("alpha", "a number");
+  if (typeof units !== "string") throw notOfType("units", "a string");
   if (units === "IP")
     temp_array = temp_array.map((tdb) => units_converter("IP", { tdb }).tdb);
 
@@ -87,6 +99,9 @@ export function running_mean_outdoor_temperature(
  * @returns {number} sky-vault view faction ranges between 0 and 1
  */
 export function f_svv(w, h, d) {
+  for (const [key, value] of Object.entries({ w, h, d })) {
+    if (typeof value !== "number") throw notOfType(key, "a number");
+  }
   let h_degrees = Math.atan(h / (2 * d)) * (180 / Math.PI);
   let w_degrees = Math.atan(w / (2 * d)) * (180 / Math.PI);
   return (h_degrees * w_degrees) / 16200;

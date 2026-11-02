@@ -1,3 +1,5 @@
+import { notOfType } from "../_internal/errors.ts";
+
 /**
  * Calculates the relative humidity from the dew point temperature.
  *
@@ -15,6 +17,10 @@
  * console.log(rh); // 56.059759430531365
  */
 export function rh_from_dew_point(t_dp: number, tdb: number): number {
+  for (const [key, value] of Object.entries({ t_dp, tdb })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
   // dew_point_tmp solves t_dp = 243.12 · γ / (17.62 − γ) with
   // γ = ln(rh / 100) + 17.62 · tdb / (243.12 + tdb).
   const gamma_m = (17.62 * t_dp) / (243.12 + t_dp);

@@ -6,7 +6,7 @@ import {
   clo_typical_ensembles,
   met_typical_tasks,
   clo_individual_garments,
-} from "../../src/utilities/utilities";
+} from "../../src/utilities/index.ts";
 import { round } from "../../src/_internal/round.ts";
 
 const DEFAULT_TOLERANCE = 0.01;
@@ -62,6 +62,27 @@ describe("v_relative", () => {
       expect(v_relative(v, met)).toBe(expected);
     },
   );
+
+  // Deviation _shared-88, deviation _shared-89, deviation _shared-90, deviation _shared-91, deviation _shared-92.
+  it("throws TypeError for an argument that is not a number, naming it", () => {
+    for (const bad of [null, true, "0.1", [0.1]]) {
+      expect(() => v_relative(bad, 1.2)).toThrow(
+        new TypeError("v must be a number."),
+      );
+      expect(() => v_relative(0.1, bad)).toThrow(
+        new TypeError("met must be a number."),
+      );
+    }
+    expect(() => v_relative()).toThrow(new TypeError("v must be a number."));
+    expect(() => v_relative(0.1)).toThrow(
+      new TypeError("met must be a number."),
+    );
+  });
+
+  it("does not throw for NaN", () => {
+    expect(() => v_relative(NaN, 1.2)).not.toThrow();
+    expect(() => v_relative(0.1, NaN)).not.toThrow();
+  });
 });
 
 describe("running_mean_outdoor_temperature", () => {
@@ -110,6 +131,53 @@ describe("running_mean_outdoor_temperature", () => {
       );
     },
   );
+
+  // Deviation _shared-125, deviation _shared-126, deviation _shared-127, deviation _shared-128.
+  it("throws TypeError for a temp_array that is not an array of numbers", () => {
+    for (const bad of [null, true, 20, "20", { 0: 20 }]) {
+      expect(() => running_mean_outdoor_temperature(bad)).toThrow(
+        new TypeError("temp_array must be an array."),
+      );
+    }
+    expect(() => running_mean_outdoor_temperature()).toThrow(
+      new TypeError("temp_array must be an array."),
+    );
+    for (const bad of [
+      [20, "21"],
+      [20, null],
+      [20, true],
+      [20, [21]],
+      [20, undefined],
+    ]) {
+      expect(() => running_mean_outdoor_temperature(bad)).toThrow(
+        new TypeError("temp_array must be an array of numbers."),
+      );
+    }
+  });
+
+  it("throws TypeError for an alpha or units of the wrong type, naming it", () => {
+    for (const bad of [null, true, "0.8", [0.8]]) {
+      expect(() => running_mean_outdoor_temperature([20, 21], bad)).toThrow(
+        new TypeError("alpha must be a number."),
+      );
+    }
+    for (const bad of [null, true, 5, ["SI"]]) {
+      expect(() =>
+        running_mean_outdoor_temperature([20, 21], 0.8, bad),
+      ).toThrow(new TypeError("units must be a string."));
+    }
+  });
+
+  it("takes the defaults for an explicit undefined", () => {
+    expect(
+      running_mean_outdoor_temperature([20, 22], undefined, undefined),
+    ).toBe(running_mean_outdoor_temperature([20, 22]));
+  });
+
+  it("does not throw for NaN", () => {
+    expect(() => running_mean_outdoor_temperature([20, NaN])).not.toThrow();
+    expect(() => running_mean_outdoor_temperature([20, 21], NaN)).not.toThrow();
+  });
 });
 
 describe("f_svv", () => {
@@ -137,6 +205,30 @@ describe("f_svv", () => {
       );
     },
   );
+
+  // Deviation _shared-93, deviation _shared-94.
+  it("throws TypeError for an argument that is not a number, naming it", () => {
+    for (const bad of [null, true, "30", [30]]) {
+      expect(() => f_svv(bad, 10, 3.3)).toThrow(
+        new TypeError("w must be a number."),
+      );
+      expect(() => f_svv(30, bad, 3.3)).toThrow(
+        new TypeError("h must be a number."),
+      );
+      expect(() => f_svv(30, 10, bad)).toThrow(
+        new TypeError("d must be a number."),
+      );
+    }
+    expect(() => f_svv()).toThrow(new TypeError("w must be a number."));
+    expect(() => f_svv(30)).toThrow(new TypeError("h must be a number."));
+    expect(() => f_svv(30, 10)).toThrow(new TypeError("d must be a number."));
+  });
+
+  it("does not throw for NaN", () => {
+    expect(() => f_svv(NaN, 10, 3.3)).not.toThrow();
+    expect(() => f_svv(30, NaN, 3.3)).not.toThrow();
+    expect(() => f_svv(30, 10, NaN)).not.toThrow();
+  });
 });
 
 describe("clo_typical_ensembles", () => {

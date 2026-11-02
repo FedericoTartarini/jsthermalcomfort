@@ -1,7 +1,7 @@
 import { expect, describe, it } from "vitest";
 import { p_sat } from "../../src/psychrometrics/p_sat.ts";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
-import { rh_from_vapour_pressure } from "../../src/psychrometrics/rh_from_vapour_pressure.ts";
+import { rh_from_vapour_pressure } from "../../src/psychrometrics/index.ts";
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];
 const RH = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
@@ -32,4 +32,24 @@ describe("rh_from_vapour_pressure", () => {
       expect(rh_from_vapour_pressure(p_vap, tdb)).toBeCloseTo(expected, 9);
     },
   );
+
+  // A call with arguments the type rejects, to test the runtime.
+  const call =
+    (...args: unknown[]) =>
+    () =>
+      (rh_from_vapour_pressure as (...a: unknown[]) => unknown)(...args);
+
+  it("throws TypeError for an argument that is not a number, naming it", () => {
+    for (const bad of [null, true, "20", [21]]) {
+      expect(call(bad, 21)).toThrow(new TypeError("p_vap must be a number."));
+      expect(call(1393, bad)).toThrow(new TypeError("tdb must be a number."));
+    }
+    expect(call()).toThrow(new TypeError("p_vap must be a number."));
+    expect(call(1393)).toThrow(new TypeError("tdb must be a number."));
+  });
+
+  it("does not throw for NaN", () => {
+    expect(call(NaN, 21)).not.toThrow();
+    expect(call(1393, NaN)).not.toThrow();
+  });
 });

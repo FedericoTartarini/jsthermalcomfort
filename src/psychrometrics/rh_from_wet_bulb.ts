@@ -1,3 +1,4 @@
+import { notOfType } from "../_internal/errors.ts";
 import { wet_bulb_tmp } from "./wet_bulb_tmp.ts";
 
 /**
@@ -22,6 +23,10 @@ import { wet_bulb_tmp } from "./wet_bulb_tmp.ts";
  * console.log(rh); // 55.9...
  */
 export function rh_from_wet_bulb(t_wb: number, tdb: number): number {
+  for (const [key, value] of Object.entries({ t_wb, tdb })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
   if (t_wb >= wet_bulb_tmp(tdb, 100)) return 100;
 
   // Start the bracket at the fit's lowest whole percent so that the bisection

@@ -1,6 +1,6 @@
 import { expect, describe, it } from "vitest";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
-import { rh_from_wet_bulb } from "../../src/psychrometrics/rh_from_wet_bulb.ts";
+import { rh_from_wet_bulb } from "../../src/psychrometrics/index.ts";
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];
 const RH = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
@@ -42,5 +42,25 @@ describe("rh_from_wet_bulb", () => {
     // floor is the clamp; above it the rising branch is the one inverted.
     expect(rh_from_wet_bulb(-4.7, 0)).toBe(0);
     expect(rh_from_wet_bulb(-3.9, 0)).toBeCloseTo(41.12, 1);
+  });
+
+  // A call with arguments the type rejects, to test the runtime.
+  const call =
+    (...args: unknown[]) =>
+    () =>
+      (rh_from_wet_bulb as (...a: unknown[]) => unknown)(...args);
+
+  it("throws TypeError for an argument that is not a number, naming it", () => {
+    for (const bad of [null, true, "20", [21]]) {
+      expect(call(bad, 21)).toThrow(new TypeError("t_wb must be a number."));
+      expect(call(15.4, bad)).toThrow(new TypeError("tdb must be a number."));
+    }
+    expect(call()).toThrow(new TypeError("t_wb must be a number."));
+    expect(call(15.4)).toThrow(new TypeError("tdb must be a number."));
+  });
+
+  it("does not throw for NaN", () => {
+    expect(call(NaN, 21)).not.toThrow();
+    expect(call(15.4, NaN)).not.toThrow();
   });
 });

@@ -1,3 +1,4 @@
+import { notOfType } from "../_internal/errors.ts";
 import { round } from "../_internal/round.ts";
 
 const g = 9.81;
@@ -40,6 +41,10 @@ export function t_mrt(
   emissivity = 0.95,
   standard = "Mixed Convection",
 ) {
+  for (const [key, value] of Object.entries({ tg, tdb, v, d, emissivity })) {
+    if (typeof value !== "number") throw notOfType(key, "a number");
+  }
+  if (typeof standard !== "string") throw notOfType("standard", "a string");
   standard = standard.toLowerCase();
   let tr = 0;
   if (standard === "mixed convection") {

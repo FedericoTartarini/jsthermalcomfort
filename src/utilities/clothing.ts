@@ -1,6 +1,7 @@
 import { v_relative } from "./utilities.js";
 import { met_to_w_m2 } from "./met_to_w_m2.ts";
 import { Standard } from "./options.ts";
+import { notOfType } from "../_internal/errors.ts";
 import { round } from "../_internal/round.ts";
 
 // pythermalcomfort's `clothing` package. The functions are members of this
@@ -52,6 +53,8 @@ function _correction_normal_clothing(_vr: number, _vw: number): number {
  * console.log(clo_area_factor(1)); // 1.28
  */
 export function clo_area_factor(i_cl: number): number {
+  if (typeof (i_cl as unknown) !== "number")
+    throw notOfType("i_cl", "a number");
   return 1 + 0.28 * i_cl;
 }
 
@@ -80,6 +83,10 @@ export function clo_insulation_air_layer(
   v_walk: number,
   i_a_static: number,
 ): number {
+  for (const [key, value] of Object.entries({ vr, v_walk, i_a_static })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
   return _correction_nude(vr, v_walk) * i_a_static;
 }
 
@@ -121,6 +128,16 @@ export function clo_total_insulation(
   i_a_static: number,
   i_cl: number,
 ): number {
+  for (const [key, value] of Object.entries({
+    i_t,
+    vr,
+    v_walk,
+    i_a_static,
+    i_cl,
+  })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
   const nude = i_a_static * _correction_nude(vr, v_walk);
   if (i_cl === 0) return nude;
   const normal_clothing = i_t * _correction_normal_clothing(vr, v_walk);
@@ -158,6 +175,13 @@ export function clo_dynamic_ashrae(
   // Upstream's `model`; this library names the option `standard` (ADR 0003).
   standard: typeof Standard.ashrae_55_2023 = Standard.ashrae_55_2023,
 ): number {
+  for (const [key, value] of Object.entries({ clo, met })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
+  if (typeof (standard as unknown) !== "string") {
+    throw notOfType("standard", "a string");
+  }
   if ((standard as unknown) !== Standard.ashrae_55_2023)
     throw new Error(
       `PMV calculations can only be performed in compliance with ASHRAE ${Standard.ashrae_55_2023}`,
@@ -209,6 +233,13 @@ export function clo_dynamic_iso(
   // Upstream's `model`; this library names the option `standard` (ADR 0003).
   standard: typeof Standard.iso_9920_2007 = Standard.iso_9920_2007,
 ): number {
+  for (const [key, value] of Object.entries({ clo, met, v, i_a })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
+  if (typeof (standard as unknown) !== "string") {
+    throw notOfType("standard", "a string");
+  }
   return clo_dynamic_iso_vr(clo, met, v_relative(v, met), i_a, standard);
 }
 
@@ -246,6 +277,13 @@ export function clo_dynamic_iso_vr(
   i_a = 0.7,
   standard: typeof Standard.iso_9920_2007 = Standard.iso_9920_2007,
 ): number {
+  for (const [key, value] of Object.entries({ clo, met, vr, i_a })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
+  if (typeof (standard as unknown) !== "string") {
+    throw notOfType("standard", "a string");
+  }
   if ((standard as unknown) !== Standard.iso_9920_2007)
     throw new Error(
       `PMV calculations can only be performed in compliance with ISO ${Standard.iso_9920_2007}`,

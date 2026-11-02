@@ -1,17 +1,15 @@
 import { describe, expect, test } from "vitest";
 import {
+  CLO_INDIVIDUAL_GARMENT_GROUPS,
   clo_area_factor,
   clo_dynamic_ashrae,
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
+  clo_individual_garments,
   clo_insulation_air_layer,
   clo_total_insulation,
-} from "../../src/utilities/clothing.ts";
-import {
-  CLO_INDIVIDUAL_GARMENT_GROUPS,
-  clo_individual_garments,
   v_relative,
-} from "../../src/utilities/utilities.js";
+} from "../../src/utilities/index.ts";
 import * as pkg from "../../src/index.ts";
 
 // Upstream's `np.isclose(..., atol=...)` on a scalar.
@@ -360,5 +358,105 @@ describe("public API surface", () => {
   test("clo_dynamic, which upstream split in two, is gone", () => {
     expect(pkg).not.toHaveProperty("clo_dynamic");
     expect(pkg.default.utilities).not.toHaveProperty("clo_dynamic");
+  });
+});
+
+// Each function checks its own arguments on entry, in parameter order
+// (decisions 291-295).
+describe("argument types", () => {
+  const cases = [
+    { fn: clo_area_factor, args: [1], params: ["i_cl"], required: 1 },
+    {
+      fn: clo_insulation_air_layer,
+      args: [0.2, 1, 0.71],
+      params: ["vr", "v_walk", "i_a_static"],
+      required: 3,
+    },
+    {
+      fn: clo_total_insulation,
+      args: [1.0, 0.26, 0.06, 0.7, 0.3],
+      params: ["i_t", "vr", "v_walk", "i_a_static", "i_cl"],
+      required: 5,
+    },
+    {
+      fn: clo_dynamic_ashrae,
+      args: [1, 2, "55-2023"],
+      params: ["clo", "met", "standard"],
+      required: 2,
+    },
+    {
+      fn: clo_dynamic_iso,
+      args: [1, 1.2, 0.2, 0.7, "9920-2007"],
+      params: ["clo", "met", "v", "i_a", "standard"],
+      required: 3,
+    },
+    {
+      fn: clo_dynamic_iso_vr,
+      args: [1, 1.2, 0.26, 0.7, "9920-2007"],
+      params: ["clo", "met", "vr", "i_a", "standard"],
+      required: 3,
+    },
+  ].map((c) => ({ ...c, name: c.fn.name }));
+
+  // A call with arguments the type rejects, to test the runtime.
+  const call =
+    (fn: (...a: never[]) => number, ...args: unknown[]) =>
+    () =>
+      (fn as (...a: unknown[]) => unknown)(...args);
+  const withArgAt = (args: unknown[], i: number, value: unknown) =>
+    args.map((arg, j) => (j === i ? value : arg));
+
+  // Deviation _shared-99, deviation _shared-100, deviation _shared-101,
+  // deviation _shared-102, deviation _shared-103, deviation _shared-104,
+  // deviation _shared-105, deviation _shared-106, deviation _shared-107,
+  // deviation _shared-108, deviation _shared-109, deviation _shared-110,
+  // deviation _shared-111, deviation _shared-112, deviation _shared-113,
+  // deviation _shared-114, deviation _shared-115, deviation _shared-116,
+  // deviation _shared-117, deviation _shared-118, deviation _shared-119.
+  test.each(cases)(
+    "$name throws TypeError for an argument of the wrong type, naming it",
+    ({ fn, args, params }) => {
+      params.forEach((param, i) => {
+        const [bads, expected] =
+          param === "standard"
+            ? [[null, true, 5, [args[i]]], "a string"]
+            : [[null, true, "1", [1]], "a number"];
+        for (const bad of bads) {
+          expect(call(fn, ...withArgAt(args, i, bad))).toThrow(
+            new TypeError(`${param} must be ${expected}.`),
+          );
+        }
+      });
+    },
+  );
+
+  test.each(cases)(
+    "$name throws TypeError for a required argument left out, naming it",
+    ({ fn, args, params, required }) => {
+      params.slice(0, required).forEach((param, i) => {
+        expect(call(fn, ...args.slice(0, i))).toThrow(
+          new TypeError(`${param} must be a number.`),
+        );
+      });
+    },
+  );
+
+  test.each(cases)(
+    "$name takes the default for an explicit undefined",
+    ({ fn, args, required }) => {
+      for (let i = required; i < args.length; i += 1) {
+        expect(call(fn, ...withArgAt(args, i, undefined))()).toBe(
+          call(fn, ...args)(),
+        );
+      }
+    },
+  );
+
+  test.each(cases)("$name does not throw for NaN", ({ fn, args, params }) => {
+    params.forEach((param, i) => {
+      if (param !== "standard") {
+        expect(call(fn, ...withArgAt(args, i, NaN))).not.toThrow();
+      }
+    });
   });
 });

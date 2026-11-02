@@ -35,10 +35,10 @@ export function isDeepFrozen(value: unknown): boolean {
  * `APMV`, `AdaptiveASHRAE`, `AnkleDraft`, `AT`, `ATHB`, `CloTOut`, `CE`,
  * `DI`, `EPMV`, `ESI`, `HI`, `Humidex`, `NET`, `PHS`, `PMVPPD`,
  * `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`, `THI`,
- * `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WCI`, `WCT` and
+ * `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WBGT`, `WCI`, `WCT` and
  * `SportsHeatStressRisk` at `classes_return.py:97, :111, :184, :200, :213,
  * :227, :241, :254, :270, :284, :297, :311, :327, :353, :415, :435, :467,
- * :480, :497, :578, :631, :689, :705, :735, :748, :1073`, and `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
+ * :480, :497, :578, :631, :689, :705, :722, :735, :748, :1073`, and `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
  * and as `AdaptiveEN` is, although upstream's is a plain `@dataclass`
  * (`:143`, deviation adaptive_en-5).
  *

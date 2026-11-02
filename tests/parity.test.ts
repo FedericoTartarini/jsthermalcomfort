@@ -708,7 +708,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => wbgt(inputs as unknown as Parameters<typeof wbgt>[0]),
     // Upstream rounds wbgt with np.round (models/wbgt.py:90-91).
     rounded: ({ round_output }) => (round_output === true ? ["wbgt"] : []),
-    warnings: false,
+    warnings: true,
   },
   {
     name: "wci",

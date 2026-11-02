@@ -9,7 +9,7 @@ import {
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net, NET_INFO } from "./net.ts";
-import { wbgt } from "./wbgt.ts";
+import { wbgt, WBGT_INFO } from "./wbgt.ts";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
 import { esi, ESI_INFO } from "./esi.ts";
 import { thi, THI_INFO } from "./thi.ts";
@@ -132,6 +132,7 @@ export type {
   VerticalTGradPPD,
   VerticalTGradPPDInputs,
 } from "./vertical_tmp_grad_ppd.ts";
+export type { WBGT, WBGTInputs } from "./wbgt.ts";
 export type { WCI, WCIInputs } from "./wci.ts";
 export type { WCT, WCTInputs } from "./wind_chill_temperature.ts";
 export type {
@@ -202,6 +203,7 @@ export {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
+  WBGT_INFO,
   wci,
   WCI_INFO,
   wind_chill_temperature,
@@ -277,6 +279,7 @@ export default {
   vertical_tmp_grad_ppd,
   VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
+  WBGT_INFO,
   wci,
   WCI_INFO,
   wind_chill_temperature,

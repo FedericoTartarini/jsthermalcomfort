@@ -68,6 +68,8 @@ import type {
   UTCIInputs,
   VerticalTGradPPD,
   VerticalTGradPPDInputs,
+  WBGT,
+  WBGTInputs,
   WCI,
   WCIInputs,
   WCT,
@@ -117,6 +119,7 @@ import {
   USE_FANS_HEATWAVES_INFO,
   UTCI_INFO,
   VERTICAL_TMP_GRAD_PPD_INFO,
+  WBGT_INFO,
   WCI_INFO,
   WIND_CHILL_TEMPERATURE_INFO,
   WORK_CAPACITY_DUNNE_INFO,
@@ -155,6 +158,7 @@ import {
   use_fans_heatwaves,
   utci,
   vertical_tmp_grad_ppd,
+  wbgt,
   wci,
   wind_chill_temperature,
   work_capacity_dunne,
@@ -215,6 +219,7 @@ const discomfortIndexInfo: ModelInfo = DISCOMFORT_INDEX_INFO;
 const esiInfo: ModelInfo = ESI_INFO;
 const netInfo: ModelInfo = NET_INFO;
 const thiInfo: ModelInfo = THI_INFO;
+const wbgtInfo: ModelInfo = WBGT_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1146,3 +1151,15 @@ thiResult.thi = 1;
 thi({ ...thiInputs, round_output: false });
 // @ts-expect-error rh is a required quantity.
 thi({ tdb: 30 });
+
+// wbgt takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's WBGTInputs and WBGT, and returns a readonly result.
+const wbgtInputs: WBGTInputs = { twb: 25, tg: 32 };
+const wbgtResult: WBGT = wbgt(wbgtInputs);
+const wbgtValue: number = wbgtResult.wbgt;
+// @ts-expect-error the result is readonly.
+wbgtResult.wbgt = 1;
+wbgt({ ...wbgtInputs, tdb: 20, with_solar_load: true, round_output: false });
+wbgt({ ...wbgtInputs, tdb: null });
+// @ts-expect-error tg is a required quantity.
+wbgt({ twb: 25 });

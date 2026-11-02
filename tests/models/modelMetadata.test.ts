@@ -184,6 +184,7 @@ const v2Calls: Record<string, object> = {
     clo: 0.5,
     vertical_tmp_grad: 7,
   },
+  wbgt: { twb: 25, tg: 32 },
   wci: { tdb: -5, v: 5.5 },
   wind_chill_temperature: { tdb: -5, v: 5.5 },
   work_capacity_dunne: { wbgt: 30 },

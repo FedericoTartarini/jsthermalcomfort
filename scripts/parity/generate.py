@@ -603,6 +603,51 @@ def _two_nodes_gagge(rng):
     return case
 
 
+def _two_nodes_gagge_ji(rng):
+    # The model checks no range, so the draws cover its branches: v below and
+    # above 0.2 m/s (free and forced convection) and the 0.1 m/s floor, clo
+    # below and above 0.5 and 0 (naked skin), a vapor_pressure past
+    # saturation (e_max < 0), shivering and both acclimatized paths. position
+    # comes in any case, as choice_field accepts it, and the kernel compares
+    # it as given. length_time_simulation is a float, which upstream ceils
+    # (models/two_nodes_gagge_ji.py:190), down to 0 or below, which gives
+    # empty series. Every other keyword argument is left out a third of the
+    # time, for its default.
+    case = {
+        "tdb": _value(rng, 0.0, 50.0),
+        "tr": _value(rng, 0.0, 60.0),
+        "v": _value(rng, 0.0, 3.0),
+        "met": _value(rng, 0.7, 4.0),
+        "clo": _value(rng, 0.0, 2.0) if rng.random() < 0.9 else 0.0,
+        "vapor_pressure": _value(rng, 0.0, 70.0),
+        "position": str(
+            rng.choice(
+                [
+                    "sitting",
+                    "standing",
+                    "standing, forced convection",
+                    "Sitting",
+                    "STANDING",
+                ]
+            )
+        ),
+        "length_time_simulation": _value(rng, -2.0, 60.0),
+    }
+    optional = {
+        "wme": lambda: _value(rng, 0.0, 1.0),
+        "body_surface_area": lambda: _value(rng, 1.4, 2.2),
+        "p_atm": lambda: _value(rng, 60000.0, 110000.0),
+        "body_weight": lambda: _value(rng, 40.0, 120.0),
+        "initial_skin_temp": lambda: _value(rng, 30.0, 38.0),
+        "initial_core_temp": lambda: _value(rng, 35.5, 38.5),
+        "acclimatized": lambda: bool(rng.random() < 0.5),
+    }
+    for key, draw in optional.items():
+        if rng.random() < 2 / 3:
+            case[key] = draw()
+    return case
+
+
 def _use_fans_heatwaves(rng):
     # The ranges reach past the limits (tdb and tr 20-50 °C, v 0.1-4.5 m/s,
     # rh 0-100 %, met 0.7-2 met, clo 0-1 clo), so NaN positions and every
@@ -838,6 +883,7 @@ MODELS = {
     "sports_heat_stress_risk": (_sports_by_name, _sports_heat_stress_risk),
     "thi": (models.thi, _thi),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
+    "two_nodes_gagge_ji": (models.two_nodes_gagge_ji, _two_nodes_gagge_ji),
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),
     "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),

@@ -100,6 +100,7 @@ export const LINTED = [
   "tests/models/sports_heat_stress_risk.test.ts",
   "tests/models/thi.test.ts",
   "tests/models/two_nodes_gagge.test.ts",
+  "tests/models/two_nodes_gagge_ji.test.ts",
   "tests/models/use_fans_heatwaves.test.ts",
   "tests/models/utci.test.ts",
   "tests/models/vertical_tmp_grad_ppd.test.ts",

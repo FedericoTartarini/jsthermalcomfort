@@ -29,6 +29,7 @@ import {
   sports_heat_stress_risk,
   thi,
   two_nodes_gagge,
+  two_nodes_gagge_ji,
   TWO_NODES_GAGGE_INFO,
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
@@ -721,6 +722,16 @@ const MODELS: readonly ParityModel[] = [
       round_output === true && calculate_ce !== true
         ? Object.keys(TWO_NODES_GAGGE_INFO.outputs)
         : [],
+    warnings: true,
+  },
+  {
+    name: "two_nodes_gagge_ji",
+    run: (inputs) =>
+      two_nodes_gagge_ji(
+        inputs as unknown as Parameters<typeof two_nodes_gagge_ji>[0],
+      ),
+    // Upstream rounds neither series (models/two_nodes_gagge_ji.py:215).
+    rounded: () => [],
     warnings: true,
   },
   {

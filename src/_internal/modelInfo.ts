@@ -37,7 +37,8 @@ export type UnitSymbol =
   | "l/(m² s)"
   | "h"
   | "cm"
-  | "years";
+  | "years"
+  | "torr";
 
 /**
  * A bound on a variable (minimum and/or maximum), inclusive. A missing side is

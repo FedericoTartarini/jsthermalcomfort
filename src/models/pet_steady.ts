@@ -9,6 +9,7 @@ import type {
   InputsOf,
   ModelInfo,
   ModelWarning,
+  OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { p_sat } from "../psychrometrics/p_sat.ts";
@@ -42,7 +43,69 @@ export const PET_STEADY_INFO = deepFreeze({
 /** @interface */
 export type PETSteadyInputs = InputsOf<typeof PET_STEADY_INFO>;
 
-export function pet_steady(inputs: PETSteadyInputs): { pet: number } {
+/**
+ * Dataclass to represent the Physiological Equivalent Temperature (PET).
+ *
+ * @interface
+ */
+export type PETSteady = OutputsOf<typeof PET_STEADY_INFO>;
+
+/**
+ * Calculate the steady physiological equivalent temperature (PET) using the Munich
+ * Energy-balance Model for Individuals (MEMI) to simulate the human body's thermal
+ * state in a medically realistic manner.
+ *
+ * PET is defined as the air temperature
+ * at which, in a typical indoor setting the heat budget of the human body is balanced
+ * with the same core and skin temperature as under the complex outdoor conditions to be
+ * assessed [Hoppe1999](../../docs/references.md#hoppe1999).
+ * The following assumptions are made for the indoor reference climate: tdb = tr, v = 0.1
+ * m/s, water vapour pressure = 12 hPa, clo = 0.9 clo, and met = 1.37 met + basic
+ * metabolism.
+ * PET allows a layperson to compare the total effects of complex thermal circumstances
+ * outside with his or her own personal experience indoors in this way. This function
+ * solves the heat balances without accounting for heat storage in the human body.
+ *
+ * The PET was originally proposed by Hoppe [Hoppe1999](../../docs/references.md#hoppe1999). In 2018, Walther and Goestchel [Walther2018](../../docs/references.md#walther2018)
+ * proposed a correction of the original model, purging the errors in the
+ * PET calculation routine, and implementing a state-of-the-art vapour diffusion model.
+ * Walther and Goestchel (2018) model is therefore used to calculate the PET.
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.v - Wind speed, [m/s].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.p_atm - Atmospheric pressure, [hPa]. Defaults to 1013.25.
+ * @param inputs.position - Position of the person "sitting", "standing", "standing, forced convection". Defaults to "sitting".
+ * @param inputs.age - Age of the person. Defaults to 23.
+ * @param inputs.sex - Sex of the person "male" or "female". Defaults to "male".
+ * @param inputs.weight - Weight of the person, [kg]. Defaults to 75.
+ * @param inputs.height - Height of the person, [m]. Defaults to 1.8.
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ *
+ * @returns A dataclass containing the Physiological Equivalent Temperature. See {@link PETSteady} for more details.
+ * To access the `pet` value, use the `pet` attribute of the returned `PETSteady` instance, e.g., `result.pet`.
+ *
+ * - `pet` - Physiological Equivalent Temperature.
+ *
+ * @example
+ * ```ts
+ * import { pet_steady } from "jsthermalcomfort/models";
+ *
+ * const result = pet_steady({ tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 });
+ * console.log(result.pet); // 24.67
+ *
+ * const pet = [
+ *   { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
+ *   { tdb: 30, tr: 30, v: 0.2, rh: 60, met: 1.4, clo: 0.6 },
+ * ].map((inputs) => pet_steady(inputs).pet);
+ * console.log(pet); // [24.67, 31.46]
+ * ```
+ */
+export function pet_steady(inputs: PETSteadyInputs): PETSteady {
   // Validate inputs using the PETSteadyInputs class
   const {
     tdb,
@@ -61,7 +124,7 @@ export function pet_steady(inputs: PETSteadyInputs): { pet: number } {
   } = parseInputs(PET_STEADY_INFO, inputs);
 
   const warnings: ModelWarning[] = [];
-  return {
+  return Object.freeze({
     pet: _pet_steady_vectorised(
       tdb,
       tr,
@@ -78,7 +141,8 @@ export function pet_steady(inputs: PETSteadyInputs): { pet: number } {
       wme,
       warnings,
     ),
-  };
+    warnings: Object.freeze(warnings),
+  });
 }
 
 function _pet_steady_vectorised(
@@ -212,13 +276,13 @@ function _pet_steady_vectorised(
     const e_skin = 0.99; // Skin emissivity
     const e_clo = 0.95; // Clothing emissivity
     const h_vap = 2.42 * 10 ** 6; // Latent heat of evaporation [J/Kg]
-    const sbc = 5.67 * 10 ** -8; // Stefan-Boltzmann constant [W/(m2*K^(-4))]
+    const sbc = 5.67 * 10 ** -8; // Stefan-Boltzmann constant [W/(m2*K^4)]
     const cb = 3640; // Blood specific heat [J/kg/k]
 
     const [t_cr = NaN, t_sk = NaN, t_clo = NaN] = t_arr;
     const e_bal_vec = [0.0, 0.0, 0.0]; // required for the vectorial expression of the balance
     // Upstream's Python float division raises at a zero divisor, and a complex
-    // dividend makes its message "complex".
+    // dividend makes its message "complex" (deviation pet_steady-4).
     const zero_division =
       weight < 0 || height < 0
         ? "complex division by zero"
@@ -283,7 +347,7 @@ function _pet_steady_vectorised(
     }
     // h_cc corrected convective heat transfer coefficient
     const h_cc = 3.0 * Math.pow(p_atm / 1013.25, 0.53);
-    // Upstream's max raises TypeError on a complex hc or h_cc.
+    // Upstream's max raises TypeError on a complex hc or h_cc (deviation pet_steady-5).
     if (_v < 0) throw new RangeError("v must not be negative.");
     if (p_atm < 0) throw new RangeError("p_atm must not be negative.");
     hc = Math.max(h_cc, hc);
@@ -332,7 +396,7 @@ function _pet_steady_vectorised(
 
     // Calculation of sweat losses
     const qmsw = sweat_rate(tbody);
-    // h_vap/1000 = 2400 000[J/kg] divided by 1000 = [J/g] // qwsw/3600 for [g/m2/h]
+    // h_vap/1000 = 2420 000[J/kg] divided by 1000 = [J/g] // qmsw/3600 for [g/m2/h]
     // to [
     // g/m2/s]
     let esw = ((h_vap / 1000) * qmsw) / 3600; // [W/m2]
@@ -347,7 +411,7 @@ function _pet_steady_vectorised(
     const fecl = 1 / (1 + 0.92 * hc * r_cl); // Burton efficiency factor
     let e_max = he_diff * fecl * (p_v_sk - vpa); // maximum diffusion at skin surface
     if (e_max === 0) {
-      // added this otherwise e_req / e_max cannot be calculated
+      // added this otherwise esw / e_max cannot be calculated
       e_max = 0.001;
     }
     let w = esw / e_max; // skin wettedness
@@ -408,7 +472,7 @@ function _pet_steady_vectorised(
       // if we solve for the system we need to return 3 temperatures
       return [...e_bal_vec];
     }
-    // minpack cannot take upstream's complex PET balance.
+    // minpack cannot take upstream's complex PET balance (deviation pet_steady-5).
     if (weight < 0) throw new RangeError("weight must not be negative.");
     if (height < 0) throw new RangeError("height must not be negative.");
     // solving for the PET requires the scalar balance only

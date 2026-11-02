@@ -82,7 +82,7 @@ import {
   work_capacity_niosh,
   WORK_CAPACITY_NIOSH_INFO,
 } from "./work_capacity_niosh.ts";
-import { pet_steady } from "./pet_steady.ts";
+import { pet_steady, PET_STEADY_INFO } from "./pet_steady.ts";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 
@@ -125,6 +125,7 @@ export type {
   RidgeRegressionInputs,
 } from "./ridge_regression_predict_t_re_t_sk.ts";
 export type { NET, NETInputs } from "./net.ts";
+export type { PETSteady, PETSteadyInputs } from "./pet_steady.ts";
 export type { APMV, APMVInputs } from "./pmv_a.ts";
 export type { ATHB, ATHBInputs } from "./pmv_athb.ts";
 export type { EPMV, EPMVInputs } from "./pmv_e.ts";
@@ -204,6 +205,7 @@ export {
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
   pet_steady,
+  PET_STEADY_INFO,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,
@@ -290,6 +292,7 @@ export default {
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
   pet_steady,
+  PET_STEADY_INFO,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
   pmv,

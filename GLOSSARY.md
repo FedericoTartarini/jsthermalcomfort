@@ -53,7 +53,7 @@ A kind of deviation the user approved once, such as scalar-only inputs or `@thro
 _Avoid_: deviation type, deviation category
 
 **Consumer contract**:
-What a main model exposes beyond upstream's function. Every model has its model info. Beyond that it has what upstream has: `limit_inputs` and `round_output` where upstream has them, `warnings` range rows where upstream checks ranges and notice rows where it warns otherwise, and bins where upstream calls `_mapping()` or for an approved added labelled output (ADR 0024). An addition upstream lacks, such as ISO 7730's `category` or `solar_gain`'s ASHRAE 55 Table C-2 rows, has a row in the model's deviation register.
+What a main model exposes beyond upstream's function. Every model has its model info. Beyond that it has what upstream has: `limit_inputs` and `round_output` where upstream has them, `warnings` range rows where upstream checks ranges and notice rows where it warns otherwise or a scipy routine it calls warns (`pet_steady`'s `fsolve`), and bins where upstream calls `_mapping()` or for an approved added labelled output (ADR 0024). An addition upstream lacks, such as ISO 7730's `category` or `solar_gain`'s ASHRAE 55 Table C-2 rows, has a row in the model's deviation register.
 _Avoid_: pattern, app surface, extras
 
 **Model info**:

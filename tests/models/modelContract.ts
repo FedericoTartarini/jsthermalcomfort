@@ -36,12 +36,12 @@ export function isDeepFrozen(value: unknown): boolean {
  * `src/_internal/errors.ts`, so a changed message fails. The outputs are frozen
  * as upstream's return dataclass is (`@dataclass(frozen=True, repr=False)`:
  * `APMV`, `AdaptiveASHRAE`, `AnkleDraft`, `AT`, `ATHB`, `CloTOut`, `CE`,
- * `DI`, `EPMV`, `ESI`, `HI`, `Humidex`, `NET`, `PHS`, `PMVPPD`,
+ * `DI`, `EPMV`, `ESI`, `HI`, `Humidex`, `NET`, `PETSteady`, `PHS`, `PMVPPD`,
  * `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`, `GaggeTwoNodesJi`,
  * `GaggeTwoNodesSleep`, `THI`, `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WBGT`, `WCI`,
  * `WCT`, `SportsHeatStressRisk`, `PredictedBodyTemperatures` and `IREQ` at
  * `classes_return.py:97, :111, :184, :200, :213, :227, :241, :254, :270,
- * :284, :297, :311, :327, :353, :415, :435, :467, :480, :497, :562, :578,
+ * :284, :297, :311, :327, :341, :353, :415, :435, :467, :480, :497, :562, :578,
  * :591, :631, :689, :705, :722, :735, :748, :1036, :1073, :1100`, and
  * `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
  * and as `AdaptiveEN` is, although upstream's is a plain `@dataclass`

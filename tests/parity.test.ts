@@ -139,6 +139,20 @@ describe("upstream_warning_key", () => {
       }),
     ).toBeUndefined();
   });
+
+  // scipy/optimize/_minpack_py.py:181-188 (decision 281).
+  test("keys scipy fsolve's RuntimeWarnings by their message", () => {
+    for (const message of [
+      "The number of calls to function has reached maxfev = 800.",
+      "xtol=0.000000 is too small, no further improvement in the approximate\n solution is possible.",
+      "The iteration is not making good progress, as measured by the \n improvement from the last five Jacobian evaluations.",
+      "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+    ]) {
+      expect(
+        upstream_warning_key({ category: "RuntimeWarning", message }),
+      ).toBe(message);
+    }
+  });
 });
 
 describe("library_warning_key", () => {
@@ -324,6 +338,20 @@ describe("compare_case", () => {
       "tdb",
       notice,
     ]);
+  });
+
+  test("leaves out the warnings of numpy's otypes run", () => {
+    const slow =
+      "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.";
+    const expected: UpstreamCase = {
+      ...upstream({}, []),
+      warnings: [
+        { category: "RuntimeWarning", message: slow },
+        { category: "RuntimeWarning", message: slow },
+      ],
+      otypes_warnings: 1,
+    };
+    expect(expected_warning_keys(expected)).toEqual([slow]);
   });
 
   test("ignores warnings of other categories", () => {
@@ -606,7 +634,7 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds pet with round() on an np.float64, numpy's rounding
     // (models/pet_steady.py:475).
     rounded: () => ["pet"],
-    warnings: false,
+    warnings: true,
   },
   {
     name: "phs",

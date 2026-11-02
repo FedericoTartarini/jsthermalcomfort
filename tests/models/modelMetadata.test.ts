@@ -129,6 +129,7 @@ const v2Calls: Record<string, object> = {
     walk_sp: 1.1,
   },
   net: { tdb: 37, rh: 100, v: 0.1 },
+  pet_steady: { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   phs: {
     tdb: 40,
     tr: 40,

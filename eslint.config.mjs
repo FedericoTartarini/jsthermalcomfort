@@ -47,6 +47,7 @@ export const LINTED = [
   "src/models/humidex.ts",
   "src/models/ireq.ts",
   "src/models/net.ts",
+  "src/models/pet_steady.ts",
   "src/models/phs.ts",
   "src/models/pmv_a.ts",
   "src/models/pmv_athb.ts",

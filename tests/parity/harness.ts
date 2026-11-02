@@ -42,6 +42,11 @@ export interface UpstreamCase {
    * `limit_inputs` true.
    */
   readonly gated_warnings?: readonly UpstreamWarning[];
+  /**
+   * For a model whose `np.vectorize` kernel numpy runs once more to find
+   * `otypes`, how many of `warnings`, which come first, that run emitted.
+   */
+  readonly otypes_warnings?: number;
 }
 
 /** Where and with what the data were generated. */
@@ -129,16 +134,25 @@ export function decode(value: EncodedOutput): Decoded | Decoded[] {
 // the name first (_internal/validation.py:51-54, _internal/ashrae55.py:44-88).
 const RANGE_MESSAGE = /^(?:airspeed_control=False: )?'(.+?)' has /;
 
+// scipy's fsolve warns its status 2 to 5 messages as a RuntimeWarning
+// (scipy/optimize/_minpack_py.py:181-188), which the library returns as a
+// notice row (decision 281).
+const FSOLVE_MESSAGE =
+  /^(?:The number of calls to function has reached maxfev = \d+\.|xtol=\d+\.\d+ is too small, no further improvement in the approximate\n solution is possible\.|The iteration is not making good progress, as measured by the \n improvement from the last (?:five Jacobian evaluations|ten iterations)\.)$/;
+
 /**
  * Keys an upstream warning as the library keys its row: a range check by the
- * name upstream gives it, any other `UserWarning` by its message. A warning of
- * another category, such as numpy's `RuntimeWarning`, has no counterpart and
- * gives `undefined` (ADR 0027).
+ * name upstream gives it, any other `UserWarning`, and scipy's `fsolve`
+ * `RuntimeWarning`, by its message. A warning of another category, such as
+ * numpy's `RuntimeWarning`, has no counterpart and gives `undefined` (ADR
+ * 0027).
  */
 export function upstream_warning_key({
   category,
   message,
 }: UpstreamWarning): string | undefined {
+  if (category === "RuntimeWarning" && FSOLVE_MESSAGE.test(message))
+    return message;
   if (category !== "UserWarning") return undefined;
   return RANGE_MESSAGE.exec(message)?.[1] ?? message;
 }
@@ -148,6 +162,8 @@ export function upstream_warning_key({
  * range rows whatever `limit_inputs` is (ADR 0024), where upstream checks the
  * ranges only under the gate, so for a case with the gate off the range keys
  * come from the same call with the gate on, and any other key from the case.
+ * The library runs a kernel once, so the warnings of numpy's `otypes` run
+ * are left out.
  */
 export function expected_warning_keys(expected: UpstreamCase): string[] {
   const keys = (warnings: readonly UpstreamWarning[], range: boolean) =>
@@ -157,8 +173,9 @@ export function expected_warning_keys(expected: UpstreamCase): string[] {
         ? []
         : [key];
     });
-  const gated = expected.gated_warnings ?? expected.warnings;
-  return [...keys(gated, true), ...keys(expected.warnings, false)];
+  const warnings = expected.warnings.slice(expected.otypes_warnings ?? 0);
+  const gated = expected.gated_warnings ?? warnings;
+  return [...keys(gated, true), ...keys(warnings, false)];
 }
 
 /** Keys a library row: a range row by its key, a notice by its message. */

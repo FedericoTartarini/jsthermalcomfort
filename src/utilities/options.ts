@@ -32,6 +32,17 @@ export const Units = Object.freeze({
 } as const);
 
 /**
+ * Sex options.
+ *
+ * Upstream's `Sex` (`utilities.py:41-45`); a parameter accepts either
+ * `Sex.male` or `"male"` (deviation _shared-81).
+ */
+export const Sex = Object.freeze({
+  male: "male",
+  female: "female",
+} as const);
+
+/**
  * Postures options.
  *
  * Upstream's `Postures` (`utilities.py:48-57`); a parameter accepts either

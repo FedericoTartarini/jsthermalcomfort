@@ -87,4 +87,15 @@ describe("OutputsOf", () => {
       readonly warnings: readonly ModelWarning[];
     }>();
   });
+
+  // `series` makes an output a time series (decision 269).
+  test("maps a series output to a readonly array of its kind", () => {
+    type Fields = OutputsOf<{
+      outputs: { s: { kind: "numeric"; unit: "°C"; series: true } };
+    }>;
+    expectTypeOf<Fields>().toEqualTypeOf<{
+      readonly s: readonly number[];
+      readonly warnings: readonly ModelWarning[];
+    }>();
+  });
 });

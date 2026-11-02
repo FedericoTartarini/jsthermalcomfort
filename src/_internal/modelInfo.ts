@@ -119,10 +119,14 @@ export interface ModelOutputs {
  * `interval`, on a `bool` output, is the {@link Interval} of the quantity it
  * tests inside which it is true: `pmv_ppd_ashrae`'s `compliance` is true for
  * -0.5 < pmv < 0.5. Unlike `applicability`, it gates nothing.
+ *
+ * `series` marks a time series, a frozen array of its kind's values, one per
+ * time step: `ridge_regression_predict_t_re_t_sk`'s `t_re` (decision 269).
  */
 export interface OutputField {
   readonly kind: "numeric" | "bool" | "label";
   readonly masked?: true;
+  readonly series?: true;
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly classifier?: ClassifierBins;
@@ -157,12 +161,16 @@ export interface DerivedField {
  * `default` of `null` is upstream's `None` for a number the model may go
  * without, `at`'s `q` (`models/at.py:14, :71-75`): the key then takes `null`
  * too.
+ *
+ * `integer` marks a number upstream types as `int`, `ridge_regression_predict_t_re_t_sk`'s
+ * `duration` (`classes_input.py:60`): the parse then takes only an integer.
  */
 export interface NumericField {
   readonly kind: "numeric";
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly default?: number | false | null;
+  readonly integer?: true;
 }
 
 /** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
@@ -286,16 +294,23 @@ export type ResolvedOf<I extends InputsInfo> = {
   -readonly [K in keyof I]: KindValue<I[K]> | NullOf<I[K]> | FalseOf<I[K]>;
 };
 
+type OutputValue<F extends OutputField> =
+  | KindValues[F["kind"]]
+  | (F extends { readonly masked: true } ? number : never);
+
 /**
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
- * `warnings`; a `masked` field adds the NaN `number` (ADR 0023).
+ * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), and a
+ * `series` field is a readonly array of those values.
  */
 export type OutputsOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
   {
-    readonly [K in keyof M["outputs"]]:
-      | KindValues[M["outputs"][K]["kind"]]
-      | (M["outputs"][K] extends { readonly masked: true } ? number : never);
+    readonly [K in keyof M["outputs"]]: M["outputs"][K] extends {
+      readonly series: true;
+    }
+      ? readonly OutputValue<M["outputs"][K]>[]
+      : OutputValue<M["outputs"][K]>;
   } & ModelOutputs
 >;
 

@@ -147,6 +147,18 @@ describe("WorkIntensity mirrors pythermalcomfort's WorkIntensity enum", () => {
   });
 });
 
+// Upstream's `Sex` enum (utilities.py:41-45), added as a constant (deviation
+// _shared-81).
+describe("Sex mirrors pythermalcomfort's Sex enum", () => {
+  test("has upstream's members and values, in its order, frozen, from the package root", () => {
+    expect(Object.entries(pkg.Sex)).toEqual([
+      ["male", "male"],
+      ["female", "female"],
+    ]);
+    expect(Object.isFrozen(pkg.Sex)).toBe(true);
+  });
+});
+
 describe("is_iso_7730", () => {
   test("accepts both editions and nothing else", () => {
     expect(is_iso_7730(Standard.iso_7730_2005)).toBe(true);

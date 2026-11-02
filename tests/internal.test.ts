@@ -706,6 +706,37 @@ describe("floatRepr (JS-only)", () => {
   });
 });
 
+// An integer, BaseInputs' duration (classes_input.py:60), whose types are
+// (int, np.ndarray) (decision 271).
+describe("parseInputs, numeric integer (JS-only)", () => {
+  const info = {
+    name: "f",
+    inputs: { duration: { kind: "numeric", unit: "min", integer: true } },
+  } as const;
+  const parse = (duration: unknown) => () => parseInputs(info, { duration });
+
+  test("takes an integer, 0 and negatives included", () => {
+    expect(parse(60)()).toEqual({ duration: 60 });
+    expect(parse(60.0)()).toEqual({ duration: 60 });
+    expect(parse(0)()).toEqual({ duration: 0 });
+    expect(parse(-5)()).toEqual({ duration: -5 });
+  });
+
+  test("throws a TypeError for a finite number that is not an integer", () => {
+    for (const bad of [60.2, 0.5, -1e-300])
+      expect(parse(bad)).toThrow(new TypeError("duration must be an integer."));
+  });
+
+  test("checks the type and finiteness first", () => {
+    expect(parse(true)).toThrow(
+      new TypeError("duration must be a finite number."),
+    );
+    expect(parse(Infinity)).toThrow(
+      new RangeError("duration must be a finite number."),
+    );
+  });
+});
+
 // A number whose default is upstream's None, as at's q is (models/at.py:14,
 // :71-75).
 describe("parseInputs, numeric with a null default (JS-only)", () => {

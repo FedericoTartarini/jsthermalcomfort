@@ -118,6 +118,10 @@ function parseNumeric(
   if (typeof value !== "number") throw notFiniteNumber(key, TypeError);
   // Upstream computes on with NaN and ±Infinity (deviation _shared-7).
   if (!Number.isFinite(value)) throw notFiniteNumber(key, RangeError);
+  // Upstream's int type also rejects 60.0, which JavaScript cannot tell from 60
+  // (deviation _shared-80).
+  if (entry.integer && !Number.isInteger(value))
+    throw notOfType(key, "an integer");
   return value;
 }
 
@@ -167,7 +171,8 @@ function parseInstance(value: unknown, entry: InstanceField): object {
  * - a required key must be given, or a `TypeError` names it;
  * - a number must be finite: a `TypeError` for any other type, a boolean,
  *   `null` or an array included, and a `RangeError` for NaN or ±Infinity;
- *   one whose default is `false` or `null` takes that value too;
+ *   one whose default is `false` or `null` takes that value too; an `integer`
+ *   one must be an integer, or a `TypeError` names it;
  * - a switch must be a boolean, or a `TypeError` names it, whether or not
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, or its

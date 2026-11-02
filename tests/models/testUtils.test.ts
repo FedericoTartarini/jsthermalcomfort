@@ -19,7 +19,7 @@ import {
 // silence the log spam here. Real model test failures still surface the
 // context because they run with the unmocked console.
 beforeEach(() => {
-  vi.spyOn(console, "log").mockImplementation(() => {});
+  vi.spyOn(console, "log").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -33,92 +33,108 @@ describe("validateResult — silent-skip guards", () => {
   // would still pass these tests.
   test("throws when expectedOutputs is an empty object", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: 1 }, {}, {}, {})).toThrow(
-      /expectedOutputs is empty/,
-    );
+    expect(() => {
+      validateResult({ a: 1 }, {}, {}, {});
+    }).toThrow(/expectedOutputs is empty/);
   });
 
   test("throws when expectedOutputs is null", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: 1 }, null, {}, {})).toThrow(
-      /expectedOutputs must be a non-null object/,
-    );
+    expect(() => {
+      validateResult(
+        { a: 1 },
+        null as unknown as Record<string, unknown>,
+        {},
+        {},
+      );
+    }).toThrow(/expectedOutputs must be a non-null object/);
   });
 
   test("throws when expectedOutputs is undefined", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: 1 }, undefined, {}, {})).toThrow(
-      /expectedOutputs must be a non-null object/,
-    );
+    expect(() => {
+      validateResult(
+        { a: 1 },
+        undefined as unknown as Record<string, unknown>,
+        {},
+        {},
+      );
+    }).toThrow(/expectedOutputs must be a non-null object/);
   });
 
   test("throws when modelResult is null but expectedOutputs is non-empty", () => {
     expect.hasAssertions();
-    expect(() => validateResult(null, { a: 1 }, {}, {})).toThrow(
-      /modelResult is null\/undefined/,
-    );
+    expect(() => {
+      validateResult(null, { a: 1 }, {}, {});
+    }).toThrow(/modelResult is null\/undefined/);
   });
 
   test("throws when modelResult is undefined but expectedOutputs is non-empty", () => {
     expect.hasAssertions();
-    expect(() => validateResult(undefined, { a: 1 }, {}, {})).toThrow(
-      /modelResult is null\/undefined/,
-    );
+    expect(() => {
+      validateResult(undefined, { a: 1 }, {}, {});
+    }).toThrow(/modelResult is null\/undefined/);
   });
 });
 
 describe("validateResult — numeric comparison", () => {
   test("passes when actual is within tolerance", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: 1.0001 }, { a: 1.0 }, { a: 0.001 }, {}),
-    ).not.toThrow();
+    expect(() => {
+      validateResult({ a: 1.0001 }, { a: 1.0 }, { a: 0.001 }, {});
+    }).not.toThrow();
   });
 
   test("throws when actual exceeds tolerance", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: 1.01 }, { a: 1.0 }, { a: 0.001 }, {}),
-    ).toThrow();
+    expect(() => {
+      validateResult({ a: 1.01 }, { a: 1.0 }, { a: 0.001 }, {});
+    }).toThrow();
   });
 
   test("falls back to upstream's default tolerance 1e-6 when tolerances is missing", () => {
     expect.hasAssertions();
     // Within default tolerance — passes.
-    expect(() =>
-      validateResult({ a: 1.0000005 }, { a: 1.0 }, undefined, {}),
-    ).not.toThrow();
+    expect(() => {
+      validateResult({ a: 1.0000005 }, { a: 1.0 }, undefined, {});
+    }).not.toThrow();
     // Outside default tolerance — throws.
-    expect(() =>
-      validateResult({ a: 1.00001 }, { a: 1.0 }, undefined, {}),
-    ).toThrow();
+    expect(() => {
+      validateResult({ a: 1.00001 }, { a: 1.0 }, undefined, {});
+    }).toThrow();
   });
 
   test("falls back to 1e-6 for a key the tolerances object does not name", () => {
     expect.hasAssertions();
-    expect(() =>
+    expect(() => {
       validateResult(
         { a: 1.0, b: 1.00001 },
         { a: 1.0, b: 1.0 },
         { a: 0.1 },
         {},
-      ),
-    ).toThrow();
+      );
+    }).toThrow();
   });
 
   test("treats null in expectedOutputs as NaN and matches NaN actual", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: NaN }, { a: null }, {}, {})).not.toThrow();
+    expect(() => {
+      validateResult({ a: NaN }, { a: null }, {}, {});
+    }).not.toThrow();
   });
 
   test("throws when expected is NaN but actual is finite", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: 1.0 }, { a: NaN }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: 1.0 }, { a: NaN }, {}, {});
+    }).toThrow();
   });
 
   test("throws when expected is finite but actual is NaN", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: NaN }, { a: 1.0 }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: NaN }, { a: 1.0 }, {}, {});
+    }).toThrow();
   });
 
   // JS coercion guards: null, false, numeric strings, and empty arrays all
@@ -127,92 +143,102 @@ describe("validateResult — numeric comparison", () => {
   // these values fail loudly.
   test("throws when expected is finite but actual is null (no coercion)", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: null }, { a: 0 }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: null }, { a: 0 }, {}, {});
+    }).toThrow();
   });
 
   test("throws when expected is finite but actual is false (no coercion)", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: false }, { a: 0 }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: false }, { a: 0 }, {}, {});
+    }).toThrow();
   });
 
   test("throws when expected is finite but actual is a numeric string", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: "1" }, { a: 1 }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: "1" }, { a: 1 }, {}, {});
+    }).toThrow();
   });
 
   test("throws when expected is finite but actual is an empty array", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: [] }, { a: 0 }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: [] }, { a: 0 }, {}, {});
+    }).toThrow();
   });
 });
 
 describe("validateResult — array comparison", () => {
   test("passes element-wise within tolerance", () => {
     expect.hasAssertions();
-    expect(() =>
+    expect(() => {
       validateResult(
         { a: [1.0001, 2.0001] },
         { a: [1.0, 2.0] },
         { a: 0.001 },
         {},
-      ),
-    ).not.toThrow();
+      );
+    }).not.toThrow();
   });
 
   test("throws when actual is shorter than expected", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: [1.0] }, { a: [1.0, 2.0] }, { a: 0.001 }, {}),
-    ).toThrow();
+    expect(() => {
+      validateResult({ a: [1.0] }, { a: [1.0, 2.0] }, { a: 0.001 }, {});
+    }).toThrow();
   });
 
   test("throws when actual is longer than expected (silent-skip guard)", () => {
     expect.hasAssertions();
     // Without an explicit length check, extra trailing elements are not
     // asserted against, so a wrong-length output slips past silently.
-    expect(() =>
+    expect(() => {
       validateResult(
         { a: [1.0, 2.0, 999.0] },
         { a: [1.0, 2.0] },
         { a: 0.001 },
         {},
-      ),
-    ).toThrow();
+      );
+    }).toThrow();
   });
 
   test("throws when actual is not an array but expected is", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: 1.0 }, { a: [1.0] }, { a: 0.001 }, {}),
-    ).toThrow();
+    expect(() => {
+      validateResult({ a: 1.0 }, { a: [1.0] }, { a: 0.001 }, {});
+    }).toThrow();
   });
 });
 
 describe("validateResult — non-numeric comparison", () => {
   test("passes when boolean values match", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: true }, { a: true }, {}, {}),
-    ).not.toThrow();
+    expect(() => {
+      validateResult({ a: true }, { a: true }, {}, {});
+    }).not.toThrow();
   });
 
   test("throws when boolean values differ", () => {
     expect.hasAssertions();
-    expect(() => validateResult({ a: false }, { a: true }, {}, {})).toThrow();
+    expect(() => {
+      validateResult({ a: false }, { a: true }, {}, {});
+    }).toThrow();
   });
 
   test("passes when string values match", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: "moderate" }, { a: "moderate" }, {}, {}),
-    ).not.toThrow();
+    expect(() => {
+      validateResult({ a: "moderate" }, { a: "moderate" }, {}, {});
+    }).not.toThrow();
   });
 
   test("throws when string values differ", () => {
     expect.hasAssertions();
-    expect(() =>
-      validateResult({ a: "strong" }, { a: "moderate" }, {}, {}),
-    ).toThrow();
+    expect(() => {
+      validateResult({ a: "strong" }, { a: "moderate" }, {}, {});
+    }).toThrow();
   });
 });
 
@@ -310,7 +336,9 @@ describe("assertNonEmptyRows", () => {
 
   test("throws when input is not an array", () => {
     expect.hasAssertions();
-    expect(() => assertNonEmptyRows(undefined, "label")).toThrow();
+    expect(() =>
+      assertNonEmptyRows(undefined as unknown as unknown[], "label"),
+    ).toThrow();
   });
 });
 

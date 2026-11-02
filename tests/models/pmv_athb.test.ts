@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { pmv_athb, PMV_ATHB_INFO } from "../../src/models/index.ts";
 import { pmv_athb as pmv_athb_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof pmv_athb>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.athb,
+  test_data_urls.athb,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_athb.py.

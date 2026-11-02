@@ -2,153 +2,49 @@ import { existsSync } from "node:fs";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
-// The files strict lint covers. Lint grows with the migration: each model
-// ticket adds its own files, and the contract ticket replaces this list with
-// every file. CI and the pre-commit hook both run `npm run lint`, so they
-// cover the same list (ADR 0020).
-export const LINTED = [
-  "vitest.config.ts",
-  "src/_internal/adaptive_cooling_effect.ts",
-  "src/_internal/ashrae55.ts",
-  "src/_internal/brentq.ts",
-  "src/_internal/classifierBins.ts",
-  "src/_internal/define.ts",
-  "src/_internal/errors.ts",
-  "src/_internal/floatRepr.ts",
-  "src/_internal/fsolve.ts",
-  "src/_internal/modelInfo.ts",
-  "src/_internal/round.ts",
-  "src/_internal/validation.ts",
-  "src/environment/index.ts",
-  "src/environment/operative_tmp.ts",
-  "src/environment/transpose_sharp_altitude.ts",
-  "src/psychrometrics/dew_point_tmp.ts",
-  "src/psychrometrics/enthalpy_air.ts",
-  "src/psychrometrics/p_sat.ts",
-  "src/psychrometrics/p_sat_torr.ts",
-  "src/psychrometrics/psy_ta_rh.ts",
-  "src/psychrometrics/wet_bulb_tmp.ts",
-  "src/utilities/body_surface_area.ts",
-  "src/utilities/met_to_w_m2.ts",
-  "src/utilities/options.ts",
-  "src/utilities/units_converter.ts",
-  "src/models/_pmv_ppd_optimized.ts",
-  "src/models/adaptive_ashrae.ts",
-  "src/models/adaptive_en.ts",
-  "src/models/ankle_draft.ts",
-  "src/models/at.ts",
-  "src/models/clo_tout.ts",
-  "src/models/cooling_effect.ts",
-  "src/models/discomfort_index.ts",
-  "src/models/esi.ts",
-  "src/models/heat_index_lu.ts",
-  "src/models/heat_index_rothfusz.ts",
-  "src/models/heat_index_schoen.ts",
-  "src/models/humidex.ts",
-  "src/models/ireq.ts",
-  "src/models/net.ts",
-  "src/models/pet_steady.ts",
-  "src/models/phs.ts",
-  "src/models/pmv_a.ts",
-  "src/models/pmv_athb.ts",
-  "src/models/pmv_e.ts",
-  "src/models/pmv_ppd_ashrae.ts",
-  "src/models/pmv_ppd_iso.ts",
-  "src/models/ridge_regression_predict_t_re_t_sk.ts",
-  "src/models/set_tmp.ts",
-  "src/models/solar_gain.ts",
-  "src/models/sports_heat_stress_risk.ts",
-  "src/models/thi.ts",
-  "src/models/two_nodes_gagge.ts",
-  "src/models/two_nodes_gagge_ji.ts",
-  "src/models/two_nodes_gagge_sleep.ts",
-  "src/models/use_fans_heatwaves.ts",
-  "src/models/utci.ts",
-  "src/models/vertical_tmp_grad_ppd.ts",
-  "src/models/wbgt.ts",
-  "src/models/wci.ts",
-  "src/models/wind_chill_temperature.ts",
-  "src/models/work_capacity_dunne.ts",
-  "src/models/work_capacity_hothaps.ts",
-  "src/models/work_capacity_iso.ts",
-  "src/models/work_capacity_niosh.ts",
-  "tests/call_sites.test.ts",
-  "tests/check_mirrored.test.ts",
-  "tests/environment/operative_tmp.test.ts",
-  "tests/environment/transpose_sharp_altitude.test.ts",
-  "tests/internal.test.ts",
-  "tests/internal/brentq.test.ts",
-  "tests/internal/fsolve.test.ts",
-  "tests/models/adaptive_ashrae.test.ts",
-  "tests/models/adaptive_en.test.ts",
-  "tests/models/ankle_draft.test.ts",
-  "tests/models/at.test.ts",
-  "tests/models/clo_tout.test.ts",
-  "tests/models/cooling_effect.test.ts",
-  "tests/models/discomfort_index.test.ts",
-  "tests/models/esi.test.ts",
-  "tests/models/heat_index_lu.test.ts",
-  "tests/models/heat_index_rothfusz.test.ts",
-  "tests/models/heat_index_schoen.test.ts",
-  "tests/models/humidex.test.ts",
-  "tests/models/ireq.test.ts",
-  "tests/models/modelContract.ts",
-  "tests/models/net.test.ts",
-  "tests/models/pet_steady.test.ts",
-  "tests/models/phs.test.ts",
-  "tests/models/pmv_a.test.ts",
-  "tests/models/pmv_athb.test.ts",
-  "tests/models/pmv_e.test.ts",
-  "tests/models/pmv_ppd_ashrae.test.ts",
-  "tests/models/pmv_ppd_iso.test.ts",
-  "tests/models/pmv_ppd_optimised.test.ts",
-  "tests/models/returnsList.test.ts",
-  "tests/models/ridge_regression_predict_t_re_t_sk.test.ts",
-  "tests/models/set_tmp.test.ts",
-  "tests/models/solar_gain.test.ts",
-  "tests/models/sports_heat_stress_risk.test.ts",
-  "tests/models/thi.test.ts",
-  "tests/models/two_nodes_gagge.test.ts",
-  "tests/models/two_nodes_gagge_ji.test.ts",
-  "tests/models/two_nodes_gagge_sleep.test.ts",
-  "tests/models/use_fans_heatwaves.test.ts",
-  "tests/models/utci.test.ts",
-  "tests/models/vertical_tmp_grad_ppd.test.ts",
-  "tests/models/wbgt.test.ts",
-  "tests/models/wci.test.ts",
-  "tests/models/wind_chill_temperature.test.ts",
-  "tests/models/work_capacity_dunne.test.ts",
-  "tests/models/work_capacity_hothaps.test.ts",
-  "tests/models/work_capacity_iso.test.ts",
-  "tests/models/work_capacity_niosh.test.ts",
-  "tests/psychrometrics/dew_point_tmp.test.ts",
-  "tests/psychrometrics/enthalpy_air.test.ts",
-  "tests/psychrometrics/p_sat.test.ts",
-  "tests/psychrometrics/p_sat_torr.test.ts",
-  "tests/psychrometrics/psy_ta_rh.test.ts",
-  "tests/psychrometrics/wet_bulb_tmp.test.ts",
-  "tests/utilities/body_surface_area.test.ts",
-  "tests/utilities/units_converter.test.ts",
+// Strict lint covers every file under src/ and tests/ (and the Vitest config),
+// apart from these, each named. CI and the pre-commit hook both run
+// `npm run lint`, so they cover the same files (ADR 0020).
+export const UNLINTED = [
+  // Deferred and still JavaScript (ADR 0018): JOS3, jos3_functions, and
+  // supa.js, which only jos3_functions imports, with their tests.
+  "src/models/JOS3.js",
+  "src/jos3_functions/",
+  "src/supa.js",
+  "tests/models/JOS3.test.js",
+  "tests/jos3_functions/",
+  // Hold only functions no model calls, so they stay JavaScript with JSDoc
+  // (decision 103), with their tests.
+  "src/psychrometrics/t_mrt.js",
+  "src/utilities/utilities.js",
+  "tests/psychrometrics/t_mrt.test.js",
+  "tests/utilities/utilities.test.js",
+  // Meant to be reported: tests/eslint.test.ts lints it with the list lifted.
+  "tests/eslint/fixture.ts",
+  // A CommonJS consumer of the packed package, which CI runs outside the
+  // repository.
+  "tests/package/require.cjs",
 ];
 
-for (const file of LINTED) {
+for (const file of UNLINTED) {
   if (!existsSync(new URL(file, import.meta.url))) {
     throw new Error(`eslint.config.mjs lists ${file}, which does not exist`);
   }
 }
 
 export default defineConfig(
-  // Everything except the listed files, while keeping directories traversable.
-  // Unignoring every directory also unignores node_modules/ and .git/, so they
-  // are ignored again. .scratch/ holds evidence with its own eslint.config.mjs,
-  // which ESLint 10 would otherwise apply to the files beside it.
+  // src/, tests/ and the Vitest config, less the named files. Everything else
+  // stays ignored, .scratch/ among it, which holds evidence with its own
+  // eslint.config.mjs that ESLint 10 would otherwise apply to the files beside
+  // it.
   globalIgnores([
     "**/*",
-    "!**/*/",
-    "**/node_modules/",
-    "**/.git/",
-    ".scratch/",
-    ...LINTED.map((file) => `!${file}`),
+    "!src/",
+    "!src/**",
+    "!tests/",
+    "!tests/**",
+    "!vitest.config.ts",
+    ...UNLINTED,
   ]),
   {
     files: ["**/*.ts"],
@@ -158,7 +54,11 @@ export default defineConfig(
     ],
     languageOptions: {
       parserOptions: {
-        project: ["configs/tsconfig.json", "tests/tsconfig.json"],
+        project: [
+          "configs/tsconfig.json",
+          "tests/tsconfig.json",
+          "tests/types/tsconfig.json",
+        ],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -229,13 +129,34 @@ export default defineConfig(
           format: ["snake_case", "camelCase", "UPPER_CASE"],
           leadingUnderscore: "allow",
         },
+        // An object literal's key may be PascalCase, so an index's default
+        // export keeps the names it re-exports, upstream's class names among
+        // them (`Units`, `_SportsValues`).
+        {
+          selector: "objectLiteralProperty",
+          format: ["snake_case", "camelCase", "UPPER_CASE", "PascalCase"],
+          leadingUnderscore: "allow",
+        },
         // A quoted key is upstream's check name verbatim ("tr - tdb").
         { selector: "memberLike", modifiers: ["requiresQuotes"], format: null },
+        // objectLiteralProperty outranks memberLike, so it repeats the
+        // quoted-key exception.
+        {
+          selector: "objectLiteralProperty",
+          modifiers: ["requiresQuotes"],
+          format: null,
+        },
       ],
       // A model destructures every input from one parse, and upstream
       // reassigns some of them (`tout = units_converter(tmp=tout)[0]`, `models/clo_tout.py:73`), so a
       // destructuring is `let` when any of its names is reassigned.
       "prefer-const": ["error", { destructuring: "all" }],
     },
+  },
+  // A type check of the built package: its bindings exist so the compiler
+  // checks their types.
+  {
+    files: ["tests/types/consumer-check.ts"],
+    rules: { "@typescript-eslint/no-unused-vars": "off" },
   },
 );

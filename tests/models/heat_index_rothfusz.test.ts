@@ -4,14 +4,14 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "../../src/models/index.ts";
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof heat_index_rothfusz>[0];
 
 const { testData: test_data, tolerances } = await loadTestData(
-  testDataUrls.heatIndex,
+  test_data_urls.heatIndex,
 );
 
 // upstream's (27.0, np.inf), which _valid_range's message prints as [27.0, inf]

@@ -1,6 +1,6 @@
-// Linted by tests/eslint.test.ts with the repo's ESLint config. It is not in
-// the lint list, so `npm run lint` skips it. Every name under "Mixed names"
-// is meant to be reported, and no other.
+// Linted by tests/eslint.test.ts with the repo's ESLint config. It is in
+// eslint.config.mjs' UNLINTED, so `npm run lint` skips it. Every name under
+// "Mixed names" is meant to be reported, and no other.
 
 import Path from "node:path";
 

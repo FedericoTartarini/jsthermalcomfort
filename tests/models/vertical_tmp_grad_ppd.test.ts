@@ -6,14 +6,14 @@ import {
 } from "../../src/models/index.ts";
 import { vertical_tmp_grad_ppd as from_root } from "../../src/index.ts";
 import { decode, read_data } from "../parity/harness.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof vertical_tmp_grad_ppd>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.verticalTmpGradPpd,
+  test_data_urls.verticalTmpGradPpd,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_vertical_tmp_grad_ppd.py.

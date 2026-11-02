@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { at, AT_INFO } from "../../src/models/index.ts";
 import { at as at_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof at>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.at,
+  test_data_urls.at,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_at.py. Its is_equal

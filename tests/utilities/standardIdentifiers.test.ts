@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { is_iso_7730, LimitSet } from "../../src/utilities/utilities.js";
 import { Standard } from "../../src/utilities/options.ts";
 import * as pkg from "../../src/index.ts";
 
@@ -11,7 +10,7 @@ import * as pkg from "../../src/index.ts";
 // Transcribed from pythermalcomfort/utilities.py. If pythermalcomfort adds a
 // standard, this test fails until the two are reconciled deliberately, which
 // is the point — silent divergence here is what #193 exists to prevent.
-const PYTHERMALCOMFORT_MODELS = {
+const PYTHERMALCOMFORT_MODELS: Record<string, string> = {
   ashrae_55_2023: "55-2023",
   iso_7730_2005: "7730-2005",
   iso_7730_2025: "7730-2025",
@@ -23,14 +22,14 @@ const PYTHERMALCOMFORT_MODELS = {
 // Identifiers pythermalcomfort has and jsthermalcomfort does not implement,
 // listed explicitly rather than left as an unexplained absence. Empty since
 // `clo_dynamic_iso` brought ISO 9920 in.
-const NOT_IMPLEMENTED_IN_JS = [];
+const NOT_IMPLEMENTED_IN_JS: string[] = [];
 
 // Identifiers jsthermalcomfort has and pythermalcomfort does not, for a
 // standard a model takes that upstream's Models names no member for
 // (deviations _shared-51, _shared-78 and _shared-79). If pythermalcomfort
 // adds one under another key or value, the first test below fails until this
 // one is renamed to match.
-const JS_ONLY = {
+const JS_ONLY: Record<string, string> = {
   iso_7243_2017: "7243-2017",
   iso_11079_2007: "11079-2007",
   en_16798_1_2019: "16798-1-2019",
@@ -70,22 +69,11 @@ describe("Standard mirrors pythermalcomfort's Models enum", () => {
       expect(name).not.toBe(value);
     }
   });
-});
-
-describe("LimitSet is separate from Standard", () => {
-  test("limit sets are not standards and do not leak into Standard", () => {
-    for (const key of Object.keys(LimitSet)) {
-      expect(Standard).not.toHaveProperty(key);
-    }
-    for (const value of Object.values(LimitSet)) {
-      expect(Object.values(Standard)).not.toContain(value);
-    }
-  });
 
   test("the unversioned identifiers are gone", () => {
     // Removed in v2. Their absence is the breaking change, so assert it rather
     // than trusting that nobody re-adds them for convenience.
-    const values = [...Object.values(Standard), ...Object.values(LimitSet)];
+    const values: string[] = Object.values(Standard);
     expect(values).not.toContain("ISO");
     expect(values).not.toContain("ASHRAE");
     expect(values).not.toContain("ANKLE_DRAFT");
@@ -94,17 +82,12 @@ describe("LimitSet is separate from Standard", () => {
 });
 
 describe("public API surface", () => {
-  test("Standard, LimitSet and is_iso_7730 are importable from the package root", () => {
-    // check_standard_compliance is public and requires one of these values, so
-    // leaving them unreachable forced callers to pass bare strings and hope.
+  test("Standard is importable from the package root", () => {
     expect(pkg.Standard).toBe(Standard);
-    expect(pkg.LimitSet).toBe(LimitSet);
-    expect(typeof pkg.is_iso_7730).toBe("function");
   });
 
-  test("Standard and LimitSet are frozen", () => {
+  test("Standard is frozen", () => {
     expect(Object.isFrozen(Standard)).toBe(true);
-    expect(Object.isFrozen(LimitSet)).toBe(true);
   });
 });
 
@@ -156,15 +139,5 @@ describe("Sex mirrors pythermalcomfort's Sex enum", () => {
       ["female", "female"],
     ]);
     expect(Object.isFrozen(pkg.Sex)).toBe(true);
-  });
-});
-
-describe("is_iso_7730", () => {
-  test("accepts both editions and nothing else", () => {
-    expect(is_iso_7730(Standard.iso_7730_2005)).toBe(true);
-    expect(is_iso_7730(Standard.iso_7730_2025)).toBe(true);
-    expect(is_iso_7730(Standard.ashrae_55_2023)).toBe(false);
-    expect(is_iso_7730(Standard.iso_7933_2004)).toBe(false);
-    expect(is_iso_7730("ISO")).toBe(false);
   });
 });

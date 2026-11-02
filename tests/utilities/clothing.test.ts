@@ -43,41 +43,41 @@ describe("test_clothing", () => {
   test("test_clo_total_insulation", () => {
     const i_cl = [0.61, 0.71, 1.01];
     const i_t = [1.21, 1.26, 1.56];
-    i_t.forEach((value, i) =>
+    i_t.forEach((value, i) => {
       expectClose(
-        clo_total_insulation(value, 0.15, 0, 0.5, i_cl[i]!),
+        clo_total_insulation(value, 0.15, 0, 0.5, i_cl[i] ?? NaN),
         value,
         0.001,
-      ),
-    );
+      );
+    });
 
     // compare the normal_clothing results with the figure in the standard
     const v_walk = [1, 0.5, 0.25];
     const normal = [1.21 * 0.5, 1.26 * 0.565, 1.56 * 0.62];
-    i_t.forEach((value, i) =>
+    i_t.forEach((value, i) => {
       expectClose(
-        clo_total_insulation(value, 2, v_walk[i]!, 0.5, i_cl[i]!),
-        normal[i]!,
+        clo_total_insulation(value, 2, v_walk[i] ?? NaN, 0.5, i_cl[i] ?? NaN),
+        normal[i] ?? NaN,
         0.005,
-      ),
-    );
+      );
+    });
 
     // test that the nude function works as expected
     const i_a_static = [0.71, 0.61, 0.5];
-    i_a_static.forEach((value) =>
-      expectClose(clo_total_insulation(0, 0.15, 0, value, 0), value, 0.001),
-    );
+    i_a_static.forEach((value) => {
+      expectClose(clo_total_insulation(0, 0.15, 0, value, 0), value, 0.001);
+    });
 
     // compare the nude results with the figure in the standard
     const vr = [0.5, 2, 3];
     const nude = [0.71 * 0.7, 0.61 * 0.4, 0.5 * 0.32];
-    i_a_static.forEach((value, i) =>
+    i_a_static.forEach((value, i) => {
       expectClose(
-        clo_total_insulation(0, vr[i]!, 0.5, value, 0),
-        nude[i]!,
+        clo_total_insulation(0, vr[i] ?? NaN, 0.5, value, 0),
+        nude[i] ?? NaN,
         0.004,
-      ),
-    );
+      );
+    });
 
     // test that the low_clothing function works as expected
     expectClose(clo_total_insulation(1.2, 0.15, 0, 0.6, 0.6), 1.2, 0.001);
@@ -121,9 +121,13 @@ describe("test_clothing", () => {
     const expected = [
       0.85, 1.06, 0.86, 0.52, 0.76, 0.61, 0.97, 0.68, 1.03, 0.63, 0.17,
     ];
-    clo.forEach((value, i) =>
-      expectClose(clo_dynamic_iso(value, met[i]!, v[i]!), expected[i]!, 0.01),
-    );
+    clo.forEach((value, i) => {
+      expectClose(
+        clo_dynamic_iso(value, met[i] ?? NaN, v[i] ?? NaN),
+        expected[i] ?? NaN,
+        0.01,
+      );
+    });
 
     // Test invalid standard input
     expect(() =>

@@ -2,8 +2,7 @@ import type { ClassifierBins } from "./classifierBins.ts";
 import type { Standard } from "../utilities/options.ts";
 
 // The model info every model publishes (`*_INFO`), the inputs and outputs types
-// derived from it, the warnings rows (ADRs 0022-0024) and `deepFreeze`, with
-// the old range row, `ApplicabilityWarning`, at the end.
+// derived from it, the warnings rows (ADRs 0022-0024) and `deepFreeze`.
 
 /** One of the identifiers in `Standard`, e.g. `"7730-2025"` or `"55-2023"`. */
 export type StandardId = (typeof Standard)[keyof typeof Standard];
@@ -433,20 +432,4 @@ export function deepFreeze<T extends object>(
   });
 
   return obj;
-}
-
-/**
- * The old form of a range row, which the models not yet migrated return;
- * {@link ModelWarning} replaces it.
- *
- * `key` names the quantity, `value` is what the call had for it (SI, and for a
- * `derived` or `output` row the unrounded value the gate compared), and `bound`
- * is the range it fell outside. `role` says where the quantity comes from.
- * Reported whatever `limit_inputs` is.
- */
-export interface ApplicabilityWarning {
-  readonly key: string;
-  readonly role: "input" | "derived" | "output";
-  readonly value: number;
-  readonly bound: Bound;
 }

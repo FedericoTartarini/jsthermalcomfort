@@ -10,7 +10,7 @@ import { Standard, Units } from "../../src/utilities/index.ts";
 import { v_relative } from "../../src/utilities/index.ts";
 import { pmv_ppd_iso as pmv_ppd_iso_from_root } from "../../src/index.ts";
 import { round } from "../../src/_internal/round.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import {
   approx,
@@ -24,7 +24,7 @@ type Outputs = ReturnType<typeof pmv_ppd_iso>;
 
 // Array rows run element-wise.
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.pmvPpd,
+  test_data_urls.pmvPpd,
 );
 
 // As upstream, the rows without a standard and those whose label lower-cases to "iso" (tests/test_pmv_ppd_iso.py:25-27).

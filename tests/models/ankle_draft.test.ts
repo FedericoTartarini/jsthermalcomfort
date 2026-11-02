@@ -4,14 +4,14 @@ import { ankle_draft, ANKLE_DRAFT_INFO } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { ankle_draft as from_root } from "../../src/index.ts";
 import { decode, read_data } from "../parity/harness.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof ankle_draft>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.ankleDraft,
+  test_data_urls.ankleDraft,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_ankle_draft.py. Upstream's

@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { set_tmp, SET_TMP_INFO } from "../../src/models/index.ts";
 import { set_tmp as from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof set_tmp>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.setTmp,
+  test_data_urls.setTmp,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_set.py.

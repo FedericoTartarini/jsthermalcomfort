@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ESLint } from "eslint";
 import { describe, expect, test } from "vitest";
+import { UNLINTED } from "../eslint.config.mjs";
 
-// Lints tests/eslint/fixture.ts with eslint.config.mjs. The fixture is outside
-// the lint list, so `ignore: false` lifts the list for this run only.
+// Lints tests/eslint/fixture.ts with eslint.config.mjs. The fixture is one of
+// the named files lint skips, so `ignore: false` lifts that for this run only.
 const cwd = fileURLToPath(new URL("..", import.meta.url));
 const FIXTURE = "tests/eslint/fixture.ts";
 const fixture_lines = readFileSync(
@@ -12,7 +13,9 @@ const fixture_lines = readFileSync(
   "utf8",
 ).split("\n");
 const [result] = await new ESLint({ cwd, ignore: false }).lintFiles([FIXTURE]);
-const messages = result!.messages;
+if (result === undefined)
+  throw new Error(`ESLint returned no result for ${FIXTURE}`);
+const messages = result.messages;
 
 function lines_of(rule: string): number[] {
   return messages.filter((m) => m.ruleId === rule).map((m) => m.line);
@@ -57,10 +60,22 @@ describe("eslint config", () => {
     ]);
   });
 
-  test("lint covers the listed files only", async () => {
+  test("lint covers src/ and tests/ less the named files", async () => {
     const eslint = new ESLint({ cwd });
-    expect(await eslint.isPathIgnored("vitest.config.ts")).toBe(false);
-    expect(await eslint.isPathIgnored("src/models/JOS3.js")).toBe(true);
-    expect(await eslint.isPathIgnored(FIXTURE)).toBe(true);
+    for (const file of [
+      "vitest.config.ts",
+      "src/index.ts",
+      "src/utilities/clothing.ts",
+      "tests/index.test.ts",
+      "tests/types/consumer-check.ts",
+    ])
+      expect(await eslint.isPathIgnored(file)).toBe(false);
+    for (const file of [
+      ...UNLINTED,
+      "src/jos3_functions/matrix.js",
+      "scripts/check-mirrored.mts",
+      ".scratch/",
+    ])
+      expect(await eslint.isPathIgnored(file)).toBe(true);
   });
 });

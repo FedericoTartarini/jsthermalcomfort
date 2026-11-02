@@ -192,42 +192,42 @@ describe("classifyFromBins - left-inclusive (right=false)", () => {
 });
 
 describe("classifyFromBins - single edge", () => {
-  const binsRight = {
+  const bins_right = {
     edges: [10],
     labels: ["low", "high"],
     right: true,
   };
 
-  const binsLeft = {
+  const bins_left = {
     edges: [10],
     labels: ["low", "high"],
     right: false,
   };
 
   test("right-inclusive: value <= edge -> labels[0]", () => {
-    expect(classifyFromBins(10, binsRight)).toBe("low");
-    expect(classifyFromBins(5, binsRight)).toBe("low");
+    expect(classifyFromBins(10, bins_right)).toBe("low");
+    expect(classifyFromBins(5, bins_right)).toBe("low");
   });
 
   test("right-inclusive: value > edge -> NaN", () => {
-    expect(classifyFromBins(10.001, binsRight)).toBeNaN();
-    expect(classifyFromBins(20, binsRight)).toBeNaN();
+    expect(classifyFromBins(10.001, bins_right)).toBeNaN();
+    expect(classifyFromBins(20, bins_right)).toBeNaN();
   });
 
   test("left-inclusive: value < edge -> labels[0]", () => {
-    expect(classifyFromBins(5, binsLeft)).toBe("low");
-    expect(classifyFromBins(9.999, binsLeft)).toBe("low");
+    expect(classifyFromBins(5, bins_left)).toBe("low");
+    expect(classifyFromBins(9.999, bins_left)).toBe("low");
   });
 
   test("left-inclusive: value >= edge -> NaN", () => {
-    expect(classifyFromBins(10, binsLeft)).toBeNaN();
-    expect(classifyFromBins(20, binsLeft)).toBeNaN();
+    expect(classifyFromBins(10, bins_left)).toBeNaN();
+    expect(classifyFromBins(20, bins_left)).toBeNaN();
   });
 });
 
 describe("classifyFromBins - mirroring heat_index bins", () => {
   // Heat index bins are right-inclusive
-  const hiBins = {
+  const hi_bins = {
     edges: [27, 32, 41, 54, 1000],
     labels: [
       "no risk",
@@ -240,38 +240,38 @@ describe("classifyFromBins - mirroring heat_index bins", () => {
   };
 
   test("hi <= 27 -> no risk", () => {
-    expect(classifyFromBins(20, hiBins)).toBe("no risk");
-    expect(classifyFromBins(27, hiBins)).toBe("no risk");
+    expect(classifyFromBins(20, hi_bins)).toBe("no risk");
+    expect(classifyFromBins(27, hi_bins)).toBe("no risk");
   });
 
   test("27 < hi <= 32 -> caution", () => {
-    expect(classifyFromBins(27.1, hiBins)).toBe("caution");
-    expect(classifyFromBins(32, hiBins)).toBe("caution");
+    expect(classifyFromBins(27.1, hi_bins)).toBe("caution");
+    expect(classifyFromBins(32, hi_bins)).toBe("caution");
   });
 
   test("32 < hi <= 41 -> extreme caution", () => {
-    expect(classifyFromBins(32.1, hiBins)).toBe("extreme caution");
-    expect(classifyFromBins(41, hiBins)).toBe("extreme caution");
+    expect(classifyFromBins(32.1, hi_bins)).toBe("extreme caution");
+    expect(classifyFromBins(41, hi_bins)).toBe("extreme caution");
   });
 
   test("41 < hi <= 54 -> danger", () => {
-    expect(classifyFromBins(41.1, hiBins)).toBe("danger");
-    expect(classifyFromBins(54, hiBins)).toBe("danger");
+    expect(classifyFromBins(41.1, hi_bins)).toBe("danger");
+    expect(classifyFromBins(54, hi_bins)).toBe("danger");
   });
 
   test("54 < hi <= 1000 -> extreme danger", () => {
-    expect(classifyFromBins(54.1, hiBins)).toBe("extreme danger");
-    expect(classifyFromBins(1000, hiBins)).toBe("extreme danger");
+    expect(classifyFromBins(54.1, hi_bins)).toBe("extreme danger");
+    expect(classifyFromBins(1000, hi_bins)).toBe("extreme danger");
   });
 
   test("hi > 1000 -> NaN", () => {
-    expect(classifyFromBins(1000.1, hiBins)).toBeNaN();
+    expect(classifyFromBins(1000.1, hi_bins)).toBeNaN();
   });
 });
 
 describe("classifyFromBins - mirroring PMV bins (left-inclusive)", () => {
   // PMV ISO bins are left-inclusive
-  const pmvBins = {
+  const pmv_bins = {
     edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
     labels: [
       "Cold",
@@ -286,52 +286,52 @@ describe("classifyFromBins - mirroring PMV bins (left-inclusive)", () => {
   };
 
   test("pmv < -2.5 -> Cold", () => {
-    expect(classifyFromBins(-3, pmvBins)).toBe("Cold");
-    expect(classifyFromBins(-2.5001, pmvBins)).toBe("Cold");
+    expect(classifyFromBins(-3, pmv_bins)).toBe("Cold");
+    expect(classifyFromBins(-2.5001, pmv_bins)).toBe("Cold");
   });
 
   test("-2.5 <= pmv < -1.5 -> Cool", () => {
-    expect(classifyFromBins(-2.5, pmvBins)).toBe("Cool");
-    expect(classifyFromBins(-2, pmvBins)).toBe("Cool");
-    expect(classifyFromBins(-1.5001, pmvBins)).toBe("Cool");
+    expect(classifyFromBins(-2.5, pmv_bins)).toBe("Cool");
+    expect(classifyFromBins(-2, pmv_bins)).toBe("Cool");
+    expect(classifyFromBins(-1.5001, pmv_bins)).toBe("Cool");
   });
 
   test("-1.5 <= pmv < -0.5 -> Slightly Cool", () => {
-    expect(classifyFromBins(-1.5, pmvBins)).toBe("Slightly Cool");
-    expect(classifyFromBins(-1, pmvBins)).toBe("Slightly Cool");
+    expect(classifyFromBins(-1.5, pmv_bins)).toBe("Slightly Cool");
+    expect(classifyFromBins(-1, pmv_bins)).toBe("Slightly Cool");
   });
 
   test("-0.5 <= pmv < 0.5 -> Neutral", () => {
-    expect(classifyFromBins(-0.5, pmvBins)).toBe("Neutral");
-    expect(classifyFromBins(0, pmvBins)).toBe("Neutral");
-    expect(classifyFromBins(0.4999, pmvBins)).toBe("Neutral");
+    expect(classifyFromBins(-0.5, pmv_bins)).toBe("Neutral");
+    expect(classifyFromBins(0, pmv_bins)).toBe("Neutral");
+    expect(classifyFromBins(0.4999, pmv_bins)).toBe("Neutral");
   });
 
   test("0.5 <= pmv < 1.5 -> Slightly Warm", () => {
-    expect(classifyFromBins(0.5, pmvBins)).toBe("Slightly Warm");
-    expect(classifyFromBins(1, pmvBins)).toBe("Slightly Warm");
+    expect(classifyFromBins(0.5, pmv_bins)).toBe("Slightly Warm");
+    expect(classifyFromBins(1, pmv_bins)).toBe("Slightly Warm");
   });
 
   test("1.5 <= pmv < 2.5 -> Warm", () => {
-    expect(classifyFromBins(1.5, pmvBins)).toBe("Warm");
-    expect(classifyFromBins(2, pmvBins)).toBe("Warm");
+    expect(classifyFromBins(1.5, pmv_bins)).toBe("Warm");
+    expect(classifyFromBins(2, pmv_bins)).toBe("Warm");
   });
 
   test("2.5 <= pmv < 10 -> Hot", () => {
-    expect(classifyFromBins(2.5, pmvBins)).toBe("Hot");
-    expect(classifyFromBins(5, pmvBins)).toBe("Hot");
-    expect(classifyFromBins(9.999, pmvBins)).toBe("Hot");
+    expect(classifyFromBins(2.5, pmv_bins)).toBe("Hot");
+    expect(classifyFromBins(5, pmv_bins)).toBe("Hot");
+    expect(classifyFromBins(9.999, pmv_bins)).toBe("Hot");
   });
 
   test("pmv >= 10 -> NaN", () => {
-    expect(classifyFromBins(10, pmvBins)).toBeNaN();
-    expect(classifyFromBins(11, pmvBins)).toBeNaN();
+    expect(classifyFromBins(10, pmv_bins)).toBeNaN();
+    expect(classifyFromBins(11, pmv_bins)).toBeNaN();
   });
 });
 
 describe("classifyFromBins - mirroring PMV bins (right-inclusive)", () => {
   // PMV ASHRAE bins are right-inclusive
-  const pmvBins = {
+  const pmv_bins = {
     edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
     labels: [
       "Cold",
@@ -346,57 +346,57 @@ describe("classifyFromBins - mirroring PMV bins (right-inclusive)", () => {
   };
 
   test("pmv <= -2.5 -> Cold", () => {
-    expect(classifyFromBins(-3, pmvBins)).toBe("Cold");
-    expect(classifyFromBins(-2.5, pmvBins)).toBe("Cold");
+    expect(classifyFromBins(-3, pmv_bins)).toBe("Cold");
+    expect(classifyFromBins(-2.5, pmv_bins)).toBe("Cold");
   });
 
   test("-2.5 < pmv <= -1.5 -> Cool", () => {
-    expect(classifyFromBins(-2.4999, pmvBins)).toBe("Cool");
-    expect(classifyFromBins(-2, pmvBins)).toBe("Cool");
-    expect(classifyFromBins(-1.5, pmvBins)).toBe("Cool");
+    expect(classifyFromBins(-2.4999, pmv_bins)).toBe("Cool");
+    expect(classifyFromBins(-2, pmv_bins)).toBe("Cool");
+    expect(classifyFromBins(-1.5, pmv_bins)).toBe("Cool");
   });
 
   test("-1.5 < pmv <= -0.5 -> Slightly Cool", () => {
-    expect(classifyFromBins(-1.4999, pmvBins)).toBe("Slightly Cool");
-    expect(classifyFromBins(-1, pmvBins)).toBe("Slightly Cool");
-    expect(classifyFromBins(-0.5, pmvBins)).toBe("Slightly Cool");
+    expect(classifyFromBins(-1.4999, pmv_bins)).toBe("Slightly Cool");
+    expect(classifyFromBins(-1, pmv_bins)).toBe("Slightly Cool");
+    expect(classifyFromBins(-0.5, pmv_bins)).toBe("Slightly Cool");
   });
 
   test("-0.5 < pmv <= 0.5 -> Neutral", () => {
-    expect(classifyFromBins(-0.4999, pmvBins)).toBe("Neutral");
-    expect(classifyFromBins(0, pmvBins)).toBe("Neutral");
-    expect(classifyFromBins(0.5, pmvBins)).toBe("Neutral");
+    expect(classifyFromBins(-0.4999, pmv_bins)).toBe("Neutral");
+    expect(classifyFromBins(0, pmv_bins)).toBe("Neutral");
+    expect(classifyFromBins(0.5, pmv_bins)).toBe("Neutral");
   });
 
   test("0.5 < pmv <= 1.5 -> Slightly Warm", () => {
-    expect(classifyFromBins(0.5001, pmvBins)).toBe("Slightly Warm");
-    expect(classifyFromBins(1, pmvBins)).toBe("Slightly Warm");
-    expect(classifyFromBins(1.5, pmvBins)).toBe("Slightly Warm");
+    expect(classifyFromBins(0.5001, pmv_bins)).toBe("Slightly Warm");
+    expect(classifyFromBins(1, pmv_bins)).toBe("Slightly Warm");
+    expect(classifyFromBins(1.5, pmv_bins)).toBe("Slightly Warm");
   });
 
   test("1.5 < pmv <= 2.5 -> Warm", () => {
-    expect(classifyFromBins(1.5001, pmvBins)).toBe("Warm");
-    expect(classifyFromBins(2, pmvBins)).toBe("Warm");
-    expect(classifyFromBins(2.5, pmvBins)).toBe("Warm");
+    expect(classifyFromBins(1.5001, pmv_bins)).toBe("Warm");
+    expect(classifyFromBins(2, pmv_bins)).toBe("Warm");
+    expect(classifyFromBins(2.5, pmv_bins)).toBe("Warm");
   });
 
   test("2.5 < pmv <= 10 -> Hot", () => {
-    expect(classifyFromBins(2.5001, pmvBins)).toBe("Hot");
-    expect(classifyFromBins(5, pmvBins)).toBe("Hot");
-    expect(classifyFromBins(10, pmvBins)).toBe("Hot");
+    expect(classifyFromBins(2.5001, pmv_bins)).toBe("Hot");
+    expect(classifyFromBins(5, pmv_bins)).toBe("Hot");
+    expect(classifyFromBins(10, pmv_bins)).toBe("Hot");
   });
 
   test("pmv > 10 -> NaN", () => {
-    expect(classifyFromBins(10.0001, pmvBins)).toBeNaN();
-    expect(classifyFromBins(11, pmvBins)).toBeNaN();
+    expect(classifyFromBins(10.0001, pmv_bins)).toBeNaN();
+    expect(classifyFromBins(11, pmv_bins)).toBeNaN();
   });
 });
 
 describe("classifyFromBins - divergence at boundary (intentional)", () => {
   // Verify that left-inclusive and right-inclusive give different results at boundary
   // This mirrors the pythermalcomfort #382 inconsistency between ISO and ASHRAE models
-  const pmvEdges = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10];
-  const pmvLabels = [
+  const pmv_edges = [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10];
+  const pmv_labels = [
     "Cold",
     "Cool",
     "Slightly Cool",
@@ -406,15 +406,15 @@ describe("classifyFromBins - divergence at boundary (intentional)", () => {
     "Hot",
   ];
 
-  const binsRight = {
-    edges: pmvEdges,
-    labels: pmvLabels,
+  const bins_right = {
+    edges: pmv_edges,
+    labels: pmv_labels,
     right: true,
   };
 
-  const binsLeft = {
-    edges: pmvEdges,
-    labels: pmvLabels,
+  const bins_left = {
+    edges: pmv_edges,
+    labels: pmv_labels,
     right: false,
   };
 
@@ -423,16 +423,16 @@ describe("classifyFromBins - divergence at boundary (intentional)", () => {
     // Left-inclusive: -0.5 <= pmv < 0.5 -> "Neutral" (labels[3])
     // Right-inclusive: -1.5 < pmv <= -0.5 -> "Slightly Cool" (labels[2])
     // This is the intentional divergence between ISO (left) and ASHRAE (right).
-    expect(classifyFromBins(-0.5, binsLeft)).toBe("Neutral");
-    expect(classifyFromBins(-0.5, binsRight)).toBe("Slightly Cool");
+    expect(classifyFromBins(-0.5, bins_left)).toBe("Neutral");
+    expect(classifyFromBins(-0.5, bins_right)).toBe("Slightly Cool");
   });
 
   test("at pmv=0.5: left-inclusive gives Slightly Warm, right-inclusive gives Neutral", () => {
     // Similar divergence at pmv=0.5.
     // Left-inclusive: 0.5 <= pmv < 1.5 -> "Slightly Warm" (labels[4])
     // Right-inclusive: -0.5 < pmv <= 0.5 -> "Neutral" (labels[3])
-    expect(classifyFromBins(0.5, binsLeft)).toBe("Slightly Warm");
-    expect(classifyFromBins(0.5, binsRight)).toBe("Neutral");
+    expect(classifyFromBins(0.5, bins_left)).toBe("Slightly Warm");
+    expect(classifyFromBins(0.5, bins_right)).toBe("Neutral");
   });
 });
 

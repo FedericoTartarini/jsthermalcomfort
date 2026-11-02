@@ -32,18 +32,28 @@ describe("deepFreeze", () => {
   });
 });
 
-const INPUTS = {
-  n: { kind: "numeric", unit: null },
-  nd: { kind: "numeric", unit: null, default: 1 },
-  b: { kind: "bool", default: false },
-  c: { kind: "choice", allowed: ["SI", "IP"], message: "" },
-  cd: { kind: "choice", allowed: ["a", "b"], default: "a", message: "" },
-} as const;
+// The type `as const` gives an inputs table.
+type Inputs = Readonly<{
+  n: { readonly kind: "numeric"; readonly unit: null };
+  nd: { readonly kind: "numeric"; readonly unit: null; readonly default: 1 };
+  b: { readonly kind: "bool"; readonly default: false };
+  c: {
+    readonly kind: "choice";
+    readonly allowed: readonly ["SI", "IP"];
+    readonly message: "";
+  };
+  cd: {
+    readonly kind: "choice";
+    readonly allowed: readonly ["a", "b"];
+    readonly default: "a";
+    readonly message: "";
+  };
+}>;
 
 describe("InputsOf", () => {
   // ADR 0019, whitelist item 6: `undefined` takes the default.
   test("a key with a default is optional, a choice takes its allowed", () => {
-    expectTypeOf<InputsOf<{ inputs: typeof INPUTS }>>().toEqualTypeOf<{
+    expectTypeOf<InputsOf<{ inputs: Inputs }>>().toEqualTypeOf<{
       n: number;
       c: "SI" | "IP";
       nd?: number | undefined;
@@ -56,7 +66,7 @@ describe("InputsOf", () => {
 describe("ResolvedOf", () => {
   // define.ts' parseChoice returns a choice in the case the caller gave.
   test("every key is required, and a choice is a string", () => {
-    expectTypeOf<ResolvedOf<typeof INPUTS>>().toEqualTypeOf<{
+    expectTypeOf<ResolvedOf<Inputs>>().toEqualTypeOf<{
       n: number;
       nd: number;
       b: boolean;
@@ -91,13 +101,13 @@ describe("OutputsOf", () => {
   // A second type argument types every series output as that type, a
   // one-step call's number where upstream returns one (decisions 276, 277).
   test("types a series output as the series type given", () => {
-    type Info = {
+    interface Info {
       outputs: {
         s: { kind: "numeric"; unit: "°C"; series: true };
         n: { kind: "numeric"; unit: null };
         m: { kind: "numeric"; unit: null; series: true; masked: true };
       };
-    };
+    }
     expectTypeOf<OutputsOf<Info, number>>().toEqualTypeOf<{
       readonly s: number;
       readonly n: number;

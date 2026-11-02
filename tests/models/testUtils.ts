@@ -52,9 +52,9 @@ import type { ModelInfo } from "../../src/index.ts";
  * Each v2 model info the package exports: a `*_INFO` export whose every input
  * has a `kind`.
  */
-export const v2Infos = Object.entries(pkg as Record<string, unknown>)
-  .filter(([exportName]) => exportName.endsWith("_INFO"))
-  .map(([exportName, info]) => ({ exportName, info: info as ModelInfo }))
+export const v2_infos = Object.entries(pkg as Record<string, unknown>)
+  .filter(([export_name]) => export_name.endsWith("_INFO"))
+  .map(([export_name, info]) => ({ export_name, info: info as ModelInfo }))
   .filter(({ info }) =>
     Object.values(info.inputs).every((entry) => "kind" in entry),
   );
@@ -124,7 +124,8 @@ export function expandArrayRows<
         `expandArrayRows: array inputs differ in length in ${JSON.stringify(row.inputs)}`,
       );
     }
-    const [length] = lengths;
+    // One length, by the two checks above.
+    const [length = 0] = lengths;
     const elementAt = (values: Record<string, unknown>, index: number) =>
       Object.fromEntries(
         Object.entries(values).map(([key, value]) => {
@@ -138,7 +139,7 @@ export function expandArrayRows<
           return [key, value[index]];
         }),
       );
-    return Array.from({ length: length! }, (_, index) => ({
+    return Array.from({ length }, (_, index) => ({
       ...row,
       inputs: elementAt(row.inputs, index),
       ...(row.outputs && { outputs: elementAt(row.outputs, index) }),
@@ -169,99 +170,97 @@ export function assertNonEmptyRows<T>(rows: T[], label: string): T[] {
 // Load test data and extract tolerance
 export async function loadTestData(
   url: string,
-  returnArray = false,
+  return_array = false,
 ): Promise<{
   testData: Fixture;
   tolerances: Record<string, number> | undefined;
 }> {
-  let testData: Fixture;
+  let test_data: Fixture;
   let tolerances: Record<string, number> | undefined;
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    testData = (await response.json()) as Fixture;
-    tolerances = testData.tolerance;
+    test_data = (await response.json()) as Fixture;
+    tolerances = test_data.tolerance;
   } catch (error) {
     console.error("Unable to fetch or parse test data:", error);
     throw error;
   }
 
-  // If returnArray is false, expand rows with array inputs into scalar cases.
+  // If return_array is false, expand rows with array inputs into scalar cases.
   // Callers iterate `testData.data`, so an empty dataset would register
   // zero tests yet report green; assertNonEmptyRows turns that into a hard
   // failure with a descriptive message.
-  if (!returnArray && Array.isArray(testData.data)) {
-    testData.data = assertNonEmptyRows(
-      expandArrayRows(testData.data),
+  if (!return_array && Array.isArray(test_data.data)) {
+    test_data.data = assertNonEmptyRows(
+      expandArrayRows(test_data.data),
       `loadTestData (url=${url})`,
     );
   }
-  return { testData, tolerances };
+  return { testData: test_data, tolerances };
 }
 
 /**
  * Validates the model's output against the expected outputs using specified tolerances.
  *
- * @param {*} modelResult - The output from the model function, which can be either a primitive value or an object.
- * @param {Object} expectedOutputs - An object containing the expected outputs, with keys matching those in modelResult.
+ * @param {*} model_result - The output from the model function, which can be either a primitive value or an object.
+ * @param {Object} expected_outputs - An object containing the expected outputs, with keys matching those in model_result.
  * @param {Object} tolerances - An object specifying tolerance values for numeric comparisons for each key.
- * @param {Object} inputs - The input parameters used to generate modelResult, logged in case of test failure.
+ * @param {Object} inputs - The input parameters used to generate model_result, logged in case of test failure.
  */
 
 export function validateResult(
-  modelResult: unknown,
-  expectedOutputs: Record<string, unknown>,
+  model_result: unknown,
+  expected_outputs: Record<string, unknown>,
   tolerances: Record<string, number> | undefined,
   inputs: unknown,
 ): void {
-  // Silent-skip guards. Without these, an empty/missing `expectedOutputs`
+  // Silent-skip guards. Without these, an empty/missing `expected_outputs`
   // makes Object.keys(...).forEach run zero assertions and the test reports
-  // green. A null/undefined `modelResult` against non-empty expectations is
+  // green. A null/undefined `model_result` against non-empty expectations is
   // also treated as a hard failure rather than letting the property access
   // throw mid-loop with a confusing TypeError.
   if (
-    expectedOutputs === null ||
-    expectedOutputs === undefined ||
-    typeof expectedOutputs !== "object"
+    typeof (expected_outputs as unknown) !== "object" ||
+    (expected_outputs as unknown) === null
   ) {
     throw new Error(
       "validateResult: expectedOutputs must be a non-null object.",
     );
   }
-  const expectedKeys = Object.keys(expectedOutputs);
-  if (expectedKeys.length === 0) {
+  const expected_keys = Object.keys(expected_outputs);
+  if (expected_keys.length === 0) {
     throw new Error(
       "validateResult: expectedOutputs is empty; refusing to run zero assertions.",
     );
   }
-  if (modelResult === null || modelResult === undefined) {
+  if (model_result === null || model_result === undefined) {
     throw new Error(
       "validateResult: modelResult is null/undefined but expectedOutputs has keys.",
     );
   }
 
   try {
-    expectedKeys.forEach((key) => {
-      const expectedValue =
-        expectedOutputs[key] === null ? NaN : expectedOutputs[key];
-      // A primitive modelResult indexes to undefined, which the assertions
+    expected_keys.forEach((key) => {
+      const expected_value =
+        expected_outputs[key] === null ? NaN : expected_outputs[key];
+      // A primitive model_result indexes to undefined, which the assertions
       // below then report against the expected value.
-      const actualValue = (modelResult as Record<string, unknown>)[key];
+      const actual_value = (model_result as Record<string, unknown>)[key];
 
       // Use the specified tolerance if available, otherwise upstream's 1e-6
-      const tol =
-        tolerances && tolerances[key] !== undefined ? tolerances[key] : 1e-6;
+      const tol = tolerances?.[key] ?? 1e-6;
 
       // Handle arrays
-      if (Array.isArray(expectedValue)) {
-        expect(Array.isArray(actualValue)).toBe(true);
+      if (Array.isArray(expected_value)) {
+        expect(Array.isArray(actual_value)).toBe(true);
         // Length check guards against the silent-skip where a longer actual
         // array slips trailing elements past the per-index loop.
-        expect(actualValue).toHaveLength(expectedValue.length);
-        expectedValue.forEach((exp: unknown, index) => {
-          const act = (actualValue as unknown[])[index];
+        expect(actual_value).toHaveLength(expected_value.length);
+        expected_value.forEach((exp: unknown, index) => {
+          const act = (actual_value as unknown[])[index];
           if (typeof exp === "number") {
             if (isNaN(exp)) {
               expect(act).toBeNaN();
@@ -278,27 +277,27 @@ export function validateResult(
             expect(act).toEqual(exp);
           }
         });
-      } else if (typeof expectedValue === "number") {
+      } else if (typeof expected_value === "number") {
         // Handle numeric values
-        if (isNaN(expectedValue)) {
-          expect(actualValue).toBeNaN();
+        if (isNaN(expected_value)) {
+          expect(actual_value).toBeNaN();
         } else {
           // typeof guard prevents JS coercion false-passes (see array branch).
-          expect(typeof actualValue).toBe("number");
+          expect(typeof actual_value).toBe("number");
           expect(
-            Math.abs((actualValue as number) - expectedValue),
+            Math.abs((actual_value as number) - expected_value),
           ).toBeLessThanOrEqual(tol + Number.EPSILON * 100);
         }
       } else {
         // For booleans or other types
-        expect(actualValue).toEqual(expectedValue);
+        expect(actual_value).toEqual(expected_value);
       }
     });
   } catch (error) {
     console.log("Test failed with the following context:");
     console.log("Inputs:", inputs);
-    console.log("Expected outputs:", expectedOutputs);
-    console.log("Model outputs:", modelResult);
+    console.log("Expected outputs:", expected_outputs);
+    console.log("Model outputs:", model_result);
     throw error;
   }
 }

@@ -19,5 +19,15 @@
     "docs/changelog.md"
   ],
   "sortEntryPoints": false,
-  "sort": ["source-order"]
+  "sort": ["source-order"],
+  "externalPattern": [
+    "**/node_modules/**",
+    "**/src/models/JOS3.js",
+    "**/src/jos3_functions/**",
+    "**/src/supa.js",
+    "**/src/psychrometrics/t_mrt.js",
+    "**/src/utilities/utilities.js"
+  ],
+  "excludeExternals": true,
+  "treatValidationWarningsAsErrors": true
 }

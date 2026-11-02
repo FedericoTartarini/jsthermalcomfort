@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { net, NET_INFO } from "../../src/models/index.ts";
 import { net as net_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof net>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.net,
+  test_data_urls.net,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_net.py.

@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { humidex, HUMIDEX_INFO } from "../../src/models/index.ts";
 import { humidex as humidex_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof humidex>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.humidex,
+  test_data_urls.humidex,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_humidex.py. Its math.isclose

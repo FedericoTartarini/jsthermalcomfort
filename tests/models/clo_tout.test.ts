@@ -2,14 +2,14 @@ import { describe, expect, test } from "vitest";
 import { clo_tout, CLO_TOUT_INFO } from "../../src/models/index.ts";
 import { Standard, Units } from "../../src/utilities/index.ts";
 import { clo_tout as clo_tout_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof clo_tout>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.cloTout,
+  test_data_urls.cloTout,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_clo_tout.py.

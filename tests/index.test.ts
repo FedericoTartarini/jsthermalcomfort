@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import jsthermalcomfort, * as namedExports from "../src";
+import jsthermalcomfort, * as namedExports from "../src/index.ts";
 
 describe("NPM Package", () => {
   it("should be an object", () => {
@@ -98,10 +98,6 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pmv_athb");
   });
 
-  it("should have models.pmv", () => {
-    expect(jsthermalcomfort.models).toHaveProperty("pmv");
-  });
-
   it("should have models.pmv_a", () => {
     expect(jsthermalcomfort.models).toHaveProperty("pmv_a");
   });
@@ -180,12 +176,6 @@ describe("NPM Package", () => {
     );
     expect(namedExports.CLO_INDIVIDUAL_GARMENT_GROUPS).toBe(
       jsthermalcomfort.utilities.CLO_INDIVIDUAL_GARMENT_GROUPS,
-    );
-  });
-
-  it("should have utilities.check_standard_compliance", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty(
-      "check_standard_compliance",
     );
   });
 

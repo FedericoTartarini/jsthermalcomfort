@@ -5,14 +5,14 @@ import {
 } from "../../src/models/index.ts";
 import { two_nodes_gagge as from_root } from "../../src/index.ts";
 import { Postures } from "../../src/utilities/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof two_nodes_gagge>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.twoNodes,
+  test_data_urls.twoNodes,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_two_nodes_gagge.py. A

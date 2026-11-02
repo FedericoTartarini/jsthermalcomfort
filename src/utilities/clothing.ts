@@ -137,8 +137,8 @@ export function clo_total_insulation(
  * clo = I_cl × (0.6 + 0.4 / met).
  *
  * This is the correction ASHRAE 55 applies, so its result is the `clo` that
- * {@link #pmv_ppd_ashrae|pmv_ppd_ashrae} and the other ASHRAE 55 models take.
- * For ISO 7730 use {@link #clo_dynamic_iso|clo_dynamic_iso}. Same name,
+ * {@link models!pmv_ppd_ashrae} and the other ASHRAE 55 models take.
+ * For ISO 7730 use {@link clo_dynamic_iso}. Same name,
  * parameters and values as pythermalcomfort's `clothing.clo_dynamic_ashrae`.
  *
  * @param {number} clo - clothing insulation, [clo]. This is the basic insulation (I_cl), also known
@@ -158,7 +158,7 @@ export function clo_dynamic_ashrae(
   // Upstream's `model`; this library names the option `standard` (ADR 0003).
   standard: typeof Standard.ashrae_55_2023 = Standard.ashrae_55_2023,
 ): number {
-  if (standard !== Standard.ashrae_55_2023)
+  if ((standard as unknown) !== Standard.ashrae_55_2023)
     throw new Error(
       `PMV calculations can only be performed in compliance with ASHRAE ${Standard.ashrae_55_2023}`,
     );
@@ -178,13 +178,13 @@ export function clo_dynamic_ashrae(
  * metabolic rate using the formula given in ISO 7730 Annex C / ISO 9920 for
  * when the actual walking speed is undefined: v_walk = 0.0052 × (M − 58),
  * clipped to 0–0.7 m/s, where M is the metabolic rate in W/m2. This is a
- * different formula from {@link #v_relative|v_relative}'s activity-generated
+ * different formula from `v_relative`'s activity-generated
  * air speed (0.3 × (met − 1)), which is used in the whole-body PMV heat
  * balance rather than for the clothing dynamic insulation correction.
  *
  * This is the correction ISO 7730 applies, so its result is the `clo` that
- * {@link #pmv_ppd_iso|pmv_ppd_iso} takes. For ASHRAE 55 use
- * {@link #clo_dynamic_ashrae|clo_dynamic_ashrae}. Same name, parameters and
+ * {@link models!pmv_ppd_iso} takes. For ASHRAE 55 use
+ * {@link clo_dynamic_ashrae}. Same name, parameters and
  * values as pythermalcomfort's `clothing.clo_dynamic_iso`: `v` is the air
  * speed, and the relative air speed is derived from it with `v_relative`.
  *
@@ -215,7 +215,7 @@ export function clo_dynamic_iso(
 /**
  * Estimates the dynamic intrinsic clothing insulation (I_cl,r) by ISO 7730
  * Annex C / ISO 9920, from the relative air speed. This is
- * {@link #clo_dynamic_iso|clo_dynamic_iso} for a caller that holds the
+ * {@link clo_dynamic_iso} for a caller that holds the
  * relative air speed `vr` and not the air speed `v`:
  * `clo_dynamic_iso(clo, met, v)` is
  * `clo_dynamic_iso_vr(clo, met, v_relative(v, met))`. The walking speed is
@@ -246,7 +246,7 @@ export function clo_dynamic_iso_vr(
   i_a = 0.7,
   standard: typeof Standard.iso_9920_2007 = Standard.iso_9920_2007,
 ): number {
-  if (standard !== Standard.iso_9920_2007)
+  if ((standard as unknown) !== Standard.iso_9920_2007)
     throw new Error(
       `PMV calculations can only be performed in compliance with ISO ${Standard.iso_9920_2007}`,
     );

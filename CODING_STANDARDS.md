@@ -1,6 +1,6 @@
 # Coding standards
 
-What a review checks a change against. Prettier, ESLint over `eslint.config.mjs`'s list, strict `tsc`, the register cross-check and the parity suite already run in the pre-commit hook and CI; a review covers what they cannot.
+What a review checks a change against. Prettier, ESLint over `src/` and `tests/` (less `eslint.config.mjs`'s `UNLINTED`), strict `tsc`, the register cross-check and the parity suite already run in the pre-commit hook and CI; a review covers what they cannot.
 
 ## Where the rules live
 

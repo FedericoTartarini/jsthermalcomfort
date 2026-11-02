@@ -4,7 +4,7 @@ import { wet_bulb_tmp } from "./wet_bulb_tmp.ts";
  * Calculates the relative humidity from the wet-bulb temperature.
  *
  * Numeric inverse of {@link wet_bulb_tmp}: bisection on the Stull equation
- * {@link #ref_6|[6]}. The Stull fit takes no atmospheric pressure, so neither
+ * [Stull2011](../../docs/references.md#stull2011). The Stull fit takes no atmospheric pressure, so neither
  * does this function.
  *
  * The fit is not monotonic in `rh` at low `tdb` (it dips before it rises, and

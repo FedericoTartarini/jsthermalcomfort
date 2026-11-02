@@ -10,7 +10,6 @@ import {
 } from "../../src/models/index.ts";
 import { THERMAL_SENSATION } from "../../src/models/_pmv_ppd_optimized.ts";
 import {
-  check_standard_compliance,
   clo_dynamic_ashrae,
   Standard,
   Units,
@@ -19,7 +18,7 @@ import {
 import { pmv_ppd_ashrae as from_root } from "../../src/index.ts";
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import { read_data } from "../parity/harness.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import {
   approx,
@@ -32,7 +31,7 @@ type Inputs = Parameters<typeof pmv_ppd_ashrae>[0];
 
 // Array rows run element-wise.
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.pmvPpd,
+  test_data_urls.pmvPpd,
 );
 
 // As upstream, the rows whose label lower-cases to "ashrae" (tests/test_pmv_ppd_ashrae.py:23-25).
@@ -594,37 +593,6 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         expect(rows.length > 0).toBe(caused_by_limits);
       },
     );
-
-    // check_standard_compliance keeps its own copy of these bounds and of the
-    // airspeed rules, so this pins the two copies together on every branch.
-    test("the input rows break exactly when check_standard_compliance warns", () => {
-      for (const airspeed_control of [true, false])
-        for (const tdb of [5, 10, 20, 24, 30, 35, 40, 45])
-          for (const vr of [0, 0.1, 0.25, 0.5, 0.9, 1.5, 2, 2.5])
-            for (const met of [0.7, 0.8, 1, 1.2, 4, 4.5])
-              for (const clo of [0, 0.5, 1, 1.5, 2, 2.5]) {
-                const rows = pmv_ppd_ashrae({
-                  tdb,
-                  tr: tdb,
-                  vr,
-                  rh: 50,
-                  met,
-                  clo,
-                  airspeed_control,
-                }).warnings.filter(({ kind }) => kind === "range");
-                const strings = check_standard_compliance(
-                  Standard.ashrae_55_2023,
-                  { tdb, tr: tdb, v: vr, met, clo, airspeed_control },
-                );
-                expect({ tdb, vr, met, clo, broke: rows.length > 0 }).toEqual({
-                  tdb,
-                  vr,
-                  met,
-                  clo,
-                  broke: strings.length > 0,
-                });
-              }
-    });
   });
 
   // _internal/ashrae55.py:41-79; clo < 0.7 and met < 1.3, the only case these limits apply to.

@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
-import { v2Infos } from "./testUtils.ts";
+import { v2_infos } from "./testUtils.ts";
 
 // Nothing else checks the `@returns` list against INFO.outputs (ADR 0023).
 describe("the function's @returns list", () => {
-  test.each(v2Infos)(
+  test.each(v2_infos)(
     "$info.name: its @returns names each INFO.outputs key, in order",
     ({ info }) => {
       const source = readFileSync(

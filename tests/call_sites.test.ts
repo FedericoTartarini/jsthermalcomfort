@@ -1,8 +1,7 @@
 import { fileURLToPath } from "node:url";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import ts from "typescript";
 import { describe, expect, test } from "vitest";
-import { LINTED } from "../eslint.config.mjs";
 
 // The counterpart of upstream's tests/test_call_site_arguments.py (#441), on
 // the repository's files (seam S3). Swapping two same-typed arguments, such
@@ -151,16 +150,14 @@ function program_of(files: readonly string[]): ts.Program {
   });
 }
 
-// The migrated source files, which the lint list holds as it grows, less the
-// port of scipy's fsolve: upstream's test reads pythermalcomfort's own files
-// (PACKAGE_DIR, tests/test_call_site_arguments.py:16, :35), and MINPACK
-// passes one array or dimension for two parameters by design (qrfac(n, n, …)).
-const MIGRATED = LINTED.filter(
-  (file) =>
-    file.startsWith("src/") &&
-    file.endsWith(".ts") &&
-    file !== "src/_internal/fsolve.ts",
-);
+// The TypeScript files in src/, less the port of scipy's fsolve: upstream's
+// test reads pythermalcomfort's own files (PACKAGE_DIR,
+// tests/test_call_site_arguments.py:16, :35), and MINPACK passes one array or
+// dimension for two parameters by design (qrfac(n, n, …)).
+const MIGRATED = ts.sys
+  .readDirectory(join(root, "src"), [".ts"])
+  .map((file) => relative(root, file))
+  .filter((file) => file !== "src/_internal/fsolve.ts");
 
 describe("test_call_site_arguments", () => {
   test("test_no_transposed_arguments", () => {

@@ -5,14 +5,14 @@ import {
   CLO_TOUT_INFO,
 } from "../../src/models/index.ts";
 import { adaptive_en as adaptive_en_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof adaptive_en>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.adaptiveEn,
+  test_data_urls.adaptiveEn,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_adaptive_en.py.

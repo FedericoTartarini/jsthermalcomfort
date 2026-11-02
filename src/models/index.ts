@@ -42,7 +42,6 @@ import {
   SPORTS_HEAT_STRESS_RISK_INFO,
 } from "./sports_heat_stress_risk.ts";
 import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
-import { pmv } from "./pmv.js";
 import { pmv_a, PMV_A_INFO } from "./pmv_a.ts";
 import { pmv_athb, PMV_ATHB_INFO } from "./pmv_athb.ts";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "./ankle_draft.ts";
@@ -89,7 +88,6 @@ import { classifyFromBins } from "../_internal/classifierBins.ts";
 export type { ClassifierBins } from "../_internal/classifierBins.ts";
 // deepFreeze is internal, so modelInfo contributes its types only.
 export type {
-  ApplicabilityWarning,
   BoolField,
   Bound,
   ChoiceField,
@@ -208,7 +206,6 @@ export {
   PET_STEADY_INFO,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
-  pmv,
   PMV_CATEGORY_BINS_ISO_7730,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,
@@ -258,6 +255,12 @@ export {
   WORK_CAPACITY_NIOSH_INFO,
 };
 
+/**
+ * The named exports as one object, for `import pkg from "jsthermalcomfort"`.
+ * Each member is documented under its own name.
+ *
+ * @hidden
+ */
 export default {
   adaptive_ashrae,
   ADAPTIVE_ASHRAE_INFO,
@@ -295,7 +298,6 @@ export default {
   PET_STEADY_INFO,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
-  pmv,
   PMV_CATEGORY_BINS_ISO_7730,
   PMV_PPD_ASHRAE_INFO,
   PMV_PPD_ISO_INFO,

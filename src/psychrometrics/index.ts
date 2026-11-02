@@ -26,6 +26,12 @@ export {
   rh_from_vapour_pressure,
 };
 
+/**
+ * The named exports as one object, for `import pkg from "jsthermalcomfort"`.
+ * Each member is documented under its own name.
+ *
+ * @hidden
+ */
 export default {
   p_sat,
   p_sat_torr,

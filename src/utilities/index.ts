@@ -6,9 +6,6 @@ import {
   clo_typical_ensembles,
   clo_individual_garments,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
-  check_standard_compliance,
-  is_iso_7730,
-  LimitSet,
 } from "./utilities.js";
 import { body_surface_area } from "./body_surface_area.ts";
 import { units_converter } from "./units_converter.ts";
@@ -38,9 +35,6 @@ export {
   clo_typical_ensembles,
   clo_individual_garments,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
-  check_standard_compliance,
-  is_iso_7730,
-  LimitSet,
   Standard,
   Units,
   Postures,
@@ -48,6 +42,12 @@ export {
   WorkIntensity,
 };
 
+/**
+ * The named exports as one object, for `import pkg from "jsthermalcomfort"`.
+ * Each member is documented under its own name.
+ *
+ * @hidden
+ */
 export default {
   body_surface_area,
   v_relative,
@@ -64,9 +64,6 @@ export default {
   clo_typical_ensembles,
   clo_individual_garments,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
-  check_standard_compliance,
-  is_iso_7730,
-  LimitSet,
   Standard,
   Units,
   Postures,

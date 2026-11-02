@@ -10,14 +10,14 @@ import { Units } from "../../src/utilities/index.ts";
 import { utci as utci_from_root } from "../../src/index.ts";
 import { p_sat } from "../../src/psychrometrics/index.ts";
 import { round } from "../../src/_internal/round.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof utci>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.utci,
+  test_data_urls.utci,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_utci.py. A UserWarning becomes a

@@ -66,7 +66,7 @@ To set up jsthermalcomfort for local development:
    ```bash
    npm run format
    ```
-   - Run ESLint over the files listed in `eslint.config.mjs`:
+   - Run ESLint over `src/` and `tests/`, less the files `eslint.config.mjs` names in `UNLINTED`:
 
    ```bash
    npm run lint
@@ -157,7 +157,6 @@ then add `my_new_model` and `MY_NEW_MODEL_INFO` to both the `export { … }` lis
 
 - Mirror upstream's `tests/test_<name>.py` in `tests/models/<name>.test.ts`, following the conventions at the top of `tests/models/testUtils.ts`.
 - Add the model to the parity suite, as `scripts/parity/README.md` ("Adding a model") describes.
-- Add the model's files to `LINTED` in `eslint.config.mjs`.
 
 ---
 

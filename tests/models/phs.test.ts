@@ -3,14 +3,14 @@ import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "../../src/models/index.ts";
 import { phs as from_root } from "../../src/index.ts";
 import { Postures } from "../../src/utilities/index.ts";
 import { met_to_w_m2 } from "../../src/utilities/met_to_w_m2.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof phs>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.phs,
+  test_data_urls.phs,
 );
 
 const weight = 75;

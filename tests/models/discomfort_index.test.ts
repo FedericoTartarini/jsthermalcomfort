@@ -4,14 +4,14 @@ import {
   DISCOMFORT_INDEX_INFO,
 } from "../../src/models/index.ts";
 import { discomfort_index as discomfort_index_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof discomfort_index>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.discomfortIndex,
+  test_data_urls.discomfortIndex,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_discomfort_index.py.

@@ -6,14 +6,14 @@ import {
   PMV_PPD_ISO_INFO,
 } from "../../src/models/index.ts";
 import { pmv_e as pmv_e_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof pmv_e>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.ePmv,
+  test_data_urls.ePmv,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_e_pmv.py.

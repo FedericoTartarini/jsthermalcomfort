@@ -5,14 +5,14 @@ import {
 } from "../../src/models/index.ts";
 import { wind_chill_temperature as wind_chill_temperature_from_root } from "../../src/index.ts";
 import { round } from "../../src/_internal/round.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof wind_chill_temperature>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.windChillTemperature,
+  test_data_urls.windChillTemperature,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_wind_chill_temperature.py.

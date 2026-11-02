@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { wci, WCI_INFO } from "../../src/models/index.ts";
 import { wci as wci_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof wci>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.windChill,
+  test_data_urls.windChill,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_wind_chill_index.py.

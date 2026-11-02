@@ -10,4 +10,11 @@ import environment from "./environment/index.ts";
 import psychrometrics from "./psychrometrics/index.ts";
 import models from "./models/index.ts";
 
+/**
+ * The four subpath default exports as one object, for
+ * `import pkg from "jsthermalcomfort"`. Each of their members is documented
+ * under its own name.
+ *
+ * @hidden
+ */
 export default { utilities, environment, psychrometrics, models };

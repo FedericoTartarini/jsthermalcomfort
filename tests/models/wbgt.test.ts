@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { wbgt, WBGT_INFO } from "../../src/models/index.ts";
 import { wbgt as wbgt_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
@@ -10,7 +10,7 @@ type Inputs = Parameters<typeof wbgt>[0];
 const call = (inputs: unknown) => wbgt(inputs as Inputs);
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.wbgt,
+  test_data_urls.wbgt,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_wbgt.py.

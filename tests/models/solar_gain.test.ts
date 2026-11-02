@@ -2,14 +2,14 @@ import { describe, expect, test } from "vitest";
 import { solar_gain, SOLAR_GAIN_INFO } from "../../src/models/index.ts";
 import { Postures, Standard } from "../../src/utilities/index.ts";
 import { solar_gain as solar_gain_from_root } from "../../src/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof solar_gain>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.solarGain,
+  test_data_urls.solarGain,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_solar_gain.py.

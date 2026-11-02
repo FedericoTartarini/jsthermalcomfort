@@ -3,14 +3,14 @@ import { describe, expect, test } from "vitest";
 import { cooling_effect, COOLING_EFFECT_INFO } from "../../src/models/index.ts";
 import { cooling_effect as from_root } from "../../src/index.ts";
 import { read_data } from "../parity/harness.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof cooling_effect>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.coolingEffect,
+  test_data_urls.coolingEffect,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_cooling_effect.py.

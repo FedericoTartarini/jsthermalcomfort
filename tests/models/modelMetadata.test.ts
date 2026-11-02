@@ -1,20 +1,13 @@
 import { describe, expect, test } from "vitest";
 import * as pkg from "../../src/index.ts";
-import {
-  ADAPTIVE_ASHRAE_INFO,
-  CLO_TOUT_INFO,
-  HEAT_INDEX_ROTHFUSZ_INFO,
-  adaptive_ashrae,
-  clo_tout,
-} from "../../src/index.ts";
 import { Standard } from "../../src/utilities/options.ts";
 import type { ModelInfo } from "../../src/_internal/modelInfo.ts";
 import { isDeepFrozen } from "./modelContract.ts";
-import { v2Infos } from "./testUtils.ts";
+import { v2_infos } from "./testUtils.ts";
 
 // The list catches a constant missing from src/models/index.ts or
 // src/index.ts, which a scan of the package cannot.
-const expectedMetadataExports = [
+const expected_metadata_exports = [
   "ADAPTIVE_ASHRAE_INFO",
   "classifyFromBins",
   "CLO_TOUT_INFO",
@@ -29,11 +22,11 @@ const expectedMetadataExports = [
 
 describe("Model Metadata Exports — enumeration test", () => {
   test("all model metadata and classifier exports are available from package root", () => {
-    const packageExports = Object.keys(pkg);
+    const package_exports = Object.keys(pkg);
 
     // Every expected export must be present in the package root
-    expectedMetadataExports.forEach((name) => {
-      expect(packageExports).toContain(name);
+    expected_metadata_exports.forEach((name) => {
+      expect(package_exports).toContain(name);
       expect((pkg as Record<string, unknown>)[name]).toBeDefined();
     });
   });
@@ -47,28 +40,28 @@ describe("Model Metadata Exports — enumeration test", () => {
 
 // Every exported model info, found by the naming convention rather than listed,
 // so a sixth `_INFO` is covered by the name test on arrival.
-const exportedInfos = Object.entries(pkg as Record<string, unknown>)
-  .filter(([exportName]) => exportName.endsWith("_INFO"))
-  .map(([exportName, info]) => ({ exportName, info: info as ModelInfo }));
+const exported_infos = Object.entries(pkg as Record<string, unknown>)
+  .filter(([export_name]) => export_name.endsWith("_INFO"))
+  .map(([export_name, info]) => ({ export_name, info: info as ModelInfo }));
 
 describe("name — each model info names its model's export", () => {
   test("the naming convention finds every listed model info", () => {
     // Guards the filter itself: a convention that matched nothing would make
     // the tests below pass vacuously.
-    expect(exportedInfos.map(({ exportName }) => exportName)).toEqual(
+    expect(exported_infos.map(({ export_name }) => export_name)).toEqual(
       expect.arrayContaining(
-        expectedMetadataExports.filter((name) => name.endsWith("_INFO")),
+        expected_metadata_exports.filter((name) => name.endsWith("_INFO")),
       ),
     );
   });
 
-  test.each(exportedInfos)(
-    "$exportName.name is an exported function whose _INFO is this object",
-    ({ exportName, info }) => {
+  test.each(exported_infos)(
+    "$export_name.name is an exported function whose _INFO is this object",
+    ({ export_name, info }) => {
       const exports = pkg as Record<string, unknown>;
       expect(typeof info.name).toBe("string");
       expect(typeof exports[info.name]).toBe("function");
-      expect(`${info.name.toUpperCase()}_INFO`).toBe(exportName);
+      expect(`${info.name.toUpperCase()}_INFO`).toBe(export_name);
     },
   );
 });
@@ -76,7 +69,7 @@ describe("name — each model info names its model's export", () => {
 describe("standards — the standards each model takes", () => {
   test("every exported _INFO lists only Standard values", () => {
     const known: readonly string[] = Object.values(Standard);
-    for (const { info } of exportedInfos) {
+    for (const { info } of exported_infos) {
       for (const standard of info.standards) {
         expect(known).toContain(standard);
       }
@@ -86,7 +79,7 @@ describe("standards — the standards each model takes", () => {
 
 describe("Deep freezing — objects are immutable", () => {
   test.each(
-    expectedMetadataExports.filter((name) =>
+    expected_metadata_exports.filter((name) =>
       /_INFO$|_BINS_|_LIMITS_/.test(name),
     ),
   )("%s is frozen deeply", (name) => {
@@ -97,7 +90,7 @@ describe("Deep freezing — objects are immutable", () => {
 // One call of each model whose INFO has the v2 form, its inputs carrying a
 // kind, with inputs it accepts. A model migrated later fails the first test
 // below until it has a call here.
-const v2Calls: Record<string, object> = {
+const v2_calls: Record<string, object> = {
   adaptive_ashrae: { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
   adaptive_en: { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 },
   ankle_draft: {
@@ -232,8 +225,8 @@ const v2Calls: Record<string, object> = {
 
 describe("Outputs staleness — each v2 model's result matches its INFO.outputs", () => {
   test("every v2 model info has a call here", () => {
-    expect(v2Infos.map(({ info }) => info.name).sort()).toEqual(
-      Object.keys(v2Calls).sort(),
+    expect(v2_infos.map(({ info }) => info.name).sort()).toEqual(
+      Object.keys(v2_calls).sort(),
     );
   });
 
@@ -241,16 +234,16 @@ describe("Outputs staleness — each v2 model's result matches its INFO.outputs"
   // to compile. A key removed from INFO while the body still returns it
   // compiles, and only this catches it. `warnings` lists the bounds a call
   // broke; it is not a quantity, so INFO.outputs does not describe it (#199).
-  test.each(v2Infos)(
-    "$exportName: the result's keys, less warnings, are INFO.outputs' keys in order",
+  test.each(v2_infos)(
+    "$export_name: the result's keys, less warnings, are INFO.outputs' keys in order",
     ({ info }) => {
       const model = (pkg as Record<string, unknown>)[info.name] as (
         inputs: object,
       ) => object;
-      const resultKeys = Object.keys(model(v2Calls[info.name]!)).filter(
+      const result_keys = Object.keys(model(v2_calls[info.name] ?? {})).filter(
         (key) => key !== "warnings",
       );
-      expect(resultKeys).toEqual(Object.keys(info.outputs));
+      expect(result_keys).toEqual(Object.keys(info.outputs));
     },
   );
 });

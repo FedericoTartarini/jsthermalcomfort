@@ -20,4 +20,4 @@ function _kernel(x: number): number {
   return x;
 }
 
-export const KERNEL = _kernel;
+export const kernel = _kernel;

@@ -10,14 +10,14 @@ import {
   ASHRAE_55_COMPLIANCE_STANDARDS,
   ASHRAE_55_LIMITS,
 } from "../../src/_internal/ashrae55.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof adaptive_ashrae>[0];
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
-  testDataUrls.adaptiveAshrae,
+  test_data_urls.adaptiveAshrae,
 );
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_adaptive_ashrae.py. The

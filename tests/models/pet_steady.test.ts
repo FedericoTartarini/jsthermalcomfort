@@ -2,12 +2,12 @@ import { describe, expect, test } from "vitest";
 import { pet_steady, PET_STEADY_INFO } from "../../src/models/index.ts";
 import { pet_steady as pet_steady_from_root } from "../../src/index.ts";
 import { Postures, Sex } from "../../src/utilities/index.ts";
-import { testDataUrls } from "./comftest.ts";
+import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
 
 const { testData: test_data, tolerances } = await loadTestData(
-  testDataUrls.petSteady,
+  test_data_urls.petSteady,
 );
 
 const PET_TEST_MATRIX = [

@@ -27,9 +27,13 @@ const NOT_IMPLEMENTED_IN_JS = [];
 
 // Identifiers jsthermalcomfort has and pythermalcomfort does not, for a
 // standard a model takes that upstream's Models names no member for
-// (deviation _shared-51). If pythermalcomfort adds one under another key or
-// value, the first test below fails until this one is renamed to match.
-const JS_ONLY = { en_16798_1_2019: "16798-1-2019" };
+// (deviations _shared-51 and _shared-78). If pythermalcomfort adds one under
+// another key or value, the first test below fails until this one is renamed
+// to match.
+const JS_ONLY = {
+  iso_7243_2017: "7243-2017",
+  en_16798_1_2019: "16798-1-2019",
+};
 
 describe("Standard mirrors pythermalcomfort's Models enum", () => {
   test("every JS identifier exists in pythermalcomfort with the same value", () => {

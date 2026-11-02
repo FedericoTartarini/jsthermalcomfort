@@ -1,3 +1,4 @@
+import { heat_index_lu } from "./heat_index_lu.ts";
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
@@ -186,6 +187,7 @@ export {
   DISCOMFORT_INDEX_INFO,
   esi,
   ESI_INFO,
+  heat_index_lu,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,
@@ -270,6 +272,7 @@ export default {
   DISCOMFORT_INDEX_INFO,
   esi,
   ESI_INFO,
+  heat_index_lu,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,

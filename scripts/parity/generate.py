@@ -203,6 +203,18 @@ def _esi(rng):
     }
 
 
+def _heat_index_lu(rng):
+    # tdb stays in [-50, 70) °C and rh in [0, 100], where upstream's root
+    # solver finds its interval (it raises from about 127 °C at rh 100,
+    # models/heat_index_lu.py:345), and rh reaches 0 and 100 now and then.
+    draw = rng.random()
+    return {
+        "tdb": _value(rng, -50.0, 70.0),
+        "rh": float(rng.choice([0.0, 100.0])) if draw < 0.05 else _value(rng, 0.0, 100.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _heat_index_rothfusz(rng):
     # tdb reaches below the 27 °C gate, so NaN positions and the tdb warning
     # are compared too.
@@ -919,6 +931,7 @@ MODELS = {
     "cooling_effect": (models.cooling_effect, _cooling_effect),
     "discomfort_index": (models.discomfort_index, _discomfort_index),
     "esi": (models.esi, _esi),
+    "heat_index_lu": (models.heat_index_lu, _heat_index_lu),
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "heat_index_schoen": (models.heat_index_schoen, _heat_index_schoen),
     "humidex": (models.humidex, _humidex),

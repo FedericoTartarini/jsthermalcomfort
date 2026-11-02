@@ -10,6 +10,7 @@ import {
   cooling_effect,
   discomfort_index,
   esi,
+  heat_index_lu,
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
@@ -532,6 +533,14 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) => esi(inputs as unknown as Parameters<typeof esi>[0]),
     // Upstream rounds esi with np.round (models/esi.py:65-66).
     rounded: ({ round_output }) => (round_output === true ? ["esi"] : []),
+    warnings: true,
+  },
+  {
+    name: "heat_index_lu",
+    run: (inputs) =>
+      heat_index_lu(inputs as unknown as Parameters<typeof heat_index_lu>[0]),
+    // Upstream rounds hi with np.around (models/heat_index_lu.py:60-61).
+    rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
   },
   {

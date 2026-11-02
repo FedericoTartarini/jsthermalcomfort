@@ -32,6 +32,7 @@ import {
   USE_FANS_HEATWAVES_INFO,
   utci,
   vertical_tmp_grad_ppd,
+  wbgt,
   wci,
   wind_chill_temperature,
   work_capacity_dunne,
@@ -701,6 +702,13 @@ const MODELS: readonly ParityModel[] = [
     // effect's notice, which upstream emits twice, are exempt by the register
     // (deviation vertical_tmp_grad_ppd-5, deviation vertical_tmp_grad_ppd-6).
     warnings: true,
+  },
+  {
+    name: "wbgt",
+    run: (inputs) => wbgt(inputs as unknown as Parameters<typeof wbgt>[0]),
+    // Upstream rounds wbgt with np.round (models/wbgt.py:90-91).
+    rounded: ({ round_output }) => (round_output === true ? ["wbgt"] : []),
+    warnings: false,
   },
   {
     name: "wci",

@@ -98,6 +98,7 @@ export const LINTED = [
   "tests/models/use_fans_heatwaves.test.ts",
   "tests/models/utci.test.ts",
   "tests/models/vertical_tmp_grad_ppd.test.ts",
+  "tests/models/wbgt.test.ts",
   "tests/models/wci.test.ts",
   "tests/models/wind_chill_temperature.test.ts",
   "tests/models/work_capacity_dunne.test.ts",

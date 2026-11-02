@@ -635,6 +635,25 @@ def _vertical_tmp_grad_ppd(rng):
     }
 
 
+def _wbgt(rng):
+    # Upstream checks no range (models/wbgt.py:70-76, WBGTInputs at
+    # classes_input.py:1021-1037), so twb, tg and tdb reach past the
+    # validation table's 0-25 °C, 0-55 °C and 0-20 °C (ts_wbgt.json at
+    # validation data v1.0.1). tdb is left out half the time, and
+    # with_solar_load is True only with a tdb, since upstream raises without
+    # one (models/wbgt.py:82-83); half of the tdb cases leave it False, where
+    # tdb is ignored (:85-88).
+    inputs = {
+        "twb": _value(rng, -30.0, 45.0),
+        "tg": _value(rng, -30.0, 90.0),
+    }
+    if rng.random() < 0.5:
+        inputs["tdb"] = _value(rng, -30.0, 60.0)
+        inputs["with_solar_load"] = bool(rng.random() < 0.5)
+    inputs["round_output"] = bool(rng.random() < 0.5)
+    return inputs
+
+
 def _wci(rng):
     # v reaches past 25 m/s (90 km/h), where the index peaks and then
     # declines (models/wci.py:25-26), and tdb past 33 °C, where its
@@ -768,6 +787,7 @@ MODELS = {
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),
     "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),
+    "wbgt": (models.wbgt, _wbgt),
     "wci": (models.wci, _wci),
     "wind_chill_temperature": (models.wind_chill_temperature, _wind_chill_temperature),
     "work_capacity_dunne": (models.work_capacity_dunne, _work_capacity_dunne),

@@ -9,7 +9,7 @@ import {
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { net, NET_INFO } from "./net.ts";
-import { wbgt } from "./wbgt.js";
+import { wbgt } from "./wbgt.ts";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
 import { esi, ESI_INFO } from "./esi.ts";
 import { thi, THI_INFO } from "./thi.ts";

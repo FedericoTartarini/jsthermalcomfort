@@ -95,16 +95,19 @@ describe("OutputsOf", () => {
       outputs: {
         s: { kind: "numeric"; unit: "°C"; series: true };
         n: { kind: "numeric"; unit: null };
+        m: { kind: "numeric"; unit: null; series: true; masked: true };
       };
     };
     expectTypeOf<OutputsOf<Info, number>>().toEqualTypeOf<{
       readonly s: number;
       readonly n: number;
+      readonly m: readonly number[];
       readonly warnings: readonly ModelWarning[];
     }>();
     expectTypeOf<OutputsOf<Info, number | readonly number[]>>().toEqualTypeOf<{
       readonly s: number | readonly number[];
       readonly n: number;
+      readonly m: readonly number[];
       readonly warnings: readonly ModelWarning[];
     }>();
   });

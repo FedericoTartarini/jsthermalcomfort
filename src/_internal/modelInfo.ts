@@ -318,26 +318,30 @@ export type ResolvedOf<I extends InputsInfo> = {
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
  * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), and a
- * `series` field is a readonly array of those values, or `Series` where it is
- * given: `number | readonly number[]` for a model that returns a number for
- * one time step, as `two_nodes_gagge_sleep` does (decisions 276, 277).
+ * `series` field is a readonly array of those values. A numeric series that
+ * is not masked takes `Series`, by default `readonly number[]`:
+ * `number | readonly number[]` for a model that returns a number for one time
+ * step, as `two_nodes_gagge_sleep` does (decisions 276, 277).
  */
 export type OutputsOf<
   M extends { readonly outputs: OutputsInfo },
-  Series extends number | readonly number[] = never,
+  Series extends number | readonly number[] = readonly number[],
 > = Flatten<
   {
     readonly [K in keyof M["outputs"]]: M["outputs"][K] extends {
       readonly series: true;
     }
-      ? [Series] extends [never]
-        ? readonly (
+      ? M["outputs"][K] extends {
+          readonly kind: "numeric";
+          readonly masked?: undefined;
+        }
+        ? Series
+        : readonly (
             | KindValues[M["outputs"][K]["kind"]]
             | (M["outputs"][K] extends { readonly masked: true }
                 ? number
                 : never)
           )[]
-        : Series
       : | KindValues[M["outputs"][K]["kind"]]
         | (M["outputs"][K] extends { readonly masked: true } ? number : never);
   } & ModelOutputs

@@ -165,6 +165,15 @@ const v2Calls: Record<string, object> = {
   },
   pmv_ppd_ashrae: { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   pmv_ppd_iso: { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 },
+  ridge_regression_predict_t_re_t_sk: {
+    sex: "male",
+    age: 70,
+    height: 1.8,
+    weight: 75,
+    tdb: 35,
+    rh: 60,
+    duration: 60,
+  },
   set_tmp: { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   solar_gain: {
     sol_altitude: 0,

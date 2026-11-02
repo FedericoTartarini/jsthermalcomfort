@@ -1,3 +1,9 @@
+// Ridge regression model for predicting rectal and skin temperature.
+//
+// Based on fold 1 from Forbes et al. (2025), doi:10.1016/j.jtherbio.2025.104078. Trained
+// on adults aged 60-100 in minimal clothing under stationary conditions. Uses Min-Max
+// scaling on features and outputs.
+
 import { choiceFieldMessage, parseInputs } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
@@ -140,6 +146,104 @@ export type PredictedBodyTemperatures = OutputsOf<
   typeof RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO
 >;
 
+/**
+ * Predicts the full history of core and skin temperature changes based on a ridge
+ * regression model.
+ *
+ * This model simulates the rectal (t_re) and mean skin (t_sk)
+ * temperatures by first establishing a baseline in a thermoneutral environment
+ * (23°C, 50% RH for 120 mins) and then simulating exposure to the specified
+ * environmental conditions for `duration`. If a `t_re` and
+ * `t_sk` are provided, then the initial 120 min simulation is skipped.
+ * Coefficients are taken from fold one from the study [Forbes2025](../../docs/references.md#forbes2025)
+ * (https://doi.org/10.1016/j.jtherbio.2025.104078). See notes documentation
+ * for limitations with this model.
+ *
+ * @param inputs
+ * @param inputs.sex - Biological sex. Pass the enum instance (e.g., `Sex.male`)
+ * or its string value (e.g., `Sex.male.value` or `"male"`).
+ * @param inputs.age - Age, in years.
+ * @param inputs.height - Body height in meters [m].
+ * @param inputs.weight - Body weight in kilograms [kg].
+ * @param inputs.tdb - Ambient (dry bulb) air temperature, in °C.
+ * @param inputs.rh - Relative humidity, in %.
+ * @param inputs.duration - Duration of the simulation in the specified environment, in minutes.
+ * @param inputs.t_re - Initial rectal temperature (°C). If provided, the baseline simulation
+ * at 23°C, 50% RH for 120 minutes is skipped, and this value is used
+ * as the starting rectal temperature for the main simulation.
+ * @param inputs.t_sk - Initial mean skin temperature (°C). If provided, the baseline simulation
+ * at 23°C, 50% RH for 120 minutes is skipped, and this value is used
+ * as the starting mean skin temperature for the main simulation.
+ * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ * @param inputs.round_output - If True, rounds outputs to 2 decimal places; otherwise leaves full precision.
+ * Defaults to True.
+ *
+ * @returns A dataclass containing the predicted rectal (`t_re`) and skin (`t_sk`)
+ * temperature history in °C. See
+ * {@link PredictedBodyTemperatures}
+ * for more details. The outputs are numpy arrays. For scalar inputs, the shape
+ * is (`duration`,).
+ *
+ * - `t_re` - Predicted rectal temperature history.
+ *   - If scalar inputs are provided, this is a 1D array of shape (`duration`,).
+ * - `t_sk` - Predicted mean skin temperature history.
+ *   - If scalar inputs are provided, this is a 1D array of shape (`duration`,).
+ *
+ * @throws `RangeError` If sex contains invalid values (must be "male"/"female" or Sex enum members).
+ * @throws `TypeError` If only one of t_re or t_sk is provided.
+ *
+ * @remarks
+ * The model is applicable for adults aged between 60 and 100 years. The ranges for
+ * the input parameters are:
+ *
+ * - **Age**: 60 to 100 years
+ * - **Height**: 1.30 to 2.30 m
+ * - **Weight**: 40 to 140 kg
+ * - **Ambient Temperature**: 0 to 60 °C
+ * - **Relative Humidity**: 0 to 100 %
+ *
+ * If inputs fall outside applicability limits and `limit_inputs=True`, the
+ * corresponding output time series are filled with NaN for all time steps.
+ *
+ * The model does not have inputs such as: air velocity, radiative heat transfer,
+ * clothing level and an individual's activity level due to there being little
+ * variation in the dataset.
+ *
+ * All individuals in the dataset were in minimal clothing while stationary in a
+ * heat chamber, therefore stationary individuals in minimal clothing are best
+ * represented by this model.
+ *
+ * @example
+ * ```ts
+ * import { ridge_regression_predict_t_re_t_sk } from "jsthermalcomfort/models";
+ * import { Sex } from "jsthermalcomfort/utilities";
+ *
+ * // Scalar example for a single person
+ * const results = ridge_regression_predict_t_re_t_sk({
+ *   sex: Sex.male,
+ *   age: 60,
+ *   height: 1.8,
+ *   weight: 75,
+ *   tdb: 35,
+ *   rh: 60,
+ *   duration: 540,
+ * });
+ *
+ * console.log(`Final Rectal temp: ${results.t_re.at(-1)?.toFixed(2)}°C`); // Final Rectal temp: 38.15°C
+ * console.log(`Final Skin temp: ${results.t_sk.at(-1)?.toFixed(2)}°C`); // Final Skin temp: 37.02°C
+ *
+ * // Vectorized example for multiple scenarios
+ * const results_vec = [
+ *   { sex: Sex.male, age: 60, height: 1.8, weight: 75, tdb: 35, rh: 60 },
+ *   { sex: Sex.female, age: 65, height: 1.65, weight: 60, tdb: 40, rh: 50 },
+ * ].map((inputs) =>
+ *   ridge_regression_predict_t_re_t_sk({ ...inputs, duration: 540 }),
+ * );
+ *
+ * console.log("Final rectal temps:", results_vec.map((r) => r.t_re.at(-1))); // Final rectal temps: [ 38.15, 38.53 ]
+ * console.log("Rectal temp history shape:", [results_vec.length, results_vec[0]?.t_re.length]); // Rectal temp history shape: [ 2, 540 ]
+ * ```
+ */
 export function ridge_regression_predict_t_re_t_sk(
   inputs: RidgeRegressionInputs,
 ): PredictedBodyTemperatures {
@@ -270,7 +374,6 @@ export function ridge_regression_predict_t_re_t_sk(
   });
 }
 
-/** One scenario's 8 input features, in the order of upstream's columns. */
 type Features = readonly [
   number,
   number,
@@ -282,6 +385,7 @@ type Features = readonly [
   number,
 ];
 
+/** Scales input features using predefined scaling constants. */
 export function _scale_features(features: Features): Features {
   return [
     features[0] * _FEATURES_SCALER_SCALE[0] + _FEATURES_SCALER_OFFSET[0],
@@ -295,6 +399,7 @@ export function _scale_features(features: Features): Features {
   ];
 }
 
+/** Apply inverse scaling to the model output. */
 export function _inverse_scale_output(
   scaled_output: readonly [number, number],
 ): [number, number] {
@@ -304,6 +409,7 @@ export function _inverse_scale_output(
   ];
 }
 
+/** Core simulation loop for temperature prediction. */
 function _predict_temperature_simulation(
   features: Features,
   duration: number,
@@ -359,6 +465,18 @@ function _predict_temperature_simulation(
   return [t_re_history, t_sk_history];
 }
 
+/**
+ * Check if the inputs are within the model's applicability limits.
+ *
+ * @param age - Age in years.
+ * @param height - Body height in cm.
+ * @param weight - Body weight in kg.
+ * @param tdb - Ambient air temperature in °C.
+ * @param rh - Relative humidity in %.
+ *
+ * @returns Five arrays with valid values preserved and out-of-range values set to NaN:
+ * (age_valid, height_valid, weight_valid, temp_valid, rh_valid).
+ */
 function _check_ridge_regression_compliance(
   age: number,
   height: number,

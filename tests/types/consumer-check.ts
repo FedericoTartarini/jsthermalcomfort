@@ -48,6 +48,8 @@ import type {
   HumidexInputs,
   IREQ,
   IREQInputs,
+  PredictedBodyTemperatures,
+  RidgeRegressionInputs,
   ModelInfo,
   ModelWarning,
   NET,
@@ -106,6 +108,7 @@ import {
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
   IREQ_INFO,
+  RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
   NET_INFO,
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
@@ -118,6 +121,7 @@ import {
   THI_INFO,
   TWO_NODES_GAGGE_INFO,
   Postures,
+  Sex,
   Units,
   USE_FANS_HEATWAVES_INFO,
   UTCI_INFO,
@@ -151,6 +155,7 @@ import {
   heat_index_schoen,
   humidex,
   ireq,
+  ridge_regression_predict_t_re_t_sk,
   net,
   phs,
   pmv_ppd_ashrae,
@@ -225,6 +230,7 @@ const netInfo: ModelInfo = NET_INFO;
 const thiInfo: ModelInfo = THI_INFO;
 const wbgtInfo: ModelInfo = WBGT_INFO;
 const ireqInfo: ModelInfo = IREQ_INFO;
+const ridgeInfo: ModelInfo = RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1192,3 +1198,44 @@ ireqResult.icl_min = 1;
 ireq({ ...ireqInputs, wme: 1, limit_inputs: false, round_output: false });
 // @ts-expect-error walk_sp is a required quantity.
 ireq({ tdb: -15, tr: -15, vr: 2, rh: 55, met: 3, clo: 2.8, p: 50 });
+
+// ridge_regression_predict_t_re_t_sk takes one inputs object of scalars
+// (decision 268), with its inputs and result types named after upstream's
+// RidgeRegressionInputs and PredictedBodyTemperatures, and returns its
+// series as readonly arrays (decision 269).
+const ridgeInputs: RidgeRegressionInputs = {
+  sex: Sex.male,
+  age: 70,
+  height: 1.8,
+  weight: 75,
+  tdb: 35,
+  rh: 60,
+  duration: 60,
+};
+const ridgeResult: PredictedBodyTemperatures =
+  ridge_regression_predict_t_re_t_sk(ridgeInputs);
+const ridgeSeries: readonly number[] = ridgeResult.t_re;
+// @ts-expect-error a series is readonly.
+ridgeResult.t_sk[0] = 1;
+// @ts-expect-error the result is readonly.
+ridgeResult.t_re = [];
+ridge_regression_predict_t_re_t_sk({
+  ...ridgeInputs,
+  sex: "female",
+  t_re: 37,
+  t_sk: 32,
+  limit_inputs: false,
+  round_output: false,
+});
+ridge_regression_predict_t_re_t_sk({ ...ridgeInputs, sex: null, t_re: null });
+// @ts-expect-error sex takes "male" or "female".
+ridge_regression_predict_t_re_t_sk({ ...ridgeInputs, sex: "other" });
+// @ts-expect-error duration is a required quantity.
+ridge_regression_predict_t_re_t_sk({
+  sex: "male",
+  age: 70,
+  height: 1.8,
+  weight: 75,
+  tdb: 35,
+  rh: 60,
+});

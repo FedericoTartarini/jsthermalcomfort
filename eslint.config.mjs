@@ -50,6 +50,7 @@ export const LINTED = [
   "src/models/pmv_e.ts",
   "src/models/pmv_ppd_ashrae.ts",
   "src/models/pmv_ppd_iso.ts",
+  "src/models/ridge_regression_predict_t_re_t_sk.ts",
   "src/models/set_tmp.ts",
   "src/models/solar_gain.ts",
   "src/models/sports_heat_stress_risk.ts",

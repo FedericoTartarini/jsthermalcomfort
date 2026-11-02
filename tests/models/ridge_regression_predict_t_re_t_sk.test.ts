@@ -1,11 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { ridge_regression_predict_t_re_t_sk } from "../../src/models/index.ts";
+import {
+  ridge_regression_predict_t_re_t_sk,
+  RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
+} from "../../src/models/index.ts";
+import { ridge_regression_predict_t_re_t_sk as ridge_from_root } from "../../src/index.ts";
 import {
   _inverse_scale_output,
   _scale_features,
-  RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
 } from "../../src/models/ridge_regression_predict_t_re_t_sk.ts";
 import { Sex } from "../../src/utilities/index.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 const call = (inputs: unknown) =>
@@ -282,5 +286,187 @@ describe("test_choice_field", () => {
     ["array", [allowed[0], "invalid"], TypeError],
   ])("test_choice_fields_reject_invalid_values[sex-%s]", (_, value, error) => {
     expect(() => final_t_re(value)).toThrow(new error(sex_message));
+  });
+});
+
+const valid = { sex: "male", ...base };
+
+describeModelContract(
+  ridge_regression_predict_t_re_t_sk,
+  RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
+  valid,
+  { ...valid, age: 50 },
+);
+
+const exact = (actual: readonly number[], expected: readonly number[]) => {
+  expect(actual).toHaveLength(expected.length);
+  for (const [i, x] of expected.entries()) expect(actual[i]).toBe(x);
+};
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("ridge_regression_predict_t_re_t_sk (JS-only)", () => {
+  // Bit for bit (register ridge_regression_predict_t_re_t_sk's Notes).
+  test.each([
+    [
+      { ...valid, duration: 3, round_output: false },
+      [37.15744500097326, 37.16101650307734, 37.16481157266281],
+      [34.59539428828672, 34.760167348740076, 34.914036926186235],
+    ],
+    [{ ...valid, duration: 3 }, [37.16, 37.16, 37.16], [34.6, 34.76, 34.91]],
+    [
+      {
+        ...valid,
+        sex: "female",
+        duration: 3,
+        t_re: 37.5,
+        t_sk: 33.0,
+        round_output: false,
+      },
+      [37.49916322203089, 37.498762394655714, 37.4987661571505],
+      [33.13729219555245, 33.404785396169665, 33.65460384911361],
+    ],
+    [
+      { ...valid, duration: 2, t_re: 37.0, t_sk: 32.0, limit_inputs: false },
+      [37.0, 37.0],
+      [32.17, 32.5],
+    ],
+  ])("%o gives upstream's series", (inputs, t_re, t_sk) => {
+    const result = call(inputs);
+    exact(result.t_re, t_re);
+    exact(result.t_sk, t_sk);
+    expect(result.warnings).toEqual([]);
+  });
+
+  test("t_re and t_sk null take the baseline simulation, as upstream's None", () => {
+    expect(call({ ...valid, duration: 2, t_re: null, t_sk: null })).toEqual(
+      call({ ...valid, duration: 2 }),
+    );
+  });
+
+  // Deviation ridge_regression_predict_t_re_t_sk-7.
+  test("duration 1 gives series of length 1, with upstream's values", () => {
+    const result = call({ ...valid, duration: 1, round_output: false });
+    exact(result.t_re, [37.15744500097326]);
+    exact(result.t_sk, [34.59539428828672]);
+  });
+
+  test("the series are frozen arrays", () => {
+    const { t_re, t_sk } = call(valid);
+    expect(Array.isArray(t_re) && Object.isFrozen(t_re)).toBe(true);
+    expect(Array.isArray(t_sk) && Object.isFrozen(t_sk)).toBe(true);
+  });
+
+  // Deviations ridge_regression_predict_t_re_t_sk-2 and -3.
+  const flagged = {
+    ...valid,
+    age: 50,
+    height: 1.2,
+    weight: 150,
+    tdb: 61,
+    duration: 2,
+  };
+  const { inputs, derived } = RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO;
+  const rows = [
+    {
+      key: "age",
+      role: "input",
+      value: 50,
+      unit: "years",
+      bound: inputs.age.applicability,
+    },
+    {
+      key: "height",
+      role: "derived",
+      value: 120,
+      unit: "cm",
+      bound: derived.height.applicability,
+    },
+    {
+      key: "weight",
+      role: "input",
+      value: 150,
+      unit: "kg",
+      bound: inputs.weight.applicability,
+    },
+    {
+      key: "tdb",
+      role: "input",
+      value: 61,
+      unit: "°C",
+      bound: inputs.tdb.applicability,
+    },
+  ].map((row) => ({ kind: "range", ...row }));
+
+  test("out of its limits, the gate on gives NaN series and upstream's rows in order", () => {
+    const result = call(flagged);
+    expect(result.t_re).toEqual([NaN, NaN]);
+    expect(result.t_sk).toEqual([NaN, NaN]);
+    expect(result.warnings).toEqual(rows);
+  });
+
+  test("with the gate off, it gives upstream's values and the same rows", () => {
+    const result = call({ ...flagged, limit_inputs: false });
+    exact(result.t_re, [37.35, 37.35]);
+    exact(result.t_sk, [34.81, 35.3]);
+    expect(result.warnings).toEqual(rows);
+  });
+
+  test("the limits are inclusive", () => {
+    for (const edge of [
+      { age: 60, height: 1.3, weight: 40, tdb: 0, rh: 0 },
+      { age: 100, height: 2.3, weight: 140, tdb: 60, rh: 100 },
+    ]) {
+      const result = call({ ...valid, ...edge, duration: 2 });
+      expect(result.warnings).toEqual([]);
+      expect(result.t_re.every((x) => !Number.isNaN(x))).toBe(true);
+    }
+  });
+
+  // Deviation ridge_regression_predict_t_re_t_sk-4; RidgeRegressionInputs'
+  // order (classes_input.py:849-910).
+  test.each([
+    [
+      { duration: 0, rh: 101, age: 0, t_re: 37 },
+      new RangeError("Duration must be a positive integer."),
+    ],
+    [
+      { rh: 101, age: 0, t_re: 37 },
+      new TypeError("Both t_re and t_sk must be provided, or neither."),
+    ],
+    [
+      { rh: 101, age: 0 },
+      new RangeError("Relative humidity (rh) must be between 0 and 100%."),
+    ],
+    [
+      { rh: -0.1 },
+      new RangeError("Relative humidity (rh) must be between 0 and 100%."),
+    ],
+    [
+      { age: 0, height: 0, weight: 0 },
+      new RangeError("age must be a positive value."),
+    ],
+    [
+      { height: 0, weight: 0 },
+      new RangeError("height must be a positive value."),
+    ],
+    [{ weight: -1 }, new RangeError("weight must be a positive value.")],
+    [
+      { sex: null, weight: 0 },
+      new RangeError("weight must be a positive value."),
+    ],
+  ])("%o throws upstream's message, in its order", (bad, error) => {
+    expect(() => call({ ...valid, duration: 2, ...bad })).toThrow(error);
+  });
+
+  // Deviation _shared-80.
+  test("a duration that is not an integer throws the library's TypeError", () => {
+    expect(() => call({ ...valid, duration: 60.2 })).toThrow(
+      new TypeError("duration must be an integer."),
+    );
+  });
+
+  test("the root entry exports the same function", () => {
+    expect(ridge_from_root).toBe(ridge_regression_predict_t_re_t_sk);
   });
 });

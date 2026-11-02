@@ -25,7 +25,9 @@ export function isDeepFrozen(value: unknown): boolean {
  * boolean or `null` (deviation _shared-6) for a quantity throws `TypeError`,
  * except `false` or `null` for one whose default is that value, upstream's
  * `False` or `None`, and
- * NaN or ±Infinity `RangeError` (deviation _shared-7); every switch is
+ * NaN or ±Infinity `RangeError` (deviation _shared-7), and a number that is
+ * not an integer for an `integer` entry `TypeError` (deviation _shared-80);
+ * every switch is
  * checked to be a boolean (deviation _shared-8); the keys are checked in
  * `INFO.inputs`' order, a missing key at its place too (deviation _shared-9);
  * and every message but a string option's is the library's (deviation
@@ -36,10 +38,11 @@ export function isDeepFrozen(value: unknown): boolean {
  * `DI`, `EPMV`, `ESI`, `HI`, `Humidex`, `NET`, `PHS`, `PMVPPD`,
  * `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`, `THI`,
  * `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WBGT`, `WCI`, `WCT`,
- * `SportsHeatStressRisk` and `IREQ` at `classes_return.py:97, :111, :184,
- * :200, :213, :227, :241, :254, :270, :284, :297, :311, :327, :353, :415,
- * :435, :467, :480, :497, :578, :631, :689, :705, :722, :735, :748, :1073,
- * :1100`, and `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
+ * `SportsHeatStressRisk`, `PredictedBodyTemperatures` and `IREQ` at
+ * `classes_return.py:97, :111, :184, :200, :213, :227, :241, :254, :270,
+ * :284, :297, :311, :327, :353, :415, :435, :467, :480, :497, :578, :631,
+ * :689, :705, :722, :735, :748, :1036, :1073, :1100`, and
+ * `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
  * and as `AdaptiveEN` is, although upstream's is a plain `@dataclass`
  * (`:143`, deviation adaptive_en-5).
  *
@@ -117,6 +120,17 @@ export function describeModelContract(
           new RangeError(finiteMessage(key)),
         );
     });
+
+    const integers = entries
+      .filter(([, e]) => e.kind === "numeric" && e.integer === true)
+      .map(([key]) => key);
+    if (integers.length > 0)
+      test.each(integers)("%s that is not an integer", (key) => {
+        for (const bad of [0.5, 60.2])
+          expect(call({ ...valid, [key]: bad })).toThrow(
+            new TypeError(`${key} must be an integer.`),
+          );
+      });
 
     test.each(keysOf("bool"))("%s that is not a boolean", (key) => {
       for (const bad of not_a_boolean)

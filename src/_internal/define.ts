@@ -118,14 +118,18 @@ function parseNumeric(
   if (entry.series)
     return Object.freeze(
       (Array.isArray(value) ? value : [value]).map((item: unknown) =>
-        parseNumber(key, item, entry),
+        parseFiniteNumber(key, item, entry),
       ),
     );
-  return parseNumber(key, value, entry);
+  return parseFiniteNumber(key, value, entry);
 }
 
 /** Checks one finite number, an `integer` entry's an integer. */
-function parseNumber(key: string, value: unknown, entry: NumericField): number {
+function parseFiniteNumber(
+  key: string,
+  value: unknown,
+  entry: NumericField,
+): number {
   // Any other type is a TypeError, a boolean or null (deviation _shared-6) and
   // an array (deviation _shared-5) included, which upstream accepts.
   if (typeof value !== "number") throw notFiniteNumber(key, TypeError);

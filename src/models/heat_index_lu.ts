@@ -92,8 +92,31 @@ export type HILuInputs = InputsOf<typeof HEAT_INDEX_LU_INFO>;
  */
 export type HILu = OutputsOf<typeof HEAT_INDEX_LU_INFO>;
 
+/**
+ * Calculate the Heat Index (HI) in accordance with the Lu and Romps (2022) model
+ * [lu](../../docs/references.md#lu).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ *
+ * @returns A dataclass containing the Heat Index. See {@link HILu} for more details.
+ * To access the `hi` value, use the `hi` attribute of the returned `HI` instance, e.g., `result.hi`.
+ *
+ * - `hi` - Heat Index, [°C].
+ * - `stress_category`
+ *
+ * @example
+ * ```ts
+ * import { heat_index_lu } from "jsthermalcomfort/models";
+ *
+ * const result = heat_index_lu({ tdb: 25, rh: 50 });
+ * console.log(result.hi); // 25
+ * ```
+ */
 export function heat_index_lu(inputs: HILuInputs): HILu {
-  // Validate inputs using the HeatIndexInputs class
+  // Validate inputs using the HIInputs class
   const { tdb, rh, round_output } = parseInputs(HEAT_INDEX_LU_INFO, inputs);
 
   let hi = _lu_heat_index_optimized(tdb + 273.15, rh / 100) - 273.15;

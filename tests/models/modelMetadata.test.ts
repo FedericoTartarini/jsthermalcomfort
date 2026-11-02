@@ -114,6 +114,7 @@ const v2Calls: Record<string, object> = {
   cooling_effect: { tdb: 25, tr: 25, vr: 0.3, rh: 50, met: 1.2, clo: 0.5 },
   discomfort_index: { tdb: 25, rh: 50 },
   esi: { tdb: 30.2, rh: 42.2, sol_radiation_global: 766 },
+  heat_index_lu: { tdb: 25, rh: 50 },
   heat_index_rothfusz: { tdb: 28, rh: 60 },
   heat_index_schoen: { tdb: 29, rh: 50 },
   humidex: { tdb: 25, rh: 50 },

@@ -47,6 +47,8 @@ import type {
   GaggeTwoNodesSleepInputs,
   HI,
   HIInputs,
+  HILu,
+  HILuInputs,
   HISchoenInputs,
   Humidex,
   HumidexInputs,
@@ -108,6 +110,7 @@ import {
   COOLING_EFFECT_INFO,
   DISCOMFORT_INDEX_INFO,
   ESI_INFO,
+  HEAT_INDEX_LU_INFO,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
@@ -157,6 +160,7 @@ import {
   cooling_effect,
   discomfort_index,
   esi,
+  heat_index_lu,
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
@@ -220,6 +224,7 @@ const verticalTmpGradPpdInfo: ModelInfo = VERTICAL_TMP_GRAD_PPD_INFO;
 const adaptiveEnInfo: ModelInfo = ADAPTIVE_EN_INFO;
 const humidexInfo: ModelInfo = HUMIDEX_INFO;
 const heatIndexSchoenInfo: ModelInfo = HEAT_INDEX_SCHOEN_INFO;
+const heatIndexLuInfo: ModelInfo = HEAT_INDEX_LU_INFO;
 const atInfo: ModelInfo = AT_INFO;
 const wciInfo: ModelInfo = WCI_INFO;
 const windChillTemperatureInfo: ModelInfo = WIND_CHILL_TEMPERATURE_INFO;
@@ -1331,3 +1336,19 @@ two_nodes_gagge_sleep({ ...sleepScalars, tdb: ["18"] });
 two_nodes_gagge_sleep({ ...sleepScalars, wme: [0] });
 // @ts-expect-error thickness_quilt is a required quantity.
 two_nodes_gagge_sleep({ tdb: 18, tr: 18, v: 0.05, rh: 50, clo: 1.4 });
+
+// heat_index_lu takes one inputs object (ADR 0002), with its inputs type
+// HILuInputs (decision 251), and returns HILu, whose stress_category is
+// upstream's None as null (decision 279), readonly.
+const luInputs: HILuInputs = { tdb: 25, rh: 50, round_output: false };
+const luResult: HILu = heat_index_lu(luInputs);
+const luHi: number = luResult.hi;
+const luCategory: null = luResult.stress_category;
+// @ts-expect-error the result is readonly.
+luResult.hi = 1;
+// @ts-expect-error HILu is not HI: its stress_category is never a label.
+const luAsHi: HI = luResult;
+// @ts-expect-error heat_index_lu takes no limit_inputs, as upstream's.
+heat_index_lu({ tdb: 25, rh: 50, limit_inputs: false });
+// @ts-expect-error rh is a required quantity.
+heat_index_lu({ tdb: 25 });

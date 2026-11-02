@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { heat_index_lu } from "../../src/models/index.ts";
+import { heat_index_lu, HEAT_INDEX_LU_INFO } from "../../src/models/index.ts";
+import { heat_index_lu as heat_index_lu_from_root } from "../../src/index.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
+
+// A call with inputs the type rejects, to test the runtime.
+const call = (inputs: unknown) =>
+  heat_index_lu(inputs as Parameters<typeof heat_index_lu>[0]);
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_heat_index_lu.py. Its
 // np.isclose and np.allclose take the default rtol, 1e-5, beside the atol
@@ -66,5 +72,81 @@ describe("test_heat_index_lu", () => {
         `${tdb}, ${rh}`,
       ).toBe(true);
     }
+  });
+});
+
+describeModelContract(heat_index_lu, HEAT_INDEX_LU_INFO, { tdb: 25, rh: 50 });
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("heat_index_lu (JS-only)", () => {
+  test.each([
+    [25, 150, 61.15796802684201],
+    [40, -500, -162.11342002088202],
+    [300, 0, 292.657793973072],
+    [200, 10, 610.6305662452593],
+    [-273.14, 50, -273.14000000534577],
+  ])("tdb %s, rh %s gives %s", (tdb, rh, expected) => {
+    const result = heat_index_lu({ tdb, rh, round_output: false });
+    expect(approx(result.hi, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+  });
+
+  // Decision 279: HI(hi=hi) leaves stress_category at its None default.
+  test("stress_category is null", () => {
+    for (const [tdb, rh] of [
+      [-40, 0],
+      [25, 50],
+      [50, 100],
+    ] as const) {
+      expect(heat_index_lu({ tdb, rh }).stress_category).toBeNull();
+    }
+  });
+
+  // Deviation heat_index_lu-3 (models/heat_index_lu.py:345).
+  test.each([
+    [500, 50],
+    [25, -1e6],
+  ])(
+    "tdb %s, rh %s throws the root solver's interval message as a RangeError",
+    (tdb, rh) => {
+      expect(() => call({ tdb, rh })).toThrow(
+        new RangeError("wrong initial interval in the root solver"),
+      );
+    },
+  );
+
+  // Deviation heat_index_lu-3 (models/heat_index_lu.py:358).
+  test.each([
+    [-273.16, 50],
+    [25, 1e300],
+  ])(
+    "tdb %s, rh %s throws the root solver's iteration message as an Error",
+    (tdb, rh) => {
+      let thrown: unknown;
+      try {
+        call({ tdb, rh });
+      } catch (error) {
+        thrown = error;
+      }
+      expect((thrown as Error).constructor).toBe(Error);
+      expect((thrown as Error).message).toBe(
+        "reaching maximum iteration in the root solver",
+      );
+    },
+  );
+
+  // Deviation heat_index_lu-2.
+  test("returns no rows", () => {
+    for (const [tdb, rh] of [
+      [-40, 0],
+      [25, 50],
+      [100, 50],
+    ] as const) {
+      expect(heat_index_lu({ tdb, rh }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(heat_index_lu_from_root).toBe(heat_index_lu);
   });
 });

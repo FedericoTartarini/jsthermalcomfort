@@ -1,4 +1,4 @@
-import { heat_index_lu } from "./heat_index_lu.ts";
+import { heat_index_lu, HEAT_INDEX_LU_INFO } from "./heat_index_lu.ts";
 import {
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
@@ -115,6 +115,7 @@ export type { CloTOut, CloTOutInputs } from "./clo_tout.ts";
 export type { CE, CEInputs } from "./cooling_effect.ts";
 export type { DI, DIInputs } from "./discomfort_index.ts";
 export type { ESI, ESIInputs } from "./esi.ts";
+export type { HILu, HILuInputs } from "./heat_index_lu.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type { HISchoenInputs } from "./heat_index_schoen.ts";
 export type { Humidex, HumidexInputs } from "./humidex.ts";
@@ -188,6 +189,7 @@ export {
   esi,
   ESI_INFO,
   heat_index_lu,
+  HEAT_INDEX_LU_INFO,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,
@@ -273,6 +275,7 @@ export default {
   esi,
   ESI_INFO,
   heat_index_lu,
+  HEAT_INDEX_LU_INFO,
   heat_index_rothfusz,
   HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,

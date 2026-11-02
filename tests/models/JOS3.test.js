@@ -8,6 +8,17 @@ import * as math from "mathjs";
 import { BODY_NAMES } from "../../src/jos3_functions/matrix.js";
 
 describe("JOS3", () => {
+  // The reference-state search calls pmv_ppd_iso with limit_inputs False
+  // (jos3.py:569-578), so a neutral operative temperature above ISO 7730's
+  // tdb limit of 30 °C is still found. Upstream 4.7.0 gives 30.07333333333334
+  // for this body, measured in the parity image.
+  it("finds the reference operative temperature outside ISO 7730's limits", () => {
+    const jos = new JOS3(1.72, 74.43, 15, 20, "female", 2.59, "ganpule");
+    for (const to of jos.to.toArray()) {
+      expect(Math.abs(to - 30.07333333333334)).toBeLessThanOrEqual(1e-10);
+    }
+  });
+
   describe("state after single iteration", () => {
     describe("results should have correct values", () => {
       const jos = new JOS3(

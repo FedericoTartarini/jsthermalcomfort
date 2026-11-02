@@ -598,8 +598,8 @@ function _sleep_set_optimized(
     const err1 = _fnerre(xold, q_skin, h_d, t_skin, wet, h_e, p_s_sk);
     const err2 = _fnerre(xold + delta, q_skin, h_d, t_skin, wet, h_e, p_s_sk);
     const err_diff = err2 - err1;
+    // Avoid division by very small values
     if (Math.abs(err_diff) < 1e-10) {
-      // Avoid division by very small values
       // Use a fallback approach or break iteration
       break;
     }
@@ -611,7 +611,8 @@ function _sleep_set_optimized(
       flag1 = true;
     }
     iterations += 1;
-    if (iterations === 1000) throw new Error("Max iterations exceeded");
+    if (!flag1 && iterations === 1000)
+      throw new Error("Max iterations exceeded");
   }
 
   if (h_d_s === 0) throw new RangeError("division by zero");
@@ -639,7 +640,8 @@ function _sleep_set_optimized(
       flag2 = true;
     }
     iterations += 1;
-    if (iterations === 1000) throw new Error("Max iterations exceeded");
+    if (!flag2 && iterations === 1000)
+      throw new Error("Max iterations exceeded");
   }
 
   const set_temp = x;

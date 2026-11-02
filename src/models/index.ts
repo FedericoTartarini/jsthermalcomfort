@@ -8,6 +8,7 @@ import {
 } from "./heat_index_schoen.ts";
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
+import { ireq } from "./ireq.ts";
 import { net, NET_INFO } from "./net.ts";
 import { wbgt, WBGT_INFO } from "./wbgt.ts";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
@@ -166,6 +167,7 @@ export {
   HEAT_INDEX_SCHOEN_INFO,
   humidex,
   HUMIDEX_INFO,
+  ireq,
   net,
   NET_INFO,
   phs,
@@ -242,6 +244,7 @@ export default {
   HEAT_INDEX_SCHOEN_INFO,
   humidex,
   HUMIDEX_INFO,
+  ireq,
   net,
   NET_INFO,
   phs,

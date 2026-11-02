@@ -239,6 +239,28 @@ def _humidex(rng):
     }
 
 
+def _ireq(rng):
+    # The ranges reach past ISO 11079's limits (58-400 W/m2 for met, tdb up to
+    # 10 °C, vr 0.4-18 m/s, walk_sp from min(0.0052 * (met - 58), 1.2) to
+    # 1.2 m/s; models/ireq.py:413-425), so NaN positions are compared too, and
+    # clo reaches 0 at mild tdb, where ireq and icl turn negative and are
+    # masked (models/ireq.py:172). Each input stays inside IREQInputs' checks
+    # (classes_input.py:1361-1374).
+    return {
+        "tdb": _value(rng, -50.0, 20.0),
+        "tr": _value(rng, -55.0, 30.0),
+        "vr": _value(rng, 0.0, 20.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 7.7),
+        "clo": 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 5.0),
+        "p": _value(rng, 1.0, 100.0),
+        "walk_sp": _value(rng, 0.0, 1.5),
+        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0,
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _net(rng):
     # Upstream checks no range (models/net.py:62-68, NETInputs at
     # classes_input.py:482-496), so tdb and v reach past the validation
@@ -772,6 +794,7 @@ MODELS = {
     "heat_index_rothfusz": (models.heat_index_rothfusz, _heat_index_rothfusz),
     "heat_index_schoen": (models.heat_index_schoen, _heat_index_schoen),
     "humidex": (models.humidex, _humidex),
+    "ireq": (models.ireq, _ireq),
     "net": (models.net, _net),
     "phs": (models.phs, _phs),
     "pmv_a": (models.pmv_a, _pmv_a),

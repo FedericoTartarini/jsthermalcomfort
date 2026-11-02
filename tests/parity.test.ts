@@ -13,6 +13,7 @@ import {
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
+  ireq,
   net,
   phs,
   PHS_INFO,
@@ -539,6 +540,26 @@ const MODELS: readonly ParityModel[] = [
       humidex(inputs as unknown as Parameters<typeof humidex>[0]),
     // Upstream rounds humidex with np.around (models/humidex.py:88-89).
     rounded: ({ round_output }) => (round_output === true ? ["humidex"] : []),
+    warnings: true,
+  },
+  {
+    name: "ireq",
+    run: (inputs) => ireq(inputs as unknown as Parameters<typeof ireq>[0]),
+    // Upstream rounds ireq and icl with np.round, and dle with np.round in
+    // _format_dle (models/ireq.py:174-178, :435-436).
+    rounded: ({ round_output }) =>
+      round_output === true
+        ? [
+            "ireq_min",
+            "ireq_neutral",
+            "icl_min",
+            "icl_neutral",
+            "dle_min",
+            "dle_neutral",
+          ]
+        : [],
+    // Upstream warns for none of its checks, so the rows are exempt by the
+    // register (deviation ireq-2).
     warnings: true,
   },
   {

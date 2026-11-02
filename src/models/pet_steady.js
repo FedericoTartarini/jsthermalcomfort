@@ -1,5 +1,6 @@
 import { p_sat } from "../psychrometrics/p_sat.ts";
-import { body_surface_area, validateInputs } from "../utilities/utilities.js";
+import { validateInputs } from "../utilities/utilities.js";
+import { body_surface_area } from "../utilities/body_surface_area.ts";
 import { round } from "../_internal/round.ts";
 
 /**

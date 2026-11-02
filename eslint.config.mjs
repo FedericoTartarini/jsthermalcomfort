@@ -15,6 +15,7 @@ export const LINTED = [
   "src/_internal/define.ts",
   "src/_internal/errors.ts",
   "src/_internal/floatRepr.ts",
+  "src/_internal/fsolve.ts",
   "src/_internal/modelInfo.ts",
   "src/_internal/round.ts",
   "src/_internal/validation.ts",
@@ -27,6 +28,7 @@ export const LINTED = [
   "src/psychrometrics/p_sat_torr.ts",
   "src/psychrometrics/psy_ta_rh.ts",
   "src/psychrometrics/wet_bulb_tmp.ts",
+  "src/utilities/body_surface_area.ts",
   "src/utilities/met_to_w_m2.ts",
   "src/utilities/options.ts",
   "src/utilities/units_converter.ts",
@@ -75,6 +77,7 @@ export const LINTED = [
   "tests/environment/transpose_sharp_altitude.test.ts",
   "tests/internal.test.ts",
   "tests/internal/brentq.test.ts",
+  "tests/internal/fsolve.test.ts",
   "tests/models/adaptive_ashrae.test.ts",
   "tests/models/adaptive_en.test.ts",
   "tests/models/ankle_draft.test.ts",
@@ -122,6 +125,7 @@ export const LINTED = [
   "tests/psychrometrics/p_sat_torr.test.ts",
   "tests/psychrometrics/psy_ta_rh.test.ts",
   "tests/psychrometrics/wet_bulb_tmp.test.ts",
+  "tests/utilities/body_surface_area.test.ts",
   "tests/utilities/units_converter.test.ts",
 ];
 

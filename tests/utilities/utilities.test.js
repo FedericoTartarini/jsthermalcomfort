@@ -1,6 +1,5 @@
 import { describe, expect, it, test } from "vitest";
 import {
-  body_surface_area,
   v_relative,
   running_mean_outdoor_temperature,
   f_svv,
@@ -42,28 +41,6 @@ describe("round", () => {
 
   test("passes NaN through", () => {
     expect(round(NaN, 1)).toBeNaN();
-  });
-});
-
-describe("body_surface_area", () => {
-  it.each([
-    { weight: 80, height: 1.8, formula: undefined, expected: 1.9917 },
-    { weight: 70, height: 1.8, formula: "dubois", expected: 1.88 },
-    { weight: 75, height: 1.75, formula: "takahira", expected: 1.919 },
-    { weight: 80, height: 1.7, formula: "fujimoto", expected: 1.872 },
-    { weight: 85, height: 1.65, formula: "kurazumi", expected: 1.89 },
-  ])(
-    "returns $expected when weight is $weight, height is $height and formula is $formula",
-    ({ weight, height, formula, expected }) => {
-      const result = body_surface_area(weight, height, formula);
-      expect(Math.abs(result - expected)).toBeLessThanOrEqual(
-        DEFAULT_TOLERANCE,
-      );
-    },
-  );
-
-  it("throws an error if the formula is not valid", () => {
-    expect(() => body_surface_area(70, 1.8, "invalid_formula")).toThrow();
   });
 });
 

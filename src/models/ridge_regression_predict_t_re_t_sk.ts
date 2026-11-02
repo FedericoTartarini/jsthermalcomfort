@@ -4,7 +4,7 @@
 // on adults aged 60-100 in minimal clothing under stationary conditions. Uses Min-Max
 // scaling on features and outputs.
 
-import { choiceFieldMessage, parseInputs } from "../_internal/define.ts";
+import { BASE_INPUTS_SEX, parseInputs } from "../_internal/define.ts";
 import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
@@ -91,19 +91,12 @@ const _THERMONEUTRAL_RH = 50.0; // %
 const _BASELINE_T_RE_INITIAL = 37.0; // °C, initial rectal temperature for baseline
 const _BASELINE_T_SK_INITIAL = 32.0; // °C, initial skin temperature for baseline
 
-const SEXES = deepFreeze([Sex.male, Sex.female] as const);
-
 export const RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO = deepFreeze({
   name: "ridge_regression_predict_t_re_t_sk",
   label: "Ridge Regression Body Temperature Prediction",
   standards: [],
   inputs: {
-    sex: {
-      kind: "choice",
-      allowed: SEXES,
-      message: choiceFieldMessage("sex", SEXES),
-      nullable: true,
-    },
+    sex: BASE_INPUTS_SEX,
     age: {
       kind: "numeric",
       unit: "years",

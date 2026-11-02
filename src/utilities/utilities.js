@@ -381,35 +381,6 @@ function _iso7933_compliance(standard, kwargs) {
 }
 
 /**
- * Returns the body surface area in square meters
- *
- * @public
- * @memberof utilities
- * @docname Body Surface Area
- *
- * @param {number} weight - body weight, [kg]
- * @param {number} height - height, [m]
- * @param {("dubois" | "takahira" | "fujimoto" | "kurazumi")} [formula="dubois"] - formula used to calculate the body surface area. default="dubois"
- * @returns {number} body surface area, [m2]
- *
- * @category Utilities
- */
-export function body_surface_area(weight, height, formula = "dubois") {
-  if (formula === "dubois")
-    return 0.202 * Math.pow(weight, 0.425) * Math.pow(height, 0.725);
-  if (formula === "takahira")
-    return 0.2042 * Math.pow(weight, 0.425) * Math.pow(height, 0.725);
-  if (formula === "fujimoto")
-    return 0.1882 * Math.pow(weight, 0.444) * Math.pow(height, 0.663);
-  if (formula === "kurazumi")
-    return 0.244 * Math.pow(weight, 0.383) * Math.pow(height, 0.693);
-
-  throw new Error(
-    `This ${formula} to calculate the body_surface_area does not exists.`,
-  );
-}
-
-/**
  * Estimates the relative air speed which combines the average air speed of the
  * space plus the relative air speed caused by the body movement. Vag is assumed
  * to be 0 for metabolic rates equal and lower than 1 met and otherwise equal to

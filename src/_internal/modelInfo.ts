@@ -75,7 +75,9 @@ export interface Bound {
  * despite.
  *
  * A `notice` row carries the text of any other upstream `warnings.warn`,
- * verbatim, such as a solver falling back. Nothing is printed to the console.
+ * verbatim, such as a solver falling back, or of the warning a scipy routine
+ * upstream calls emits, such as `fsolve` stopping short of convergence.
+ * Nothing is printed to the console.
  */
 export type ModelWarning =
   | {

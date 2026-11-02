@@ -151,9 +151,15 @@ function program_of(files: readonly string[]): ts.Program {
   });
 }
 
-// The migrated source files, which the lint list holds as it grows.
+// The migrated source files, which the lint list holds as it grows, less the
+// port of scipy's fsolve: upstream's test reads pythermalcomfort's own files
+// (PACKAGE_DIR, tests/test_call_site_arguments.py:16, :35), and MINPACK
+// passes one array or dimension for two parameters by design (qrfac(n, n, …)).
 const MIGRATED = LINTED.filter(
-  (file) => file.startsWith("src/") && file.endsWith(".ts"),
+  (file) =>
+    file.startsWith("src/") &&
+    file.endsWith(".ts") &&
+    file !== "src/_internal/fsolve.ts",
 );
 
 describe("test_call_site_arguments", () => {

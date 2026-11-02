@@ -13,12 +13,13 @@ import type {
   NumericField,
   ResolvedOf,
 } from "./modelInfo.ts";
-import { Postures, Units, WorkIntensity } from "../utilities/options.ts";
+import { Postures, Sex, Units, WorkIntensity } from "../utilities/options.ts";
 
 // The parse of a model's inputs against its `INFO.inputs` (ADR 0022), standing
 // in for upstream's input dataclass checks (`classes_input.py`; ADR 0019,
-// whitelist item 2), `BASE_INPUTS_UNITS`, `BASE_INPUTS_POSITION` and
-// `BASE_INPUTS_WORK_INTENSITY`, and `checkWorkCapacityStandardsInputs`.
+// whitelist item 2), `BASE_INPUTS_UNITS`, `BASE_INPUTS_POSITION`,
+// `BASE_INPUTS_SEX` and `BASE_INPUTS_WORK_INTENSITY`, and
+// `checkWorkCapacityStandardsInputs`.
 
 /**
  * Upstream's `BaseInputs.units`: defaults to 'SI' and raises "Units must be
@@ -49,6 +50,21 @@ export const BASE_INPUTS_POSITION = deepFreeze({
   kind: "choice",
   allowed: POSITIONS,
   message: choiceFieldMessage("position", POSITIONS),
+  nullable: true,
+} as const satisfies ChoiceField);
+
+const SEXES = deepFreeze([Sex.male, Sex.female] as const);
+
+/**
+ * Upstream's `BaseInputs.sex`, a `choice_field` of 'male' and 'female'
+ * (`classes_input.py:80`), with its message and `None` skipped
+ * (`classes_input.py:138-139, :183`). Its default is `None`, so each model's
+ * INFO references it with the model's own default.
+ */
+export const BASE_INPUTS_SEX = deepFreeze({
+  kind: "choice",
+  allowed: SEXES,
+  message: choiceFieldMessage("sex", SEXES),
   nullable: true,
 } as const satisfies ChoiceField);
 

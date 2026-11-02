@@ -96,3 +96,5 @@ Before submitting a pull request, please ensure:
 ## License
 
 The `jsthermalcomfort` library is released under the **MIT License**.
+
+`pet_steady` solves its heat balances with a port of SciPy's `fsolve` and the MINPACK routines it calls, which carries their licences. This product includes software developed by the University of Chicago, as Operator of Argonne National Laboratory.

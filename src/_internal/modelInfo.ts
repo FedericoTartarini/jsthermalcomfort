@@ -22,6 +22,7 @@ export type UnitSymbol =
   | "W/m²"
   | "°"
   | "Pa"
+  | "hPa"
   | "kPa"
   | "m²"
   | "kg/h/m²"

@@ -93,6 +93,7 @@ export const LINTED = [
   "tests/models/ireq.test.ts",
   "tests/models/modelContract.ts",
   "tests/models/net.test.ts",
+  "tests/models/pet_steady.test.ts",
   "tests/models/phs.test.ts",
   "tests/models/pmv_a.test.ts",
   "tests/models/pmv_athb.test.ts",

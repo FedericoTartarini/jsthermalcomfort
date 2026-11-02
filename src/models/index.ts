@@ -82,7 +82,7 @@ import {
   work_capacity_niosh,
   WORK_CAPACITY_NIOSH_INFO,
 } from "./work_capacity_niosh.ts";
-import { pet_steady } from "./pet_steady.js";
+import { pet_steady } from "./pet_steady.ts";
 import { JOS3 } from "./JOS3.js";
 import { classifyFromBins } from "../_internal/classifierBins.ts";
 

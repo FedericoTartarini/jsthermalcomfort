@@ -16,6 +16,7 @@ import {
   humidex,
   ireq,
   net,
+  pet_steady,
   phs,
   PHS_INFO,
   pmv_a,
@@ -597,6 +598,15 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds net with np.around (models/net.py:77-78).
     rounded: ({ round_output }) => (round_output === true ? ["net"] : []),
     warnings: true,
+  },
+  {
+    name: "pet_steady",
+    run: (inputs) =>
+      pet_steady(inputs as unknown as Parameters<typeof pet_steady>[0]),
+    // Upstream rounds pet with round() on an np.float64, numpy's rounding
+    // (models/pet_steady.py:475).
+    rounded: () => ["pet"],
+    warnings: false,
   },
   {
     name: "phs",

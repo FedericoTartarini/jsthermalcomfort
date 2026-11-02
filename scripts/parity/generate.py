@@ -286,6 +286,40 @@ def _net(rng):
     }
 
 
+def _pet_steady(rng):
+    # The ranges reach past everyday conditions, so the cases where fsolve stops
+    # short of convergence, and warns, are compared too (decision 281). clo,
+    # weight, height and p_atm stay clear of the zero divisors at which upstream
+    # raises (decision 283). position and sex come in any case, as the check
+    # accepts, and the kernel compares them as given. age, weight and wme are
+    # doubles, as a JavaScript number is, where upstream's defaults are ints.
+    return {
+        "tdb": _value(rng, -30.0, 50.0),
+        "tr": _value(rng, -30.0, 80.0),
+        "v": _value(rng, 0.0, 10.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "met": _value(rng, 0.7, 4.0),
+        "clo": _value(rng, 0.1, 3.0),
+        "p_atm": _value(rng, 600.0, 1100.0) if rng.random() < 0.3 else 1013.25,
+        "position": str(
+            rng.choice(
+                [
+                    "sitting",
+                    "standing",
+                    "standing, forced convection",
+                    "Standing",
+                    "SITTING",
+                ]
+            )
+        ),
+        "age": _value(rng, 5.0, 90.0) if rng.random() < 0.3 else 23.0,
+        "sex": str(rng.choice(["male", "female", "Male", "FEMALE"])),
+        "weight": _value(rng, 30.0, 150.0) if rng.random() < 0.3 else 75.0,
+        "height": _value(rng, 1.2, 2.1) if rng.random() < 0.3 else 1.8,
+        "wme": _value(rng, 0.0, 0.3) if rng.random() < 0.3 else 0.0,
+    }
+
+
 def _phs(rng):
     # The ranges reach past ISO 7933's limits (tdb 15-50 °C, tr - tdb 0-60 °C,
     # v 0-3 m/s, p_a 0.5 or 0-4.5 kPa, met 56-250 or 100-450 W/m2, clo 0.1-1
@@ -913,6 +947,14 @@ GATED_RAISES = {"ankle_draft": ValueError}
 # masks to NaN, so the same call with the gate on checks an unadjusted met.
 GATED_INNER = {"pmv_e": ("pythermalcomfort.models.pmv_e", "pmv_ppd_iso")}
 
+# The models whose np.vectorize kernel numpy runs once more, on the first
+# element, to find otypes, before the run whose result upstream returns
+# (decision 208). A case records how many of its warnings that first run
+# emitted, as otypes_warnings, since the library runs the kernel once.
+OTYPES_PASS = {
+    "pet_steady": ("pythermalcomfort.models.pet_steady", "_pet_steady_vectorised")
+}
+
 
 def _sports_by_name(**inputs):
     """sports_heat_stress_risk with sport given by its name in Sports."""
@@ -938,6 +980,7 @@ MODELS = {
     "humidex": (models.humidex, _humidex),
     "ireq": (models.ireq, _ireq),
     "net": (models.net, _net),
+    "pet_steady": (models.pet_steady, _pet_steady),
     "phs": (models.phs, _phs),
     "pmv_a": (models.pmv_a, _pmv_a),
     "pmv_athb": (models.pmv_athb, _pmv_athb),
@@ -1038,8 +1081,17 @@ def _run(model, function, inputs):
     with limit_inputs True: upstream checks the ranges only under the gate, and
     the library returns those range rows whatever limit_inputs is (ADR 0024).
     For a model in GATED_INNER, they are its inner calls' warnings instead.
+    For a model in OTYPES_PASS, the case records how many of its warnings come
+    from numpy's otypes run, which come first.
     """
-    result, emitted = _call(function, inputs)
+    otypes = []
+    if model in OTYPES_PASS:
+        path, name = OTYPES_PASS[model]
+        kernel = getattr(importlib.import_module(path), name)
+        with mock.patch.object(kernel, "pyfunc", _counted(kernel.pyfunc, otypes)):
+            result, emitted = _call(function, inputs)
+    else:
+        result, emitted = _call(function, inputs)
     case = {
         "inputs": inputs,
         "outputs": {
@@ -1048,6 +1100,8 @@ def _run(model, function, inputs):
         },
         "warnings": emitted,
     }
+    if model in OTYPES_PASS:
+        case["otypes_warnings"] = otypes[0]
     if inputs.get("limit_inputs") is False:
         if model in GATED_INNER:
             path, name = GATED_INNER[model]
@@ -1059,6 +1113,24 @@ def _run(model, function, inputs):
                 function, {**inputs, "limit_inputs": True}, GATED_RAISES.get(model, ())
             )[1]
     return case
+
+
+def _counted(pyfunc, otypes):
+    """`pyfunc`, appending to `otypes` the number of warnings its first run,
+    numpy's otypes run, emits, and passing those warnings on in order."""
+
+    def counted(*args, **kwargs):
+        if otypes:
+            return pyfunc(*args, **kwargs)
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = pyfunc(*args, **kwargs)
+        otypes.append(len(caught))
+        for w in caught:
+            warnings.warn_explicit(w.message, w.category, w.filename, w.lineno)
+        return result
+
+    return counted
 
 
 def _gated(inner):

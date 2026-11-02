@@ -430,8 +430,8 @@ describe("ireq (JS-only)", () => {
     ).toEqual(["met", "tdb", "vr"]);
   });
 
-  // models/ireq.py:172, deviation ireq-2, deviation ireq-3.
-  test("gives an output row for each negative ireq or icl, whatever limit_inputs is", () => {
+  // models/ireq.py:172, :415, deviation ireq-2, deviation ireq-3.
+  test("gives the walk_sp row, then an output row for each negative ireq or icl, whatever limit_inputs is", () => {
     for (const limit_inputs of [true, false]) {
       const rows = ireq({ ...non_physical, limit_inputs }).warnings;
       expect(
@@ -439,7 +439,6 @@ describe("ireq (JS-only)", () => {
           (row) => row.kind === "range" && [row.key, row.role, row.unit],
         ),
       ).toEqual([
-        // At 350 W/m², walk_sp's lower bound is min(0.0052 * 292, 1.2) = 1.2.
         ["walk_sp", "input", "m/s"],
         ["ireq_min", "output", "clo"],
         ["icl_min", "output", "clo"],
@@ -461,7 +460,7 @@ describe("ireq (JS-only)", () => {
   });
 
   // models/ireq.py:172-186: each criterion is masked on its own.
-  test("masks only the criterion whose icl is negative", () => {
+  test("masks the minimal criterion, whose icl is negative, and keeps the neutral dle", () => {
     const result = ireq({ ...valid, tr: -1e300 });
     expect(outputs(result).slice(0, 5).every(Number.isNaN)).toBe(true);
     expect(result.dle_neutral).toBe(4.7);

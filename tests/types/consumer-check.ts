@@ -43,6 +43,8 @@ import type {
   GaggeTwoNodesInputs,
   GaggeTwoNodesJi,
   GaggeTwoNodesJiInputs,
+  GaggeTwoNodesSleep,
+  GaggeTwoNodesSleepInputs,
   HI,
   HIInputs,
   HISchoenInputs,
@@ -123,6 +125,7 @@ import {
   THI_INFO,
   TWO_NODES_GAGGE_INFO,
   TWO_NODES_GAGGE_JI_INFO,
+  TWO_NODES_GAGGE_SLEEP_INFO,
   Postures,
   Sex,
   Units,
@@ -168,6 +171,7 @@ import {
   thi,
   two_nodes_gagge,
   two_nodes_gagge_ji,
+  two_nodes_gagge_sleep,
   use_fans_heatwaves,
   utci,
   vertical_tmp_grad_ppd,
@@ -236,6 +240,7 @@ const wbgtInfo: ModelInfo = WBGT_INFO;
 const ireqInfo: ModelInfo = IREQ_INFO;
 const ridgeInfo: ModelInfo = RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO;
 const twoNodesJiInfo: ModelInfo = TWO_NODES_GAGGE_JI_INFO;
+const twoNodesSleepInfo: ModelInfo = TWO_NODES_GAGGE_SLEEP_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1279,3 +1284,50 @@ two_nodes_gagge_ji({ ...twoNodesJiInputs, position: "lying" });
 two_nodes_gagge_ji({ ...twoNodesJiInputs, acclimatized: 1 });
 // @ts-expect-error vapor_pressure is a required quantity.
 two_nodes_gagge_ji({ tdb: 36.5, tr: 36.5, v: 0.25, met: 0.95, clo: 0.1 });
+
+// two_nodes_gagge_sleep takes its six time series as numbers or arrays, its
+// **kwargs included, with its inputs and result types named after upstream's
+// GaggeTwoNodesSleepInputs and GaggeTwoNodesSleep: numbers for a call of one
+// time step, typed so where the series are numbers, and number | readonly
+// number[] otherwise (decisions 276, 277).
+const sleepScalars: GaggeTwoNodesSleepInputs<number> = {
+  tdb: 18,
+  tr: 18,
+  v: 0.05,
+  rh: 50,
+  clo: 1.4,
+  thickness_quilt: 1.76,
+};
+const sleepScalar: GaggeTwoNodesSleep<number> =
+  two_nodes_gagge_sleep(sleepScalars);
+const sleepSet: number = sleepScalar.set;
+const sleepSeriesInputs: GaggeTwoNodesSleepInputs = {
+  ...sleepScalars,
+  tdb: [18, 19],
+  tr: [18, 18.5],
+  v: [0.05, 0.1],
+  rh: [50, 55],
+  clo: [1.4, 1.3],
+  thickness_quilt: [1.76, 1.6],
+};
+const sleepSeries: GaggeTwoNodesSleep =
+  two_nodes_gagge_sleep(sleepSeriesInputs);
+const sleepTCore: number | readonly number[] = sleepSeries.t_core;
+// @ts-expect-error an array input may give a series.
+const sleepNotNumber: number = sleepSeries.set;
+// @ts-expect-error the result is readonly.
+sleepScalar.set = 1;
+two_nodes_gagge_sleep({
+  ...sleepScalars,
+  ltime: 2,
+  height: 171,
+  weight: 70,
+  temp_core_neutral: 36.8,
+  met_shivering: 0,
+});
+// @ts-expect-error a series holds numbers.
+two_nodes_gagge_sleep({ ...sleepScalars, tdb: ["18"] });
+// @ts-expect-error wme is a scalar.
+two_nodes_gagge_sleep({ ...sleepScalars, wme: [0] });
+// @ts-expect-error thickness_quilt is a required quantity.
+two_nodes_gagge_sleep({ tdb: 18, tr: 18, v: 0.05, rh: 50, clo: 1.4 });

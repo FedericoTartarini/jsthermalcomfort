@@ -61,7 +61,10 @@ import {
   two_nodes_gagge_ji,
   TWO_NODES_GAGGE_JI_INFO,
 } from "./two_nodes_gagge_ji.ts";
-import { two_nodes_gagge_sleep } from "./two_nodes_gagge_sleep.ts";
+import {
+  two_nodes_gagge_sleep,
+  TWO_NODES_GAGGE_SLEEP_INFO,
+} from "./two_nodes_gagge_sleep.ts";
 import {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
@@ -143,6 +146,10 @@ export type {
   GaggeTwoNodesJiInputs,
 } from "./two_nodes_gagge_ji.ts";
 export type {
+  GaggeTwoNodesSleep,
+  GaggeTwoNodesSleepInputs,
+} from "./two_nodes_gagge_sleep.ts";
+export type {
   UseFansHeatwaves,
   UseFansHeatwavesInputs,
 } from "./use_fans_heatwaves.ts";
@@ -222,6 +229,7 @@ export {
   two_nodes_gagge_sleep,
   TWO_NODES_GAGGE_INFO,
   TWO_NODES_GAGGE_JI_INFO,
+  TWO_NODES_GAGGE_SLEEP_INFO,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,
@@ -305,6 +313,7 @@ export default {
   two_nodes_gagge_sleep,
   TWO_NODES_GAGGE_INFO,
   TWO_NODES_GAGGE_JI_INFO,
+  TWO_NODES_GAGGE_SLEEP_INFO,
   utci,
   UTCI_INFO,
   use_fans_heatwaves,

@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { two_nodes_gagge_sleep } from "../../src/models/index.ts";
+import {
+  two_nodes_gagge_sleep,
+  TWO_NODES_GAGGE_SLEEP_INFO,
+} from "../../src/models/index.ts";
+import { two_nodes_gagge_sleep as sleep_from_root } from "../../src/index.ts";
 import { _two_nodes_gagge_sleep_optimized } from "../../src/models/two_nodes_gagge_sleep.ts";
 import { round } from "../../src/_internal/round.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 const call = (inputs: unknown) =>
@@ -293,5 +298,196 @@ describe("test_two_nodes_gagge_sleep", () => {
     const max_step = Math.max(...diff.map(Math.abs));
     expect(max_step).toBeLessThan(0.05);
     expect(diff.every((d) => d > 0)).toBe(true); // monotonic
+  });
+});
+
+const valid = {
+  tdb: 18,
+  tr: 18,
+  v: 0.05,
+  rh: 50,
+  clo: 1.4,
+  thickness_quilt: 1.76,
+};
+
+describeModelContract(two_nodes_gagge_sleep, TWO_NODES_GAGGE_SLEEP_INFO, valid);
+
+const thrown = (inputs: unknown): Error => {
+  try {
+    call(inputs);
+  } catch (error) {
+    return error as Error;
+  }
+  throw new Error("no throw");
+};
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("two_nodes_gagge_sleep (JS-only)", () => {
+  // Bit for bit (register two_nodes_gagge_sleep's Notes).
+  test.each([
+    [{}, "set", 24.285471240487254],
+    [{}, "t_core", 37.03223590335804],
+    [{ ltime: 3 }, "set", 23.711550520294498],
+    [{ ltime: 3 }, "t_core", 37.042875780636834],
+    [{ ltime: 2 }, "set", 23.636439397349513],
+    [{ clo: 0 }, "set", -3.913418784528049],
+    [{ rh: 0 }, "set", 22.991293736472308],
+    [{ rh: 0 }, "t_core", 37.03166958731263],
+    [{ height: 0 }, "set", 24.297798410110772],
+    [{ skin_blood_flow: 0 }, "disc", 1.4912040181586583],
+    [{ wme: 2 }, "set", 86.70377113439152],
+    [{ tdb: -200 }, "set", -168.92477836981874],
+  ] as const)("%o gives upstream's %s", (inputs, field, expected) => {
+    const result = two_nodes_gagge_sleep({ ...valid, ...inputs });
+    expect(result[field]).toBe(expected);
+    expect(result.warnings).toEqual([]);
+  });
+
+  // Decision 276: a number for one time step, from numbers, arrays of one or
+  // both.
+  test("one time step gives numbers, whatever mix of numbers and arrays of one", () => {
+    const scalar = two_nodes_gagge_sleep(valid);
+    expect(call({ ...valid, tdb: [18], tr: [18] })).toEqual(scalar);
+    expect(
+      call(Object.fromEntries(Object.entries(valid).map(([k, x]) => [k, [x]]))),
+    ).toEqual(scalar);
+  });
+
+  test("the series are frozen arrays, the first minute equal to a scalar call's", () => {
+    const result = call(
+      Object.fromEntries(Object.entries(valid).map(([k, x]) => [k, [x, x]])),
+    );
+    for (const field of fields) {
+      const values = series(result[field]);
+      expect(Object.isFrozen(values)).toBe(true);
+      expect(values[0]).toBe(two_nodes_gagge_sleep(valid)[field]);
+    }
+  });
+
+  // Deviation two_nodes_gagge_sleep-8.
+  test.each([
+    [
+      { ...valid, tr: [18, 19] },
+      "Parameters tdb, tr, v, rh, clo and thickness_quilt must have the same length. Got lengths [1, 2, 1, 1, 1, 1]",
+    ],
+    [
+      { tdb: [], tr: [], v: [], rh: [], clo: [], thickness_quilt: [] },
+      "Time-series inputs must not be empty.",
+    ],
+  ])("%o throws upstream's message as an Error", (inputs, message) => {
+    const error = thrown(inputs);
+    expect(error.constructor).toBe(Error);
+    expect(error.message).toBe(message);
+  });
+
+  // Deviation two_nodes_gagge_sleep-7.
+  test.each([
+    [{ ltime: 0 }, "ltime must be a positive integer, got 0"],
+    [{ ltime: -1 }, "ltime must be a positive integer, got -1"],
+    [
+      { ltime: -1e21 },
+      "ltime must be a positive integer, got -1000000000000000000000",
+    ],
+    [
+      {
+        thickness_quilt: [1.76, -1],
+        tdb: [18, 18],
+        tr: [18, 18],
+        v: [0.05, 0.05],
+        rh: [50, 50],
+        clo: [1.4, 1.4],
+      },
+      "thickness_quilt must be greater than or equal to 0 cm.",
+    ],
+  ])("%o throws upstream's message as a RangeError", (inputs, message) => {
+    expect(() => call({ ...valid, ...inputs })).toThrow(
+      new RangeError(message),
+    );
+  });
+
+  // Deviation two_nodes_gagge_sleep-6.
+  test.each([
+    [1.5, "ltime must be an integer."],
+    ["1", "ltime must be a finite number."],
+    [true, "ltime must be a finite number."],
+  ])("ltime %o throws the library's TypeError", (ltime, message) => {
+    expect(() => call({ ...valid, ltime })).toThrow(new TypeError(message));
+  });
+
+  // Deviation two_nodes_gagge_sleep-9.
+  test.each([
+    ["tdb", ["18"]],
+    ["tdb", ["a"]],
+    ["tdb", [[18]]],
+    ["height", "171"],
+  ])("%s %o throws the library's TypeError", (key, value) => {
+    expect(() => call({ ...valid, [key]: value })).toThrow(
+      new TypeError(`${key} must be a finite number.`),
+    );
+  });
+
+  // Deviation two_nodes_gagge_sleep-10: checked, then never read.
+  test("temp_core_neutral is checked as a number and changes nothing", () => {
+    expect(call({ ...valid, temp_core_neutral: 50 })).toEqual(
+      two_nodes_gagge_sleep(valid),
+    );
+    expect(() => call({ ...valid, temp_core_neutral: "abc" })).toThrow(
+      new TypeError("temp_core_neutral must be a finite number."),
+    );
+  });
+
+  // models/two_nodes_gagge_sleep.py:444: the kernel sets met_shivering before
+  // it reads it.
+  test("the met_shivering input changes nothing", () => {
+    expect(call({ ...valid, met_shivering: 100 })).toEqual(
+      two_nodes_gagge_sleep(valid),
+    );
+  });
+
+  // Deviation two_nodes_gagge_sleep-4.
+  test.each([
+    [{ tdb: 33.7 }],
+    [{ p_atm: 0 }],
+    [{ weight: 0 }],
+    [{ alfa: 0 }],
+    [{ alfa: 1 }],
+    [{ tdb: -235 }],
+    [
+      {
+        tdb: -5.197913646697998,
+        tr: -6.830699443817139,
+        v: 3.0107510089874268,
+        rh: 29.146409034729004,
+        clo: 22.275272407767105,
+        thickness_quilt: 3.0191242694854736,
+        p_atm: 0.008837205405705754,
+      },
+    ],
+  ])("%o throws numba's division by zero as a RangeError", (bad) => {
+    expect(() => call({ ...valid, ...bad })).toThrow(
+      new RangeError("division by zero"),
+    );
+  });
+
+  // Deviation two_nodes_gagge_sleep-5.
+  test("a Newton loop that does not converge throws Error at the cap", () => {
+    const error = thrown({
+      tdb: 26.292985677719116,
+      tr: 0.40826576120748487,
+      v: 596.6716153947957,
+      rh: 29.500246047973633,
+      clo: -1.442467212677002,
+      thickness_quilt: 7.711873352527618,
+      wme: -2248732.0579214664,
+      alfa: 0.4412975311279297,
+      c_str: -6175.49996273028,
+    });
+    expect(error.constructor).toBe(Error);
+    expect(error.message).toBe("Max iterations exceeded");
+  });
+
+  test("the root entry exports the same function", () => {
+    expect(sleep_from_root).toBe(two_nodes_gagge_sleep);
   });
 });

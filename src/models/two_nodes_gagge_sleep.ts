@@ -61,6 +61,51 @@ export type GaggeTwoNodesSleep<
   Series extends number | readonly number[] = number | readonly number[],
 > = OutputsOf<typeof TWO_NODES_GAGGE_SLEEP_INFO, Series>;
 
+/**
+ * Adaption of the Gagge two-node model for sleep thermal environment, developed by
+ * Yan, S., Xiong, J., Kim, J. and de Dear, R. [Yan2022](../../docs/references.md#yan2022).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ *
+ * > [!NOTE]
+ * > tdb, tr, v, rh, clo and thickness_quilt must have the same length.
+ * > This length will be the duration of the simulation.
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.v - Air speed, [m/s].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.thickness_quilt - Thickness of the quilt. [cm].
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ * @param inputs.p_atm - Atmospheric pressure, default value 101325 [Pa]. Defaults to 101325.
+ * @param inputs.ltime - Number of time steps for each iteration. Defaults to 1.
+ * @param inputs.height - Height of the person, [cm]. Defaults to 171.
+ * @param inputs.weight - Weight of the person, [kg]. Defaults to 70.
+ * @param inputs.c_sw - Driving coefficient for regulatory sweating. Defaults to 170.
+ * @param inputs.c_dil - Driving coefficient for vasodilation. Defaults to 120.
+ * @param inputs.c_str - Driving coefficient for vasoconstriction. Defaults to 0.5.
+ * @param inputs.temp_skin_neutral - Skin temperature at neutral conditions, [°C]. Defaults to 33.7.
+ * @param inputs.temp_core_neutral - Core temperature at neutral conditions, [°C]. Defaults to 36.8.
+ * @param inputs.e_skin - Total evaporative heat loss, [W/m2]. Defaults to 0.094.
+ * @param inputs.alfa - Dynamic fraction of total body mass assigned to the skin node. Defaults to 0.1.
+ * @param inputs.skin_blood_flow - Skin-blood-flow rate per unit surface area, [kg/h/m2]. Defaults to 6.3.
+ * @param inputs.met_shivering - Metabolic rate due to shivering, [W/m2]. Defaults to 0.
+ *
+ * @returns A dataclass containing the results of the Gagge two-node model for sleep thermal environment.
+ * See {@link GaggeTwoNodesSleep} for more details.
+ * To access the results, use the corresponding attributes of the returned instance, e.g. `result.e_skin`.
+ *
+ * - `set` - Standard Effective Temperature (SET).
+ * - `t_core` - Core temperature, [°C].
+ * - `t_skin` - Skin temperature, [°C].
+ * - `wet` - Skin wettedness, adimensional. Ranges from 0 to 1.
+ * - `t_sens` - Predicted Thermal Sensation.
+ * - `disc` - Thermal discomfort.
+ * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.
+ * - `met_shivering` - Metabolic rate due to shivering, [W/m2].
+ * - `alfa` - Dynamic fraction of total body mass assigned to the skin node (dimensionless).
+ * - `skin_blood_flow` - Skin-blood-flow rate per unit surface area, [kg/h/m2].
+ */
 export function two_nodes_gagge_sleep(
   inputs: GaggeTwoNodesSleepInputs<number>,
 ): GaggeTwoNodesSleep<number>;
@@ -634,7 +679,7 @@ function _sleep_set_optimized(
  * Calculate saturation vapor pressure at temperature t.
  *
  * @param t - Temperature [°C]
- * @returns Saturation vapor pressure [Pa]
+ * @returns Saturation vapor pressure [torr]
  */
 function _fnsvp(t: number): number {
   if (t + 235 === 0) throw new RangeError("division by zero");

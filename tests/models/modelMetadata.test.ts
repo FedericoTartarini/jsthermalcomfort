@@ -200,6 +200,14 @@ const v2Calls: Record<string, object> = {
     clo: 0.1,
     vapor_pressure: 12,
   },
+  two_nodes_gagge_sleep: {
+    tdb: 18,
+    tr: 18,
+    v: 0.05,
+    rh: 50,
+    clo: 1.4,
+    thickness_quilt: 1.76,
+  },
   use_fans_heatwaves: { tdb: 35, tr: 35, v: 1.0, rh: 50, met: 1.2, clo: 0.5 },
   utci: { tdb: 25, tr: 25, v: 1, rh: 50 },
   vertical_tmp_grad_ppd: {

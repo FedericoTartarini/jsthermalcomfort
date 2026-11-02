@@ -706,6 +706,47 @@ describe("floatRepr (JS-only)", () => {
   });
 });
 
+// A time series, two_nodes_gagge_sleep's tdb, which upstream reads with
+// np.atleast_1d (models/two_nodes_gagge_sleep.py:120; decision 277).
+describe("parseInputs, numeric series (JS-only)", () => {
+  const info = {
+    name: "f",
+    inputs: { tdb: { kind: "numeric", unit: "°C", series: true } },
+  } as const;
+  const parse = (tdb: unknown) => () => parseInputs(info, { tdb });
+
+  test("takes an array of numbers, and a number as an array of one, frozen", () => {
+    const given = [18, 19.5, -2];
+    const { tdb } = parse(given)();
+    expect(tdb).toEqual([18, 19.5, -2]);
+    expect(Object.isFrozen(tdb)).toBe(true);
+    expect(tdb).not.toBe(given);
+    expect(parse(18)()).toEqual({ tdb: [18] });
+    expect(parse([])()).toEqual({ tdb: [] });
+  });
+
+  test("checks each element as a number", () => {
+    for (const bad of [[18, "19"], [18, true], [18, null], [[18]], ["18"]])
+      expect(parse(bad)).toThrow(new TypeError("tdb must be a finite number."));
+    for (const bad of [[18, NaN], [Infinity]])
+      expect(parse(bad)).toThrow(
+        new RangeError("tdb must be a finite number."),
+      );
+    for (const bad of ["18", true, null, NaN])
+      expect(parse(bad)).toThrow(/^tdb must be a finite number\.$/);
+  });
+
+  test("types the entry as a number or an array of them", () => {
+    expectTypeOf<InputsOf<typeof info>>().toEqualTypeOf<{
+      tdb: number | readonly number[];
+    }>();
+    expectTypeOf<InputsOf<typeof info, number>>().toEqualTypeOf<{
+      tdb: number;
+    }>();
+    expectTypeOf(parse(18)()).toEqualTypeOf<{ tdb: readonly number[] }>();
+  });
+});
+
 // An integer, BaseInputs' duration (classes_input.py:60), whose types are
 // (int, np.ndarray) (decision 271).
 describe("parseInputs, numeric integer (JS-only)", () => {

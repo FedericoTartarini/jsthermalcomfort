@@ -167,6 +167,11 @@ export interface DerivedField {
  *
  * `integer` marks a number upstream types as `int`, `ridge_regression_predict_t_re_t_sk`'s
  * `duration` (`classes_input.py:60`): the parse then takes only an integer.
+ *
+ * `series` marks a time series, `two_nodes_gagge_sleep`'s `tdb`: the key
+ * takes a number or an array of numbers, and the parse returns a frozen
+ * array, a number as an array of one, as upstream's `np.atleast_1d` reads it
+ * (`models/two_nodes_gagge_sleep.py:120`; decision 277).
  */
 export interface NumericField {
   readonly kind: "numeric";
@@ -174,6 +179,7 @@ export interface NumericField {
   readonly applicability?: Bound;
   readonly default?: number | false | null;
   readonly integer?: true;
+  readonly series?: true;
 }
 
 /** A switch, a field upstream marks `is_bool`, such as `limit_inputs`. */
@@ -267,9 +273,11 @@ type FalseOf<F> = F extends { readonly default: false } ? false : never;
 type KindValue<F extends InputsInfo[string]> = F extends InstanceField
   ? InstanceType<F["of"]>
   : KindValues[F["kind"]];
-type InputValue<F extends InputsInfo[string]> = F extends ChoiceField
+type InputValue<F extends InputsInfo[string], Series> = F extends ChoiceField
   ? F["allowed"][number] | NullOf<F>
-  : KindValue<F> | FalseOf<F> | NullOf<F>;
+  : F extends { readonly series: true }
+    ? Series
+    : KindValue<F> | FalseOf<F> | NullOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
 
 /**
@@ -278,40 +286,58 @@ type Flatten<T> = { [K in keyof T]: T[K] } & {};
  * omitted keyword does (ADR 0019, whitelist item 6); a `choice` takes one of
  * its `allowed`, or `null` where it is `nullable`; a `numeric` whose default
  * is `false` or `null` takes that value too; an `instance` takes an instance
- * of its `of`.
+ * of its `of`; a `series` takes `Series`, by default a number or an array of
+ * them, and `number` for a call of one time step (decision 277).
  */
-export type InputsOf<M extends { readonly inputs: InputsInfo }> = Flatten<
+export type InputsOf<
+  M extends { readonly inputs: InputsInfo },
+  Series extends number | readonly number[] = number | readonly number[],
+> = Flatten<
   {
     -readonly [
       K in keyof M["inputs"] as K extends OptionalKey<M["inputs"]> ? never : K
-    ]: InputValue<M["inputs"][K]>;
+    ]: InputValue<M["inputs"][K], Series>;
   } & {
     -readonly [
       K in keyof M["inputs"] as K extends OptionalKey<M["inputs"]> ? K : never
-    ]?: InputValue<M["inputs"][K]> | undefined;
+    ]?: InputValue<M["inputs"][K], Series> | undefined;
   }
 >;
 
-/** The inputs after the parse, each default applied. */
+/**
+ * The inputs after the parse, each default applied, a `series` as a frozen
+ * array.
+ */
 export type ResolvedOf<I extends InputsInfo> = {
-  -readonly [K in keyof I]: KindValue<I[K]> | NullOf<I[K]> | FalseOf<I[K]>;
+  -readonly [K in keyof I]: I[K] extends { readonly series: true }
+    ? readonly number[]
+    : KindValue<I[K]> | NullOf<I[K]> | FalseOf<I[K]>;
 };
 
 /**
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
  * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), and a
- * `series` field is a readonly array of those values.
+ * `series` field is a readonly array of those values, or `Series` where it is
+ * given: `number | readonly number[]` for a model that returns a number for
+ * one time step, as `two_nodes_gagge_sleep` does (decisions 276, 277).
  */
-export type OutputsOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
+export type OutputsOf<
+  M extends { readonly outputs: OutputsInfo },
+  Series extends number | readonly number[] = never,
+> = Flatten<
   {
     readonly [K in keyof M["outputs"]]: M["outputs"][K] extends {
       readonly series: true;
     }
-      ? readonly (
-          | KindValues[M["outputs"][K]["kind"]]
-          | (M["outputs"][K] extends { readonly masked: true } ? number : never)
-        )[]
+      ? [Series] extends [never]
+        ? readonly (
+            | KindValues[M["outputs"][K]["kind"]]
+            | (M["outputs"][K] extends { readonly masked: true }
+                ? number
+                : never)
+          )[]
+        : Series
       : | KindValues[M["outputs"][K]["kind"]]
         | (M["outputs"][K] extends { readonly masked: true } ? number : never);
   } & ModelOutputs

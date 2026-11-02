@@ -26,7 +26,8 @@ export function isDeepFrozen(value: unknown): boolean {
  * except `false` or `null` for one whose default is that value, upstream's
  * `False` or `None`, and
  * NaN or ±Infinity `RangeError` (deviation _shared-7), and a number that is
- * not an integer for an `integer` entry `TypeError` (deviation _shared-80);
+ * not an integer for an `integer` entry `TypeError` (deviation _shared-80),
+ * and a `series` entry, which takes an array, checks each element so;
  * every switch is
  * checked to be a boolean (deviation _shared-8); the keys are checked in
  * `INFO.inputs`' order, a missing key at its place too (deviation _shared-9);
@@ -110,12 +111,25 @@ export function describeModelContract(
     );
 
     test.each(keysOf("numeric"))("%s that is not a number", (key) => {
-      const fallback = info.inputs[key]?.default;
-      for (const bad of not_a_number.filter((v) => v !== fallback))
+      const entry = info.inputs[key];
+      const series = entry?.kind === "numeric" && entry.series === true;
+      const fallback = entry?.default;
+      // A series takes an array, each element checked as a number
+      // (decision 277).
+      const elements = series ? not_a_number.map((v) => [25, v]) : [];
+      for (const bad of [
+        ...not_a_number.filter(
+          (v) => v !== fallback && !(series && Array.isArray(v)),
+        ),
+        ...elements,
+      ])
         expect(call({ ...valid, [key]: bad })).toThrow(
           new TypeError(finiteMessage(key)),
         );
-      for (const bad of not_finite)
+      for (const bad of [
+        ...not_finite,
+        ...(series ? not_finite.map((v) => [25, v]) : []),
+      ])
         expect(call({ ...valid, [key]: bad })).toThrow(
           new RangeError(finiteMessage(key)),
         );

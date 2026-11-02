@@ -88,6 +88,27 @@ describe("OutputsOf", () => {
     }>();
   });
 
+  // A second type argument types every series output as that type, a
+  // one-step call's number where upstream returns one (decisions 276, 277).
+  test("types a series output as the series type given", () => {
+    type Info = {
+      outputs: {
+        s: { kind: "numeric"; unit: "°C"; series: true };
+        n: { kind: "numeric"; unit: null };
+      };
+    };
+    expectTypeOf<OutputsOf<Info, number>>().toEqualTypeOf<{
+      readonly s: number;
+      readonly n: number;
+      readonly warnings: readonly ModelWarning[];
+    }>();
+    expectTypeOf<OutputsOf<Info, number | readonly number[]>>().toEqualTypeOf<{
+      readonly s: number | readonly number[];
+      readonly n: number;
+      readonly warnings: readonly ModelWarning[];
+    }>();
+  });
+
   // `series` makes an output a time series (decision 269).
   test("maps a series output to a readonly array of its kind", () => {
     type Fields = OutputsOf<{

@@ -104,15 +104,28 @@ export function choiceFieldMessage(
 
 /**
  * Checks one number, as given or defaulted, or `false` or `null` where the
- * entry's default is that value, upstream's `False` or `None`.
+ * entry's default is that value, upstream's `False` or `None`; a `series`
+ * entry's number or array of numbers is returned as a frozen array.
  */
 function parseNumeric(
   key: string,
   value: unknown,
   entry: NumericField,
-): number | false | null {
+): number | false | null | readonly number[] {
   if (value === false && entry.default === false) return false;
   if (value === null && entry.default === null) return null;
+  // A time series, as upstream's np.atleast_1d reads it (decision 277).
+  if (entry.series)
+    return Object.freeze(
+      (Array.isArray(value) ? value : [value]).map((item: unknown) =>
+        parseNumber(key, item, entry),
+      ),
+    );
+  return parseNumber(key, value, entry);
+}
+
+/** Checks one finite number, an `integer` entry's an integer. */
+function parseNumber(key: string, value: unknown, entry: NumericField): number {
   // Any other type is a TypeError, a boolean or null (deviation _shared-6) and
   // an array (deviation _shared-5) included, which upstream accepts.
   if (typeof value !== "number") throw notFiniteNumber(key, TypeError);
@@ -172,7 +185,9 @@ function parseInstance(value: unknown, entry: InstanceField): object {
  * - a number must be finite: a `TypeError` for any other type, a boolean,
  *   `null` or an array included, and a `RangeError` for NaN or ±Infinity;
  *   one whose default is `false` or `null` takes that value too; an `integer`
- *   one must be an integer, or a `TypeError` names it;
+ *   one must be an integer, or a `TypeError` names it; a `series` one takes
+ *   a number or an array of numbers, each element checked as a number, and
+ *   comes back a frozen array;
  * - a switch must be a boolean, or a `TypeError` names it, whether or not
  *   upstream checks it (deviation _shared-8);
  * - a string option must be one of its `allowed` values, in any case, or its

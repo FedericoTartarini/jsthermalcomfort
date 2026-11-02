@@ -171,6 +171,7 @@ const v2Calls: Record<string, object> = {
     vr: 2.0,
     sport: pkg.Sports.RUNNING,
   },
+  thi: { tdb: 30, rh: 70 },
   two_nodes_gagge: { tdb: 25, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 },
   use_fans_heatwaves: { tdb: 35, tr: 35, v: 1.0, rh: 50, met: 1.2, clo: 0.5 },
   utci: { tdb: 25, tr: 25, v: 1, rh: 50 },

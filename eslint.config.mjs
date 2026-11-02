@@ -52,6 +52,7 @@ export const LINTED = [
   "src/models/set_tmp.ts",
   "src/models/solar_gain.ts",
   "src/models/sports_heat_stress_risk.ts",
+  "src/models/thi.ts",
   "src/models/two_nodes_gagge.ts",
   "src/models/use_fans_heatwaves.ts",
   "src/models/utci.ts",

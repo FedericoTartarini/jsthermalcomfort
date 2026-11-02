@@ -82,6 +82,8 @@ import type {
   ATHBInputs,
   SportsHeatStressInputs,
   SportsHeatStressRisk,
+  THI,
+  THIInputs,
   OutputField,
   StandardId,
   UnitSymbol,
@@ -100,6 +102,7 @@ import {
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
   NET_INFO,
+  THI_INFO,
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
   PMV_CATEGORY_BINS_ISO_7730,
@@ -142,6 +145,7 @@ import {
   heat_index_schoen,
   humidex,
   net,
+  thi,
   phs,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
@@ -210,6 +214,7 @@ const workCapacityNioshInfo: ModelInfo = WORK_CAPACITY_NIOSH_INFO;
 const discomfortIndexInfo: ModelInfo = DISCOMFORT_INDEX_INFO;
 const esiInfo: ModelInfo = ESI_INFO;
 const netInfo: ModelInfo = NET_INFO;
+const thiInfo: ModelInfo = THI_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1130,3 +1135,14 @@ netResult.net = 1;
 net({ ...netInputs, round_output: false });
 // @ts-expect-error v is a required quantity.
 net({ tdb: 37, rh: 100 });
+
+// thi takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's THIInputs and THI, and returns a readonly result.
+const thiInputs: THIInputs = { tdb: 30, rh: 70 };
+const thiResult: THI = thi(thiInputs);
+const thiValue: number = thiResult.thi;
+// @ts-expect-error the result is readonly.
+thiResult.thi = 1;
+thi({ ...thiInputs, round_output: false });
+// @ts-expect-error rh is a required quantity.
+thi({ tdb: 30 });

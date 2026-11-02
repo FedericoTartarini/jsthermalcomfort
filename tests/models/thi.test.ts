@@ -1,6 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { thi } from "../../src/models/index.ts";
+import { thi, THI_INFO } from "../../src/models/index.ts";
+import { thi as thi_from_root } from "../../src/index.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
+
+type Inputs = Parameters<typeof thi>[0];
+
+const call = (inputs: unknown) => thi(inputs as Inputs);
 
 // Mirrors pythermalcomfort v4.7.0 tests/test_thi.py. Its is_equal
 // (tests/conftest.py:101-116) is np.isclose or np.allclose with atol 1e-6 and
@@ -50,4 +56,72 @@ describe("test_thi", () => {
       ).toThrow(expected_error);
     },
   );
+});
+
+describeModelContract(thi, THI_INFO, { tdb: 30, rh: 70 });
+
+const rh_message = "Relative humidity must be between 0 and 100 %";
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("thi (JS-only)", () => {
+  test.each([
+    [30, 70, 81.38, 81.4],
+    [20, 50, 65.25, 65.2],
+    [25, 0, 66.55, 66.6],
+    [0, 50, 39.15, 39.2],
+    [-40, 0, 13.900000000000006, 13.9],
+    [60, 100, 140.0, 140.0],
+    [37, 30, 82.96900000000001, 83.0],
+    [-50, 100, -58.0, -58.0],
+    [0, 0, 46.3, 46.3],
+    [25, -0.0, 66.55, 66.6],
+    [25, 5e-324, 66.55, 66.6],
+  ] as const)(
+    "tdb %s, rh %s gives %s, rounded %s",
+    (tdb, rh, expected, rounded) => {
+      const result = thi({ tdb, rh, round_output: false });
+      expect(approx(result.thi, expected, { rel: 1e-12, abs: 0 })).toBe(true);
+      expect(thi({ tdb, rh }).thi).toBe(rounded);
+    },
+  );
+
+  // Deviation thi-3.
+  test.each([-5, -Number.MIN_VALUE, 100.00000000000001, 150])(
+    "rh %s throws upstream's message as a RangeError",
+    (rh) => {
+      expect(() => call({ tdb: 25, rh })).toThrow(new RangeError(rh_message));
+    },
+  );
+
+  // Deviation thi-4.
+  test.each([Infinity, -Infinity])(
+    "rh %s throws the parse's message as a RangeError",
+    (rh) => {
+      expect(() => call({ tdb: 25, rh })).toThrow(
+        new RangeError("rh must be a finite number."),
+      );
+    },
+  );
+
+  test("checks the range after the parse, as THIInputs' __post_init__ runs after BaseInputs'", () => {
+    expect(() => call({ tdb: "25", rh: -5 })).toThrow(
+      new TypeError("tdb must be a finite number."),
+    );
+  });
+
+  // Deviation thi-2.
+  test("returns no rows", () => {
+    for (const [tdb, rh] of [
+      [-50, 0],
+      [30, 70],
+      [60, 100],
+    ] as const) {
+      expect(thi({ tdb, rh }).warnings).toEqual([]);
+    }
+  });
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(thi_from_root).toBe(thi);
+  });
 });

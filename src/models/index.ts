@@ -12,7 +12,7 @@ import { net, NET_INFO } from "./net.ts";
 import { wbgt } from "./wbgt.js";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
 import { esi, ESI_INFO } from "./esi.ts";
-import { thi } from "./thi.ts";
+import { thi, THI_INFO } from "./thi.ts";
 import { set_tmp, SET_TMP_INFO } from "./set_tmp.ts";
 import { wci, WCI_INFO } from "./wci.ts";
 import {
@@ -117,6 +117,7 @@ export type {
   SportsHeatStressInputs,
   SportsHeatStressRisk,
 } from "./sports_heat_stress_risk.ts";
+export type { THI, THIInputs } from "./thi.ts";
 export type {
   GaggeTwoNodes,
   GaggeTwoNodesInputs,
@@ -191,6 +192,7 @@ export {
   set_tmp,
   SET_TMP_INFO,
   thi,
+  THI_INFO,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   utci,
@@ -265,6 +267,7 @@ export default {
   set_tmp,
   SET_TMP_INFO,
   thi,
+  THI_INFO,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   utci,

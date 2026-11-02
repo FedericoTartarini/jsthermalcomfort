@@ -125,11 +125,17 @@ export interface ModelOutputs {
  *
  * `series` marks a time series, a frozen array of its kind's values, one per
  * time step: `ridge_regression_predict_t_re_t_sk`'s `t_re` (decision 269).
+ *
+ * `none` marks a field that the model leaves at its dataclass's `None`
+ * default, which the field then holds as `null`: `heat_index_lu`'s
+ * `stress_category` (`classes_return.py:308`, `models/heat_index_lu.py:63`;
+ * decision 279).
  */
 export interface OutputField {
   readonly kind: "numeric" | "bool" | "label";
   readonly masked?: true;
   readonly series?: true;
+  readonly none?: true;
   readonly unit: UnitSymbol | null;
   readonly applicability?: Bound;
   readonly classifier?: ClassifierBins;
@@ -317,7 +323,8 @@ export type ResolvedOf<I extends InputsInfo> = {
 /**
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
- * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), and a
+ * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), a `none`
+ * field is `null`, and a
  * `series` field is a readonly array of those values. A numeric series that
  * is not masked takes `Series`, by default `readonly number[]`:
  * `number | readonly number[]` for a model that returns a number for one time
@@ -342,8 +349,12 @@ export type OutputsOf<
                 ? number
                 : never)
           )[]
-      : | KindValues[M["outputs"][K]["kind"]]
-        | (M["outputs"][K] extends { readonly masked: true } ? number : never);
+      : M["outputs"][K] extends { readonly none: true }
+        ? null
+        : | KindValues[M["outputs"][K]["kind"]]
+          | (M["outputs"][K] extends { readonly masked: true }
+              ? number
+              : never);
   } & ModelOutputs
 >;
 

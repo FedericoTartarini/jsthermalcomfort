@@ -112,6 +112,21 @@ describe("OutputsOf", () => {
     }>();
   });
 
+  // `none` keeps a dataclass field at its `None` default (decision 279).
+  test("maps a none output to null", () => {
+    type Fields = OutputsOf<{
+      outputs: {
+        h: { kind: "numeric"; unit: "°C" };
+        c: { kind: "label"; unit: null; none: true };
+      };
+    }>;
+    expectTypeOf<Fields>().toEqualTypeOf<{
+      readonly h: number;
+      readonly c: null;
+      readonly warnings: readonly ModelWarning[];
+    }>();
+  });
+
   // `series` makes an output a time series (decision 269).
   test("maps a series output to a readonly array of its kind", () => {
     type Fields = OutputsOf<{

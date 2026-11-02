@@ -204,9 +204,10 @@ def _esi(rng):
 
 
 def _heat_index_lu(rng):
-    # tdb stays in [-50, 70) °C and rh in [0, 100], where upstream's root
-    # solver finds its interval (it raises from about 127 °C at rh 100,
-    # models/heat_index_lu.py:345), and rh reaches 0 and 100 now and then.
+    # tdb stays in [-50, 70] °C and rh in [0, 100], where upstream's root
+    # solver finds its interval: at rh 100 it returns up to tdb 127.23 °C and
+    # raises above it (models/heat_index_lu.py:345, measured on 4.7.0). rh
+    # reaches 0 and 100 now and then.
     draw = rng.random()
     return {
         "tdb": _value(rng, -50.0, 70.0),

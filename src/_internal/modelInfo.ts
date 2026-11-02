@@ -129,7 +129,8 @@ export interface ModelOutputs {
  * `none` marks a field that the model leaves at its dataclass's `None`
  * default, which the field then holds as `null`: `heat_index_lu`'s
  * `stress_category` (`classes_return.py:308`, `models/heat_index_lu.py:63`;
- * decision 279).
+ * decision 279). Such a field is never computed, so it takes no `masked`,
+ * `series` or `classifier`.
  */
 export interface OutputField {
   readonly kind: "numeric" | "bool" | "label";
@@ -324,9 +325,9 @@ export type ResolvedOf<I extends InputsInfo> = {
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
  * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), a `none`
- * field is `null`, and a
- * `series` field is a readonly array of those values. A numeric series that
- * is not masked takes `Series`, by default `readonly number[]`:
+ * field is `null`, and a `series` field is a readonly array of those values.
+ * A numeric series that is not masked takes `Series`, by default
+ * `readonly number[]`:
  * `number | readonly number[]` for a model that returns a number for one time
  * step, as `two_nodes_gagge_sleep` does (decisions 276, 277).
  */

@@ -4,10 +4,6 @@ import { heat_index_lu as heat_index_lu_from_root } from "../../src/index.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
-// A call with inputs the type rejects, to test the runtime.
-const call = (inputs: unknown) =>
-  heat_index_lu(inputs as Parameters<typeof heat_index_lu>[0]);
-
 // Mirrors pythermalcomfort v4.7.0 tests/test_heat_index_lu.py. Its
 // np.isclose and np.allclose take the default rtol, 1e-5, beside the atol
 // given, and its list call runs element-wise.
@@ -109,7 +105,7 @@ describe("heat_index_lu (JS-only)", () => {
   ])(
     "tdb %s, rh %s throws the root solver's interval message as a RangeError",
     (tdb, rh) => {
-      expect(() => call({ tdb, rh })).toThrow(
+      expect(() => heat_index_lu({ tdb, rh })).toThrow(
         new RangeError("wrong initial interval in the root solver"),
       );
     },
@@ -124,10 +120,11 @@ describe("heat_index_lu (JS-only)", () => {
     (tdb, rh) => {
       let thrown: unknown;
       try {
-        call({ tdb, rh });
+        heat_index_lu({ tdb, rh });
       } catch (error) {
         thrown = error;
       }
+      expect(thrown).toBeInstanceOf(Error);
       expect((thrown as Error).constructor).toBe(Error);
       expect((thrown as Error).message).toBe(
         "reaching maximum iteration in the root solver",

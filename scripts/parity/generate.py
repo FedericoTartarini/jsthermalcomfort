@@ -10,6 +10,7 @@ arguments, its outputs and the warnings it emitted. tests/parity/harness.ts
 compares the library with these files (ADR 0020).
 """
 
+import contextlib
 import dataclasses
 import importlib
 import importlib.metadata
@@ -949,7 +950,7 @@ GATED_INNER = {"pmv_e": ("pythermalcomfort.models.pmv_e", "pmv_ppd_iso")}
 
 # The models whose np.vectorize kernel numpy runs once more, on the first
 # element, to find otypes, before the run whose result upstream returns
-# (decision 208). A case records how many of its warnings that first run
+# (decisions 208, 285). A case records how many of its warnings that first run
 # emitted, as otypes_warnings, since the library runs the kernel once.
 OTYPES_PASS = {
     "pet_steady": ("pythermalcomfort.models.pet_steady", "_pet_steady_vectorised")
@@ -1085,12 +1086,12 @@ def _run(model, function, inputs):
     from numpy's otypes run, which come first.
     """
     otypes = []
+    patch = contextlib.nullcontext()
     if model in OTYPES_PASS:
         path, name = OTYPES_PASS[model]
         kernel = getattr(importlib.import_module(path), name)
-        with mock.patch.object(kernel, "pyfunc", _counted(kernel.pyfunc, otypes)):
-            result, emitted = _call(function, inputs)
-    else:
+        patch = mock.patch.object(kernel, "pyfunc", _counted(kernel.pyfunc, otypes))
+    with patch:
         result, emitted = _call(function, inputs)
     case = {
         "inputs": inputs,

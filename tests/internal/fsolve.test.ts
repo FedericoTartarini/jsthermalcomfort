@@ -97,12 +97,8 @@ const SLOW_ITERATIONS =
 const MAXFEV_400 = "The number of calls to function has reached maxfev = 400.";
 const MAXFEV_600 = "The number of calls to function has reached maxfev = 600.";
 
-// scipy 1.18.1's fsolve in the parity image (scripts/parity/Dockerfile,
-// x86_64), called as pet_steady calls it: the root, bit for bit, the calls to
-// func, two fewer than scipy's, whose _check_func and minpack_hybrd evaluate
-// func at x0 before HYBRD does, and the warning. Up to three cases per family
-// and outcome of the 7,000 measured, all of which the port matches. No case
-// reaches status 3 ("xtol=... is too small").
+// scipy 1.18.1's fsolve in the parity image, called as pet_steady calls it
+// (register _shared's Notes).
 describe("fsolve", () => {
   test.each([
     [

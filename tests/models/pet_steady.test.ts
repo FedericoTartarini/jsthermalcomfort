@@ -104,18 +104,17 @@ describe("pet_steady (JS-only)", () => {
   });
 
   // Deviations pet_steady-12, pet_steady-13 and pet_steady-14.
+  const POSITION =
+    "position must be one of ['sitting', 'standing', 'standing, forced convection']";
+  const SEX = "sex must be one of ['male', 'female']";
   test.each([
-    ["position", "lying", RangeError],
-    ["position", 5, TypeError],
-    ["position", ["standing"], TypeError],
-    ["sex", "x", RangeError],
-    ["sex", 5, TypeError],
-    ["sex", ["female"], TypeError],
-  ])("%s %o throws choice_field's message", (key, value, error) => {
-    const message =
-      key === "position"
-        ? "position must be one of ['sitting', 'standing', 'standing, forced convection']"
-        : "sex must be one of ['male', 'female']";
+    ["position", "lying", RangeError, POSITION],
+    ["position", 5, TypeError, POSITION],
+    ["position", ["standing"], TypeError, POSITION],
+    ["sex", "x", RangeError, SEX],
+    ["sex", 5, TypeError, SEX],
+    ["sex", ["female"], TypeError, SEX],
+  ])("%s %o throws choice_field's message", (key, value, error, message) => {
     expect(() => call({ ...valid, [key]: value })).toThrow(new error(message));
   });
 

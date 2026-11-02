@@ -6,7 +6,8 @@
 // the model's name for a call with no inputs object; it replaces each upstream
 // message that names Python's types or Python's call binding (deviations
 // _shared-10, for the parse, _shared-23, for `units_converter`, and _shared-31,
-// for `transpose_sharp_altitude`).
+// for `transpose_sharp_altitude`), or a raise that names no input (deviation
+// pet_steady-6).
 
 /**
  * The library's message for a quantity that is not a finite number: a
@@ -37,6 +38,14 @@ export function missingInput(key: string): TypeError {
 /** The library's message for a key the model does not take. */
 export function notAnInput(key: string, name: string): TypeError {
   return new TypeError(`${key} is not an input of ${name}().`);
+}
+
+/**
+ * The library's message for a negative quantity where upstream's arithmetic
+ * makes a complex number and raises on it.
+ */
+export function negativeInput(key: string): RangeError {
+  return new RangeError(`${key} must not be negative.`);
 }
 
 /** The library's message for a model called with no inputs object. */

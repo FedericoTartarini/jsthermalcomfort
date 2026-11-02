@@ -3,6 +3,7 @@ import {
   BASE_INPUTS_SEX,
   parseInputs,
 } from "../_internal/define.ts";
+import { negativeInput } from "../_internal/errors.ts";
 import { fsolve } from "../_internal/fsolve.ts";
 import { deepFreeze } from "../_internal/modelInfo.ts";
 import type {
@@ -283,7 +284,7 @@ function _pet_steady_vectorised(
     const e_bal_vec = [0.0, 0.0, 0.0]; // required for the vectorial expression of the balance
     // Upstream's Python float division raises at a zero divisor, and a complex
     // dividend makes its message "complex" (deviation pet_steady-4).
-    const zero_division =
+    const zero_division_message =
       weight < 0 || height < 0
         ? "complex division by zero"
         : "float division by zero";
@@ -310,7 +311,8 @@ function _pet_steady_vectorised(
 
     // Source term : metabolic activity
     // a_dubois is NaN where upstream's is complex, so its zero is tested on height.
-    if (a_dubois === 0 || height === 0) throw new RangeError(zero_division);
+    if (a_dubois === 0 || height === 0)
+      throw new RangeError(zero_division_message);
     const he = (_met + met_correction) / a_dubois;
     // impact of efficiency
     const h = he * (1.0 - wme); // [W/m2]
@@ -348,8 +350,8 @@ function _pet_steady_vectorised(
     // h_cc corrected convective heat transfer coefficient
     const h_cc = 3.0 * Math.pow(p_atm / 1013.25, 0.53);
     // Upstream's max raises TypeError on a complex hc or h_cc (deviation pet_steady-5).
-    if (_v < 0) throw new RangeError("v must not be negative.");
-    if (p_atm < 0) throw new RangeError("p_atm must not be negative.");
+    if (_v < 0) throw negativeInput("v");
+    if (p_atm < 0) throw negativeInput("p_atm");
     hc = Math.max(h_cc, hc);
     // modification of hc with the total pressure
     hc = hc * (p_atm / 1013.25) ** 0.55;
@@ -385,13 +387,13 @@ function _pet_steady_vectorised(
     }
     // calculation of the clothing radius depending on the clothing level (6.28 = 2*
     // pi !)
-    if (6.28 * height * y === 0) throw new RangeError(zero_division);
+    if (6.28 * height * y === 0) throw new RangeError(zero_division_message);
     const r2 = (a_dubois * (fcl - 1.0 + f_a_cl)) / (6.28 * height * y); // External radius
     const r1 = (f_a_cl * a_dubois) / (6.28 * height * y); // Internal radius
     const di = r2 - r1;
     // Calculation of the equivalent thermal resistance of body tissues
     // r1 is NaN where upstream's is complex, so its zero is tested on f_a_cl.
-    if (r1 === 0 || f_a_cl === 0) throw new RangeError(zero_division);
+    if (r1 === 0 || f_a_cl === 0) throw new RangeError(zero_division_message);
     const htcl = (6.28 * height * y * di) / (r_cl * Math.log(r2 / r1) * a_clo); // [W/(m2.K)]
 
     // Calculation of sweat losses
@@ -473,8 +475,8 @@ function _pet_steady_vectorised(
       return [...e_bal_vec];
     }
     // minpack cannot take upstream's complex PET balance (deviation pet_steady-5).
-    if (weight < 0) throw new RangeError("weight must not be negative.");
-    if (height < 0) throw new RangeError("height must not be negative.");
+    if (weight < 0) throw negativeInput("weight");
+    if (height < 0) throw negativeInput("height");
     // solving for the PET requires the scalar balance only
     return e_bal_scal;
   }

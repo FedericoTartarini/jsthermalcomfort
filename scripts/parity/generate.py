@@ -648,6 +648,62 @@ def _two_nodes_gagge_ji(rng):
     return case
 
 
+def _two_nodes_gagge_sleep(rng):
+    # The model checks no range, so the draws cover its branches: the 0.1 m/s
+    # floor on v, clo at or below 0 (naked skin) and above, the wettedness cap
+    # (hot, humid nights), shivering (cold nights) and ltime above 1, which
+    # repeats the clothing-temperature loop. The six series are scalars a
+    # third of the time, which upstream returns as scalars, and otherwise
+    # lists of 1 to 20 minutes, mixed with scalars where the length is 1
+    # (decision 276). tdb never equals temp_skin_neutral at the first minute,
+    # where chc is 0 and upstream raises ZeroDivisionError (deviation
+    # two_nodes_gagge_sleep-4). Every keyword argument is left out a third of
+    # the time, for its default.
+    hot = rng.random() < 0.3
+    duration = 1 if rng.random() < 1 / 3 else int(rng.integers(1, 21))
+    scalar = duration == 1 and rng.random() < 0.5
+    draws = {
+        "tdb": (24.0, 38.0) if hot else (5.0, 30.0),
+        "tr": (24.0, 40.0) if hot else (5.0, 32.0),
+        "v": (0.0, 0.5),
+        "rh": (60.0, 100.0) if hot else (10.0, 100.0),
+        "clo": (0.0, 3.0),
+        "thickness_quilt": (0.0, 5.0),
+    }
+    optional = {
+        "wme": lambda: _value(rng, 0.0, 0.3),
+        "p_atm": lambda: _value(rng, 60000.0, 110000.0),
+        "ltime": lambda: int(rng.integers(1, 6)),
+        "height": lambda: _value(rng, 140.0, 200.0),
+        "weight": lambda: _value(rng, 40.0, 120.0),
+        "c_sw": lambda: _value(rng, 100.0, 250.0),
+        "c_dil": lambda: _value(rng, 50.0, 200.0),
+        "c_str": lambda: _value(rng, 0.1, 1.0),
+        "temp_skin_neutral": lambda: _value(rng, 32.0, 35.0),
+        "temp_core_neutral": lambda: _value(rng, 36.0, 38.0),
+        "e_skin": lambda: _value(rng, 0.0, 50.0),
+        "alfa": lambda: _value(rng, 0.05, 0.3),
+        "skin_blood_flow": lambda: _value(rng, 1.0, 20.0),
+        "met_shivering": lambda: _value(rng, 0.0, 50.0),
+    }
+    case = {}
+    for key in optional:
+        if rng.random() < 2 / 3:
+            case[key] = optional[key]()
+    while True:
+        series = {}
+        for key, (low, high) in draws.items():
+            values = [_value(rng, low, high) for _ in range(duration)]
+            if key == "clo" and rng.random() < 0.1:
+                values = [0.0] * duration
+            one = scalar or (duration == 1 and rng.random() < 0.5)
+            series[key] = values[0] if one else values
+        tdb = series["tdb"]
+        if (tdb[0] if isinstance(tdb, list) else tdb) != case.get("temp_skin_neutral", 33.7):
+            break
+    return {**series, **case}
+
+
 def _use_fans_heatwaves(rng):
     # The ranges reach past the limits (tdb and tr 20-50 °C, v 0.1-4.5 m/s,
     # rh 0-100 %, met 0.7-2 met, clo 0-1 clo), so NaN positions and every
@@ -884,6 +940,7 @@ MODELS = {
     "thi": (models.thi, _thi),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
     "two_nodes_gagge_ji": (models.two_nodes_gagge_ji, _two_nodes_gagge_ji),
+    "two_nodes_gagge_sleep": (models.two_nodes_gagge_sleep, _two_nodes_gagge_sleep),
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),
     "vertical_tmp_grad_ppd": (models.vertical_tmp_grad_ppd, _vertical_tmp_grad_ppd),
@@ -899,13 +956,26 @@ MODELS = {
 
 # The inputs upstream types as int (classes_input.py:60), which a JavaScript
 # number holds exactly (deviation _shared-80).
-INTEGER_INPUTS = {"ridge_regression_predict_t_re_t_sk": {"duration"}}
+INTEGER_INPUTS = {
+    "ridge_regression_predict_t_re_t_sk": {"duration"},
+    "two_nodes_gagge_sleep": {"ltime"},
+}
+
+# The time-series inputs, a double or a list of doubles (decision 277).
+SERIES_INPUTS = {
+    "two_nodes_gagge_sleep": {"tdb", "tr", "v", "rh", "clo", "thickness_quilt"},
+}
 
 
 def _check_inputs(model, inputs):
     """Numeric inputs are doubles only (ADR 0027), as a JavaScript number is,
-    or ints where upstream requires one."""
+    or ints where upstream requires one, or lists of doubles for a time
+    series."""
     for key, value in inputs.items():
+        if key in SERIES_INPUTS.get(model, ()) and type(value) is list:
+            if all(type(item) is float for item in value):
+                continue
+            raise TypeError(f"{model}: input {key} holds a value that is not a float")
         allowed = (int,) if key in INTEGER_INPUTS.get(model, ()) else (float, bool, str)
         if type(value) not in allowed:
             raise TypeError(f"{model}: input {key} is {type(value).__name__}")

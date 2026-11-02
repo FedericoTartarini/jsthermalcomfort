@@ -30,6 +30,7 @@ import {
   thi,
   two_nodes_gagge,
   two_nodes_gagge_ji,
+  two_nodes_gagge_sleep,
   TWO_NODES_GAGGE_INFO,
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
@@ -731,6 +732,16 @@ const MODELS: readonly ParityModel[] = [
         inputs as unknown as Parameters<typeof two_nodes_gagge_ji>[0],
       ),
     // Upstream rounds neither series (models/two_nodes_gagge_ji.py:215).
+    rounded: () => [],
+    warnings: true,
+  },
+  {
+    name: "two_nodes_gagge_sleep",
+    run: (inputs) =>
+      two_nodes_gagge_sleep(
+        inputs as unknown as Parameters<typeof two_nodes_gagge_sleep>[0],
+      ),
+    // Upstream rounds no output (models/two_nodes_gagge_sleep.py:170-175).
     rounded: () => [],
     warnings: true,
   },

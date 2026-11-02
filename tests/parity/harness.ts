@@ -31,7 +31,10 @@ export interface UpstreamWarning {
 
 /** One seeded case: upstream's keyword arguments, outputs and warnings. */
 export interface UpstreamCase {
-  readonly inputs: Readonly<Record<string, number | boolean | string>>;
+  /** A time-series input is a list of numbers (decision 277). */
+  readonly inputs: Readonly<
+    Record<string, number | boolean | string | readonly number[]>
+  >;
   readonly outputs: Readonly<Record<string, EncodedOutput>>;
   readonly warnings: readonly UpstreamWarning[];
   /**

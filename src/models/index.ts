@@ -61,6 +61,7 @@ import {
   two_nodes_gagge_ji,
   TWO_NODES_GAGGE_JI_INFO,
 } from "./two_nodes_gagge_ji.ts";
+import { two_nodes_gagge_sleep } from "./two_nodes_gagge_sleep.ts";
 import {
   work_capacity_dunne,
   WORK_CAPACITY_DUNNE_INFO,
@@ -218,6 +219,7 @@ export {
   THI_INFO,
   two_nodes_gagge,
   two_nodes_gagge_ji,
+  two_nodes_gagge_sleep,
   TWO_NODES_GAGGE_INFO,
   TWO_NODES_GAGGE_JI_INFO,
   utci,
@@ -300,6 +302,7 @@ export default {
   THI_INFO,
   two_nodes_gagge,
   two_nodes_gagge_ji,
+  two_nodes_gagge_sleep,
   TWO_NODES_GAGGE_INFO,
   TWO_NODES_GAGGE_JI_INFO,
   utci,

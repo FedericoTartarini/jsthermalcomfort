@@ -55,6 +55,75 @@ export type IREQInputs = InputsOf<typeof IREQ_INFO>;
  */
 export type IREQ = OutputsOf<typeof IREQ_INFO>;
 
+/**
+ * Calculate Required Clothing Insulation (IREQ) and exposure duration.
+ *
+ * The model estimates the clothing insulation required to maintain thermal
+ * equilibrium in cold environments and the Duration Limited Exposure (DLE)
+ * when available clothing insulation is insufficient, in accordance with
+ * ISO 11079 [11079ISO2007](../../docs/references.md#11079iso2007).
+ *
+ * @param inputs
+ * @param inputs.tdb - Dry bulb air temperature, [°C].
+ * @param inputs.tr - Mean radiant temperature, [°C].
+ * @param inputs.vr - Relative air speed, [m/s].
+ * @param inputs.rh - Relative humidity, [%].
+ * @param inputs.met - Metabolic rate, [met].
+ * @param inputs.clo - Clothing insulation, [clo].
+ * @param inputs.p - Air permeability of clothing, [l/(m2 s)].
+ * @param inputs.walk_sp - Walking speed, [m/s].
+ * @param inputs.wme - External work, [met]. Defaults to 0.
+ * @param inputs.limit_inputs - When True, results outside the ISO 11079 applicability limits are set
+ * to nan. Non-physical negative clothing insulation outputs are also set
+ * to nan. Defaults to True.
+ *
+ * > [!NOTE]
+ * > The ISO 11079 applicability limits used by this function are
+ * > 58 <= met [W/m2] <= 400 after converting the input metabolic rate
+ * > from met to W/m2, tdb <= 10 [°C], 0.4 <= vr [m/s] <= 18, and
+ * > minimum_walking_speed <= walk_sp [m/s] <= 1.2, where
+ * > minimum_walking_speed = min(0.0052 * (met [W/m2] - 58), 1.2).
+ * @param inputs.round_output - When True, rounds numeric output values to one decimal place. Defaults
+ * to True.
+ *
+ * @returns A dataclass containing ``ireq_min``, ``ireq_neutral``, ``icl_min``,
+ * ``icl_neutral``, ``dle_min``, and ``dle_neutral``. See
+ * {@link IREQ} for more details.
+ *
+ * - `ireq_min` - Minimal required clothing insulation, [clo].
+ * - `ireq_neutral` - Neutral required clothing insulation, [clo].
+ * - `icl_min` - Minimal intrinsic clothing insulation, [clo].
+ * - `icl_neutral` - Neutral intrinsic clothing insulation, [clo].
+ * - `dle_min` - Duration limited exposure for the minimal criterion, [h].
+ * - `dle_neutral` - Duration limited exposure for the neutral criterion, [h].
+ *
+ * @throws `TypeError` If an input has an unsupported type, or if ``limit_inputs`` or
+ * ``round_output`` are not booleans.
+ * @throws `RangeError` If inputs contain non-finite
+ * values, or fail physical validation. The physical validation rejects
+ * ``met <= 0``, ``wme < 0``, ``p <= 0``, ``vr < 0``, ``walk_sp < 0``,
+ * relative humidity outside 0 to 100 %, and ``clo < 0``.
+ *
+ * @example
+ * ```ts
+ * import { ireq } from "jsthermalcomfort/models";
+ *
+ * const result = ireq({
+ *   tdb: -15.0,
+ *   tr: -15.0,
+ *   vr: 2.0,
+ *   rh: 55.0,
+ *   met: 175.0 / 58.15,
+ *   clo: 2.8,
+ *   p: 50.0,
+ *   walk_sp: 1.1,
+ * });
+ * console.log(result.ireq_min); // 1.6
+ * console.log(result.dle_min); // more than 8
+ * ```
+ *
+ * @see ISO 11079:2007 [11079ISO2007](../../docs/references.md#11079iso2007).
+ */
 export function ireq(inputs: IREQInputs): IREQ {
   let {
     tdb,
@@ -171,6 +240,10 @@ export function ireq(inputs: IREQInputs): IREQ {
   });
 }
 
+/**
+ * Compute the ISO 11079 Annex A wind/permeability correction factor shared by the
+ * total and resultant clothing insulation calculations.
+ */
 function _clothing_constant_part(
   p: number,
   vr: number,
@@ -183,6 +256,15 @@ function _clothing_constant_part(
   );
 }
 
+/**
+ * Solve the ISO 11079 Annex A thermal balance for one physiological criterion
+ * (minimal or neutral), returning IREQ, ICL, and DLE in m2.K/W and hours.
+ *
+ * This mirrors the array-vectorized version of the same solve, but works on plain
+ * floats so it can be JIT-compiled with Numba: each element gets its own
+ * early-converging loop instead of the whole array running the full iteration
+ * budget.
+ */
 function _solve_single_criterion(
   tdb: number,
   tr: number,
@@ -396,6 +478,7 @@ function _solve_single_criterion(
   return [ireq_final, icl_raw, dle];
 }
 
+/** Return a boolean mask of inputs within the ISO 11079 applicability limits. */
 function _valid_iso_11079_inputs(
   met: number,
   tdb: number,
@@ -450,6 +533,10 @@ function _valid_iso_11079_inputs(
   );
 }
 
+/**
+ * Convert raw Duration Limited Exposure hours to the ISO 11079 output format,
+ * replacing values above the 8 h ceiling with "more than 8".
+ */
 function _format_dle(dle: number, round_output: boolean): string | number {
   const unlimited = dle > 8.0 || dle < 0;
   if (unlimited) {

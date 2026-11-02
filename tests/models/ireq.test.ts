@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { ireq } from "../../src/models/index.ts";
+import { ireq, IREQ_INFO } from "../../src/models/index.ts";
+import { ireq as ireq_from_root } from "../../src/index.ts";
 import { ireq as implementation_ireq } from "../../src/models/ireq.ts";
+import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof ireq>[0];
@@ -268,5 +270,239 @@ describe("test_ireq", () => {
 
   test("test_ireq_public_api_export", () => {
     expect(ireq).toBe(implementation_ireq);
+  });
+});
+
+const valid = {
+  tdb: -15.0,
+  tr: -15.0,
+  vr: 2.0,
+  rh: 55.0,
+  met: MET_175_W_M2,
+  clo: 2.8,
+  p: 50.0,
+  walk_sp: 1.1,
+};
+
+describeModelContract(ireq, IREQ_INFO, valid, { ...valid, vr: 0.2 });
+
+const call = (inputs: unknown) => ireq(inputs as Inputs);
+
+const outputs = (result: ReturnType<typeof ireq>) => [
+  result.ireq_min,
+  result.ireq_neutral,
+  result.icl_min,
+  result.icl_neutral,
+  result.dle_min,
+  result.dle_neutral,
+];
+
+const non_physical = {
+  tdb: 10.0,
+  tr: 10.0,
+  vr: 0.4,
+  rh: 0.0,
+  met: 350.0 / 58.15,
+  clo: 0.0,
+  p: 1.0,
+  walk_sp: 0.9984,
+};
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
+describe("ireq (JS-only)", () => {
+  // The unrounded values agree to 3.8e-10 relative (register ireq's Notes).
+  test.each([
+    [
+      valid,
+      [
+        1.5610762634243995,
+        1.8579521026613632,
+        2.206155021403332,
+        2.64144148591956,
+        "more than 8",
+        "more than 8",
+      ],
+      [1.6, 1.9, 2.2, 2.6, "more than 8", "more than 8"],
+    ],
+    [
+      { ...valid, wme: 1.0 },
+      [
+        2.678866706805238, 3.150070656982723, 3.8440180359484346,
+        4.533718625562801, 1.3104317050248946, 0.7879432752018372,
+      ],
+      [2.7, 3.2, 3.8, 4.5, 1.3, 0.8],
+    ],
+    [
+      { ...valid, met: 0.9, limit_inputs: false },
+      [
+        6.556171777853863, 6.943667177360992, 9.511633039604911,
+        10.077393130812231, 0.42244224422442245, 0.38829302685896855,
+      ],
+      [6.6, 6.9, 9.5, 10.1, 0.4, 0.4],
+    ],
+    [
+      { ...non_physical, limit_inputs: false },
+      [
+        -0.1881265454419726,
+        0.059363933471064854,
+        -0.296523599322182,
+        -0.019976880213545555,
+        "more than 8",
+        "more than 8",
+      ],
+      [-0.2, 0.1, -0.3, -0.0, "more than 8", "more than 8"],
+    ],
+  ] as const)("%o gives %o, rounded %o", (inputs, expected, rounded) => {
+    const unrounded = outputs(ireq({ ...inputs, round_output: false }));
+    expected.forEach((want, i) => {
+      const value = unrounded[i];
+      if (typeof want === "string") expect(value).toBe(want);
+      else
+        expect(approx(value as number, want, { rel: 1e-9, abs: 0 })).toBe(true);
+    });
+    expect(outputs(ireq(inputs))).toEqual(rounded);
+  });
+
+  // models/ireq.py:413-425, deviation ireq-2, deviation ireq-3.
+  test.each([
+    [
+      { vr: 0.2 },
+      {
+        key: "vr",
+        role: "input",
+        value: 0.2,
+        unit: "m/s",
+        bound: { min: 0.4, max: 18.0 },
+      },
+    ],
+    [
+      { met: 0.9 },
+      {
+        key: "met",
+        role: "derived",
+        value: 52.335,
+        unit: "W/m²",
+        bound: { min: 58.0, max: 400.0 },
+      },
+    ],
+    [
+      { tdb: 12.0 },
+      {
+        key: "tdb",
+        role: "input",
+        value: 12.0,
+        unit: "°C",
+        bound: { max: 10.0 },
+      },
+    ],
+    [
+      { walk_sp: 0.5 },
+      {
+        key: "walk_sp",
+        role: "input",
+        value: 0.5,
+        unit: "m/s",
+        bound: { min: 0.6083999999999999, max: 1.2 },
+      },
+    ],
+  ] as const)("%o gives the row %o and NaN with the gate on", (change, row) => {
+    for (const limit_inputs of [true, false]) {
+      const result = ireq({ ...valid, ...change, limit_inputs });
+      expect(result.warnings).toEqual([{ kind: "range", ...row }]);
+      expect(outputs(result).every((value) => Number.isNaN(value))).toBe(
+        limit_inputs,
+      );
+    }
+  });
+
+  // models/ireq.py:417-424.
+  test("gives the input rows in upstream's order", () => {
+    const result = ireq({
+      ...valid,
+      tdb: 12.0,
+      vr: 0.2,
+      walk_sp: 0.5,
+      met: 0.9,
+    });
+    expect(
+      result.warnings.map((row) => row.kind === "range" && row.key),
+    ).toEqual(["met", "tdb", "vr"]);
+  });
+
+  // models/ireq.py:172, deviation ireq-2, deviation ireq-3.
+  test("gives an output row for each negative ireq or icl, whatever limit_inputs is", () => {
+    for (const limit_inputs of [true, false]) {
+      const rows = ireq({ ...non_physical, limit_inputs }).warnings;
+      expect(
+        rows.map(
+          (row) => row.kind === "range" && [row.key, row.role, row.unit],
+        ),
+      ).toEqual([
+        // At 350 W/m², walk_sp's lower bound is min(0.0052 * 292, 1.2) = 1.2.
+        ["walk_sp", "input", "m/s"],
+        ["ireq_min", "output", "clo"],
+        ["icl_min", "output", "clo"],
+        ["icl_neutral", "output", "clo"],
+      ]);
+      for (const row of rows.slice(1)) {
+        expect(row).toEqual(expect.objectContaining({ bound: { min: 0 } }));
+      }
+    }
+  });
+
+  // models/ireq.py:172: NaN < 0 is false, so a NaN ireq masks nothing.
+  test("keeps dle where ireq and icl are NaN, as upstream's mask does", () => {
+    const result = ireq({ ...valid, tr: 1e300 });
+    expect(outputs(result).slice(0, 4).every(Number.isNaN)).toBe(true);
+    expect(result.dle_min).toBe(0.0);
+    expect(result.dle_neutral).toBe(0.0);
+    expect(result.warnings).toEqual([]);
+  });
+
+  // models/ireq.py:172-186: each criterion is masked on its own.
+  test("masks only the criterion whose icl is negative", () => {
+    const result = ireq({ ...valid, tr: -1e300 });
+    expect(outputs(result).slice(0, 5).every(Number.isNaN)).toBe(true);
+    expect(result.dle_neutral).toBe(4.7);
+    expect(
+      result.warnings.map((row) => row.kind === "range" && row.key),
+    ).toEqual(["icl_min"]);
+    const unmasked = ireq({ ...valid, tr: -1e300, limit_inputs: false });
+    expect(Object.is(unmasked.ireq_min, -0)).toBe(true);
+    expect(unmasked.icl_min).toBe(-0.1);
+    expect(unmasked.dle_min).toBe("more than 8");
+  });
+
+  // classes_input.py:1361-1374, deviation ireq-4.
+  test.each([
+    [{ met: 0.0, p: -1.0 }, "Metabolic rate (met) must be greater than 0."],
+    [{ wme: -1.0, rh: 105.0 }, "External work (wme) must be non-negative."],
+    [
+      { vr: -1.0, walk_sp: -1.0 },
+      "Relative air speed (vr) must be non-negative.",
+    ],
+    [
+      { rh: -1.0, clo: -1.0 },
+      "Relative humidity (rh) must be between 0 and 100.",
+    ],
+  ])("%o throws IREQInputs' first message, %s", (change, message) => {
+    expect(() => call({ ...valid, ...change })).toThrow(
+      new RangeError(message),
+    );
+  });
+
+  // Deviation ireq-6.
+  test.each([true, false])(
+    "throws numba's division error at tdb -235 with limit_inputs %s",
+    (limit_inputs) => {
+      expect(() => ireq({ ...valid, tdb: -235.0, limit_inputs })).toThrow(
+        new RangeError("division by zero"),
+      );
+    },
+  );
+
+  test("is exported from the package root as from its subpath", () => {
+    expect(ireq_from_root).toBe(ireq);
   });
 });

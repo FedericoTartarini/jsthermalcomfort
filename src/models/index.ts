@@ -8,7 +8,7 @@ import {
 } from "./heat_index_schoen.ts";
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
-import { ireq } from "./ireq.ts";
+import { ireq, IREQ_INFO } from "./ireq.ts";
 import { net, NET_INFO } from "./net.ts";
 import { wbgt, WBGT_INFO } from "./wbgt.ts";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
@@ -105,6 +105,7 @@ export type { ESI, ESIInputs } from "./esi.ts";
 export type { HI, HIInputs } from "./heat_index_rothfusz.ts";
 export type { HISchoenInputs } from "./heat_index_schoen.ts";
 export type { Humidex, HumidexInputs } from "./humidex.ts";
+export type { IREQ, IREQInputs } from "./ireq.ts";
 export type { NET, NETInputs } from "./net.ts";
 export type { APMV, APMVInputs } from "./pmv_a.ts";
 export type { ATHB, ATHBInputs } from "./pmv_athb.ts";
@@ -168,6 +169,7 @@ export {
   humidex,
   HUMIDEX_INFO,
   ireq,
+  IREQ_INFO,
   net,
   NET_INFO,
   phs,
@@ -245,6 +247,7 @@ export default {
   humidex,
   HUMIDEX_INFO,
   ireq,
+  IREQ_INFO,
   net,
   NET_INFO,
   phs,

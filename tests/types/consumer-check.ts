@@ -46,6 +46,8 @@ import type {
   HISchoenInputs,
   Humidex,
   HumidexInputs,
+  IREQ,
+  IREQInputs,
   ModelInfo,
   ModelWarning,
   NET,
@@ -103,6 +105,7 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
+  IREQ_INFO,
   NET_INFO,
   PHS_INFO,
   PHS_LIMITS_ISO_7933,
@@ -147,6 +150,7 @@ import {
   heat_index_rothfusz,
   heat_index_schoen,
   humidex,
+  ireq,
   net,
   phs,
   pmv_ppd_ashrae,
@@ -220,6 +224,7 @@ const esiInfo: ModelInfo = ESI_INFO;
 const netInfo: ModelInfo = NET_INFO;
 const thiInfo: ModelInfo = THI_INFO;
 const wbgtInfo: ModelInfo = WBGT_INFO;
+const ireqInfo: ModelInfo = IREQ_INFO;
 
 // A migrated model's INFO.inputs is its input definition, switches included,
 // typed by kind.
@@ -1163,3 +1168,27 @@ wbgt({ ...wbgtInputs, tdb: 20, with_solar_load: true, round_output: false });
 wbgt({ ...wbgtInputs, tdb: null });
 // @ts-expect-error tg is a required quantity.
 wbgt({ twb: 25 });
+
+// ireq takes one inputs object (ADR 0002), with its inputs and result types
+// named after upstream's IREQInputs and IREQ, and returns a readonly result
+// whose dle is upstream's str | float (decision 264).
+const ireqInputs: IREQInputs = {
+  tdb: -15,
+  tr: -15,
+  vr: 2,
+  rh: 55,
+  met: 3,
+  clo: 2.8,
+  p: 50,
+  walk_sp: 1.1,
+};
+const ireqResult: IREQ = ireq(ireqInputs);
+const ireqValue: number = ireqResult.ireq_min;
+const ireqDle: string | number = ireqResult.dle_min;
+// @ts-expect-error dle may be "more than 8".
+const ireqDleNumber: number = ireqResult.dle_neutral;
+// @ts-expect-error the result is readonly.
+ireqResult.icl_min = 1;
+ireq({ ...ireqInputs, wme: 1, limit_inputs: false, round_output: false });
+// @ts-expect-error walk_sp is a required quantity.
+ireq({ tdb: -15, tr: -15, vr: 2, rh: 55, met: 3, clo: 2.8, p: 50 });

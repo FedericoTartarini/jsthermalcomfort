@@ -296,10 +296,6 @@ export type ResolvedOf<I extends InputsInfo> = {
   -readonly [K in keyof I]: KindValue<I[K]> | NullOf<I[K]> | FalseOf<I[K]>;
 };
 
-type OutputValue<F extends OutputField> =
-  | KindValues[F["kind"]]
-  | (F extends { readonly masked: true } ? number : never);
-
 /**
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
@@ -311,8 +307,12 @@ export type OutputsOf<M extends { readonly outputs: OutputsInfo }> = Flatten<
     readonly [K in keyof M["outputs"]]: M["outputs"][K] extends {
       readonly series: true;
     }
-      ? readonly OutputValue<M["outputs"][K]>[]
-      : OutputValue<M["outputs"][K]>;
+      ? readonly (
+          | KindValues[M["outputs"][K]["kind"]]
+          | (M["outputs"][K] extends { readonly masked: true } ? number : never)
+        )[]
+      : | KindValues[M["outputs"][K]["kind"]]
+        | (M["outputs"][K] extends { readonly masked: true } ? number : never);
   } & ModelOutputs
 >;
 

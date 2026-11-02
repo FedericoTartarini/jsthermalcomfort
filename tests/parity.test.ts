@@ -22,6 +22,7 @@ import {
   pmv_e,
   pmv_ppd_ashrae,
   pmv_ppd_iso,
+  ridge_regression_predict_t_re_t_sk,
   set_tmp,
   solar_gain,
   Sports,
@@ -175,6 +176,23 @@ describe("compare_case", () => {
       compare_case(expected, { t: 24.1 + 1e-9, warnings: [] }, OPTIONS),
     ).toEqual([
       "output t: library 24.100000001, upstream 24.1, beyond rel 1e-12 + abs 1e-12",
+    ]);
+  });
+
+  // A time series output (decision 269).
+  test("compares a series element by element, reporting its first difference", () => {
+    const expected = upstream({ t: [24.1, { float: "nan" }, 24.3] });
+    expect(
+      compare_case(expected, { t: [24.1, NaN, 24.3], warnings: [] }, OPTIONS),
+    ).toEqual([]);
+    expect(
+      compare_case(expected, { t: [24.1, 24.2, 24.4], warnings: [] }, OPTIONS),
+    ).toEqual(["output t[1]: library 24.2, upstream NaN"]);
+    expect(
+      compare_case(expected, { t: [24.1, NaN], warnings: [] }, OPTIONS),
+    ).toEqual(["output t: library length 2, upstream length 3"]);
+    expect(compare_case(expected, { t: 24.1, warnings: [] }, OPTIONS)).toEqual([
+      "output t: library 24.1, upstream length 3",
     ]);
   });
 
@@ -631,6 +649,20 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_iso.py:205-207).
     rounded: ({ round_output }) =>
       round_output === true ? ["pmv", "ppd"] : [],
+    warnings: true,
+  },
+  {
+    name: "ridge_regression_predict_t_re_t_sk",
+    run: (inputs) =>
+      ridge_regression_predict_t_re_t_sk(
+        inputs as unknown as Parameters<
+          typeof ridge_regression_predict_t_re_t_sk
+        >[0],
+      ),
+    // Upstream rounds both series with np.round
+    // (models/ridge_regression_predict_t_re_t_sk.py:455-457).
+    rounded: ({ round_output }) =>
+      round_output === true ? ["t_re", "t_sk"] : [],
     warnings: true,
   },
   {

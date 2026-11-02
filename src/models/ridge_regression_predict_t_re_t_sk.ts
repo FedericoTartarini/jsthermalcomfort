@@ -1,0 +1,412 @@
+import { choiceFieldMessage, parseInputs } from "../_internal/define.ts";
+import { deepFreeze } from "../_internal/modelInfo.ts";
+import type {
+  InputsOf,
+  ModelInfo,
+  ModelWarning,
+  OutputsOf,
+} from "../_internal/modelInfo.ts";
+import { round } from "../_internal/round.ts";
+import { _valid_range } from "../_internal/validation.ts";
+import { Sex } from "../utilities/options.ts";
+
+// --- Model Constants ---
+
+// Minimum values for each of the 8 input features, used for Min-Max scaling.
+const _FEATURES_SCALER_OFFSET = [
+  0.0, // sex
+  -0.3114754098360656, // age
+  -3.020833333333333, // height
+  -0.6183587248751761, // weight
+  -1.222222222222222, // tdb
+  -0.21951219512195122, // rh
+  -11.197107405358395, // t_re
+  -2.105553500973682, // t_sk
+] as const;
+
+// Scaling factors (1 / (max - min)) for each of the 8 input features, used for Min-Max scaling.
+const _FEATURES_SCALER_SCALE = [
+  1.0, // sex
+  0.01639344262295082, // age
+  0.020833333333333332, // height
+  0.012802458071949815, // weight
+  0.05555555555555555, // tdb
+  0.024390243902439025, // rh
+  0.31613056192207334, // t_re
+  0.08119094120192633, // t_sk
+] as const;
+
+// Minimum values for the 2 output variables (Rectal Temp, Mean Skin Temp), used for inverse scaling.
+const _OUTPUT_SCALER_OFFSET = [
+  -11.197107405358395, // t_re
+  -2.0197777680408033, // t_sk
+] as const;
+
+// Scaling factors (1 / (max - min)) for the 2 output variables, used for inverse scaling.
+const _OUTPUT_SCALER_SCALE = [
+  0.31613056192207334, // t_re
+  0.07894843838015173, // t_sk
+] as const;
+
+// Coefficients for the Rectal Temperature (t_re) ridge regression model.
+// Corresponds to the 8 input features in order.
+const _T_RE_COEFFS = [
+  0.00016261586852849347, // sex
+  0.0007368142143779594, // age
+  -0.00043916987857211637, // height
+  0.00046532701146677997, // weight
+  0.0008443934806620367, // tdb
+  0.0006663379066237714, // rh
+  0.9932810428489056, // t_re (previous)
+  0.006016233208250791, // t_sk (previous)
+] as const;
+// Intercept term for the Rectal Temperature (t_re) ridge regression model.
+const _T_RE_INTERCEPT = -0.0013528489525256315;
+
+// Coefficients for the Mean Skin Temperature (t_sk) ridge regression model.
+// Corresponds to the 8 input features in order.
+const _T_SK_COEFFS = [
+  0.0006157845452869151, // sex
+  0.00014854705372386215, // age
+  -0.0004329826169348138, // height
+  -0.0011471088118388912, // weight
+  0.018904677058503336, // tdb
+  0.003188995712763656, // rh
+  -0.0010477636196332153, // t_re (previous)
+  0.933918210580563, // t_sk (previous)
+] as const;
+// Intercept term for the Mean Skin Temperature (t_sk) ridge regression model.
+const _T_SK_INTERCEPT = 0.04356328728329839;
+
+// Thermoneutral baseline configuration
+const _BASELINE_DURATION = 120; // minutes
+const _THERMONEUTRAL_TDB = 23.0; // °C
+const _THERMONEUTRAL_RH = 50.0; // %
+const _BASELINE_T_RE_INITIAL = 37.0; // °C, initial rectal temperature for baseline
+const _BASELINE_T_SK_INITIAL = 32.0; // °C, initial skin temperature for baseline
+
+const SEXES = deepFreeze([Sex.male, Sex.female] as const);
+
+export const RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO = deepFreeze({
+  name: "ridge_regression_predict_t_re_t_sk",
+  label: "Ridge Regression Body Temperature Prediction",
+  standards: [],
+  inputs: {
+    sex: {
+      kind: "choice",
+      allowed: SEXES,
+      message: choiceFieldMessage("sex", SEXES),
+      nullable: true,
+    },
+    age: {
+      kind: "numeric",
+      unit: "years",
+      applicability: { min: 60, max: 100 },
+    },
+    height: { kind: "numeric", unit: "m" },
+    weight: {
+      kind: "numeric",
+      unit: "kg",
+      applicability: { min: 40, max: 140 },
+    },
+    tdb: { kind: "numeric", unit: "°C", applicability: { min: 0, max: 60 } },
+    rh: { kind: "numeric", unit: "%", applicability: { min: 0, max: 100 } },
+    duration: { kind: "numeric", unit: "min", integer: true },
+    t_re: { kind: "numeric", unit: "°C", default: null },
+    t_sk: { kind: "numeric", unit: "°C", default: null },
+    limit_inputs: { kind: "bool", default: true },
+    round_output: { kind: "bool", default: true },
+  },
+  outputs: {
+    t_re: { kind: "numeric", unit: "°C", series: true },
+    t_sk: { kind: "numeric", unit: "°C", series: true },
+  },
+  derived: {
+    height: { unit: "cm", applicability: { min: 130, max: 230 } },
+  },
+} as const satisfies ModelInfo);
+
+/** @interface */
+export type RidgeRegressionInputs = InputsOf<
+  typeof RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO
+>;
+
+/**
+ * Dataclass for returning predicted temperature history.
+ *
+ * @interface
+ */
+export type PredictedBodyTemperatures = OutputsOf<
+  typeof RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO
+>;
+
+export function ridge_regression_predict_t_re_t_sk(
+  inputs: RidgeRegressionInputs,
+): PredictedBodyTemperatures {
+  // Validate inputs
+  let {
+    sex,
+    age,
+    height,
+    weight,
+    tdb,
+    rh,
+    duration,
+    t_re,
+    t_sk,
+    limit_inputs,
+    round_output,
+  } = parseInputs(RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO, inputs);
+  if (duration <= 0) {
+    throw new RangeError("Duration must be a positive integer.");
+  }
+  if ((t_re === null) !== (t_sk === null)) {
+    throw new TypeError("Both t_re and t_sk must be provided, or neither.");
+  }
+  if (rh < 0 || rh > 100) {
+    throw new RangeError("Relative humidity (rh) must be between 0 and 100%.");
+  }
+  for (const [param_name, value] of [
+    ["age", age],
+    ["height", height],
+    ["weight", weight],
+  ] as const) {
+    if (value <= 0) {
+      throw new RangeError(`${param_name} must be a positive value.`);
+    }
+  }
+
+  // Convert height from m to cm, handling both scalar and list-like inputs
+  const height_cm = height * 100;
+
+  // Convert sex (enum or string) to string values and then 0/1 encoding
+  // The parse leaves only null for upstream's check (deviation ridge_regression_predict_t_re_t_sk-6).
+  if (sex === null) {
+    throw new TypeError(
+      "Invalid input for sex. Must be one of ['male', 'female']",
+    );
+  }
+  // 1 for female, 0 for male
+  const sex_value = sex.trim().toLowerCase() === Sex.female ? 1 : 0;
+
+  const warnings: ModelWarning[] = [];
+  const [age_valid, height_valid, weight_valid, temp_valid, rh_valid] =
+    _check_ridge_regression_compliance(
+      age,
+      height_cm,
+      weight,
+      tdb,
+      rh,
+      warnings,
+    );
+
+  let current_t_re: number;
+  let current_t_sk: number;
+  if (t_re !== null && t_sk !== null) {
+    // Use provided baseline temperatures
+    current_t_re = t_re;
+    current_t_sk = t_sk;
+  } else {
+    // Baseline simulation (120 mins in a neutral environment)
+    t_re = _BASELINE_T_RE_INITIAL;
+    t_sk = _BASELINE_T_SK_INITIAL;
+
+    const baseline_features = [
+      sex_value, // sex
+      age, // age
+      height_cm, // height
+      weight, // weight
+      _THERMONEUTRAL_TDB, // tdb
+      _THERMONEUTRAL_RH, // relative humidity
+      t_re,
+      t_sk,
+    ] as const;
+
+    const [baseline_t_re_hist, baseline_t_sk_hist] =
+      _predict_temperature_simulation(baseline_features, _BASELINE_DURATION);
+    current_t_re = baseline_t_re_hist.at(-1) ?? NaN;
+    current_t_sk = baseline_t_sk_hist.at(-1) ?? NaN;
+  }
+
+  // Final simulation in specified environment
+  const final_features = [
+    sex_value, // sex
+    age, // age
+    height_cm, // height
+    weight, // weight
+    tdb, // tdb
+    rh, // humidity
+    current_t_re,
+    current_t_sk,
+  ] as const;
+
+  let [final_t_re_hist, final_t_sk_hist] = _predict_temperature_simulation(
+    final_features,
+    duration,
+  );
+
+  if (limit_inputs) {
+    const all_valid = !(
+      Number.isNaN(age_valid) ||
+      Number.isNaN(height_valid) ||
+      Number.isNaN(weight_valid) ||
+      Number.isNaN(temp_valid) ||
+      Number.isNaN(rh_valid)
+    );
+    // Apply validity mask across the time dimension
+    final_t_re_hist = final_t_re_hist.map((x) => (all_valid ? x : NaN));
+    final_t_sk_hist = final_t_sk_hist.map((x) => (all_valid ? x : NaN));
+  }
+
+  if (round_output) {
+    final_t_re_hist = final_t_re_hist.map((x) => round(x, 2));
+    final_t_sk_hist = final_t_sk_hist.map((x) => round(x, 2));
+  }
+
+  return Object.freeze({
+    t_re: Object.freeze(final_t_re_hist),
+    t_sk: Object.freeze(final_t_sk_hist),
+    warnings: Object.freeze(warnings),
+  });
+}
+
+/** One scenario's 8 input features, in the order of upstream's columns. */
+type Features = readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
+
+export function _scale_features(features: Features): Features {
+  return [
+    features[0] * _FEATURES_SCALER_SCALE[0] + _FEATURES_SCALER_OFFSET[0],
+    features[1] * _FEATURES_SCALER_SCALE[1] + _FEATURES_SCALER_OFFSET[1],
+    features[2] * _FEATURES_SCALER_SCALE[2] + _FEATURES_SCALER_OFFSET[2],
+    features[3] * _FEATURES_SCALER_SCALE[3] + _FEATURES_SCALER_OFFSET[3],
+    features[4] * _FEATURES_SCALER_SCALE[4] + _FEATURES_SCALER_OFFSET[4],
+    features[5] * _FEATURES_SCALER_SCALE[5] + _FEATURES_SCALER_OFFSET[5],
+    features[6] * _FEATURES_SCALER_SCALE[6] + _FEATURES_SCALER_OFFSET[6],
+    features[7] * _FEATURES_SCALER_SCALE[7] + _FEATURES_SCALER_OFFSET[7],
+  ];
+}
+
+export function _inverse_scale_output(
+  scaled_output: readonly [number, number],
+): [number, number] {
+  return [
+    (scaled_output[0] - _OUTPUT_SCALER_OFFSET[0]) / _OUTPUT_SCALER_SCALE[0],
+    (scaled_output[1] - _OUTPUT_SCALER_OFFSET[1]) / _OUTPUT_SCALER_SCALE[1],
+  ];
+}
+
+function _predict_temperature_simulation(
+  features: Features,
+  duration: number,
+): [number[], number[]] {
+  // Scale input features
+  const scaled_features = _scale_features(features);
+
+  // Precompute static components of the regression
+  const static_t_re =
+    scaled_features[0] * _T_RE_COEFFS[0] +
+    scaled_features[1] * _T_RE_COEFFS[1] +
+    scaled_features[2] * _T_RE_COEFFS[2] +
+    scaled_features[3] * _T_RE_COEFFS[3] +
+    scaled_features[4] * _T_RE_COEFFS[4] +
+    scaled_features[5] * _T_RE_COEFFS[5] +
+    _T_RE_INTERCEPT;
+  const static_t_sk =
+    scaled_features[0] * _T_SK_COEFFS[0] +
+    scaled_features[1] * _T_SK_COEFFS[1] +
+    scaled_features[2] * _T_SK_COEFFS[2] +
+    scaled_features[3] * _T_SK_COEFFS[3] +
+    scaled_features[4] * _T_SK_COEFFS[4] +
+    scaled_features[5] * _T_SK_COEFFS[5] +
+    _T_SK_INTERCEPT;
+
+  // Initialize temperatures from scaled features
+  let prev_t_re = scaled_features[6];
+  let prev_t_sk = scaled_features[7];
+
+  // Store history of temperatures
+  const t_re_history_scaled: number[] = [];
+  const t_sk_history_scaled: number[] = [];
+
+  // Run simulation
+  for (let i = 0; i < duration; i++) {
+    const new_t_re =
+      static_t_re + _T_RE_COEFFS[6] * prev_t_re + _T_RE_COEFFS[7] * prev_t_sk;
+    const new_t_sk =
+      static_t_sk + _T_SK_COEFFS[6] * prev_t_re + _T_SK_COEFFS[7] * prev_t_sk;
+    [prev_t_re, prev_t_sk] = [new_t_re, new_t_sk];
+
+    t_re_history_scaled[i] = new_t_re;
+    t_sk_history_scaled[i] = new_t_sk;
+  }
+
+  // Stack as (n_scenarios, duration, 2) and inverse-scale via broadcasting
+  const inv = t_re_history_scaled.map((t_re_scaled, i) =>
+    _inverse_scale_output([t_re_scaled, t_sk_history_scaled[i] ?? NaN]),
+  );
+  const t_re_history = inv.map((step) => step[0]);
+  const t_sk_history = inv.map((step) => step[1]);
+
+  return [t_re_history, t_sk_history];
+}
+
+function _check_ridge_regression_compliance(
+  age: number,
+  height: number,
+  weight: number,
+  tdb: number,
+  rh: number,
+  warnings: ModelWarning[],
+): [number, number, number, number, number] {
+  const { inputs, derived } = RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO;
+  const age_valid = _valid_range(
+    age,
+    inputs.age.applicability,
+    "age",
+    "input",
+    inputs.age.unit,
+    warnings,
+  );
+  const height_valid = _valid_range(
+    height,
+    derived.height.applicability,
+    "height",
+    "derived",
+    derived.height.unit,
+    warnings,
+  );
+  const weight_valid = _valid_range(
+    weight,
+    inputs.weight.applicability,
+    "weight",
+    "input",
+    inputs.weight.unit,
+    warnings,
+  );
+  const temp_valid = _valid_range(
+    tdb,
+    inputs.tdb.applicability,
+    "tdb",
+    "input",
+    inputs.tdb.unit,
+    warnings,
+  );
+  const rh_valid = _valid_range(
+    rh,
+    inputs.rh.applicability,
+    "rh",
+    "input",
+    inputs.rh.unit,
+    warnings,
+  );
+  return [age_valid, height_valid, weight_valid, temp_valid, rh_valid];
+}

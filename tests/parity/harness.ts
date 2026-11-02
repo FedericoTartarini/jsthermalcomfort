@@ -20,6 +20,9 @@ const MACHINE = "x86_64";
 export type Encoded =
   number | boolean | string | null | { readonly float: "nan" | "inf" | "-inf" };
 
+/** An output in the data: a value, or a time series of values (decision 269). */
+export type EncodedOutput = Encoded | readonly Encoded[];
+
 /** One warning upstream emitted under `simplefilter("always")`. */
 export interface UpstreamWarning {
   readonly category: string;
@@ -29,7 +32,7 @@ export interface UpstreamWarning {
 /** One seeded case: upstream's keyword arguments, outputs and warnings. */
 export interface UpstreamCase {
   readonly inputs: Readonly<Record<string, number | boolean | string>>;
-  readonly outputs: Readonly<Record<string, Encoded>>;
+  readonly outputs: Readonly<Record<string, EncodedOutput>>;
   readonly warnings: readonly UpstreamWarning[];
   /**
    * For a case with `limit_inputs` false, the warnings of the same call with
@@ -106,11 +109,17 @@ export interface ParityModel {
 
 const NON_FINITE = { nan: NaN, inf: Infinity, "-inf": -Infinity } as const;
 
-/** Reads a value from the data. */
-export function decode(value: Encoded): number | boolean | string | null {
-  return value !== null && typeof value === "object"
-    ? NON_FINITE[value.float]
-    : value;
+type Decoded = number | boolean | string | null;
+
+/** Reads a value from the data, or each value of a time series. */
+export function decode(value: Encoded): Decoded;
+export function decode(value: EncodedOutput): Decoded | Decoded[];
+export function decode(value: EncodedOutput): Decoded | Decoded[] {
+  if (Array.isArray(value)) return value.map((item: Encoded) => decode(item));
+  const scalar = value as Encoded;
+  return scalar !== null && typeof scalar === "object"
+    ? NON_FINITE[scalar.float]
+    : scalar;
 }
 
 // _valid_range's message and the airspeed_control checks' messages both quote
@@ -181,6 +190,36 @@ function compare_output(
     : `${failure}, beyond rel ${rel} + abs ${abs}`;
 }
 
+/**
+ * Compares a time series element by element, as `compare_output` compares one
+ * value, and reports its length or its first differing element.
+ */
+function compare_series(
+  name: string,
+  expected: readonly Decoded[],
+  actual: unknown,
+  exact: boolean,
+  tolerance: Tolerance,
+): string | undefined {
+  if (!Array.isArray(actual) || actual.length !== expected.length) {
+    const length = Array.isArray(actual)
+      ? `length ${String(actual.length)}`
+      : show(actual);
+    return `output ${name}: library ${length}, upstream length ${String(expected.length)}`;
+  }
+  for (const [i, value] of expected.entries()) {
+    const failure = compare_output(
+      `${name}[${String(i)}]`,
+      value,
+      actual[i],
+      exact,
+      tolerance,
+    );
+    if (failure !== undefined) return failure;
+  }
+  return undefined;
+}
+
 function compared_keys(keys: readonly string[], exempt: Parity): string[] {
   return keys.filter((key) => !exempt.warnings.includes(key)).sort();
 }
@@ -203,13 +242,22 @@ export function compare_case(
       failures.push(`output ${name}: missing from the library's result`);
       continue;
     }
-    const failure = compare_output(
-      name,
-      decode(value),
-      actual[name],
-      rounded.includes(name),
-      tolerance,
-    );
+    const decoded = decode(value);
+    const failure = Array.isArray(decoded)
+      ? compare_series(
+          name,
+          decoded,
+          actual[name],
+          rounded.includes(name),
+          tolerance,
+        )
+      : compare_output(
+          name,
+          decoded,
+          actual[name],
+          rounded.includes(name),
+          tolerance,
+        );
     if (failure !== undefined) failures.push(failure);
   }
   if (warnings) {

@@ -9,6 +9,7 @@ import {
 import { phs, PHS_INFO, PHS_LIMITS_ISO_7933 } from "./phs.ts";
 import { humidex, HUMIDEX_INFO } from "./humidex.ts";
 import { ireq, IREQ_INFO } from "./ireq.ts";
+import { ridge_regression_predict_t_re_t_sk } from "./ridge_regression_predict_t_re_t_sk.ts";
 import { net, NET_INFO } from "./net.ts";
 import { wbgt, WBGT_INFO } from "./wbgt.ts";
 import { discomfort_index, DISCOMFORT_INDEX_INFO } from "./discomfort_index.ts";
@@ -188,6 +189,7 @@ export {
   PMV_ATHB_INFO,
   pmv_e,
   PMV_E_INFO,
+  ridge_regression_predict_t_re_t_sk,
   solar_gain,
   SOLAR_GAIN_INFO,
   _SportsValues,
@@ -266,6 +268,7 @@ export default {
   PMV_ATHB_INFO,
   pmv_e,
   PMV_E_INFO,
+  ridge_regression_predict_t_re_t_sk,
   solar_gain,
   SOLAR_GAIN_INFO,
   _SportsValues,

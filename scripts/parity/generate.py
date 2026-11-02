@@ -446,6 +446,33 @@ def _pmv_ppd_iso(rng):
     }
 
 
+def _ridge_regression_predict_t_re_t_sk(rng):
+    # The ranges reach past the model's limits (age 60-100, height 130-230 cm,
+    # weight 40-140 kg, tdb 0-60 °C;
+    # models/ridge_regression_predict_t_re_t_sk.py:185-189), so NaN positions
+    # are compared too, and stay inside RidgeRegressionInputs' checks
+    # (classes_input.py:846-910). sex comes in either case, as upstream
+    # lower-cases it. duration is an int, as upstream requires, from 2: at 1 a
+    # scalar call returns a 0-d array (deviation
+    # ridge_regression_predict_t_re_t_sk-7). Half the cases give t_re and t_sk,
+    # which skip the baseline simulation.
+    inputs = {
+        "sex": str(rng.choice(["male", "female", "Male", "FEMALE"])),
+        "age": _value(rng, 50.0, 110.0),
+        "height": _value(rng, 1.2, 2.4),
+        "weight": _value(rng, 30.0, 150.0),
+        "tdb": _value(rng, -5.0, 65.0),
+        "rh": _value(rng, 0.0, 100.0),
+        "duration": int(rng.integers(2, 61)),
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
+    }
+    if rng.random() < 0.5:
+        inputs["t_re"] = _value(rng, 35.5, 39.5)
+        inputs["t_sk"] = _value(rng, 28.0, 38.0)
+    return inputs
+
+
 def _set_tmp(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, v 0-2
     # m/s, met 1-4 met, clo 0-1.5 clo), so NaN positions and every check's
@@ -802,6 +829,10 @@ MODELS = {
     "pmv_e": (models.pmv_e, _pmv_e),
     "pmv_ppd_ashrae": (models.pmv_ppd_ashrae, _pmv_ppd_ashrae),
     "pmv_ppd_iso": (models.pmv_ppd_iso, _pmv_ppd_iso),
+    "ridge_regression_predict_t_re_t_sk": (
+        models.ridge_regression_predict_t_re_t_sk,
+        _ridge_regression_predict_t_re_t_sk,
+    ),
     "set_tmp": (models.set_tmp, _set_tmp),
     "solar_gain": (models.solar_gain, _solar_gain),
     "sports_heat_stress_risk": (_sports_by_name, _sports_heat_stress_risk),
@@ -820,18 +851,28 @@ MODELS = {
 }
 
 
+# The inputs upstream types as int (classes_input.py:60), which a JavaScript
+# number holds exactly (deviation _shared-80).
+INTEGER_INPUTS = {"ridge_regression_predict_t_re_t_sk": {"duration"}}
+
+
 def _check_inputs(model, inputs):
-    """Numeric inputs are doubles only (ADR 0027), as a JavaScript number is."""
+    """Numeric inputs are doubles only (ADR 0027), as a JavaScript number is,
+    or ints where upstream requires one."""
     for key, value in inputs.items():
-        if type(value) not in (float, bool, str):
+        allowed = (int,) if key in INTEGER_INPUTS.get(model, ()) else (float, bool, str)
+        if type(value) not in allowed:
             raise TypeError(f"{model}: input {key} is {type(value).__name__}")
 
 
 def _encode(model, name, value):
-    """A JSON value for one output; a non-finite float is tagged."""
+    """A JSON value for one output, or a list for a time series (decision 269);
+    a non-finite float is tagged."""
     array = np.asarray(value)
+    if array.ndim == 1:
+        return [_encode(model, name, item) for item in array]
     if array.ndim != 0:
-        raise TypeError(f"{model}: output {name} is not a scalar")
+        raise TypeError(f"{model}: output {name} is neither a scalar nor a series")
     item = array.item()
     # An object array holds a numpy scalar, such as pmv_ppd_ashrae's compliance.
     if isinstance(item, np.generic):

@@ -25,6 +25,7 @@ import {
   solar_gain,
   Sports,
   sports_heat_stress_risk,
+  thi,
   two_nodes_gagge,
   TWO_NODES_GAGGE_INFO,
   use_fans_heatwaves,
@@ -645,6 +646,13 @@ const MODELS: readonly ParityModel[] = [
       "t_high",
       "t_extreme",
     ],
+    warnings: true,
+  },
+  {
+    name: "thi",
+    run: (inputs) => thi(inputs as unknown as Parameters<typeof thi>[0]),
+    // Upstream rounds thi with np.round (models/thi.py:46-47).
+    rounded: ({ round_output }) => (round_output === true ? ["thi"] : []),
     warnings: true,
   },
   {

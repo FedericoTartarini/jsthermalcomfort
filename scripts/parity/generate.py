@@ -505,6 +505,17 @@ def _sports_heat_stress_risk(rng):
     }
 
 
+def _thi(rng):
+    # rh stays in [0, 100], outside which THIInputs raises
+    # (classes_input.py:931-933), and reaches its bounds now and then; upstream
+    # checks no tdb range (models/thi.py:35-39).
+    return {
+        "tdb": _value(rng, -50.0, 60.0),
+        "rh": float(rng.choice([0.0, 100.0])) if rng.random() < 0.05 else _value(rng, 0.0, 100.0),
+        "round_output": bool(rng.random() < 0.5),
+    }
+
+
 def _two_nodes_gagge(rng):
     # The ranges reach skin wettedness at w_max, shivering and the 0.1 m/s air
     # speed floor; position comes in any case, which upstream's check accepts
@@ -752,6 +763,7 @@ MODELS = {
     "set_tmp": (models.set_tmp, _set_tmp),
     "solar_gain": (models.solar_gain, _solar_gain),
     "sports_heat_stress_risk": (_sports_by_name, _sports_heat_stress_risk),
+    "thi": (models.thi, _thi),
     "two_nodes_gagge": (models.two_nodes_gagge, _two_nodes_gagge),
     "use_fans_heatwaves": (models.use_fans_heatwaves, _use_fans_heatwaves),
     "utci": (models.utci, _utci),

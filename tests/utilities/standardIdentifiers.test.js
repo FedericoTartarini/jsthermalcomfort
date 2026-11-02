@@ -27,11 +27,12 @@ const NOT_IMPLEMENTED_IN_JS = [];
 
 // Identifiers jsthermalcomfort has and pythermalcomfort does not, for a
 // standard a model takes that upstream's Models names no member for
-// (deviations _shared-51 and _shared-78). If pythermalcomfort adds one under
-// another key or value, the first test below fails until this one is renamed
-// to match.
+// (deviations _shared-51, _shared-78 and _shared-79). If pythermalcomfort
+// adds one under another key or value, the first test below fails until this
+// one is renamed to match.
 const JS_ONLY = {
   iso_7243_2017: "7243-2017",
+  iso_11079_2007: "11079-2007",
   en_16798_1_2019: "16798-1-2019",
 };
 

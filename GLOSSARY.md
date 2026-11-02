@@ -33,7 +33,7 @@ What a model returns: the fields `INFO.outputs` describes, then `warnings`, whic
 _Avoid_: result, return value, response
 
 **Standard**:
-A versioned identifier for a published standard (`Standard.ashrae_55_2023`, value `"55-2023"`). Upstream calls this `Models`/`model`, and lacks only `en_16798_1_2019` and `iso_7243_2017`, which the library adds for `adaptive_en` and `wbgt`; a model here is a function such as `pmv_ppd_iso`. A model's `INFO.standards` lists the standards it takes, and its `standard` input, where upstream takes `model`, picks one of them.
+A versioned identifier for a published standard (`Standard.ashrae_55_2023`, value `"55-2023"`). Upstream calls this `Models`/`model`, and lacks only `en_16798_1_2019`, `iso_7243_2017` and `iso_11079_2007`, which the library adds for `adaptive_en`, `wbgt` and `ireq`; a model here is a function such as `pmv_ppd_iso`. A model's `INFO.standards` lists the standards it takes, and its `standard` input, where upstream takes `model`, picks one of them.
 _Avoid_: model (for a standard), edition (except when contrasting two versions), norm
 
 **Deviation**:

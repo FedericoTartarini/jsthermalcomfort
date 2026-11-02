@@ -104,6 +104,7 @@ describe("thi (JS-only)", () => {
     },
   );
 
+  // classes_input.py:928-929.
   test("checks the range after the parse, as THIInputs' __post_init__ runs after BaseInputs'", () => {
     expect(() => call({ tdb: "25", rh: -5 })).toThrow(
       new TypeError("tdb must be a finite number."),

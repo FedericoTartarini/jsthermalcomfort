@@ -1,4 +1,4 @@
-import { _pmv_ppd_optimized, THERMAL_SENSATION } from "./_pmv_ppd_optimized.ts";
+import { _pmv_ppd_optimized } from "./_pmv_ppd_optimized.ts";
 import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
 import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
@@ -12,6 +12,21 @@ import { round } from "../_internal/round.ts";
 import { _mapping, _valid_range } from "../_internal/validation.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
+
+/** Thermal sensation of each PMV range. Bins include their lower edge. */
+const TSV_CATEGORIES = deepFreeze({
+  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
+  labels: [
+    "Cold",
+    "Cool",
+    "Slightly Cool",
+    "Neutral",
+    "Slightly Warm",
+    "Warm",
+    "Hot",
+  ],
+  right: false,
+} as const satisfies ClassifierBins);
 
 export const PMV_CATEGORY_BINS_ISO_7730 = deepFreeze({
   [Standard.iso_7730_2025]: {
@@ -85,7 +100,7 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
       kind: "label",
       nullable: true,
       unit: null,
-      classifier: { ...THERMAL_SENSATION, right: false },
+      classifier: TSV_CATEGORIES,
     },
     category: {
       kind: "label",

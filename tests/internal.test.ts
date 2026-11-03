@@ -4,6 +4,7 @@ import {
   _as_flag,
   _mapping,
   _valid_range,
+  HEAT_INDEX_RISK_CATEGORIES,
   HEAT_INDEX_STRESS_CATEGORIES,
 } from "../src/_internal/validation.ts";
 import type { ModelWarning } from "../src/_internal/modelInfo.ts";
@@ -399,6 +400,26 @@ describe("HEAT_INDEX_STRESS_CATEGORIES", () => {
     expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES)).toBe(true);
     expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES.edges)).toBe(true);
     expect(Object.isFrozen(HEAT_INDEX_STRESS_CATEGORIES.labels)).toBe(true);
+  });
+});
+
+// Upstream's _CategoryBins (_internal/validation.py:289-291): the 27.0 floor
+// before HEAT_INDEX_STRESS_CATEGORIES, right-inclusive.
+describe("HEAT_INDEX_RISK_CATEGORIES", () => {
+  test("composes the no-risk floor with the shared categories, frozen", () => {
+    expect(HEAT_INDEX_RISK_CATEGORIES).toEqual({
+      edges: [27, 32, 41, 54, 1000],
+      labels: [
+        "no risk",
+        "caution",
+        "extreme caution",
+        "danger",
+        "extreme danger",
+      ],
+      right: true,
+    });
+    expect(Object.isFrozen(HEAT_INDEX_RISK_CATEGORIES.edges)).toBe(true);
+    expect(Object.isFrozen(HEAT_INDEX_RISK_CATEGORIES.labels)).toBe(true);
   });
 });
 

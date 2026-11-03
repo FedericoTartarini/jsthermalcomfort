@@ -5,7 +5,7 @@ import type { InputsOf, ModelInfo } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import {
   _mapping,
-  HEAT_INDEX_STRESS_CATEGORIES,
+  HEAT_INDEX_RISK_CATEGORIES,
 } from "../_internal/validation.ts";
 import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.ts";
 
@@ -24,11 +24,7 @@ export const HEAT_INDEX_SCHOEN_INFO = deepFreeze({
       kind: "label",
       nullable: true,
       unit: null,
-      classifier: {
-        edges: [27.0, ...HEAT_INDEX_STRESS_CATEGORIES.edges],
-        labels: ["no risk", ...HEAT_INDEX_STRESS_CATEGORIES.labels],
-        right: true,
-      },
+      classifier: HEAT_INDEX_RISK_CATEGORIES,
     },
   },
 } as const satisfies ModelInfo);

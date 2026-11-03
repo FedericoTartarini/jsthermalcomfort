@@ -176,8 +176,8 @@ def _cooling_effect(rng):
 
 def _discomfort_index(rng):
     # rh 100 makes di equal tdb, so a tdb on a category edge puts di on it,
-    # where _mapping's right=False picks the upper class
-    # (models/discomfort_index.py:68-79). tdb reaches past 99 °C, where the
+    # where DISCOMFORT_CATEGORIES' right=False picks the upper class
+    # (models/discomfort_index.py:11-21, :80). tdb reaches past 99 °C, where the
     # category is NaN.
     if rng.random() < 0.05:
         return {

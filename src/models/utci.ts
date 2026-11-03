@@ -1,3 +1,4 @@
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
 import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
@@ -10,6 +11,24 @@ import { round } from "../_internal/round.ts";
 import { _mapping, _valid_range } from "../_internal/validation.ts";
 import { Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
+
+/** Thermal stress category of each UTCI range, [°C]. Bins include their upper edge. */
+const STRESS_CATEGORIES = deepFreeze({
+  edges: [-40.0, -27.0, -13.0, 0.0, 9.0, 26.0, 32.0, 38.0, 46.0, 1000.0],
+  labels: [
+    "extreme cold stress",
+    "very strong cold stress",
+    "strong cold stress",
+    "moderate cold stress",
+    "slight cold stress",
+    "no thermal stress",
+    "moderate heat stress",
+    "strong heat stress",
+    "very strong heat stress",
+    "extreme heat stress",
+  ],
+  right: true,
+} as const satisfies ClassifierBins);
 
 export const UTCI_INFO = deepFreeze({
   name: "utci",
@@ -38,22 +57,7 @@ export const UTCI_INFO = deepFreeze({
       kind: "label",
       nullable: true,
       unit: null,
-      classifier: {
-        edges: [-40.0, -27.0, -13.0, 0.0, 9.0, 26.0, 32.0, 38.0, 46.0, 1000.0],
-        labels: [
-          "extreme cold stress",
-          "very strong cold stress",
-          "strong cold stress",
-          "moderate cold stress",
-          "slight cold stress",
-          "no thermal stress",
-          "moderate heat stress",
-          "strong heat stress",
-          "very strong heat stress",
-          "extreme heat stress",
-        ],
-        right: true,
-      },
+      classifier: STRESS_CATEGORIES,
     },
   },
   derived: {

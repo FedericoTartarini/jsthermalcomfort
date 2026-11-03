@@ -10,7 +10,7 @@ import { round } from "../_internal/round.ts";
 import {
   _mapping,
   _valid_range,
-  HEAT_INDEX_STRESS_CATEGORIES,
+  HEAT_INDEX_RISK_CATEGORIES,
 } from "../_internal/validation.ts";
 
 export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
@@ -29,11 +29,7 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
       kind: "label",
       nullable: true,
       unit: null,
-      classifier: {
-        edges: [27.0, ...HEAT_INDEX_STRESS_CATEGORIES.edges],
-        labels: ["no risk", ...HEAT_INDEX_STRESS_CATEGORIES.labels],
-        right: true,
-      },
+      classifier: HEAT_INDEX_RISK_CATEGORIES,
     },
   },
 } as const satisfies ModelInfo);

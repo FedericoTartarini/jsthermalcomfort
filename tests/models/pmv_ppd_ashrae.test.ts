@@ -8,7 +8,6 @@ import {
   PMV_PPD_ISO_INFO,
   UTCI_INFO,
 } from "../../src/models/index.ts";
-import { THERMAL_SENSATION } from "../../src/models/_pmv_ppd_optimized.ts";
 import {
   clo_dynamic_ashrae,
   Standard,
@@ -463,14 +462,6 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(inputs.clo.applicability).toBe(ASHRAE_55_LIMITS.clo);
       expect(inputs.units).toBe(UTCI_INFO.inputs.units);
     });
-
-    // models/pmv_ppd_ashrae.py:227-240.
-    test("tsv's classifier is the shared thermal sensation table, right-inclusive", () => {
-      const { classifier } = PMV_PPD_ASHRAE_INFO.outputs.tsv;
-      expect(classifier.edges).toBe(THERMAL_SENSATION.edges);
-      expect(classifier.labels).toBe(THERMAL_SENSATION.labels);
-      expect(classifier.right).toBe(true);
-    });
   });
 
   describe("compliance", () => {
@@ -691,7 +682,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result.tsv).toBe(null);
     });
 
-    // Upstream classifies the pmv it returns, 0.5043645689727003 rounded to 0.5 (models/pmv_ppd_ashrae.py:223-240).
+    // Upstream classifies the pmv it returns, 0.5043645689727003 rounded to 0.5 (models/pmv_ppd_ashrae.py:239-246).
     test("tsv is classified from the pmv returned, rounded or not", () => {
       const warm = { ...neutral, tdb: 26.4, tr: 26.4, limit_inputs: false };
       const rounded = pmv_ppd_ashrae({ ...warm, round_output: true });

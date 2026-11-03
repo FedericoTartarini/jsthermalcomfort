@@ -5,6 +5,7 @@ import {
 } from "../../src/models/index.ts";
 import { heat_index_schoen as heat_index_schoen_from_root } from "../../src/index.ts";
 import { psy_ta_rh } from "../../src/psychrometrics/index.ts";
+import { HEAT_INDEX_RISK_CATEGORIES } from "../../src/_internal/validation.ts";
 import { round } from "../../src/_internal/round.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
@@ -175,19 +176,11 @@ describe("heat_index_schoen (JS-only)", () => {
     expect(result.stress_category).toBe(category);
   });
 
-  // deviation heat_index_schoen-1 (heat_index_schoen.py:70, _internal/validation.py:173)
-  test("the stress category bins are the model's 27.0 floor and the shared categories, right-inclusive", () => {
-    expect(HEAT_INDEX_SCHOEN_INFO.outputs.stress_category.classifier).toEqual({
-      edges: [27, 32, 41, 54, 1000],
-      labels: [
-        "no risk",
-        "caution",
-        "extreme caution",
-        "danger",
-        "extreme danger",
-      ],
-      right: true,
-    });
+  // deviation heat_index_schoen-1 (heat_index_schoen.py:70, _internal/validation.py:289)
+  test("the stress category bins are the shared HEAT_INDEX_RISK_CATEGORIES, not a copy", () => {
+    expect(HEAT_INDEX_SCHOEN_INFO.outputs.stress_category.classifier).toBe(
+      HEAT_INDEX_RISK_CATEGORIES,
+    );
   });
 
   // _internal/validation.py:242-244, as upstream's _mapping maps it.

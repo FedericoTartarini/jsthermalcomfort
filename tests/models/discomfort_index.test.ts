@@ -48,7 +48,7 @@ describe("discomfort_index (JS-only)", () => {
     expect(result.discomfort_condition).toBe(condition);
   });
 
-  // Deviation discomfort_index-1 (models/discomfort_index.py:79): rh 100 makes di equal tdb.
+  // Deviation discomfort_index-1 (models/discomfort_index.py:80): rh 100 makes di equal tdb.
   test.each([
     [21, "Less than 50% feels discomfort"],
     [24, "More than 50% feels discomfort"],
@@ -70,7 +70,7 @@ describe("discomfort_index (JS-only)", () => {
     }
   });
 
-  // models/discomfort_index.py:78-79.
+  // models/discomfort_index.py:83-84.
   test("the category is mapped from the unrounded di", () => {
     const result = discomfort_index({ tdb: 20.95, rh: 100 });
     expect(result.di).toBe(21.0);

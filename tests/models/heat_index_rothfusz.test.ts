@@ -4,6 +4,7 @@ import {
   HEAT_INDEX_ROTHFUSZ_INFO,
 } from "../../src/models/index.ts";
 import { heat_index_rothfusz as heat_index_rothfusz_from_root } from "../../src/index.ts";
+import { HEAT_INDEX_RISK_CATEGORIES } from "../../src/_internal/validation.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
@@ -194,20 +195,10 @@ describeModelContract(
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, and what only the library adds.
 describe("heat_index_rothfusz (JS-only)", () => {
-  // deviation heat_index_rothfusz-2 (heat_index_rothfusz.py:83, _internal/validation.py:173)
-  test("the stress category bins are upstream's mapping, right-inclusive", () => {
-    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toEqual(
-      {
-        edges: [27, 32, 41, 54, 1000],
-        labels: [
-          "no risk",
-          "caution",
-          "extreme caution",
-          "danger",
-          "extreme danger",
-        ],
-        right: true,
-      },
+  // deviation heat_index_rothfusz-2 (heat_index_rothfusz.py:82, _internal/validation.py:289)
+  test("the stress category bins are the shared HEAT_INDEX_RISK_CATEGORIES, not a copy", () => {
+    expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toBe(
+      HEAT_INDEX_RISK_CATEGORIES,
     );
   });
 

@@ -1,10 +1,11 @@
-import { _pmv_ppd_optimized, THERMAL_SENSATION } from "./_pmv_ppd_optimized.ts";
+import { _pmv_ppd_optimized } from "./_pmv_ppd_optimized.ts";
 import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import {
   _check_ashrae55_compliance,
   ASHRAE_55_LIMITS,
   ASHRAE_55_STILL_AIR_THRESHOLD,
 } from "../_internal/ashrae55.ts";
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
 import {
   buildOutputs,
@@ -21,6 +22,21 @@ import { round } from "../_internal/round.ts";
 import { _as_flag, _mapping } from "../_internal/validation.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
+
+/** Thermal sensation of each PMV range. Bins include their upper edge. */
+const TSV_CATEGORIES = deepFreeze({
+  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
+  labels: [
+    "Cold",
+    "Cool",
+    "Slightly Cool",
+    "Neutral",
+    "Slightly Warm",
+    "Warm",
+    "Hot",
+  ],
+  right: true,
+} as const satisfies ClassifierBins);
 
 const STANDARDS = deepFreeze([Standard.ashrae_55_2023] as const);
 
@@ -63,7 +79,7 @@ export const PMV_PPD_ASHRAE_INFO = deepFreeze({
       kind: "label",
       nullable: true,
       unit: null,
-      classifier: { ...THERMAL_SENSATION, right: true },
+      classifier: TSV_CATEGORIES,
     },
     compliance: {
       kind: "flag",

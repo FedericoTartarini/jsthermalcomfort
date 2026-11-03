@@ -5,7 +5,6 @@ import {
   PMV_PPD_ISO_INFO,
   UTCI_INFO,
 } from "../../src/models/index.ts";
-import { THERMAL_SENSATION } from "../../src/models/_pmv_ppd_optimized.ts";
 import { Standard, Units } from "../../src/utilities/index.ts";
 import { v_relative } from "../../src/utilities/index.ts";
 import { pmv_ppd_iso as pmv_ppd_iso_from_root } from "../../src/index.ts";
@@ -472,14 +471,6 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(PMV_PPD_ISO_INFO.inputs.units).toBe(UTCI_INFO.inputs.units);
     });
 
-    // models/pmv_ppd_iso.py:209-222.
-    test("tsv's classifier is the shared thermal sensation table, left-inclusive", () => {
-      const { classifier } = PMV_PPD_ISO_INFO.outputs.tsv;
-      expect(classifier.edges).toBe(THERMAL_SENSATION.edges);
-      expect(classifier.labels).toBe(THERMAL_SENSATION.labels);
-      expect(classifier.right).toBe(false);
-    });
-
     test("category's classifier is the default edition's bins", () => {
       expect(PMV_PPD_ISO_INFO.outputs.category.classifier).toBe(
         PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025],
@@ -713,7 +704,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(result.tsv).toBe(null);
     });
 
-    // models/pmv_ppd_iso.py:205-222: tsv classifies the pmv returned, after rounding.
+    // models/pmv_ppd_iso.py:219-226: tsv classifies the pmv returned, after rounding.
     test("tsv is classified from the pmv returned, rounded or not", () => {
       // pmv ≈ 0.4983 rounds to 0.5, which opens the left-inclusive [0.5, 1.5).
       const edge = { ...neutral, tdb: 26.38, tr: 26.38, limit_inputs: false };

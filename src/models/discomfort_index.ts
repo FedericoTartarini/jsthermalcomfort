@@ -1,8 +1,26 @@
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { parseInputs } from "../_internal/define.ts";
 import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { _mapping } from "../_internal/validation.ts";
+
+/**
+ * Discomfort condition of each Discomfort Index range, [°C]. Bins include their lower
+ * edge.
+ */
+const DISCOMFORT_CATEGORIES = deepFreeze({
+  edges: [21, 24, 27, 29, 32, 99],
+  labels: [
+    "No discomfort",
+    "Less than 50% feels discomfort",
+    "More than 50% feels discomfort",
+    "Most of the population feels discomfort",
+    "Everyone feels severe stress",
+    "State of medical emergency",
+  ],
+  right: false,
+} as const satisfies ClassifierBins);
 
 export const DISCOMFORT_INDEX_INFO = deepFreeze({
   name: "discomfort_index",
@@ -18,18 +36,7 @@ export const DISCOMFORT_INDEX_INFO = deepFreeze({
       kind: "label",
       nullable: true,
       unit: null,
-      classifier: {
-        edges: [21, 24, 27, 29, 32, 99],
-        labels: [
-          "No discomfort",
-          "Less than 50% feels discomfort",
-          "More than 50% feels discomfort",
-          "Most of the population feels discomfort",
-          "Everyone feels severe stress",
-          "State of medical emergency",
-        ],
-        right: false,
-      },
+      classifier: DISCOMFORT_CATEGORIES,
     },
   },
 } as const satisfies ModelInfo);

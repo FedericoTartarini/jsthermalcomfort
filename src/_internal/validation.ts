@@ -49,9 +49,8 @@ export function _valid_range(
 }
 
 /**
- * Stress category thresholds shared by the Heat Index models (e.g. Rothfusz, Schoen).
- * Each model prepends its own "no risk" floor, since that lower bound depends on the
- * model's applicability range, e.g. {27.0: "no risk", **HEAT_INDEX_STRESS_CATEGORIES}.
+ * Stress category thresholds of the Heat Index, [°C]. HEAT_INDEX_RISK_CATEGORIES below
+ * adds the "no risk" floor that the Rothfusz and Schoen models use.
  */
 export const HEAT_INDEX_STRESS_CATEGORIES = deepFreeze({
   edges: [32.0, 41.0, 54.0, 1000.0],
@@ -96,3 +95,10 @@ export function _as_flag(condition: boolean, valid?: boolean): number {
 export function _mapping(value: number, bins: ClassifierBins): string | number {
   return classifyFromBins(value, bins);
 }
+
+/** Shared by the Rothfusz and Schoen Heat Index models. Below 27 °C there is no risk. */
+export const HEAT_INDEX_RISK_CATEGORIES = deepFreeze({
+  edges: [27.0, ...HEAT_INDEX_STRESS_CATEGORIES.edges],
+  labels: ["no risk", ...HEAT_INDEX_STRESS_CATEGORIES.labels],
+  right: true,
+} as const satisfies ClassifierBins);

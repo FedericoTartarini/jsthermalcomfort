@@ -1,19 +1,4 @@
-import type { ClassifierBins } from "../_internal/classifierBins.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
 import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
-
-export const THERMAL_SENSATION = deepFreeze({
-  edges: [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10],
-  labels: [
-    "Cold",
-    "Cool",
-    "Slightly Cool",
-    "Neutral",
-    "Slightly Warm",
-    "Warm",
-    "Hot",
-  ],
-} as const satisfies Pick<ClassifierBins, "edges" | "labels">);
 
 export function _pmv_ppd_optimized(
   tdb: number,

@@ -1,5 +1,5 @@
 import { BASE_INPUTS_POSITION, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -156,11 +156,7 @@ export function two_nodes_gagge_ji(
   );
 
   const warnings: ModelWarning[] = [];
-  return Object.freeze({
-    t_core: Object.freeze(t_core),
-    t_skin: Object.freeze(t_skin),
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(TWO_NODES_GAGGE_JI_INFO, { t_core, t_skin }, warnings);
 }
 
 /**

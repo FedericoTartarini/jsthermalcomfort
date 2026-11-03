@@ -2,7 +2,7 @@ import {
   BASE_INPUTS_WORK_INTENSITY,
   parseInputs,
 } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo } from "../_internal/modelInfo.ts";
 import { WorkIntensity } from "../utilities/options.ts";
 import type { WorkCapacity } from "./work_capacity_dunne.ts";
@@ -19,7 +19,7 @@ export const WORK_CAPACITY_HOTHAPS_INFO = deepFreeze({
     },
   },
   outputs: {
-    capacity: { kind: "numeric", unit: "%" },
+    capacity: { kind: "numeric", masked: true, unit: "%" },
   },
 } as const satisfies ModelInfo);
 
@@ -101,5 +101,5 @@ export function work_capacity_hothaps(
     100,
   );
 
-  return Object.freeze({ capacity, warnings: Object.freeze([]) });
+  return buildOutputs(WORK_CAPACITY_HOTHAPS_INFO, { capacity }, []);
 }

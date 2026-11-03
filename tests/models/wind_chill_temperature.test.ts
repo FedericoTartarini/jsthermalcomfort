@@ -32,7 +32,7 @@ describe("test_wind_chill_temperature", () => {
       const result = wind_chill_temperature({ tdb: -5.0, v: 5.5 });
 
       expect(typeof result.wct).toBe("number");
-      expect(round(result.wct, 1)).toBe(-7.5);
+      expect(round(result.wct ?? NaN, 1)).toBe(-7.5);
     });
 
     // Upstream's empty lists, element-wise.
@@ -126,11 +126,11 @@ describe("wind_chill_temperature (JS-only)", () => {
   );
 
   // As upstream's: v**0.16 of a negative v is NaN (models/wind_chill_temperature.py:59).
-  test("a negative v gives NaN", () => {
-    expect(wind_chill_temperature({ tdb: 0, v: -1 }).wct).toBeNaN();
+  test("a negative v gives null", () => {
+    expect(wind_chill_temperature({ tdb: 0, v: -1 }).wct).toBe(null);
     expect(
       wind_chill_temperature({ tdb: 0, v: -1, round_output: false }).wct,
-    ).toBeNaN();
+    ).toBe(null);
   });
 
   // Deviation wind_chill_temperature-2.

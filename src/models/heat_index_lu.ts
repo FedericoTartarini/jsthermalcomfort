@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
@@ -125,11 +125,7 @@ export function heat_index_lu(inputs: HILuInputs): HILu {
     hi = round(hi, 1);
   }
 
-  return Object.freeze({
-    hi,
-    stress_category: null,
-    warnings: Object.freeze([]),
-  });
+  return buildOutputs(HEAT_INDEX_LU_INFO, { hi, stress_category: null }, []);
 }
 
 function _pv_star(t: number): number {

@@ -121,9 +121,9 @@ describe("work_capacity_iso (JS-only)", () => {
     },
   );
 
-  test("at the resting 117 W, wbgt on the resting limit gives NaN, as upstream's does", () => {
+  test("at the resting 117 W, wbgt on the resting limit gives upstream's NaN, as null", () => {
     const wbgt = 34.9 - 117 / 46;
-    expect(work_capacity_iso({ wbgt, met: 117 }).capacity).toBeNaN();
+    expect(work_capacity_iso({ wbgt, met: 117 }).capacity).toBe(null);
   });
 
   test("wbgt on the resting limit with met below 117 W gives -0.0, as upstream's np.clip keeps it", () => {

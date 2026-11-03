@@ -1,7 +1,11 @@
 import { pmv_ppd_iso, PMV_PPD_ISO_INFO } from "./pmv_ppd_iso.ts";
 import type { PMVPPDInputs } from "./pmv_ppd_iso.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -48,7 +52,7 @@ export const PMV_E_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    e_pmv: { kind: "numeric", unit: null },
+    e_pmv: { kind: "numeric", masked: true, unit: null },
   },
   derived: {
     pa: PMV_PPD_ISO_INFO.derived.pa,
@@ -160,31 +164,37 @@ export function pmv_e(inputs: EPMVInputs): EPMV {
     units: units as PMVPPDInputs["units"],
     limit_inputs,
   };
-  const first = pmv_ppd_iso({
-    tdb,
-    tr,
-    vr,
-    rh,
-    met,
-    clo,
-    wme,
-    standard: Standard.iso_7730_2025,
-    ...default_kwargs,
-  });
+  const first = toComputedOutputs(
+    PMV_PPD_ISO_INFO,
+    pmv_ppd_iso({
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      standard: Standard.iso_7730_2025,
+      ...default_kwargs,
+    }),
+  );
   warnings.push(...first.warnings);
   let _pmv = first.pmv;
   met = _pmv > 0 ? met * (1 + _pmv * -0.067) : met;
-  const second = pmv_ppd_iso({
-    tdb,
-    tr,
-    vr,
-    rh,
-    met,
-    clo,
-    wme,
-    standard: Standard.iso_7730_2025,
-    ...default_kwargs,
-  });
+  const second = toComputedOutputs(
+    PMV_PPD_ISO_INFO,
+    pmv_ppd_iso({
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      standard: Standard.iso_7730_2025,
+      ...default_kwargs,
+    }),
+  );
   // The second call checks the adjusted met, a derived quantity (deviation pmv_e-2).
   for (const row of second.warnings)
     warnings.push(
@@ -196,8 +206,5 @@ export function pmv_e(inputs: EPMVInputs): EPMV {
 
   const e_pmv_value = round(_pmv * e_coefficient, 2);
 
-  return Object.freeze({
-    e_pmv: e_pmv_value,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(PMV_E_INFO, { e_pmv: e_pmv_value }, warnings);
 }

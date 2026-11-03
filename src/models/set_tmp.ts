@@ -6,7 +6,11 @@ import {
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_POSITION, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -43,7 +47,7 @@ export const SET_TMP_INFO = deepFreeze({
     calculate_ce: { kind: "bool", default: false },
   },
   outputs: {
-    set: { kind: "numeric", unit: "°C" },
+    set: { kind: "numeric", masked: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 
@@ -120,20 +124,23 @@ export function set_tmp(inputs: SETInputs): SET {
     calculate_ce,
   } = parseInputs(SET_TMP_INFO, inputs);
 
-  let set_array = two_nodes_gagge({
-    tdb,
-    tr,
-    v,
-    rh,
-    met,
-    clo,
-    wme,
-    body_surface_area,
-    p_atm,
-    position: position as GaggeTwoNodesInputs["position"],
-    calculate_ce,
-    round_output: false,
-  }).set;
+  let set_array = toComputedOutputs(
+    SET_TMP_INFO,
+    two_nodes_gagge({
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atm,
+      position: position as GaggeTwoNodesInputs["position"],
+      calculate_ce,
+      round_output: false,
+    }),
+  ).set;
 
   const warnings: ModelWarning[] = [];
   const [tdb_valid, tr_valid, v_valid, met_valid, clo_valid] =
@@ -160,5 +167,5 @@ export function set_tmp(inputs: SETInputs): SET {
     set_array = round(set_array, 1);
   }
 
-  return Object.freeze({ set: set_array, warnings: Object.freeze(warnings) });
+  return buildOutputs(SET_TMP_INFO, { set: set_array }, warnings);
 }

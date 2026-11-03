@@ -8,7 +8,7 @@ import { brentq } from "../_internal/brentq.ts";
 import { parseInputs } from "../_internal/define.ts";
 import { notOfType } from "../_internal/errors.ts";
 import { floatRepr } from "../_internal/floatRepr.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -289,14 +289,17 @@ export function sports_heat_stress_risk(
   const [risk_levels, t_mediums, t_highs, t_extremes, recommendations] =
     _calc_risk_single_value(tdb, tr, rh, vr_effective, sport, warnings);
 
-  return Object.freeze({
-    risk_level_interpolated: risk_levels,
-    t_medium: t_mediums,
-    t_high: t_highs,
-    t_extreme: t_extremes,
-    recommendation: recommendations,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    SPORTS_HEAT_STRESS_RISK_INFO,
+    {
+      risk_level_interpolated: risk_levels,
+      t_medium: t_mediums,
+      t_high: t_highs,
+      t_extreme: t_extremes,
+      recommendation: recommendations,
+    },
+    warnings,
+  );
 }
 
 /**

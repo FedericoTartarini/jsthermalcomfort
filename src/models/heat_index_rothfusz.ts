@@ -24,7 +24,7 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    hi: { kind: "numeric", unit: "°C" },
+    hi: { kind: "numeric", masked: true, unit: "°C" },
     stress_category: {
       kind: "label",
       masked: true,

@@ -1,6 +1,7 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
+  ComputedOutputsOf,
   InputsOf,
   ModelInfo,
   ModelWarning,
@@ -34,16 +35,26 @@ export const TWO_NODES_GAGGE_SLEEP_INFO = deepFreeze({
     met_shivering: { kind: "numeric", unit: "W/m²", default: 0 },
   },
   outputs: {
-    set: { kind: "numeric", unit: "°C", series: true },
-    t_core: { kind: "numeric", unit: "°C", series: true },
-    t_skin: { kind: "numeric", unit: "°C", series: true },
-    wet: { kind: "numeric", unit: null, series: true },
-    t_sens: { kind: "numeric", unit: null, series: true },
-    disc: { kind: "numeric", unit: null, series: true },
-    e_skin: { kind: "numeric", unit: "W/m²", series: true },
-    met_shivering: { kind: "numeric", unit: "W/m²", series: true },
-    alfa: { kind: "numeric", unit: null, series: true },
-    skin_blood_flow: { kind: "numeric", unit: "kg/h/m²", series: true },
+    set: { kind: "numeric", masked: true, unit: "°C", series: true },
+    t_core: { kind: "numeric", masked: true, unit: "°C", series: true },
+    t_skin: { kind: "numeric", masked: true, unit: "°C", series: true },
+    wet: { kind: "numeric", masked: true, unit: null, series: true },
+    t_sens: { kind: "numeric", masked: true, unit: null, series: true },
+    disc: { kind: "numeric", masked: true, unit: null, series: true },
+    e_skin: { kind: "numeric", masked: true, unit: "W/m²", series: true },
+    met_shivering: {
+      kind: "numeric",
+      masked: true,
+      unit: "W/m²",
+      series: true,
+    },
+    alfa: { kind: "numeric", masked: true, unit: null, series: true },
+    skin_blood_flow: {
+      kind: "numeric",
+      masked: true,
+      unit: "kg/h/m²",
+      series: true,
+    },
   },
 } as const satisfies ModelInfo);
 
@@ -197,12 +208,12 @@ export function two_nodes_gagge_sleep(
   const output = Object.fromEntries(
     fields.map((field, i) => {
       const values = result_arrays[i] ?? [];
-      return [field, duration === 1 ? values[0] : Object.freeze(values)];
+      return [field, duration === 1 ? values[0] : values];
     }),
-  ) as Omit<GaggeTwoNodesSleep, "warnings">;
+  ) as ComputedOutputsOf<typeof TWO_NODES_GAGGE_SLEEP_INFO>;
 
   const warnings: ModelWarning[] = [];
-  return Object.freeze({ ...output, warnings: Object.freeze(warnings) });
+  return buildOutputs(TWO_NODES_GAGGE_SLEEP_INFO, output, warnings);
 }
 
 /**

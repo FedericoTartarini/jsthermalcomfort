@@ -24,14 +24,14 @@ describe("test_heat_index_schoen", () => {
     );
   }
 
-  function _expected_stress_category(hi: number): string | number {
+  function _expected_stress_category(hi: number): string | null {
     // Calculate heat stress categories from heat index thresholds.
-    let category: string | number = "extreme danger";
+    let category: string | null = "extreme danger";
     if (hi <= 54) category = "danger";
     if (hi <= 41) category = "extreme caution";
     if (hi <= 32) category = "caution";
     if (hi <= 27) category = "no risk";
-    if (hi > 1000) category = NaN;
+    if (hi > 1000) category = null;
     return category;
   }
 
@@ -200,9 +200,9 @@ describe("heat_index_schoen (JS-only)", () => {
   });
 
   // psychrometrics/dew_point_tmp.py:53, as upstream's log(0) gives it.
-  test("rh 0 gives a NaN hi and a null category", () => {
+  test("rh 0 gives a null hi and a null category", () => {
     const result = heat_index_schoen({ tdb: 25, rh: 0 });
-    expect(result.hi).toBeNaN();
+    expect(result.hi).toBe(null);
     expect(result.stress_category).toBe(null);
   });
 

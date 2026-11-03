@@ -63,7 +63,7 @@ ADR 0019 names error classes, check order and messages as classes of their own (
 | flag          | `_as_flag`'s 1.0, 0.0 and NaN, for a `flag` output           | `true`, `false` and `null`              | `flag_mapping` in `tests/parity/harness.ts`   | 0028 |
 | masked output | any value but `None`, for any other output declared `masked` | NaN as `null`, any other value as it is | `masked_mapping` in `tests/parity/harness.ts` | 0028 |
 
-The library converts at one place too, `buildOutputs` in `src/_internal/modelInfo.ts`, through which a model returns its outputs (decision 314).
+The library converts at one place too, `buildOutputs` in `src/_internal/modelInfo.ts`, through which a model returns its outputs (decision 314), and its inverse `toComputedOutputs` beside it, through which a model that calls another computes on upstream's NaN (decision 321).
 
 **Other deviations an ADR approves.** A deviation an ADR approves outside the classes and additions above names that ADR in its row. One case is `classifyFromBins`, which throws `RangeError` unless its edges are strictly increasing (ADR 0024).
 

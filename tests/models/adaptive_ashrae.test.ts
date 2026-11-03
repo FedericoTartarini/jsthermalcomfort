@@ -110,7 +110,7 @@ describe("test_adaptive_ashrae", () => {
       limit_inputs: true,
     });
 
-    expect(result.tmp_cmf).toBeNaN();
+    expect(result.tmp_cmf).toBe(null);
 
     // outside the applicability limits the acceptability flags are NaN, not 0.0 (#484)
     expect(result.acceptability_80).toBe(null);
@@ -284,7 +284,7 @@ describe("adaptive_ashrae (JS-only)", () => {
         warnings: [],
       });
       expect(adaptive_ashrae({ ...neutral, t_running_mean: 9 })).toMatchObject({
-        tmp_cmf: NaN,
+        tmp_cmf: null,
         acceptability_90: null,
       });
     });
@@ -305,7 +305,7 @@ describe("adaptive_ashrae (JS-only)", () => {
     // negative v as one below 0.2 m/s.
     test("a negative v computes as upstream does", () => {
       const negative = { ...neutral, v: -0.5 };
-      expect(adaptive_ashrae(negative).tmp_cmf).toBeNaN();
+      expect(adaptive_ashrae(negative).tmp_cmf).toBe(null);
       const off = adaptive_ashrae({ ...negative, limit_inputs: false });
       expect(off.tmp_cmf).toBe(24.0);
       expect(off.acceptability_90).toBe(true);
@@ -385,9 +385,9 @@ describe("adaptive_ashrae (JS-only)", () => {
 
   describe("result", () => {
     // adaptive_ashrae.py:150-159
-    test("the acceptability is null where tmp_cmf is NaN", () => {
+    test("the acceptability is null where tmp_cmf is null", () => {
       const result = adaptive_ashrae({ ...neutral, tdb: 45 });
-      expect(result.tmp_cmf).toBeNaN();
+      expect(result.tmp_cmf).toBe(null);
       expect(result.acceptability_80).toBe(null);
       expect(result.acceptability_90).toBe(null);
     });
@@ -450,7 +450,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       ]);
       const [first] = on.warnings;
       expect(first?.kind === "range" && first.bound).toBe(bound);
-      expect(on.tmp_cmf).toBeNaN();
+      expect(on.tmp_cmf).toBe(null);
       // deviation adaptive_ashrae-3
       const off = adaptive_ashrae({
         ...neutral,
@@ -508,7 +508,7 @@ describe("adaptive_ashrae (JS-only)", () => {
 
     // Upstream calls warnings.warn only through _valid_range here, so no
     // notice row.
-    test("a NaN under the gate never comes without a row, and no notice", () => {
+    test("a null under the gate never comes without a row, and no notice", () => {
       for (const t of [5, 10, 25, 40, 45])
         for (const speed of [-0.5, 0, 1, 2, 2.5])
           for (const t_running_mean of [5, 10, 20, 33.5, 40]) {
@@ -527,7 +527,7 @@ describe("adaptive_ashrae (JS-only)", () => {
               t,
               speed,
               t_running_mean,
-              gated: Number.isNaN(tmp_cmf),
+              gated: tmp_cmf === null,
             });
             expect(warnings.every((row) => row.kind === "range")).toBe(true);
           }

@@ -102,9 +102,9 @@ describe("humidex (JS-only)", () => {
   });
 
   // As upstream's: dew_point_tmp takes log(0), and a NaN falls in no mask.
-  test("masterson at rh 0 gives NaN and 'Heat stroke probable'", () => {
+  test("masterson at rh 0 gives null and 'Heat stroke probable'", () => {
     const result = humidex({ tdb: 35, rh: 0, model: "masterson" });
-    expect(result.humidex).toBeNaN();
+    expect(result.humidex).toBe(null);
     expect(result.discomfort).toBe("Heat stroke probable");
     expect(humidex({ tdb: 35, rh: 0 }).humidex).toBe(29.4);
   });

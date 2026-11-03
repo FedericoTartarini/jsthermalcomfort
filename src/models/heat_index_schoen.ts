@@ -19,7 +19,7 @@ export const HEAT_INDEX_SCHOEN_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    hi: { kind: "numeric", unit: "°C" },
+    hi: { kind: "numeric", masked: true, unit: "°C" },
     stress_category: {
       kind: "label",
       masked: true,

@@ -126,8 +126,8 @@ describe("test_solar_gain", () => {
         bound: { min: 0.0, max: 90.0 },
       }),
     ]);
-    expect(result.erf).toBeNaN();
-    expect(result.delta_mrt).toBeNaN();
+    expect(result.erf).toBe(null);
+    expect(result.delta_mrt).toBe(null);
 
     result = solar_gain({ sol_altitude: 45, sharp: 300, ...common });
     expect(result.warnings).toEqual([
@@ -137,19 +137,19 @@ describe("test_solar_gain", () => {
         bound: { min: 0.0, max: 180.0 },
       }),
     ]);
-    expect(result.erf).toBeNaN();
-    expect(result.delta_mrt).toBeNaN();
+    expect(result.erf).toBe(null);
+    expect(result.delta_mrt).toBe(null);
 
-    // mixed valid/invalid array: only the invalid element becomes NaN,
+    // mixed valid/invalid array: only the invalid element becomes null,
     // element-wise
     const [valid, invalid] = [45, 200].map((sol_altitude) =>
       solar_gain({ sol_altitude, sharp: 90, ...common }),
     );
-    expect(valid?.erf).not.toBeNaN();
+    expect(valid?.erf).not.toBe(null);
     expect(invalid?.warnings).toEqual([
       expect.objectContaining({ key: "sol_altitude", value: 200 }),
     ]);
-    expect(invalid?.erf).toBeNaN();
+    expect(invalid?.erf).toBe(null);
   });
 
   test("test_solar_gain_array", () => {
@@ -286,8 +286,10 @@ describe("solar_gain (JS-only)", () => {
           posture: "supine",
           round_output: false,
         });
-        expect(Math.round(result.erf * 100) / 100).toBe(erf);
-        expect(Math.round(result.delta_mrt * 100) / 100).toBe(delta_mrt);
+        expect(Math.round((result.erf ?? NaN) * 100) / 100).toBe(erf);
+        expect(Math.round((result.delta_mrt ?? NaN) * 100) / 100).toBe(
+          delta_mrt,
+        );
       }
     });
   });
@@ -319,7 +321,7 @@ describe("solar_gain (JS-only)", () => {
       expect(solar_gain(base).warnings).toEqual([]);
     });
 
-    test("sol_altitude outside 0-90 gives a row and NaN", () => {
+    test("sol_altitude outside 0-90 gives a row and null", () => {
       const result = solar_gain({ ...base, sol_altitude: 95 });
       expect(result.warnings).toEqual([
         {
@@ -335,11 +337,11 @@ describe("solar_gain (JS-only)", () => {
         "bound",
         inputs.sol_altitude.applicability,
       );
-      expect(result.erf).toBeNaN();
-      expect(result.delta_mrt).toBeNaN();
+      expect(result.erf).toBe(null);
+      expect(result.delta_mrt).toBe(null);
     });
 
-    test("sharp outside 0-180 gives a row and NaN, supine included", () => {
+    test("sharp outside 0-180 gives a row and null, supine included", () => {
       for (const posture of ["sitting", "standing", "supine"] as const) {
         const result = solar_gain({ ...base, sharp: -1, posture });
         expect(result.warnings).toEqual([
@@ -352,7 +354,7 @@ describe("solar_gain (JS-only)", () => {
             bound: { min: 0.0, max: 180.0 },
           },
         ]);
-        expect(result.erf).toBeNaN();
+        expect(result.erf).toBe(null);
       }
     });
 
@@ -400,7 +402,9 @@ describe("solar_gain (JS-only)", () => {
       ]);
       // erf is linear in asw, so the number is upstream's formula unchanged.
       const at_default = solar_gain({ ...base, round_output: false });
-      expect(approx(result.erf, (at_default.erf * 0.95) / 0.7)).toBe(true);
+      expect(approx(result.erf, ((at_default.erf ?? NaN) * 0.95) / 0.7)).toBe(
+        true,
+      );
     });
 
     test("every broken range has its own row, in the checks' order", () => {
@@ -414,7 +418,7 @@ describe("solar_gain (JS-only)", () => {
       expect(
         result.warnings.map((row) => row.kind === "range" && row.key),
       ).toEqual(["sol_altitude", "sharp", "sol_radiation_dir", "asw"]);
-      expect(result.erf).toBeNaN();
+      expect(result.erf).toBe(null);
     });
 
     test("the bounds' ends are inside the range", () => {

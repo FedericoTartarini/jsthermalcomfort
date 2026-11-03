@@ -60,8 +60,8 @@ describe("test_pmv_ppd_iso", () => {
       ).map((inputs) =>
         pmv_ppd_iso({ ...inputs, standard: Standard.iso_7730_2005 }),
       );
-      expect(results[1]?.pmv).toBeNaN();
-      expect(results[1]?.ppd).toBeNaN();
+      expect(results[1]?.pmv).toBe(null);
+      expect(results[1]?.ppd).toBe(null);
 
       expect(
         round(
@@ -74,7 +74,7 @@ describe("test_pmv_ppd_iso", () => {
             clo: 1,
             units: "IP",
             standard: Standard.iso_7730_2005,
-          }).pmv,
+          }).pmv ?? NaN,
           1,
         ),
       ).toBe(-0.5);
@@ -91,7 +91,7 @@ describe("test_pmv_ppd_iso", () => {
               clo: 1,
               units: "IP",
               standard: Standard.iso_7730_2005,
-            }).pmv,
+            }).pmv ?? NaN,
             1,
           ),
         ),
@@ -117,7 +117,7 @@ describe("test_pmv_ppd_iso", () => {
           clo,
           standard: Standard.iso_7730_2005,
         });
-        expect(result.pmv).toBeNaN();
+        expect(result.pmv).toBe(null);
       }
 
       // check results with limit_inputs disabled. Upstream compares the whole
@@ -200,8 +200,8 @@ describe("test_pmv_ppd_iso", () => {
         met: 1.2,
         clo: 0.5,
       });
-      expect(result.pmv).toBeNaN();
-      expect(result.ppd).toBeNaN();
+      expect(result.pmv).toBe(null);
+      expect(result.ppd).toBe(null);
     });
 
     // Upstream calls np.isclose without asserting its result; this asserts it,
@@ -489,7 +489,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
 
   describe("applicability limits", () => {
     // tdb 35 °C is outside ISO 7730's 10-30 °C.
-    test("out-of-range inputs should return NaN under ISO standard", () => {
+    test("out-of-range inputs should return null under ISO standard", () => {
       const result = pmv_ppd_iso({
         tdb: 35,
         tr: 35,
@@ -498,15 +498,15 @@ describe("pmv_ppd_iso (JS-only)", () => {
         met: 2.0,
         clo: 0.3,
       });
-      expect(result.pmv).toBeNaN();
-      expect(result.ppd).toBeNaN();
+      expect(result.pmv).toBe(null);
+      expect(result.ppd).toBe(null);
     });
 
     // Issue #180: ISO 7730's met lower bound, 0.8, inclusive.
-    test("met=0.7 (below lower bound) returns NaN when limit_inputs is enabled", () => {
+    test("met=0.7 (below lower bound) returns null when limit_inputs is enabled", () => {
       const result = pmv_ppd_iso({ ...neutral, met: 0.7, limit_inputs: true });
-      expect(result.pmv).toBeNaN();
-      expect(result.ppd).toBeNaN();
+      expect(result.pmv).toBe(null);
+      expect(result.ppd).toBe(null);
     });
 
     test("met=0.8 (inclusive lower bound) returns valid numbers when limit_inputs is enabled", () => {
@@ -545,21 +545,21 @@ describe("pmv_ppd_iso (JS-only)", () => {
     );
 
     test.each(NEAR_LIMIT)(
-      "pa just above 2700 Pa gives a NaN pmv and ppd and a null tsv (tdb=$tdb)",
+      "pa just above 2700 Pa gives a null pmv, ppd and tsv (tdb=$tdb)",
       ({ tdb, rh }) => {
         const result = call(tdb, rh + STEP_OVER);
-        expect(result.pmv).toBeNaN();
-        expect(result.ppd).toBeNaN();
+        expect(result.pmv).toBe(null);
+        expect(result.ppd).toBe(null);
         expect(result.tsv).toBe(null);
       },
     );
 
     // Every input is inside its limit, and the ungated pmv inside [-2, 2].
-    test("the NaN comes from the vapour pressure bound, not the PMV output gate", () => {
+    test("the null comes from the vapour pressure bound, not the PMV output gate", () => {
       const params = { tdb: 30, tr: 30, vr: 0.1, rh: 90, met: 1.2, clo: 0.5 };
       const unlimited = pmv_ppd_iso({ ...params, limit_inputs: false });
-      expect(Math.abs(unlimited.pmv)).toBeLessThan(2);
-      expect(pmv_ppd_iso(params).pmv).toBeNaN();
+      expect(Math.abs(unlimited.pmv ?? NaN)).toBeLessThan(2);
+      expect(pmv_ppd_iso(params).pmv).toBe(null);
     });
   });
 
@@ -645,7 +645,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       };
       const on = pmv_ppd_iso({ ...params, limit_inputs: true });
       const off = pmv_ppd_iso({ ...params, limit_inputs: false });
-      expect(on.pmv).toBeNaN();
+      expect(on.pmv).toBe(null);
       expect(Number.isFinite(off.pmv)).toBe(true);
       expect(off.warnings).toEqual(on.warnings);
       expect(
@@ -678,7 +678,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
 
     test.each(iso_rows)(
-      "a NaN under the gate never comes without a row, and no notice (fixture #%#)",
+      "a null under the gate never comes without a row, and no notice (fixture #%#)",
       ({ inputs }) => {
         const run = (limit_inputs: boolean) =>
           pmv_ppd_iso({
@@ -688,7 +688,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
           } as unknown as Inputs);
         const limited = run(true);
         const caused_by_limits =
-          Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
+          limited.pmv === null && Number.isFinite(run(false).pmv);
         expect(limited.warnings.length > 0).toBe(caused_by_limits);
         expect(limited.warnings.every((w) => w.kind === "range")).toBe(true);
       },
@@ -700,7 +700,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(pmv_ppd_iso(neutral).tsv).toBe("Neutral");
     });
 
-    test("tsv is null when pmv is NaN (out of range)", () => {
+    test("tsv is null when pmv is null (out of range)", () => {
       const result = pmv_ppd_iso({
         tdb: 35,
         tr: 35,
@@ -709,7 +709,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         met: 2.0,
         clo: 0.3,
       });
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.tsv).toBe(null);
     });
 
@@ -781,7 +781,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       // is otherwise category B.
       const out_of_range = { ...neutral, tdb: 28, tr: 28, vr: 1.2, ...iso2005 };
       const result = pmv_ppd_iso(out_of_range);
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.category).toBe(null);
       // The same call with the gate off is classified.
       expect(
@@ -860,7 +860,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         ...iso2025,
       };
       const result = pmv_ppd_iso(out_of_range);
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.category).toBe(null);
       // The same call with the gate off is classified.
       expect(

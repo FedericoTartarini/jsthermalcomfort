@@ -127,10 +127,10 @@ describe("test_ireq", () => {
     };
 
     const result_limited = ireq(params);
-    expect(Number.isNaN(result_limited.ireq_min)).toBe(true);
-    expect(Number.isNaN(result_limited.ireq_neutral)).toBe(true);
-    expect(Number.isNaN(result_limited.icl_min)).toBe(true);
-    expect(Number.isNaN(result_limited.icl_neutral)).toBe(true);
+    expect(result_limited.ireq_min).toBe(null);
+    expect(result_limited.ireq_neutral).toBe(null);
+    expect(result_limited.icl_min).toBe(null);
+    expect(result_limited.icl_neutral).toBe(null);
     expect(result_limited.dle_min).toBe(null);
     expect(result_limited.dle_neutral).toBe(null);
 
@@ -192,8 +192,8 @@ describe("test_ireq", () => {
       walk_sp: 0.9984,
     });
 
-    expect(Number.isNaN(result.ireq_min)).toBe(true);
-    expect(Number.isNaN(result.icl_min)).toBe(true);
+    expect(result.ireq_min).toBe(null);
+    expect(result.icl_min).toBe(null);
     expect(result.dle_min).toBe(null);
   });
 
@@ -210,8 +210,8 @@ describe("test_ireq", () => {
     };
 
     const result_limited = ireq(params);
-    expect(Number.isNaN(result_limited.ireq_min)).toBe(true);
-    expect(Number.isNaN(result_limited.icl_min)).toBe(true);
+    expect(result_limited.ireq_min).toBe(null);
+    expect(result_limited.icl_min).toBe(null);
 
     const result_unlimited = ireq({ ...params, limit_inputs: false });
     expect(result_unlimited.ireq_min).toBeLessThan(0);
@@ -415,7 +415,7 @@ describe("ireq (JS-only)", () => {
         expect(
           outputs(result)
             .slice(0, 4)
-            .every((value) => Number.isNaN(value)),
+            .every((value) => value === null),
         ).toBe(limit_inputs);
         expect(
           [result.dle_min, result.dle_neutral].every((value) => value === null),
@@ -459,9 +459,13 @@ describe("ireq (JS-only)", () => {
   });
 
   // models/ireq.py:172: NaN < 0 is false, so a NaN ireq masks nothing.
-  test("keeps dle where ireq and icl are NaN, as upstream's mask does", () => {
+  test("keeps dle where ireq and icl are null, as upstream's mask does", () => {
     const result = ireq({ ...valid, tr: 1e300 });
-    expect(outputs(result).slice(0, 4).every(Number.isNaN)).toBe(true);
+    expect(
+      outputs(result)
+        .slice(0, 4)
+        .every((value) => value === null),
+    ).toBe(true);
     expect(result.dle_min).toBe(0.0);
     expect(result.dle_neutral).toBe(0.0);
     expect(result.warnings).toEqual([]);
@@ -470,7 +474,11 @@ describe("ireq (JS-only)", () => {
   // models/ireq.py:172-186: each criterion is masked on its own.
   test("masks the minimal criterion, whose icl is negative, and keeps the neutral dle", () => {
     const result = ireq({ ...valid, tr: -1e300 });
-    expect(outputs(result).slice(0, 4).every(Number.isNaN)).toBe(true);
+    expect(
+      outputs(result)
+        .slice(0, 4)
+        .every((value) => value === null),
+    ).toBe(true);
     expect(result.dle_min).toBe(null);
     expect(result.dle_neutral).toBe(4.7);
     expect(

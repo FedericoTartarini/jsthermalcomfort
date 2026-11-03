@@ -1,5 +1,5 @@
 import { BASE_INPUTS_POSITION, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -45,10 +45,10 @@ export const TWO_NODES_GAGGE_INFO = deepFreeze({
     m_rsw: { kind: "numeric", unit: "mL/h/m²" },
     w: { kind: "numeric", unit: null },
     w_max: { kind: "numeric", unit: null },
-    set: { kind: "numeric", unit: "°C" },
-    et: { kind: "numeric", unit: "°C" },
+    set: { kind: "numeric", masked: true, unit: "°C" },
+    et: { kind: "numeric", masked: true, unit: "°C" },
     pmv_gagge: { kind: "numeric", unit: null },
-    pmv_set: { kind: "numeric", unit: null },
+    pmv_set: { kind: "numeric", masked: true, unit: null },
     disc: { kind: "numeric", unit: null },
     t_sens: { kind: "numeric", unit: null },
   },
@@ -211,7 +211,11 @@ export function two_nodes_gagge(
       p_atm,
       1,
     );
-    return Object.freeze({ set: result, warnings: Object.freeze(warnings) });
+    return buildOutputs(
+      { outputs: { set: TWO_NODES_GAGGE_INFO.outputs.set } },
+      { set: result },
+      warnings,
+    );
   }
 
   let _set,
@@ -294,7 +298,7 @@ export function two_nodes_gagge(
     }
   }
 
-  return Object.freeze({ ...output, warnings: Object.freeze(warnings) });
+  return buildOutputs(TWO_NODES_GAGGE_INFO, output, warnings);
 }
 
 export function _gagge_two_nodes_optimized(

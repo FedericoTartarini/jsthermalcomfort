@@ -62,7 +62,7 @@ describe("test_utci", () => {
       expect(result.warnings).toContainEqual(
         expect.objectContaining({ key: "pa (kPa)" }),
       );
-      expect(result.utci).toBeNaN();
+      expect(result.utci).toBe(null);
       expect(result.stress_category).toBe(null);
     },
   );
@@ -74,7 +74,7 @@ describe("test_utci", () => {
       expect(result.warnings).toContainEqual(
         expect.objectContaining({ key: "rh" }),
       );
-      expect(result.utci).toBeNaN();
+      expect(result.utci).toBe(null);
       expect(result.stress_category).toBe(null);
     },
   );
@@ -120,7 +120,7 @@ describe("test_utci", () => {
       expect(limited.warnings).toEqual(
         invalid ? [expect.objectContaining({ key: "pa (kPa)" })] : [],
       );
-      expect(Number.isNaN(limited.utci)).toBe(invalid);
+      expect(limited.utci === null).toBe(invalid);
       if (invalid) {
         expect(limited.stress_category).toBe(null);
       } else {
@@ -150,7 +150,7 @@ describe("test_utci", () => {
         const inputs = { tdb: t, tr: t, v: wind, rh, units };
         const limited = utci(inputs);
         const unlimited = utci({ ...inputs, limit_inputs: false });
-        expect(Number.isNaN(limited.utci)).toBe(invalid);
+        expect(limited.utci === null).toBe(invalid);
         expect(limited.warnings.length > 0).toBe(invalid);
         if (invalid) {
           expect(limited.stress_category).toBe(null);
@@ -246,7 +246,7 @@ describe("test_utci", () => {
       units: "IP",
     });
 
-    expect(result.utci).toBeNaN();
+    expect(result.utci).toBe(null);
     expect(result.stress_category).toBe(null);
 
     const first = utci({ tdb: 77, tr: 77, v: 3.28084, rh: 50, units: "IP" });
@@ -259,7 +259,7 @@ describe("test_utci", () => {
     });
 
     expect(approx(first.utci, 76.3, { rel: 1e-7, abs: 0 })).toBe(true);
-    expect(second.utci).toBeNaN();
+    expect(second.utci).toBe(null);
     expect(first.stress_category).toBe("no thermal stress");
     expect(second.stress_category).toBe(null);
   });
@@ -423,7 +423,7 @@ describe("utci (JS-only)", () => {
       expect(on.warnings).toEqual([{ kind: "range", ...row, bound }]);
       const [first] = on.warnings;
       expect(first?.kind === "range" && first.bound).toBe(bound);
-      expect(on.utci).toBeNaN();
+      expect(on.utci).toBe(null);
       expect(on.stress_category).toBe(null);
       // deviation utci-3
       const off = utci({ ...call_inputs, limit_inputs: false });
@@ -485,7 +485,7 @@ describe("utci (JS-only)", () => {
 
     // Upstream calls warnings.warn only in _valid_range
     // (_internal/validation.py:57), so no notice row.
-    test("a NaN under the gate never comes without a row, and no notice", () => {
+    test("a null under the gate never comes without a row, and no notice", () => {
       for (const t of [-60, -50, 0, 30, 50, 55])
         for (const dt of [-40, -30, 0, 70, 80])
           for (const speed of [0.2, 0.5, 5, 17, 20])
@@ -501,7 +501,7 @@ describe("utci (JS-only)", () => {
                 dt,
                 speed,
                 rh,
-                gated: Number.isNaN(value),
+                gated: value === null,
               });
               expect(warnings.every((row) => row.kind === "range")).toBe(true);
             }

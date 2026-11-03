@@ -49,6 +49,22 @@ describeModelContract(
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("pmv_e (JS-only)", () => {
+  // Decision 321; upstream's e_pmv is NaN here, measured on 4.8.0 in the parity image.
+  test("a null pmv from pmv_ppd_iso gives upstream's NaN e_pmv, as null", () => {
+    expect(
+      pmv_e({
+        tdb: -240,
+        tr: -240,
+        vr: 0.1,
+        rh: 0,
+        met: 1.2,
+        clo: 0.5,
+        e_coefficient: 0.6,
+        limit_inputs: false,
+      }).e_pmv,
+    ).toBe(null);
+  });
+
   test.each([
     [{ ...neutral, e_coefficient: 0.6 }, 0.04],
     [{ ...neutral, e_coefficient: 1 }, 0.07],
@@ -82,7 +98,7 @@ describe("pmv_e (JS-only)", () => {
   // Deviation pmv_e-2.
   test("returns both inner pmv_ppd_iso calls' rows, without deduplication", () => {
     const result = pmv_e(hot);
-    expect(result.e_pmv).toBeNaN();
+    expect(result.e_pmv).toBe(null);
     const inner = pmv_ppd_iso({ ...neutral, tdb: 35, tr: 35 }).warnings;
     expect(inner).toEqual([
       expect.objectContaining({ key: "tdb", role: "input" }),

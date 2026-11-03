@@ -129,8 +129,8 @@ describe("work_capacity_hothaps (JS-only)", () => {
     );
   });
 
-  test("a negative wbgt gives NaN, as upstream's does", () => {
-    expect(work_capacity_hothaps({ wbgt: -5 }).capacity).toBeNaN();
+  test("a negative wbgt gives upstream's NaN, as null", () => {
+    expect(work_capacity_hothaps({ wbgt: -5 }).capacity).toBe(null);
   });
 
   // Deviation work_capacity_hothaps-3, deviation work_capacity_hothaps-4,

@@ -5,7 +5,7 @@ import {
 } from "../_internal/define.ts";
 import { negativeInput } from "../_internal/errors.ts";
 import { fsolve } from "../_internal/fsolve.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -125,25 +125,28 @@ export function pet_steady(inputs: PETSteadyInputs): PETSteady {
   } = parseInputs(PET_STEADY_INFO, inputs);
 
   const warnings: ModelWarning[] = [];
-  return Object.freeze({
-    pet: _pet_steady_vectorised(
-      tdb,
-      tr,
-      v,
-      rh,
-      met,
-      clo,
-      p_atm,
-      position,
-      age,
-      sex,
-      weight,
-      height,
-      wme,
-      warnings,
-    ),
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    PET_STEADY_INFO,
+    {
+      pet: _pet_steady_vectorised(
+        tdb,
+        tr,
+        v,
+        rh,
+        met,
+        clo,
+        p_atm,
+        position,
+        age,
+        sex,
+        weight,
+        height,
+        wme,
+        warnings,
+      ),
+    },
+    warnings,
+  );
 }
 
 function _pet_steady_vectorised(

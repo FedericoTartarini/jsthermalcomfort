@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
@@ -14,7 +14,7 @@ export const NET_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    net: { kind: "numeric", unit: "°C" },
+    net: { kind: "numeric", masked: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 
@@ -85,5 +85,5 @@ export function net(inputs: NETInputs): NET {
     et = round(et, 1);
   }
 
-  return Object.freeze({ net: et, warnings: Object.freeze([]) });
+  return buildOutputs(NET_INFO, { net: et }, []);
 }

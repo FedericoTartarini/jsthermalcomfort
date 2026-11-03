@@ -42,7 +42,7 @@ describe("test_adaptive_en", () => {
       expect(result.warnings).toEqual([
         expect.objectContaining({ key: "t_running_mean" }),
       ]);
-      expect(result.tmp_cmf).toBeNaN();
+      expect(result.tmp_cmf).toBe(null);
     }
 
     const result = adaptive_en({
@@ -223,16 +223,16 @@ describe("adaptive_en (JS-only)", () => {
   // A call with inputs the type rejects, to test the runtime.
   const call = (inputs: unknown) => () => adaptive_en(inputs as Inputs);
   const masked = {
-    tmp_cmf: NaN,
+    tmp_cmf: null,
     acceptability_cat_i: null,
     acceptability_cat_ii: null,
     acceptability_cat_iii: null,
-    tmp_cmf_cat_i_up: NaN,
-    tmp_cmf_cat_ii_up: NaN,
-    tmp_cmf_cat_iii_up: NaN,
-    tmp_cmf_cat_i_low: NaN,
-    tmp_cmf_cat_ii_low: NaN,
-    tmp_cmf_cat_iii_low: NaN,
+    tmp_cmf_cat_i_up: null,
+    tmp_cmf_cat_ii_up: null,
+    tmp_cmf_cat_iii_up: null,
+    tmp_cmf_cat_i_low: null,
+    tmp_cmf_cat_ii_low: null,
+    tmp_cmf_cat_iii_low: null,
   };
 
   describe("values", () => {
@@ -316,10 +316,14 @@ describe("adaptive_en (JS-only)", () => {
           round_output: false,
         });
         expect(
-          approx(result.tmp_cmf_cat_i_up - result.tmp_cmf - 2.0, ce, {
-            rel: 0,
-            abs: 1e-12,
-          }),
+          approx(
+            (result.tmp_cmf_cat_i_up ?? NaN) - (result.tmp_cmf ?? NaN) - 2.0,
+            ce,
+            {
+              rel: 0,
+              abs: 1e-12,
+            },
+          ),
         ).toBe(true);
       },
     );

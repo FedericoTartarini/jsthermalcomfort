@@ -124,10 +124,10 @@ describe("work_capacity_niosh (JS-only)", () => {
     },
   );
 
-  test("at the resting 117 W, wbgt on the resting limit gives NaN, as upstream's does", () => {
+  test("at the resting 117 W, wbgt on the resting limit gives upstream's NaN, as null", () => {
     expect(
       work_capacity_niosh({ wbgt: wbgt_lim_rest, met: 117 }).capacity,
-    ).toBeNaN();
+    ).toBe(null);
   });
 
   test("wbgt on the resting limit with met below 117 W gives -0.0, as upstream's np.clip keeps it", () => {

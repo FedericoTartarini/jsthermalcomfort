@@ -43,7 +43,7 @@ describe("test_heat_index_rothfusz", () => {
   test("test_below_threshold_produces_nan", () => {
     const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
     expect(result.warnings).toEqual([expect.objectContaining({ key: "tdb" })]);
-    expect(result.hi).toBeNaN();
+    expect(result.hi).toBe(null);
     expect(result.stress_category).toBe(null);
   });
 
@@ -65,7 +65,7 @@ describe("test_heat_index_rothfusz", () => {
       [expect.objectContaining({ key: "tdb", value: 20, bound: TDB_BOUND })],
       [],
     ]);
-    expect(second.hi).toBeNaN();
+    expect(second.hi).toBe(null);
     expect(Number.isFinite(first.hi) && Number.isFinite(third.hi)).toBe(true);
   });
 
@@ -107,8 +107,8 @@ describe("test_heat_index_rothfusz", () => {
     ).toEqual([0, 1, 0]);
     // First element has multiple decimals and matches expected formula
     expect(approx(first.hi, 35.33, { rel: 1e-2, abs: 0 })).toBe(true);
-    // Second element below threshold ⇒ NaN
-    expect(second.hi).toBeNaN();
+    // Second element below threshold ⇒ null
+    expect(second.hi).toBe(null);
     // Third element above threshold ⇒ finite number
     expect(Number.isFinite(third.hi)).toBe(true);
     expect(first.stress_category).toBe("extreme caution");
@@ -178,7 +178,7 @@ describe("test_heat_index_rothfusz", () => {
       expect(results.map((result) => result.warnings.length)).toEqual([
         0, 0, 0, 1,
       ]);
-      expect(results[3]?.hi).toBeNaN();
+      expect(results[3]?.hi).toBe(null);
       expect(results[3]?.stress_category).toBe(null);
     },
   );
@@ -256,14 +256,14 @@ describe("heat_index_rothfusz (JS-only)", () => {
     });
 
     // Upstream calls warnings.warn only in _valid_range, so no notice row.
-    test("a NaN under the gate never comes without a row, and no notice", () => {
+    test("a null under the gate never comes without a row, and no notice", () => {
       for (const tdb of [-40, 0, 20, 26.99, 27, 30, 45, 60])
         for (const rh of [0, 50, 100]) {
           const { hi, warnings } = heat_index_rothfusz({ tdb, rh });
           expect({ tdb, rh, gated: warnings.length > 0 }).toEqual({
             tdb,
             rh,
-            gated: Number.isNaN(hi),
+            gated: hi === null,
           });
           expect(warnings.every((row) => row.kind === "range")).toBe(true);
         }
@@ -276,16 +276,16 @@ describe("heat_index_rothfusz (JS-only)", () => {
       ["tdb well below 27", 20, 50],
       ["tdb at 0", 0, 50],
     ])(
-      "returns a NaN hi and a null stress_category under default limit_inputs when %s",
+      "returns a null hi and a null stress_category under default limit_inputs when %s",
       (_, tdb, rh) => {
         const result = heat_index_rothfusz({ tdb, rh });
-        expect(result.hi).toBeNaN();
+        expect(result.hi).toBe(null);
         expect(result.stress_category).toBe(null);
       },
     );
 
     test("the gate is inclusive at 27 °C", () => {
-      expect(heat_index_rothfusz({ tdb: 26.99, rh: 50 }).hi).toBeNaN();
+      expect(heat_index_rothfusz({ tdb: 26.99, rh: 50 }).hi).toBe(null);
       expect(heat_index_rothfusz({ tdb: 27, rh: 50 }).hi).toBe(27.4);
       expect(Number.isFinite(heat_index_rothfusz({ tdb: 35, rh: 80 }).hi)).toBe(
         true,

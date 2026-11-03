@@ -49,8 +49,8 @@ describe("net (JS-only)", () => {
   );
 
   // Upstream checks no v range (classes_input.py:482-496).
-  test("a negative v gives NaN", () => {
-    expect(net({ tdb: 37, rh: 100, v: -1 }).net).toBeNaN();
+  test("a negative v gives null", () => {
+    expect(net({ tdb: 37, rh: 100, v: -1 }).net).toBe(null);
   });
 
   // Deviation net-2.

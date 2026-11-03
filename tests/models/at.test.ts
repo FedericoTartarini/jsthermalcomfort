@@ -66,7 +66,7 @@ describe("at (JS-only)", () => {
   test("a v of -10 divides by zero", () => {
     expect(at({ tdb: 25, rh: 30, v: -10, q: 100 }).at).toBe(Infinity);
     expect(at({ tdb: 25, rh: 30, v: -10, q: -100 }).at).toBe(-Infinity);
-    expect(at({ tdb: 25, rh: 30, v: -10, q: 0 }).at).toBeNaN();
+    expect(at({ tdb: 25, rh: 30, v: -10, q: 0 }).at).toBe(null);
   });
 
   // p_vap is 0, while psy_ta_rh's dew point takes log(0).

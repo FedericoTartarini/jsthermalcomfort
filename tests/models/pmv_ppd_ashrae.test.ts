@@ -85,10 +85,10 @@ describe("test_pmv_ppd_ashrae", () => {
 
     test("test_returns_nan_for_invalid_input_values", () => {
       // test airspeed limits
-      const airspeed: [number, number, number, number, number][] = [
-        [26, 0.9, 1.1, 0.5, NaN],
-        [24, 0.6, 1.1, 0.5, NaN],
-        [22, 0.3, 1.1, 0.5, NaN],
+      const airspeed: [number, number, number, number, number | null][] = [
+        [26, 0.9, 1.1, 0.5, null],
+        [24, 0.6, 1.1, 0.5, null],
+        [22, 0.3, 1.1, 0.5, null],
         [26, 0.9, 1.3, 0.7, -0.14],
         [24, 0.6, 1.3, 0.7, -0.43],
         [22, 0.3, 1.3, 0.7, -0.57],
@@ -125,7 +125,7 @@ describe("test_pmv_ppd_ashrae", () => {
           clo,
           standard: Standard.ashrae_55_2023,
         });
-        expect(result.pmv).toBeNaN();
+        expect(result.pmv).toBe(null);
       }
 
       // Upstream compares the whole PMVPPDAshrae; field by field here, as the
@@ -176,12 +176,12 @@ describe("test_pmv_ppd_ashrae", () => {
 
       // For these inputs, PMV is outside (-0.5, 0.5), so should be non-compliant
       let result = at(22.5);
-      expect(result.pmv < -0.5 || result.pmv > 0.5).toBe(true);
+      expect(Math.abs(result.pmv ?? NaN) > 0.5).toBe(true);
       expect(result.compliance).toBe(false);
 
       // Also test inputs that produce PMV close to upper bound
       result = at(27.45);
-      expect(result.pmv < -0.5 || result.pmv > 0.5).toBe(true);
+      expect(Math.abs(result.pmv ?? NaN) > 0.5).toBe(true);
       // Upstream's `is False or == np.bool_(False)` (tests/test_pmv_ppd_ashrae.py:176).
       expect(result.compliance).toBe(false);
     });
@@ -249,7 +249,7 @@ describe("test_pmv_ppd_ashrae", () => {
       expect(result.warnings).toEqual([
         expect.objectContaining({ key: "tdb", value: 41 }),
       ]);
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
     });
 
     // Upstream warns nothing with the gate off; the library returns the gate-off rows (decision 78).
@@ -500,9 +500,9 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     });
 
     // models/pmv_ppd_ashrae.py:237: upstream masks it with np.nan.
-    test("is null where the gate makes pmv NaN", () => {
+    test("is null where the gate makes pmv null", () => {
       const result = pmv_ppd_ashrae({ ...neutral, tdb: 45 });
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.compliance).toBe(null);
     });
 
@@ -529,7 +529,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         airspeed_control: false,
         limit_inputs: false,
       });
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.compliance).toBe(null);
     });
   });
@@ -614,7 +614,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     });
 
     test.each(ashrae_rows)(
-      "a NaN under the gate never comes without a row (fixture #%#)",
+      "a null under the gate never comes without a row (fixture #%#)",
       ({ inputs }) => {
         const run = (limit_inputs: boolean) =>
           pmv_ppd_ashrae({
@@ -624,7 +624,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
           } as unknown as Inputs);
         const limited = run(true);
         const caused_by_limits =
-          Number.isNaN(limited.pmv) && Number.isFinite(run(false).pmv);
+          limited.pmv === null && Number.isFinite(run(false).pmv);
         const rows = limited.warnings.filter(({ kind }) => kind === "range");
         expect(rows.length > 0).toBe(caused_by_limits);
       },
@@ -647,7 +647,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
 
     test("to <= 23 °C: vr above 0.2 m/s gives a vr row against 0.2", () => {
       const result = ashrae(20, 0.3);
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.warnings).toEqual([range("vr", 0.3, { max: 0.2 })]);
     });
 
@@ -656,13 +656,13 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       const to = 24;
       const v_limit = 50.49 - 4.4047 * to + 0.096425 * to * to;
       const result = ashrae(24, 0.5);
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.warnings).toEqual([range("vr", 0.5, { max: v_limit })]);
     });
 
     test("vr above 0.8 m/s gives a row against 0.8", () => {
       const result = ashrae(26, 1.0);
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.warnings).toEqual([range("vr", 1.0, { max: 0.8 })]);
     });
 
@@ -678,7 +678,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
   });
 
   describe("tsv classification (right-inclusive)", () => {
-    test("tsv is null when pmv is NaN (out of range)", () => {
+    test("tsv is null when pmv is null (out of range)", () => {
       const result = pmv_ppd_ashrae({
         tdb: 50,
         tr: 50,
@@ -687,7 +687,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         met: 2.0,
         clo: 0.3,
       });
-      expect(result.pmv).toBeNaN();
+      expect(result.pmv).toBe(null);
       expect(result.tsv).toBe(null);
     });
 

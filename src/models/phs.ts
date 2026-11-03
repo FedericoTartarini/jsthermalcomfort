@@ -1,5 +1,5 @@
 import { choiceFieldMessage, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   Bound,
   InputsOf,
@@ -118,17 +118,17 @@ export const PHS_INFO = deepFreeze({
     evap_load_wm2_min: { kind: "numeric", unit: "W·min/m²", default: 0 },
   },
   outputs: {
-    t_re: { kind: "numeric", unit: "°C" },
-    t_sk: { kind: "numeric", unit: "°C" },
-    t_cr: { kind: "numeric", unit: "°C" },
-    t_cr_eq: { kind: "numeric", unit: "°C" },
-    t_sk_t_cr_wg: { kind: "numeric", unit: null },
-    d_lim_loss_50: { kind: "numeric", unit: "min" },
-    d_lim_loss_95: { kind: "numeric", unit: "min" },
-    d_lim_t_re: { kind: "numeric", unit: "min" },
-    sweat_loss_g: { kind: "numeric", unit: "g" },
-    sweat_rate_watt: { kind: "numeric", unit: "W/m²" },
-    evap_load_wm2_min: { kind: "numeric", unit: "W·min/m²" },
+    t_re: { kind: "numeric", masked: true, unit: "°C" },
+    t_sk: { kind: "numeric", masked: true, unit: "°C" },
+    t_cr: { kind: "numeric", masked: true, unit: "°C" },
+    t_cr_eq: { kind: "numeric", masked: true, unit: "°C" },
+    t_sk_t_cr_wg: { kind: "numeric", masked: true, unit: null },
+    d_lim_loss_50: { kind: "numeric", masked: true, unit: "min" },
+    d_lim_loss_95: { kind: "numeric", masked: true, unit: "min" },
+    d_lim_t_re: { kind: "numeric", masked: true, unit: "min" },
+    sweat_loss_g: { kind: "numeric", masked: true, unit: "g" },
+    sweat_rate_watt: { kind: "numeric", masked: true, unit: "W/m²" },
+    evap_load_wm2_min: { kind: "numeric", masked: true, unit: "W·min/m²" },
   },
   derived: {
     "tr - tdb": { unit: "°C", applicability: { min: 0.0, max: 60.0 } },
@@ -449,20 +449,23 @@ export function phs(inputs: PHSInputs): PHS {
   );
   // The ranges are checked before the kernel, which a masked call skips (deviation phs-5).
   if (limit_inputs && !all_valid) {
-    return Object.freeze({
-      t_re: NaN,
-      t_sk: NaN,
-      t_cr: NaN,
-      t_cr_eq: NaN,
-      t_sk_t_cr_wg: NaN,
-      d_lim_loss_50: NaN,
-      d_lim_loss_95: NaN,
-      d_lim_t_re: NaN,
-      sweat_loss_g: NaN,
-      sweat_rate_watt: NaN,
-      evap_load_wm2_min: NaN,
-      warnings: Object.freeze(warnings),
-    });
+    return buildOutputs(
+      PHS_INFO,
+      {
+        t_re: NaN,
+        t_sk: NaN,
+        t_cr: NaN,
+        t_cr_eq: NaN,
+        t_sk_t_cr_wg: NaN,
+        d_lim_loss_50: NaN,
+        d_lim_loss_95: NaN,
+        d_lim_t_re: NaN,
+        sweat_loss_g: NaN,
+        sweat_rate_watt: NaN,
+        evap_load_wm2_min: NaN,
+      },
+      warnings,
+    );
   }
 
   let sw_tot_g, d_lim_loss_50, d_lim_loss_95, d_lim_t_re;
@@ -531,7 +534,7 @@ export function phs(inputs: PHSInputs): PHS {
     }
   }
 
-  return Object.freeze({ ...output, warnings: Object.freeze(warnings) });
+  return buildOutputs(PHS_INFO, output, warnings);
 }
 
 /**

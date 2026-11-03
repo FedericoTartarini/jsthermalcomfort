@@ -1,12 +1,16 @@
 import { _pmv_ppd_optimized, THERMAL_SENSATION } from "./_pmv_ppd_optimized.ts";
-import { cooling_effect } from "./cooling_effect.ts";
+import { cooling_effect, COOLING_EFFECT_INFO } from "./cooling_effect.ts";
 import {
   _check_ashrae55_compliance,
   ASHRAE_55_LIMITS,
   ASHRAE_55_STILL_AIR_THRESHOLD,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -53,8 +57,8 @@ export const PMV_PPD_ASHRAE_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    pmv: { kind: "numeric", unit: null },
-    ppd: { kind: "numeric", unit: "%" },
+    pmv: { kind: "numeric", masked: true, unit: null },
+    ppd: { kind: "numeric", masked: true, unit: "%" },
     tsv: {
       kind: "label",
       masked: true,
@@ -213,7 +217,10 @@ export function pmv_ppd_ashrae(inputs: PMVPPDAshraeInputs): PMVPPDAshrae {
 
   const warnings: ModelWarning[] = [];
   // if v_r is higher than 0.1 follow methodology ASHRAE Appendix H, H3
-  const cooling = cooling_effect({ tdb, tr, vr, rh, met, clo, wme });
+  const cooling = toComputedOutputs(
+    COOLING_EFFECT_INFO,
+    cooling_effect({ tdb, tr, vr, rh, met, clo, wme }),
+  );
   warnings.push(...cooling.warnings);
   const ce = vr > ASHRAE_55_STILL_AIR_THRESHOLD ? cooling.ce : 0.0;
 

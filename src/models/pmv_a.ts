@@ -1,7 +1,11 @@
 import { pmv_ppd_iso, PMV_PPD_ISO_INFO } from "./pmv_ppd_iso.ts";
 import type { PMVPPDInputs } from "./pmv_ppd_iso.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -48,7 +52,7 @@ export const PMV_A_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    a_pmv: { kind: "numeric", unit: null },
+    a_pmv: { kind: "numeric", masked: true, unit: null },
   },
   derived: {
     pa: PMV_PPD_ISO_INFO.derived.pa,
@@ -141,22 +145,25 @@ export function pmv_a(inputs: APMVInputs): APMV {
     parseInputs(PMV_A_INFO, inputs);
 
   const warnings: ModelWarning[] = [];
-  const pmv_result = pmv_ppd_iso({
-    tdb,
-    tr,
-    vr,
-    rh,
-    met,
-    clo,
-    wme,
-    standard: Standard.iso_7730_2025,
-    units: units as PMVPPDInputs["units"],
-    limit_inputs,
-  });
+  const pmv_result = toComputedOutputs(
+    PMV_PPD_ISO_INFO,
+    pmv_ppd_iso({
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      wme,
+      standard: Standard.iso_7730_2025,
+      units: units as PMVPPDInputs["units"],
+      limit_inputs,
+    }),
+  );
   warnings.push(...pmv_result.warnings);
   const _pmv = pmv_result.pmv;
 
   const pmv_value = round(_pmv / (1 + a_coefficient * _pmv), 2);
 
-  return Object.freeze({ a_pmv: pmv_value, warnings: Object.freeze(warnings) });
+  return buildOutputs(PMV_A_INFO, { a_pmv: pmv_value }, warnings);
 }

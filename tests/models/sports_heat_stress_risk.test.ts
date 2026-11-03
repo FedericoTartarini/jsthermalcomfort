@@ -896,13 +896,16 @@ describe("test_sports_heat_stress_risk", () => {
       const result = _phs_scalar(tdb, tr, rh, vr, sport);
 
       expect(
-        approx(result[_PHS_IDX_SWEAT_LOSS_G], expected.sweat_loss_g, {
+        approx(result[_PHS_IDX_SWEAT_LOSS_G], expected.sweat_loss_g ?? NaN, {
           rel: 1e-9,
           abs: 0,
         }),
       ).toBe(true);
       expect(
-        approx(result[_PHS_IDX_T_CR], expected.t_cr, { rel: 1e-9, abs: 0 }),
+        approx(result[_PHS_IDX_T_CR], expected.t_cr ?? NaN, {
+          rel: 1e-9,
+          abs: 0,
+        }),
       ).toBe(true);
     },
   );
@@ -911,12 +914,12 @@ describe("test_sports_heat_stress_risk", () => {
     "test_risk_thresholds_match_public_phs_solver[%s-%s-%s-%s]",
     (tdb, tr, rh, vr, sport) => {
       function water_loss(x: number): number {
-        const sl = _public_phs(x, tr, vr, rh, sport).sweat_loss_g;
+        const sl = _public_phs(x, tr, vr, rh, sport).sweat_loss_g ?? NaN;
         return (sl / sport.duration) * 45.0 - 850;
       }
 
       function core(x: number): number {
-        return _public_phs(x, tr, vr, rh, sport).t_cr - 40;
+        return (_public_phs(x, tr, vr, rh, sport).t_cr ?? NaN) - 40;
       }
 
       function solve(func: (x: number) => number, fallback: number): number {

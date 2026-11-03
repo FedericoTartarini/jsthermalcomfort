@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
@@ -13,7 +13,7 @@ export const WIND_CHILL_TEMPERATURE_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    wct: { kind: "numeric", unit: "°C" },
+    wct: { kind: "numeric", masked: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 
@@ -71,5 +71,5 @@ export function wind_chill_temperature(inputs: WCTInputs): WCT {
     _wct = round(_wct, 1);
   }
 
-  return Object.freeze({ wct: _wct, warnings: Object.freeze([]) });
+  return buildOutputs(WIND_CHILL_TEMPERATURE_INFO, { wct: _wct }, []);
 }

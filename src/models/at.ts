@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.ts";
@@ -16,7 +16,7 @@ export const AT_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    at: { kind: "numeric", unit: "°C" },
+    at: { kind: "numeric", masked: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 
@@ -84,5 +84,5 @@ export function at(inputs: ATInputs): AT {
     t_at = round(t_at, 1);
   }
 
-  return Object.freeze({ at: t_at, warnings: Object.freeze([]) });
+  return buildOutputs(AT_INFO, { at: t_at }, []);
 }

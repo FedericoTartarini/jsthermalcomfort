@@ -1,6 +1,6 @@
 import { transpose_sharp_altitude } from "../environment/transpose_sharp_altitude.ts";
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -90,8 +90,8 @@ export const SOLAR_GAIN_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    erf: { kind: "numeric", unit: "W/m²" },
-    delta_mrt: { kind: "numeric", unit: "°C" },
+    erf: { kind: "numeric", masked: true, unit: "W/m²" },
+    delta_mrt: { kind: "numeric", masked: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 
@@ -263,11 +263,7 @@ export function solar_gain(inputs: SolarGainInputs): SolarGain {
     d_mrt = round(d_mrt, 1);
   }
 
-  return Object.freeze({
-    erf,
-    delta_mrt: d_mrt,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(SOLAR_GAIN_INFO, { erf, delta_mrt: d_mrt }, warnings);
 }
 
 function _find_span(arr: readonly number[], x: number): number {

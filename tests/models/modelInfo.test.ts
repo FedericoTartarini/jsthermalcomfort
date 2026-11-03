@@ -1,5 +1,9 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { buildOutputs, deepFreeze } from "../../src/_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../../src/_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelWarning,
@@ -125,6 +129,48 @@ describe("buildOutputs", () => {
   });
 });
 
+describe("toComputedOutputs", () => {
+  const INFO = {
+    outputs: {
+      n: { kind: "numeric", unit: null },
+      nm: { kind: "numeric", masked: true, unit: null },
+      f: { kind: "flag", masked: true, unit: null },
+      l: { kind: "label", masked: true, unit: null },
+      ln: { kind: "label_or_numeric", masked: true, unit: "h" },
+      s: { kind: "numeric", masked: true, series: true, unit: "°C" },
+      c: { kind: "label", none: true, unit: null },
+    },
+  } as const satisfies { outputs: OutputsInfo };
+  const ROW: ModelWarning = { kind: "notice", message: "fell back" };
+
+  // Decision 321.
+  test("a round trip gives back every NaN and every flag's 1.0 and 0.0", () => {
+    const masked = {
+      n: NaN,
+      nm: NaN,
+      f: NaN,
+      l: NaN,
+      ln: NaN,
+      s: [NaN, 2.5],
+      c: null,
+    };
+    const valued = {
+      n: 1.5,
+      nm: 2.5,
+      f: 0.0,
+      l: "cold",
+      ln: "more than 8",
+      s: [3],
+      c: null,
+    };
+    for (const values of [masked, valued, { ...valued, f: 1.0, ln: 4.5 }]) {
+      expect(
+        toComputedOutputs(INFO, buildOutputs(INFO, values, [ROW])),
+      ).toEqual({ ...values, warnings: [ROW] });
+    }
+  });
+});
+
 // The type `as const` gives an inputs table.
 type Inputs = Readonly<{
   n: { readonly kind: "numeric"; readonly unit: null };
@@ -195,8 +241,9 @@ describe("OutputsOf", () => {
     }>();
   });
 
-  // A second type argument types every series output as that type, a
-  // one-step call's number where upstream returns one (decisions 276, 277).
+  // A second type argument types every numeric series output as that type, a
+  // one-step call's number where upstream returns one (decisions 276, 277),
+  // with null for each value of a masked one.
   test("types a series output as the series type given", () => {
     interface Info {
       outputs: {
@@ -208,13 +255,13 @@ describe("OutputsOf", () => {
     expectTypeOf<OutputsOf<Info, number>>().toEqualTypeOf<{
       readonly s: number;
       readonly n: number;
-      readonly m: readonly (number | null)[];
+      readonly m: number | null;
       readonly warnings: readonly ModelWarning[];
     }>();
     expectTypeOf<OutputsOf<Info, number | readonly number[]>>().toEqualTypeOf<{
       readonly s: number | readonly number[];
       readonly n: number;
-      readonly m: readonly (number | null)[];
+      readonly m: number | null | readonly (number | null)[];
       readonly warnings: readonly ModelWarning[];
     }>();
   });

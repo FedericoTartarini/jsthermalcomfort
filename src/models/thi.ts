@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
@@ -13,7 +13,7 @@ export const THI_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    thi: { kind: "numeric", unit: null },
+    thi: { kind: "numeric", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -57,5 +57,5 @@ export function thi(inputs: THIInputs): THI {
     _thi = round(_thi, 1);
   }
 
-  return Object.freeze({ thi: _thi, warnings: Object.freeze([]) });
+  return buildOutputs(THI_INFO, { thi: _thi }, []);
 }

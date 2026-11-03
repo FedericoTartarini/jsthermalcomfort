@@ -2,7 +2,7 @@ import {
   checkWorkCapacityStandardsInputs,
   parseInputs,
 } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { ModelInfo } from "../_internal/modelInfo.ts";
 import type { WorkCapacity } from "./work_capacity_dunne.ts";
 import type { WorkCapacityStandardsInputs } from "./work_capacity_iso.ts";
@@ -16,7 +16,7 @@ export const WORK_CAPACITY_NIOSH_INFO = deepFreeze({
     met: { kind: "numeric", unit: "W" },
   },
   outputs: {
-    capacity: { kind: "numeric", unit: "%" },
+    capacity: { kind: "numeric", masked: true, unit: "%" },
   },
 } as const satisfies ModelInfo);
 
@@ -63,5 +63,5 @@ export function work_capacity_niosh(
   let capacity = ((wbgt_lim_rest - wbgt) / (wbgt_lim_rest - wbgt_lim)) * 100;
   capacity = capacity < 0 ? 0 : capacity > 100 ? 100 : capacity;
 
-  return Object.freeze({ capacity, warnings: Object.freeze([]) });
+  return buildOutputs(WORK_CAPACITY_NIOSH_INFO, { capacity }, []);
 }

@@ -1,5 +1,5 @@
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { Standard, Units } from "../utilities/options.ts";
@@ -79,8 +79,5 @@ export function clo_tout(inputs: CloTOutInputs): CloTOut {
   clo = tout < 5 ? 0.818 - 0.0364 * tout : clo;
   clo = tout < -5 ? 1 : clo;
 
-  return Object.freeze({
-    clo_tout: round(clo, 2),
-    warnings: Object.freeze([]),
-  });
+  return buildOutputs(CLO_TOUT_INFO, { clo_tout: round(clo, 2) }, []);
 }

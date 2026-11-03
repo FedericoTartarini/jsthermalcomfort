@@ -42,7 +42,7 @@ describe("test_vertical_tmp_grad_ppd", () => {
         clo: 0.5,
         vertical_tmp_grad: 7,
       }).ppd_vg,
-    ).toBeNaN();
+    ).toBe(null);
   });
 
   // Upstream warns nothing with the gate off; the library returns the gate-off rows (decision 78).
@@ -60,7 +60,7 @@ describe("test_vertical_tmp_grad_ppd", () => {
     expect(result.warnings).toEqual([
       expect.objectContaining({ key: "tdb", value: 50 }),
     ]);
-    expect(result.ppd_vg).not.toBeNaN();
+    expect(result.ppd_vg).not.toBe(null);
   });
 
   test("test_vertical_tmp_grad_ppd_limit_inputs_true_still_warns_and_nans", () => {
@@ -76,7 +76,7 @@ describe("test_vertical_tmp_grad_ppd", () => {
     expect(result.warnings).toEqual([
       expect.objectContaining({ key: "tdb", value: 50 }),
     ]);
-    expect(result.ppd_vg).toBeNaN();
+    expect(result.ppd_vg).toBe(null);
   });
 
   test("test_vertical_tmp_grad_ppd_is_never_negative", () => {
@@ -156,6 +156,21 @@ const parity_cases = () =>
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image, and acceptability on 4.8.0.
 describe("vertical_tmp_grad_ppd (JS-only)", () => {
+  // Decision 321; upstream's ppd_vg and acceptability are NaN here, measured on 4.8.0 in the parity image.
+  test("a null pmv from pmv_ppd_ashrae gives upstream's NaN ppd_vg, as null", () => {
+    const result = vertical_tmp_grad_ppd({
+      tdb: -240,
+      tr: -240,
+      vr: 0.1,
+      rh: 0,
+      met: 1.2,
+      clo: 0.5,
+      vertical_tmp_grad: 1,
+      limit_inputs: false,
+    });
+    expect([result.ppd_vg, result.acceptability]).toEqual([null, null]);
+  });
+
   // models/vertical_tmp_grad_ppd.py:91-95.
   test("the docstring's example gives its outputs", () => {
     expect(call(valid)).toEqual({
@@ -191,7 +206,7 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
           bound: VERTICAL_TMP_GRAD_PPD_INFO.inputs.vr.applicability,
         }),
       ]);
-      expect(result.ppd_vg).toBeNaN();
+      expect(result.ppd_vg).toBe(null);
       expect(result.acceptability).toBe(null);
     },
   );
@@ -235,7 +250,7 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
         }),
       ),
     );
-    expect(result.ppd_vg).toBeNaN();
+    expect(result.ppd_vg).toBe(null);
     expect(result.acceptability).toBe(null);
   });
 

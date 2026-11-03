@@ -618,6 +618,8 @@ const utci_params: UTCIInputs = {
 };
 const utci_result: UTCI = utci(utci_params);
 const utci_category: string | null = utci_result.stress_category;
+// @ts-expect-error a masked number may be null, no value.
+const utci_number: number = utci_result.utci;
 // @ts-expect-error `return_stress_category` is not a param; stress_category is always returned.
 utci({ tdb: 25, tr: 25, v: 1, rh: 50, return_stress_category: true });
 // @ts-expect-error rh is a required quantity.
@@ -696,7 +698,7 @@ const solar_gain_params: SolarGainInputs = {
   round_output: false,
 };
 const solar_gain_result: SolarGain = solar_gain(solar_gain_params);
-const delta_mrt: number = solar_gain_result.delta_mrt;
+const delta_mrt: number | null = solar_gain_result.delta_mrt;
 const solar_gain_warnings: readonly ModelWarning[] = solar_gain_result.warnings;
 const solar_gain_posture_default: "sitting" =
   SOLAR_GAIN_INFO.inputs.posture.default;
@@ -769,7 +771,7 @@ const two_nodes_inputs: GaggeTwoNodesInputs = {
   position: null,
 };
 const two_nodes: SET | GaggeTwoNodes = two_nodes_gagge(two_nodes_inputs);
-const two_nodes_set: number = two_nodes.set;
+const two_nodes_set: number | null = two_nodes.set;
 // @ts-expect-error a boolean calculate_ce returns the union, not GaggeTwoNodes.
 const two_nodes_union: GaggeTwoNodes = two_nodes_gagge(two_nodes_inputs);
 const two_nodes_w: number = two_nodes_gagge({
@@ -806,7 +808,7 @@ const phs_inputs: PHSInputs = {
   standard: "7933-2004",
 };
 const phs_result: PHS = phs(phs_inputs);
-const phs_tre: number = phs_result.t_re;
+const phs_tre: number | null = phs_result.t_re;
 const phs_met2004: Bound = PHS_LIMITS_ISO_7933["7933-2004"].met;
 // @ts-expect-error posture is required.
 phs({ tdb: 40, tr: 40, v: 0.3, rh: 33.85, met: 2.5, clo: 0.5 });
@@ -828,7 +830,7 @@ const set_inputs: SETInputs = {
   calculate_ce: true,
 };
 const set_result: SET = set_tmp(set_inputs);
-const set_value: number = set_result.set;
+const set_value: number | null = set_result.set;
 // @ts-expect-error the result is readonly.
 set_result.set = 1;
 // @ts-expect-error position is one of choice_field's three values.
@@ -848,7 +850,7 @@ const use_fans_inputs: UseFansHeatwavesInputs = {
   position: "sitting",
 };
 const use_fans: UseFansHeatwaves = use_fans_heatwaves(use_fans_inputs);
-const use_fans_skin: number = use_fans.e_skin;
+const use_fans_skin: number | null = use_fans.e_skin;
 const use_fans_strain: boolean | null = use_fans.heat_strain;
 // @ts-expect-error a masked flag may be null, no value.
 const use_fans_strain_bool: boolean = use_fans.heat_strain;
@@ -868,7 +870,7 @@ const ankle_inputs: AnkleDraftInputs = {
   units: "SI",
 };
 const ankle: AnkleDraft = ankle_draft(ankle_inputs);
-const ankle_ppd: number = ankle.ppd_ad;
+const ankle_ppd: number | null = ankle.ppd_ad;
 const ankle_acceptability: boolean | null = ankle.acceptability;
 // @ts-expect-error a masked flag may be null, no value.
 const ankle_acceptability_bool: boolean = ankle.acceptability;
@@ -887,7 +889,7 @@ const vertical_inputs: VerticalTGradPPDInputs = {
   vertical_tmp_grad: 7,
 };
 const vertical: VerticalTGradPPD = vertical_tmp_grad_ppd(vertical_inputs);
-const vertical_ppd: number = vertical.ppd_vg;
+const vertical_ppd: number | null = vertical.ppd_vg;
 const vertical_acceptability: boolean | null = vertical.acceptability;
 // @ts-expect-error a masked flag may be null, no value.
 const vertical_acceptability_bool: boolean = vertical.acceptability;
@@ -899,7 +901,7 @@ vertical_tmp_grad_ppd({ ...vertical_inputs, units: "SI" });
 // result, frozen although upstream's dataclass is not (deviation adaptive_en-5).
 const en_inputs: ENInputs = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
 const en: AdaptiveEN = adaptive_en(en_inputs);
-const en_cmf: number = en.tmp_cmf;
+const en_cmf: number | null = en.tmp_cmf;
 const en_acceptability: boolean | null = en.acceptability_cat_i;
 // @ts-expect-error a masked flag may be null, no value.
 const en_acceptability_bool: boolean = en.acceptability_cat_i;
@@ -915,7 +917,7 @@ adaptive_en({ ...en_inputs, standard: "16798-1-2019" });
 // result whose discomfort is a label.
 const humidex_inputs: HumidexInputs = { tdb: 25, rh: 50, model: "masterson" };
 const humidex_result: Humidex = humidex(humidex_inputs);
-const humidex_value: number = humidex_result.humidex;
+const humidex_value: number | null = humidex_result.humidex;
 const humidex_discomfort: string = humidex_result.discomfort;
 // @ts-expect-error the result is readonly.
 humidex_result.humidex = 1;
@@ -928,7 +930,7 @@ humidex({ tdb: 25, rh: 50, standard: "rana" });
 // named after upstream's WCIInputs and WCI, and returns a readonly result.
 const wci_inputs: WCIInputs = { tdb: -5, v: 5.5, round_output: false };
 const wci_result: WCI = wci(wci_inputs);
-const wci_value: number = wci_result.wci;
+const wci_value: number | null = wci_result.wci;
 // @ts-expect-error the result is readonly.
 wci_result.wci = 1;
 // @ts-expect-error v is required.
@@ -939,7 +941,7 @@ wci({ tdb: -5 });
 // readonly result.
 const wct_inputs: WCTInputs = { tdb: -5, v: 5.5, round_output: false };
 const wct_result: WCT = wind_chill_temperature(wct_inputs);
-const wct_value: number = wct_result.wct;
+const wct_value: number | null = wct_result.wct;
 // @ts-expect-error the result is readonly.
 wct_result.wct = 1;
 // @ts-expect-error v is required.
@@ -958,7 +960,7 @@ const pmv_a_inputs: APMVInputs = {
   units: "SI",
 };
 const pmv_a_result: APMV = pmv_a(pmv_a_inputs);
-const pmv_a_value: number = pmv_a_result.a_pmv;
+const pmv_a_value: number | null = pmv_a_result.a_pmv;
 // @ts-expect-error the result is readonly.
 pmv_a_result.a_pmv = 1;
 // @ts-expect-error a_coefficient is required.
@@ -977,7 +979,7 @@ const pmv_e_inputs: EPMVInputs = {
   units: "SI",
 };
 const pmv_e_result: EPMV = pmv_e(pmv_e_inputs);
-const pmv_e_value: number = pmv_e_result.e_pmv;
+const pmv_e_value: number | null = pmv_e_result.e_pmv;
 // @ts-expect-error the result is readonly.
 pmv_e_result.e_pmv = 1;
 // @ts-expect-error e_coefficient is required.
@@ -996,7 +998,7 @@ const pmv_athb_inputs: ATHBInputs = {
   clo: false,
 };
 const pmv_athb_result: ATHB = pmv_athb(pmv_athb_inputs);
-const pmv_athb_value: number = pmv_athb_result.athb_pmv;
+const pmv_athb_value: number | null = pmv_athb_result.athb_pmv;
 pmv_athb({ ...pmv_athb_inputs, clo: 0.5 });
 // @ts-expect-error clo takes false or a number, not true.
 pmv_athb({ ...pmv_athb_inputs, clo: true });
@@ -1037,7 +1039,7 @@ sports_heat_stress_risk({ tdb: 35, tr: 35, rh: 40, vr: 2.0 });
 // HISchoenInputs (decision 251), and returns upstream's HI, readonly.
 const schoen_inputs: HISchoenInputs = { tdb: 29, rh: 50, round_output: false };
 const schoen_result: HI = heat_index_schoen(schoen_inputs);
-const schoen_hi: number = schoen_result.hi;
+const schoen_hi: number | null = schoen_result.hi;
 // @ts-expect-error the result is readonly.
 schoen_result.hi = 1;
 // @ts-expect-error heat_index_schoen takes no limit_inputs, as upstream's.
@@ -1050,7 +1052,7 @@ heat_index_schoen({ tdb: 29 });
 // (decision 252), and returns a readonly result.
 const at_inputs: ATInputs = { tdb: 25, rh: 30, v: 0.1, q: 100 };
 const at_result: AT = at(at_inputs);
-const at_value: number = at_result.at;
+const at_value: number | null = at_result.at;
 at({ tdb: 25, rh: 30, v: 0.1, q: null });
 at({ tdb: 25, rh: 30, v: 0.1 });
 // @ts-expect-error the result is readonly.
@@ -1071,7 +1073,7 @@ const work_capacity_dunne_inputs: WorkCapacityDunneInputs = {
 const work_capacity_dunne_result: WorkCapacity = work_capacity_dunne(
   work_capacity_dunne_inputs,
 );
-const work_capacity: number = work_capacity_dunne_result.capacity;
+const work_capacity: number | null = work_capacity_dunne_result.capacity;
 work_capacity_dunne({ wbgt: 30, work_intensity: "light" });
 work_capacity_dunne({ wbgt: 30 });
 // @ts-expect-error the result is readonly.
@@ -1092,7 +1094,7 @@ const work_capacity_hothaps_inputs: WorkCapacityHothapsInputs = {
 const work_capacity_hothaps_result: WorkCapacity = work_capacity_hothaps(
   work_capacity_hothaps_inputs,
 );
-const work_capacity_hothaps_value: number =
+const work_capacity_hothaps_value: number | null =
   work_capacity_hothaps_result.capacity;
 work_capacity_hothaps({ wbgt: 30, work_intensity: "moderate" });
 work_capacity_hothaps({ wbgt: 30 });
@@ -1113,7 +1115,8 @@ const work_capacity_standards_inputs: WorkCapacityStandardsInputs = {
 const work_capacity_iso_result: WorkCapacity = work_capacity_iso(
   work_capacity_standards_inputs,
 );
-const work_capacity_iso_value: number = work_capacity_iso_result.capacity;
+const work_capacity_iso_value: number | null =
+  work_capacity_iso_result.capacity;
 // @ts-expect-error the result is readonly.
 work_capacity_iso_result.capacity = 1;
 // @ts-expect-error met is a required quantity.
@@ -1127,7 +1130,8 @@ work_capacity_iso({ met: 300 });
 const work_capacity_niosh_result: WorkCapacity = work_capacity_niosh(
   work_capacity_standards_inputs,
 );
-const work_capacity_niosh_value: number = work_capacity_niosh_result.capacity;
+const work_capacity_niosh_value: number | null =
+  work_capacity_niosh_result.capacity;
 // @ts-expect-error the result is readonly.
 work_capacity_niosh_result.capacity = 1;
 // @ts-expect-error met is a required quantity.
@@ -1170,7 +1174,7 @@ esi({ tdb: 30.2, rh: 42.2 });
 // named after upstream's NETInputs and NET, and returns a readonly result.
 const net_inputs: NETInputs = { tdb: 37, rh: 100, v: 0.1 };
 const net_result: NET = net(net_inputs);
-const net_value: number = net_result.net;
+const net_value: number | null = net_result.net;
 // @ts-expect-error the result is readonly.
 net_result.net = 1;
 net({ ...net_inputs, round_output: false });
@@ -1181,7 +1185,7 @@ net({ tdb: 37, rh: 100 });
 // named after upstream's THIInputs and THI, and returns a readonly result.
 const thi_inputs: THIInputs = { tdb: 30, rh: 70 };
 const thi_result: THI = thi(thi_inputs);
-const thi_value: number = thi_result.thi;
+const thi_value: number | null = thi_result.thi;
 // @ts-expect-error the result is readonly.
 thi_result.thi = 1;
 thi({ ...thi_inputs, round_output: false });
@@ -1214,7 +1218,7 @@ const ireq_inputs: IREQInputs = {
   walk_sp: 1.1,
 };
 const ireq_result: IREQ = ireq(ireq_inputs);
-const ireq_value: number = ireq_result.ireq_min;
+const ireq_value: number | null = ireq_result.ireq_min;
 const ireq_dle: string | number | null = ireq_result.dle_min;
 // @ts-expect-error dle may be "more than 8".
 const ireq_dle_number: number = ireq_result.dle_neutral;
@@ -1239,7 +1243,7 @@ const ridge_inputs: RidgeRegressionInputs = {
 };
 const ridge_result: PredictedBodyTemperatures =
   ridge_regression_predict_t_re_t_sk(ridge_inputs);
-const ridge_series: readonly number[] = ridge_result.t_re;
+const ridge_series: readonly (number | null)[] = ridge_result.t_re;
 // @ts-expect-error a series is readonly.
 ridge_result.t_sk[0] = 1;
 // @ts-expect-error the result is readonly.
@@ -1316,7 +1320,7 @@ const sleep_scalars: GaggeTwoNodesSleepInputs<number> = {
 };
 const sleep_scalar: GaggeTwoNodesSleep<number> =
   two_nodes_gagge_sleep(sleep_scalars);
-const sleep_set: number = sleep_scalar.set;
+const sleep_set: number | null = sleep_scalar.set;
 const sleep_series_inputs: GaggeTwoNodesSleepInputs = {
   ...sleep_scalars,
   tdb: [18, 19],
@@ -1328,7 +1332,8 @@ const sleep_series_inputs: GaggeTwoNodesSleepInputs = {
 };
 const sleep_series: GaggeTwoNodesSleep =
   two_nodes_gagge_sleep(sleep_series_inputs);
-const sleep_t_core: number | readonly number[] = sleep_series.t_core;
+const sleep_t_core: number | null | readonly (number | null)[] =
+  sleep_series.t_core;
 // @ts-expect-error an array input may give a series.
 const sleep_not_number: number = sleep_series.set;
 // @ts-expect-error the result is readonly.

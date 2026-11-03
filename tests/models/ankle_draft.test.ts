@@ -65,7 +65,7 @@ describe("test_ankle_draft", () => {
       clo: 0.5,
       v_ankle: 0.1,
     });
-    expect(r.ppd_ad).toBeNaN();
+    expect(r.ppd_ad).toBe(null);
 
     for (const tdb of [50, 45])
       expect(
@@ -78,7 +78,7 @@ describe("test_ankle_draft", () => {
           clo: 0.5,
           v_ankle: 0.1,
         }).ppd_ad,
-      ).toBeNaN();
+      ).toBe(null);
   });
 
   test("test_ankle_draft_list_inputs", () => {
@@ -128,7 +128,7 @@ describe("test_ankle_draft", () => {
     expect(result.warnings).toEqual([
       expect.objectContaining({ key: "tdb", value: 50 }),
     ]);
-    expect(result.ppd_ad).not.toBeNaN();
+    expect(result.ppd_ad).not.toBe(null);
   });
 
   test("test_ankle_draft_limit_inputs_false_skips_valueerror", () => {
@@ -143,7 +143,7 @@ describe("test_ankle_draft", () => {
       v_ankle: 0.1,
       limit_inputs: false,
     });
-    expect(result.ppd_ad).not.toBeNaN();
+    expect(result.ppd_ad).not.toBe(null);
   });
 
   test("test_ankle_draft_limit_inputs_true_still_warns_and_nans", () => {
@@ -159,7 +159,7 @@ describe("test_ankle_draft", () => {
     expect(result.warnings).toEqual([
       expect.objectContaining({ key: "tdb", value: 50 }),
     ]);
-    expect(result.ppd_ad).toBeNaN();
+    expect(result.ppd_ad).toBe(null);
   });
 
   // Upstream's tdb = [25, np.nan], element-wise; deviation _shared-7.
@@ -208,6 +208,21 @@ const parity_cases = () =>
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image, and acceptability on 4.8.0.
 describe("ankle_draft (JS-only)", () => {
+  // Decision 321; upstream's ppd_ad and acceptability are NaN here, measured on 4.8.0 in the parity image.
+  test("a null pmv from pmv_ppd_ashrae gives upstream's NaN ppd_ad, as null", () => {
+    const result = call({
+      tdb: -240,
+      tr: -240,
+      vr: 0.1,
+      rh: 0,
+      met: 1.2,
+      clo: 0.5,
+      v_ankle: 0.1,
+      limit_inputs: false,
+    });
+    expect([result.ppd_ad, result.acceptability]).toEqual([null, null]);
+  });
+
   // models/ankle_draft.py:90-94.
   test("the docstring's example gives its outputs", () => {
     expect(call(valid)).toEqual({
@@ -304,7 +319,7 @@ describe("ankle_draft (JS-only)", () => {
         }),
       ),
     );
-    expect(result.ppd_ad).toBeNaN();
+    expect(result.ppd_ad).toBe(null);
     expect(result.acceptability).toBe(null);
   });
 

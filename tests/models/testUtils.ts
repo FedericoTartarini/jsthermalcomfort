@@ -68,8 +68,9 @@ export const v2_infos = Object.entries(pkg as Record<string, unknown>)
  * `np.isclose` and `np.allclose` rtol 1e-5 and atol 1e-8,
  * `np.testing.assert_allclose` rtol 1e-7 and atol 0, and `pytest.approx`
  * rel 1e-6 (its absolute 1e-12 taken as 0, since it takes the larger of the
- * two rather than their sum). A NaN or an infinity is close to nothing,
- * where `np.isclose` takes an infinity as close to itself.
+ * two rather than their sum). A NaN, an infinity or a masked output's `null`
+ * is close to nothing, where `np.isclose` takes an infinity as close to
+ * itself.
  *
  * @param actual - the value under test
  * @param expected - the reference value
@@ -77,10 +78,11 @@ export const v2_infos = Object.entries(pkg as Record<string, unknown>)
  * @returns whether the two are within the tolerance
  */
 export function approx(
-  actual: number,
+  actual: number | null,
   expected: number,
   { rel = 0, abs = 1e-6 }: { rel?: number; abs?: number } = {},
 ): boolean {
+  if (actual === null) return false;
   return Math.abs(actual - expected) <= abs + rel * Math.abs(expected);
 }
 
@@ -250,11 +252,8 @@ export function validateResult(
       // below then report against the expected value.
       const actual_value = (model_result as Record<string, unknown>)[key];
       // The data write upstream's NaN as null, which a masked output
-      // returns as null (decision 310) and any other output as NaN.
-      const expected_value =
-        expected_outputs[key] === null && actual_value !== null
-          ? NaN
-          : expected_outputs[key];
+      // returns as null (decision 310), so null compares exactly.
+      const expected_value = expected_outputs[key];
 
       // Use the specified tolerance if available, otherwise upstream's 1e-6
       const tol = tolerances?.[key] ?? 1e-6;

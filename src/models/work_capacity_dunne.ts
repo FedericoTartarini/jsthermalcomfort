@@ -2,9 +2,10 @@ import {
   BASE_INPUTS_WORK_INTENSITY,
   parseInputs,
 } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { WorkIntensity } from "../utilities/options.ts";
+import type { WORK_CAPACITY_HOTHAPS_INFO } from "./work_capacity_hothaps.ts";
 
 export const WORK_CAPACITY_DUNNE_INFO = deepFreeze({
   name: "work_capacity_dunne",
@@ -30,7 +31,8 @@ export type WorkCapacityDunneInputs = InputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
  *
  * @interface
  */
-export type WorkCapacity = OutputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
+// Typed from hothaps' INFO, whose capacity can be NaN where dunne's cannot.
+export type WorkCapacity = OutputsOf<typeof WORK_CAPACITY_HOTHAPS_INFO>;
 
 /**
  * Estimate work capacity due to heat based on Dunne et al [Dunne2013](../../docs/references.md#dunne2013).
@@ -91,5 +93,5 @@ export function work_capacity_dunne(
     100,
   );
 
-  return Object.freeze({ capacity, warnings: Object.freeze([]) });
+  return buildOutputs(WORK_CAPACITY_DUNNE_INFO, { capacity }, []);
 }

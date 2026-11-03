@@ -35,7 +35,7 @@ describe("test_set", () => {
   ])(
     "test_set_npnan: tdb %s, tr %s, v %s, met %s, clo %s",
     (tdb, tr, v, met, clo) => {
-      expect(set_tmp({ tdb, tr, v, rh: 50, met, clo }).set).toBeNaN();
+      expect(set_tmp({ tdb, tr, v, rh: 50, met, clo }).set).toBe(null);
     },
   );
 
@@ -55,7 +55,9 @@ describe("test_set", () => {
           limit_inputs: false,
         }).set,
     );
-    const diff = result.slice(1).map((value, i) => value - (result[i] ?? NaN));
+    const diff = result
+      .slice(1)
+      .map((value, i) => (value ?? NaN) - (result[i] ?? NaN));
     const max_step = Math.max(...diff.map(Math.abs));
     expect(max_step).toBeLessThan(0.01);
     // monotonic, so cooling_effect has a single root
@@ -82,6 +84,12 @@ const out_rows = (["tdb", "tr", "v", "met", "clo"] as const).map(
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("set_tmp (JS-only)", () => {
+  // Decision 321; upstream's set is NaN here, measured on 4.8.0 in the parity image.
+  test("a null set from two_nodes_gagge gives upstream's NaN set, as null", () => {
+    const cold = { tdb: -234, tr: -234, v: 0.1, rh: 0, met: 1.2, clo: 0.5 };
+    expect(set_tmp({ ...cold, limit_inputs: false }).set).toBe(null);
+  });
+
   // models/set_tmp.py:86-87.
   test("the docstring's example gives its output", () => {
     expect(call(valid)).toEqual({ set: 24.3, warnings: [] });
@@ -127,7 +135,7 @@ describe("set_tmp (JS-only)", () => {
   test("each bound broken gives a row, in upstream's order, and masks set with the gate on", () => {
     const result = call({ ...out, rh: 50 });
     expect(result.warnings).toEqual(out_rows);
-    expect(result.set).toBeNaN();
+    expect(result.set).toBe(null);
   });
 
   // Deviation set_tmp-3: upstream warns nothing with the gate off.

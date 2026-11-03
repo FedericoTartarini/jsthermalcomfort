@@ -48,16 +48,6 @@ describe("validateResult (Testing the Test)", () => {
     }).toThrow();
   });
 
-  it("should handle null expected outputs by treating them as NaN", () => {
-    const model_result = { a: NaN };
-    const expected_output = { a: null };
-    const tolerances = { a: 0.1 };
-
-    expect(() => {
-      validateResult(model_result, expected_output, tolerances, {});
-    }).not.toThrow();
-  });
-
   it("should correctly handle array comparisons", () => {
     const model_result = { a: [25.5, 26.6] };
     const expected_output = { a: [25.50001, 26.59999] };

@@ -1,6 +1,6 @@
 import { _pmv_ppd_optimized } from "./_pmv_ppd_optimized.ts";
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
@@ -19,7 +19,7 @@ export const PMV_ATHB_INFO = deepFreeze({
     clo: { kind: "numeric", unit: "clo", default: false },
   },
   outputs: {
-    athb_pmv: { kind: "numeric", unit: null },
+    athb_pmv: { kind: "numeric", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -138,5 +138,5 @@ export function pmv_athb(inputs: ATHBInputs): ATHB {
     3,
   );
 
-  return Object.freeze({ athb_pmv, warnings: Object.freeze([]) });
+  return buildOutputs(PMV_ATHB_INFO, { athb_pmv }, []);
 }

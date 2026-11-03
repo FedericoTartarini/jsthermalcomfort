@@ -298,7 +298,10 @@ describeModelContract(
   { ...valid, age: 50 },
 );
 
-const exact = (actual: readonly number[], expected: readonly number[]) => {
+const exact = (
+  actual: readonly (number | null)[],
+  expected: readonly number[],
+) => {
   expect(actual).toHaveLength(expected.length);
   for (const [i, x] of expected.entries()) expect(actual[i]).toBe(x);
 };
@@ -398,10 +401,10 @@ describe("ridge_regression_predict_t_re_t_sk (JS-only)", () => {
     },
   ].map((row) => ({ kind: "range", ...row }));
 
-  test("out of its limits, the gate on gives NaN series and upstream's rows in order", () => {
+  test("out of its limits, the gate on gives null series and upstream's rows in order", () => {
     const result = call(flagged);
-    expect(result.t_re).toEqual([NaN, NaN]);
-    expect(result.t_sk).toEqual([NaN, NaN]);
+    expect(result.t_re).toEqual([null, null]);
+    expect(result.t_sk).toEqual([null, null]);
     expect(result.warnings).toEqual(rows);
   });
 
@@ -419,7 +422,7 @@ describe("ridge_regression_predict_t_re_t_sk (JS-only)", () => {
     ]) {
       const result = call({ ...valid, ...edge, duration: 2 });
       expect(result.warnings).toEqual([]);
-      expect(result.t_re.every((x) => !Number.isNaN(x))).toBe(true);
+      expect(result.t_re.every((x) => x !== null)).toBe(true);
     }
   });
 

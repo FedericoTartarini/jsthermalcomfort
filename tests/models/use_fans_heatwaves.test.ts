@@ -111,7 +111,7 @@ describe("use_fans_heatwaves (JS-only)", () => {
           }),
         ),
       );
-      expect(Number.isNaN(result.e_skin)).toBe(limit_inputs);
+      expect(result.e_skin === null).toBe(limit_inputs);
       expect(result.heat_strain === null).toBe(limit_inputs);
     },
   );

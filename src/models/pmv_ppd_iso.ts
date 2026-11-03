@@ -74,8 +74,13 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    pmv: { kind: "numeric", unit: null, applicability: { min: -2, max: 2 } },
-    ppd: { kind: "numeric", unit: "%" },
+    pmv: {
+      kind: "numeric",
+      masked: true,
+      unit: null,
+      applicability: { min: -2, max: 2 },
+    },
+    ppd: { kind: "numeric", masked: true, unit: "%" },
     tsv: {
       kind: "label",
       masked: true,

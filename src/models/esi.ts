@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
@@ -83,5 +83,5 @@ export function esi(inputs: ESIInputs): ESI {
     _esi = round(_esi, 1);
   }
 
-  return Object.freeze({ esi: _esi, warnings: Object.freeze([]) });
+  return buildOutputs(ESI_INFO, { esi: _esi }, []);
 }

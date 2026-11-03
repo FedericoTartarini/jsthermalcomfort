@@ -1,11 +1,15 @@
-import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.ts";
+import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import {
   _check_ashrae55_compliance,
   ASHRAE_55_COMPLIANCE_STANDARDS,
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { parseInputs } from "../_internal/define.ts";
-import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -44,7 +48,7 @@ export const VERTICAL_TMP_GRAD_PPD_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    ppd_vg: { kind: "numeric", unit: "%" },
+    ppd_vg: { kind: "numeric", masked: true, unit: "%" },
     acceptability: { kind: "flag", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
@@ -146,16 +150,19 @@ export function vertical_tmp_grad_ppd(
   } = parseInputs(VERTICAL_TMP_GRAD_PPD_INFO, inputs);
 
   const warnings: ModelWarning[] = [];
-  const pmv_result = pmv_ppd_ashrae({
-    tdb,
-    tr,
-    vr,
-    rh,
-    met,
-    clo,
-    standard: Standard.ashrae_55_2023,
-    limit_inputs: false,
-  });
+  const pmv_result = toComputedOutputs(
+    PMV_PPD_ASHRAE_INFO,
+    pmv_ppd_ashrae({
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      standard: Standard.ashrae_55_2023,
+      limit_inputs: false,
+    }),
+  );
   // With limit_inputs=False upstream's call warns only its notices (deviation vertical_tmp_grad_ppd-3).
   warnings.push(...pmv_result.warnings.filter((row) => row.kind === "notice"));
   const tsv = pmv_result.pmv;

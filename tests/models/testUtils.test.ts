@@ -116,11 +116,20 @@ describe("validateResult — numeric comparison", () => {
     }).toThrow();
   });
 
-  test("treats null in expectedOutputs as NaN and matches NaN actual", () => {
+  // The data write upstream's NaN as null, a masked output's null (decision 310).
+  test("reads null in expectedOutputs as null, which a NaN does not match", () => {
     expect.hasAssertions();
     expect(() => {
-      validateResult({ a: NaN }, { a: null }, {}, {});
+      validateResult(
+        { a: null, s: [null, 1] },
+        { a: null, s: [null, 1] },
+        {},
+        {},
+      );
     }).not.toThrow();
+    expect(() => {
+      validateResult({ a: NaN }, { a: null }, {}, {});
+    }).toThrow();
   });
 
   test("throws when expected is NaN but actual is finite", () => {
@@ -379,5 +388,9 @@ describe("approx", () => {
   test("a NaN is close to nothing", () => {
     expect(approx(NaN, NaN)).toBe(false);
     expect(approx(NaN, 1, { abs: Infinity })).toBe(false);
+  });
+
+  test("a null is close to nothing", () => {
+    expect(approx(null, 0, { abs: Infinity })).toBe(false);
   });
 });

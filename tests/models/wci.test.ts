@@ -64,9 +64,9 @@ describe("wci (JS-only)", () => {
   );
 
   // As upstream's: v**0.5 of a negative v is NaN (models/wci.py:68).
-  test("a negative v gives NaN", () => {
-    expect(wci({ tdb: 0, v: -1 }).wci).toBeNaN();
-    expect(wci({ tdb: 0, v: -1, round_output: false }).wci).toBeNaN();
+  test("a negative v gives null", () => {
+    expect(wci({ tdb: 0, v: -1 }).wci).toBe(null);
+    expect(wci({ tdb: 0, v: -1, round_output: false }).wci).toBe(null);
   });
 
   // Deviation wci-2.

@@ -1,7 +1,11 @@
-import { two_nodes_gagge } from "./two_nodes_gagge.ts";
+import { two_nodes_gagge, TWO_NODES_GAGGE_INFO } from "./two_nodes_gagge.ts";
 import type { GaggeTwoNodesInputs } from "./two_nodes_gagge.ts";
 import { BASE_INPUTS_POSITION, parseInputs } from "../_internal/define.ts";
-import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   ComputedOutputsOf,
   InputsOf,
@@ -50,18 +54,18 @@ export const USE_FANS_HEATWAVES_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    e_skin: { kind: "numeric", unit: "W/m²" },
-    e_rsw: { kind: "numeric", unit: "W/m²" },
-    e_max: { kind: "numeric", unit: "W/m²" },
-    q_sensible: { kind: "numeric", unit: "W/m²" },
-    q_skin: { kind: "numeric", unit: "W/m²" },
-    q_res: { kind: "numeric", unit: "W/m²" },
-    t_core: { kind: "numeric", unit: "°C" },
-    t_skin: { kind: "numeric", unit: "°C" },
-    m_bl: { kind: "numeric", unit: "kg/h/m²" },
-    m_rsw: { kind: "numeric", unit: "mL/h/m²" },
-    w: { kind: "numeric", unit: null },
-    w_max: { kind: "numeric", unit: null },
+    e_skin: { kind: "numeric", masked: true, unit: "W/m²" },
+    e_rsw: { kind: "numeric", masked: true, unit: "W/m²" },
+    e_max: { kind: "numeric", masked: true, unit: "W/m²" },
+    q_sensible: { kind: "numeric", masked: true, unit: "W/m²" },
+    q_skin: { kind: "numeric", masked: true, unit: "W/m²" },
+    q_res: { kind: "numeric", masked: true, unit: "W/m²" },
+    t_core: { kind: "numeric", masked: true, unit: "°C" },
+    t_skin: { kind: "numeric", masked: true, unit: "°C" },
+    m_bl: { kind: "numeric", masked: true, unit: "kg/h/m²" },
+    m_rsw: { kind: "numeric", masked: true, unit: "mL/h/m²" },
+    w: { kind: "numeric", masked: true, unit: null },
+    w_max: { kind: "numeric", masked: true, unit: null },
     heat_strain: { kind: "flag", masked: true, unit: null },
     heat_strain_blood_flow: { kind: "flag", masked: true, unit: null },
     heat_strain_w: { kind: "flag", masked: true, unit: null },
@@ -174,21 +178,24 @@ export function use_fans_heatwaves(
     round_output,
   } = parseInputs(USE_FANS_HEATWAVES_INFO, inputs);
 
-  const result = two_nodes_gagge({
-    tdb,
-    tr,
-    v,
-    rh,
-    met,
-    clo,
-    wme,
-    body_surface_area,
-    p_atm,
-    position: position as GaggeTwoNodesInputs["position"],
-    max_skin_blood_flow,
-    round_output: false,
-    max_sweating,
-  });
+  const result = toComputedOutputs(
+    TWO_NODES_GAGGE_INFO,
+    two_nodes_gagge({
+      tdb,
+      tr,
+      v,
+      rh,
+      met,
+      clo,
+      wme,
+      body_surface_area,
+      p_atm,
+      position: position as GaggeTwoNodesInputs["position"],
+      max_skin_blood_flow,
+      round_output: false,
+      max_sweating,
+    }),
+  );
 
   // NaN where the underlying value is NaN, which np.max then carries into heat_strain
   const heat_strain_blood_flow = _as_flag(

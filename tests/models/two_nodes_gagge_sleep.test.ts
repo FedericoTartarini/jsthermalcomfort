@@ -13,8 +13,11 @@ const call = (inputs: unknown) =>
   two_nodes_gagge_sleep(inputs as Parameters<typeof two_nodes_gagge_sleep>[0]);
 
 // An output upstream returns as an array, for a call of more than one minute.
-const series = (value: number | readonly number[]): readonly number[] => {
-  if (typeof value === "number") throw new TypeError("not a series");
+const series = (
+  value: number | null | readonly (number | null)[],
+): readonly (number | null)[] => {
+  if (typeof value === "number" || value === null)
+    throw new TypeError("not a series");
   return value;
 };
 
@@ -294,7 +297,7 @@ describe("test_two_nodes_gagge_sleep", () => {
           thickness_quilt: 1.76,
         }).set,
     );
-    const diff = result.slice(1).map((x, i) => x - (result[i] ?? NaN));
+    const diff = result.slice(1).map((x, i) => (x ?? NaN) - (result[i] ?? NaN));
     const max_step = Math.max(...diff.map(Math.abs));
     expect(max_step).toBeLessThan(0.05);
     expect(diff.every((d) => d > 0)).toBe(true); // monotonic

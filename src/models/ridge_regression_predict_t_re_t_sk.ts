@@ -5,7 +5,7 @@
 // scaling on features and outputs.
 
 import { BASE_INPUTS_SEX, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -117,8 +117,8 @@ export const RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    t_re: { kind: "numeric", unit: "°C", series: true },
-    t_sk: { kind: "numeric", unit: "°C", series: true },
+    t_re: { kind: "numeric", masked: true, unit: "°C", series: true },
+    t_sk: { kind: "numeric", masked: true, unit: "°C", series: true },
   },
   derived: {
     height: { unit: "cm", applicability: { min: 130, max: 230 } },
@@ -360,11 +360,11 @@ export function ridge_regression_predict_t_re_t_sk(
     final_t_sk_hist = final_t_sk_hist.map((x) => round(x, 2));
   }
 
-  return Object.freeze({
-    t_re: Object.freeze(final_t_re_hist),
-    t_sk: Object.freeze(final_t_sk_hist),
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
+    { t_re: final_t_re_hist, t_sk: final_t_sk_hist },
+    warnings,
+  );
 }
 
 type Features = readonly [

@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "../utilities/options.ts";
@@ -99,5 +99,5 @@ export function wbgt(inputs: WBGTInputs): WBGT {
     t_wbg = round(t_wbg, 1);
   }
 
-  return Object.freeze({ wbgt: t_wbg, warnings: Object.freeze([]) });
+  return buildOutputs(WBGT_INFO, { wbgt: t_wbg }, []);
 }

@@ -1,7 +1,7 @@
 import { ASHRAE_55_STILL_AIR_THRESHOLD } from "../_internal/ashrae55.ts";
 import { brentq } from "../_internal/brentq.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -146,10 +146,7 @@ export function cooling_effect(inputs: CEInputs): CE {
     _ce = _ce * 1.8;
   }
 
-  return Object.freeze({
-    ce: round(_ce, 2),
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(COOLING_EFFECT_INFO, { ce: round(_ce, 2) }, warnings);
 }
 
 function _p_sat_torr(tdb: number): number {

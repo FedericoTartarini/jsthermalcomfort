@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
@@ -13,7 +13,7 @@ export const WCI_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    wci: { kind: "numeric", unit: "W/m²" },
+    wci: { kind: "numeric", masked: true, unit: "W/m²" },
   },
 } as const satisfies ModelInfo);
 
@@ -81,5 +81,5 @@ export function wci(inputs: WCIInputs): WCI {
     _wci = round(_wci, 1);
   }
 
-  return Object.freeze({ wci: _wci, warnings: Object.freeze([]) });
+  return buildOutputs(WCI_INFO, { wci: _wci }, []);
 }

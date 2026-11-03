@@ -1,11 +1,15 @@
-import { pmv_ppd_ashrae } from "./pmv_ppd_ashrae.ts";
+import { pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO } from "./pmv_ppd_ashrae.ts";
 import {
   _check_ashrae55_compliance,
   ASHRAE_55_COMPLIANCE_STANDARDS,
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
+import {
+  buildOutputs,
+  deepFreeze,
+  toComputedOutputs,
+} from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -45,7 +49,7 @@ export const ANKLE_DRAFT_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    ppd_ad: { kind: "numeric", unit: "%" },
+    ppd_ad: { kind: "numeric", masked: true, unit: "%" },
     acceptability: { kind: "flag", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
@@ -141,16 +145,19 @@ export function ankle_draft(inputs: AnkleDraftInputs): AnkleDraft {
   }
 
   const warnings: ModelWarning[] = [];
-  const pmv_result = pmv_ppd_ashrae({
-    tdb,
-    tr,
-    vr,
-    rh,
-    met,
-    clo,
-    standard: Standard.ashrae_55_2023,
-    limit_inputs: false,
-  });
+  const pmv_result = toComputedOutputs(
+    PMV_PPD_ASHRAE_INFO,
+    pmv_ppd_ashrae({
+      tdb,
+      tr,
+      vr,
+      rh,
+      met,
+      clo,
+      standard: Standard.ashrae_55_2023,
+      limit_inputs: false,
+    }),
+  );
   // With limit_inputs=False upstream's call warns only its notices (deviation ankle_draft-3).
   warnings.push(...pmv_result.warnings.filter((row) => row.kind === "notice"));
   const tsv = pmv_result.pmv;

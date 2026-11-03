@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { dew_point_tmp } from "../psychrometrics/dew_point_tmp.ts";
@@ -20,7 +20,7 @@ export const HUMIDEX_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    humidex: { kind: "numeric", unit: "°C" },
+    humidex: { kind: "numeric", masked: true, unit: "°C" },
     discomfort: { kind: "label", unit: null },
   },
 } as const satisfies ModelInfo);
@@ -114,9 +114,9 @@ export function humidex(inputs: HumidexInputs): Humidex {
     stress_category = "Intense discomfort; avoid exertion";
   if (hi > 45 && hi <= 54) stress_category = "Dangerous discomfort";
 
-  return Object.freeze({
-    humidex: hi,
-    discomfort: stress_category,
-    warnings: Object.freeze([]),
-  });
+  return buildOutputs(
+    HUMIDEX_INFO,
+    { humidex: hi, discomfort: stress_category },
+    [],
+  );
 }

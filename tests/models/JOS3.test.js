@@ -144,4 +144,11 @@ describe("JOS3", () => {
       }
     });
   });
+
+  // Decisions 321 and 311: the next step's NaN temperature throws.
+  it("computes on a null pmv from pmv_ppd_iso as NaN", () => {
+    expect(() =>
+      new JOS3()._calculate_operative_temp_when_pmv_is_zero(0.1, 50, 1.2, -1),
+    ).toThrow(new RangeError("tdb must be a finite number."));
+  });
 });

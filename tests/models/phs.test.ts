@@ -230,7 +230,7 @@ describe("test_phs", () => {
         standard: model,
         round_output: false,
       } as unknown as Inputs);
-      expect(result.t_cr).toBeNaN();
+      expect(result.t_cr).toBe(null);
     },
   );
 
@@ -245,8 +245,8 @@ describe("test_phs", () => {
       posture: "standing" as const,
       round_output: false,
     };
-    expect(phs({ standard: "7933-2023", ...kwargs }).t_cr).not.toBeNaN();
-    expect(phs({ standard: "7933-2004", ...kwargs }).t_cr).toBeNaN();
+    expect(phs({ standard: "7933-2023", ...kwargs }).t_cr).not.toBe(null);
+    expect(phs({ standard: "7933-2004", ...kwargs }).t_cr).toBe(null);
   });
 
   test("test_2023_forces_skin_temperature_to_equilibrium_on_minute_one", () => {
@@ -267,7 +267,7 @@ describe("test_phs", () => {
     const result_2023 = phs({ standard: "7933-2023", ...kwargs });
     const result_2004 = phs({ standard: "7933-2004", ...kwargs });
     expect(result_2023.t_sk).toBeGreaterThan(30);
-    expect(result_2004.t_sk).toBeLessThan(result_2023.t_sk);
+    expect(result_2004.t_sk).toBeLessThan(result_2023.t_sk ?? NaN);
   });
 });
 
@@ -459,7 +459,7 @@ describe("phs (JS-only)", () => {
         row("met", 581.5, PHS_LIMITS_ISO_7933["7933-2023"].met),
         row("clo", 2, PHS_INFO.inputs.clo.applicability),
       ]);
-      expect(Number.isNaN(result.t_re)).toBe(limit_inputs);
+      expect(result.t_re === null).toBe(limit_inputs);
       const result_2004 = call({
         ...valid,
         ...out,
@@ -487,7 +487,7 @@ describe("phs (JS-only)", () => {
         new RangeError("division by zero"),
       );
     const masked = call({ ...valid, clo: 0 });
-    expect(masked.t_re).toBeNaN();
+    expect(masked.t_re).toBe(null);
     expect(masked.warnings).toEqual([
       expect.objectContaining({ key: "clo", value: 0 }),
     ]);

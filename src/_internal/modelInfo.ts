@@ -120,7 +120,7 @@ export interface ModelOutputs {
  *
  * `applicability` is the range over which the model is applicable. It is an
  * **applicability gate, not a clamp**. Outside it, and only when `limit_inputs`
- * is enabled, the model returns NaN — it does not constrain the value to the
+ * is enabled, the output is `null` — it does not constrain the value to the
  * bound. On an output such as `pmv_ppd_iso`'s `pmv`, read it as "outputs
  * outside this band are suppressed", not "the output is guaranteed to fall
  * inside it". A front end should surface it as a condition on the answer rather
@@ -301,6 +301,10 @@ type InputValue<F extends InputsInfo[string], Series> = F extends ChoiceField
     ? Series
     : KindValue<F> | FalseOf<F> | NullOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
+/** A masked numeric series' type: `Series` with `null` for each value. */
+type MaskedSeries<Series> = Series extends number
+  ? number | null
+  : readonly (number | null)[];
 
 /**
  * The inputs object a model's `INFO` accepts, upstream's input dataclass. A
@@ -342,8 +346,8 @@ export type ResolvedOf<I extends InputsInfo> = {
  * `warnings`; a `masked` field adds `null`, its "no value" (decision 310), a
  * `none` field is `null`, and a `series` field is a readonly array of those
  * values.
- * A numeric series that is not masked takes `Series`, by default
- * `readonly number[]`:
+ * A numeric series takes `Series`, by default `readonly number[]`, each value
+ * `number | null` where it is masked:
  * `number | readonly number[]` for a model that returns a number for one time
  * step, as `two_nodes_gagge_sleep` does (decisions 276, 277).
  */
@@ -360,10 +364,14 @@ export type OutputsOf<
           readonly masked?: undefined;
         }
         ? Series
-        : readonly (
-            | KindValues[M["outputs"][K]["kind"]]
-            | (M["outputs"][K] extends { readonly masked: true } ? null : never)
-          )[]
+        : M["outputs"][K] extends { readonly kind: "numeric" }
+          ? MaskedSeries<Series>
+          : readonly (
+              | KindValues[M["outputs"][K]["kind"]]
+              | (M["outputs"][K] extends { readonly masked: true }
+                  ? null
+                  : never)
+            )[]
       : M["outputs"][K] extends { readonly none: true }
         ? null
         : | KindValues[M["outputs"][K]["kind"]]
@@ -450,6 +458,42 @@ function toOutput(value: unknown, field: OutputField): unknown {
   if (field.masked === true && Number.isNaN(value)) return null;
   if (field.kind === "flag" && (value === 1 || Object.is(value, 0)))
     return value === 1;
+  return value;
+}
+
+/**
+ * The inverse of {@link buildOutputs}: a model's public outputs back in
+ * upstream's representation, for a model that computes on another model's
+ * outputs as upstream's does (decision 321, ADR 0028). Each `null` of a
+ * `masked` output, and of each element of a masked time series, becomes NaN,
+ * and a `flag`'s `true` and `false` become 1.0 and 0.0; any other value, a
+ * `none` output's `null` included, and `warnings` are returned as they are.
+ *
+ * @param info - The called model's `*_INFO`, whose `outputs` drive the
+ *   conversion.
+ * @param outputs - What the called model returned.
+ * @returns The values the called model computed, then `warnings`.
+ */
+export function toComputedOutputs<M extends { readonly outputs: OutputsInfo }>(
+  info: M,
+  outputs: OutputsOf<M>,
+): ComputedOutputsOf<M> & ModelOutputs {
+  const returned = outputs as Readonly<Record<string, unknown>>;
+  const computed: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(info.outputs)) {
+    const value = returned[key];
+    computed[key] = Array.isArray(value)
+      ? value.map((item: unknown) => toComputed(item, field))
+      : toComputed(value, field);
+  }
+  computed.warnings = outputs.warnings;
+  return computed as ComputedOutputsOf<M> & ModelOutputs;
+}
+
+/** Converts one returned value back by its `INFO.outputs` entry. */
+function toComputed(value: unknown, field: OutputField): unknown {
+  if (field.masked === true && value === null) return NaN;
+  if (field.kind === "flag" && typeof value === "boolean") return value ? 1 : 0;
   return value;
 }
 

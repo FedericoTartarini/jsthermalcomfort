@@ -49,8 +49,8 @@ export const ANKLE_DRAFT_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    ppd_ad: { kind: "numeric", masked: true, unit: "%" },
-    acceptability: { kind: "flag", masked: true, unit: null },
+    ppd_ad: { kind: "numeric", nullable: true, unit: "%" },
+    acceptability: { kind: "flag", nullable: true, unit: null },
   },
 } as const satisfies ModelInfo);
 

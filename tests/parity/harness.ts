@@ -207,18 +207,18 @@ export function flag_mapping(value: Decoded): boolean | null | undefined {
 }
 
 /**
- * R item "masked output" (ADR 0028): upstream's NaN as `null`, any other value
+ * R item "nullable output" (ADR 0028): upstream's NaN as `null`, any other value
  * as it is; `undefined` for `null`, upstream's None, outside its domain, since
  * it could not be told from a NaN.
  */
-export function masked_mapping(value: Decoded): Decoded | undefined {
+export function nullable_mapping(value: Decoded): Decoded | undefined {
   if (value === null) return undefined;
   return typeof value === "number" && Number.isNaN(value) ? null : value;
 }
 
 /**
  * Reads one upstream value in the library's representation, through the
- * mapping its `INFO.outputs` entry selects: a `flag`'s, else a `masked`
+ * mapping its `INFO.outputs` entry selects: a `flag`'s, else a `nullable`
  * output's, else none. A value outside the mapping's domain fails.
  */
 function to_library(
@@ -229,8 +229,8 @@ function to_library(
   const [mapped, mapping, domain] =
     field?.kind === "flag"
       ? [flag_mapping(value), "flag", "1.0, 0.0 or NaN"]
-      : field?.masked === true
-        ? [masked_mapping(value), "masked", "any value but None"]
+      : field?.nullable === true
+        ? [nullable_mapping(value), "nullable", "any value but None"]
         : [value, "", ""];
   return mapped === undefined
     ? {
@@ -247,10 +247,17 @@ function compare_output(
   { rel, abs }: Tolerance,
   field: OutputField | undefined,
 ): string | undefined {
-  // A null is "no value", which only an output declared masked returns, or a
-  // field held at its dataclass's None.
-  if (actual === null && field?.masked !== true && field?.none !== true) {
-    return `output ${name}: library null, but INFO.outputs does not declare ${name.replace(/\[\d+\]$/, "")} masked`;
+  // Upstream's NaN, its "no value", needs the output declared nullable
+  // (decision 327); so does the library's null, the same "no value" (decision
+  // 310), except in a field held at its dataclass's None.
+  if (field?.nullable !== true) {
+    const not_declared = `but INFO.outputs does not declare ${name.replace(/\[\d+\]$/, "")} nullable`;
+    if (typeof upstream === "number" && Number.isNaN(upstream)) {
+      return `output ${name}: upstream NaN, ${not_declared}`;
+    }
+    if (actual === null && field?.none !== true) {
+      return `output ${name}: library null, ${not_declared}`;
+    }
   }
   const mapped = to_library(name, upstream, field);
   if ("failure" in mapped) return mapped.failure;
@@ -262,9 +269,9 @@ function compare_output(
   if (typeof expected !== "number" || typeof actual !== "number") {
     return actual === expected ? undefined : failure;
   }
-  if (Number.isNaN(expected) || Number.isNaN(actual)) {
-    return Number.isNaN(expected) && Number.isNaN(actual) ? undefined : failure;
-  }
+  // Upstream's NaN has failed or become null above, so a NaN here is the
+  // library's.
+  if (Number.isNaN(actual)) return failure;
   if (actual === expected) return undefined;
   if (exact || !Number.isFinite(expected)) return failure;
   return Math.abs(actual - expected) <= abs + rel * Math.abs(expected)

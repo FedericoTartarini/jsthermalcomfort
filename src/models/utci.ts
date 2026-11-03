@@ -33,10 +33,10 @@ export const UTCI_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    utci: { kind: "numeric", masked: true, unit: "°C" },
+    utci: { kind: "numeric", nullable: true, unit: "°C" },
     stress_category: {
       kind: "label",
-      masked: true,
+      nullable: true,
       unit: null,
       classifier: {
         edges: [-40.0, -27.0, -13.0, 0.0, 9.0, 26.0, 32.0, 38.0, 46.0, 1000.0],

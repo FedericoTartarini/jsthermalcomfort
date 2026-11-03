@@ -90,8 +90,8 @@ export const SOLAR_GAIN_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    erf: { kind: "numeric", masked: true, unit: "W/m²" },
-    delta_mrt: { kind: "numeric", masked: true, unit: "°C" },
+    erf: { kind: "numeric", nullable: true, unit: "W/m²" },
+    delta_mrt: { kind: "numeric", nullable: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 

@@ -117,8 +117,8 @@ export const RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    t_re: { kind: "numeric", masked: true, unit: "°C", series: true },
-    t_sk: { kind: "numeric", masked: true, unit: "°C", series: true },
+    t_re: { kind: "numeric", nullable: true, unit: "°C", series: true },
+    t_sk: { kind: "numeric", nullable: true, unit: "°C", series: true },
   },
   derived: {
     height: { unit: "cm", applicability: { min: 130, max: 230 } },

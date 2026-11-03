@@ -19,7 +19,7 @@ export const PMV_ATHB_INFO = deepFreeze({
     clo: { kind: "numeric", unit: "clo", default: false },
   },
   outputs: {
-    athb_pmv: { kind: "numeric", masked: true, unit: null },
+    athb_pmv: { kind: "numeric", nullable: true, unit: null },
   },
 } as const satisfies ModelInfo);
 

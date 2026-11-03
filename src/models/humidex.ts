@@ -20,7 +20,7 @@ export const HUMIDEX_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    humidex: { kind: "numeric", masked: true, unit: "°C" },
+    humidex: { kind: "numeric", nullable: true, unit: "°C" },
     discomfort: { kind: "label", unit: null },
   },
 } as const satisfies ModelInfo);

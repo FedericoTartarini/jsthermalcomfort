@@ -14,7 +14,7 @@ export const NET_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    net: { kind: "numeric", masked: true, unit: "°C" },
+    net: { kind: "numeric", nullable: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 

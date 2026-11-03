@@ -47,7 +47,7 @@ export const SET_TMP_INFO = deepFreeze({
     calculate_ce: { kind: "bool", default: false },
   },
   outputs: {
-    set: { kind: "numeric", masked: true, unit: "°C" },
+    set: { kind: "numeric", nullable: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 

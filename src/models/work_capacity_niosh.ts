@@ -16,7 +16,7 @@ export const WORK_CAPACITY_NIOSH_INFO = deepFreeze({
     met: { kind: "numeric", unit: "W" },
   },
   outputs: {
-    capacity: { kind: "numeric", masked: true, unit: "%" },
+    capacity: { kind: "numeric", nullable: true, unit: "%" },
   },
 } as const satisfies ModelInfo);
 

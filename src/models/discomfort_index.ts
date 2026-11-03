@@ -16,7 +16,7 @@ export const DISCOMFORT_INDEX_INFO = deepFreeze({
     di: { kind: "numeric", unit: "°C" },
     discomfort_condition: {
       kind: "label",
-      masked: true,
+      nullable: true,
       unit: null,
       classifier: {
         edges: [21, 24, 27, 29, 32, 99],

@@ -116,7 +116,7 @@ describe("validateResult — numeric comparison", () => {
     }).toThrow();
   });
 
-  // The data write upstream's NaN as null, a masked output's null (decision 310).
+  // The data write upstream's NaN as null, a nullable output's null (decision 310).
   test("reads null in expectedOutputs as null, which a NaN does not match", () => {
     expect.hasAssertions();
     expect(() => {

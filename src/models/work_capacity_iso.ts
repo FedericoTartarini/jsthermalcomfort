@@ -15,7 +15,7 @@ export const WORK_CAPACITY_ISO_INFO = deepFreeze({
     met: { kind: "numeric", unit: "W" },
   },
   outputs: {
-    capacity: { kind: "numeric", masked: true, unit: "%" },
+    capacity: { kind: "numeric", nullable: true, unit: "%" },
   },
 } as const satisfies ModelInfo);
 

@@ -57,17 +57,17 @@ export const PMV_PPD_ASHRAE_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    pmv: { kind: "numeric", masked: true, unit: null },
-    ppd: { kind: "numeric", masked: true, unit: "%" },
+    pmv: { kind: "numeric", nullable: true, unit: null },
+    ppd: { kind: "numeric", nullable: true, unit: "%" },
     tsv: {
       kind: "label",
-      masked: true,
+      nullable: true,
       unit: null,
       classifier: { ...THERMAL_SENSATION, right: true },
     },
     compliance: {
       kind: "flag",
-      masked: true,
+      nullable: true,
       unit: null,
       interval: { min: -0.5, max: 0.5 },
     },

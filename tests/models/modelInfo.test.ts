@@ -41,11 +41,11 @@ describe("buildOutputs", () => {
   const INFO = {
     outputs: {
       n: { kind: "numeric", unit: null },
-      nm: { kind: "numeric", masked: true, unit: null },
-      f: { kind: "flag", masked: true, unit: null },
-      l: { kind: "label", masked: true, unit: null },
-      ln: { kind: "label_or_numeric", masked: true, unit: "h" },
-      s: { kind: "numeric", masked: true, series: true, unit: "°C" },
+      nm: { kind: "numeric", nullable: true, unit: null },
+      f: { kind: "flag", nullable: true, unit: null },
+      l: { kind: "label", nullable: true, unit: null },
+      ln: { kind: "label_or_numeric", nullable: true, unit: "h" },
+      s: { kind: "numeric", nullable: true, series: true, unit: "°C" },
       c: { kind: "label", none: true, unit: null },
     },
   } as const satisfies { outputs: OutputsInfo };
@@ -64,7 +64,7 @@ describe("buildOutputs", () => {
     expect(values).toEqual([true, false, null]);
   });
 
-  test("turns a NaN into null only in an output declared masked", () => {
+  test("turns a NaN into null only in an output declared nullable", () => {
     const result = buildOutputs(
       INFO,
       { n: NaN, nm: NaN, f: 1.0, l: NaN, ln: NaN, s: [NaN, 2.5], c: null },
@@ -133,11 +133,11 @@ describe("toComputedOutputs", () => {
   const INFO = {
     outputs: {
       n: { kind: "numeric", unit: null },
-      nm: { kind: "numeric", masked: true, unit: null },
-      f: { kind: "flag", masked: true, unit: null },
-      l: { kind: "label", masked: true, unit: null },
-      ln: { kind: "label_or_numeric", masked: true, unit: "h" },
-      s: { kind: "numeric", masked: true, series: true, unit: "°C" },
+      nm: { kind: "numeric", nullable: true, unit: null },
+      f: { kind: "flag", nullable: true, unit: null },
+      l: { kind: "label", nullable: true, unit: null },
+      ln: { kind: "label_or_numeric", nullable: true, unit: "h" },
+      s: { kind: "numeric", nullable: true, series: true, unit: "°C" },
       c: { kind: "label", none: true, unit: null },
     },
   } as const satisfies { outputs: OutputsInfo };
@@ -145,7 +145,7 @@ describe("toComputedOutputs", () => {
 
   // Decision 321.
   test("a round trip gives back every NaN and every flag's 1.0 and 0.0", () => {
-    const masked = {
+    const unvalued = {
       n: NaN,
       nm: NaN,
       f: NaN,
@@ -163,7 +163,7 @@ describe("toComputedOutputs", () => {
       s: [3],
       c: null,
     };
-    for (const values of [masked, valued, { ...valued, f: 1.0, ln: 4.5 }]) {
+    for (const values of [unvalued, valued, { ...valued, f: 1.0, ln: 4.5 }]) {
       expect(
         toComputedOutputs(INFO, buildOutputs(INFO, values, [ROW])),
       ).toEqual({ ...values, warnings: [ROW] });
@@ -216,17 +216,17 @@ describe("ResolvedOf", () => {
 });
 
 describe("OutputsOf", () => {
-  // `masked` adds `null`, an output's "no value" (decision 310).
+  // `nullable` adds `null`, an output's "no value" (decision 310).
   test("maps each kind to its value type, then warnings", () => {
     type Fields = OutputsOf<{
       outputs: {
         n: { kind: "numeric"; unit: null };
-        nm: { kind: "numeric"; unit: null; masked: true };
+        nm: { kind: "numeric"; unit: null; nullable: true };
         f: { kind: "flag"; unit: null };
-        fm: { kind: "flag"; unit: null; masked: true };
+        fm: { kind: "flag"; unit: null; nullable: true };
         l: { kind: "label"; unit: null };
-        lm: { kind: "label"; unit: null; masked: true };
-        ln: { kind: "label_or_numeric"; unit: "h"; masked: true };
+        lm: { kind: "label"; unit: null; nullable: true };
+        ln: { kind: "label_or_numeric"; unit: "h"; nullable: true };
       };
     }>;
     expectTypeOf<Fields>().toEqualTypeOf<{
@@ -243,13 +243,13 @@ describe("OutputsOf", () => {
 
   // A second type argument types every numeric series output as that type, a
   // one-step call's number where upstream returns one (decisions 276, 277),
-  // with null for each value of a masked one.
+  // with null for each value of a nullable one.
   test("types a series output as the series type given", () => {
     interface Info {
       outputs: {
         s: { kind: "numeric"; unit: "°C"; series: true };
         n: { kind: "numeric"; unit: null };
-        m: { kind: "numeric"; unit: null; series: true; masked: true };
+        m: { kind: "numeric"; unit: null; series: true; nullable: true };
       };
     }
     expectTypeOf<OutputsOf<Info, number>>().toEqualTypeOf<{

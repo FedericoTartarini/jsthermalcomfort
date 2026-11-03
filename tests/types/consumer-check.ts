@@ -530,7 +530,7 @@ const pmv_ashrae_params: PMVPPDAshraeInputs = {
 };
 const pmv_ashrae: PMVPPDAshrae = pmv_ppd_ashrae(pmv_ashrae_params);
 const ashrae_compliance: boolean | null = pmv_ashrae.compliance;
-// @ts-expect-error a masked flag may be null, no value.
+// @ts-expect-error a nullable flag may be null, no value.
 const ashrae_compliance_bool: boolean = pmv_ashrae.compliance;
 const ashrae_tsv: string | null = pmv_ashrae.tsv;
 // The interval compliance is read against, published once in its INFO.
@@ -618,7 +618,7 @@ const utci_params: UTCIInputs = {
 };
 const utci_result: UTCI = utci(utci_params);
 const utci_category: string | null = utci_result.stress_category;
-// @ts-expect-error a masked number may be null, no value.
+// @ts-expect-error a nullable number may be null, no value.
 const utci_number: number = utci_result.utci;
 // @ts-expect-error `return_stress_category` is not a param; stress_category is always returned.
 utci({ tdb: 25, tr: 25, v: 1, rh: 50, return_stress_category: true });
@@ -852,7 +852,7 @@ const use_fans_inputs: UseFansHeatwavesInputs = {
 const use_fans: UseFansHeatwaves = use_fans_heatwaves(use_fans_inputs);
 const use_fans_skin: number | null = use_fans.e_skin;
 const use_fans_strain: boolean | null = use_fans.heat_strain;
-// @ts-expect-error a masked flag may be null, no value.
+// @ts-expect-error a nullable flag may be null, no value.
 const use_fans_strain_bool: boolean = use_fans.heat_strain;
 // @ts-expect-error position is one of choice_field's three values.
 use_fans_heatwaves({ ...use_fans_inputs, position: "lying" });
@@ -872,7 +872,7 @@ const ankle_inputs: AnkleDraftInputs = {
 const ankle: AnkleDraft = ankle_draft(ankle_inputs);
 const ankle_ppd: number | null = ankle.ppd_ad;
 const ankle_acceptability: boolean | null = ankle.acceptability;
-// @ts-expect-error a masked flag may be null, no value.
+// @ts-expect-error a nullable flag may be null, no value.
 const ankle_acceptability_bool: boolean = ankle.acceptability;
 // @ts-expect-error units is 'SI' or 'IP'.
 ankle_draft({ ...ankle_inputs, units: "metric" });
@@ -891,7 +891,7 @@ const vertical_inputs: VerticalTGradPPDInputs = {
 const vertical: VerticalTGradPPD = vertical_tmp_grad_ppd(vertical_inputs);
 const vertical_ppd: number | null = vertical.ppd_vg;
 const vertical_acceptability: boolean | null = vertical.acceptability;
-// @ts-expect-error a masked flag may be null, no value.
+// @ts-expect-error a nullable flag may be null, no value.
 const vertical_acceptability_bool: boolean = vertical.acceptability;
 // @ts-expect-error vertical_tmp_grad_ppd takes no units.
 vertical_tmp_grad_ppd({ ...vertical_inputs, units: "SI" });
@@ -903,7 +903,7 @@ const en_inputs: ENInputs = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
 const en: AdaptiveEN = adaptive_en(en_inputs);
 const en_cmf: number | null = en.tmp_cmf;
 const en_acceptability: boolean | null = en.acceptability_cat_i;
-// @ts-expect-error a masked flag may be null, no value.
+// @ts-expect-error a nullable flag may be null, no value.
 const en_acceptability_bool: boolean = en.acceptability_cat_i;
 // @ts-expect-error the result is readonly.
 en.tmp_cmf = 1;

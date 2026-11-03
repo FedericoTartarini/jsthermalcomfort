@@ -109,9 +109,9 @@ export interface ModelOutputs {
  * `dle_min`). A `flag` is a `boolean`: `true` where upstream returns 1.0,
  * `false` where it returns 0.0.
  *
- * `masked` marks an output upstream can return as NaN, its "no value": the
- * output is then `null` in place of NaN, and its type adds `null`, so a masked
- * `flag` is `boolean | null` and a masked `label` `string | null` (decision
+ * `nullable` marks an output upstream can return as NaN, its "no value": the
+ * output is then `null` in place of NaN, and its type adds `null`, so a nullable
+ * `flag` is `boolean | null` and a nullable `label` `string | null` (decision
  * 310, ADR 0028). Check it explicitly (`result.tsv === null`): an untyped
  * JavaScript caller's arithmetic reads `null` as 0, `null * 2` being 0 where
  * `NaN * 2` is NaN (node v26.8.2).
@@ -140,12 +140,12 @@ export interface ModelOutputs {
  * `none` marks a field that the model leaves at its dataclass's `None`
  * default, which the field then holds as `null`: `heat_index_lu`'s
  * `stress_category` (`classes_return.py:315`, `models/heat_index_lu.py:63`;
- * decision 279). Such a field is never computed, so it takes no `masked`,
+ * decision 279). Such a field is never computed, so it takes no `nullable`,
  * `series` or `classifier`.
  */
 export interface OutputField {
   readonly kind: "numeric" | "flag" | "label" | "label_or_numeric";
-  readonly masked?: true;
+  readonly nullable?: true;
   readonly series?: true;
   readonly none?: true;
   readonly unit: UnitSymbol | null;
@@ -301,8 +301,8 @@ type InputValue<F extends InputsInfo[string], Series> = F extends ChoiceField
     ? Series
     : KindValue<F> | FalseOf<F> | NullOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
-/** A masked numeric series' type: `Series` with `null` for each value. */
-type MaskedSeries<Series> = Series extends number
+/** A nullable numeric series' type: `Series` with `null` for each value. */
+type NullableSeries<Series> = Series extends number
   ? number | null
   : readonly (number | null)[];
 
@@ -343,11 +343,11 @@ export type ResolvedOf<I extends InputsInfo> = {
 /**
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
- * `warnings`; a `masked` field adds `null`, its "no value" (decision 310), a
+ * `warnings`; a `nullable` field adds `null`, its "no value" (decision 310), a
  * `none` field is `null`, and a `series` field is a readonly array of those
  * values.
  * A numeric series takes `Series`, by default `readonly number[]`, each value
- * `number | null` where it is masked:
+ * `number | null` where it is nullable:
  * `number | readonly number[]` for a model that returns a number for one time
  * step, as `two_nodes_gagge_sleep` does (decisions 276, 277).
  */
@@ -361,21 +361,23 @@ export type OutputsOf<
     }
       ? M["outputs"][K] extends {
           readonly kind: "numeric";
-          readonly masked?: undefined;
+          readonly nullable?: undefined;
         }
         ? Series
         : M["outputs"][K] extends { readonly kind: "numeric" }
-          ? MaskedSeries<Series>
+          ? NullableSeries<Series>
           : readonly (
               | KindValues[M["outputs"][K]["kind"]]
-              | (M["outputs"][K] extends { readonly masked: true }
+              | (M["outputs"][K] extends { readonly nullable: true }
                   ? null
                   : never)
             )[]
       : M["outputs"][K] extends { readonly none: true }
         ? null
         : | KindValues[M["outputs"][K]["kind"]]
-          | (M["outputs"][K] extends { readonly masked: true } ? null : never);
+          | (M["outputs"][K] extends { readonly nullable: true }
+              ? null
+              : never);
   } & ModelOutputs
 >;
 
@@ -396,11 +398,11 @@ type ComputedValue<F extends OutputField> = F extends {
 }
   ? null
   : | ComputedKindValues[F["kind"]]
-    | (F extends { readonly masked: true } ? number : never);
+    | (F extends { readonly nullable: true } ? number : never);
 
 /**
  * The values a model computes, one per `INFO.outputs` key, which
- * {@link buildOutputs} takes: upstream's representation, a masked output's
+ * {@link buildOutputs} takes: upstream's representation, a nullable output's
  * NaN included, a `series` output a number or an array of them.
  */
 export type ComputedOutputsOf<M extends { readonly outputs: OutputsInfo }> = {
@@ -419,11 +421,11 @@ export type ComputedOutputsOf<M extends { readonly outputs: OutputsInfo }> = {
  * The outputs are built in `INFO.outputs`' order, then `warnings`, and each is
  * converted by its entry:
  *
- * - an output declared `masked` that is NaN becomes `null`, as does each NaN
- *   element of a masked time series;
+ * - an output declared `nullable` that is NaN becomes `null`, as does each NaN
+ *   element of a nullable time series;
  * - a `flag`'s 1.0 becomes `true` and its 0.0 `false`;
  * - any other value is returned as it is, a NaN in an output not declared
- *   `masked` included, which the parity suite then reports.
+ *   `nullable` included, which the parity suite then reports.
  *
  * "No value" is `null`, never NaN, and is checked explicitly
  * (`result.tsv === null`), since an untyped JavaScript caller's arithmetic
@@ -455,7 +457,7 @@ export function buildOutputs<M extends { readonly outputs: OutputsInfo }>(
 
 /** Converts one computed value by its `INFO.outputs` entry. */
 function toOutput(value: unknown, field: OutputField): unknown {
-  if (field.masked === true && Number.isNaN(value)) return null;
+  if (field.nullable === true && Number.isNaN(value)) return null;
   if (field.kind === "flag" && (value === 1 || Object.is(value, 0)))
     return value === 1;
   return value;
@@ -465,7 +467,7 @@ function toOutput(value: unknown, field: OutputField): unknown {
  * The inverse of {@link buildOutputs}: a model's public outputs back in
  * upstream's representation, for a model that computes on another model's
  * outputs as upstream's does (decision 321, ADR 0028). Each `null` of a
- * `masked` output, and of each element of a masked time series, becomes NaN,
+ * `nullable` output, and of each element of a nullable time series, becomes NaN,
  * and a `flag`'s `true` and `false` become 1.0 and 0.0; any other value, a
  * `none` output's `null` included, and `warnings` are returned as they are.
  *
@@ -492,7 +494,7 @@ export function toComputedOutputs<M extends { readonly outputs: OutputsInfo }>(
 
 /** Converts one returned value back by its `INFO.outputs` entry. */
 function toComputed(value: unknown, field: OutputField): unknown {
-  if (field.masked === true && value === null) return NaN;
+  if (field.nullable === true && value === null) return NaN;
   if (field.kind === "flag" && typeof value === "boolean") return value ? 1 : 0;
   return value;
 }

@@ -13,7 +13,7 @@ export const WCI_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    wci: { kind: "numeric", masked: true, unit: "W/m²" },
+    wci: { kind: "numeric", nullable: true, unit: "W/m²" },
   },
 } as const satisfies ModelInfo);
 

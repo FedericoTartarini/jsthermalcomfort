@@ -36,30 +36,30 @@ export const IREQ_INFO = deepFreeze({
   outputs: {
     ireq_min: {
       kind: "numeric",
-      masked: true,
+      nullable: true,
       unit: "clo",
       applicability: { min: 0 },
     },
     ireq_neutral: {
       kind: "numeric",
-      masked: true,
+      nullable: true,
       unit: "clo",
       applicability: { min: 0 },
     },
     icl_min: {
       kind: "numeric",
-      masked: true,
+      nullable: true,
       unit: "clo",
       applicability: { min: 0 },
     },
     icl_neutral: {
       kind: "numeric",
-      masked: true,
+      nullable: true,
       unit: "clo",
       applicability: { min: 0 },
     },
-    dle_min: { kind: "label_or_numeric", masked: true, unit: "h" },
-    dle_neutral: { kind: "label_or_numeric", masked: true, unit: "h" },
+    dle_min: { kind: "label_or_numeric", nullable: true, unit: "h" },
+    dle_neutral: { kind: "label_or_numeric", nullable: true, unit: "h" },
   },
   derived: {
     met: { unit: "W/m²", applicability: { min: 58.0, max: 400.0 } },

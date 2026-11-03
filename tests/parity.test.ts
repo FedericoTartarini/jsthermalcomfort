@@ -236,16 +236,22 @@ describe("compare_case", () => {
   // A time series output (decision 269).
   test("compares a series element by element, reporting its first difference", () => {
     const expected = upstream({ t: [24.1, { float: "nan" }, 24.3] });
+    const options: CompareOptions = {
+      ...OPTIONS,
+      outputs: {
+        t: { kind: "numeric", nullable: true, series: true, unit: "°C" },
+      },
+    };
     expect(
-      compare_case(expected, { t: [24.1, NaN, 24.3], warnings: [] }, OPTIONS),
+      compare_case(expected, { t: [24.1, null, 24.3], warnings: [] }, options),
     ).toEqual([]);
     expect(
-      compare_case(expected, { t: [24.1, 24.2, 24.4], warnings: [] }, OPTIONS),
-    ).toEqual(["output t[1]: library 24.2, upstream NaN"]);
+      compare_case(expected, { t: [24.1, 24.2, 24.4], warnings: [] }, options),
+    ).toEqual(["output t[1]: library 24.2, upstream NaN as null"]);
     expect(
-      compare_case(expected, { t: [24.1, NaN], warnings: [] }, OPTIONS),
+      compare_case(expected, { t: [24.1, null], warnings: [] }, options),
     ).toEqual(["output t: library length 2, upstream length 3"]);
-    expect(compare_case(expected, { t: 24.1, warnings: [] }, OPTIONS)).toEqual([
+    expect(compare_case(expected, { t: 24.1, warnings: [] }, options)).toEqual([
       "output t: library 24.1, upstream length 3",
     ]);
   });
@@ -256,21 +262,27 @@ describe("compare_case", () => {
     ).toEqual([]);
   });
 
+  // Upstream's NaN is the library's null, in an output declared nullable
+  // (decisions 310, 327).
   test("checks NaN positions both ways", () => {
+    const options: CompareOptions = {
+      ...OPTIONS,
+      outputs: { t: { kind: "numeric", nullable: true, unit: "°C" } },
+    };
     expect(
       compare_case(
         upstream({ t: { float: "nan" } }),
-        { t: NaN, warnings: [] },
-        OPTIONS,
+        { t: null, warnings: [] },
+        options,
       ),
     ).toEqual([]);
     expect(
       compare_case(
         upstream({ t: { float: "nan" } }),
         { t: 24, warnings: [] },
-        OPTIONS,
+        options,
       ),
-    ).toEqual(["output t: library 24, upstream NaN"]);
+    ).toEqual(["output t: library 24, upstream NaN as null"]);
     expect(
       compare_case(upstream({ t: 24 }), { t: NaN, warnings: [] }, OPTIONS),
     ).toEqual(["output t: library NaN, upstream 24"]);
@@ -278,19 +290,18 @@ describe("compare_case", () => {
 
   test("never takes a boolean for NaN", () => {
     expect(
-      compare_case(
-        upstream({ ok: { float: "nan" } }),
-        { ok: NaN, warnings: [] },
-        OPTIONS,
-      ),
-    ).toEqual([]);
+      compare_case(upstream({ ok: false }), { ok: NaN, warnings: [] }, OPTIONS),
+    ).toEqual(["output ok: library NaN, upstream false"]);
     expect(
       compare_case(
         upstream({ ok: { float: "nan" } }),
         { ok: false, warnings: [] },
-        OPTIONS,
+        {
+          ...OPTIONS,
+          outputs: { ok: { kind: "numeric", nullable: true, unit: null } },
+        },
       ),
-    ).toEqual(["output ok: library false, upstream NaN"]);
+    ).toEqual(["output ok: library false, upstream NaN as null"]);
   });
 
   test("compares booleans and strings exactly", () => {

@@ -16,7 +16,7 @@ export const AT_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    at: { kind: "numeric", masked: true, unit: "°C" },
+    at: { kind: "numeric", nullable: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 

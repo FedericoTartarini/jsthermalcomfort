@@ -76,20 +76,20 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
   outputs: {
     pmv: {
       kind: "numeric",
-      masked: true,
+      nullable: true,
       unit: null,
       applicability: { min: -2, max: 2 },
     },
-    ppd: { kind: "numeric", masked: true, unit: "%" },
+    ppd: { kind: "numeric", nullable: true, unit: "%" },
     tsv: {
       kind: "label",
-      masked: true,
+      nullable: true,
       unit: null,
       classifier: { ...THERMAL_SENSATION, right: false },
     },
     category: {
       kind: "label",
-      masked: true,
+      nullable: true,
       unit: null,
       classifier: PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025],
     },

@@ -52,7 +52,7 @@ export const PMV_E_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    e_pmv: { kind: "numeric", masked: true, unit: null },
+    e_pmv: { kind: "numeric", nullable: true, unit: null },
   },
   derived: {
     pa: PMV_PPD_ISO_INFO.derived.pa,

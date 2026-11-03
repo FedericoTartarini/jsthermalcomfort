@@ -48,8 +48,8 @@ export const VERTICAL_TMP_GRAD_PPD_INFO = deepFreeze({
     limit_inputs: { kind: "bool", default: true },
   },
   outputs: {
-    ppd_vg: { kind: "numeric", masked: true, unit: "%" },
-    acceptability: { kind: "flag", masked: true, unit: null },
+    ppd_vg: { kind: "numeric", nullable: true, unit: "%" },
+    acceptability: { kind: "flag", nullable: true, unit: null },
   },
 } as const satisfies ModelInfo);
 

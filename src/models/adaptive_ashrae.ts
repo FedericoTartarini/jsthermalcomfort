@@ -43,13 +43,13 @@ export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    tmp_cmf: { kind: "numeric", masked: true, unit: "°C" },
-    tmp_cmf_80_low: { kind: "numeric", masked: true, unit: "°C" },
-    tmp_cmf_80_up: { kind: "numeric", masked: true, unit: "°C" },
-    tmp_cmf_90_low: { kind: "numeric", masked: true, unit: "°C" },
-    tmp_cmf_90_up: { kind: "numeric", masked: true, unit: "°C" },
-    acceptability_80: { kind: "flag", masked: true, unit: null },
-    acceptability_90: { kind: "flag", masked: true, unit: null },
+    tmp_cmf: { kind: "numeric", nullable: true, unit: "°C" },
+    tmp_cmf_80_low: { kind: "numeric", nullable: true, unit: "°C" },
+    tmp_cmf_80_up: { kind: "numeric", nullable: true, unit: "°C" },
+    tmp_cmf_90_low: { kind: "numeric", nullable: true, unit: "°C" },
+    tmp_cmf_90_up: { kind: "numeric", nullable: true, unit: "°C" },
+    acceptability_80: { kind: "flag", nullable: true, unit: null },
+    acceptability_90: { kind: "flag", nullable: true, unit: null },
   },
 } as const satisfies ModelInfo);
 

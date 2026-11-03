@@ -19,7 +19,7 @@ export const WORK_CAPACITY_HOTHAPS_INFO = deepFreeze({
     },
   },
   outputs: {
-    capacity: { kind: "numeric", masked: true, unit: "%" },
+    capacity: { kind: "numeric", nullable: true, unit: "%" },
   },
 } as const satisfies ModelInfo);
 

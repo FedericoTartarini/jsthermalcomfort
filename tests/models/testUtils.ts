@@ -22,7 +22,7 @@
  *   `validateResult`'s default for a key the fixture's `tolerance` does not
  *   name. An expected value is read through the representation mappings
  *   (ADR 0028): a flag's 1.0, 0.0 or NaN as `true`, `false` or `null`, a
- *   masked output's NaN as `null`.
+ *   nullable output's NaN as `null`.
  * - Array or vector inputs run element-wise: one scalar case per element,
  *   the expected outputs indexed the same way. `loadTestData` does this for
  *   fixture rows (see `expandArrayRows`).
@@ -68,7 +68,7 @@ export const v2_infos = Object.entries(pkg as Record<string, unknown>)
  * `np.isclose` and `np.allclose` rtol 1e-5 and atol 1e-8,
  * `np.testing.assert_allclose` rtol 1e-7 and atol 0, and `pytest.approx`
  * rel 1e-6 (its absolute 1e-12 taken as 0, since it takes the larger of the
- * two rather than their sum). A NaN, an infinity or a masked output's `null`
+ * two rather than their sum). A NaN, an infinity or a nullable output's `null`
  * is close to nothing, where `np.isclose` takes an infinity as close to
  * itself.
  *
@@ -251,7 +251,7 @@ export function validateResult(
       // A primitive model_result indexes to undefined, which the assertions
       // below then report against the expected value.
       const actual_value = (model_result as Record<string, unknown>)[key];
-      // The data write upstream's NaN as null, which a masked output
+      // The data write upstream's NaN as null, which a nullable output
       // returns as null (decision 310), so null compares exactly.
       const expected_value = expected_outputs[key];
 

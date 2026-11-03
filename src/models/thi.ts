@@ -13,7 +13,7 @@ export const THI_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    thi: { kind: "numeric", masked: true, unit: null },
+    thi: { kind: "numeric", nullable: true, unit: null },
   },
 } as const satisfies ModelInfo);
 

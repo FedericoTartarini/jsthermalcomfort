@@ -13,7 +13,7 @@ export const WIND_CHILL_TEMPERATURE_INFO = deepFreeze({
     round_output: { kind: "bool", default: true },
   },
   outputs: {
-    wct: { kind: "numeric", masked: true, unit: "°C" },
+    wct: { kind: "numeric", nullable: true, unit: "°C" },
   },
 } as const satisfies ModelInfo);
 

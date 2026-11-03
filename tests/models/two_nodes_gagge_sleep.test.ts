@@ -358,7 +358,7 @@ const thrown = (inputs: unknown): Error => {
 };
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image.
+// parity image, the zero divisors and the loop cap on 4.8.0.
 describe("two_nodes_gagge_sleep (JS-only)", () => {
   // Bit for bit (register two_nodes_gagge_sleep's Notes).
   test.each([

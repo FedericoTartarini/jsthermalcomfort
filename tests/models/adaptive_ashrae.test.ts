@@ -422,10 +422,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       expect(unrounded.acceptability_90).toBe(rounded.acceptability_90);
     });
 
-    // Upstream rounds the five temperatures after the bounds, the acceptability
-    // and the IP conversion (adaptive_ashrae.py:145-183). At to = 27.98,
-    // trm = 21.5, v = 0.1 the reported 80_up is 28.0 >= to, and the unrounded
-    // 27.965 < to that the acceptability uses (measured on 4.8.0).
+    // models/adaptive_ashrae.py:145-183; the reported 80_up is 28.0, measured on 4.8.0.
     test("acceptability_80 follows the unrounded bound where the rounded one would differ", () => {
       const boundary = { tdb: 27.98, tr: 27.98, t_running_mean: 21.5, v: 0.1 };
       const rounded = adaptive_ashrae(boundary);

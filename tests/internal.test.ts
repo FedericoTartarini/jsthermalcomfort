@@ -34,6 +34,10 @@ import {
 // _internal directly, so it imports the kernels' own file (seam S2). A
 // UserWarning becomes a range row (deviation _shared-3), and a `match=` on its
 // text becomes assertions on the row's key, value and bound.
+// A call _check_ashrae55_compliance's type must accept or reject.
+const typed = (kwargs: Parameters<typeof _check_ashrae55_compliance>[0]) =>
+  kwargs;
+
 describe("test_internal", () => {
   const bound = { min: 10.0, max: 40.0 };
 
@@ -162,9 +166,6 @@ describe("test_internal", () => {
 
     // Deviation _shared-39: the type rejects each call upstream raises for.
     test("test_airspeed_control_false_requires_v_met_clo", () => {
-      const typed = (
-        kwargs: Parameters<typeof _check_ashrae55_compliance>[0],
-      ) => kwargs;
       // @ts-expect-error airspeed_control false requires v.
       typed({ tdb: 24, tr: 24, met: 1.2, clo: 0.5, airspeed_control: false });
       // @ts-expect-error airspeed_control false requires met.
@@ -307,8 +308,6 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
   // and ValueError for airspeed_control=False without v (:39-43; measured on
   // 4.8.0), so the type rejects both calls.
   test("the type requires what upstream reads unguarded", () => {
-    const typed = (kwargs: Parameters<typeof _check_ashrae55_compliance>[0]) =>
-      kwargs;
     // @ts-expect-error clo goes with met.
     typed({ tdb: 20, tr: 20, met: 1.2 });
     // @ts-expect-error airspeed_control false needs v.

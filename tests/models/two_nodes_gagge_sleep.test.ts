@@ -34,7 +34,7 @@ const fields = [
   "skin_blood_flow",
 ] as const;
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_two_nodes_gagge_sleep.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_two_nodes_gagge_sleep.py.
 describe("test_two_nodes_gagge_sleep", () => {
   test("test_two_nodes_gagge_sleep_single_input", () => {
     const result = two_nodes_gagge_sleep({
@@ -302,6 +302,39 @@ describe("test_two_nodes_gagge_sleep", () => {
     expect(max_step).toBeLessThan(0.05);
     expect(diff.every((d) => d > 0)).toBe(true); // monotonic
   });
+
+  // Deviation two_nodes_gagge_sleep-3: the parse's message.
+  test("test_temp_core_neutral_is_rejected", () => {
+    expect(() =>
+      call({
+        tdb: 18,
+        tr: 18,
+        v: 0.05,
+        rh: 50,
+        clo: 1.4,
+        thickness_quilt: 1.76,
+        temp_core_neutral: 37,
+      }),
+    ).toThrow(
+      new TypeError(
+        "temp_core_neutral is not an input of two_nodes_gagge_sleep().",
+      ),
+    );
+  });
+
+  test("test_two_nodes_gagge_sleep_air_more_humid_than_skin", () => {
+    const result = two_nodes_gagge_sleep({
+      tdb: 38,
+      tr: 38,
+      v: 0.1,
+      rh: 90,
+      clo: 1.4,
+      thickness_quilt: 1.76,
+    });
+    expect(result.wet).toBeGreaterThanOrEqual(0.06);
+    expect(result.wet).toBeLessThanOrEqual(0.59 * 0.1 ** -0.08);
+    expect(result.disc).toBe(6.0);
+  });
 });
 
 const valid = {
@@ -448,16 +481,6 @@ describe("two_nodes_gagge_sleep (JS-only)", () => {
     );
   });
 
-  // Deviation two_nodes_gagge_sleep-10: checked, then never read.
-  test("temp_core_neutral is checked as a number and changes nothing", () => {
-    expect(call({ ...valid, temp_core_neutral: 50 })).toEqual(
-      two_nodes_gagge_sleep(valid),
-    );
-    expect(() => call({ ...valid, temp_core_neutral: "abc" })).toThrow(
-      new TypeError("temp_core_neutral must be a finite number."),
-    );
-  });
-
   // models/two_nodes_gagge_sleep.py:445: the kernel sets met_shivering before
   // it reads it.
   test("the met_shivering input changes nothing", () => {
@@ -494,15 +517,16 @@ describe("two_nodes_gagge_sleep (JS-only)", () => {
   // Deviation two_nodes_gagge_sleep-5.
   test("a Newton loop that does not converge throws Error at the cap", () => {
     const error = thrown({
-      tdb: 26.292985677719116,
-      tr: 0.40826576120748487,
-      v: 596.6716153947957,
-      rh: 29.500246047973633,
-      clo: -1.442467212677002,
-      thickness_quilt: 7.711873352527618,
-      wme: -2248732.0579214664,
-      alfa: 0.4412975311279297,
-      c_str: -6175.49996273028,
+      tdb: 16033.507302819778,
+      tr: 49.774322509765625,
+      v: 4.899091720581055,
+      rh: -0.03004482046964206,
+      clo: 4.2970850467681885,
+      thickness_quilt: 7.228963375091553,
+      c_dil: 151.4079213142395,
+      temp_skin_neutral: 32.31352490186691,
+      e_skin: 0.9003673791885376,
+      alfa: -2912.3817409558123,
     });
     expect(error.constructor).toBe(Error);
     expect(error.message).toBe("Max iterations exceeded");

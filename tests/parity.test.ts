@@ -975,27 +975,12 @@ const MODELS: readonly ParityModel[] = [
   },
 ];
 
-// Models whose values 4.8.0 changes, with the ticket aligning each (decision 298).
-const ALIGNED_LATER: Readonly<Record<string, string>> = {
-  two_nodes_gagge_sleep: "ticket 51c",
-};
-
 describe("parity with pythermalcomfort", () => {
-  const check = (model: ParityModel) => {
+  test.each(MODELS)("$name", (model) => {
     const failures = parity_failures(root, model);
     expect({ count: failures.length, first: failures.slice(0, 20) }).toEqual({
       count: 0,
       first: [],
     });
-  };
-  test.each(MODELS.filter(({ name }) => !(name in ALIGNED_LATER)))(
-    "$name",
-    check,
-  );
-  test.fails.each(
-    MODELS.filter(({ name }) => name in ALIGNED_LATER).map((model) => ({
-      ...model,
-      ticket: ALIGNED_LATER[model.name],
-    })),
-  )("$name, until $ticket", check);
+  });
 });

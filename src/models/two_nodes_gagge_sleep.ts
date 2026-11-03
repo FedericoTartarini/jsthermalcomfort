@@ -28,7 +28,6 @@ export const TWO_NODES_GAGGE_SLEEP_INFO = deepFreeze({
     c_dil: { kind: "numeric", unit: null, default: 120 },
     c_str: { kind: "numeric", unit: null, default: 0.5 },
     temp_skin_neutral: { kind: "numeric", unit: "°C", default: 33.7 },
-    temp_core_neutral: { kind: "numeric", unit: "°C", default: 36.8 },
     e_skin: { kind: "numeric", unit: "W/m²", default: 0.094 },
     alfa: { kind: "numeric", unit: null, default: 0.1 },
     skin_blood_flow: { kind: "numeric", unit: "kg/h/m²", default: 6.3 },
@@ -96,7 +95,6 @@ export type GaggeTwoNodesSleep<
  * @param inputs.c_dil - Driving coefficient for vasodilation. Defaults to 120.
  * @param inputs.c_str - Driving coefficient for vasoconstriction. Defaults to 0.5.
  * @param inputs.temp_skin_neutral - Skin temperature at neutral conditions, [°C]. Defaults to 33.7.
- * @param inputs.temp_core_neutral - Core temperature at neutral conditions, [°C]. Defaults to 36.8.
  * @param inputs.e_skin - Total evaporative heat loss, [W/m2]. Defaults to 0.094.
  * @param inputs.alfa - Dynamic fraction of total body mass assigned to the skin node. Defaults to 0.1.
  * @param inputs.skin_blood_flow - Skin-blood-flow rate per unit surface area, [kg/h/m2]. Defaults to 6.3.
@@ -126,8 +124,6 @@ export function two_nodes_gagge_sleep(
 export function two_nodes_gagge_sleep(
   inputs: GaggeTwoNodesSleepInputs,
 ): GaggeTwoNodesSleep {
-  // Kept as an accepted keyword for backwards compatibility. The model derives
-  // core temperature from the Yan et al. time polynomial at every time step.
   const {
     tdb,
     tr,
@@ -543,7 +539,10 @@ function _sleep_set_optimized(
     r_ecl = r_clo / (lr * i_cl);
     if (r_ea + r_ecl === 0) throw new RangeError("division by zero");
     e_max = (_fnsvp(t_skin) - pa) / (r_ea + r_ecl);
-    if (e_max === 0) throw new RangeError("division by zero");
+    // otherwise e_rsw / e_max cannot be calculated
+    if (e_max === 0) {
+      e_max = 0.001;
+    }
     let p_rsw = e_rsw / e_max;
     p_wet = 0.06 + 0.94 * p_rsw;
     e_diff = p_wet * e_max - e_rsw;
@@ -554,6 +553,12 @@ function _sleep_set_optimized(
       p_rsw = (w_max - 0.06) / 0.94;
       e_rsw = p_rsw * e_max;
       e_diff = 0.06 * (1 - p_rsw) * e_max;
+    }
+    // the air is more humid than the skin, so no sweat evaporates
+    if (e_max < 0) {
+      e_diff = 0;
+      e_rsw = 0;
+      p_wet = w_max;
     }
     e_skin = e_rsw + e_diff;
     met_shivering = 19.4 * cold_s * cold_c;
@@ -667,12 +672,19 @@ function _sleep_set_optimized(
     t_sens = w_max * 4.7 + 0.4685 * (t_body - tbm_h);
   }
 
-  if (e_max - e_comfort - e_diff === 0)
-    throw new RangeError("division by zero");
-  let disc = (4.7 * (e_rsw - e_comfort)) / (e_max - e_comfort - e_diff);
+  // e_max was multiplied by w_max above, as in two_nodes_gagge's e_max * w_max
+  let disc: number;
+  if (t_sens > 0 && 0 > e_max - e_comfort - e_diff) {
+    disc = 6.0;
+  } else {
+    if (e_max - e_comfort - e_diff === 0)
+      throw new RangeError("division by zero");
+    disc = (4.7 * (e_rsw - e_comfort)) / (e_max - e_comfort - e_diff);
+  }
   if (disc < 0) {
     disc = t_sens;
   }
+  disc = 6.0 < disc ? 6.0 : disc;
 
   return [
     set_temp,

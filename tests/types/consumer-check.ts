@@ -1343,7 +1343,6 @@ two_nodes_gagge_sleep({
   ltime: 2,
   height: 171,
   weight: 70,
-  temp_core_neutral: 36.8,
   met_shivering: 0,
 });
 // @ts-expect-error a series holds numbers.

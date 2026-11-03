@@ -1,5 +1,4 @@
 import { notOfType } from "../_internal/errors.ts";
-import { round } from "../_internal/round.ts";
 
 const g = 9.81;
 const c_to_k = 273.15;
@@ -46,17 +45,16 @@ export function t_mrt(
   }
   if (typeof standard !== "string") throw notOfType("standard", "a string");
   standard = standard.toLowerCase();
-  let tr = 0;
   if (standard === "mixed convection") {
-    tr = get_tr_mixed_convection(tg, tdb, v, d, emissivity);
-    return d >= 0.04 && d <= 0.15 ? round(tr, 1) : NaN;
+    const tr = get_tr_mixed_convection(tg, tdb, v, d, emissivity);
+    return d >= 0.04 && d <= 0.15 ? tr : NaN;
   }
 
   if (standard === "iso") {
     return get_tr_iso(tg, tdb, v, d, emissivity);
   }
-  throw new Error(
-    "No standard found, please choose standard from ISO and Mixed Convectioin",
+  throw new RangeError(
+    "Standard not recognized. Please choose either 'Mixed Convection' or 'ISO'.",
   );
 }
 
@@ -104,5 +102,5 @@ function get_tr_iso(_tg, _tdb, _v, _d, _emissivity) {
       0.25,
     ) - c_to_k;
 
-  return round(tr, 1);
+  return tr;
 }

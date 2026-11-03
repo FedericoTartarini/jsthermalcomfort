@@ -182,9 +182,9 @@ export function clo_dynamic_ashrae(
   if (typeof (standard as unknown) !== "string") {
     throw notOfType("standard", "a string");
   }
-  if ((standard as unknown) !== Standard.ashrae_55_2023)
-    throw new Error(
-      `PMV calculations can only be performed in compliance with ASHRAE ${Standard.ashrae_55_2023}`,
+  if (standard.toLowerCase() !== Standard.ashrae_55_2023)
+    throw new RangeError(
+      `Dynamic clothing insulation calculations can only be performed in compliance with ASHRAE ${Standard.ashrae_55_2023}`,
     );
 
   return met > 1.2 ? round(clo * (0.6 + 0.4 / met), 3) : clo;
@@ -284,9 +284,9 @@ export function clo_dynamic_iso_vr(
   if (typeof (standard as unknown) !== "string") {
     throw notOfType("standard", "a string");
   }
-  if ((standard as unknown) !== Standard.iso_9920_2007)
-    throw new Error(
-      `PMV calculations can only be performed in compliance with ISO ${Standard.iso_9920_2007}`,
+  if (standard.toLowerCase() !== Standard.iso_9920_2007)
+    throw new RangeError(
+      `Dynamic clothing insulation calculations can only be performed in compliance with ISO ${Standard.iso_9920_2007}`,
     );
 
   const f_cl = clo_area_factor(clo);

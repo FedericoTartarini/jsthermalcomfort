@@ -100,7 +100,7 @@ describe("test_clothing", () => {
 
     // Test invalid standard input
     // @ts-expect-error the only standard the type allows is "55-2023"
-    expect(() => clo_dynamic_ashrae(1.0, 1.0, "invalid")).toThrow(Error);
+    expect(() => clo_dynamic_ashrae(1.0, 1.0, "invalid")).toThrow(RangeError);
   });
 
   test("test_clo_dynamic_iso", () => {
@@ -131,7 +131,7 @@ describe("test_clothing", () => {
     expect(() =>
       // @ts-expect-error the only standard the type allows is "9920-2007"
       clo_dynamic_iso(1.0, 1.0, 0.2, undefined, "invalid"),
-    ).toThrow(Error);
+    ).toThrow(RangeError);
   });
 });
 
@@ -189,7 +189,9 @@ describe("clo_dynamic_ashrae", () => {
   test("names the standard it serves when given another", () => {
     // @ts-expect-error an ISO 7730 edition is not an ASHRAE 55 one
     expect(() => clo_dynamic_ashrae(1, 1, "7730-2025")).toThrow(
-      "PMV calculations can only be performed in compliance with ASHRAE 55-2023",
+      new RangeError(
+        "Dynamic clothing insulation calculations can only be performed in compliance with ASHRAE 55-2023",
+      ),
     );
   });
 });
@@ -241,7 +243,9 @@ describe("clo_dynamic_iso", () => {
       // @ts-expect-error ISO 7730 is not the standard the correction is from
       clo_dynamic_iso(1, 1, 0.2, 0.7, "7730-2025"),
     ).toThrow(
-      "PMV calculations can only be performed in compliance with ISO 9920-2007",
+      new RangeError(
+        "Dynamic clothing insulation calculations can only be performed in compliance with ISO 9920-2007",
+      ),
     );
   });
 });
@@ -284,7 +288,9 @@ describe("clo_dynamic_iso_vr", () => {
       // @ts-expect-error ISO 7730 is not the standard the correction is from
       clo_dynamic_iso_vr(1, 1, 0.2, 0.7, "7730-2025"),
     ).toThrow(
-      "PMV calculations can only be performed in compliance with ISO 9920-2007",
+      new RangeError(
+        "Dynamic clothing insulation calculations can only be performed in compliance with ISO 9920-2007",
+      ),
     );
   });
 });

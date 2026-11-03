@@ -1,5 +1,6 @@
 import { notOfType } from "../_internal/errors.ts";
-import { round } from "../_internal/round.ts";
+import { pythonRound, round } from "../_internal/round.ts";
+import { pythonSum } from "../_internal/pythonSum.ts";
 import { units_converter } from "./units_converter.ts";
 
 /**
@@ -71,18 +72,36 @@ export function running_mean_outdoor_temperature(
   }
   if (typeof alpha !== "number") throw notOfType("alpha", "a number");
   if (typeof units !== "string") throw notOfType("units", "a string");
+  units = units.toUpperCase();
   if (units === "IP")
     temp_array = temp_array.map((tdb) => units_converter("IP", { tdb }).tdb);
 
-  let coeff = temp_array.map((_tdb, index) => Math.pow(alpha, index));
-  let summ_t_rm = temp_array.reduce(
-    (acum, curr, index) => acum + curr * coeff[index],
+  const coeff = temp_array.map((_tdb, ix) => Math.pow(alpha, ix));
+  // Python's sum and division message depend on which items are ints, an
+  // integral number read as one (decisions 271, 331, 332) and the IP path's
+  // conversion returning floats.
+  const isInt = (x) => Number.isInteger(x) && !Object.is(x, -0);
+  const coeffInt = coeff.map(() => isInt(alpha));
+  const productInt = temp_array.map(
+    (tdb) => isInt(alpha) && units !== "IP" && isInt(tdb),
   );
-  let summ_coeff = coeff.reduce((acum, curr) => acum + curr);
+  const summ_t_rm = pythonSum(
+    temp_array.map((tdb, ix) => coeff[ix] * tdb),
+    productInt,
+  );
+  const summ_coeff = pythonSum(coeff, coeffInt);
+  // Python raises ZeroDivisionError here, a RangeError (ADR 0022).
+  if (summ_coeff === 0) {
+    throw new RangeError(
+      // Both sums are ints when every weighted temperature is, whose int alpha
+      // makes every weight one too.
+      productInt.every(Boolean) ? "division by zero" : "float division by zero",
+    );
+  }
   let t_rm = summ_t_rm / summ_coeff;
   if (units === "IP") t_rm = units_converter("SI", { tmp: t_rm }).tmp;
 
-  return Math.round(t_rm * 10 + Number.EPSILON) / 10;
+  return pythonRound(t_rm, 1);
 }
 
 /**

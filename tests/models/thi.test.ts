@@ -86,6 +86,12 @@ describe("thi (JS-only)", () => {
     },
   );
 
+  // Upstream's thi is nan at tdb 1e308 and rh 50, rounded or not, as inf - inf, measured on 4.8.0 in the parity image (models/thi.py:44).
+  test("a tdb of 1e308 gives null", () => {
+    expect(thi({ tdb: 1e308, rh: 50 }).thi).toBe(null);
+    expect(thi({ tdb: 1e308, rh: 50, round_output: false }).thi).toBe(null);
+  });
+
   // Deviation thi-3.
   test.each([-5, -Number.MIN_VALUE, 100.00000000000001, 150])(
     "rh %s throws upstream's message as a RangeError",

@@ -46,6 +46,11 @@ describe("pmv_athb (JS-only)", () => {
     expect(pmv_athb(inputs).athb_pmv).toBe(expected);
   });
 
+  // Upstream's athb_pmv is nan at neutral with met -400, measured on 4.8.0 in the parity image (models/pmv_athb.py:95-124).
+  test("a met of -400 gives null", () => {
+    expect(pmv_athb({ ...neutral, met: -400 }).athb_pmv).toBe(null);
+  });
+
   // Deviation pmv_athb-3.
   test("clo true throws TypeError, where upstream computes with clo=1", () => {
     expect(call({ ...neutral, clo: true })).toThrow(

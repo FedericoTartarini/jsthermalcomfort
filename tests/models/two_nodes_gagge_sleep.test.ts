@@ -368,6 +368,24 @@ describe("two_nodes_gagge_sleep (JS-only)", () => {
     }
   });
 
+  // Upstream's ten outputs are nan at valid with height -1 or weight -1, for one minute and each minute of two, measured on 4.8.0 in the parity image (models/two_nodes_gagge_sleep.py:334).
+  test.each([{ height: -1 }, { weight: -1 }])(
+    "%o gives null in every output, every minute",
+    (bad) => {
+      const scalar = call({ ...valid, ...bad });
+      const twice = call({
+        ...Object.fromEntries(
+          Object.entries(valid).map(([k, x]) => [k, [x, x]]),
+        ),
+        ...bad,
+      });
+      for (const field of fields) {
+        expect(scalar[field]).toBe(null);
+        expect(series(twice[field])).toEqual([null, null]);
+      }
+    },
+  );
+
   // Deviation two_nodes_gagge_sleep-8.
   test.each([
     [

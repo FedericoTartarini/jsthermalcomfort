@@ -169,6 +169,21 @@ describe("two_nodes_gagge (JS-only)", () => {
     }
   });
 
+  // Upstream's set, et and pmv_set are nan at base with tdb and tr -235, rounded or not, measured on 4.8.0 in the parity image (models/two_nodes_gagge.py:464-510, :540-542).
+  test("a tdb and tr of -235 give a null set, et and pmv_set", () => {
+    for (const round_output of [true, false]) {
+      const result = two_nodes_gagge({
+        ...base,
+        tdb: -235,
+        tr: -235,
+        round_output,
+      });
+      expect(result.set).toBe(null);
+      expect(result.et).toBe(null);
+      expect(result.pmv_set).toBe(null);
+    }
+  });
+
   // Deviation two_nodes_gagge-2.
   test("returns no warnings, as upstream emits none", () => {
     expect(call(base).warnings).toEqual([]);

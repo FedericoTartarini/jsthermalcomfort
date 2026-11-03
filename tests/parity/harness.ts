@@ -1,5 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type {
+  ModelInfo,
+  OutputField,
+  OutputsInfo,
+} from "../../src/_internal/modelInfo.ts";
 import { read_registers } from "../deviations/register.ts";
 import type { Parity, Row } from "../deviations/register.ts";
 
@@ -99,12 +104,16 @@ export interface CompareOptions {
   /** Whether warning keys are compared. */
   readonly warnings: boolean;
   readonly exempt: Parity;
+  /** The model's `INFO.outputs`, which select each output's mapping. */
+  readonly outputs: OutputsInfo;
 }
 
 /** One model's suite. */
 export interface ParityModel {
   /** Upstream's function name, which names the data file and the register. */
   readonly name: string;
+  /** The model's `*_INFO`, whose outputs select the mappings. */
+  readonly info: ModelInfo;
   /** Calls the model through its public entry with upstream's arguments. */
   readonly run: (
     inputs: UpstreamCase["inputs"],
@@ -187,16 +196,69 @@ function show(value: unknown): string {
   return typeof value === "string" ? JSON.stringify(value) : String(value);
 }
 
+/**
+ * R item "flag" (ADR 0028): upstream's `_as_flag` 1.0, 0.0 and NaN as `true`,
+ * `false` and `null`; `undefined` for any other value, outside its domain.
+ */
+export function flag_mapping(value: Decoded): boolean | null | undefined {
+  if (value === 1) return true;
+  if (Object.is(value, 0)) return false;
+  return typeof value === "number" && Number.isNaN(value) ? null : undefined;
+}
+
+/**
+ * R item "masked output" (ADR 0028): upstream's NaN as `null`, any other value
+ * as it is; `undefined` for `null`, upstream's None, outside its domain, since
+ * it could not be told from a NaN.
+ */
+export function masked_mapping(value: Decoded): Decoded | undefined {
+  if (value === null) return undefined;
+  return typeof value === "number" && Number.isNaN(value) ? null : value;
+}
+
+/**
+ * Reads one upstream value in the library's representation, through the
+ * mapping its `INFO.outputs` entry selects: a `flag`'s, else a `masked`
+ * output's, else none. A value outside the mapping's domain fails.
+ */
+function to_library(
+  name: string,
+  value: Decoded,
+  field: OutputField | undefined,
+): { readonly value: Decoded } | { readonly failure: string } {
+  const [mapped, mapping, domain] =
+    field?.kind === "flag"
+      ? [flag_mapping(value), "flag", "1.0, 0.0 or NaN"]
+      : field?.masked === true
+        ? [masked_mapping(value), "masked", "any value but None"]
+        : [value, "", ""];
+  return mapped === undefined
+    ? {
+        failure: `output ${name}: upstream ${show(value)} is outside the ${mapping} mapping's domain, ${domain}`,
+      }
+    : { value: mapped };
+}
+
 function compare_output(
   name: string,
-  expected: number | boolean | string | null,
+  upstream: Decoded,
   actual: unknown,
   exact: boolean,
   { rel, abs }: Tolerance,
+  field: OutputField | undefined,
 ): string | undefined {
-  const failure = `output ${name}: library ${show(actual)}, upstream ${show(expected)}`;
-  // A boolean, a string or null compares exactly, and never equals a number:
-  // a masked boolean's NaN must be NaN (ADR 0006).
+  // A null is "no value", which only an output declared masked returns, or a
+  // field held at its dataclass's None.
+  if (actual === null && field?.masked !== true && field?.none !== true) {
+    return `output ${name}: library null, but INFO.outputs does not declare ${name.replace(/\[\d+\]$/, "")} masked`;
+  }
+  const mapped = to_library(name, upstream, field);
+  if ("failure" in mapped) return mapped.failure;
+  const expected = mapped.value;
+  const as = Object.is(expected, upstream) ? "" : ` as ${show(expected)}`;
+  const failure = `output ${name}: library ${show(actual)}, upstream ${show(upstream)}${as}`;
+  // A boolean, a string or null compares exactly, and never equals a number,
+  // so a NaN is never taken for a boolean.
   if (typeof expected !== "number" || typeof actual !== "number") {
     return actual === expected ? undefined : failure;
   }
@@ -220,6 +282,7 @@ function compare_series(
   actual: unknown,
   exact: boolean,
   tolerance: Tolerance,
+  field: OutputField | undefined,
 ): string | undefined {
   if (!Array.isArray(actual) || actual.length !== expected.length) {
     const length = Array.isArray(actual)
@@ -234,6 +297,7 @@ function compare_series(
       actual[i],
       exact,
       tolerance,
+      field,
     );
     if (failure !== undefined) return failure;
   }
@@ -253,7 +317,7 @@ function compared_keys(keys: readonly string[], exempt: Parity): string[] {
 export function compare_case(
   expected: UpstreamCase,
   actual: Readonly<Record<string, unknown>>,
-  { rounded, tolerance, warnings, exempt }: CompareOptions,
+  { rounded, tolerance, warnings, exempt, outputs }: CompareOptions,
 ): string[] {
   const failures: string[] = [];
   for (const [name, value] of Object.entries(expected.outputs)) {
@@ -270,6 +334,7 @@ export function compare_case(
           actual[name],
           rounded.includes(name),
           tolerance,
+          outputs[name],
         )
       : compare_output(
           name,
@@ -277,6 +342,7 @@ export function compare_case(
           actual[name],
           rounded.includes(name),
           tolerance,
+          outputs[name],
         );
     if (failure !== undefined) failures.push(failure);
   }
@@ -391,6 +457,7 @@ export function parity_failures(root: string, model: ParityModel): string[] {
       tolerance,
       warnings: model.warnings,
       exempt,
+      outputs: model.info.outputs,
     }).map((failure) => `${at}: ${failure}`);
   });
 }

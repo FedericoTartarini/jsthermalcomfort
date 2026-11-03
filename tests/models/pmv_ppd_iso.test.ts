@@ -545,12 +545,12 @@ describe("pmv_ppd_iso (JS-only)", () => {
     );
 
     test.each(NEAR_LIMIT)(
-      "pa just above 2700 Pa NaNs pmv, ppd and tsv (tdb=$tdb)",
+      "pa just above 2700 Pa gives a NaN pmv and ppd and a null tsv (tdb=$tdb)",
       ({ tdb, rh }) => {
         const result = call(tdb, rh + STEP_OVER);
         expect(result.pmv).toBeNaN();
         expect(result.ppd).toBeNaN();
-        expect(result.tsv).toBeNaN();
+        expect(result.tsv).toBe(null);
       },
     );
 
@@ -700,7 +700,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(pmv_ppd_iso(neutral).tsv).toBe("Neutral");
     });
 
-    test("tsv is NaN when pmv is NaN (out of range)", () => {
+    test("tsv is null when pmv is NaN (out of range)", () => {
       const result = pmv_ppd_iso({
         tdb: 35,
         tr: 35,
@@ -710,7 +710,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
         clo: 0.3,
       });
       expect(result.pmv).toBeNaN();
-      expect(result.tsv).toBeNaN();
+      expect(result.tsv).toBe(null);
     });
 
     // models/pmv_ppd_iso.py:205-222: tsv classifies the pmv returned, after rounding.
@@ -776,13 +776,13 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(cool.category).toBe("none");
     });
 
-    test("is NaN when the applicability gate fails", () => {
+    test("is null when the applicability gate fails", () => {
       // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
       // is otherwise category B.
       const out_of_range = { ...neutral, tdb: 28, tr: 28, vr: 1.2, ...iso2005 };
       const result = pmv_ppd_iso(out_of_range);
       expect(result.pmv).toBeNaN();
-      expect(result.category).toBeNaN();
+      expect(result.category).toBe(null);
       // The same call with the gate off is classified.
       expect(
         pmv_ppd_iso({ ...out_of_range, limit_inputs: false }),
@@ -849,7 +849,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       expect(pmv_ppd_iso(warm)).toHaveProperty("category", "II");
     });
 
-    test("is NaN when the applicability gate fails", () => {
+    test("is null when the applicability gate fails", () => {
       // vr = 1.2 m/s breaks only ISO 7730's 1 m/s bound; the pmv, ≈ 0.26,
       // is otherwise category II.
       const out_of_range = {
@@ -861,7 +861,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
       };
       const result = pmv_ppd_iso(out_of_range);
       expect(result.pmv).toBeNaN();
-      expect(result.category).toBeNaN();
+      expect(result.category).toBe(null);
       // The same call with the gate off is classified.
       expect(
         pmv_ppd_iso({ ...out_of_range, limit_inputs: false }),

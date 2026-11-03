@@ -20,7 +20,9 @@
  *   upstream's tolerance where it states one (`pytest.approx(..., abs=...)`,
  *   a fixture's `tolerance`), 1e-6 otherwise, which is also
  *   `validateResult`'s default for a key the fixture's `tolerance` does not
- *   name.
+ *   name. An expected value is read through the representation mappings
+ *   (ADR 0028): a flag's 1.0, 0.0 or NaN as `true`, `false` or `null`, a
+ *   masked output's NaN as `null`.
  * - Array or vector inputs run element-wise: one scalar case per element,
  *   the expected outputs indexed the same way. `loadTestData` does this for
  *   fixture rows (see `expandArrayRows`).
@@ -244,11 +246,15 @@ export function validateResult(
 
   try {
     expected_keys.forEach((key) => {
-      const expected_value =
-        expected_outputs[key] === null ? NaN : expected_outputs[key];
       // A primitive model_result indexes to undefined, which the assertions
       // below then report against the expected value.
       const actual_value = (model_result as Record<string, unknown>)[key];
+      // The data write upstream's NaN as null, which a masked output
+      // returns as null (decision 310) and any other output as NaN.
+      const expected_value =
+        expected_outputs[key] === null && actual_value !== null
+          ? NaN
+          : expected_outputs[key];
 
       // Use the specified tolerance if available, otherwise upstream's 1e-6
       const tol = tolerances?.[key] ?? 1e-6;

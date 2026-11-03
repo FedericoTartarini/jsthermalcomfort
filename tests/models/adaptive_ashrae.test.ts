@@ -25,31 +25,19 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
 // tests/internal.test.ts, and test_t_o of tests/test_environment.py is in
 // tests/environment/operative_tmp.test.ts.
 describe("test_adaptive_ashrae", () => {
-  // v1.1.0's NaN acceptability (pythermalcomfort#484) fails until ticket 51b.
-  const cases = reference_table.data.map((entry, index) => ({
-    ...entry,
-    index,
-  }));
-  const isNanFlagCase = ({ outputs }: (typeof cases)[number]) =>
-    outputs.acceptability_80 === null;
-  const checkCase = (entry: (typeof cases)[number]) => {
-    const { inputs, outputs } = entry;
-    // As upstream's adaptive_ashrae(tdb, tr, t_running_mean, v, units): the
-    // fixture's entries hold those keys only, and one without units runs on
-    // the "SI" default.
-    const result = adaptive_ashrae(
-      inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
-    );
+  test.each(reference_table.data)(
+    "test_adaptive_ashrae: fixture case %#",
+    (entry) => {
+      const { inputs, outputs } = entry;
+      // As upstream's adaptive_ashrae(tdb, tr, t_running_mean, v, units): the
+      // fixture's entries hold those keys only, and one without units runs on
+      // the "SI" default.
+      const result = adaptive_ashrae(
+        inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
+      );
 
-    validateResult(result, outputs, tolerance, inputs);
-  };
-  test.each(cases.filter((entry) => !isNanFlagCase(entry)))(
-    "test_adaptive_ashrae: fixture case $index",
-    checkCase,
-  );
-  test.fails.each(cases.filter(isNanFlagCase))(
-    "test_adaptive_ashrae: fixture case $index, until ticket 51b",
-    checkCase,
+      validateResult(result, outputs, tolerance, inputs);
+    },
   );
 
   test("test_ashrae_inputs_invalid_units", () => {
@@ -123,8 +111,10 @@ describe("test_adaptive_ashrae", () => {
     });
 
     expect(result.tmp_cmf).toBeNaN();
-    expect(result.acceptability_80).toBe(false);
-    expect(result.acceptability_90).toBe(false);
+
+    // outside the applicability limits the acceptability flags are NaN, not 0.0 (#484)
+    expect(result.acceptability_80).toBe(null);
+    expect(result.acceptability_90).toBe(null);
   });
 
   test("test_round_output_default_preserves_behaviour", () => {
@@ -209,6 +199,20 @@ describe("test_adaptive_ashrae", () => {
       }),
     ).toThrow(TypeError);
   });
+
+  // Upstream's [value, np.nan], element-wise; deviation _shared-7.
+  test.each(["tdb", "tr", "v"] as const)(
+    "test_acceptability_nan_for_nan_input[%s]",
+    (nan_input) => {
+      const inputs = { tdb: 25.0, tr: 25.0, t_running_mean: 20.0, v: 0.1 };
+      const result = adaptive_ashrae({ ...inputs, limit_inputs: false });
+      expect(result.acceptability_80).toBe(true);
+      expect(result.acceptability_90).toBe(true);
+      expect(() =>
+        adaptive_ashrae({ ...inputs, [nan_input]: NaN, limit_inputs: false }),
+      ).toThrow(RangeError);
+    },
+  );
 });
 
 describeModelContract(
@@ -220,7 +224,7 @@ describeModelContract(
 
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, measured on pythermalcomfort 4.7.0,
-// and what only the library adds.
+// the acceptability on 4.8.0, and what only the library adds.
 describe("adaptive_ashrae (JS-only)", () => {
   const neutral = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
   // A call with inputs the type rejects, to test the runtime.
@@ -246,7 +250,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       expect(result.acceptability_90).toBe(false);
     });
 
-    // The docstring's examples (adaptive_ashrae.py:80-100).
+    // The docstring's examples (adaptive_ashrae.py:78-98).
     test("the TSDoc examples give what upstream prints", () => {
       expect(adaptive_ashrae(neutral)).toEqual({
         tmp_cmf: 24,
@@ -281,7 +285,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       });
       expect(adaptive_ashrae({ ...neutral, t_running_mean: 9 })).toMatchObject({
         tmp_cmf: NaN,
-        acceptability_90: false,
+        acceptability_90: null,
       });
     });
 
@@ -380,12 +384,12 @@ describe("adaptive_ashrae (JS-only)", () => {
   });
 
   describe("result", () => {
-    // adaptive_ashrae.py:155-156
-    test("the acceptability is a boolean even when tmp_cmf is NaN", () => {
+    // adaptive_ashrae.py:150-159
+    test("the acceptability is null where tmp_cmf is NaN", () => {
       const result = adaptive_ashrae({ ...neutral, tdb: 45 });
       expect(result.tmp_cmf).toBeNaN();
-      expect(result.acceptability_80).toBe(false);
-      expect(result.acceptability_90).toBe(false);
+      expect(result.acceptability_80).toBe(null);
+      expect(result.acceptability_90).toBe(null);
     });
   });
 

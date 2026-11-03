@@ -6,7 +6,7 @@ import {
   ASHRAE_55_STILL_AIR_THRESHOLD,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -14,7 +14,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
-import { _mapping } from "../_internal/validation.ts";
+import { _as_flag, _mapping } from "../_internal/validation.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
 
@@ -62,7 +62,7 @@ export const PMV_PPD_ASHRAE_INFO = deepFreeze({
       classifier: { ...THERMAL_SENSATION, right: true },
     },
     compliance: {
-      kind: "bool",
+      kind: "flag",
       masked: true,
       unit: null,
       interval: { min: -0.5, max: 0.5 },
@@ -142,9 +142,9 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * - `pmv` - Predicted Mean Vote.
  * - `ppd` - Predicted Percentage of Dissatisfied.
  * - `tsv` - Predicted thermal sensation vote.
- * - `compliance` - True if PMV is within the acceptable range (-0.5 < PMV < 0.5) according to
- *   ASHRAE Standard 55-2023. When ``limit_inputs=True`` and any input is outside
- *   the standard applicability limits, ``compliance`` will be ``nan``.
+ * - `compliance` - 1.0 if PMV is within the acceptable range (-0.5 < PMV < 0.5) according to
+ *   ASHRAE Standard 55-2023, 0.0 if not, and NaN where the inputs are outside the
+ *   applicability limits (``limit_inputs=True``).
  *
  * @example
  * ```ts
@@ -231,9 +231,11 @@ export function pmv_ppd_ashrae(inputs: PMVPPDAshraeInputs): PMVPPDAshrae {
       );
 
   const { interval } = PMV_PPD_ASHRAE_INFO.outputs.compliance;
-  // Calculate compliance: True if -0.5 < PMV < 0.5
-  let compliance_array: boolean | number =
-    pmv_array > interval.min && pmv_array < interval.max;
+  // 1.0 if -0.5 < PMV < 0.5, otherwise 0.0, and NaN where PMV is undefined
+  let compliance_array = _as_flag(
+    pmv_array > interval.min && pmv_array < interval.max,
+    !Number.isNaN(pmv_array),
+  );
 
   const [tdb_valid, tr_valid, v_valid, met_valid, clo_valid] =
     _check_ashrae55_compliance(
@@ -264,11 +266,14 @@ export function pmv_ppd_ashrae(inputs: PMVPPDAshraeInputs): PMVPPDAshrae {
     ppd_array = round(ppd_array, 1);
   }
 
-  return Object.freeze({
-    pmv: pmv_array,
-    ppd: ppd_array,
-    tsv: _mapping(pmv_array, PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier),
-    compliance: compliance_array,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    PMV_PPD_ASHRAE_INFO,
+    {
+      pmv: pmv_array,
+      ppd: ppd_array,
+      tsv: _mapping(pmv_array, PMV_PPD_ASHRAE_INFO.outputs.tsv.classifier),
+      compliance: compliance_array,
+    },
+    warnings,
+  );
 }

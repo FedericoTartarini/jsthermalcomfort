@@ -756,10 +756,7 @@ def _use_fans_heatwaves(rng):
     # rh 0-100 %, met 0.7-2 met, clo 0-1 clo), so NaN positions and every
     # check's warning are compared too, and reach the heat strain each maximum
     # gives: skin blood flow, skin wettedness and regulatory sweating. position
-    # comes in any case, as two_nodes_gagge's check accepts. With limit_inputs
-    # off, round_output is off too: np.around raises on the boolean outputs
-    # there (decision 224).
-    limit_inputs = bool(rng.random() < 0.5)
+    # comes in any case, as two_nodes_gagge's check accepts.
     return {
         "tdb": _value(rng, 15.0, 55.0),
         "tr": _value(rng, 15.0, 60.0),
@@ -783,8 +780,8 @@ def _use_fans_heatwaves(rng):
         ),
         "max_skin_blood_flow": _value(rng, 30.0, 150.0) if rng.random() < 0.5 else 80.0,
         "max_sweating": _value(rng, 50.0, 800.0) if rng.random() < 0.5 else 500.0,
-        "limit_inputs": limit_inputs,
-        "round_output": bool(rng.random() < 0.5) if limit_inputs else False,
+        "limit_inputs": bool(rng.random() < 0.5),
+        "round_output": bool(rng.random() < 0.5),
     }
 
 

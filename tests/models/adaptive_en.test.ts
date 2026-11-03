@@ -15,29 +15,17 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.adaptiveEn,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_adaptive_en.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_adaptive_en.py.
 // Upstream's arrays are called element-wise, and a UserWarning becomes a range row.
 describe("test_adaptive_en", () => {
-  // v1.1.0's NaN acceptability (pythermalcomfort#484) fails until ticket 51b.
-  const cases = reference_table.data.map((entry, index) => ({
-    ...entry,
-    index,
-  }));
-  const isNanFlagCase = ({ outputs }: (typeof cases)[number]) =>
-    outputs.acceptability_cat_i === null;
-  const checkCase = (entry: (typeof cases)[number]) => {
-    const { inputs, outputs } = entry;
-    const result = adaptive_en(inputs as unknown as Inputs);
+  test.each(reference_table.data)(
+    "test_adaptive_en: fixture case %#",
+    (entry) => {
+      const { inputs, outputs } = entry;
+      const result = adaptive_en(inputs as unknown as Inputs);
 
-    validateResult(result, outputs, tolerance, inputs);
-  };
-  test.each(cases.filter((entry) => !isNanFlagCase(entry)))(
-    "test_adaptive_en: fixture case $index",
-    checkCase,
-  );
-  test.fails.each(cases.filter(isNanFlagCase))(
-    "test_adaptive_en: fixture case $index, until ticket 51b",
-    checkCase,
+      validateResult(result, outputs, tolerance, inputs);
+    },
   );
 
   test("test_adaptive_en_running_mean_limits", () => {
@@ -202,6 +190,24 @@ describe("test_adaptive_en", () => {
       } as unknown as Inputs),
     ).toThrow(TypeError);
   });
+
+  // Upstream's [value, np.nan], element-wise; deviation _shared-7.
+  test.each(["tdb", "tr", "v"] as const)(
+    "test_acceptability_nan_for_nan_input[%s]",
+    (nan_input) => {
+      const inputs = { tdb: 25.0, tr: 25.0, t_running_mean: 20.0, v: 0.1 };
+      const result = adaptive_en({ ...inputs, limit_inputs: false });
+      for (const flag of [
+        result.acceptability_cat_i,
+        result.acceptability_cat_ii,
+        result.acceptability_cat_iii,
+      ])
+        expect(flag).toBe(true);
+      expect(() =>
+        adaptive_en({ ...inputs, [nan_input]: NaN, limit_inputs: false }),
+      ).toThrow(RangeError);
+    },
+  );
 });
 
 const neutral = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
@@ -212,15 +218,15 @@ describeModelContract(adaptive_en, ADAPTIVE_EN_INFO, neutral, {
 });
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image, and what only the library adds.
+// parity image, the acceptability on 4.8.0, and what only the library adds.
 describe("adaptive_en (JS-only)", () => {
   // A call with inputs the type rejects, to test the runtime.
   const call = (inputs: unknown) => () => adaptive_en(inputs as Inputs);
   const masked = {
     tmp_cmf: NaN,
-    acceptability_cat_i: false,
-    acceptability_cat_ii: false,
-    acceptability_cat_iii: false,
+    acceptability_cat_i: null,
+    acceptability_cat_ii: null,
+    acceptability_cat_iii: null,
     tmp_cmf_cat_i_up: NaN,
     tmp_cmf_cat_ii_up: NaN,
     tmp_cmf_cat_iii_up: NaN,
@@ -319,16 +325,16 @@ describe("adaptive_en (JS-only)", () => {
     );
 
     // adaptive_en(tdb=25, tr=25, t_running_mean=20, v=-0.5) gives every
-    // acceptability False with tmp_cmf 25.4 and only numpy's RuntimeWarning,
-    // whatever limit_inputs is: operative_tmp's ISO square root is NaN.
+    // acceptability NaN with tmp_cmf 25.4 and only numpy's RuntimeWarning on
+    // 4.8.0, whatever limit_inputs is: operative_tmp's ISO square root is NaN.
     test.each([true, false])(
-      "a negative v is outside every category with no row, limit_inputs %s",
+      "a negative v makes every acceptability null with no row, limit_inputs %s",
       (limit_inputs) => {
         const result = adaptive_en({ ...neutral, v: -0.5, limit_inputs });
         expect(result.tmp_cmf).toBe(25.4);
-        expect(result.acceptability_cat_i).toBe(false);
-        expect(result.acceptability_cat_ii).toBe(false);
-        expect(result.acceptability_cat_iii).toBe(false);
+        expect(result.acceptability_cat_i).toBe(null);
+        expect(result.acceptability_cat_ii).toBe(null);
+        expect(result.acceptability_cat_iii).toBe(null);
         expect(result.warnings).toEqual([]);
       },
     );

@@ -42,7 +42,7 @@ const ashrae_rows = assertNonEmptyRows(
   "pmv_ppd_ashrae ASHRAE rows",
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_pmv_ppd_ashrae.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_pmv_ppd_ashrae.py.
 describe("test_pmv_ppd_ashrae", () => {
   test.each(ashrae_rows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
@@ -143,6 +143,7 @@ describe("test_pmv_ppd_ashrae", () => {
       expect(result.pmv).toBe(4.51); // 4.48 before #489
       expect(result.ppd).toBe(100.0);
       expect(result.tsv).toBe("Hot");
+      // Upstream's compliance=np.bool_(False) (tests/test_pmv_ppd_ashrae.py:107).
       expect(result.compliance).toBe(false);
     });
 
@@ -181,7 +182,42 @@ describe("test_pmv_ppd_ashrae", () => {
       // Also test inputs that produce PMV close to upper bound
       result = at(27.45);
       expect(result.pmv < -0.5 || result.pmv > 0.5).toBe(true);
+      // Upstream's `is False or == np.bool_(False)` (tests/test_pmv_ppd_ashrae.py:176).
       expect(result.compliance).toBe(false);
+    });
+
+    // Upstream's tdb = [25, 25, 60], element-wise.
+    test("test_compliance_is_float_with_nan", () => {
+      const results = [25, 25, 60].map((tdb) =>
+        pmv_ppd_ashrae({ tdb, tr: 25, vr: 0.1, rh: 50, met: 1.2, clo: 0.5 }),
+      );
+      expect(results.flatMap(({ warnings }) => warnings)).toEqual([
+        expect.objectContaining({ key: "tdb", value: 60 }),
+      ]);
+      expect(
+        results.map(({ compliance }) =>
+          compliance === null ? null : typeof compliance,
+        ),
+      ).toEqual(["boolean", "boolean", null]);
+      expect(results.map(({ compliance }) => compliance === null)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+    });
+
+    // Upstream's tdb = [25, np.nan], element-wise; deviation _shared-7.
+    test("test_compliance_nan_where_pmv_undefined", () => {
+      const inputs = {
+        tr: 25,
+        vr: 0.1,
+        rh: 50,
+        met: 1.2,
+        clo: 0.5,
+        limit_inputs: false,
+      };
+      expect(pmv_ppd_ashrae({ ...inputs, tdb: 25 }).compliance).toBe(true);
+      expect(() => pmv_ppd_ashrae({ ...inputs, tdb: NaN })).toThrow(RangeError);
     });
 
     test("test_wrong_standard", () => {
@@ -318,13 +354,13 @@ describeModelContract(pmv_ppd_ashrae, PMV_PPD_ASHRAE_INFO, neutral, {
 });
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image.
+// parity image, and compliance on 4.8.0.
 describe("pmv_ppd_ashrae (JS-only)", () => {
   // A JS-only test passes an invalid input through here (decision 175).
   const call = (inputs: unknown) => () => pmv_ppd_ashrae(inputs as Inputs);
 
   describe("values", () => {
-    // The docstring's examples (models/pmv_ppd_ashrae.py:108-138).
+    // The docstring's examples (models/pmv_ppd_ashrae.py:121-155).
     test("the examples print upstream's values", () => {
       const met = 1.4;
       const results = pmv_ppd_ashrae({
@@ -463,14 +499,14 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(at(25).compliance).toBe(true);
     });
 
-    // ADR 0006: upstream masks it with np.nan.
-    test("is NaN where the gate makes pmv NaN", () => {
+    // models/pmv_ppd_ashrae.py:237: upstream masks it with np.nan.
+    test("is null where the gate makes pmv NaN", () => {
       const result = pmv_ppd_ashrae({ ...neutral, tdb: 45 });
       expect(result.pmv).toBeNaN();
-      expect(result.compliance).toBeNaN();
+      expect(result.compliance).toBe(null);
     });
 
-    test("is a boolean with limit_inputs off, even out of range", () => {
+    test("is false, not null, with limit_inputs off, even out of range", () => {
       const result = pmv_ppd_ashrae({
         ...neutral,
         tdb: 45,
@@ -481,8 +517,8 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
       expect(result.compliance).toBe(false);
     });
 
-    // A clo below 0 overflows the kernel; upstream compares the NaN pmv as False.
-    test("is false where the kernel's pmv is NaN and the gate is off", () => {
+    // A clo below 0 overflows the kernel; upstream's _as_flag makes the NaN pmv's compliance NaN.
+    test("is null where the kernel's pmv is NaN and the gate is off", () => {
       const result = pmv_ppd_ashrae({
         tdb: 45,
         tr: 5,
@@ -494,7 +530,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         limit_inputs: false,
       });
       expect(result.pmv).toBeNaN();
-      expect(result.compliance).toBe(false);
+      expect(result.compliance).toBe(null);
     });
   });
 
@@ -642,7 +678,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
   });
 
   describe("tsv classification (right-inclusive)", () => {
-    test("tsv is NaN when pmv is NaN (out of range)", () => {
+    test("tsv is null when pmv is NaN (out of range)", () => {
       const result = pmv_ppd_ashrae({
         tdb: 50,
         tr: 50,
@@ -652,7 +688,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         clo: 0.3,
       });
       expect(result.pmv).toBeNaN();
-      expect(result.tsv).toBeNaN();
+      expect(result.tsv).toBe(null);
     });
 
     // Upstream classifies the pmv it returns, 0.5043645689727003 rounded to 0.5 (models/pmv_ppd_ashrae.py:223-240).

@@ -5,7 +5,7 @@ import {
   VERTICAL_TMP_GRAD_PPD_INFO,
 } from "../../src/models/index.ts";
 import { vertical_tmp_grad_ppd as from_root } from "../../src/index.ts";
-import { decode, read_data } from "../parity/harness.ts";
+import { read_data } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
@@ -16,7 +16,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.verticalTmpGradPpd,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_vertical_tmp_grad_ppd.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_vertical_tmp_grad_ppd.py.
 // Upstream's arrays are called element-wise, and a UserWarning becomes a range row.
 describe("test_vertical_tmp_grad_ppd", () => {
   test.each(reference_table.data)(
@@ -99,6 +99,25 @@ describe("test_vertical_tmp_grad_ppd", () => {
       expect(result.acceptability).toBe(acceptability);
     }
   });
+
+  // Upstream's tdb = [25, np.nan], element-wise; deviation _shared-7.
+  test("test_vertical_tmp_grad_ppd_acceptability_nan_where_ppd_undefined", () => {
+    const inputs = {
+      tr: 25,
+      vr: 0.1,
+      rh: 50,
+      met: 1.2,
+      clo: 0.5,
+      vertical_tmp_grad: 7,
+      limit_inputs: false,
+    };
+    expect(vertical_tmp_grad_ppd({ ...inputs, tdb: 25 }).acceptability).toBe(
+      false,
+    );
+    expect(() => vertical_tmp_grad_ppd({ ...inputs, tdb: NaN })).toThrow(
+      RangeError,
+    );
+  });
 });
 
 const valid = {
@@ -135,9 +154,9 @@ const parity_cases = () =>
   ).cases;
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image.
+// parity image, and acceptability on 4.8.0.
 describe("vertical_tmp_grad_ppd (JS-only)", () => {
-  // models/vertical_tmp_grad_ppd.py:88-94.
+  // models/vertical_tmp_grad_ppd.py:91-95.
   test("the docstring's example gives its outputs", () => {
     expect(call(valid)).toEqual({
       ppd_vg: 12.6,
@@ -152,7 +171,7 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
     );
   });
 
-  // models/vertical_tmp_grad_ppd.py:128-131: an unrounded 5.0287 % is not acceptable.
+  // models/vertical_tmp_grad_ppd.py:129-132: an unrounded 5.0287 % is not acceptable.
   test("acceptability is taken before ppd_vg is rounded", () => {
     const result = call({ ...valid, vertical_tmp_grad: 4.93 });
     expect(result.ppd_vg).toBe(5.0);
@@ -173,7 +192,7 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
         }),
       ]);
       expect(result.ppd_vg).toBeNaN();
-      expect(result.acceptability).toBeNaN();
+      expect(result.acceptability).toBe(null);
     },
   );
 
@@ -217,7 +236,7 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
       ),
     );
     expect(result.ppd_vg).toBeNaN();
-    expect(result.acceptability).toBeNaN();
+    expect(result.acceptability).toBe(null);
   });
 
   // Deviation vertical_tmp_grad_ppd-5.
@@ -228,17 +247,6 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
         ({ kind }) => kind === "notice",
       );
       expect(notices).toEqual(warned ? [notice] : []);
-    }
-  });
-
-  // Deviation vertical_tmp_grad_ppd-6.
-  test("acceptability is upstream's over the parity data, read as a boolean", () => {
-    for (const { inputs, outputs } of parity_cases()) {
-      const expected = decode(outputs.acceptability ?? null);
-      const actual = call(inputs).acceptability;
-      if (typeof expected === "number" && !Number.isNaN(expected))
-        expect(actual).toBe(expected === 1);
-      else expect(actual).toEqual(expected);
     }
   });
 

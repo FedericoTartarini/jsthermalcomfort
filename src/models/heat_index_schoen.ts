@@ -1,6 +1,6 @@
 import type { HI } from "./heat_index_rothfusz.ts";
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import {
@@ -83,11 +83,14 @@ export function heat_index_schoen(inputs: HISchoenInputs): HI {
     hi = round(hi, 1);
   }
 
-  return Object.freeze({
-    hi,
-    stress_category,
-    warnings: Object.freeze([]),
-  });
+  return buildOutputs(
+    HEAT_INDEX_SCHOEN_INFO,
+    {
+      hi,
+      stress_category,
+    },
+    [],
+  );
 }
 
 function _schoen_heat_index_optimized(tdb: number, t_dew: number): number {

@@ -44,7 +44,7 @@ describe("test_heat_index_rothfusz", () => {
     const result = heat_index_rothfusz({ tdb: 25, rh: 80 });
     expect(result.warnings).toEqual([expect.objectContaining({ key: "tdb" })]);
     expect(result.hi).toBeNaN();
-    expect(result.stress_category).toBeNaN();
+    expect(result.stress_category).toBe(null);
   });
 
   // Upstream matches r"'tdb' has value 25\.0.*\[27\.0, inf\]".
@@ -179,7 +179,7 @@ describe("test_heat_index_rothfusz", () => {
         0, 0, 0, 1,
       ]);
       expect(results[3]?.hi).toBeNaN();
-      expect(results[3]?.stress_category).toBeNaN();
+      expect(results[3]?.stress_category).toBe(null);
     },
   );
 });
@@ -275,11 +275,14 @@ describe("heat_index_rothfusz (JS-only)", () => {
       ["tdb just below 27", 26.9, 50],
       ["tdb well below 27", 20, 50],
       ["tdb at 0", 0, 50],
-    ])("returns NaN under default limit_inputs when %s", (_, tdb, rh) => {
-      const result = heat_index_rothfusz({ tdb, rh });
-      expect(result.hi).toBeNaN();
-      expect(result.stress_category).toBeNaN();
-    });
+    ])(
+      "returns a NaN hi and a null stress_category under default limit_inputs when %s",
+      (_, tdb, rh) => {
+        const result = heat_index_rothfusz({ tdb, rh });
+        expect(result.hi).toBeNaN();
+        expect(result.stress_category).toBe(null);
+      },
+    );
 
     test("the gate is inclusive at 27 °C", () => {
       expect(heat_index_rothfusz({ tdb: 26.99, rh: 50 }).hi).toBeNaN();

@@ -240,6 +240,25 @@ describe("validateResult — non-numeric comparison", () => {
       validateResult({ a: "strong" }, { a: "moderate" }, {}, {});
     }).toThrow();
   });
+
+  // A flag is true, false or null (decision 310), as the data write it.
+  test("compares a flag's true, false and null with the data's directly", () => {
+    expect.hasAssertions();
+    expect(() => {
+      validateResult(
+        { a: true, b: false, c: null },
+        { a: true, b: false, c: null },
+        {},
+        {},
+      );
+    }).not.toThrow();
+    expect(() => {
+      validateResult({ a: false }, { a: true }, {}, {});
+    }).toThrow();
+    expect(() => {
+      validateResult({ a: false }, { a: null }, {}, {});
+    }).toThrow();
+  });
 });
 
 describe("expandArrayRows", () => {

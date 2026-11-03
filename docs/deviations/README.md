@@ -1,6 +1,6 @@
 # Deviation registers
 
-Every difference between this library and pythermalcomfort v4.8.0, whose `.py` is the only standard, is either a whitelisted mechanical translation or a row in a register here (ADRs 0019, 0027). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
+Every difference between this library and pythermalcomfort v4.8.0, whose `.py` is the only standard, is a whitelisted mechanical translation, a representation mapping or a row in a register here (ADRs 0019, 0027, 0028). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
 
 - `<model>.md` holds one main model's rows, named after upstream's function (`utci.md`). A model's ticket creates its register when it migrates the model. A model with no register here has not been migrated yet, and its differences from upstream are not recorded yet.
 - `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the inputs parse, `classifyFromBins`, `ModelInfo`) and the helpers the models call.
@@ -55,6 +55,15 @@ ADR 0019 names error classes, check order and messages as classes of their own (
 | added bins     | Bins for an approved added labelled output.                                                                          | 0024 |
 | Table C-2 rows | `solar_gain`'s ASHRAE 55 Table C-2 rows.                                                                             | 0024 |
 | `Units`        | The `Units` constant.                                                                                                | 0019 |
+
+**Representation mappings (R).** A returned value may take a TypeScript representation in place of upstream's only through a mapping that is one-to-one on upstream's domain, so that it cannot merge two upstream values (ADR 0028). The parity harness applies each mapping in one place, selected by the output's `INFO.outputs` entry, and fails on any upstream value outside its domain; it also fails where the library returns `null` for an output not declared `masked`. A mapping is registered once, here, with tests of its own (`tests/parity/mappings.test.ts`), and gets no row per model:
+
+| Mapping       | Upstream's domain                                            | TypeScript value                        | Harness function                              | ADR  |
+| ------------- | ------------------------------------------------------------ | --------------------------------------- | --------------------------------------------- | ---- |
+| flag          | `_as_flag`'s 1.0, 0.0 and NaN, for a `flag` output           | `true`, `false` and `null`              | `flag_mapping` in `tests/parity/harness.ts`   | 0028 |
+| masked output | any value but `None`, for any other output declared `masked` | NaN as `null`, any other value as it is | `masked_mapping` in `tests/parity/harness.ts` | 0028 |
+
+The library converts at one place too, `buildOutputs` in `src/_internal/modelInfo.ts`, through which a model returns its outputs (decision 314).
 
 **Other deviations an ADR approves.** A deviation an ADR approves outside the classes and additions above names that ADR in its row. One case is `classifyFromBins`, which throws `RangeError` unless its edges are strictly increasing (ADR 0024).
 

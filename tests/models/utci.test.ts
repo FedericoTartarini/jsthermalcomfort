@@ -63,7 +63,7 @@ describe("test_utci", () => {
         expect.objectContaining({ key: "pa (kPa)" }),
       );
       expect(result.utci).toBeNaN();
-      expect(result.stress_category).toBeNaN();
+      expect(result.stress_category).toBe(null);
     },
   );
 
@@ -75,7 +75,7 @@ describe("test_utci", () => {
         expect.objectContaining({ key: "rh" }),
       );
       expect(result.utci).toBeNaN();
-      expect(result.stress_category).toBeNaN();
+      expect(result.stress_category).toBe(null);
     },
   );
 
@@ -122,7 +122,7 @@ describe("test_utci", () => {
       );
       expect(Number.isNaN(limited.utci)).toBe(invalid);
       if (invalid) {
-        expect(limited.stress_category).toBeNaN();
+        expect(limited.stress_category).toBe(null);
       } else {
         expect(limited.utci).toBe(unlimited.utci);
         expect(limited.stress_category).toBe(unlimited.stress_category);
@@ -153,7 +153,7 @@ describe("test_utci", () => {
         expect(Number.isNaN(limited.utci)).toBe(invalid);
         expect(limited.warnings.length > 0).toBe(invalid);
         if (invalid) {
-          expect(limited.stress_category).toBeNaN();
+          expect(limited.stress_category).toBe(null);
         } else {
           expect(limited.utci).toBe(unlimited.utci);
           expect(limited.stress_category).toBe(unlimited.stress_category);
@@ -247,7 +247,7 @@ describe("test_utci", () => {
     });
 
     expect(result.utci).toBeNaN();
-    expect(result.stress_category).toBeNaN();
+    expect(result.stress_category).toBe(null);
 
     const first = utci({ tdb: 77, tr: 77, v: 3.28084, rh: 50, units: "IP" });
     const second = utci({
@@ -261,7 +261,7 @@ describe("test_utci", () => {
     expect(approx(first.utci, 76.3, { rel: 1e-7, abs: 0 })).toBe(true);
     expect(second.utci).toBeNaN();
     expect(first.stress_category).toBe("no thermal stress");
-    expect(second.stress_category).toBeNaN();
+    expect(second.stress_category).toBe(null);
   });
 
   test("test_utci_saturation_vapour_pressure_matches_p_sat", () => {
@@ -424,7 +424,7 @@ describe("utci (JS-only)", () => {
       const [first] = on.warnings;
       expect(first?.kind === "range" && first.bound).toBe(bound);
       expect(on.utci).toBeNaN();
-      expect(on.stress_category).toBeNaN();
+      expect(on.stress_category).toBe(null);
       // deviation utci-3
       const off = utci({ ...call_inputs, limit_inputs: false });
       expect(off.warnings).toEqual(on.warnings);

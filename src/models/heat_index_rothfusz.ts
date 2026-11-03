@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -111,11 +111,14 @@ export function heat_index_rothfusz(inputs: HIInputs): HI {
     hi_valid = round(hi_valid, 1);
   }
 
-  return Object.freeze({
-    hi: hi_valid,
-    stress_category,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    HEAT_INDEX_ROTHFUSZ_INFO,
+    {
+      hi: hi_valid,
+      stress_category,
+    },
+    warnings,
+  );
 }
 
 function _rothfusz_heat_index_optimized(tdb: number, rh: number): number {

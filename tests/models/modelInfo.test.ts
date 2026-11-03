@@ -1,8 +1,9 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { deepFreeze } from "../../src/_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../../src/_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelWarning,
+  OutputsInfo,
   OutputsOf,
   ResolvedOf,
 } from "../../src/_internal/modelInfo.ts";
@@ -29,6 +30,98 @@ describe("deepFreeze", () => {
 
     expect(Object.isFrozen(obj[key])).toBe(true);
     expect(Object.isFrozen(obj[key].nested)).toBe(true);
+  });
+});
+
+describe("buildOutputs", () => {
+  const INFO = {
+    outputs: {
+      n: { kind: "numeric", unit: null },
+      nm: { kind: "numeric", masked: true, unit: null },
+      f: { kind: "flag", masked: true, unit: null },
+      l: { kind: "label", masked: true, unit: null },
+      ln: { kind: "label_or_numeric", masked: true, unit: "h" },
+      s: { kind: "numeric", masked: true, series: true, unit: "°C" },
+      c: { kind: "label", none: true, unit: null },
+    },
+  } as const satisfies { outputs: OutputsInfo };
+  const ROW: ModelWarning = { kind: "notice", message: "fell back" };
+
+  // Decision 310.
+  test("reads a flag's 1.0, 0.0 and NaN as true, false and null", () => {
+    const values = [1.0, 0.0, NaN].map(
+      (f) =>
+        buildOutputs(
+          INFO,
+          { n: 1, nm: 1, f, l: "a", ln: 1, s: [1], c: null },
+          [],
+        ).f,
+    );
+    expect(values).toEqual([true, false, null]);
+  });
+
+  test("turns a NaN into null only in an output declared masked", () => {
+    const result = buildOutputs(
+      INFO,
+      { n: NaN, nm: NaN, f: 1.0, l: NaN, ln: NaN, s: [NaN, 2.5], c: null },
+      [],
+    );
+    expect(result.n).toBeNaN();
+    expect(result.nm).toBe(null);
+    expect(result.l).toBe(null);
+    expect(result.ln).toBe(null);
+    expect(result.s).toEqual([null, 2.5]);
+    expect(result.c).toBe(null);
+  });
+
+  test("keeps every other value as it is", () => {
+    const result = buildOutputs(
+      INFO,
+      {
+        n: 1.5,
+        nm: 2.5,
+        f: 0.0,
+        l: "cold",
+        ln: "more than 8",
+        s: [3],
+        c: null,
+      },
+      [],
+    );
+    expect(result).toEqual({
+      n: 1.5,
+      nm: 2.5,
+      f: false,
+      l: "cold",
+      ln: "more than 8",
+      s: [3],
+      c: null,
+      warnings: [],
+    });
+    expect(
+      buildOutputs(
+        INFO,
+        { n: 1, nm: 1, f: 1, l: "a", ln: 4.5, s: [], c: null },
+        [],
+      ).ln,
+    ).toBe(4.5);
+  });
+
+  test("returns the outputs in INFO's order, then warnings, all frozen", () => {
+    const warnings = [ROW];
+    const result = buildOutputs(
+      INFO,
+      { c: null, s: [1], ln: 1, l: "a", f: 1, nm: 1, n: 1 },
+      warnings,
+    );
+    expect(Object.keys(result)).toEqual([
+      ...Object.keys(INFO.outputs),
+      "warnings",
+    ]);
+    expect(result.warnings).toEqual([ROW]);
+    expect(Object.isFrozen(result)).toBe(true);
+    expect(Object.isFrozen(result.warnings)).toBe(true);
+    expect(Object.isFrozen(result.s)).toBe(true);
   });
 });
 
@@ -77,23 +170,27 @@ describe("ResolvedOf", () => {
 });
 
 describe("OutputsOf", () => {
-  // `masked` adds the NaN `number` of a masked output (ADR 0023).
+  // `masked` adds `null`, an output's "no value" (decision 310).
   test("maps each kind to its value type, then warnings", () => {
     type Fields = OutputsOf<{
       outputs: {
         n: { kind: "numeric"; unit: null };
-        b: { kind: "bool"; unit: null };
-        bm: { kind: "bool"; unit: null; masked: true };
+        nm: { kind: "numeric"; unit: null; masked: true };
+        f: { kind: "flag"; unit: null };
+        fm: { kind: "flag"; unit: null; masked: true };
         l: { kind: "label"; unit: null };
         lm: { kind: "label"; unit: null; masked: true };
+        ln: { kind: "label_or_numeric"; unit: "h"; masked: true };
       };
     }>;
     expectTypeOf<Fields>().toEqualTypeOf<{
       readonly n: number;
-      readonly b: boolean;
-      readonly bm: boolean | number;
+      readonly nm: number | null;
+      readonly f: boolean;
+      readonly fm: boolean | null;
       readonly l: string;
-      readonly lm: string | number;
+      readonly lm: string | null;
+      readonly ln: string | number | null;
       readonly warnings: readonly ModelWarning[];
     }>();
   });
@@ -111,13 +208,13 @@ describe("OutputsOf", () => {
     expectTypeOf<OutputsOf<Info, number>>().toEqualTypeOf<{
       readonly s: number;
       readonly n: number;
-      readonly m: readonly number[];
+      readonly m: readonly (number | null)[];
       readonly warnings: readonly ModelWarning[];
     }>();
     expectTypeOf<OutputsOf<Info, number | readonly number[]>>().toEqualTypeOf<{
       readonly s: number | readonly number[];
       readonly n: number;
-      readonly m: readonly number[];
+      readonly m: readonly (number | null)[];
       readonly warnings: readonly ModelWarning[];
     }>();
   });

@@ -103,9 +103,18 @@ export interface ModelOutputs {
  * One returned value in `INFO.outputs`; `INFO.inputs` describes the inputs
  * (`InputsInfo`).
  *
- * `kind` is its value kind, a number (`numeric`), a boolean (`bool`) or a
- * label (`label`). `masked` adds the NaN `number` of a masked output, so a
- * masked `label` is `string | number` (ADR 0023).
+ * `kind` is its value kind, a number (`numeric`), a yes/no (`flag`, after
+ * upstream's `_as_flag`, `_internal/validation.py:181`), a label (`label`), or
+ * a label or a number (`label_or_numeric`, upstream's `str | float`, `ireq`'s
+ * `dle_min`). A `flag` is a `boolean`: `true` where upstream returns 1.0,
+ * `false` where it returns 0.0.
+ *
+ * `masked` marks an output upstream can return as NaN, its "no value": the
+ * output is then `null` in place of NaN, and its type adds `null`, so a masked
+ * `flag` is `boolean | null` and a masked `label` `string | null` (decision
+ * 310, ADR 0028). Check it explicitly (`result.tsv === null`): an untyped
+ * JavaScript caller's arithmetic reads `null` as 0, `null * 2` being 0 where
+ * `NaN * 2` is NaN (node v26.8.2).
  *
  * `unit` is the unit of measurement, or `null` if dimensionless.
  *
@@ -121,8 +130,8 @@ export interface ModelOutputs {
  * into a categorical label. Pass it to `classifyFromBins` rather than
  * reimplementing the edge handling.
  *
- * `interval`, on a `bool` output, is the {@link Interval} of the quantity it
- * tests inside which it is true: `pmv_ppd_ashrae`'s `compliance` is true for
+ * `interval`, on a `flag` output, is the {@link Interval} of the quantity it
+ * tests inside which it is `true`: `pmv_ppd_ashrae`'s `compliance` is `true` for
  * -0.5 < pmv < 0.5. Unlike `applicability`, it gates nothing.
  *
  * `series` marks a time series, a frozen array of its kind's values, one per
@@ -135,7 +144,7 @@ export interface ModelOutputs {
  * `series` or `classifier`.
  */
 export interface OutputField {
-  readonly kind: "numeric" | "bool" | "label";
+  readonly kind: "numeric" | "flag" | "label" | "label_or_numeric";
   readonly masked?: true;
   readonly series?: true;
   readonly none?: true;
@@ -261,14 +270,18 @@ export type DerivedInfo = Readonly<Record<string, DerivedField>>;
  * the `is_bool` metadata key (`classes_input.py:66, :125`) and the
  * `isinstance` check (`classes_input.py:1262`). A `choice` is a `string`: the
  * parse accepts it in any case and returns it as given. An `instance` is an
- * instance of its entry's class (`KindValue`).
+ * instance of its entry's class (`KindValue`). A `flag` output is a
+ * `boolean`, where upstream's `_as_flag` returns 1.0 or 0.0, and a
+ * `label_or_numeric` output a `string` or a `number`, upstream's `str | float`.
  */
 interface KindValues {
   numeric: number;
   bool: boolean;
+  flag: boolean;
   choice: string;
   instance: object;
   label: string;
+  label_or_numeric: string | number;
 }
 
 type OptionalKey<I extends InputsInfo> = {
@@ -326,8 +339,9 @@ export type ResolvedOf<I extends InputsInfo> = {
 /**
  * What a model returns, upstream's return dataclass: each field
  * `INFO.outputs` describes, `readonly` and typed by its kind, then
- * `warnings`; a `masked` field adds the NaN `number` (ADR 0023), a `none`
- * field is `null`, and a `series` field is a readonly array of those values.
+ * `warnings`; a `masked` field adds `null`, its "no value" (decision 310), a
+ * `none` field is `null`, and a `series` field is a readonly array of those
+ * values.
  * A numeric series that is not masked takes `Series`, by default
  * `readonly number[]`:
  * `number | readonly number[]` for a model that returns a number for one time
@@ -348,18 +362,96 @@ export type OutputsOf<
         ? Series
         : readonly (
             | KindValues[M["outputs"][K]["kind"]]
-            | (M["outputs"][K] extends { readonly masked: true }
-                ? number
-                : never)
+            | (M["outputs"][K] extends { readonly masked: true } ? null : never)
           )[]
       : M["outputs"][K] extends { readonly none: true }
         ? null
         : | KindValues[M["outputs"][K]["kind"]]
-          | (M["outputs"][K] extends { readonly masked: true }
-              ? number
-              : never);
+          | (M["outputs"][K] extends { readonly masked: true } ? null : never);
   } & ModelOutputs
 >;
+
+/**
+ * The value type of each output kind as a model computes it, upstream's
+ * representation, before {@link buildOutputs} converts it: a `flag` is 1.0 or
+ * 0.0, as upstream's `_as_flag` returns it.
+ */
+interface ComputedKindValues {
+  numeric: number;
+  flag: number;
+  label: string;
+  label_or_numeric: string | number;
+}
+
+type ComputedValue<F extends OutputField> = F extends {
+  readonly none: true;
+}
+  ? null
+  : | ComputedKindValues[F["kind"]]
+    | (F extends { readonly masked: true } ? number : never);
+
+/**
+ * The values a model computes, one per `INFO.outputs` key, which
+ * {@link buildOutputs} takes: upstream's representation, a masked output's
+ * NaN included, a `series` output a number or an array of them.
+ */
+export type ComputedOutputsOf<M extends { readonly outputs: OutputsInfo }> = {
+  readonly [K in keyof M["outputs"]]: M["outputs"][K] extends {
+    readonly series: true;
+  }
+    ? ComputedValue<M["outputs"][K]> | readonly ComputedValue<M["outputs"][K]>[]
+    : ComputedValue<M["outputs"][K]>;
+};
+
+/**
+ * Returns a model's outputs, as `parseInputs` takes its inputs: the one
+ * place where the values a model computes, in upstream's representation,
+ * become its public outputs (decision 314, ADR 0028).
+ *
+ * The outputs are built in `INFO.outputs`' order, then `warnings`, and each is
+ * converted by its entry:
+ *
+ * - an output declared `masked` that is NaN becomes `null`, as does each NaN
+ *   element of a masked time series;
+ * - a `flag`'s 1.0 becomes `true` and its 0.0 `false`;
+ * - any other value is returned as it is, a NaN in an output not declared
+ *   `masked` included, which the parity suite then reports.
+ *
+ * "No value" is `null`, never NaN, and is checked explicitly
+ * (`result.tsv === null`), since an untyped JavaScript caller's arithmetic
+ * reads `null` as 0: `null * 2` is 0 where `NaN * 2` is NaN (node v26.8.2).
+ *
+ * The outputs, `warnings` and each time series are frozen.
+ *
+ * @param info - The model's `*_INFO`, whose `outputs` drive the conversion.
+ * @param values - The values the model computed, one per `INFO.outputs` key.
+ * @param warnings - The call's {@link ModelWarning} rows.
+ * @returns The outputs, then `warnings`, frozen.
+ */
+export function buildOutputs<M extends { readonly outputs: OutputsInfo }>(
+  info: M,
+  values: ComputedOutputsOf<M>,
+  warnings: readonly ModelWarning[],
+): OutputsOf<M> {
+  const computed = values as Readonly<Record<string, unknown>>;
+  const outputs: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(info.outputs)) {
+    const value = computed[key];
+    outputs[key] = Array.isArray(value)
+      ? Object.freeze(value.map((item: unknown) => toOutput(item, field)))
+      : toOutput(value, field);
+  }
+  outputs.warnings = Object.freeze(warnings);
+  return Object.freeze(outputs) as OutputsOf<M>;
+}
+
+/** Converts one computed value by its `INFO.outputs` entry. */
+function toOutput(value: unknown, field: OutputField): unknown {
+  if (field.masked === true && Number.isNaN(value)) return null;
+  if (field.kind === "flag" && (value === 1 || Object.is(value, 0)))
+    return value === 1;
+  return value;
+}
 
 /**
  * Metadata describing a thermal comfort model: its `*_INFO` (ADR 0024,
@@ -375,8 +467,8 @@ export type OutputsOf<
  * upstream's order, with its kind (`numeric`, `bool`, `choice` or `instance`),
  * unit, applicability and default. The model validates its inputs against it, and its inputs type
  * is derived from it. `outputs` are the returned values, in the order of
- * upstream's return dataclass, each with its kind (`numeric`, `bool` or
- * `label`) and unit, and the outputs type is derived from it. `derived` covers
+ * upstream's return dataclass, each with its kind (`numeric`, `flag`,
+ * `label` or `label_or_numeric`) and unit, and the outputs type is derived from it. `derived` covers
  * quantities computed from the inputs rather than supplied by the caller,
  * keyed by upstream's name for the check, as the `warnings` rows are.
  *

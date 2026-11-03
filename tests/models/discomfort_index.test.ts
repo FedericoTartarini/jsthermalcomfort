@@ -62,11 +62,11 @@ describe("discomfort_index (JS-only)", () => {
   });
 
   // Deviation discomfort_index-1 (_internal/validation.py:242-245).
-  test("a di at or above 99 has a NaN category", () => {
+  test("a di at or above 99 has a null category", () => {
     for (const tdb of [99, 120]) {
       const result = discomfort_index({ tdb, rh: 100 });
       expect(result.di).toBe(tdb);
-      expect(result.discomfort_condition).toBeNaN();
+      expect(result.discomfort_condition).toBe(null);
     }
   });
 

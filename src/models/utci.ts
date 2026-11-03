@@ -1,5 +1,5 @@
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -235,14 +235,17 @@ export function utci(inputs: UTCIInputs): UTCI {
     utci_si = round(utci_si, 1);
   }
 
-  return Object.freeze({
-    utci: utci_approx,
-    stress_category: _mapping(
-      utci_si,
-      UTCI_INFO.outputs.stress_category.classifier,
-    ),
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    UTCI_INFO,
+    {
+      utci: utci_approx,
+      stress_category: _mapping(
+        utci_si,
+        UTCI_INFO.outputs.stress_category.classifier,
+      ),
+    },
+    warnings,
+  );
 }
 
 export function _utci_optimized(

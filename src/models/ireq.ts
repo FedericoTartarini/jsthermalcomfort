@@ -1,6 +1,7 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
+  ComputedOutputsOf,
   InputsOf,
   ModelInfo,
   ModelWarning,
@@ -37,8 +38,8 @@ export const IREQ_INFO = deepFreeze({
     ireq_neutral: { kind: "numeric", unit: "clo", applicability: { min: 0 } },
     icl_min: { kind: "numeric", unit: "clo", applicability: { min: 0 } },
     icl_neutral: { kind: "numeric", unit: "clo", applicability: { min: 0 } },
-    dle_min: { kind: "label", masked: true, unit: "h" },
-    dle_neutral: { kind: "label", masked: true, unit: "h" },
+    dle_min: { kind: "label_or_numeric", masked: true, unit: "h" },
+    dle_neutral: { kind: "label_or_numeric", masked: true, unit: "h" },
   },
   derived: {
     met: { unit: "W/m²", applicability: { min: 58.0, max: 400.0 } },
@@ -168,7 +169,9 @@ export function ireq(inputs: IREQInputs): IREQ {
 
   const clo_m2c_w = clo * 0.155;
   const results = {} as {
-    -readonly [K in keyof typeof IREQ_INFO.outputs]: IREQ[K];
+    -readonly [K in keyof typeof IREQ_INFO.outputs]: ComputedOutputsOf<
+      typeof IREQ_INFO
+    >[K];
   };
 
   const calculation_criteria = [
@@ -229,15 +232,18 @@ export function ireq(inputs: IREQInputs): IREQ {
     results[`dle_${suffix}`] = masked ? NaN : dle_out;
   }
 
-  return Object.freeze({
-    ireq_min: results.ireq_min,
-    ireq_neutral: results.ireq_neutral,
-    icl_min: results.icl_min,
-    icl_neutral: results.icl_neutral,
-    dle_min: results.dle_min,
-    dle_neutral: results.dle_neutral,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    IREQ_INFO,
+    {
+      ireq_min: results.ireq_min,
+      ireq_neutral: results.ireq_neutral,
+      icl_min: results.icl_min,
+      icl_neutral: results.icl_neutral,
+      dle_min: results.dle_min,
+      dle_neutral: results.dle_neutral,
+    },
+    warnings,
+  );
 }
 
 /**

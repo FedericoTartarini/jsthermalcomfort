@@ -131,8 +131,8 @@ describe("test_ireq", () => {
     expect(Number.isNaN(result_limited.ireq_neutral)).toBe(true);
     expect(Number.isNaN(result_limited.icl_min)).toBe(true);
     expect(Number.isNaN(result_limited.icl_neutral)).toBe(true);
-    expect(Number.isNaN(result_limited.dle_min)).toBe(true);
-    expect(Number.isNaN(result_limited.dle_neutral)).toBe(true);
+    expect(result_limited.dle_min).toBe(null);
+    expect(result_limited.dle_neutral).toBe(null);
 
     const result_unlimited = ireq({ ...params, limit_inputs: false });
     expect(Number.isFinite(result_unlimited.ireq_min)).toBe(true);
@@ -194,7 +194,7 @@ describe("test_ireq", () => {
 
     expect(Number.isNaN(result.ireq_min)).toBe(true);
     expect(Number.isNaN(result.icl_min)).toBe(true);
-    expect(Number.isNaN(result.dle_min)).toBe(true);
+    expect(result.dle_min).toBe(null);
   });
 
   test("test_ireq_non_physical_outputs_not_masked_when_limit_inputs_false", () => {
@@ -406,15 +406,23 @@ describe("ireq (JS-only)", () => {
         bound: { min: 0.6083999999999999, max: 1.2 },
       },
     ],
-  ] as const)("%o gives the row %o and NaN with the gate on", (change, row) => {
-    for (const limit_inputs of [true, false]) {
-      const result = ireq({ ...valid, ...change, limit_inputs });
-      expect(result.warnings).toEqual([{ kind: "range", ...row }]);
-      expect(outputs(result).every((value) => Number.isNaN(value))).toBe(
-        limit_inputs,
-      );
-    }
-  });
+  ] as const)(
+    "%o gives the row %o and masks every output with the gate on",
+    (change, row) => {
+      for (const limit_inputs of [true, false]) {
+        const result = ireq({ ...valid, ...change, limit_inputs });
+        expect(result.warnings).toEqual([{ kind: "range", ...row }]);
+        expect(
+          outputs(result)
+            .slice(0, 4)
+            .every((value) => Number.isNaN(value)),
+        ).toBe(limit_inputs);
+        expect(
+          [result.dle_min, result.dle_neutral].every((value) => value === null),
+        ).toBe(limit_inputs);
+      }
+    },
+  );
 
   // models/ireq.py:417-424.
   test("gives the input rows in upstream's order", () => {
@@ -462,7 +470,8 @@ describe("ireq (JS-only)", () => {
   // models/ireq.py:172-186: each criterion is masked on its own.
   test("masks the minimal criterion, whose icl is negative, and keeps the neutral dle", () => {
     const result = ireq({ ...valid, tr: -1e300 });
-    expect(outputs(result).slice(0, 5).every(Number.isNaN)).toBe(true);
+    expect(outputs(result).slice(0, 4).every(Number.isNaN)).toBe(true);
+    expect(result.dle_min).toBe(null);
     expect(result.dle_neutral).toBe(4.7);
     expect(
       result.warnings.map((row) => row.kind === "range" && row.key),

@@ -1,15 +1,16 @@
 import { two_nodes_gagge } from "./two_nodes_gagge.ts";
 import type { GaggeTwoNodesInputs } from "./two_nodes_gagge.ts";
 import { BASE_INPUTS_POSITION, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
+  ComputedOutputsOf,
   InputsOf,
   ModelInfo,
   ModelWarning,
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
-import { _valid_range } from "../_internal/validation.ts";
+import { _as_flag, _valid_range } from "../_internal/validation.ts";
 import { Postures } from "../utilities/options.ts";
 
 export const USE_FANS_HEATWAVES_INFO = deepFreeze({
@@ -61,10 +62,10 @@ export const USE_FANS_HEATWAVES_INFO = deepFreeze({
     m_rsw: { kind: "numeric", unit: "mL/h/m²" },
     w: { kind: "numeric", unit: null },
     w_max: { kind: "numeric", unit: null },
-    heat_strain: { kind: "bool", masked: true, unit: null },
-    heat_strain_blood_flow: { kind: "bool", masked: true, unit: null },
-    heat_strain_w: { kind: "bool", masked: true, unit: null },
-    heat_strain_sweating: { kind: "bool", masked: true, unit: null },
+    heat_strain: { kind: "flag", masked: true, unit: null },
+    heat_strain_blood_flow: { kind: "flag", masked: true, unit: null },
+    heat_strain_w: { kind: "flag", masked: true, unit: null },
+    heat_strain_sweating: { kind: "flag", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -128,10 +129,14 @@ export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  * - `m_rsw` - Rate at which regulatory sweat is generated, [mL/h/m2].
  * - `w` - Skin wettedness, adimensional. Ranges from 0 to 1.
  * - `w_max` - Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 to 1.
- * - `heat_strain` - True if the model predicts that the person may be experiencing heat strain.
- * - `heat_strain_blood_flow` - True if heat strain is caused by skin blood flow (m_bl) reaching its maximum value.
- * - `heat_strain_w` - True if heat strain is caused by skin wettedness (w) reaching its maximum value.
- * - `heat_strain_sweating` - True if heat strain is caused by regulatory sweating (m_rsw) reaching its maximum value.
+ * - `heat_strain` - 1.0 if the model predicts that the person may be experiencing heat strain, 0.0
+ *   if not, and NaN where the inputs are outside the applicability limits.
+ * - `heat_strain_blood_flow` - 1.0 if skin blood flow (m_bl) reaches its maximum value, otherwise 0.0, or NaN
+ *   outside the applicability limits.
+ * - `heat_strain_w` - 1.0 if skin wettedness (w) reaches its maximum value, otherwise 0.0, or NaN
+ *   outside the applicability limits.
+ * - `heat_strain_sweating` - 1.0 if regulatory sweating (m_rsw) reaches its maximum value, otherwise 0.0,
+ *   or NaN outside the applicability limits.
  *
  * @example
  * ```ts
@@ -185,17 +190,30 @@ export function use_fans_heatwaves(
     max_sweating,
   });
 
-  const heat_strain_blood_flow = result.m_bl === max_skin_blood_flow;
-  const heat_strain_w = result.w === result.w_max;
-  const heat_strain_sweating = result.m_rsw === max_sweating;
+  // NaN where the underlying value is NaN, which np.max then carries into heat_strain
+  const heat_strain_blood_flow = _as_flag(
+    result.m_bl === max_skin_blood_flow,
+    !Number.isNaN(result.m_bl),
+  );
+  const heat_strain_w = _as_flag(
+    result.w === result.w_max,
+    !(Number.isNaN(result.w) || Number.isNaN(result.w_max)),
+  );
+  const heat_strain_sweating = _as_flag(
+    result.m_rsw === max_sweating,
+    !Number.isNaN(result.m_rsw),
+  );
 
-  const heat_strain =
-    heat_strain_blood_flow || heat_strain_w || heat_strain_sweating;
+  const heat_strain = Math.max(
+    heat_strain_blood_flow,
+    heat_strain_w,
+    heat_strain_sweating,
+  );
 
   const output: {
     -readonly [
-      K in Exclude<keyof UseFansHeatwaves, "warnings">
-    ]: UseFansHeatwaves[K];
+      K in keyof ComputedOutputsOf<typeof USE_FANS_HEATWAVES_INFO>
+    ]: ComputedOutputsOf<typeof USE_FANS_HEATWAVES_INFO>[K];
   } = {
     e_skin: result.e_skin,
     e_rsw: result.e_rsw,
@@ -281,17 +299,10 @@ export function use_fans_heatwaves(
   }
 
   if (round_output) {
-    // np.around raises on the boolean outputs, which only limit_inputs' np.where makes floats (deviation use_fans_heatwaves-4).
-    if (!limit_inputs) {
-      throw new TypeError(
-        "Cannot cast ufunc 'multiply' output from dtype('float64') to dtype('bool') with casting rule 'same_kind'",
-      );
-    }
     for (const key of Object.keys(output) as (keyof typeof output)[]) {
-      const value = output[key];
-      if (typeof value === "number") output[key] = round(value, 1);
+      output[key] = round(output[key], 1);
     }
   }
 
-  return Object.freeze({ ...output, warnings: Object.freeze(warnings) });
+  return buildOutputs(USE_FANS_HEATWAVES_INFO, output, warnings);
 }

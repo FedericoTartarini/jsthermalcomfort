@@ -5,7 +5,7 @@ import {
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -13,6 +13,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
+import { _as_flag } from "../_internal/validation.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
 
@@ -45,7 +46,7 @@ export const ANKLE_DRAFT_INFO = deepFreeze({
   },
   outputs: {
     ppd_ad: { kind: "numeric", unit: "%" },
-    acceptability: { kind: "bool", masked: true, unit: null },
+    acceptability: { kind: "flag", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -101,7 +102,9 @@ export type AnkleDraft = OutputsOf<typeof ANKLE_DRAFT_INFO>;
  * @returns Dataclass containing the results of the ankle draft calculation. See {@link AnkleDraft} for more details.
  *
  * - `ppd_ad` - Predicted Percentage of Dissatisfied occupants with ankle draft, [%].
- * - `acceptability` - Indicates if the air speed at the ankle level is acceptable according to ASHRAE 55 2020 standard.
+ * - `acceptability` - 1.0 if the air speed at the ankle level is acceptable according to ASHRAE 55
+ *   (PPD_ad ≤ 20 %), 0.0 if not, and NaN where the inputs are outside the
+ *   applicability limits.
  *
  * @example
  * ```ts
@@ -157,7 +160,7 @@ export function ankle_draft(inputs: AnkleDraftInputs): AnkleDraft {
       100,
     1,
   );
-  let acceptability: boolean | number = ppd_val <= 20;
+  let acceptability = _as_flag(ppd_val <= 20, !Number.isNaN(ppd_val));
 
   const [tdb_valid, tr_valid, v_valid, met_valid, clo_valid, v_limited] =
     _check_ashrae55_compliance(
@@ -189,9 +192,12 @@ export function ankle_draft(inputs: AnkleDraftInputs): AnkleDraft {
   ppd_val = limit_inputs && !all_valid ? NaN : ppd_val;
   acceptability = limit_inputs && !all_valid ? NaN : acceptability;
 
-  return Object.freeze({
-    ppd_ad: ppd_val,
-    acceptability,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    ANKLE_DRAFT_INFO,
+    {
+      ppd_ad: ppd_val,
+      acceptability,
+    },
+    warnings,
+  );
 }

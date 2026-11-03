@@ -1,11 +1,9 @@
-import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
 } from "../../src/models/index.ts";
 import { use_fans_heatwaves as from_root } from "../../src/index.ts";
-import { decode, read_data } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -49,14 +47,13 @@ const position_message =
   "position must be one of ['sitting', 'standing', 'standing, forced convection']";
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image.
+// parity image, and the flags on 4.8.0.
 describe("use_fans_heatwaves (JS-only)", () => {
   // models/use_fans_heatwaves.py:91-92.
   test("the docstring's example gives its e_skin", () => {
     expect(call(valid).e_skin).toBe(63);
   });
 
-  // Deviation use_fans_heatwaves-5: upstream gives 1.0, 1.0, 1.0 and 0.0.
   test("each maximum reached gives its flag", () => {
     const result = call({
       tdb: 45,
@@ -85,29 +82,11 @@ describe("use_fans_heatwaves (JS-only)", () => {
     expect(result.heat_strain_sweating).toBe(false);
   });
 
-  // Deviation use_fans_heatwaves-5.
-  test("the flags are upstream's over the parity data, read as booleans", () => {
-    const root = fileURLToPath(new URL("../..", import.meta.url));
-    const { cases } = read_data(root, "use_fans_heatwaves");
-    for (const { inputs, outputs } of cases) {
-      const result = call(inputs);
-      for (const key of flags) {
-        const expected = decode(outputs[key] ?? null);
-        if (typeof expected === "number" && !Number.isNaN(expected))
-          expect(result[key]).toBe(expected === 1);
-        else expect(result[key]).toEqual(expected);
-      }
-    }
-  });
-
-  // Deviation use_fans_heatwaves-4 (decision 224).
-  test("limit_inputs off with round_output on throws numpy's TypeError", () => {
-    expect(() => call({ ...valid, limit_inputs: false })).toThrow(
-      new TypeError(
-        "Cannot cast ufunc 'multiply' output from dtype('float64') to dtype('bool') with casting rule 'same_kind'",
-      ),
-    );
-    const result = call({ ...valid, limit_inputs: false, round_output: false });
+  // models/use_fans_heatwaves.py:197-198: np.around rounds the flags too.
+  test("limit_inputs off with round_output on rounds every output", () => {
+    const result = call({ ...valid, limit_inputs: false });
+    expect(result.e_skin).toBe(63.0);
+    expect(result.w).toBe(0.4);
     expect(flags.map((key) => result[key])).toEqual([
       false,
       false,
@@ -133,7 +112,7 @@ describe("use_fans_heatwaves (JS-only)", () => {
         ),
       );
       expect(Number.isNaN(result.e_skin)).toBe(limit_inputs);
-      expect(Number.isNaN(result.heat_strain)).toBe(limit_inputs);
+      expect(result.heat_strain === null).toBe(limit_inputs);
     },
   );
 

@@ -1,5 +1,5 @@
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { _mapping } from "../_internal/validation.ts";
@@ -92,12 +92,15 @@ export function discomfort_index(inputs: DIInputs): DI {
 
   const di = tdb - 0.55 * (1 - 0.01 * rh) * (tdb - 14.5);
 
-  return Object.freeze({
-    di: round(di, 1),
-    discomfort_condition: _mapping(
-      di,
-      DISCOMFORT_INDEX_INFO.outputs.discomfort_condition.classifier,
-    ),
-    warnings: Object.freeze([]),
-  });
+  return buildOutputs(
+    DISCOMFORT_INDEX_INFO,
+    {
+      di: round(di, 1),
+      discomfort_condition: _mapping(
+        di,
+        DISCOMFORT_INDEX_INFO.outputs.discomfort_condition.classifier,
+      ),
+    },
+    [],
+  );
 }

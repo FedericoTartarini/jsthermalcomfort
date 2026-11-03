@@ -59,6 +59,22 @@ export const HEAT_INDEX_STRESS_CATEGORIES = deepFreeze({
 } as const satisfies Pick<ClassifierBins, "edges" | "labels">);
 
 /**
+ * Return a condition as 1.0 where it holds and 0.0 where it does not.
+ *
+ * Every yes/no model output uses this form, so it can hold NaN where the inputs are
+ * outside the model's applicability limits. A boolean array cannot.
+ *
+ * @param condition - The condition to report.
+ * @param valid - Where False, the result is NaN.
+ * @returns 1.0, 0.0 or NaN.
+ */
+export function _as_flag(condition: boolean, valid?: boolean): number {
+  const flag = Number(condition);
+  if (valid === undefined) return flag;
+  return valid ? flag : NaN;
+}
+
+/**
  * Map a temperature to stress categories.
  *
  * @param value - Temperature to map.

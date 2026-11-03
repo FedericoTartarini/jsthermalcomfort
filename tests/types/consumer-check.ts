@@ -253,7 +253,7 @@ const limit_inputs_default: boolean =
   HEAT_INDEX_ROTHFUSZ_INFO.inputs.limit_inputs.default;
 // Its INFO.outputs gives each returned value's kind, from which the result
 // type is derived.
-const acceptability_kind: "bool" =
+const acceptability_kind: "flag" =
   ADAPTIVE_ASHRAE_INFO.outputs.acceptability_80.kind;
 // A migrated INFO's entries are typed `OutputField` and `DerivedField`.
 const utci_output: OutputField = UTCI_INFO.outputs.utci;
@@ -529,8 +529,10 @@ const pmv_ashrae_params: PMVPPDAshraeInputs = {
   round_output: false,
 };
 const pmv_ashrae: PMVPPDAshrae = pmv_ppd_ashrae(pmv_ashrae_params);
-const ashrae_compliance: boolean | number = pmv_ashrae.compliance;
-const ashrae_tsv: string | number = pmv_ashrae.tsv;
+const ashrae_compliance: boolean | null = pmv_ashrae.compliance;
+// @ts-expect-error a masked flag may be null, no value.
+const ashrae_compliance_bool: boolean = pmv_ashrae.compliance;
+const ashrae_tsv: string | null = pmv_ashrae.tsv;
 // The interval compliance is read against, published once in its INFO.
 const compliance_max: number =
   PMV_PPD_ASHRAE_INFO.outputs.compliance.interval.max;
@@ -565,7 +567,7 @@ PMV_PPD_ASHRAE_INFO.outputs.compliance.interval.max = 1;
 
 // pmv_ppd_iso returns ISO 7730's category, read against bins published once,
 // keyed by edition, whose edges a front end finds by label.
-const iso_category: string | number = pmv_iso.category;
+const iso_category: string | null = pmv_iso.category;
 const category_ii_max: number | undefined =
   PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025].edges[
     PMV_CATEGORY_BINS_ISO_7730[Standard.iso_7730_2025].labels.indexOf("II")
@@ -615,7 +617,7 @@ const utci_params: UTCIInputs = {
   round_output: false,
 };
 const utci_result: UTCI = utci(utci_params);
-const utci_category: string | number = utci_result.stress_category;
+const utci_category: string | null = utci_result.stress_category;
 // @ts-expect-error `return_stress_category` is not a param; stress_category is always returned.
 utci({ tdb: 25, tr: 25, v: 1, rh: 50, return_stress_category: true });
 // @ts-expect-error rh is a required quantity.
@@ -835,7 +837,7 @@ set_tmp({ ...set_inputs, position: "lying" });
 set_tmp({ ...set_inputs, units: "SI" });
 
 // use_fans_heatwaves takes position as two_nodes_gagge does, and returns the
-// heat strain flags as masked booleans, NaN where the gate masks them.
+// heat strain flags as true, false or null.
 const use_fans_inputs: UseFansHeatwavesInputs = {
   tdb: 35,
   tr: 35,
@@ -847,14 +849,14 @@ const use_fans_inputs: UseFansHeatwavesInputs = {
 };
 const use_fans: UseFansHeatwaves = use_fans_heatwaves(use_fans_inputs);
 const use_fans_skin: number = use_fans.e_skin;
-const use_fans_strain: boolean | number = use_fans.heat_strain;
-// @ts-expect-error a masked boolean may be NaN, a number.
+const use_fans_strain: boolean | null = use_fans.heat_strain;
+// @ts-expect-error a masked flag may be null, no value.
 const use_fans_strain_bool: boolean = use_fans.heat_strain;
 // @ts-expect-error position is one of choice_field's three values.
 use_fans_heatwaves({ ...use_fans_inputs, position: "lying" });
 
-// ankle_draft takes units as BaseInputs does, and returns acceptability as a
-// masked boolean, NaN where the gate masks it.
+// ankle_draft takes units as BaseInputs does, and returns acceptability as
+// true, false or null.
 const ankle_inputs: AnkleDraftInputs = {
   tdb: 25,
   tr: 25,
@@ -867,14 +869,14 @@ const ankle_inputs: AnkleDraftInputs = {
 };
 const ankle: AnkleDraft = ankle_draft(ankle_inputs);
 const ankle_ppd: number = ankle.ppd_ad;
-const ankle_acceptability: boolean | number = ankle.acceptability;
-// @ts-expect-error a masked boolean may be NaN, a number.
+const ankle_acceptability: boolean | null = ankle.acceptability;
+// @ts-expect-error a masked flag may be null, no value.
 const ankle_acceptability_bool: boolean = ankle.acceptability;
 // @ts-expect-error units is 'SI' or 'IP'.
 ankle_draft({ ...ankle_inputs, units: "metric" });
 
 // vertical_tmp_grad_ppd takes no units, as upstream's signature does, and
-// returns acceptability as a masked boolean, NaN where the gate masks it.
+// returns acceptability as true, false or null.
 const vertical_inputs: VerticalTGradPPDInputs = {
   tdb: 25,
   tr: 25,
@@ -886,8 +888,8 @@ const vertical_inputs: VerticalTGradPPDInputs = {
 };
 const vertical: VerticalTGradPPD = vertical_tmp_grad_ppd(vertical_inputs);
 const vertical_ppd: number = vertical.ppd_vg;
-const vertical_acceptability: boolean | number = vertical.acceptability;
-// @ts-expect-error a masked boolean may be NaN, a number.
+const vertical_acceptability: boolean | null = vertical.acceptability;
+// @ts-expect-error a masked flag may be null, no value.
 const vertical_acceptability_bool: boolean = vertical.acceptability;
 // @ts-expect-error vertical_tmp_grad_ppd takes no units.
 vertical_tmp_grad_ppd({ ...vertical_inputs, units: "SI" });
@@ -898,7 +900,9 @@ vertical_tmp_grad_ppd({ ...vertical_inputs, units: "SI" });
 const en_inputs: ENInputs = { tdb: 25, tr: 25, t_running_mean: 20, v: 0.1 };
 const en: AdaptiveEN = adaptive_en(en_inputs);
 const en_cmf: number = en.tmp_cmf;
-const en_acceptability: boolean = en.acceptability_cat_i;
+const en_acceptability: boolean | null = en.acceptability_cat_i;
+// @ts-expect-error a masked flag may be null, no value.
+const en_acceptability_bool: boolean = en.acceptability_cat_i;
 // @ts-expect-error the result is readonly.
 en.tmp_cmf = 1;
 // @ts-expect-error units is 'SI' or 'IP'.
@@ -1133,15 +1137,15 @@ work_capacity_niosh({ met: 300 });
 
 // discomfort_index takes one inputs object (ADR 0002), with its inputs and
 // result types named after upstream's DIInputs and DI, and returns a readonly
-// result whose category is NaN where upstream's _mapping leaves it unmapped.
+// result whose category is null where upstream's _mapping leaves it unmapped.
 const discomfort_index_inputs: DIInputs = { tdb: 25, rh: 50 };
 const discomfort_index_result: DI = discomfort_index(discomfort_index_inputs);
 const discomfort_index_value: number = discomfort_index_result.di;
-const discomfort_condition: string | number =
+const discomfort_condition: string | null =
   discomfort_index_result.discomfort_condition;
 // @ts-expect-error the result is readonly.
 discomfort_index_result.di = 1;
-// @ts-expect-error the category can be NaN, so it is not only a string.
+// @ts-expect-error the category can be null, so it is not only a string.
 const discomfort_condition_string: string =
   discomfort_index_result.discomfort_condition;
 // @ts-expect-error rh is a required quantity.
@@ -1211,7 +1215,7 @@ const ireq_inputs: IREQInputs = {
 };
 const ireq_result: IREQ = ireq(ireq_inputs);
 const ireq_value: number = ireq_result.ireq_min;
-const ireq_dle: string | number = ireq_result.dle_min;
+const ireq_dle: string | number | null = ireq_result.dle_min;
 // @ts-expect-error dle may be "more than 8".
 const ireq_dle_number: number = ireq_result.dle_neutral;
 // @ts-expect-error the result is readonly.
@@ -1353,8 +1357,8 @@ const lu_hi: number = lu_result.hi;
 const lu_category: null = lu_result.stress_category;
 // @ts-expect-error the result is readonly.
 lu_result.hi = 1;
-// @ts-expect-error HILu is not HI: its stress_category is never a label.
-const lu_as_hi: HI = lu_result;
+// @ts-expect-error HI is not HILu: its stress_category may be a label.
+const hi_as_lu: HILu = heat_index_result;
 // @ts-expect-error heat_index_lu takes no limit_inputs, as upstream's.
 heat_index_lu({ tdb: 25, rh: 50, limit_inputs: false });
 // @ts-expect-error rh is a required quantity.

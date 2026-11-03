@@ -191,19 +191,19 @@ describe("heat_index_schoen (JS-only)", () => {
   });
 
   // _internal/validation.py:242-244, as upstream's _mapping maps it.
-  test("an hi above 1000 has a NaN category", () => {
+  test("an hi above 1000 has a null category", () => {
     const result = heat_index_schoen({ tdb: 70, rh: 100, round_output: false });
     expect(approx(result.hi, 1382.4282571690032, { rel: 1e-12, abs: 0 })).toBe(
       true,
     );
-    expect(result.stress_category).toBeNaN();
+    expect(result.stress_category).toBe(null);
   });
 
   // psychrometrics/dew_point_tmp.py:53, as upstream's log(0) gives it.
-  test("rh 0 gives a NaN hi and category", () => {
+  test("rh 0 gives a NaN hi and a null category", () => {
     const result = heat_index_schoen({ tdb: 25, rh: 0 });
     expect(result.hi).toBeNaN();
-    expect(result.stress_category).toBeNaN();
+    expect(result.stress_category).toBe(null);
   });
 
   // Deviation _shared-57, through psy_ta_rh's dew_point_tmp.

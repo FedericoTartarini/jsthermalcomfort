@@ -5,7 +5,7 @@ import {
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -13,7 +13,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
-import { _valid_range } from "../_internal/validation.ts";
+import { _as_flag, _valid_range } from "../_internal/validation.ts";
 import { operative_tmp } from "../environment/operative_tmp.ts";
 import { Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
@@ -48,8 +48,8 @@ export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
     tmp_cmf_80_up: { kind: "numeric", unit: "°C" },
     tmp_cmf_90_low: { kind: "numeric", unit: "°C" },
     tmp_cmf_90_up: { kind: "numeric", unit: "°C" },
-    acceptability_80: { kind: "bool", unit: null },
-    acceptability_90: { kind: "bool", unit: null },
+    acceptability_80: { kind: "flag", masked: true, unit: null },
+    acceptability_90: { kind: "flag", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -107,8 +107,10 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * - `tmp_cmf_80_up` - Upper acceptable comfort temperature for 80% occupants, default in [°C] or [°F].
  * - `tmp_cmf_90_low` - Lower acceptable comfort temperature for 90% occupants, default in [°C] or [°F].
  * - `tmp_cmf_90_up` - Upper acceptable comfort temperature for 90% occupants, default in [°C] or [°F].
- * - `acceptability_80` - Acceptability for 80% occupants.
- * - `acceptability_90` - Acceptability for 90% occupants.
+ * - `acceptability_80` - 1.0 if the operative temperature is acceptable for 80% of occupants, 0.0 if
+ *   not, and NaN where the inputs are outside the applicability limits.
+ * - `acceptability_90` - 1.0 if the operative temperature is acceptable for 90% of occupants, 0.0 if
+ *   not, and NaN where the inputs are outside the applicability limits.
  *
  * @example
  * ```ts
@@ -134,7 +136,7 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * // { tmp_cmf: 75.2, tmp_cmf_80_low: 68.9, tmp_cmf_80_up: 81.5, tmp_cmf_90_low: 70.7, tmp_cmf_90_up: 79.7, acceptability_80: true, acceptability_90: true, warnings: [] }
  *
  * adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
- * // { tmp_cmf: NaN, ... acceptability_90: false, warnings: [...] }
+ * // { tmp_cmf: NaN, ... acceptability_90: null, warnings: [...] }
  * // The adaptive thermal comfort model can only be used if the running mean temperature is higher than 10°C.
  * ```
  */
@@ -195,8 +197,23 @@ export function adaptive_ashrae(inputs: ASHRAEInputs): AdaptiveASHRAE {
   let tmp_cmf_80_up = t_cmf + 3.5 + ce;
   let tmp_cmf_90_up = t_cmf + 2.5 + ce;
 
-  const acceptability_80 = tmp_cmf_80_low <= to && to <= tmp_cmf_80_up;
-  const acceptability_90 = tmp_cmf_90_low <= to && to <= tmp_cmf_90_up;
+  // NaN where the inputs are outside the applicability limits (t_cmf is NaN) or
+  // where an input is NaN. The cooling effect treats a NaN v as still air, so v is
+  // checked directly.
+  const valid = !(
+    Number.isNaN(t_cmf) ||
+    Number.isNaN(to) ||
+    Number.isNaN(ce) ||
+    Number.isNaN(v)
+  );
+  const acceptability_80 = _as_flag(
+    tmp_cmf_80_low <= to && to <= tmp_cmf_80_up,
+    valid,
+  );
+  const acceptability_90 = _as_flag(
+    tmp_cmf_90_low <= to && to <= tmp_cmf_90_up,
+    valid,
+  );
 
   if (units.toUpperCase() === Units.IP) {
     ({
@@ -214,14 +231,17 @@ export function adaptive_ashrae(inputs: ASHRAEInputs): AdaptiveASHRAE {
     }));
   }
 
-  return Object.freeze({
-    tmp_cmf: t_cmf,
-    tmp_cmf_80_low,
-    tmp_cmf_80_up,
-    tmp_cmf_90_low,
-    tmp_cmf_90_up,
-    acceptability_80,
-    acceptability_90,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    ADAPTIVE_ASHRAE_INFO,
+    {
+      tmp_cmf: t_cmf,
+      tmp_cmf_80_low,
+      tmp_cmf_80_up,
+      tmp_cmf_90_low,
+      tmp_cmf_90_up,
+      acceptability_80,
+      acceptability_90,
+    },
+    warnings,
+  );
 }

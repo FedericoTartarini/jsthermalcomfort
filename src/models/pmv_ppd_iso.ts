@@ -1,7 +1,7 @@
 import { _pmv_ppd_optimized, THERMAL_SENSATION } from "./_pmv_ppd_optimized.ts";
 import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -320,11 +320,14 @@ export function pmv_ppd_iso(inputs: PMVPPDInputs): PMVPPD {
     ppd_array = round(ppd_array, 1);
   }
 
-  return Object.freeze({
-    pmv,
-    ppd: ppd_array,
-    tsv: _mapping(pmv, PMV_PPD_ISO_INFO.outputs.tsv.classifier),
-    category,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    PMV_PPD_ISO_INFO,
+    {
+      pmv,
+      ppd: ppd_array,
+      tsv: _mapping(pmv, PMV_PPD_ISO_INFO.outputs.tsv.classifier),
+      category,
+    },
+    warnings,
+  );
 }

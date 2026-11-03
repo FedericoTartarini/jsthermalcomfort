@@ -2,49 +2,84 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   adaptive_ashrae,
+  ADAPTIVE_ASHRAE_INFO,
   adaptive_en,
   ADAPTIVE_EN_INFO,
   ankle_draft,
+  ANKLE_DRAFT_INFO,
   at,
+  AT_INFO,
   clo_tout,
+  CLO_TOUT_INFO,
   cooling_effect,
+  COOLING_EFFECT_INFO,
   discomfort_index,
+  DISCOMFORT_INDEX_INFO,
   esi,
+  ESI_INFO,
   heat_index_lu,
+  HEAT_INDEX_LU_INFO,
   heat_index_rothfusz,
+  HEAT_INDEX_ROTHFUSZ_INFO,
   heat_index_schoen,
+  HEAT_INDEX_SCHOEN_INFO,
   humidex,
+  HUMIDEX_INFO,
   ireq,
+  IREQ_INFO,
   net,
+  NET_INFO,
   pet_steady,
+  PET_STEADY_INFO,
   phs,
   PHS_INFO,
   pmv_a,
+  PMV_A_INFO,
   pmv_athb,
+  PMV_ATHB_INFO,
   pmv_e,
+  PMV_E_INFO,
   pmv_ppd_ashrae,
+  PMV_PPD_ASHRAE_INFO,
   pmv_ppd_iso,
+  PMV_PPD_ISO_INFO,
   ridge_regression_predict_t_re_t_sk,
+  RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
   set_tmp,
+  SET_TMP_INFO,
   solar_gain,
+  SOLAR_GAIN_INFO,
   Sports,
   sports_heat_stress_risk,
+  SPORTS_HEAT_STRESS_RISK_INFO,
   thi,
+  THI_INFO,
   two_nodes_gagge,
-  two_nodes_gagge_ji,
-  two_nodes_gagge_sleep,
   TWO_NODES_GAGGE_INFO,
+  two_nodes_gagge_ji,
+  TWO_NODES_GAGGE_JI_INFO,
+  two_nodes_gagge_sleep,
+  TWO_NODES_GAGGE_SLEEP_INFO,
   use_fans_heatwaves,
   USE_FANS_HEATWAVES_INFO,
   utci,
+  UTCI_INFO,
   vertical_tmp_grad_ppd,
+  VERTICAL_TMP_GRAD_PPD_INFO,
   wbgt,
+  WBGT_INFO,
   wci,
+  WCI_INFO,
   wind_chill_temperature,
+  WIND_CHILL_TEMPERATURE_INFO,
   work_capacity_dunne,
+  WORK_CAPACITY_DUNNE_INFO,
   work_capacity_hothaps,
+  WORK_CAPACITY_HOTHAPS_INFO,
   work_capacity_iso,
+  WORK_CAPACITY_ISO_INFO,
   work_capacity_niosh,
+  WORK_CAPACITY_NIOSH_INFO,
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
@@ -75,6 +110,7 @@ const OPTIONS: CompareOptions = {
   tolerance: DEFAULT_TOLERANCE,
   warnings: true,
   exempt: { outputs: [], warnings: [] },
+  outputs: {},
 };
 
 // A range warning as _valid_range words it (_internal/validation.py:53-56).
@@ -240,7 +276,7 @@ describe("compare_case", () => {
     ).toEqual(["output t: library NaN, upstream 24"]);
   });
 
-  test("checks a masked boolean's NaN", () => {
+  test("never takes a boolean for NaN", () => {
     expect(
       compare_case(
         upstream({ ok: { float: "nan" } }),
@@ -487,6 +523,7 @@ describe("read_pins", () => {
 const MODELS: readonly ParityModel[] = [
   {
     name: "adaptive_ashrae",
+    info: ADAPTIVE_ASHRAE_INFO,
     run: (inputs) =>
       adaptive_ashrae(
         inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
@@ -501,6 +538,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "adaptive_en",
+    info: ADAPTIVE_EN_INFO,
     run: (inputs) =>
       adaptive_en(inputs as unknown as Parameters<typeof adaptive_en>[0]),
     // Upstream rounds t_cmf and the bounds with np.around after converting
@@ -515,17 +553,18 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "ankle_draft",
+    info: ANKLE_DRAFT_INFO,
     run: (inputs) =>
       ankle_draft(inputs as unknown as Parameters<typeof ankle_draft>[0]),
     // Upstream always rounds ppd_ad with np.around (models/ankle_draft.py:131-136).
     rounded: () => ["ppd_ad"],
-    // acceptability, a boolean where upstream's is 1.0 or 0.0, and the cooling
-    // effect's notice, which upstream emits twice, are exempt by the register
-    // (deviation ankle_draft-5, deviation ankle_draft-6).
+    // The cooling effect's notice, which upstream emits twice, is exempt by the
+    // register (deviation ankle_draft-5).
     warnings: true,
   },
   {
     name: "at",
+    info: AT_INFO,
     run: (inputs) => at(inputs as unknown as Parameters<typeof at>[0]),
     // Upstream rounds at with np.around (models/at.py:77-78).
     rounded: ({ round_output }) => (round_output === true ? ["at"] : []),
@@ -533,6 +572,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "clo_tout",
+    info: CLO_TOUT_INFO,
     run: (inputs) =>
       clo_tout(inputs as unknown as Parameters<typeof clo_tout>[0]),
     // Upstream rounds clo_tout with np.around (models/clo_tout.py:80).
@@ -541,6 +581,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "cooling_effect",
+    info: COOLING_EFFECT_INFO,
     run: (inputs) =>
       cooling_effect(inputs as unknown as Parameters<typeof cooling_effect>[0]),
     // Upstream always rounds ce with np.around (models/cooling_effect.py:157).
@@ -549,6 +590,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "discomfort_index",
+    info: DISCOMFORT_INDEX_INFO,
     run: (inputs) =>
       discomfort_index(
         inputs as unknown as Parameters<typeof discomfort_index>[0],
@@ -559,6 +601,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "esi",
+    info: ESI_INFO,
     run: (inputs) => esi(inputs as unknown as Parameters<typeof esi>[0]),
     // Upstream rounds esi with np.round (models/esi.py:65-66).
     rounded: ({ round_output }) => (round_output === true ? ["esi"] : []),
@@ -566,6 +609,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "heat_index_lu",
+    info: HEAT_INDEX_LU_INFO,
     run: (inputs) =>
       heat_index_lu(inputs as unknown as Parameters<typeof heat_index_lu>[0]),
     // Upstream rounds hi with np.around (models/heat_index_lu.py:60-61).
@@ -574,6 +618,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "heat_index_rothfusz",
+    info: HEAT_INDEX_ROTHFUSZ_INFO,
     run: (inputs) =>
       heat_index_rothfusz(
         inputs as unknown as Parameters<typeof heat_index_rothfusz>[0],
@@ -584,6 +629,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "heat_index_schoen",
+    info: HEAT_INDEX_SCHOEN_INFO,
     run: (inputs) =>
       heat_index_schoen(
         inputs as unknown as Parameters<typeof heat_index_schoen>[0],
@@ -594,6 +640,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "humidex",
+    info: HUMIDEX_INFO,
     run: (inputs) =>
       humidex(inputs as unknown as Parameters<typeof humidex>[0]),
     // Upstream rounds humidex with np.around (models/humidex.py:88-89).
@@ -602,6 +649,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "ireq",
+    info: IREQ_INFO,
     run: (inputs) => ireq(inputs as unknown as Parameters<typeof ireq>[0]),
     // Upstream rounds ireq and icl with np.round, and dle with np.round in
     // _format_dle (models/ireq.py:174-178, :435-436).
@@ -622,6 +670,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "net",
+    info: NET_INFO,
     run: (inputs) => net(inputs as unknown as Parameters<typeof net>[0]),
     // Upstream rounds net with np.around (models/net.py:77-78).
     rounded: ({ round_output }) => (round_output === true ? ["net"] : []),
@@ -629,6 +678,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "pet_steady",
+    info: PET_STEADY_INFO,
     run: (inputs) =>
       pet_steady(inputs as unknown as Parameters<typeof pet_steady>[0]),
     // Upstream rounds pet with round() on an np.float64, numpy's rounding
@@ -638,6 +688,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "phs",
+    info: PHS_INFO,
     // Upstream's `model` is the library's `standard` (ADR 0019, whitelist item 3).
     run: ({ model, ...inputs }) =>
       phs({ ...inputs, standard: model } as unknown as Parameters<
@@ -654,6 +705,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "pmv_a",
+    info: PMV_A_INFO,
     run: (inputs) => pmv_a(inputs as unknown as Parameters<typeof pmv_a>[0]),
     // Upstream rounds a_pmv with np.around (models/pmv_a.py:132).
     rounded: () => ["a_pmv"],
@@ -661,6 +713,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "pmv_athb",
+    info: PMV_ATHB_INFO,
     run: (inputs) =>
       pmv_athb(inputs as unknown as Parameters<typeof pmv_athb>[0]),
     // Upstream rounds athb_pmv with np.around (models/pmv_athb.py:115-124).
@@ -669,6 +722,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "pmv_e",
+    info: PMV_E_INFO,
     run: (inputs) => pmv_e(inputs as unknown as Parameters<typeof pmv_e>[0]),
     // Upstream rounds e_pmv with np.around (models/pmv_e.py:147).
     rounded: () => ["e_pmv"],
@@ -676,6 +730,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "pmv_ppd_ashrae",
+    info: PMV_PPD_ASHRAE_INFO,
     // Upstream's `model` is the library's `standard` (ADR 0019, whitelist item 3).
     run: ({ model, ...inputs }) =>
       pmv_ppd_ashrae({ ...inputs, standard: model } as unknown as Parameters<
@@ -690,6 +745,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "pmv_ppd_iso",
+    info: PMV_PPD_ISO_INFO,
     // Upstream's `model` is the library's `standard` (ADR 0019, whitelist item 3).
     run: ({ model, ...inputs }) =>
       pmv_ppd_iso({ ...inputs, standard: model } as unknown as Parameters<
@@ -702,6 +758,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "ridge_regression_predict_t_re_t_sk",
+    info: RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
     run: (inputs) =>
       ridge_regression_predict_t_re_t_sk(
         inputs as unknown as Parameters<
@@ -716,6 +773,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "set_tmp",
+    info: SET_TMP_INFO,
     run: (inputs) =>
       set_tmp(inputs as unknown as Parameters<typeof set_tmp>[0]),
     // Upstream rounds set with np.around (models/set_tmp.py:153-154).
@@ -724,6 +782,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "solar_gain",
+    info: SOLAR_GAIN_INFO,
     run: (inputs) =>
       solar_gain(inputs as unknown as Parameters<typeof solar_gain>[0]),
     // Upstream rounds erf and delta_mrt with np.round (models/solar_gain.py:255-257).
@@ -735,6 +794,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "sports_heat_stress_risk",
+    info: SPORTS_HEAT_STRESS_RISK_INFO,
     // The generator names sport by its attribute in Sports (_sports_by_name).
     run: (inputs) =>
       sports_heat_stress_risk({
@@ -753,6 +813,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "thi",
+    info: THI_INFO,
     run: (inputs) => thi(inputs as unknown as Parameters<typeof thi>[0]),
     // Upstream rounds thi with np.round (models/thi.py:46-47).
     rounded: ({ round_output }) => (round_output === true ? ["thi"] : []),
@@ -760,6 +821,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "two_nodes_gagge",
+    info: TWO_NODES_GAGGE_INFO,
     run: (inputs) =>
       two_nodes_gagge(
         inputs as unknown as Parameters<typeof two_nodes_gagge>[0],
@@ -774,6 +836,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "two_nodes_gagge_ji",
+    info: TWO_NODES_GAGGE_JI_INFO,
     run: (inputs) =>
       two_nodes_gagge_ji(
         inputs as unknown as Parameters<typeof two_nodes_gagge_ji>[0],
@@ -784,6 +847,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "two_nodes_gagge_sleep",
+    info: TWO_NODES_GAGGE_SLEEP_INFO,
     run: (inputs) =>
       two_nodes_gagge_sleep(
         inputs as unknown as Parameters<typeof two_nodes_gagge_sleep>[0],
@@ -794,6 +858,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "use_fans_heatwaves",
+    info: USE_FANS_HEATWAVES_INFO,
     run: (inputs) =>
       use_fans_heatwaves(
         inputs as unknown as Parameters<typeof use_fans_heatwaves>[0],
@@ -801,12 +866,11 @@ const MODELS: readonly ParityModel[] = [
     // Upstream rounds every output with np.around (models/use_fans_heatwaves.py:197-198).
     rounded: ({ round_output }) =>
       round_output === true ? Object.keys(USE_FANS_HEATWAVES_INFO.outputs) : [],
-    // The four heat_strain flags, booleans where upstream's are 1.0 or 0.0, are
-    // exempt by the register (deviation use_fans_heatwaves-5).
     warnings: true,
   },
   {
     name: "utci",
+    info: UTCI_INFO,
     run: (inputs) => utci(inputs as unknown as Parameters<typeof utci>[0]),
     // Upstream rounds utci with np.round (models/utci.py:177-179).
     rounded: ({ round_output }) => (round_output === true ? ["utci"] : []),
@@ -814,19 +878,20 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "vertical_tmp_grad_ppd",
+    info: VERTICAL_TMP_GRAD_PPD_INFO,
     run: (inputs) =>
       vertical_tmp_grad_ppd(
         inputs as unknown as Parameters<typeof vertical_tmp_grad_ppd>[0],
       ),
     // Upstream rounds ppd_vg with np.round (models/vertical_tmp_grad_ppd.py:131-132).
     rounded: ({ round_output }) => (round_output === true ? ["ppd_vg"] : []),
-    // acceptability, a boolean where upstream's is 1.0 or 0.0, and the cooling
-    // effect's notice, which upstream emits twice, are exempt by the register
-    // (deviation vertical_tmp_grad_ppd-5, deviation vertical_tmp_grad_ppd-6).
+    // The cooling effect's notice, which upstream emits twice, is exempt by the
+    // register (deviation vertical_tmp_grad_ppd-5).
     warnings: true,
   },
   {
     name: "wbgt",
+    info: WBGT_INFO,
     run: (inputs) => wbgt(inputs as unknown as Parameters<typeof wbgt>[0]),
     // Upstream rounds wbgt with np.round (models/wbgt.py:90-91).
     rounded: ({ round_output }) => (round_output === true ? ["wbgt"] : []),
@@ -834,6 +899,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "wci",
+    info: WCI_INFO,
     run: (inputs) => wci(inputs as unknown as Parameters<typeof wci>[0]),
     // Upstream rounds wci with np.around (models/wci.py:73-74).
     rounded: ({ round_output }) => (round_output === true ? ["wci"] : []),
@@ -841,6 +907,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "wind_chill_temperature",
+    info: WIND_CHILL_TEMPERATURE_INFO,
     run: (inputs) =>
       wind_chill_temperature(
         inputs as unknown as Parameters<typeof wind_chill_temperature>[0],
@@ -851,6 +918,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "work_capacity_dunne",
+    info: WORK_CAPACITY_DUNNE_INFO,
     run: (inputs) =>
       work_capacity_dunne(
         inputs as unknown as Parameters<typeof work_capacity_dunne>[0],
@@ -861,6 +929,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "work_capacity_hothaps",
+    info: WORK_CAPACITY_HOTHAPS_INFO,
     run: (inputs) =>
       work_capacity_hothaps(
         inputs as unknown as Parameters<typeof work_capacity_hothaps>[0],
@@ -871,6 +940,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "work_capacity_iso",
+    info: WORK_CAPACITY_ISO_INFO,
     run: (inputs) =>
       work_capacity_iso(
         inputs as unknown as Parameters<typeof work_capacity_iso>[0],
@@ -881,6 +951,7 @@ const MODELS: readonly ParityModel[] = [
   },
   {
     name: "work_capacity_niosh",
+    info: WORK_CAPACITY_NIOSH_INFO,
     run: (inputs) =>
       work_capacity_niosh(
         inputs as unknown as Parameters<typeof work_capacity_niosh>[0],
@@ -893,9 +964,7 @@ const MODELS: readonly ParityModel[] = [
 
 // Models whose values 4.8.0 changes, with the ticket aligning each (decision 298).
 const ALIGNED_LATER: Readonly<Record<string, string>> = {
-  adaptive_ashrae: "tickets 51b and 51c",
-  adaptive_en: "ticket 51b",
-  pmv_ppd_ashrae: "ticket 51b",
+  adaptive_ashrae: "ticket 51c",
   solar_gain: "ticket 51c",
   two_nodes_gagge_sleep: "ticket 51c",
 };

@@ -1,6 +1,7 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import * as validation from "../src/_internal/validation.ts";
 import {
+  _as_flag,
   _mapping,
   _valid_range,
   HEAT_INDEX_STRESS_CATEGORIES,
@@ -164,6 +165,23 @@ describe("test_internal", () => {
   test.todo(
     "test_base_inputs_store_normalized_numpy_scalar: no counterpart, as JavaScript has no numpy scalars",
   );
+
+  // Upstream's arrays, element-wise.
+  test("test_as_flag", () => {
+    expect([true, false].map((condition) => _as_flag(condition))).toEqual([
+      1.0, 0.0,
+    ]);
+    expect(
+      (
+        [
+          [true, true],
+          [false, true],
+          [true, false],
+        ] as const
+      ).map(([condition, valid]) => _as_flag(condition, valid)),
+    ).toEqual([1.0, 0.0, NaN]);
+    expect(typeof _as_flag(true)).toBe("number");
+  });
 });
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the

@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { ankle_draft as from_root } from "../../src/index.ts";
-import { decode, read_data } from "../parity/harness.ts";
+import { read_data } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -14,7 +14,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.ankleDraft,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_ankle_draft.py. Upstream's
+// Mirrors pythermalcomfort v4.8.0 tests/test_ankle_draft.py. Upstream's
 // arrays are called element-wise, and a UserWarning becomes a range row.
 describe("test_ankle_draft", () => {
   test.each(reference_table.data)(
@@ -161,6 +161,21 @@ describe("test_ankle_draft", () => {
     ]);
     expect(result.ppd_ad).toBeNaN();
   });
+
+  // Upstream's tdb = [25, np.nan], element-wise; deviation _shared-7.
+  test("test_ankle_draft_acceptability_nan_where_ppd_undefined", () => {
+    const inputs = {
+      tr: 25,
+      vr: 0.1,
+      rh: 50,
+      met: 1.2,
+      clo: 0.5,
+      v_ankle: 0.1,
+      limit_inputs: false,
+    };
+    expect(ankle_draft({ ...inputs, tdb: 25 }).acceptability).toBe(true);
+    expect(() => ankle_draft({ ...inputs, tdb: NaN })).toThrow(RangeError);
+  });
 });
 
 const valid = {
@@ -191,9 +206,9 @@ const parity_cases = () =>
     .cases;
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image.
+// parity image, and acceptability on 4.8.0.
 describe("ankle_draft (JS-only)", () => {
-  // models/ankle_draft.py:89-93.
+  // models/ankle_draft.py:90-94.
   test("the docstring's example gives its outputs", () => {
     expect(call(valid)).toEqual({
       ppd_ad: 18.5,
@@ -272,8 +287,8 @@ describe("ankle_draft (JS-only)", () => {
         bound: ANKLE_DRAFT_INFO.inputs.vr.applicability,
       }),
     ]);
-    expect(result.ppd_ad).not.toBeNaN();
-    expect(typeof result.acceptability).toBe("boolean");
+    expect(result.ppd_ad).toBe(0.0);
+    expect(result.acceptability).toBe(true);
   });
 
   // Deviation ankle_draft-2.
@@ -290,7 +305,7 @@ describe("ankle_draft (JS-only)", () => {
       ),
     );
     expect(result.ppd_ad).toBeNaN();
-    expect(result.acceptability).toBeNaN();
+    expect(result.acceptability).toBe(null);
   });
 
   // Deviation ankle_draft-3: upstream warns the notice twice, then 'tdb' and 'v_limited'.
@@ -320,17 +335,6 @@ describe("ankle_draft (JS-only)", () => {
         ({ kind }) => kind === "notice",
       );
       expect(notices).toEqual(warned ? [notice] : []);
-    }
-  });
-
-  // Deviation ankle_draft-6.
-  test("acceptability is upstream's over the parity data, read as a boolean", () => {
-    for (const { inputs, outputs } of parity_cases()) {
-      const expected = decode(outputs.acceptability ?? null);
-      const actual = call(inputs).acceptability;
-      if (typeof expected === "number" && !Number.isNaN(expected))
-        expect(actual).toBe(expected === 1);
-      else expect(actual).toEqual(expected);
     }
   });
 

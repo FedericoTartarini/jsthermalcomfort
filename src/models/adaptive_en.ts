@@ -1,6 +1,6 @@
 import { adaptive_cooling_effect } from "../_internal/adaptive_cooling_effect.ts";
 import { BASE_INPUTS_UNITS, parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -8,7 +8,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
-import { _valid_range } from "../_internal/validation.ts";
+import { _as_flag, _valid_range } from "../_internal/validation.ts";
 import { operative_tmp } from "../environment/operative_tmp.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
@@ -35,9 +35,9 @@ export const ADAPTIVE_EN_INFO = deepFreeze({
   },
   outputs: {
     tmp_cmf: { kind: "numeric", unit: "°C" },
-    acceptability_cat_i: { kind: "bool", unit: null },
-    acceptability_cat_ii: { kind: "bool", unit: null },
-    acceptability_cat_iii: { kind: "bool", unit: null },
+    acceptability_cat_i: { kind: "flag", masked: true, unit: null },
+    acceptability_cat_ii: { kind: "flag", masked: true, unit: null },
+    acceptability_cat_iii: { kind: "flag", masked: true, unit: null },
     tmp_cmf_cat_i_up: { kind: "numeric", unit: "°C" },
     tmp_cmf_cat_ii_up: { kind: "numeric", unit: "°C" },
     tmp_cmf_cat_iii_up: { kind: "numeric", unit: "°C" },
@@ -89,9 +89,12 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  * @returns A dataclass containing the results. See {@link AdaptiveEN} for more details.
  *
  * - `tmp_cmf` - Comfort temperature at that specific running mean temperature, default in [°C] or in [°F].
- * - `acceptability_cat_i` - If the indoor conditions comply with comfort category I.
- * - `acceptability_cat_ii` - If the indoor conditions comply with comfort category II.
- * - `acceptability_cat_iii` - If the indoor conditions comply with comfort category III.
+ * - `acceptability_cat_i` - 1.0 if the indoor conditions comply with comfort category I, 0.0 if not, and
+ *   NaN where the inputs are outside the applicability limits.
+ * - `acceptability_cat_ii` - 1.0 if the indoor conditions comply with comfort category II, 0.0 if not, and
+ *   NaN where the inputs are outside the applicability limits.
+ * - `acceptability_cat_iii` - 1.0 if the indoor conditions comply with comfort category III, 0.0 if not, and
+ *   NaN where the inputs are outside the applicability limits.
  * - `tmp_cmf_cat_i_up` - Upper acceptable comfort temperature for category I, default in [°C] or in [°F].
  * - `tmp_cmf_cat_ii_up` - Upper acceptable comfort temperature for category II, default in [°C] or in [°F].
  * - `tmp_cmf_cat_iii_up` - Upper acceptable comfort temperature for category III, default in [°C] or in [°F].
@@ -118,7 +121,7 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  *
  * results = adaptive_en({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
  * console.log(results);
- * // { tmp_cmf: NaN, acceptability_cat_i: false, ... }
+ * // { tmp_cmf: NaN, acceptability_cat_i: null, ... }
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is between 10 °C and 30 °C.
  * ```
@@ -169,9 +172,21 @@ export function adaptive_en(inputs: ENInputs): AdaptiveEN {
   let t_cmf_ii_upper = t_cmf + 3.0 + ce;
   let t_cmf_iii_upper = t_cmf + 4.0 + ce;
 
-  const acceptability_i = t_cmf_i_lower <= to && to <= t_cmf_i_upper;
-  const acceptability_ii = t_cmf_ii_lower <= to && to <= t_cmf_ii_upper;
-  const acceptability_iii = t_cmf_iii_lower <= to && to <= t_cmf_iii_upper;
+  // NaN where the inputs are outside the applicability limits (t_cmf is NaN) or
+  // where a NaN input makes the operative temperature or cooling effect NaN
+  const valid = !(Number.isNaN(t_cmf) || Number.isNaN(to) || Number.isNaN(ce));
+  const acceptability_i = _as_flag(
+    t_cmf_i_lower <= to && to <= t_cmf_i_upper,
+    valid,
+  );
+  const acceptability_ii = _as_flag(
+    t_cmf_ii_lower <= to && to <= t_cmf_ii_upper,
+    valid,
+  );
+  const acceptability_iii = _as_flag(
+    t_cmf_iii_lower <= to && to <= t_cmf_iii_upper,
+    valid,
+  );
 
   if (units.toUpperCase() === Units.IP) {
     ({
@@ -206,17 +221,20 @@ export function adaptive_en(inputs: ENInputs): AdaptiveEN {
     t_cmf_iii_upper = round(t_cmf_iii_upper, 1);
   }
 
-  return Object.freeze({
-    tmp_cmf: t_cmf,
-    acceptability_cat_i: acceptability_i,
-    acceptability_cat_ii: acceptability_ii,
-    acceptability_cat_iii: acceptability_iii,
-    tmp_cmf_cat_i_up: t_cmf_i_upper,
-    tmp_cmf_cat_ii_up: t_cmf_ii_upper,
-    tmp_cmf_cat_iii_up: t_cmf_iii_upper,
-    tmp_cmf_cat_i_low: t_cmf_i_lower,
-    tmp_cmf_cat_ii_low: t_cmf_ii_lower,
-    tmp_cmf_cat_iii_low: t_cmf_iii_lower,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    ADAPTIVE_EN_INFO,
+    {
+      tmp_cmf: t_cmf,
+      acceptability_cat_i: acceptability_i,
+      acceptability_cat_ii: acceptability_ii,
+      acceptability_cat_iii: acceptability_iii,
+      tmp_cmf_cat_i_up: t_cmf_i_upper,
+      tmp_cmf_cat_ii_up: t_cmf_ii_upper,
+      tmp_cmf_cat_iii_up: t_cmf_iii_upper,
+      tmp_cmf_cat_i_low: t_cmf_i_lower,
+      tmp_cmf_cat_ii_low: t_cmf_ii_lower,
+      tmp_cmf_cat_iii_low: t_cmf_iii_lower,
+    },
+    warnings,
+  );
 }

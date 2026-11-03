@@ -5,7 +5,7 @@ import {
   ASHRAE_55_LIMITS,
 } from "../_internal/ashrae55.ts";
 import { parseInputs } from "../_internal/define.ts";
-import { deepFreeze } from "../_internal/modelInfo.ts";
+import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type {
   InputsOf,
   ModelInfo,
@@ -13,6 +13,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
+import { _as_flag } from "../_internal/validation.ts";
 import { Standard } from "../utilities/options.ts";
 
 export const VERTICAL_TMP_GRAD_PPD_INFO = deepFreeze({
@@ -44,7 +45,7 @@ export const VERTICAL_TMP_GRAD_PPD_INFO = deepFreeze({
   },
   outputs: {
     ppd_vg: { kind: "numeric", unit: "%" },
-    acceptability: { kind: "bool", masked: true, unit: null },
+    acceptability: { kind: "flag", masked: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -108,7 +109,8 @@ export type VerticalTGradPPD = OutputsOf<typeof VERTICAL_TMP_GRAD_PPD_INFO>;
  * To access the `ppd_vg` and `acceptability` values, use the corresponding attributes of the returned `VerticalTGradPPD` instance, e.g., `result.ppd_vg`.
  *
  * - `ppd_vg` - Predicted Percentage of Dissatisfied occupants with vertical temperature gradient.
- * - `acceptability` - True if the vertical temperature gradient between the feet and the head is acceptable (PPD_vg <= 5%).
+ * - `acceptability` - 1.0 if the vertical air temperature difference is acceptable (PPD_vg ≤ 5 %),
+ *   0.0 if not, and NaN where the inputs are outside the applicability limits.
  *
  * @example
  * ```ts
@@ -162,7 +164,7 @@ export function vertical_tmp_grad_ppd(
   );
   // 34.5 % baseline subtracted, negative values set to zero (Liu et al. 2020, eq. 3)
   let ppd_val = Math.max((numerator / (1 + numerator) - 0.345) * 100, 0.0);
-  let acceptability: boolean | number = ppd_val <= 5;
+  let acceptability = _as_flag(ppd_val <= 5, !Number.isNaN(ppd_val));
 
   if (round_output) {
     ppd_val = round(ppd_val, 1);
@@ -191,9 +193,12 @@ export function vertical_tmp_grad_ppd(
   ppd_val = limit_inputs && !all_valid ? NaN : ppd_val;
   acceptability = limit_inputs && !all_valid ? NaN : acceptability;
 
-  return Object.freeze({
-    ppd_vg: ppd_val,
-    acceptability,
-    warnings: Object.freeze(warnings),
-  });
+  return buildOutputs(
+    VERTICAL_TMP_GRAD_PPD_INFO,
+    {
+      ppd_vg: ppd_val,
+      acceptability,
+    },
+    warnings,
+  );
 }

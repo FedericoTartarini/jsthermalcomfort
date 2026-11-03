@@ -1,5 +1,4 @@
 import { notOfType } from "../_internal/errors.ts";
-import { round } from "../_internal/round.ts";
 
 /** Transpose the solar altitude and solar azimuth angles. */
 export function transpose_sharp_altitude(
@@ -25,5 +24,5 @@ export function transpose_sharp_altitude(
     ) *
     (180 / Math.PI);
   const sol_altitude = altitude_new;
-  return Object.freeze([round(sharp, 3), round(sol_altitude, 3)] as const);
+  return Object.freeze([sharp, sol_altitude] as const);
 }

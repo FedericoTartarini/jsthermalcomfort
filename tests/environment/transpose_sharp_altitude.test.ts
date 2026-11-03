@@ -1,32 +1,55 @@
 import { describe, expect, test } from "vitest";
 import { transpose_sharp_altitude } from "../../src/environment/index.ts";
 import { transpose_sharp_altitude as from_root } from "../../src/index.ts";
+import { approx } from "../models/testUtils.ts";
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_environment.py,
+// Mirrors pythermalcomfort v4.8.0 tests/test_environment.py,
 // test_transpose_sharp_altitude; its keyword calls are positional here.
 describe("test_environment", () => {
   test("test_transpose_sharp_altitude", () => {
-    expect(transpose_sharp_altitude(0, 0)).toEqual([0, 90]);
-    expect(transpose_sharp_altitude(0, 20)).toEqual([0, 70]);
-    expect(transpose_sharp_altitude(0, 45)).toEqual([0, 45]);
-    expect(transpose_sharp_altitude(0, 60)).toEqual([0, 30]);
-    expect(transpose_sharp_altitude(90, 0)).toEqual([90, 0]);
-    expect(transpose_sharp_altitude(90, 45)).toEqual([45, 0]);
-    expect(transpose_sharp_altitude(90, 30)).toEqual([60, 0]);
-    expect(transpose_sharp_altitude(135, 60)).toEqual([22.208, 20.705]);
-    expect(transpose_sharp_altitude(120, 75)).toEqual([13.064, 7.435]);
-    expect(transpose_sharp_altitude(150, 30)).toEqual([40.893, 48.59]);
+    for (const [sharp, altitude, expected] of [
+      [0, 0, [0, 90]],
+      [0, 20, [0, 70]],
+      [0, 45, [0, 45]],
+      [0, 60, [0, 30]],
+      [90, 0, [90, 0]],
+      [90, 45, [45, 0]],
+      [90, 30, [60, 0]],
+      [135, 60, [22.208, 20.705]],
+      [120, 75, [13.064, 7.435]],
+      [150, 30, [40.893, 48.59]],
+    ] as const) {
+      const result = transpose_sharp_altitude(sharp, altitude);
+      expect(
+        result.map((value, i) =>
+          approx(value, expected[i] ?? NaN, { rel: 0, abs: 5e-4 }),
+        ),
+      ).toEqual([true, true]);
+    }
   });
 });
 
 // What upstream's test leaves out, measured on pythermalcomfort 4.6.2 in the
-// parity image.
+// parity image, the unrounded values on 4.8.0.
 describe("transpose_sharp_altitude (JS-only)", () => {
   // A call with arguments the type rejects, to test the runtime.
   const call =
     (...args: unknown[]) =>
     () =>
       (transpose_sharp_altitude as (...a: unknown[]) => unknown)(...args);
+
+  // transpose_sharp_altitude.py:22 returns the angles unrounded (641646c).
+  test.each([
+    [135, 60, [22.207654298596488, 20.70481105463543]],
+    [120, 75, [13.064313429508289, 7.435472226131851]],
+    [150, 30, [40.89339464913089, 48.590377890729144]],
+    [0, 20, [0, 70.00000000000001]],
+  ] as const)(
+    "(%s, %s) gives upstream's unrounded angles",
+    (sharp, altitude, expected) => {
+      expect(transpose_sharp_altitude(sharp, altitude)).toEqual(expected);
+    },
+  );
 
   // Upstream returns a tuple (decision 152).
   test("returns a frozen pair", () => {

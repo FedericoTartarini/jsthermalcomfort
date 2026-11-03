@@ -977,7 +977,6 @@ const MODELS: readonly ParityModel[] = [
 
 // Models whose values 4.8.0 changes, with the ticket aligning each (decision 298).
 const ALIGNED_LATER: Readonly<Record<string, string>> = {
-  solar_gain: "ticket 51c",
   two_nodes_gagge_sleep: "ticket 51c",
 };
 

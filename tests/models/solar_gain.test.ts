@@ -210,7 +210,7 @@ describeModelContract(
 
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, measured on pythermalcomfort 4.6.2
-// (the supine values on 4.7.0), and what only the library adds.
+// (the supine values on 4.8.0), and what only the library adds.
 describe("solar_gain (JS-only)", () => {
   const base = {
     sol_altitude: 0,
@@ -232,7 +232,7 @@ describe("solar_gain (JS-only)", () => {
     });
 
     // Upstream lower-cases posture (models/solar_gain.py:210): "Supine"
-    // gives 40.0 and 9.2 on pythermalcomfort 4.7.0.
+    // gives 40.0 and 9.2 on pythermalcomfort 4.8.0.
     test("posture is case-insensitive, as upstream", () => {
       for (const posture of ["standing", "supine", "sitting"] as const)
         for (const given of [
@@ -271,7 +271,7 @@ describe("solar_gain (JS-only)", () => {
     });
 
     // The supine path transposes sharp and sol_altitude for the fp lookup
-    // (models/solar_gain.py:294-295); measured on pythermalcomfort 4.7.0.
+    // (models/solar_gain.py:294-295); measured on pythermalcomfort 4.8.0.
     test("supine gives upstream's values at the table's corners", () => {
       for (const [sol_altitude, sharp, erf, delta_mrt] of [
         [0, 0, 25.86, 5.94],

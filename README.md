@@ -155,7 +155,7 @@ so `latest` and the default branch agree about what the current release is.
 
 Validation datasets for model tests are fetched from
 `FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).
-By default tests use the `v1.0.1` tag, the ref pythermalcomfort's own tests pin
+By default tests use the `v1.1.0` tag, the ref pythermalcomfort's own tests pin
 (`unit_test_data_prefix` in its `tests/conftest.py`); bump it together with
 upstream. To run the tests against another ref (tag/branch/commit), set
 `VALIDATION_DATA_REF`:

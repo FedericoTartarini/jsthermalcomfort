@@ -4,7 +4,7 @@
 const validation_data_ref =
   process.env.VALIDATION_DATA_REF === undefined ||
   process.env.VALIDATION_DATA_REF === ""
-    ? "v1.0.1"
+    ? "v1.1.0"
     : process.env.VALIDATION_DATA_REF;
 const unit_test_data_prefix = `https://raw.githubusercontent.com/FedericoTartarini/validation-data-comfort-models/${validation_data_ref}/`;
 
@@ -24,7 +24,6 @@ export const test_data_urls = {
   net: unit_test_data_prefix + "ts_net.json",
   petSteady: unit_test_data_prefix + "ts_pet_steady.json",
   phs: unit_test_data_prefix + "ts_phs.json",
-  pmv: unit_test_data_prefix + "ts_pmv.json",
   pmvPpd: unit_test_data_prefix + "ts_pmv_ppd.json",
   use_fans_heatwaves: unit_test_data_prefix + "ts_use_fans_heatwaves.json",
   utci: unit_test_data_prefix + "ts_utci.json",

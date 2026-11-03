@@ -278,7 +278,7 @@ def _ireq(rng):
 def _net(rng):
     # Upstream checks no range (models/net.py:62-68, NETInputs at
     # classes_input.py:482-496), so tdb and v reach past the validation
-    # table's 25-40 °C and 0.1-4.5 m/s (ts_net.json at validation data v1.0.1).
+    # table's 25-40 °C and 0.1-4.5 m/s (ts_net.json at validation data v1.1.0).
     return {
         "tdb": _value(rng, -40.0, 60.0),
         "rh": _value(rng, 0.0, 100.0),
@@ -728,7 +728,6 @@ def _two_nodes_gagge_sleep(rng):
         "c_dil": lambda: _value(rng, 50.0, 200.0),
         "c_str": lambda: _value(rng, 0.1, 1.0),
         "temp_skin_neutral": lambda: _value(rng, 32.0, 35.0),
-        "temp_core_neutral": lambda: _value(rng, 36.0, 38.0),
         "e_skin": lambda: _value(rng, 0.0, 50.0),
         "alfa": lambda: _value(rng, 0.05, 0.3),
         "skin_blood_flow": lambda: _value(rng, 1.0, 20.0),
@@ -837,7 +836,7 @@ def _wbgt(rng):
     # Upstream checks no range (models/wbgt.py:70-76, WBGTInputs at
     # classes_input.py:1021-1037), so twb, tg and tdb reach past the
     # validation table's 0-25 °C, 0-55 °C and 0-20 °C (ts_wbgt.json at
-    # validation data v1.0.1). tdb is left out half the time, and
+    # validation data v1.1.0). tdb is left out half the time, and
     # with_solar_load is True only with a tdb, since upstream raises without
     # one (models/wbgt.py:82-83); half of the tdb cases leave it False, where
     # tdb is ignored (:85-88).
@@ -866,7 +865,7 @@ def _wci(rng):
 def _wind_chill_temperature(rng):
     # Upstream checks no range (models/wind_chill_temperature.py:49-62), so
     # tdb and v reach past the validation table's -40 to 0 °C and 0.1 to
-    # 60 km/h (ts_wind_chill_temperature.json at validation data v1.0.1).
+    # 60 km/h (ts_wind_chill_temperature.json at validation data v1.1.0).
     return {
         "tdb": _value(rng, -50.0, 20.0),
         "v": _value(rng, 0.0, 120.0),

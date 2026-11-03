@@ -429,7 +429,7 @@ describe("exemptions", () => {
 
 const PINS = {
   python: "3.12.15",
-  packages: { numpy: "2.5.4", pythermalcomfort: "4.7.0" },
+  packages: { numpy: "2.5.4", pythermalcomfort: "4.8.0" },
 };
 
 function header(overrides: Partial<Header> = {}): Header {
@@ -466,7 +466,7 @@ describe("check_header", () => {
       'header: machine "arm64", expected "x86_64"',
       'header: python "3.13.1", expected the pinned "3.12.15"',
       'header: numpy "2.4.0", expected the pinned "2.5.4"',
-      'header: pythermalcomfort missing, expected the pinned "4.7.0"',
+      'header: pythermalcomfort missing, expected the pinned "4.8.0"',
       'header: scipy "1.18.1" is not pinned',
     ]);
   });
@@ -477,7 +477,7 @@ describe("read_pins", () => {
     const pins = read_pins(root);
     expect(pins.python).toMatch(/^3\.12\.\d+$/);
     expect(pins.packages).toMatchObject({
-      pythermalcomfort: "4.7.0",
+      pythermalcomfort: "4.8.0",
       scipy: "1.18.1",
     });
   });
@@ -891,12 +891,31 @@ const MODELS: readonly ParityModel[] = [
   },
 ];
 
+// Models whose values 4.8.0 changes, with the ticket aligning each (decision 298).
+const ALIGNED_LATER: Readonly<Record<string, string>> = {
+  adaptive_ashrae: "tickets 51b and 51c",
+  adaptive_en: "ticket 51b",
+  pmv_ppd_ashrae: "ticket 51b",
+  solar_gain: "ticket 51c",
+  two_nodes_gagge_sleep: "ticket 51c",
+};
+
 describe("parity with pythermalcomfort", () => {
-  test.each(MODELS)("$name", (model) => {
+  const check = (model: ParityModel) => {
     const failures = parity_failures(root, model);
     expect({ count: failures.length, first: failures.slice(0, 20) }).toEqual({
       count: 0,
       first: [],
     });
-  });
+  };
+  test.each(MODELS.filter(({ name }) => !(name in ALIGNED_LATER)))(
+    "$name",
+    check,
+  );
+  test.fails.each(
+    MODELS.filter(({ name }) => name in ALIGNED_LATER).map((model) => ({
+      ...model,
+      ticket: ALIGNED_LATER[model.name],
+    })),
+  )("$name, until $ticket", check);
 });

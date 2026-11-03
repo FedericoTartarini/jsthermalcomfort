@@ -93,12 +93,10 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * > [!NOTE]
  * > ASHRAE 55 2020 limits: 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40, 0 <= v [m/s] <= 2, 10 <= t_running_mean [°C] <= 33.5.
  *
- * @param inputs.round_output - If True, rounds ``t_cmf`` to one decimal place in SI before the comfort bounds are
- * derived, so ``tmp_cmf_80_low``, ``tmp_cmf_80_up``, ``tmp_cmf_90_low`` and
- * ``tmp_cmf_90_up`` inherit that rounding. If False, ``t_cmf`` and the derived bounds
- * are returned at full precision. Under ``units='IP'`` the rounded SI value is then
- * converted to °F, so IP outputs carry the extra decimals from the °C-to-°F conversion.
- * Defaults to True.
+ * @param inputs.round_output - If True, rounds the five reported temperatures to one decimal place, after the
+ * conversion to °F when ``units='IP'``. The comfort bounds and the acceptability
+ * flags are always calculated from unrounded values, so ``round_output`` never
+ * changes ``acceptability_80`` or ``acceptability_90``. Defaults to True.
  *
  * @returns A dataclass containing the results. See {@link AdaptiveASHRAE} for more details.
  *
@@ -188,10 +186,6 @@ export function adaptive_ashrae(inputs: ASHRAEInputs): AdaptiveASHRAE {
   );
   t_cmf = limit_inputs && !all_valid ? NaN : t_cmf;
 
-  if (round_output) {
-    t_cmf = round(t_cmf, 1);
-  }
-
   let tmp_cmf_80_low = t_cmf - 3.5;
   let tmp_cmf_90_low = t_cmf - 2.5;
   let tmp_cmf_80_up = t_cmf + 3.5 + ce;
@@ -229,6 +223,15 @@ export function adaptive_ashrae(inputs: ASHRAEInputs): AdaptiveASHRAE {
       tmp_cmf_90_low,
       tmp_cmf_90_up,
     }));
+  }
+
+  // round only the reported temperatures, so round_output never changes acceptability
+  if (round_output) {
+    t_cmf = round(t_cmf, 1);
+    tmp_cmf_80_low = round(tmp_cmf_80_low, 1);
+    tmp_cmf_80_up = round(tmp_cmf_80_up, 1);
+    tmp_cmf_90_low = round(tmp_cmf_90_low, 1);
+    tmp_cmf_90_up = round(tmp_cmf_90_up, 1);
   }
 
   return buildOutputs(

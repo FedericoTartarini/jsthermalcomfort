@@ -539,11 +539,13 @@ const MODELS: readonly ParityModel[] = [
       adaptive_ashrae(
         inputs as unknown as Parameters<typeof adaptive_ashrae>[0],
       ),
-    // Upstream rounds t_cmf in SI before deriving the bounds
-    // (adaptive_ashrae.py:147-148), and converts it afterwards under IP.
-    rounded: ({ units, round_output }) =>
-      round_output === true && String(units).toUpperCase() === "SI"
-        ? ["tmp_cmf"]
+    // Upstream rounds the five temperatures with np.around after converting
+    // them under IP (models/adaptive_ashrae.py:177-183).
+    rounded: ({ round_output }) =>
+      round_output === true
+        ? Object.entries(ADAPTIVE_ASHRAE_INFO.outputs)
+            .filter(([, { kind }]) => kind === "numeric")
+            .map(([name]) => name)
         : [],
     warnings: true,
   },
@@ -975,7 +977,6 @@ const MODELS: readonly ParityModel[] = [
 
 // Models whose values 4.8.0 changes, with the ticket aligning each (decision 298).
 const ALIGNED_LATER: Readonly<Record<string, string>> = {
-  adaptive_ashrae: "ticket 51c",
   solar_gain: "ticket 51c",
   two_nodes_gagge_sleep: "ticket 51c",
 };

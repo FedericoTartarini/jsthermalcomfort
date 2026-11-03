@@ -3,7 +3,7 @@ import { _pmv_ppd_optimized } from "../../src/models/_pmv_ppd_optimized.ts";
 import { round } from "../../src/_internal/round.ts";
 import { approx } from "./testUtils.ts";
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_pmv_ppd_optimised.py, through the
+// Mirrors pythermalcomfort v4.8.0 tests/test_pmv_ppd_optimised.py, through the
 // kernel's own file (S2), as upstream imports it. Upstream's arrays are called
 // element-wise.
 describe("test_pmv_ppd_optimised", () => {

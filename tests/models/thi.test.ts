@@ -8,8 +8,8 @@ type Inputs = Parameters<typeof thi>[0];
 
 const call = (inputs: unknown) => thi(inputs as Inputs);
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_thi.py. Its is_equal
-// (tests/conftest.py:101-116) is np.isclose or np.allclose with atol 1e-6 and
+// Mirrors pythermalcomfort v4.8.0 tests/test_thi.py. Its is_equal
+// (tests/conftest.py:100-115) is np.isclose or np.allclose with atol 1e-6 and
 // the default rtol, 1e-5, and its list call runs element-wise.
 describe("test_thi", () => {
   test.each([

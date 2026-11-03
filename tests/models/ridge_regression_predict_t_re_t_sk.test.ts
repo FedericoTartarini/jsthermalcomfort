@@ -22,7 +22,7 @@ const allclose = (actual: readonly number[], expected: readonly number[]) =>
   actual.length === expected.length &&
   actual.every((x, i) => approx(x, expected[i] ?? NaN, { rel: 1e-6, abs: 0 }));
 
-// Mirrors pythermalcomfort v4.7.0
+// Mirrors pythermalcomfort v4.8.0
 // tests/data_driven/test_ridge_regression_body_temperature_predictor.py.
 describe("test_ridge_regression_body_temperature_predictor", () => {
   // The private functions through the model's own file (S2), as upstream
@@ -238,7 +238,7 @@ const base = {
 };
 const sex_message = "sex must be one of ['male', 'female']";
 
-// Mirrors the sex cases of pythermalcomfort v4.7.0 tests/test_choice_field.py
+// Mirrors the sex cases of pythermalcomfort v4.8.0 tests/test_choice_field.py
 // through the model, whose inputs class receives sex
 // (models/ridge_regression_predict_t_re_t_sk.py:330-331).
 describe("test_choice_field", () => {

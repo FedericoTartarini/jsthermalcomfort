@@ -8,8 +8,8 @@ type Inputs = Parameters<typeof esi>[0];
 
 const call = (inputs: unknown) => esi(inputs as Inputs);
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_esi.py. Its is_equal
-// (tests/conftest.py:101-116) is np.isclose or np.allclose with the given atol
+// Mirrors pythermalcomfort v4.8.0 tests/test_esi.py. Its is_equal
+// (tests/conftest.py:100-115) is np.isclose or np.allclose with the given atol
 // and the default rtol, 1e-5, and its list call runs element-wise.
 describe("test_esi", () => {
   // tests/test_esi.py:10 calls is_equal without asserting its result; this asserts it.

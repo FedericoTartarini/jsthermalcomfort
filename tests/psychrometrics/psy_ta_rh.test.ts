@@ -3,7 +3,7 @@ import { psy_ta_rh } from "../../src/psychrometrics/index.ts";
 import { psy_ta_rh as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the psy_ta_rh case of pythermalcomfort v4.7.0
+// Mirrors the psy_ta_rh case of pythermalcomfort v4.8.0
 // tests/test_psychrometrics.py.
 describe("test_psychrometrics", () => {
   test("test_psy_ta_rh", () => {
@@ -132,7 +132,7 @@ describe("psy_ta_rh (JS-only)", () => {
   });
 
   // As upstream's PsychrometricValues, @dataclass(frozen=True)
-  // (classes_return.py:457), with its fields in the dataclass's order.
+  // (classes_return.py:464), with its fields in the dataclass's order.
   test("returns a frozen object with upstream's fields", () => {
     const result = psy_ta_rh(25, 50);
     expect(Object.isFrozen(result)).toBe(true);

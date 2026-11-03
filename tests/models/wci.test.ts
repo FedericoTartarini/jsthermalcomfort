@@ -11,7 +11,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.windChill,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_wind_chill_index.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_wind_chill_index.py.
 describe("test_wind_chill_index", () => {
   test.each(reference_table.data)("test_calculates_wci: case %#", (entry) => {
     const { inputs, outputs } = entry;

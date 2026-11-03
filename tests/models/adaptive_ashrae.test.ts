@@ -399,7 +399,7 @@ describe("adaptive_ashrae (JS-only)", () => {
       expect(inputs.units).toBe(CLO_TOUT_INFO.inputs.units);
     });
 
-    // deviation _shared-4 (models/adaptive_ashrae.py:133, _internal/ashrae55.py:12)
+    // deviation _shared-4 (models/adaptive_ashrae.py:131, _internal/ashrae55.py:12)
     test("standards is the array of ASHRAE 55's check, not a copy", () => {
       expect(ADAPTIVE_ASHRAE_INFO.standards).toBe(
         ASHRAE_55_COMPLIANCE_STANDARDS,
@@ -475,7 +475,7 @@ describe("adaptive_ashrae (JS-only)", () => {
     });
 
     // Upstream passes _check_ashrae55_compliance no airspeed_control, met or
-    // clo (adaptive_ashrae.py:133-137), so the no-control rules never apply.
+    // clo (adaptive_ashrae.py:131-135), so the no-control rules never apply.
     test("no airspeed_control rule applies", () => {
       expect(
         adaptive_ashrae({ tdb: 20, tr: 20, t_running_mean: 20, v: 1.5 })
@@ -483,8 +483,8 @@ describe("adaptive_ashrae (JS-only)", () => {
       ).toEqual([]);
     });
 
-    // Upstream checks the converted values (adaptive_ashrae.py:118-124,
-    // :133): 106 °F is 41.1 °C.
+    // Upstream checks the converted values (adaptive_ashrae.py:116-122,
+    // :131): 106 °F is 41.1 °C.
     test("under IP the rows hold the SI values upstream compares", () => {
       const { warnings } = adaptive_ashrae({
         tdb: 106,

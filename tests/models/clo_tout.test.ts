@@ -12,7 +12,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.cloTout,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_clo_tout.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_clo_tout.py.
 describe("test_clo_tout", () => {
   test.each(reference_table.data)("test_clo_tout: fixture case %#", (entry) => {
     const { inputs, outputs } = entry;
@@ -36,7 +36,7 @@ describe("clo_tout (JS-only)", () => {
   const call = (inputs: unknown) => () => clo_tout(inputs as Inputs);
 
   describe("values", () => {
-    // Upstream's np.where chain (models/clo_tout.py:75-77): each breakpoint belongs
+    // Upstream's np.where chain (models/clo_tout.py:76-78): each breakpoint belongs
     // to the piece above it.
     test.each([
       [-5.0001, 1.0],

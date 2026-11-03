@@ -3,7 +3,7 @@ import { dew_point_tmp } from "../../src/psychrometrics/index.ts";
 import { dew_point_tmp as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the dew_point_tmp cases of pythermalcomfort v4.7.0
+// Mirrors the dew_point_tmp cases of pythermalcomfort v4.8.0
 // tests/test_psychrometrics.py. Upstream's arrays are called element-wise.
 describe("test_psychrometrics", () => {
   test("test_t_dp", () => {

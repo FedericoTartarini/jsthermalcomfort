@@ -13,7 +13,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.wbgt,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_wbgt.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_wbgt.py.
 describe("test_wbgt", () => {
   test.each(reference_table.data)(
     "test_wbgt_with_url_cases: fixture case %#",

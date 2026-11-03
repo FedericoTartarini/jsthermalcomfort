@@ -131,7 +131,7 @@ export function decode(value: EncodedOutput): Decoded | Decoded[] {
 }
 
 // _valid_range's message and the airspeed_control checks' messages both quote
-// the name first (_internal/validation.py:51-54, _internal/ashrae55.py:44-88).
+// the name first (_internal/validation.py:53-56, _internal/ashrae55.py:48-92).
 const RANGE_MESSAGE = /^(?:airspeed_control=False: )?'(.+?)' has /;
 
 // scipy's fsolve warns its status 2 to 5 messages as a RuntimeWarning

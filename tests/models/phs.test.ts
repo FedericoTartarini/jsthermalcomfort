@@ -17,7 +17,7 @@ const weight = 75;
 const height = 1.8;
 const a_dubois = 0.202 * weight ** 0.425 * height ** 0.725;
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_phs.py. A `pytest.raises(ValueError)`
+// Mirrors pythermalcomfort v4.8.0 tests/test_phs.py. A `pytest.raises(ValueError)`
 // becomes a throw of the class the library maps that case to, a RangeError.
 describe("test_phs", () => {
   test.each(reference_table.data)("test_phs: fixture case %#", (entry) => {
@@ -284,7 +284,7 @@ const posture_message =
 const phs_posture_message =
   "Posture has to be either 'standing', 'sitting', or 'crouching'.";
 
-// Mirrors the posture cases of pythermalcomfort v4.7.0 tests/test_choice_field.py
+// Mirrors the posture cases of pythermalcomfort v4.8.0 tests/test_choice_field.py
 // through the model, whose inputs class receives posture (models/phs.py:218).
 describe("test_choice_field", () => {
   const allowed = ["sitting", "standing", "crouching"];

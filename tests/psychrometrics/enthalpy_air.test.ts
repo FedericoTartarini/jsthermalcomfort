@@ -3,7 +3,7 @@ import { enthalpy_air } from "../../src/psychrometrics/index.ts";
 import { enthalpy_air as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the enthalpy_air case of pythermalcomfort v4.7.0
+// Mirrors the enthalpy_air case of pythermalcomfort v4.8.0
 // tests/test_psychrometrics.py. Its is_equal is np.isclose with atol 0.1 and
 // the default rtol, 1e-5.
 describe("test_psychrometrics", () => {

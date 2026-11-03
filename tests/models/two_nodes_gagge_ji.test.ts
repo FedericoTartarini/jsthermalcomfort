@@ -19,7 +19,7 @@ const allclose = (actual: readonly number[], expected: readonly number[]) =>
     approx(x, expected[i] ?? NaN, { rel: 1e-12, abs: 1e-12 }),
   );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_two_nodes_gagge_ji.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_two_nodes_gagge_ji.py.
 describe("test_two_nodes_gagge_ji", () => {
   test("test_two_nodes_gagge_ji_complete_time_series_regression", () => {
     const weight = 80.1;

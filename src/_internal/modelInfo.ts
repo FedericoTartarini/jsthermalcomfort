@@ -130,7 +130,7 @@ export interface ModelOutputs {
  *
  * `none` marks a field that the model leaves at its dataclass's `None`
  * default, which the field then holds as `null`: `heat_index_lu`'s
- * `stress_category` (`classes_return.py:308`, `models/heat_index_lu.py:63`;
+ * `stress_category` (`classes_return.py:315`, `models/heat_index_lu.py:63`;
  * decision 279). Such a field is never computed, so it takes no `masked`,
  * `series` or `classifier`.
  */
@@ -180,7 +180,7 @@ export interface DerivedField {
  * `series` marks a time series, `two_nodes_gagge_sleep`'s `tdb`: the key
  * takes a number or an array of numbers, and the parse returns a frozen
  * array, a number as an array of one, as upstream's `np.atleast_1d` reads it
- * (`models/two_nodes_gagge_sleep.py:120`; decision 277).
+ * (`models/two_nodes_gagge_sleep.py:115`; decision 277).
  */
 export interface NumericField {
   readonly kind: "numeric";
@@ -202,13 +202,13 @@ export interface BoolField {
  * `message`, upstream's own text for that check (ADR 0022): `units`, a plain
  * field that `BaseInputs` checks by its name (`classes_input.py:95, :114-121`),
  * `solar_gain`'s `posture`, which the model checks itself
- * (`models/solar_gain.py:207-212`), and a `choice_field`, which `BaseInputs`
+ * (`models/solar_gain.py:210-215`), and a `choice_field`, which `BaseInputs`
  * checks against its `allowed` (`classes_input.py:23, :155-159`).
  *
  * Where upstream's text embeds the value given, `message` is a function of
  * that value, which the parse calls with `String(value)`:
  * `pmv_ppd_ashrae`'s `standard` reads "Model 'random' is not supported. …"
- * (`models/pmv_ppd_ashrae.py:165-171`).
+ * (`models/pmv_ppd_ashrae.py:182-188`).
  *
  * `nullable` marks a `choice_field`: `BaseInputs` skips one that is `None`
  * (`classes_input.py:138-139`), so `null` passes the parse unchanged.

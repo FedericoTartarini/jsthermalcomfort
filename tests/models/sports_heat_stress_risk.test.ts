@@ -28,7 +28,7 @@ function expect_valid_risk(result: ReturnType<typeof sports_heat_stress_risk>) {
   expect(result.risk_level_interpolated).toBeLessThanOrEqual(4.9);
 }
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_sports_heat_stress_risk.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_sports_heat_stress_risk.py.
 describe("test_sports_heat_stress_risk", () => {
   test.each([
     // Moderate temperature

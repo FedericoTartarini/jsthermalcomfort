@@ -11,7 +11,7 @@ import { approx } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof heat_index_schoen>[0];
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_heat_index_schoen.py. Its
+// Mirrors pythermalcomfort v4.8.0 tests/test_heat_index_schoen.py. Its
 // is_equal is np.allclose with atol 1e-6 and the default rtol, 1e-5, and its
 // list and broadcast calls run element-wise.
 describe("test_heat_index_schoen", () => {
@@ -175,7 +175,7 @@ describe("heat_index_schoen (JS-only)", () => {
     expect(result.stress_category).toBe(category);
   });
 
-  // deviation heat_index_schoen-1 (heat_index_schoen.py:70, _internal/validation.py:172)
+  // deviation heat_index_schoen-1 (heat_index_schoen.py:70, _internal/validation.py:173)
   test("the stress category bins are the model's 27.0 floor and the shared categories, right-inclusive", () => {
     expect(HEAT_INDEX_SCHOEN_INFO.outputs.stress_category.classifier).toEqual({
       edges: [27, 32, 41, 54, 1000],
@@ -190,7 +190,7 @@ describe("heat_index_schoen (JS-only)", () => {
     });
   });
 
-  // _internal/validation.py:214-216, as upstream's _mapping maps it.
+  // _internal/validation.py:242-244, as upstream's _mapping maps it.
   test("an hi above 1000 has a NaN category", () => {
     const result = heat_index_schoen({ tdb: 70, rh: 100, round_output: false });
     expect(approx(result.hi, 1382.4282571690032, { rel: 1e-12, abs: 0 })).toBe(

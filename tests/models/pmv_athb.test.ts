@@ -11,7 +11,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.athb,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_athb.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_athb.py.
 describe("test_athb", () => {
   test.each(reference_table.data)("test_athb: case %#", (entry) => {
     const { inputs, outputs } = entry;

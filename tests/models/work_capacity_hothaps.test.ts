@@ -11,7 +11,7 @@ import { approx } from "./testUtils.ts";
 const call = (inputs: unknown) =>
   work_capacity_hothaps(inputs as Parameters<typeof work_capacity_hothaps>[0]);
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_work_capacity_hothaps.py. Its
+// Mirrors pythermalcomfort v4.8.0 tests/test_work_capacity_hothaps.py. Its
 // pytest.approx is rel 1e-3 or 1e-6; its list call runs element-wise.
 describe("test_work_capacity_hothaps", () => {
   const _expected_capacity = (

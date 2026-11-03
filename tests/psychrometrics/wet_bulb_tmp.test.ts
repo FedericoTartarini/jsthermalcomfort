@@ -3,7 +3,7 @@ import { wet_bulb_tmp } from "../../src/psychrometrics/index.ts";
 import { wet_bulb_tmp as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the wet_bulb_tmp case of pythermalcomfort v4.7.0
+// Mirrors the wet_bulb_tmp case of pythermalcomfort v4.8.0
 // tests/test_psychrometrics.py.
 describe("test_psychrometrics", () => {
   test("test_t_wb", () => {

@@ -387,7 +387,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     const message = (model: string) =>
       `Model '${model}' is not supported. Supported models are: 55-2023.`;
 
-    // models/pmv_ppd_ashrae.py:165-171, which lower-cases the value before its message.
+    // models/pmv_ppd_ashrae.py:182-188, which lower-cases the value before its message.
     test.each([
       ["random", "random"],
       ["RANDOM", "random"],
@@ -410,7 +410,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
 
   // Deviation pmv_ppd_ashrae-1.
   describe("PMV_PPD_ASHRAE_INFO", () => {
-    // models/pmv_ppd_ashrae.py:22, :166.
+    // models/pmv_ppd_ashrae.py:39, :183.
     test("standards are the one ASHRAE 55 edition upstream supports", () => {
       expect(PMV_PPD_ASHRAE_INFO.standards).toEqual(["55-2023"]);
       expect(PMV_PPD_ASHRAE_INFO.inputs.standard.allowed).toBe(
@@ -595,7 +595,7 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     );
   });
 
-  // _internal/ashrae55.py:41-79; clo < 0.7 and met < 1.3, the only case these limits apply to.
+  // _internal/ashrae55.py:45-83; clo < 0.7 and met < 1.3, the only case these limits apply to.
   describe("airspeed limits without airspeed control", () => {
     const ashrae = (tdb: number, vr: number, inputs: Partial<Inputs> = {}) =>
       pmv_ppd_ashrae({

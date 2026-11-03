@@ -35,7 +35,7 @@ const iso_rows = assertNonEmptyRows(
   "pmv_ppd_iso ISO rows",
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_pmv_ppd_iso.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_pmv_ppd_iso.py.
 describe("test_pmv_ppd_iso", () => {
   test.each(iso_rows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;
@@ -393,7 +393,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
   const call = (inputs: unknown) => () => pmv_ppd_iso(inputs as Inputs);
 
   describe("values", () => {
-    // The docstring's examples (models/pmv_ppd_iso.py:107-140), measured on pythermalcomfort 4.7.0.
+    // The docstring's examples (models/pmv_ppd_iso.py:121-154), measured on pythermalcomfort 4.7.0.
     test("the examples print upstream's values", () => {
       const results = pmv_ppd_iso({
         tdb: 25,
@@ -434,7 +434,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     const message =
       "PMV calculations can only be performed in compliance with ISO 7730-2005 or ISO 7730-2025";
 
-    // models/pmv_ppd_iso.py:166-172; a value that is not a string raises AttributeError there.
+    // models/pmv_ppd_iso.py:180-186; a value that is not a string raises AttributeError there.
     test.each(["random", Standard.ashrae_55_2023, Standard.iso_7933_2023])(
       "standard %s throws upstream's message",
       (standard) => {
@@ -460,7 +460,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
   });
 
   describe("PMV_PPD_ISO_INFO", () => {
-    // models/pmv_ppd_iso.py:24, :167.
+    // models/pmv_ppd_iso.py:38, :181.
     test("standards are ISO 7730's two editions, the default first", () => {
       expect(PMV_PPD_ISO_INFO.standards).toEqual(["7730-2025", "7730-2005"]);
       expect(PMV_PPD_ISO_INFO.inputs.standard.allowed).toBe(
@@ -522,7 +522,7 @@ describe("pmv_ppd_iso (JS-only)", () => {
     });
   });
 
-  // Issue #195: ISO 7730 Clause 4's 0-2700 Pa vapour pressure limit (models/pmv_ppd_iso.py:182-190).
+  // Issue #195: ISO 7730 Clause 4's 0-2700 Pa vapour pressure limit (models/pmv_ppd_iso.py:196-204).
   describe("vapour pressure limit (#195)", () => {
     // rh solved for pa = 2700 Pa, landing a few parts in 1e-6 below it.
     const NEAR_LIMIT = [

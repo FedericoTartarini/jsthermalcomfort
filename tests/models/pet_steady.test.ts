@@ -23,7 +23,7 @@ const PET_TEST_MATRIX = [
   [30, 30, 80, 1.0, 1.37, 0.9, 32.21],
 ] as const;
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_pet_steady.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_pet_steady.py.
 describe("test_pet_steady", () => {
   test.each(test_data.data)("test_pet_steady: fixture case %#", (row) => {
     const { inputs, outputs } = row;

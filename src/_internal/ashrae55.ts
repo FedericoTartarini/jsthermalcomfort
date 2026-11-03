@@ -33,7 +33,7 @@ export const ASHRAE_55_COMPLIANCE_STANDARDS = deepFreeze([
  * ASHRAE 55's still-air speed, 0.1 m/s: `cooling_effect` calculates the
  * cooling effect only above it and computes the still-air SET at it
  * (`models/cooling_effect.py:35-40, :141, :187`), and `pmv_ppd_ashrae`
- * applies the cooling effect above it (`models/pmv_ppd_ashrae.py:173-182`).
+ * applies the cooling effect above it (`models/pmv_ppd_ashrae.py:190-199`).
  */
 export const ASHRAE_55_STILL_AIR_THRESHOLD = 0.1;
 
@@ -50,8 +50,8 @@ const ASHRAE_55_AIRSPEED_NO_CONTROL = deepFreeze({
 /**
  * The keyword arguments `_check_ashrae55_compliance` takes. Upstream reads
  * `clo` wherever `met` is given, and `v`, `met` and `clo` wherever
- * `airspeed_control` is false (`_internal/ashrae55.py:40-41, :94-95` at
- * v4.7.0), so the type requires them there.
+ * `airspeed_control` is false (`_internal/ashrae55.py:44-45, :98-99` at
+ * v4.8.0), so the type requires them there.
  */
 type Ashrae55Kwargs = {
   readonly tdb: number;

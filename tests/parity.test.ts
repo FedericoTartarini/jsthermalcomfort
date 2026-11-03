@@ -77,7 +77,7 @@ const OPTIONS: CompareOptions = {
   exempt: { outputs: [], warnings: [] },
 };
 
-// A range warning as _valid_range words it (_internal/validation.py:51-54).
+// A range warning as _valid_range words it (_internal/validation.py:53-56).
 const TDB_WARNING =
   "'tdb' has value 50.0 outside the applicability limits [10.0, 40.0] and will be set to NaN.";
 
@@ -504,7 +504,7 @@ const MODELS: readonly ParityModel[] = [
     run: (inputs) =>
       adaptive_en(inputs as unknown as Parameters<typeof adaptive_en>[0]),
     // Upstream rounds t_cmf and the bounds with np.around after converting
-    // them under IP (models/adaptive_en.py:138-160).
+    // them under IP (models/adaptive_en.py:143-165).
     rounded: ({ round_output }) =>
       round_output === true
         ? Object.entries(ADAPTIVE_EN_INFO.outputs)
@@ -517,7 +517,7 @@ const MODELS: readonly ParityModel[] = [
     name: "ankle_draft",
     run: (inputs) =>
       ankle_draft(inputs as unknown as Parameters<typeof ankle_draft>[0]),
-    // Upstream always rounds ppd_ad with np.around (models/ankle_draft.py:130-135).
+    // Upstream always rounds ppd_ad with np.around (models/ankle_draft.py:131-136).
     rounded: () => ["ppd_ad"],
     // acceptability, a boolean where upstream's is 1.0 or 0.0, and the cooling
     // effect's notice, which upstream emits twice, are exempt by the register
@@ -535,7 +535,7 @@ const MODELS: readonly ParityModel[] = [
     name: "clo_tout",
     run: (inputs) =>
       clo_tout(inputs as unknown as Parameters<typeof clo_tout>[0]),
-    // Upstream rounds clo_tout with np.around (models/clo_tout.py:79).
+    // Upstream rounds clo_tout with np.around (models/clo_tout.py:80).
     rounded: () => ["clo_tout"],
     warnings: true,
   },
@@ -553,7 +553,7 @@ const MODELS: readonly ParityModel[] = [
       discomfort_index(
         inputs as unknown as Parameters<typeof discomfort_index>[0],
       ),
-    // Upstream always rounds di with np.around (models/discomfort_index.py:78).
+    // Upstream always rounds di with np.around (models/discomfort_index.py:83).
     rounded: () => ["di"],
     warnings: true,
   },
@@ -578,7 +578,7 @@ const MODELS: readonly ParityModel[] = [
       heat_index_rothfusz(
         inputs as unknown as Parameters<typeof heat_index_rothfusz>[0],
       ),
-    // Upstream rounds hi with np.around (heat_index_rothfusz.py:87).
+    // Upstream rounds hi with np.around (heat_index_rothfusz.py:85).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
   },
@@ -588,7 +588,7 @@ const MODELS: readonly ParityModel[] = [
       heat_index_schoen(
         inputs as unknown as Parameters<typeof heat_index_schoen>[0],
       ),
-    // Upstream rounds hi with np.around (models/heat_index_schoen.py:73-74).
+    // Upstream rounds hi with np.around (models/heat_index_schoen.py:72-73).
     rounded: ({ round_output }) => (round_output === true ? ["hi"] : []),
     warnings: true,
   },
@@ -681,7 +681,7 @@ const MODELS: readonly ParityModel[] = [
       pmv_ppd_ashrae({ ...inputs, standard: model } as unknown as Parameters<
         typeof pmv_ppd_ashrae
       >[0]),
-    // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_ashrae.py:223-225).
+    // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_ashrae.py:239-241).
     rounded: ({ round_output }) =>
       round_output === true ? ["pmv", "ppd"] : [],
     // The cooling effect's notice, which upstream emits twice, is exempt by
@@ -695,7 +695,7 @@ const MODELS: readonly ParityModel[] = [
       pmv_ppd_iso({ ...inputs, standard: model } as unknown as Parameters<
         typeof pmv_ppd_iso
       >[0]),
-    // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_iso.py:205-207).
+    // Upstream rounds pmv and ppd with np.round (models/pmv_ppd_iso.py:219-221).
     rounded: ({ round_output }) =>
       round_output === true ? ["pmv", "ppd"] : [],
     warnings: true,
@@ -726,7 +726,7 @@ const MODELS: readonly ParityModel[] = [
     name: "solar_gain",
     run: (inputs) =>
       solar_gain(inputs as unknown as Parameters<typeof solar_gain>[0]),
-    // Upstream rounds erf and delta_mrt with np.round (models/solar_gain.py:252-254).
+    // Upstream rounds erf and delta_mrt with np.round (models/solar_gain.py:255-257).
     rounded: ({ round_output }) =>
       round_output === true ? ["erf", "delta_mrt"] : [],
     // ASHRAE 55 Table C-2's rows, which upstream does not check, are exempt
@@ -788,7 +788,7 @@ const MODELS: readonly ParityModel[] = [
       two_nodes_gagge_sleep(
         inputs as unknown as Parameters<typeof two_nodes_gagge_sleep>[0],
       ),
-    // Upstream rounds no output (models/two_nodes_gagge_sleep.py:170-175).
+    // Upstream rounds no output (models/two_nodes_gagge_sleep.py:165-170).
     rounded: () => [],
     warnings: true,
   },
@@ -808,7 +808,7 @@ const MODELS: readonly ParityModel[] = [
   {
     name: "utci",
     run: (inputs) => utci(inputs as unknown as Parameters<typeof utci>[0]),
-    // Upstream rounds utci with np.round (models/utci.py:173-175).
+    // Upstream rounds utci with np.round (models/utci.py:177-179).
     rounded: ({ round_output }) => (round_output === true ? ["utci"] : []),
     warnings: true,
   },
@@ -818,7 +818,7 @@ const MODELS: readonly ParityModel[] = [
       vertical_tmp_grad_ppd(
         inputs as unknown as Parameters<typeof vertical_tmp_grad_ppd>[0],
       ),
-    // Upstream rounds ppd_vg with np.round (models/vertical_tmp_grad_ppd.py:130-131).
+    // Upstream rounds ppd_vg with np.round (models/vertical_tmp_grad_ppd.py:131-132).
     rounded: ({ round_output }) => (round_output === true ? ["ppd_vg"] : []),
     // acceptability, a boolean where upstream's is 1.0 or 0.0, and the cooling
     // effect's notice, which upstream emits twice, are exempt by the register

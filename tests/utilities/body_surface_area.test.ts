@@ -3,7 +3,7 @@ import { body_surface_area } from "../../src/utilities/index.ts";
 import { body_surface_area as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the body_surface_area cases of pythermalcomfort v4.7.0
+// Mirrors the body_surface_area cases of pythermalcomfort v4.8.0
 // tests/test_utilities.py; its keyword call is positional here.
 describe("test_utilities", () => {
   test("test_body_surface_area", () => {

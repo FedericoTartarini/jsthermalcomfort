@@ -3,7 +3,7 @@ import { p_sat } from "../../src/psychrometrics/index.ts";
 import { p_sat as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the p_sat case of pythermalcomfort v4.7.0 tests/test_psychrometrics.py.
+// Mirrors the p_sat case of pythermalcomfort v4.8.0 tests/test_psychrometrics.py.
 describe("test_psychrometrics", () => {
   test("test_p_sat", () => {
     expect(approx(p_sat(25), 3169.2, { abs: 1e-1 })).toBe(true);

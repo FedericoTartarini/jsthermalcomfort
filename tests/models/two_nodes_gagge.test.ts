@@ -15,7 +15,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.twoNodes,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_two_nodes_gagge.py. A
+// Mirrors pythermalcomfort v4.8.0 tests/test_two_nodes_gagge.py. A
 // `pytest.raises(ValueError, match="w_max")` becomes a throw whose message
 // names w_max, of the class the library maps that case to.
 describe("test_two_nodes_gagge", () => {
@@ -73,7 +73,7 @@ const position_message =
 const call = (inputs: unknown) =>
   two_nodes_gagge(inputs as Parameters<typeof two_nodes_gagge>[0]);
 
-// Mirrors the position cases of pythermalcomfort v4.7.0
+// Mirrors the position cases of pythermalcomfort v4.8.0
 // tests/test_choice_field.py through the model, whose inputs class receives
 // position (models/two_nodes_gagge.py:115).
 describe("test_choice_field", () => {

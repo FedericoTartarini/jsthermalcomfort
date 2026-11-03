@@ -11,7 +11,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.setTmp,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_set.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_set.py.
 // Upstream's arrays are called element-wise.
 describe("test_set", () => {
   test.each(reference_table.data)("test_set_url: fixture case %#", (entry) => {

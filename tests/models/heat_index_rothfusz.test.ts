@@ -17,7 +17,7 @@ const { testData: test_data, tolerances } = await loadTestData(
 // upstream's (27.0, np.inf), which _valid_range's message prints as [27.0, inf]
 const TDB_BOUND = { min: 27 };
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_heat_index_rothfusz.py. A
+// Mirrors pythermalcomfort v4.8.0 tests/test_heat_index_rothfusz.py. A
 // UserWarning becomes a range row, and a `match=` on its text becomes
 // assertions on the row's key, value and bound.
 describe("test_heat_index_rothfusz", () => {
@@ -194,7 +194,7 @@ describeModelContract(
 // The per-model checks of the template (ADRs 0022-0024), through the public
 // entry: what upstream's tests leave out, and what only the library adds.
 describe("heat_index_rothfusz (JS-only)", () => {
-  // deviation heat_index_rothfusz-2 (heat_index_rothfusz.py:83, _internal/validation.py:172)
+  // deviation heat_index_rothfusz-2 (heat_index_rothfusz.py:83, _internal/validation.py:173)
   test("the stress category bins are upstream's mapping, right-inclusive", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.outputs.stress_category.classifier).toEqual(
       {
@@ -211,7 +211,7 @@ describe("heat_index_rothfusz (JS-only)", () => {
     );
   });
 
-  // deviation _shared-4 (models/heat_index_rothfusz.py:26)
+  // deviation _shared-4 (models/heat_index_rothfusz.py:25)
   test("INFO.standards is empty", () => {
     expect(HEAT_INDEX_ROTHFUSZ_INFO.standards).toEqual([]);
   });

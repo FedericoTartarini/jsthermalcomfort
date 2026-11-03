@@ -11,7 +11,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.humidex,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_humidex.py. Its math.isclose
+// Mirrors pythermalcomfort v4.8.0 tests/test_humidex.py. Its math.isclose
 // keeps its default rel_tol, 1e-9.
 describe("test_humidex", () => {
   test.each(reference_table.data)("test_humidex: fixture case %#", (entry) => {

@@ -175,7 +175,7 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
     return { values, warnings };
   };
 
-  // ashrae55.py:29-30, :36, :94-95, :101.
+  // ashrae55.py:29-30, :36, :98-99, :105.
   test("ASHRAE_55_LIMITS holds upstream's limits, keyed as its arguments, frozen", () => {
     expect(ASHRAE_55_LIMITS).toEqual({
       tdb: { min: 10.0, max: 40.0 },
@@ -272,7 +272,7 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
   });
 
   // Upstream raises KeyError for met without clo, and for
-  // airspeed_control=False without v (_internal/ashrae55.py:40-41, :95), so
+  // airspeed_control=False without v (_internal/ashrae55.py:44-45, :99), so
   // the type rejects both calls.
   test("the type requires what upstream reads unguarded", () => {
     const typed = (kwargs: Parameters<typeof _check_ashrae55_compliance>[0]) =>
@@ -340,7 +340,7 @@ describe("_valid_range (JS-only)", () => {
 
 describe("_mapping (JS-only)", () => {
   // The example in _mapping's TSDoc. Upstream's docstring prints
-  // ['low', 'medium', 'high'] (_internal/validation.py:206-207); pythermalcomfort
+  // ['low', 'medium', 'high'] (_internal/validation.py:234-235); pythermalcomfort
   // 4.6.2 with numpy 2.5.4 returns ['medium', 'medium', 'high'] in the parity
   // image (scripts/parity/Dockerfile, linux/amd64).
   test("the TSDoc example gives what upstream returns", () => {
@@ -357,7 +357,7 @@ describe("_mapping (JS-only)", () => {
   });
 });
 
-// Upstream's dict (_internal/validation.py:172), its keys as edges and its
+// Upstream's dict (_internal/validation.py:173), its keys as edges and its
 // values as labels.
 describe("HEAT_INDEX_STRESS_CATEGORIES", () => {
   test("holds upstream's thresholds and categories, frozen", () => {
@@ -414,7 +414,7 @@ describe("parseInputs, choice (JS-only)", () => {
       );
   });
 
-  // solar_gain's own posture check (models/solar_gain.py:207-212), which
+  // solar_gain's own posture check (models/solar_gain.py:210-215), which
   // lower-cases where BaseInputs upper-cases units.
   const posture = {
     name: "g",
@@ -446,7 +446,7 @@ describe("parseInputs, choice (JS-only)", () => {
   });
 });
 
-// A message that embeds the value given, as pmv_ppd_ashrae's own check on model does (models/pmv_ppd_ashrae.py:165-171).
+// A message that embeds the value given, as pmv_ppd_ashrae's own check on model does (models/pmv_ppd_ashrae.py:182-188).
 describe("parseInputs, choice with a message of the value (JS-only)", () => {
   const info = {
     name: "f",
@@ -707,7 +707,7 @@ describe("floatRepr (JS-only)", () => {
 });
 
 // A time series, two_nodes_gagge_sleep's tdb, which upstream reads with
-// np.atleast_1d (models/two_nodes_gagge_sleep.py:120; decision 277).
+// np.atleast_1d (models/two_nodes_gagge_sleep.py:115; decision 277).
 describe("parseInputs, numeric series (JS-only)", () => {
   const info = {
     name: "f",

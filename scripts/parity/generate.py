@@ -104,7 +104,7 @@ def _ankle_draft(rng):
     # met, clo 0-1.5 clo), so NaN positions and every check's warning are
     # compared too, and the hot, humid cases return the cooling effect's
     # warning. With limit_inputs on, vr stays within 0-0.2 m/s, outside which
-    # upstream raises (models/ankle_draft.py:151-154); with it off, vr reaches
+    # upstream raises (models/ankle_draft.py:152-155); with it off, vr reaches
     # past 0.2 and 2 m/s and below 0. units comes in either case, as upstream
     # upper-cases it.
     units = str(rng.choice(["SI", "IP", "si", "ip"]))
@@ -817,7 +817,7 @@ def _vertical_tmp_grad_ppd(rng):
     # the cooling effect's warning. vr goes below 0 and past 0.2 m/s with
     # either gate, more often with it off, and vertical_tmp_grad reaches the
     # gradients whose ppd_vg the 34.5 % baseline clamps to 0
-    # (models/vertical_tmp_grad_ppd.py:125-127).
+    # (models/vertical_tmp_grad_ppd.py:126-128).
     limit_inputs = bool(rng.random() < 0.5)
     return {
         "tdb": _value(rng, 5.0, 45.0),
@@ -937,7 +937,7 @@ def _work_capacity_niosh(rng):
 
 # The exception a model's call with limit_inputs True raises after its
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
-# (models/ankle_draft.py:151-154). Any other raise stops the generator.
+# (models/ankle_draft.py:152-155). Any other raise stops the generator.
 GATED_RAISES = {"ankle_draft": ValueError}
 
 # A model whose inner public-model call takes an input that the gate changes:

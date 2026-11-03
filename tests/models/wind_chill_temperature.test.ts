@@ -15,7 +15,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.windChillTemperature,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_wind_chill_temperature.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_wind_chill_temperature.py.
 describe("test_wind_chill_temperature", () => {
   test.each(reference_table.data)(
     "test_wind_chill_temperature: case %#",

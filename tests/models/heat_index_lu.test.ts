@@ -4,7 +4,7 @@ import { heat_index_lu as heat_index_lu_from_root } from "../../src/index.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_heat_index_lu.py. Its
+// Mirrors pythermalcomfort v4.8.0 tests/test_heat_index_lu.py. Its
 // np.isclose and np.allclose take the default rtol, 1e-5, beside the atol
 // given, and its list call runs element-wise.
 describe("test_heat_index_lu", () => {

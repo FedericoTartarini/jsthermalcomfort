@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 
 const rows = [1, 2];
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_first.py. A second line of the
+// Mirrors pythermalcomfort v4.8.0 tests/test_first.py. A second line of the
 // same comment.
 describe("test_first", () => {
   test("a closing line inside a template literal", () => {
@@ -19,7 +19,7 @@ describe("test_first", () => {
   });
 });
 
-// Mirrors the position cases of pythermalcomfort v4.7.0
+// Mirrors the position cases of pythermalcomfort v4.8.0
 // tests/test_choice_field.py.
 describe("test_choice_field", () => {
   test("position", () => {

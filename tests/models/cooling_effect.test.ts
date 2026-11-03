@@ -13,7 +13,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.coolingEffect,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_cooling_effect.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_cooling_effect.py.
 describe("test_cooling_effect", () => {
   test.each([0.05, 0.3, 1.0])(
     "test_cooling_effect_ip_is_a_temperature_difference[%s]",

@@ -15,7 +15,7 @@ const MET_400_W_M2 = 400.0 / 58.15;
 const allclose = (actual: unknown, expected: number) =>
   approx(actual as number, expected, { rel: 1e-5, abs: 1e-8 });
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_ireq.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_ireq.py.
 describe("test_ireq", () => {
   test("test_ireq_scalar_example", () => {
     const result = ireq({

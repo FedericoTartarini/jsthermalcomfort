@@ -437,7 +437,7 @@ describe("two_nodes_gagge_sleep (JS-only)", () => {
     );
   });
 
-  // models/two_nodes_gagge_sleep.py:444: the kernel sets met_shivering before
+  // models/two_nodes_gagge_sleep.py:445: the kernel sets met_shivering before
   // it reads it.
   test("the met_shivering input changes nothing", () => {
     expect(call({ ...valid, met_shivering: 100 })).toEqual(

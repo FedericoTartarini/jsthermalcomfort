@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { operative_tmp } from "../../src/environment/index.ts";
 import { operative_tmp as from_root } from "../../src/index.ts";
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_environment.py, test_t_o; its
+// Mirrors pythermalcomfort v4.8.0 tests/test_environment.py, test_t_o; its
 // keyword calls are positional here.
 describe("test_environment", () => {
   test("test_t_o", () => {

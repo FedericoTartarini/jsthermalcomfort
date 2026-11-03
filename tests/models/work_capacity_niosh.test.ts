@@ -12,7 +12,7 @@ import { approx } from "./testUtils.ts";
 const call = (inputs: unknown) =>
   work_capacity_niosh(inputs as Parameters<typeof work_capacity_niosh>[0]);
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_work_capacity_niosh.py. Its
+// Mirrors pythermalcomfort v4.8.0 tests/test_work_capacity_niosh.py. Its
 // pytest.approx is rel 1e-3 or abs 1e-6; its list call runs element-wise.
 describe("test_work_capacity_niosh", () => {
   const _expected_capacity = (wbgt: number, met: number) => {

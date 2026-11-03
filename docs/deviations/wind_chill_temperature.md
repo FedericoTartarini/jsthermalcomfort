@@ -1,6 +1,6 @@
 # wind_chill_temperature
 
-Deviations of `wind_chill_temperature` from pythermalcomfort v4.7.0. The format is in the [README](README.md).
+Deviations of `wind_chill_temperature` from pythermalcomfort v4.8.0. The format is in the [README](README.md).
 
 | id                       | part        | upstream site                         | TS site                                                              | reason                                                                                                                                                                                                                                           | class/ADR                       | status   | date       | parity |
 | ------------------------ | ----------- | ------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- | -------- | ---------- | ------ |

@@ -11,7 +11,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.net,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_net.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_net.py.
 describe("test_net", () => {
   test.each(reference_table.data)("test_net: fixture case %#", (entry) => {
     const { inputs, outputs } = entry;

@@ -14,7 +14,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.discomfortIndex,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_discomfort_index.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_discomfort_index.py.
 describe("test_discomfort_index", () => {
   test.each(reference_table.data)(
     "test_discomfort_index: fixture case %#",
@@ -61,7 +61,7 @@ describe("discomfort_index (JS-only)", () => {
     expect(result.discomfort_condition).toBe(condition);
   });
 
-  // Deviation discomfort_index-1 (_internal/validation.py:214-217).
+  // Deviation discomfort_index-1 (_internal/validation.py:242-245).
   test("a di at or above 99 has a NaN category", () => {
     for (const tdb of [99, 120]) {
       const result = discomfort_index({ tdb, rh: 100 });

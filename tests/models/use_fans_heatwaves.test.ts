@@ -16,7 +16,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.use_fans_heatwaves,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_use_fans_heatwaves.py. Upstream's
+// Mirrors pythermalcomfort v4.8.0 tests/test_use_fans_heatwaves.py. Upstream's
 // arrays are called element-wise.
 describe("test_use_fans_heatwaves", () => {
   test.each(reference_table.data)(

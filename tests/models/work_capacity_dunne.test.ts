@@ -11,7 +11,7 @@ import { approx } from "./testUtils.ts";
 const call = (inputs: unknown) =>
   work_capacity_dunne(inputs as Parameters<typeof work_capacity_dunne>[0]);
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_work_capacity_dunne.py. Its
+// Mirrors pythermalcomfort v4.8.0 tests/test_work_capacity_dunne.py. Its
 // pytest.approx is rel 1e-6 and its np.allclose rtol 1e-5 and atol 1e-8; its
 // list call runs element-wise.
 describe("test_work_capacity_dunne", () => {
@@ -87,7 +87,7 @@ describe("test_work_capacity_dunne", () => {
 const work_intensity_message =
   "work_intensity must be one of ['heavy', 'moderate', 'light']";
 
-// Mirrors the work_intensity cases of pythermalcomfort v4.7.0
+// Mirrors the work_intensity cases of pythermalcomfort v4.8.0
 // tests/test_choice_field.py through the model, whose inputs class receives
 // work_intensity (models/work_capacity_dunne.py:52).
 describe("test_choice_field", () => {

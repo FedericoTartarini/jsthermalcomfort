@@ -40,12 +40,12 @@ export function isDeepFrozen(value: unknown): boolean {
  * `PMVPPDAshrae`, `SET`, `SolarGain`, `GaggeTwoNodes`, `GaggeTwoNodesJi`,
  * `GaggeTwoNodesSleep`, `THI`, `UseFansHeatwaves`, `UTCI`, `VerticalTGradPPD`, `WBGT`, `WCI`,
  * `WCT`, `SportsHeatStressRisk`, `PredictedBodyTemperatures` and `IREQ` at
- * `classes_return.py:97, :111, :184, :200, :213, :227, :241, :254, :270,
- * :284, :297, :311, :327, :341, :353, :415, :435, :467, :480, :497, :562, :578,
- * :591, :631, :689, :705, :722, :735, :748, :1036, :1073, :1100`, and
- * `@dataclass(frozen=True)`: `WorkCapacity` at `:761`),
+ * `classes_return.py:97, :111, :189, :207, :220, :234, :248, :261, :277,
+ * :291, :304, :318, :334, :347, :360, :422, :442, :474, :487, :504, :569, :585,
+ * :598, :638, :700, :716, :734, :747, :760, :1048, :1085, :1112`, and
+ * `@dataclass(frozen=True)`: `WorkCapacity` at `:773`),
  * and as `AdaptiveEN` is, although upstream's is a plain `@dataclass`
- * (`:143`, deviation adaptive_en-5).
+ * (`:145`, deviation adaptive_en-5).
  *
  * Every case calls the model the subpath index exports, the seam of every
  * behaviour test (decision 93, S1), so the contract holds for what a consumer

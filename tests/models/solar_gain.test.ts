@@ -12,7 +12,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.solarGain,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_solar_gain.py.
+// Mirrors pythermalcomfort v4.8.0 tests/test_solar_gain.py.
 describe("test_solar_gain", () => {
   test.each(reference_table.data)(
     "test_solar_gain: fixture case %#",
@@ -231,7 +231,7 @@ describe("solar_gain (JS-only)", () => {
       expect(result.delta_mrt).toBe(10.4);
     });
 
-    // Upstream lower-cases posture (models/solar_gain.py:207): "Supine"
+    // Upstream lower-cases posture (models/solar_gain.py:210): "Supine"
     // gives 40.0 and 9.2 on pythermalcomfort 4.7.0.
     test("posture is case-insensitive, as upstream", () => {
       for (const posture of ["standing", "supine", "sitting"] as const)
@@ -261,7 +261,7 @@ describe("solar_gain (JS-only)", () => {
       );
     });
 
-    // np.round(erf, 1) (models/solar_gain.py:252-254); the unrounded values
+    // np.round(erf, 1) (models/solar_gain.py:255-257); the unrounded values
     // are upstream's, measured on pythermalcomfort 4.6.2.
     test("round_output rounds both outputs to one decimal, and only then", () => {
       const unrounded = solar_gain({ ...base, round_output: false });
@@ -271,7 +271,7 @@ describe("solar_gain (JS-only)", () => {
     });
 
     // The supine path transposes sharp and sol_altitude for the fp lookup
-    // (models/solar_gain.py:291-292); measured on pythermalcomfort 4.7.0.
+    // (models/solar_gain.py:294-295); measured on pythermalcomfort 4.7.0.
     test("supine gives upstream's values at the table's corners", () => {
       for (const [sol_altitude, sharp, erf, delta_mrt] of [
         [0, 0, 25.86, 5.94],
@@ -293,7 +293,7 @@ describe("solar_gain (JS-only)", () => {
   });
 
   describe("errors", () => {
-    // deviation solar_gain-5 (models/solar_gain.py:209-211)
+    // deviation solar_gain-5 (models/solar_gain.py:212-214)
     test("posture outside the three throws RangeError with upstream's message", () => {
       for (const bad of ["lying", "crouching", "", "sitting "])
         expect(call({ ...base, posture: bad })).toThrow(

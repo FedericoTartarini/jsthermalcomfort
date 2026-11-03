@@ -20,7 +20,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.utci,
 );
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_utci.py. A UserWarning becomes a
+// Mirrors pythermalcomfort v4.8.0 tests/test_utci.py. A UserWarning becomes a
 // range row, and a `match=` on its text becomes an assertion on the row's key.
 // Upstream's arrays are called element-wise.
 describe("test_utci", () => {
@@ -336,7 +336,7 @@ describe("utci (JS-only)", () => {
       expect(UTCI_INFO.inputs.units).toBe(CLO_TOUT_INFO.inputs.units);
     });
 
-    // deviation _shared-4 (models/utci.py:35)
+    // deviation _shared-4 (models/utci.py:52)
     test("standards is empty", () => {
       expect(UTCI_INFO.standards).toEqual([]);
     });
@@ -464,7 +464,7 @@ describe("utci (JS-only)", () => {
       ]);
     });
 
-    // Upstream checks the converted values (models/utci.py:110, :138): 68 °F
+    // Upstream checks the converted values (models/utci.py:127, :155): 68 °F
     // is 20 °C and 212 °F is 100 °C, so tr - tdb is 80 °C, not 144 °F.
     test("under IP the rows hold the SI values upstream compares", () => {
       const { warnings } = utci({
@@ -484,7 +484,7 @@ describe("utci (JS-only)", () => {
     });
 
     // Upstream calls warnings.warn only in _valid_range
-    // (_internal/validation.py:55), so no notice row.
+    // (_internal/validation.py:57), so no notice row.
     test("a NaN under the gate never comes without a row, and no notice", () => {
       for (const t of [-60, -50, 0, 30, 50, 55])
         for (const dt of [-40, -30, 0, 70, 80])

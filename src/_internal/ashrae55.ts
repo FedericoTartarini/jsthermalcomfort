@@ -49,9 +49,9 @@ const ASHRAE_55_AIRSPEED_NO_CONTROL = deepFreeze({
 
 /**
  * The keyword arguments `_check_ashrae55_compliance` takes. Upstream reads
- * `clo` wherever `met` is given, and `v`, `met` and `clo` wherever
- * `airspeed_control` is false (`_internal/ashrae55.py:44-45, :98-99` at
- * v4.8.0), so the type requires them there.
+ * `clo` wherever `met` is given (`_internal/ashrae55.py:98-99` at v4.8.0),
+ * and raises `ValueError` where `airspeed_control` is false without `v`,
+ * `met` or `clo` (`:39-43`), so the type requires them there.
  */
 type Ashrae55Kwargs = {
   readonly tdb: number;

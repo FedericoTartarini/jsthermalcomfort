@@ -29,7 +29,7 @@ import {
   WORK_CAPACITY_HOTHAPS_INFO,
 } from "../src/models/index.ts";
 
-// Mirrors pythermalcomfort v4.7.0 tests/test_internal.py, which tests
+// Mirrors pythermalcomfort v4.8.0 tests/test_internal.py, which tests
 // _internal directly, so it imports the kernels' own file (seam S2). A
 // UserWarning becomes a range row (deviation _shared-3), and a `match=` on its
 // text becomes assertions on the row's key, value and bound.
@@ -157,6 +157,19 @@ describe("test_internal", () => {
         warnings,
       );
       expect(warnings).toHaveLength(0);
+    });
+
+    // Deviation _shared-39: the type rejects each call upstream raises for.
+    test("test_airspeed_control_false_requires_v_met_clo", () => {
+      const typed = (
+        kwargs: Parameters<typeof _check_ashrae55_compliance>[0],
+      ) => kwargs;
+      // @ts-expect-error airspeed_control false requires v.
+      typed({ tdb: 24, tr: 24, met: 1.2, clo: 0.5, airspeed_control: false });
+      // @ts-expect-error airspeed_control false requires met.
+      typed({ tdb: 24, tr: 24, v: 0.1, clo: 0.5, airspeed_control: false });
+      // @ts-expect-error airspeed_control false requires clo.
+      typed({ tdb: 24, tr: 24, v: 0.1, met: 1.2, airspeed_control: false });
     });
   });
   test.todo(
@@ -289,9 +302,9 @@ describe("_check_ashrae55_compliance (JS-only)", () => {
     ).toMatchObject([{ key: "v_limited", value: 0.3, unit: "m/s" }]);
   });
 
-  // Upstream raises KeyError for met without clo, and for
-  // airspeed_control=False without v (_internal/ashrae55.py:44-45, :99), so
-  // the type rejects both calls.
+  // Upstream raises KeyError for met without clo (_internal/ashrae55.py:99),
+  // and ValueError for airspeed_control=False without v (:39-43; measured on
+  // 4.8.0), so the type rejects both calls.
   test("the type requires what upstream reads unguarded", () => {
     const typed = (kwargs: Parameters<typeof _check_ashrae55_compliance>[0]) =>
       kwargs;

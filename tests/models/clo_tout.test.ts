@@ -79,7 +79,7 @@ describe("clo_tout (JS-only)", () => {
     });
   });
 
-  // deviation _shared-4 (models/clo_tout.py:44)
+  // deviation _shared-4 (models/clo_tout.py:45)
   test("INFO.standards is ASHRAE 55-2023", () => {
     expect(CLO_TOUT_INFO.standards).toEqual([Standard.ashrae_55_2023]);
   });

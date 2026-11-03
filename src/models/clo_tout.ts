@@ -48,8 +48,9 @@ export type CloTOut = OutputsOf<typeof CLO_TOUT_INFO>;
  *
  * @remarks
  * > [!NOTE]
- * > The ASHRAE 55 2020 states that it is acceptable to determine the clothing
- * > insulation Icl using this equation in mechanically conditioned buildings [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ * > ASHRAE 55 Section 5.2.2.2 (f) uses this relationship (its Figure 5-1) to determine
+ * > the clothing insulation Icl of a representative occupant for a day as a function of
+ * > the outdoor air temperature at 6 a.m. [55ASHRAE2023](../../docs/references.md#55ashrae2023).
  *
  * > [!NOTE]
  * > Limitations:

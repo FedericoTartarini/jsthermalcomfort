@@ -122,7 +122,7 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  * radiation from the back. SHARP is the angle between the sun and the person
  * only. Orientation relative to compass or to room is not included in SHARP.
  * @param inputs.sol_radiation_dir - Direct-beam solar radiation, [W/m2]. Ranges between 200 and 1000. See Table
- * C2-3 of ASHRAE 55 2020 [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ * C-2 of ASHRAE 55 [55ASHRAE2023](../../docs/references.md#55ashrae2023).
  * @param inputs.sol_transmittance - Total solar transmittance, ranges from 0 to 1. The total solar
  * transmittance of window systems, including glazing unit, blinds, and other
  * façade treatments, shall be determined using one of the following methods:
@@ -132,11 +132,14 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  * ii) Glazing unit plus venetian blinds or other complex or unique shades
  * shall be calculated using National Fenestration Rating Council approved
  * software or Lawrence Berkeley National Lab Complex Glazing Database.
+ * iii) Glazing unit plus interior fabric shade shall be calculated as the
+ * product of glazing unit total solar transmittance (in item i) multiplied by
+ * the shade openness factor.
  * @param inputs.f_svv - Fraction of sky-vault view fraction exposed to body, ranges from 0 to 1.
  * It can be calculated using the function
  * `f_svv`.
  * @param inputs.f_bes - Fraction of the possible body surface exposed to sun, ranges from 0 to 1.
- * See Table C2-2 and equation C-7 ASHRAE 55 2020 [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ * See Figure C2-1 of ASHRAE 55 [55ASHRAE2023](../../docs/references.md#55ashrae2023).
  * @param inputs.asw - The average short-wave absorptivity of the occupant. It will range widely,
  * depending on the color of the skin of the occupant as well as the color and
  * amount of clothing covering the body. Defaults to 0.7.
@@ -183,7 +186,7 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  *
  * - Solar altitude (sol_altitude) must be between 0° and 90°.
  * - Solar horizontal angle (sharp) must be between 0° and 180°.
- * - Direct-beam solar radiation (sol_radiation_dir) should typically range from 200 to 1000 W/m², as per ASHRAE 55 Table C2-3.
+ * - Direct-beam solar radiation (sol_radiation_dir) should typically range from 200 to 1000 W/m², as per ASHRAE 55 Table C-2.
  * - Solar transmittance (sol_transmittance) must be between 0 and 1.
  * - Sky-vault view fraction (f_svv) and body surface exposure fraction (f_bes) must be between 0 and 1.
  * - Average short-wave absorptivity (asw) typically ranges from 0.57 to 0.84, depending on skin and clothing color.

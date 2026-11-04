@@ -22,3 +22,7 @@ Default vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 ### Domain docs
 
 Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Upstream sync
+
+Retargeting to a new pythermalcomfort release, which `.github/workflows/upstream-release.yml` reports weekly. See `docs/agents/upstream-sync.md`.

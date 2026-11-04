@@ -51,7 +51,7 @@ describe("test_esi", () => {
     },
   );
 
-  // tests/test_esi.py:49 never asserts its 16.5, 19.5 and 18.0; 4.7.0 returns 19.9, 33.1 and 24.8 (decision 253, upstream draft 46).
+  // tests/test_esi.py:49 never asserts its 16.5, 19.5 and 18.0; 4.7.0 returns 19.9, 33.1 and 24.8 (decision 253, pythermalcomfort#527).
   test.each([
     [30, 0, 500, 19.9], // minimum RH
     [30, 100, 500, 33.1], // maximum RH

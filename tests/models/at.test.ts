@@ -34,7 +34,7 @@ describe("test_at", () => {
     });
   });
 
-  // tests/test_at.py:31 never asserts its 25.3; 4.7.0 returns 30.9 (decision 253, upstream draft 46).
+  // tests/test_at.py:31 never asserts its 25.3; 4.7.0 returns 30.9 (decision 253, pythermalcomfort#527).
   test("test_at_q", () => {
     const result = at({ tdb: 25, rh: 30, v: 0.1, q: 100 });
     expect(approx(result.at, 30.9, { rel: 1e-5, abs: 0.1 })).toBe(true);

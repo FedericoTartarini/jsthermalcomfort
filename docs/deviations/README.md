@@ -40,7 +40,7 @@ Every difference between this library and pythermalcomfort v4.8.0, whose `.py` i
 | zero divisors numba drops | Where upstream's kernel raises and numba's `prange` drops the exception, the library throws `RangeError`.                                                                                                                             | 0022 |
 | loop cap                  | A loop with no upstream bound stops after 1000 iterations and throws `Error("Max iterations exceeded")`.                                                                                                                              | 0015 |
 | `@throws`                 | Raises becomes `@throws`, with the JavaScript class.                                                                                                                                                                                  | 0025 |
-| docstring errors          | An error in upstream's docstring, a typo included, is fixed. The user files the upstream issue.                                                                                                                                       | 0025 |
+| docstring errors          | An error in upstream's docstring, a typo included, is fixed. The user files the upstream issue, and the row then cites it by its full link.                                                                                           | 0025 |
 
 ADR 0019 names error classes, check order and messages as classes of their own (whitelist item 2). ADR 0022 defines them.
 

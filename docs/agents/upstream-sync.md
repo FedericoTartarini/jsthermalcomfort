@@ -23,6 +23,8 @@ Open a retarget ticket in `.scratch/<feature>/issues/` (`docs/agents/issue-track
 - the validation-data ref in upstream's `tests/conftest.py`;
 - the tracked mentions of vX, from `git grep -l` on its version with the dots escaped.
 
+Then cross-check the diff against the "pythermalcomfort changes to port" issue in FedericoTartarini/jsthermalcomfort (label `pythermalcomfort sync`). Upstream's `.github/workflows/js-sync.yml` has kept it since v4.8.0. It lists each pull request merged into `development` that is labelled `js: needed`, or that touches code the library mirrors (`PORTED_PATHS` in `.github/scripts/js_sync.js`) and is not labelled `js: not needed`. At each final release the script renames the open issue "pythermalcomfort changes to port (up to vY)", closes it, and moves its unticked lines to a new one. The diff stays the record: a commit pushed to `development` without a pull request is not listed. cba6bf5, which changed `two_nodes_gagge`, is one.
+
 ## 2. Classify each change
 
 Each change in the diff takes one class, ADR 0028's three layers plus docstrings, and each class lands in a ticket: the retarget ticket, or an alignment ticket it names. An open ticket whose model or helper vY changes gains a note naming the change.

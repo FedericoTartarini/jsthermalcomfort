@@ -1,0 +1,203 @@
+[
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5
+    },
+    "outputs": {
+      "pet": 24.67
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "position": "standing"
+    },
+    "outputs": {
+      "pet": 24.69
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "position": "standing, forced convection"
+    },
+    "outputs": {
+      "pet": 24.79
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "sex": "female"
+    },
+    "outputs": {
+      "pet": 24.69
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "age": 60
+    },
+    "outputs": {
+      "pet": 24.71
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "weight": 55
+    },
+    "outputs": {
+      "pet": 24.6
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "height": 1.6
+    },
+    "outputs": {
+      "pet": 24.61
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "p_atm": 800
+    },
+    "outputs": {
+      "pet": 24.76
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "wme": 0.2
+    },
+    "outputs": {
+      "pet": 24.87
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "position": "standing",
+      "sex": "female",
+      "age": 45,
+      "weight": 60,
+      "height": 1.65,
+      "p_atm": 900,
+      "wme": 0.1
+    },
+    "outputs": {
+      "pet": 24.76
+    }
+  },
+  {
+    "inputs": {
+      "tdb": [25, 30],
+      "tr": [25, 30],
+      "v": [0.1, 0.2],
+      "rh": [50, 60],
+      "met": [1.2, 1.4],
+      "clo": [0.5, 0.6]
+    },
+    "outputs": {
+      "pet": [24.67, 31.46]
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "position": ["sitting", "standing", "standing, forced convection"],
+      "sex": "female"
+    },
+    "outputs": {
+      "pet": [24.69, 24.7, 24.8]
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "position": "STANDING"
+    },
+    "outputs": {
+      "pet": 24.67
+    }
+  },
+  {
+    "inputs": {
+      "tdb": 25,
+      "tr": 25,
+      "v": 0.1,
+      "rh": 50,
+      "met": 1.2,
+      "clo": 0.5,
+      "sex": "MALE"
+    },
+    "outputs": {
+      "pet": 24.69
+    }
+  }
+]

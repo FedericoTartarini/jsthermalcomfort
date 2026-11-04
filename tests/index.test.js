@@ -22,6 +22,13 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("heat_index");
   });
 
+  it("should have models.heat_index_lu", () => {
+    expect(jsthermalcomfort.models.heat_index_lu(25, 50)).toEqual({
+      hi: 25.0,
+      stress_category: null,
+    });
+  });
+
   it("should have models.wci", () => {
     expect(jsthermalcomfort.models.wci(-5, 5.5)).toEqual({ wci: 1255.2 });
   });

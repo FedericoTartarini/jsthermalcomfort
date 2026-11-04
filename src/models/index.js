@@ -15,6 +15,7 @@ import { work_capacity_dunne } from "./work_capacity_dunne.js";
 import { discomfort_index } from "./discomfort_index.js";
 import { two_nodes_gagge } from "./two_nodes_gagge.js";
 import { two_nodes_gagge_ji } from "./two_nodes_gagge_ji.js";
+import { two_nodes_gagge_sleep } from "./two_nodes_gagge_sleep.js";
 import { set_tmp } from "./set_tmp.js";
 import { wci } from "./wci.js";
 import { wc } from "./wc.js";
@@ -91,6 +92,7 @@ export {
   thi,
   two_nodes_gagge,
   two_nodes_gagge_ji,
+  two_nodes_gagge_sleep,
   utci,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,
@@ -141,6 +143,7 @@ export default {
   thi,
   two_nodes_gagge,
   two_nodes_gagge_ji,
+  two_nodes_gagge_sleep,
   utci,
   use_fans_heatwaves,
   vertical_tmp_grad_ppd,

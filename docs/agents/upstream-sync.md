@@ -6,7 +6,7 @@ Below, `vX` is the current pin and `vY` the new release.
 
 ## When
 
-`.github/workflows/upstream-release.yml` runs `scripts/parity/check-upstream-release.sh` every Monday. The script fails, naming both versions, when PyPI's latest release (`info.version` of `https://pypi.org/pypi/pythermalcomfort/json`) differs from the pin in `scripts/parity/requirements.in`. GitHub runs a schedule only on the default branch, notifies the user who last changed its cron line, and, in a public repository, disables it after 60 days with no repository activity (GitHub docs, _Events that trigger workflows_, `schedule`). The script also runs locally: `bash scripts/parity/check-upstream-release.sh`.
+`.github/workflows/upstream-release.yml` schedules `scripts/parity/check-upstream-release.sh` for every Monday. The schedule runs once the workflow is on `main`, which it reaches with v2; until then run the script by hand at the start of each work session. The script fails, naming both versions, when PyPI's latest release (`info.version` of `https://pypi.org/pypi/pythermalcomfort/json`) differs from the pin in `scripts/parity/requirements.in`. GitHub runs a schedule only on the default branch, notifies the user who last changed its cron line, and, in a public repository, disables it after 60 days with no repository activity (GitHub docs, _Events that trigger workflows_, `schedule`). The script also runs locally: `bash scripts/parity/check-upstream-release.sh`.
 
 ## Measuring upstream
 

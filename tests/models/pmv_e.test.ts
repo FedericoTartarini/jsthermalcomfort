@@ -6,6 +6,7 @@ import {
   PMV_PPD_ISO_INFO,
 } from "../../src/models/index.ts";
 import { pmv_e as pmv_e_from_root } from "../../src/index.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -119,13 +120,25 @@ describe("pmv_e (JS-only)", () => {
   // Deviation pmv_e-3 (decision 243).
   test("with the gate off, the second call checks the adjusted met", () => {
     expect(pmv_e(warm).warnings).toEqual([
-      expect.objectContaining({ key: "pmv", value: 2.323863160308001 }),
-      expect.objectContaining({ key: "pmv", value: 2.323863160308001 }),
+      expect.objectContaining({
+        key: "pmv",
+        value: expect.toBeApprox(2.323863160308001, DEFAULT_TOLERANCE),
+      }),
+      expect.objectContaining({
+        key: "pmv",
+        value: expect.toBeApprox(2.323863160308001, DEFAULT_TOLERANCE),
+      }),
     ]);
     expect(pmv_e({ ...warm, limit_inputs: false }).warnings).toEqual([
-      expect.objectContaining({ key: "pmv", value: 2.323863160308001 }),
+      expect.objectContaining({
+        key: "pmv",
+        value: expect.toBeApprox(2.323863160308001, DEFAULT_TOLERANCE),
+      }),
       expect.objectContaining({ key: "met", role: "derived", value: 0.717876 }),
-      expect.objectContaining({ key: "pmv", value: 2.045025099778569 }),
+      expect.objectContaining({
+        key: "pmv",
+        value: expect.toBeApprox(2.045025099778569, DEFAULT_TOLERANCE),
+      }),
     ]);
   });
 

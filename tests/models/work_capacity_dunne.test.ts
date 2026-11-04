@@ -5,6 +5,7 @@ import {
 } from "../../src/models/index.ts";
 import { work_capacity_dunne as work_capacity_dunne_from_root } from "../../src/index.ts";
 import { WorkIntensity } from "../../src/utilities/index.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
@@ -112,7 +113,7 @@ describe("test_choice_field", () => {
   ])(
     "test_choice_fields_preserve_valid_values[work_intensity-%s]",
     (_, value, expected) => {
-      expect(capacity(value)).toBe(expected);
+      expect(approx(capacity(value), expected, DEFAULT_TOLERANCE)).toBe(true);
     },
   );
 

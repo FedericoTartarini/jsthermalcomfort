@@ -6,6 +6,7 @@ import {
 import { two_nodes_gagge_sleep as sleep_from_root } from "../../src/index.ts";
 import { _two_nodes_gagge_sleep_optimized } from "../../src/models/two_nodes_gagge_sleep.ts";
 import { round } from "../../src/_internal/round.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
@@ -360,7 +361,8 @@ const thrown = (inputs: unknown): Error => {
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image, the zero divisors and the loop cap on 4.8.0.
 describe("two_nodes_gagge_sleep (JS-only)", () => {
-  // Bit for bit (register two_nodes_gagge_sleep's Notes).
+  // Register two_nodes_gagge_sleep's Notes measure how far the port's
+  // elements can differ from upstream's.
   test.each([
     [{}, "set", 24.285471240487254],
     [{}, "t_core", 37.03223590335804],
@@ -376,7 +378,7 @@ describe("two_nodes_gagge_sleep (JS-only)", () => {
     [{ tdb: -200 }, "set", -168.92477836981874],
   ] as const)("%o gives upstream's %s", (inputs, field, expected) => {
     const result = two_nodes_gagge_sleep({ ...valid, ...inputs });
-    expect(result[field]).toBe(expected);
+    expect(approx(result[field], expected, DEFAULT_TOLERANCE)).toBe(true);
     expect(result.warnings).toEqual([]);
   });
 

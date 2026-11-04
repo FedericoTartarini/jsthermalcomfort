@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { fsolve } from "../../src/_internal/fsolve.ts";
 import type { ModelWarning } from "../../src/_internal/modelInfo.ts";
+import { approx } from "../models/testUtils.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 
 // The equations scipy was run on, each written with the same operations in the
 // same order as the Python one and no libm call, so both evaluate to the same
@@ -823,8 +825,9 @@ describe("fsolve", () => {
       warnings,
     );
     expect(x).toHaveLength(root.length);
+    // enorm's `2 ** 63.5` (src/_internal/fsolve.ts:622) is one ulp lower on Node 22.13.0 than on 24.21.0.
     root.forEach((r, i) => {
-      expect(x[i]).toBe(r);
+      expect(approx(x[i] ?? null, r, DEFAULT_TOLERANCE)).toBe(true);
     });
     expect(n).toBe(calls);
     expect(warnings).toEqual(

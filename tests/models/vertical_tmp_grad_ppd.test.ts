@@ -5,7 +5,11 @@ import {
   VERTICAL_TMP_GRAD_PPD_INFO,
 } from "../../src/models/index.ts";
 import { vertical_tmp_grad_ppd as from_root } from "../../src/index.ts";
-import { read_data, upstream_returns } from "../parity/harness.ts";
+import {
+  DEFAULT_TOLERANCE,
+  read_data,
+  upstream_returns,
+} from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
@@ -181,9 +185,13 @@ describe("vertical_tmp_grad_ppd (JS-only)", () => {
   });
 
   test("round_output false returns the unrounded ppd_vg", () => {
-    expect(call({ ...valid, round_output: false }).ppd_vg).toBe(
-      12.637059952602048,
-    );
+    expect(
+      approx(
+        call({ ...valid, round_output: false }).ppd_vg,
+        12.637059952602048,
+        DEFAULT_TOLERANCE,
+      ),
+    ).toBe(true);
   });
 
   // models/vertical_tmp_grad_ppd.py:129-132: an unrounded 5.0287 % is not acceptable.

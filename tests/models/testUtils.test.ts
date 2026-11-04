@@ -394,3 +394,15 @@ describe("approx", () => {
     expect(approx(null, 0, { abs: Infinity })).toBe(false);
   });
 });
+
+describe("toBeApprox", () => {
+  test("matches inside toEqual as approx does, its tolerance included", () => {
+    const tolerance = { rel: 0.1, abs: 0 };
+    expect({ x: -110 }).toEqual({ x: expect.toBeApprox(-100, tolerance) });
+    expect({ x: -110.5 }).not.toEqual({
+      x: expect.toBeApprox(-100, tolerance),
+    });
+    expect([1 + 1e-6]).toEqual([expect.toBeApprox(1)]);
+    expect([null]).not.toEqual([expect.toBeApprox(0, { abs: Infinity })]);
+  });
+});

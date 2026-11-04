@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { transpose_sharp_altitude } from "../../src/environment/index.ts";
 import { transpose_sharp_altitude as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 
 // Mirrors pythermalcomfort v4.8.0 tests/test_environment.py,
 // test_transpose_sharp_altitude; its keyword calls are positional here.
@@ -47,7 +48,12 @@ describe("transpose_sharp_altitude (JS-only)", () => {
   ] as const)(
     "(%s, %s) gives upstream's unrounded angles",
     (sharp, altitude, expected) => {
-      expect(transpose_sharp_altitude(sharp, altitude)).toEqual(expected);
+      // A 0 stays exact, as Math.sin(+0) and Math.atan(+0) are +0.
+      expect(transpose_sharp_altitude(sharp, altitude)).toEqual(
+        expected.map((angle) =>
+          angle === 0 ? angle : expect.toBeApprox(angle, DEFAULT_TOLERANCE),
+        ),
+      );
     },
   );
 

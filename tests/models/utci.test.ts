@@ -10,6 +10,7 @@ import { Units } from "../../src/utilities/index.ts";
 import { utci as utci_from_root } from "../../src/index.ts";
 import { p_sat } from "../../src/psychrometrics/index.ts";
 import { round } from "../../src/_internal/round.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
@@ -98,7 +99,9 @@ describe("test_utci", () => {
   );
 
   // Upstream's `pytest.warns(UserWarning, match="pa")` becomes the row on the
-  // element above the limit.
+  // element above the limit, compared exactly since the bits at the 5.0 kPa
+  // limit are the test's subject: a failure on a new engine is a parity
+  // finding to investigate, not a tolerance to widen.
   test("test_utci_vapour_pressure_limit_is_inclusive", () => {
     // Hardy's equation at 40 C: this RH gives exactly 5.0 kPa in float64.
     const rh_at_limit = 67.70206528209202;
@@ -407,7 +410,7 @@ describe("utci (JS-only)", () => {
         row: {
           key: "pa (kPa)",
           role: "derived",
-          value: 5.169709351430658,
+          value: expect.toBeApprox(5.169709351430658, DEFAULT_TOLERANCE),
           unit: "kPa",
         },
         bound: derived["pa (kPa)"].applicability,
@@ -438,7 +441,7 @@ describe("utci (JS-only)", () => {
       expect(warnings).toEqual([
         expect.objectContaining({
           key: "pa (kPa)",
-          value: -0.0023392623958624946,
+          value: expect.toBeApprox(-0.0023392623958624946, DEFAULT_TOLERANCE),
         }),
         {
           kind: "range",

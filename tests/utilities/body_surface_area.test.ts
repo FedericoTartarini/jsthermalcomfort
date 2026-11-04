@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { body_surface_area } from "../../src/utilities/index.ts";
 import { body_surface_area as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 
 // Mirrors the body_surface_area cases of pythermalcomfort v4.8.0
 // tests/test_utilities.py; its keyword call is positional here.
@@ -44,7 +45,9 @@ describe("body_surface_area (JS-only)", () => {
     [80, 1.7, "fujimoto", 1.8723162568631528],
     [85, 1.65, "kurazumi", 1.8926645519678011],
   ] as const)("(%d, %d, %s) gives upstream's value", (w, h, f, expected) => {
-    expect(body_surface_area(w, h, f)).toBe(expected);
+    expect(
+      approx(body_surface_area(w, h, f), expected, DEFAULT_TOLERANCE),
+    ).toBe(true);
   });
 
   test("is exported from the root entry", () => {

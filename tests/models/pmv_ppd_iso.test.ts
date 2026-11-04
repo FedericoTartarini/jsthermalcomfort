@@ -753,6 +753,8 @@ describe("pmv_ppd_iso (JS-only)", () => {
       "pmv $id is category $iso2005",
       ({ rh, met, t, pmv, iso2005: category }) => {
         const result = at(rh, met, t);
+        // Exact, since the bits at the edge are the subject: a failure on a new
+        // engine is a parity finding to investigate, not a tolerance to widen.
         expect(result.pmv).toBe(pmv);
         expect(result.category).toBe(category);
       },
@@ -813,6 +815,8 @@ describe("pmv_ppd_iso (JS-only)", () => {
       "pmv $id is category $iso2025",
       ({ rh, met, t, pmv, iso2025: category }) => {
         const result = at(rh, met, t);
+        // Exact, since the bits at the edge are the subject: a failure on a new
+        // engine is a parity finding to investigate, not a tolerance to widen.
         expect(result.pmv).toBe(pmv);
         expect(result.category).toBe(category);
       },

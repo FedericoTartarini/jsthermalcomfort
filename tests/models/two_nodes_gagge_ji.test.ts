@@ -6,6 +6,7 @@ import {
 import { two_nodes_gagge_ji as ji_from_root } from "../../src/index.ts";
 import { p_sat_torr } from "../../src/psychrometrics/index.ts";
 import { body_surface_area, Postures } from "../../src/utilities/index.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx } from "./testUtils.ts";
 
@@ -295,18 +296,14 @@ const valid = {
 
 describeModelContract(two_nodes_gagge_ji, TWO_NODES_GAGGE_JI_INFO, valid);
 
-const exact = (actual: readonly number[], expected: readonly number[]) => {
-  expect(actual).toHaveLength(expected.length);
-  for (const [i, x] of expected.entries()) expect(actual[i]).toBe(x);
-};
-
 const position_message =
   "position must be one of ['sitting', 'standing', 'standing, forced convection']";
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("two_nodes_gagge_ji (JS-only)", () => {
-  // Bit for bit (register two_nodes_gagge_ji's Notes).
+  // Register two_nodes_gagge_ji's Notes measure how far the port's elements
+  // can differ from upstream's.
   test.each([
     [
       { ...valid, length_time_simulation: 3 },
@@ -339,8 +336,12 @@ describe("two_nodes_gagge_ji (JS-only)", () => {
     ],
   ])("%o gives upstream's series", (inputs, t_core, t_skin) => {
     const result = call(inputs);
-    exact(result.t_core, t_core);
-    exact(result.t_skin, t_skin);
+    expect(result.t_core).toEqual(
+      t_core.map((x) => expect.toBeApprox(x, DEFAULT_TOLERANCE)),
+    );
+    expect(result.t_skin).toEqual(
+      t_skin.map((x) => expect.toBeApprox(x, DEFAULT_TOLERANCE)),
+    );
     expect(result.warnings).toEqual([]);
   });
 

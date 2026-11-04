@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { set_tmp, SET_TMP_INFO } from "../../src/models/index.ts";
 import { set_tmp as from_root } from "../../src/index.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
-import { loadTestData, validateResult } from "./testUtils.ts";
+import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof set_tmp>[0];
 
@@ -96,19 +97,26 @@ describe("set_tmp (JS-only)", () => {
   });
 
   test("round_output false returns the unrounded set", () => {
-    expect(call({ ...valid, round_output: false }).set).toBe(
-      24.314907736364308,
-    );
+    expect(
+      approx(
+        call({ ...valid, round_output: false }).set,
+        24.314907736364308,
+        DEFAULT_TOLERANCE,
+      ),
+    ).toBe(true);
   });
 
   // models/two_nodes_gagge.py:133-146, :337-342: the SET path passes 1 as position, which computes as standing.
   test.each(["sitting", "standing"])(
     "calculate_ce takes the SET path, whatever the position, %s",
     (position) => {
-      expect(
-        call({ ...valid, position, calculate_ce: true, round_output: false })
-          .set,
-      ).toBe(24.662342565066787);
+      const { set } = call({
+        ...valid,
+        position,
+        calculate_ce: true,
+        round_output: false,
+      });
+      expect(approx(set, 24.662342565066787, DEFAULT_TOLERANCE)).toBe(true);
     },
   );
 

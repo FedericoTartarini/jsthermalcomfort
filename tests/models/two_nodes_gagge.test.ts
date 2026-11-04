@@ -5,6 +5,7 @@ import {
 } from "../../src/models/index.ts";
 import { two_nodes_gagge as from_root } from "../../src/index.ts";
 import { Postures } from "../../src/utilities/index.ts";
+import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -164,7 +165,10 @@ describe("two_nodes_gagge (JS-only)", () => {
       { round_output: false },
     ]) {
       const result = call({ ...base, ...changed, calculate_ce: true });
-      expect(result).toEqual({ set: 32.316713448080286, warnings: [] });
+      expect(result).toEqual({
+        set: expect.toBeApprox(32.316713448080286, DEFAULT_TOLERANCE),
+        warnings: [],
+      });
       expect(isDeepFrozen(result)).toBe(true);
     }
   });

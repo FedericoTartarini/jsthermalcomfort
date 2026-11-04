@@ -45,6 +45,21 @@
  * - JS-only tests live in their own `describe` in the same file, after the
  *   mirrored ones. A JS-only test that a mirrored test now covers with the
  *   same inputs is deleted.
+ * - A JS-only test compares an unrounded value with a value measured on
+ *   upstream, or with any full-precision float, within `DEFAULT_TOLERANCE`
+ *   (`tests/parity/harness.ts`): `approx(actual, expected, DEFAULT_TOLERANCE)`,
+ *   or `expect.toBeApprox(expected, DEFAULT_TOLERANCE)` for a float inside
+ *   `toEqual`. ECMA-262 (tc39.es/ecma262, §6.1.6.1.3 and §21.3.2, read
+ *   2026-11-05) lets `**`, `Math.pow`, `Math.exp`, `Math.log` and the
+ *   trigonometric functions return an "implementation-approximated" value, so
+ *   their last bits can change with the engine. It compares exactly: a value
+ *   the library rounds; an exact result (0, -0, ±Infinity, a NaN check, an
+ *   integer, a boolean, a string, identity) or a value computed only with
+ *   `+ - * /` and `Math.sqrt`, which ECMA-262 defines as correctly rounded; a
+ *   value whose exact bits at a threshold or bin edge are the test's subject,
+ *   with a comment saying a failure on a new engine is a parity finding to
+ *   investigate, not a tolerance to widen; and the library compared with
+ *   itself. A test that already compares within a tolerance keeps it.
  */
 import { expect } from "vitest";
 import * as pkg from "../../src/index.ts";
@@ -85,6 +100,35 @@ export function approx(
   if (actual === null) return false;
   return Math.abs(actual - expected) <= abs + rel * Math.abs(expected);
 }
+
+declare module "vitest" {
+  interface AsymmetricMatchersContaining {
+    /**
+     * `approx` as an asymmetric matcher, for a float inside `toEqual`:
+     * `expect.toBeApprox(expected, tolerance)` stands where the float goes,
+     * hence its `number` type.
+     */
+    toBeApprox: (
+      expected: number,
+      tolerance?: { rel?: number; abs?: number },
+    ) => number;
+  }
+}
+
+expect.extend({
+  toBeApprox(
+    received: number | null,
+    expected: number,
+    tolerance?: { rel?: number; abs?: number },
+  ) {
+    return {
+      pass: approx(received, expected, tolerance),
+      message: () =>
+        `expected ${String(received)} to be within ` +
+        `${JSON.stringify(tolerance ?? {})} of ${String(expected)}`,
+    };
+  },
+});
 
 /** One row of a validation-data fixture: the model inputs and expected outputs. */
 export interface FixtureRow {

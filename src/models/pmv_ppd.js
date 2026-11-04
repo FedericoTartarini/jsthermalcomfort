@@ -348,15 +348,25 @@ export function pmv_ppd(
 }
 
 /**
- * @param {number} tdb
- * @param {number} tr
- * @param {number} vr
- * @param {number} rh
- * @param {number} met
- * @param {number} clo
- * @param {number} wme
+ * Calculates the raw, unrounded Fanger PMV for scalar SI inputs.
  *
- * @returns {number} _pmv
+ * Corresponds to pythermalcomfort 3.9.3
+ * `pythermalcomfort.models._pmv_ppd_optimized._pmv_ppd_optimized`.
+ * Unlike Python's vectorized implementation, this function accepts scalar
+ * inputs only. Unit conversion, input validation, standard applicability
+ * limits, cooling-effect adjustments, and output rounding are handled by
+ * the calling functions.
+ *
+ * @param {number} tdb - dry bulb air temperature, [°C]
+ * @param {number} tr - mean radiant temperature, [°C]
+ * @param {number} vr - relative air speed, [m/s]
+ * @param {number} rh - relative humidity, [%]
+ * @param {number} met - metabolic rate, [met]
+ * @param {number} clo - clothing insulation, [clo]
+ * @param {number} wme - external work, [met]
+ *
+ * @returns {number} unrounded Predicted Mean Vote (PMV)
+ * @throws {Error} if the clothing temperature iteration exceeds 150 iterations.
  */
 export function pmv_calculation(tdb, tr, vr, rh, met, clo, wme) {
   const pa = partial_vapour_pressure(tdb, rh);

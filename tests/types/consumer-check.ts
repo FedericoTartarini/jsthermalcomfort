@@ -24,6 +24,7 @@ import type {
   VariableInfo,
 } from "jsthermalcomfort";
 import {
+  cooling_effect,
   HEAT_INDEX_ROTHFUSZ_INFO,
   HEAT_INDEX_STRESS_CATEGORY_BINS,
   PMV_PPD_ISO_INFO,
@@ -33,6 +34,12 @@ import {
   pmv_e,
   e_pmv,
 } from "jsthermalcomfort";
+
+// Scalar calls retain a numeric result; array calls expose their possible shape.
+const scalarCe: number = cooling_effect(25, 25, 0.3, 50, 1.2, 0.5).ce;
+const batchCe = cooling_effect([25, 26], 25, [0.1, 0.3], 50, 1.2, 0.5).ce;
+// @ts-expect-error A batch result cannot be used as a scalar without narrowing.
+const batchCeAsNumber: number = batchCe;
 
 // Scalar and broadcast ankle-draft calls retain the documented lowercase keys.
 const ankleScalar = ankle_draft(25, 25, 0.1, 50, 1.2, 0.5, 0.3);

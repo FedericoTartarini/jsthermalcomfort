@@ -5,57 +5,6 @@ import {
 } from "../utilities/utilities.js";
 import { set_tmp } from "./set_tmp.js";
 
-/**
- * @typedef {object} CoolingEffectResult
- * @property {number} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
- * @public
- */
-/**
- * Returns the value of the Cooling Effect ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} )
- * calculated in compliance with the ASHRAE 55 2020 Standard {@link #ref_1|[1]}.
- * The {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} of the elevated air speed
- * is the value that, when subtracted equally from both the average air temperature and the mean radiant temperature,
- * the same {@link https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature|SET} under still air
- * as in the first {@link https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature|SET} calculation
- * under elevated air speed. The cooling effect is calculated only for air speed higher than 0.1 m/s.
- *
- * @public
- * @memberof models
- * @docname Cooling Effect (CE)
- *
- * @param {number} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
- * @param {number} vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
- *
- * Note: vr is the relative air speed caused by body movement and not the air
- * speed measured by the air speed sensor. The relative air speed is the sum of the
- * average air speed measured by the sensor plus the activity-generated air speed
- * (Vag). Where Vag is the activity-generated air speed caused by motion of individual body parts.
- * vr can be calculated using the function `v_relative` which is in .utilities.js.
- *
- * @param {number} rh - relative humidity, [%]
- * @param {number} met - metabolic rate, [met]
- * @param {number} clo - clothing insulation, [clo]
- *
- * Note: The activity as well as the air speed modify the insulation characteristics
- * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
- * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
- * for the effect of the body movement for met equal or higher than 1.2 met using
- * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
- * can be calculated using the function `clo_dynamic` which is in .utilities.js.
- *
- * @param {number} [wme=0] - external work
- * @param {'SI'|'IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
- * @returns {CoolingEffectResult} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
- *
- * @example
- * const CE = cooling_effect(25, 25, 0.3, 50, 1.2, 0.5);
- * console.log(CE); // Output: {ce: 1.64}
- *
- * // For users who want to use the IP system
- * const CE_IP = cooling_effect(77, 77, 1.64, 50, 1, 0.6, "IP");
- * console.log(CE_IP); // Output: {ce: 3.74}
- */
 const COOLING_EFFECT_SCHEMA = {
   tdb: { type: "number" },
   tr: { type: "number" },
@@ -67,6 +16,97 @@ const COOLING_EFFECT_SCHEMA = {
   units: { enum: ["SI", "IP"] },
 };
 
+/**
+ * @typedef {number | boolean | CoolingEffectInput[]} CoolingEffectInput
+ * @public
+ */
+/**
+ * @typedef {number | CoolingEffectOutput[]} CoolingEffectOutput
+ * @public
+ */
+
+/**
+ * @typedef {object} CoolingEffectResult
+ * @property {CoolingEffectOutput} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'. Preserves the broadcast input shape.
+ * @public
+ */
+/**
+ * Returns the value of the Cooling Effect ( {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} )
+ * calculated in compliance with the ASHRAE 55 2020 Standard {@link #ref_1|[1]}.
+ * The {@link https://en.wikipedia.org/wiki/Thermal_comfort#Cooling_Effect|CE} of the elevated air speed
+ * is the value that, when subtracted equally from both the average air temperature and the mean radiant temperature,
+ * the same {@link https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature|SET} under still air
+ * as in the first {@link https://en.wikipedia.org/wiki/Thermal_comfort#Standard_effective_temperature|SET} calculation
+ * under elevated air speed. The cooling effect is calculated only for air speed higher than 0.1 m/s.
+ *
+ * Numeric inputs accept finite scalars or rectangular arrays. Arrays broadcast
+ * along trailing dimensions as in NumPy; each dimension must match or be 1.
+ * Booleans are treated as 0/1. Empty arrays are not supported, matching Python's
+ * vectorized implementation. Non-finite values retain the JS API's validation.
+ *
+ * @public
+ * @memberof models
+ * @docname Cooling Effect (CE)
+ * @param {CoolingEffectInput} tdb - dry bulb air temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {CoolingEffectInput} tr - mean radiant temperature, default in [°C] in [°F] if `units` = 'IP'
+ * @param {CoolingEffectInput} vr - relative air speed, default in [m/s] in [fps] if `units` = 'IP'
+ *
+ * Note: vr is the relative air speed caused by body movement and not the air
+ * speed measured by the air speed sensor. The relative air speed is the sum of the
+ * average air speed measured by the sensor plus the activity-generated air speed
+ * (Vag). Where Vag is the activity-generated air speed caused by motion of individual body parts.
+ * vr can be calculated using the function `v_relative` which is in .utilities.js.
+ *
+ * @param {CoolingEffectInput} rh - relative humidity, [%]
+ * @param {CoolingEffectInput} met - metabolic rate, [met]
+ * @param {CoolingEffectInput} clo - clothing insulation, [clo]
+ *
+ * Note: The activity as well as the air speed modify the insulation characteristics
+ * of the clothing and the adjacent air layer. Consequently, the ISO 7730 states that
+ * the clothing insulation shall be corrected {@link #ref_2|[2]}. The ASHRAE 55 Standard corrects
+ * for the effect of the body movement for met equal or higher than 1.2 met using
+ * the equation clo = Icl × (0.6 + 0.4/met) The dynamic clothing insulation, clo,
+ * can be calculated using the function `clo_dynamic` which is in .utilities.js.
+ *
+ * @param {CoolingEffectInput} [wme=0] - external work
+ * @param {'SI'|'IP'} [units= "SI"] - select the SI (International System of Units) or the IP (Imperial Units) system.
+ * @returns {CoolingEffectResult} ce - Cooling Effect, default in [°C] in [°F] if `units` = 'IP'
+ *
+ * @example
+ * const CE = cooling_effect(25, 25, 0.3, 50, 1.2, 0.5);
+ * console.log(CE); // Output: {ce: 1.68}
+ *
+ * // For users who want to use the IP system
+ * const CE_IP = cooling_effect(77, 77, 1.64, 50, 1, 0.6, 0, "IP");
+ * console.log(CE_IP); // Output: {ce: 3.95}
+ *
+ * const batch = cooling_effect(25, 25, [0.1, 0.3, 0.5], 50, 1.2, 0.5);
+ * console.log(batch); // Output: {ce: [0, 1.68, 2.62]}
+ */
+/**
+ * @overload
+ * @param {number | boolean} tdb
+ * @param {number | boolean} tr
+ * @param {number | boolean} vr
+ * @param {number | boolean} rh
+ * @param {number | boolean} met
+ * @param {number | boolean} clo
+ * @param {number | boolean} [wme]
+ * @param {string} [units]
+ * @returns {{ce: number}}
+ */
+/**
+ * @overload
+ * @param {CoolingEffectInput} tdb
+ * @param {CoolingEffectInput} tr
+ * @param {CoolingEffectInput} vr
+ * @param {CoolingEffectInput} rh
+ * @param {CoolingEffectInput} met
+ * @param {CoolingEffectInput} clo
+ * @param {CoolingEffectInput} [wme]
+ * @param {string} [units]
+ * @returns {CoolingEffectResult}
+ */
 export function cooling_effect(
   tdb,
   tr,
@@ -77,12 +117,62 @@ export function cooling_effect(
   wme = 0,
   units = "SI",
 ) {
-  validateInputs(
-    { tdb, tr, vr, rh, met, clo, wme, units: units.toUpperCase() },
-    COOLING_EFFECT_SCHEMA,
+  if (typeof units !== "string") {
+    throw new TypeError('Parameter "units" must be a string');
+  }
+  units = units.toUpperCase();
+  validateInputs({ units }, { units: COOLING_EFFECT_SCHEMA.units });
+  const inputs = { tdb, tr, vr, rh, met, clo, wme };
+  const shapeOf = (value, name) => {
+    if (!Array.isArray(value)) {
+      validateInputs(
+        { [name]: typeof value === "boolean" ? Number(value) : value },
+        { [name]: COOLING_EFFECT_SCHEMA[name] },
+      );
+      return [];
+    }
+    if (value.length === 0)
+      throw new RangeError("Empty arrays are not supported");
+    const shapes = Array.from(value, (item) => shapeOf(item, name));
+    if (shapes.some((shape) => shape.join() !== shapes[0].join())) {
+      throw new RangeError(`${name} must be a rectangular array`);
+    }
+    return [value.length, ...shapes[0]];
+  };
+  const values = Object.values(inputs);
+  const shapes = Object.entries(inputs).map(([name, value]) =>
+    shapeOf(value, name),
   );
+  const rank = Math.max(...shapes.map((shape) => shape.length));
+  const outputShape = Array(rank).fill(1);
+  for (const shape of shapes) {
+    shape.forEach((size, i) => {
+      const axis = rank - shape.length + i;
+      if (outputShape[axis] !== 1 && size !== 1 && outputShape[axis] !== size) {
+        throw new RangeError("Input shapes cannot be broadcast together");
+      }
+      outputShape[axis] = Math.max(outputShape[axis], size);
+    });
+  }
+  const calculate = (indices) => {
+    if (indices.length < rank) {
+      return Array.from({ length: outputShape[indices.length] }, (_, i) =>
+        calculate([...indices, i]),
+      );
+    }
+    const args = values.map((value, j) => {
+      shapes[j].forEach((size, i) => {
+        value = value[size === 1 ? 0 : indices[rank - shapes[j].length + i]];
+      });
+      return Number(value);
+    });
+    return coolingEffectScalar(...args, units);
+  };
+  return { ce: calculate([]) };
+}
 
-  if (units.toLowerCase() === "ip") {
+function coolingEffectScalar(tdb, tr, vr, rh, met, clo, wme, units) {
+  if (units === "IP") {
     const result = units_converter({ tdb, tr, vr }, "IP");
     tdb = result.tdb;
     tr = result.tr;
@@ -90,7 +180,7 @@ export function cooling_effect(
   }
 
   if (vr <= 0.1) {
-    return { ce: 0 };
+    return 0;
   }
 
   const still_air_threshold = 0.1;
@@ -151,13 +241,13 @@ export function cooling_effect(
     );
   }
 
-  if (units.toLowerCase() === "ip") {
+  if (units === "IP") {
     ce = (ce / 1.8) * 3.28;
   }
 
   ce = round(ce, 2);
 
-  return { ce: ce };
+  return ce;
 }
 
 // https://gist.github.com/ryanspradlin/18c1010b7dd2d875284933d018c5c908

@@ -3,7 +3,7 @@ import { cooling_effect } from "../../src/models/cooling_effect";
 import { testDataUrls } from "./comftest"; // Import all test URLs from comftest.js
 import { loadTestData, validateResult } from "./testUtils"; // Import utility functions
 
-let returnArray = false;
+let returnArray = true;
 
 // use top-level await to load test data before tests are defined.
 let { testData, tolerances } = await loadTestData(

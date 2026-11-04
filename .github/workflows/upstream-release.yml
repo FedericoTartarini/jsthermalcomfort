@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # curl and jq are in the image (actions/runner-images,
       # images/ubuntu/Ubuntu2404-Readme.md).
       - run: bash scripts/parity/check-upstream-release.sh

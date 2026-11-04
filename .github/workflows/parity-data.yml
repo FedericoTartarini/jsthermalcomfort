@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # The image pins Python, installs the hashed lockfile and sets
       # NUMBA_CPU_NAME and NPY_DISABLE_CPU_FEATURES, as local runs do.
       - run: docker build --platform linux/amd64 -t jsthermalcomfort-parity scripts/parity

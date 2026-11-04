@@ -169,7 +169,8 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * @example
  * ```ts
  * import { pmv_ppd_ashrae } from "jsthermalcomfort/models";
- * import { clo_dynamic_ashrae, v_relative } from "jsthermalcomfort/utilities";
+ * import { clo_dynamic_ashrae } from "jsthermalcomfort/utilities";
+ * import { v_relative } from "jsthermalcomfort/environment";
  *
  * const tdb = 25;
  * const tr = 25;

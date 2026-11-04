@@ -130,10 +130,6 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });
 
-  it("should have utilities.v_relative", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("v_relative");
-  });
-
   it("should have utilities.clo_dynamic_ashrae", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_ashrae");
   });
@@ -144,16 +140,6 @@ describe("NPM Package", () => {
 
   it("should have utilities.units_converter", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("units_converter");
-  });
-
-  it("should have utilities.running_mean_outdoor_temperature", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty(
-      "running_mean_outdoor_temperature",
-    );
-  });
-
-  it("should have utilities.f_svv", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("f_svv");
   });
 
   it("should have utilities.met_typical_tasks", () => {
@@ -189,6 +175,28 @@ describe("NPM Package", () => {
 
   it("should have environment.operative_tmp", () => {
     expect(jsthermalcomfort.environment).toHaveProperty("operative_tmp");
+  });
+
+  it.each([
+    "f_svv",
+    "mean_radiant_tmp",
+    "running_mean_outdoor_temperature",
+    "v_relative",
+  ] as const)("should have environment.%s, and at the root", (name) => {
+    expect(jsthermalcomfort.environment).toHaveProperty(name);
+    expect(namedExports[name]).toBe(jsthermalcomfort.environment[name]);
+  });
+
+  it.each(["f_svv", "running_mean_outdoor_temperature", "v_relative"])(
+    "should not have utilities.%s",
+    (name) => {
+      expect(jsthermalcomfort.utilities).not.toHaveProperty(name);
+    },
+  );
+
+  it("should not have psychrometrics.t_mrt", () => {
+    expect(jsthermalcomfort.psychrometrics).not.toHaveProperty("t_mrt");
+    expect(namedExports).not.toHaveProperty("t_mrt");
   });
 
   it("should have psychrometrics.enthalpy_air", () => {

@@ -15,9 +15,15 @@ export const UNLINTED = [
   "tests/jos3_functions/",
   // Hold only functions no model calls, so they stay JavaScript with JSDoc
   // (decision 103), with their tests.
-  "src/psychrometrics/t_mrt.js",
+  "src/environment/f_svv.js",
+  "src/environment/mean_radiant_tmp.js",
+  "src/environment/running_mean_outdoor_temperature.js",
+  "src/environment/v_relative.js",
   "src/utilities/utilities.js",
-  "tests/psychrometrics/t_mrt.test.js",
+  "tests/environment/f_svv.test.js",
+  "tests/environment/mean_radiant_tmp.test.js",
+  "tests/environment/running_mean_outdoor_temperature.test.js",
+  "tests/environment/v_relative.test.js",
   "tests/utilities/utilities.test.js",
   // Meant to be reported: tests/eslint.test.ts lints it with the list lifted.
   "tests/eslint/fixture.ts",

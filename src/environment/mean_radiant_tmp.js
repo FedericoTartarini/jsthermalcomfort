@@ -16,7 +16,7 @@ const o = 0.0000000567;
  * developed by Teitelbaum E. et al. (2022) or the ISO 7726:1998 Standard {@link #ref_5|[5]}.
  *
  * @public
- * @memberof psychrometrics
+ * @memberof environment
  *
  * @param {number} tg - globe temperature, [°C]
  * @param {number} tdb - air temperature, [°C]
@@ -32,7 +32,7 @@ const o = 0.0000000567;
  *      been validated for globe sensors with a diameter between 0.04 and 0.15 m.
  * @returns {number}
  */
-export function t_mrt(
+export function mean_radiant_tmp(
   tg,
   tdb,
   v,

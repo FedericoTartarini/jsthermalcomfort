@@ -1,7 +1,4 @@
 import {
-  v_relative,
-  running_mean_outdoor_temperature,
-  f_svv,
   met_typical_tasks,
   clo_typical_ensembles,
   clo_individual_garments,
@@ -21,7 +18,6 @@ import {
 
 export {
   body_surface_area,
-  v_relative,
   clo_dynamic_ashrae,
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
@@ -29,8 +25,6 @@ export {
   clo_insulation_air_layer,
   clo_total_insulation,
   units_converter,
-  running_mean_outdoor_temperature,
-  f_svv,
   met_typical_tasks,
   clo_typical_ensembles,
   clo_individual_garments,
@@ -50,7 +44,6 @@ export {
  */
 export default {
   body_surface_area,
-  v_relative,
   clo_dynamic_ashrae,
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
@@ -58,8 +51,6 @@ export default {
   clo_insulation_air_layer,
   clo_total_insulation,
   units_converter,
-  running_mean_outdoor_temperature,
-  f_svv,
   met_typical_tasks,
   clo_typical_ensembles,
   clo_individual_garments,

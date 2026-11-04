@@ -190,7 +190,7 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  * @example
  * ```ts
  * import { pmv_ppd_iso } from "jsthermalcomfort/models";
- * import { v_relative } from "jsthermalcomfort/utilities";
+ * import { v_relative } from "jsthermalcomfort/environment";
  *
  * const tdb = 25;
  * const tr = 25;

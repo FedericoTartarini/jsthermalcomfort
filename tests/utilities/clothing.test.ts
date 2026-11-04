@@ -8,8 +8,8 @@ import {
   clo_individual_garments,
   clo_insulation_air_layer,
   clo_total_insulation,
-  v_relative,
 } from "../../src/utilities/index.ts";
+import { v_relative } from "../../src/environment/index.ts";
 import * as pkg from "../../src/index.ts";
 
 // Upstream's `np.isclose(..., atol=...)` on a scalar.

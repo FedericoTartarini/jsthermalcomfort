@@ -6,7 +6,7 @@ import {
   UTCI_INFO,
 } from "../../src/models/index.ts";
 import { Standard, Units } from "../../src/utilities/index.ts";
-import { v_relative } from "../../src/utilities/index.ts";
+import { v_relative } from "../../src/environment/index.ts";
 import { pmv_ppd_iso as pmv_ppd_iso_from_root } from "../../src/index.ts";
 import { round } from "../../src/_internal/round.ts";
 import { test_data_urls } from "./comftest.ts";

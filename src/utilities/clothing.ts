@@ -1,12 +1,11 @@
-import { v_relative } from "./utilities.js";
+import { v_relative } from "../environment/v_relative.js";
 import { met_to_w_m2 } from "./met_to_w_m2.ts";
 import { Standard } from "./options.ts";
 import { notOfType } from "../_internal/errors.ts";
 import { round } from "../_internal/round.ts";
 
 // pythermalcomfort's `clothing` package. The functions are members of this
-// library's `utilities` namespace, as `v_relative` is (upstream's
-// `environment`): the library has no `clothing` or `environment` namespace.
+// library's `utilities` namespace: the library has no `clothing` namespace.
 
 /**
  * Correction factor for the insulation of a nude person, ISO 9920.

@@ -25,7 +25,10 @@
     "**/src/models/JOS3.js",
     "**/src/jos3_functions/**",
     "**/src/supa.js",
-    "**/src/psychrometrics/t_mrt.js",
+    "**/src/environment/f_svv.js",
+    "**/src/environment/mean_radiant_tmp.js",
+    "**/src/environment/running_mean_outdoor_temperature.js",
+    "**/src/environment/v_relative.js",
     "**/src/utilities/utilities.js"
   ],
   "excludeExternals": true,

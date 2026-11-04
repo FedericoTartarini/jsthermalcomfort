@@ -12,8 +12,8 @@ import {
   clo_dynamic_ashrae,
   Standard,
   Units,
-  v_relative,
 } from "../../src/utilities/index.ts";
+import { v_relative } from "../../src/environment/index.ts";
 import { pmv_ppd_ashrae as from_root } from "../../src/index.ts";
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
 import { read_data } from "../parity/harness.ts";

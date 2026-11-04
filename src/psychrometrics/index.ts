@@ -3,7 +3,6 @@ import { p_sat_torr } from "./p_sat_torr.ts";
 import { enthalpy_air } from "./enthalpy_air.ts";
 import { wet_bulb_tmp } from "./wet_bulb_tmp.ts";
 import { dew_point_tmp } from "./dew_point_tmp.ts";
-import { t_mrt } from "./t_mrt.js";
 import { psy_ta_rh } from "./psy_ta_rh.ts";
 import { hr_to_rh } from "./hr_to_rh.ts";
 import { rh_from_dew_point } from "./rh_from_dew_point.ts";
@@ -19,7 +18,6 @@ export {
   enthalpy_air,
   wet_bulb_tmp,
   dew_point_tmp,
-  t_mrt,
   hr_to_rh,
   rh_from_dew_point,
   rh_from_wet_bulb,
@@ -39,7 +37,6 @@ export default {
   enthalpy_air,
   wet_bulb_tmp,
   dew_point_tmp,
-  t_mrt,
   hr_to_rh,
   rh_from_dew_point,
   rh_from_wet_bulb,

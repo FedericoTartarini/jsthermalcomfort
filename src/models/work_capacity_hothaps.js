@@ -6,8 +6,14 @@ const PARAMETERS = {
   light: { divisor: 34.64, exponent: 22.72 },
 };
 
-/** @typedef {number | NumericInput[]} NumericInput */
-/** @typedef {number | boolean | WbgtInput[]} WbgtInput */
+/**
+ * @typedef {number | HothapsCapacity[]} HothapsCapacity
+ * @public
+ */
+/**
+ * @typedef {number | boolean | HothapsWbgtInput[]} HothapsWbgtInput
+ * @public
+ */
 
 /**
  * Estimates work capacity from WBGT using the Hothaps model.
@@ -19,12 +25,12 @@ const PARAMETERS = {
  * @public
  * @memberof models
  * @docname Work capacity (Hothaps)
- * @param {WbgtInput} wbgt - Wet bulb globe temperature, [°C].
+ * @param {HothapsWbgtInput} wbgt - Wet bulb globe temperature, [°C].
  * Accepts numbers or rectangular numeric arrays, including NaN and infinities.
  * Booleans are treated as 0/1 for compatibility with Python.
  * @param {string} [work_intensity="heavy"] - Work intensity: "heavy",
  * "moderate", or "light" (case-insensitive).
- * @returns {{capacity: NumericInput}} Work capacity, [%], preserving input shape.
+ * @returns {{capacity: HothapsCapacity}} Work capacity, [%], preserving input shape.
  * @throws {TypeError} If WBGT contains non-numeric values,
  * or work_intensity is not a string.
  * @throws {Error} If work_intensity is not a supported intensity.

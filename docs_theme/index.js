@@ -76,7 +76,10 @@ async function copyDir(sorce, dest) {
  */
 function isType(section) {
   if (section.type === undefined) return false;
-  return section.type.type === "NameExpression";
+  return (
+    section.type.type === "NameExpression" ||
+    (section.kind === "typedef" && section.type.type !== "FunctionType")
+  );
 }
 
 /**

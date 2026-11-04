@@ -6,11 +6,14 @@ const optionDefaults = {
   with_solar_load: false,
 };
 
-/** @typedef {number | number[]} NumericInput */
+/**
+ * @typedef {number | number[]} WbgtNumericInput
+ * @public
+ */
 
 /**
  * @typedef {object} WbgtResult
- * @property {NumericInput} wbgt - Wet Bulb Globe Temperature Index, [°C]
+ * @property {WbgtNumericInput} wbgt - Wet Bulb Globe Temperature Index, [°C]
  * @public
  */
 
@@ -69,12 +72,12 @@ function broadcastValue(value, index, outputLength, name) {
  * @memberof models
  * @docname Wet Bulb Globe Temperature Index (WBGT)
  *
- * @param {NumericInput} twb - natural (no forced air flow) wet bulb temperature, [°C]
- * @param {NumericInput} tg - globe temperature, [°C]
+ * @param {WbgtNumericInput} twb - natural (no forced air flow) wet bulb temperature, [°C]
+ * @param {WbgtNumericInput} tg - globe temperature, [°C]
  * @param {object} [options] - configuration options for the function.
  * @param {boolean} [options.round_output = true] - If true rounds output value. If
  * false it does not round it.
- * @param {NumericInput} [options.tdb = undefined] - Dry bulb air temperature, [°C].
+ * @param {WbgtNumericInput} [options.tdb = undefined] - Dry bulb air temperature, [°C].
  * This value is needed as input if the person is exposed to direct solar
  * radiation.
  * @param {boolean} [options.with_solar_load = false] - If the globe sensor is

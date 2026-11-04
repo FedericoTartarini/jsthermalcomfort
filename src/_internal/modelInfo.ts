@@ -301,10 +301,6 @@ type InputValue<F extends InputsInfo[string], Series> = F extends ChoiceField
     ? Series
     : KindValue<F> | FalseOf<F> | NullOf<F>;
 type Flatten<T> = { [K in keyof T]: T[K] } & {};
-/** A nullable numeric series' type: `Series` with `null` for each value. */
-type NullableSeries<Series> = Series extends number
-  ? number | null
-  : readonly (number | null)[];
 
 /**
  * The inputs object a model's `INFO` accepts, upstream's input dataclass. A
@@ -365,7 +361,9 @@ export type OutputsOf<
         }
         ? Series
         : M["outputs"][K] extends { readonly kind: "numeric" }
-          ? NullableSeries<Series>
+          ? Series extends number
+            ? number | null
+            : readonly (number | null)[]
           : readonly (
               | KindValues[M["outputs"][K]["kind"]]
               | (M["outputs"][K] extends { readonly nullable: true }

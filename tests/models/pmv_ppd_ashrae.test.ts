@@ -16,7 +16,7 @@ import {
 import { v_relative } from "../../src/environment/index.ts";
 import { pmv_ppd_ashrae as from_root } from "../../src/index.ts";
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";
-import { read_data } from "../parity/harness.ts";
+import { read_data, upstream_returns } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import {
@@ -592,7 +592,9 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
     // Deviation pmv_ppd_ashrae-4: upstream warns twice where the library returns one row.
     test("gives one notice where upstream warns, over the parity data", () => {
       const root = fileURLToPath(new URL("../..", import.meta.url));
-      const { cases } = read_data(root, "pmv_ppd_ashrae");
+      const cases = read_data(root, "pmv_ppd_ashrae").cases.filter(
+        upstream_returns,
+      );
       const counts = cases.map(({ inputs: { model, ...inputs }, warnings }) => [
         pmv_ppd_ashrae({
           ...inputs,

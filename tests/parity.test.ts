@@ -83,6 +83,7 @@ import {
 } from "../src/models/index.ts";
 import type { Row } from "./deviations/register.ts";
 import {
+  case_failures,
   check_header,
   compare_case,
   decode,
@@ -98,6 +99,7 @@ import type {
   CompareOptions,
   Header,
   ParityModel,
+  RaisingCase,
   UpstreamCase,
 } from "./parity/harness.ts";
 
@@ -109,7 +111,7 @@ const OPTIONS: CompareOptions = {
   rounded: [],
   tolerance: DEFAULT_TOLERANCE,
   warnings: true,
-  exempt: { outputs: [], warnings: [] },
+  exempt: { outputs: [], warnings: [], throws: [] },
   outputs: {},
 };
 
@@ -423,7 +425,7 @@ describe("compare_case", () => {
   test("exempts registered outputs and warning keys", () => {
     const options = {
       ...OPTIONS,
-      exempt: { outputs: ["t"], warnings: ["tdb"] },
+      exempt: { outputs: ["t"], warnings: ["tdb"], throws: [] },
     };
     expect(
       compare_case(
@@ -441,6 +443,50 @@ describe("compare_case", () => {
   });
 });
 
+const RAISING: RaisingCase = {
+  inputs: { rh: 101 },
+  raises: {
+    type: "ValueError",
+    message: "Relative humidity must be between 0 and 100 %",
+  },
+};
+
+function throws(message: string): () => never {
+  return () => {
+    throw new RangeError(message);
+  };
+}
+
+describe("case_failures", () => {
+  test("passes a case upstream raises for where the library throws", () => {
+    expect(case_failures(RAISING, throws("other words"), OPTIONS)).toEqual([]);
+  });
+
+  test("fails a case upstream raises for where the library returns", () => {
+    expect(case_failures(RAISING, () => ({ thi: 30 }), OPTIONS)).toEqual([
+      "library returned, upstream raised ValueError: Relative humidity must be between 0 and 100 %",
+    ]);
+  });
+
+  test("fails a case upstream returns for where the library throws", () => {
+    expect(
+      case_failures(upstream({ t: 24 }), throws("division by zero"), OPTIONS),
+    ).toEqual([
+      "library threw RangeError: division by zero, upstream returned",
+    ]);
+  });
+
+  test("exempts a throw a register row names, by its message", () => {
+    const options = {
+      ...OPTIONS,
+      exempt: { ...OPTIONS.exempt, throws: ["division by zero"] },
+    };
+    expect(
+      case_failures(upstream({ t: 24 }), throws("division by zero"), options),
+    ).toEqual([]);
+  });
+});
+
 function row(file: string, outputs: string[], warnings: string[]): Row {
   return {
     file,
@@ -455,7 +501,7 @@ function row(file: string, outputs: string[], warnings: string[]): Row {
     status: "approved",
     doubtful: false,
     date: "2026-10-26",
-    parity: { outputs, warnings },
+    parity: { outputs, warnings, throws: [] },
   };
 }
 
@@ -470,6 +516,7 @@ describe("exemptions", () => {
     expect(exemptions(rows, "utci")).toEqual({
       outputs: ["utci"],
       warnings: ["tdb", "tr - tdb"],
+      throws: [],
     });
   });
 });

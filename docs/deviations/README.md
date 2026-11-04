@@ -112,11 +112,12 @@ The column states what the parity suite (ADR 0020) exempts for the row (ADR 0019
 
 ```text
 parity  = "none" | item ( ", " item )*
-item    = "output `" name "`" | "warning `" key "`"
+item    = "output `" name "`" | "warning `" key "`" | "throw `" message "`"
 ```
 
 - `` output `name` `` exempts the output field `name` from comparison.
 - `` warning `key` `` exempts the warning key `key`, upstream's name for the check, verbatim (`` warning `tr - tdb` ``).
+- `` throw `message` `` exempts a case where upstream returns and the library throws an error whose message is `message`, verbatim (`` throw `division by zero` ``): a throw the library adds (decision 318). The suite otherwise requires the library to throw exactly where upstream raises.
 - `none` exempts nothing.
 
 No item appears twice. A pipe in a name is written `\|` and read as `|`.

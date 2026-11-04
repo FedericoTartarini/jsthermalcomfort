@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { ankle_draft, ANKLE_DRAFT_INFO } from "../../src/models/index.ts";
 import { Units } from "../../src/utilities/index.ts";
 import { ankle_draft as from_root } from "../../src/index.ts";
-import { read_data } from "../parity/harness.ts";
+import { read_data, upstream_returns } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { loadTestData, validateResult } from "./testUtils.ts";
@@ -202,8 +202,10 @@ const notice = {
   message: "Cooling effect could not be calculated. Returning 0.",
 };
 const parity_cases = () =>
-  read_data(fileURLToPath(new URL("../..", import.meta.url)), "ankle_draft")
-    .cases;
+  read_data(
+    fileURLToPath(new URL("../..", import.meta.url)),
+    "ankle_draft",
+  ).cases.filter(upstream_returns);
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image, and acceptability on 4.8.0.

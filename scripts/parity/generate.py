@@ -33,6 +33,7 @@ from numpy._core._multiarray_umath import (
 
 import pythermalcomfort.models as models
 from pythermalcomfort.models.sports_heat_stress_risk import _SportsValues
+from scipy.optimize._minpack import error as minpack_error
 
 HERE = Path(__file__).resolve().parent
 
@@ -55,6 +56,33 @@ def _value(rng, low, high):
     """
     x = float(rng.uniform(low, high))
     return round(x, 1) if rng.random() < 0.5 else x
+
+
+def _near(rng, bound, width):
+    """A double within width of bound, on either side.
+
+    Drawn at a bound past which upstream raises, it puts cases on both sides,
+    where the library must throw exactly where upstream raises (decision 318).
+    """
+    return _value(rng, bound - width, bound + width)
+
+
+def _across(rng, p, bounds, width, draw):
+    """draw, or with probability p a double within width of one of bounds."""
+    if rng.random() < p:
+        return _near(rng, float(rng.choice(bounds)), width)
+    return draw
+
+
+def _rh(rng):
+    """rh in [0, 100], at each bound now and then, and a tenth of the time
+    within 5 % of a bound, past which upstream raises."""
+    draw = rng.random()
+    if draw < 0.05:
+        return float(rng.choice([0.0, 100.0]))
+    if draw < 0.15:
+        return _near(rng, float(rng.choice([0.0, 100.0])), 5.0)
+    return _value(rng, 0.0, 100.0)
 
 
 def _adaptive_ashrae(rng):
@@ -103,18 +131,18 @@ def _ankle_draft(rng):
     # The ranges reach past ASHRAE 55's limits (tdb and tr 10-40 °C, met 1-4
     # met, clo 0-1.5 clo), so NaN positions and every check's warning are
     # compared too, and the hot, humid cases return the cooling effect's
-    # warning. With limit_inputs on, vr stays within 0-0.2 m/s, outside which
-    # upstream raises (models/ankle_draft.py:152-155); with it off, vr reaches
-    # past 0.2 and 2 m/s and below 0. units comes in either case, as upstream
-    # upper-cases it.
+    # warning. With limit_inputs on, vr reaches a little past 0-0.2 m/s on
+    # both sides, outside which upstream raises (models/ankle_draft.py:152-155);
+    # with it off, vr reaches past 0.2 and 2 m/s and below 0. units comes in
+    # either case, as upstream upper-cases it.
     units = str(rng.choice(["SI", "IP", "si", "ip"]))
     limit_inputs = bool(rng.random() < 0.5)
     if units.upper() == "SI":
         t, v_ankle = (5.0, 45.0), (0.0, 0.6)
-        vr = (0.0, 0.2) if limit_inputs else (-0.2, 2.5)
+        vr = (-0.05, 0.25) if limit_inputs else (-0.2, 2.5)
     else:
         t, v_ankle = (41.0, 113.0), (0.0, 2.0)
-        vr = (0.0, 0.65) if limit_inputs else (-0.66, 8.2)
+        vr = (-0.16, 0.82) if limit_inputs else (-0.66, 8.2)
     return {
         "tdb": _value(rng, *t),
         "tr": _value(rng, *t),
@@ -129,13 +157,13 @@ def _ankle_draft(rng):
 
 
 def _at(rng):
-    # rh stays in [0, 100], outside which upstream's dew_point_tmp raises
-    # (psychrometrics/dew_point_tmp.py:46-47), and reaches 0 now and then.
-    # q is left out half the time, so its None default picks the formula
-    # without solar load (models/at.py:71-75).
+    # rh reaches past [0, 100], outside which upstream's dew_point_tmp raises
+    # through psy_ta_rh (psychrometrics/dew_point_tmp.py:46-47,
+    # psychrometrics/psy_ta_rh.py:78). q is left out half the time, so its
+    # None default picks the formula without solar load (models/at.py:71-75).
     inputs = {
         "tdb": _value(rng, -20.0, 50.0),
-        "rh": 0.0 if rng.random() < 0.02 else _value(rng, 0.0, 100.0),
+        "rh": _rh(rng),
         "v": _value(rng, 0.0, 20.0),
     }
     if rng.random() < 0.5:
@@ -191,28 +219,50 @@ def _discomfort_index(rng):
 
 
 def _esi(rng):
-    # rh stays in [0, 100] and sol_radiation_global at or above 0 W/m2,
-    # outside which ESIInputs raises (classes_input.py:428-434), and each
-    # reaches its bound now and then; at 0 W/m2 the (0.1 + sol) ** (-1) term
-    # is largest (models/esi.py:62).
+    # rh reaches past [0, 100] and sol_radiation_global below 0 W/m2, outside
+    # which ESIInputs raises (classes_input.py:428-434), and each reaches its
+    # bound now and then; at 0 W/m2 the (0.1 + sol) ** (-1) term is largest
+    # (models/esi.py:62).
     draw = rng.random()
+    if draw < 0.05:
+        sol_radiation_global = 0.0
+    elif draw < 0.1:
+        sol_radiation_global = _near(rng, 0.0, 50.0)
+    else:
+        sol_radiation_global = _value(rng, 0.0, 1400.0)
     return {
         "tdb": _value(rng, -20.0, 50.0),
-        "rh": float(rng.choice([0.0, 100.0])) if draw < 0.05 else _value(rng, 0.0, 100.0),
-        "sol_radiation_global": 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 1400.0),
+        "rh": _rh(rng),
+        "sol_radiation_global": sol_radiation_global,
         "round_output": bool(rng.random() < 0.5),
     }
 
 
 def _heat_index_lu(rng):
-    # tdb stays in [-50, 70] °C and rh in [0, 100], where upstream's root
-    # solver finds its interval: at rh 100 it returns up to tdb 127.23 °C and
-    # raises above it (models/heat_index_lu.py:345, measured on 4.7.0). rh
-    # reaches 0 and 100 now and then.
+    # tdb spans [-50, 70] °C, and a tenth of the time reaches 220 °C, past
+    # which upstream's root solver finds no interval and raises
+    # (models/heat_index_lu.py:345): measured on 4.8.0 in the parity image, at
+    # rh 100 between 127 and 128 °C and at rh 50 between 150 and 200 °C, while
+    # at rh 10 it still returns at 200 °C. rh stays in [0, 100] and reaches 0 and 100 now
+    # and then. Now and then the inputs are deviation heat_index_lu-3's, where
+    # upstream raises: tdb -273.16 °C, where the solver reaches its maximum
+    # iteration (:358), and rh -1e6 or 1e300.
     draw = rng.random()
+    if rng.random() < 0.01:
+        tdb = -273.16
+    elif rng.random() < 0.1:
+        tdb = _value(rng, 70.0, 220.0)
+    else:
+        tdb = _value(rng, -50.0, 70.0)
+    if draw < 0.02:
+        rh = float(rng.choice([-1e6, 1e300]))
+    elif draw < 0.07:
+        rh = float(rng.choice([0.0, 100.0]))
+    else:
+        rh = _value(rng, 0.0, 100.0)
     return {
-        "tdb": _value(rng, -50.0, 70.0),
-        "rh": float(rng.choice([0.0, 100.0])) if draw < 0.05 else _value(rng, 0.0, 100.0),
+        "tdb": tdb,
+        "rh": rh,
         "round_output": bool(rng.random() < 0.5),
     }
 
@@ -229,25 +279,25 @@ def _heat_index_rothfusz(rng):
 
 
 def _heat_index_schoen(rng):
-    # rh stays in [0, 100], outside which upstream's dew_point_tmp raises
+    # rh reaches past [0, 100], outside which upstream's dew_point_tmp raises
     # (psychrometrics/dew_point_tmp.py:46-47), and reaches 0 now and then,
     # where the dew point is NaN. tdb reaches 70 °C, where hi passes the
     # 1000 °C edge and the category is NaN.
     return {
         "tdb": _value(rng, -20.0, 70.0),
-        "rh": 0.0 if rng.random() < 0.02 else _value(rng, 0.0, 100.0),
+        "rh": _rh(rng),
         "round_output": bool(rng.random() < 0.5),
     }
 
 
 def _humidex(rng):
-    # rh stays in [0, 100], outside which upstream raises
+    # rh reaches past [0, 100], outside which upstream raises
     # (models/humidex.py:70-71), and reaches 0 now and then, where the
     # masterson model's dew point is NaN. Both models come in, in the lower
     # case upstream's check compares.
     return {
         "tdb": _value(rng, -20.0, 50.0),
-        "rh": 0.0 if rng.random() < 0.02 else _value(rng, 0.0, 100.0),
+        "rh": _rh(rng),
         "model": str(rng.choice(["rana", "masterson"])),
         "round_output": bool(rng.random() < 0.5),
     }
@@ -258,18 +308,24 @@ def _ireq(rng):
     # 10 °C, vr 0.4-18 m/s, walk_sp from min(0.0052 * (met - 58), 1.2) to
     # 1.2 m/s; models/ireq.py:413-425), so NaN positions are compared too, and
     # clo reaches 0 at mild tdb, where ireq and icl turn negative and are
-    # masked (models/ireq.py:172). Each input stays inside IREQInputs' checks
-    # (classes_input.py:1361-1374).
+    # masked (models/ireq.py:172). Each input bounded by IREQInputs' checks
+    # (classes_input.py:1361-1374) is drawn a little past its bound now and
+    # then, where upstream raises, and tdb is -235 °C, a zero divisor at which
+    # the kernel raises ZeroDivisionError (deviation ireq-6).
     return {
-        "tdb": _value(rng, -50.0, 20.0),
+        "tdb": -235.0 if rng.random() < 0.01 else _value(rng, -50.0, 20.0),
         "tr": _value(rng, -55.0, 30.0),
-        "vr": _value(rng, 0.0, 20.0),
-        "rh": _value(rng, 0.0, 100.0),
-        "met": _value(rng, 0.7, 7.7),
-        "clo": 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 5.0),
-        "p": _value(rng, 1.0, 100.0),
-        "walk_sp": _value(rng, 0.0, 1.5),
-        "wme": _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0,
+        "vr": _across(rng, 0.03, [0.0], 0.5, _value(rng, 0.0, 20.0)),
+        "rh": _rh(rng),
+        "met": _across(rng, 0.03, [0.0], 0.5, _value(rng, 0.7, 7.7)),
+        "clo": _across(
+            rng, 0.03, [0.0], 0.5, 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 5.0)
+        ),
+        "p": _across(rng, 0.03, [0.0], 1.0, _value(rng, 1.0, 100.0)),
+        "walk_sp": _across(rng, 0.03, [0.0], 0.5, _value(rng, 0.0, 1.5)),
+        "wme": _across(
+            rng, 0.03, [0.0], 0.5, _value(rng, 0.0, 1.0) if rng.random() < 0.5 else 0.0
+        ),
         "limit_inputs": bool(rng.random() < 0.5),
         "round_output": bool(rng.random() < 0.5),
     }
@@ -289,19 +345,29 @@ def _net(rng):
 
 def _pet_steady(rng):
     # The ranges reach past everyday conditions, so the cases where fsolve stops
-    # short of convergence, and warns, are compared too (decision 281). clo,
-    # weight, height and p_atm stay clear of the zero divisors at which upstream
-    # raises (decision 283). position and sex come in any case, as the check
-    # accepts, and the kernel compares them as given. age, weight and wme are
-    # doubles, as a JavaScript number is, where upstream's defaults are ints.
+    # short of convergence, and warns, are compared too (decision 281). Now
+    # and then the inputs reach decision 283's raises: clo and v come within
+    # 0.1 of 0, and p_atm, weight and height are 0 or negative, a zero divisor
+    # or a negative base under a fractional power, and height is 0.2, whose
+    # y = (height - 0.2) / height is a zero divisor where 0.6 < clo < 2.0
+    # (models/pet_steady.py:357-358, :365-366). position and
+    # sex come in any case, as the check accepts, and the kernel compares them
+    # as given. age, weight and wme are doubles, as a JavaScript number is,
+    # where upstream's defaults are ints.
+    def raising(values, draw):
+        return float(rng.choice(values)) if rng.random() < 0.02 else draw
+
     return {
         "tdb": _value(rng, -30.0, 50.0),
         "tr": _value(rng, -30.0, 80.0),
-        "v": _value(rng, 0.0, 10.0),
+        "v": _across(rng, 0.03, [0.0], 0.1, _value(rng, 0.0, 10.0)),
         "rh": _value(rng, 0.0, 100.0),
         "met": _value(rng, 0.7, 4.0),
-        "clo": _value(rng, 0.1, 3.0),
-        "p_atm": _value(rng, 600.0, 1100.0) if rng.random() < 0.3 else 1013.25,
+        "clo": _across(rng, 0.03, [0.0], 0.1, _value(rng, 0.1, 3.0)),
+        "p_atm": raising(
+            [0.0, -1013.25],
+            _value(rng, 600.0, 1100.0) if rng.random() < 0.3 else 1013.25,
+        ),
         "position": str(
             rng.choice(
                 [
@@ -315,8 +381,12 @@ def _pet_steady(rng):
         ),
         "age": _value(rng, 5.0, 90.0) if rng.random() < 0.3 else 23.0,
         "sex": str(rng.choice(["male", "female", "Male", "FEMALE"])),
-        "weight": _value(rng, 30.0, 150.0) if rng.random() < 0.3 else 75.0,
-        "height": _value(rng, 1.2, 2.1) if rng.random() < 0.3 else 1.8,
+        "weight": raising(
+            [0.0, -75.0], _value(rng, 30.0, 150.0) if rng.random() < 0.3 else 75.0
+        ),
+        "height": raising(
+            [0.0, 0.2, -1.8], _value(rng, 1.2, 2.1) if rng.random() < 0.3 else 1.8
+        ),
         "wme": _value(rng, 0.0, 0.3) if rng.random() < 0.3 else 0.0,
     }
 
@@ -329,7 +399,14 @@ def _phs(rng):
     # case. The keyword arguments are left out half the time, so each edition's
     # defaults run, f_r, t_re and t_cr_eq among them; duration is a whole
     # number of minutes, a tenth of the time with a fraction, which numba's
-    # range truncates.
+    # range truncates. A tenth of the time, each keyword argument upstream
+    # checks is drawn across its bound, where it raises
+    # (models/phs.py:287-310): sweat_rate_watt and evap_load_wm2_min across 0,
+    # t_sk_t_cr_wg across 0 or 1, acclimatized across 0 or 100 (which int()
+    # truncates first), drink between -0.5 and 1.5, weight across 0 or 1000.
+    # i_mst, height and clo stay clear of the zero divisors at which numba's
+    # prange drops ZeroDivisionError and upstream returns uninitialised memory
+    # (deviation phs-6).
     tdb = _value(rng, 10.0, 55.0)
     case = {
         "tdb": tdb,
@@ -350,21 +427,25 @@ def _phs(rng):
     optional = {
         "i_mst": lambda: _value(rng, 0.1, 0.9),
         "a_p": lambda: _value(rng, 0.0, 1.0),
-        "drink": lambda: float(rng.choice([0.0, 1.0])),
-        "weight": lambda: _value(rng, 40.0, 130.0),
+        "drink": lambda: _across(rng, 0.1, [0.5], 1.0, float(rng.choice([0.0, 1.0]))),
+        "weight": lambda: _across(rng, 0.1, [0.0, 1000.0], 5.0, _value(rng, 40.0, 130.0)),
         "height": lambda: _value(rng, 1.4, 2.1),
         "walk_sp": lambda: _value(rng, 0.0, 2.0),
         "theta": lambda: _value(rng, 0.0, 180.0),
-        "acclimatized": lambda: float(rng.choice([0.0, 100.0])),
+        "acclimatized": lambda: _across(
+            rng, 0.1, [0.0, 100.0], 2.0, float(rng.choice([0.0, 100.0]))
+        ),
         "duration": lambda: duration,
         "f_r": lambda: _value(rng, 0.0, 1.0),
         "t_sk": lambda: _value(rng, 30.0, 37.0),
         "t_cr": lambda: _value(rng, 36.0, 39.0),
         "t_re": lambda: _value(rng, 36.0, 39.0),
         "t_cr_eq": lambda: _value(rng, 36.0, 38.0),
-        "t_sk_t_cr_wg": lambda: _value(rng, 0.1, 0.3),
-        "sweat_rate_watt": lambda: _value(rng, 0.0, 300.0),
-        "evap_load_wm2_min": lambda: _value(rng, 0.0, 50000.0),
+        "t_sk_t_cr_wg": lambda: _across(rng, 0.1, [0.0, 1.0], 0.1, _value(rng, 0.1, 0.3)),
+        "sweat_rate_watt": lambda: _across(rng, 0.1, [0.0], 30.0, _value(rng, 0.0, 300.0)),
+        "evap_load_wm2_min": lambda: _across(
+            rng, 0.1, [0.0], 500.0, _value(rng, 0.0, 50000.0)
+        ),
     }
     for key, draw in optional.items():
         if rng.random() < 0.5:
@@ -498,20 +579,21 @@ def _ridge_regression_predict_t_re_t_sk(rng):
     # The ranges reach past the model's limits (age 60-100, height 130-230 cm,
     # weight 40-140 kg, tdb 0-60 °C;
     # models/ridge_regression_predict_t_re_t_sk.py:185-189), so NaN positions
-    # are compared too, and stay inside RidgeRegressionInputs' checks
-    # (classes_input.py:846-910). sex comes in either case, as upstream
-    # lower-cases it. duration is an int, as upstream requires, from 2: at 1 a
-    # scalar call returns a 0-d array (deviation
-    # ridge_regression_predict_t_re_t_sk-7). Half the cases give t_re and t_sk,
-    # which skip the baseline simulation.
+    # are compared too, and now and then cross RidgeRegressionInputs' checks
+    # (classes_input.py:846-910), where upstream raises: rh past [0, 100],
+    # age, height and weight near 0, and duration -1 or 0. sex comes in either
+    # case, as upstream lower-cases it. duration is an int, as upstream
+    # requires, otherwise from 2: at 1 a scalar call returns a 0-d array
+    # (deviation ridge_regression_predict_t_re_t_sk-7). Half the cases give
+    # t_re and t_sk, which skip the baseline simulation.
     inputs = {
         "sex": str(rng.choice(["male", "female", "Male", "FEMALE"])),
-        "age": _value(rng, 50.0, 110.0),
-        "height": _value(rng, 1.2, 2.4),
-        "weight": _value(rng, 30.0, 150.0),
+        "age": _across(rng, 0.03, [0.0], 5.0, _value(rng, 50.0, 110.0)),
+        "height": _across(rng, 0.03, [0.0], 0.5, _value(rng, 1.2, 2.4)),
+        "weight": _across(rng, 0.03, [0.0], 10.0, _value(rng, 30.0, 150.0)),
         "tdb": _value(rng, -5.0, 65.0),
-        "rh": _value(rng, 0.0, 100.0),
-        "duration": int(rng.integers(2, 61)),
+        "rh": _rh(rng),
+        "duration": int(rng.integers(-1, 1)) if rng.random() < 0.03 else int(rng.integers(2, 61)),
         "limit_inputs": bool(rng.random() < 0.5),
         "round_output": bool(rng.random() < 0.5),
     }
@@ -590,25 +672,25 @@ def _sports_heat_stress_risk(rng):
     # 23 °C under which upstream returns its default thresholds, and tr the
     # cold and hot surroundings where both brentq brackets of a threshold fail,
     # which warns and falls back to its maximum; vr reaches below every
-    # sport's minimum, which upstream raises it to. rh stays in [0, 100] and vr
-    # at or above 0, outside which upstream raises (classes_input.py:1284-1289).
+    # sport's minimum, which upstream raises it to. rh reaches past [0, 100]
+    # and vr below 0, where upstream raises (classes_input.py:1284-1289).
     tdb = _value(rng, 15.0, 55.0)
     return {
         "tdb": tdb,
         "tr": _value(rng, tdb - 40.0, tdb + 40.0),
-        "rh": 0.0 if rng.random() < 0.05 else _value(rng, 0.0, 100.0),
-        "vr": _value(rng, 0.0, 4.0),
+        "rh": _rh(rng),
+        "vr": _across(rng, 0.05, [0.0], 0.5, _value(rng, 0.0, 4.0)),
         "sport": str(rng.choice(_SPORTS)),
     }
 
 
 def _thi(rng):
-    # rh stays in [0, 100], outside which THIInputs raises
+    # rh reaches past [0, 100], outside which THIInputs raises
     # (classes_input.py:931-933), and reaches its bounds now and then; upstream
     # checks no tdb range (models/thi.py:35-39).
     return {
         "tdb": _value(rng, -50.0, 60.0),
-        "rh": float(rng.choice([0.0, 100.0])) if rng.random() < 0.05 else _value(rng, 0.0, 100.0),
+        "rh": _rh(rng),
         "round_output": bool(rng.random() < 0.5),
     }
 
@@ -617,8 +699,10 @@ def _two_nodes_gagge(rng):
     # The ranges reach skin wettedness at w_max, shivering and the 0.1 m/s air
     # speed floor; position comes in any case, which upstream's check accepts
     # and its kernel compares as given. w_max is left out half the time, as
-    # its default computes it, and is otherwise 0.0, which also computes it,
-    # or a cap in (0.06, 1]. calculate_ce takes the SET path, which ignores
+    # its default computes it, and is otherwise 0.0, which also computes it, a
+    # cap in (0.06, 1], or, a fifth of the time, within 0.05 of 0, 0.06 or 1,
+    # where GaggeTwoNodesInputs raises outside 0 and (0.06, 1]
+    # (classes_input.py:725-740). calculate_ce takes the SET path, which ignores
     # position, the two maxima, w_max and round_output.
     case = {
         "tdb": _value(rng, 0.0, 50.0),
@@ -647,7 +731,13 @@ def _two_nodes_gagge(rng):
         "calculate_ce": bool(rng.random() < 0.2),
     }
     if rng.random() < 0.5:
-        case["w_max"] = 0.0 if rng.random() < 0.2 else _value(rng, 0.07, 1.0)
+        draw = rng.random()
+        if draw < 0.2:
+            case["w_max"] = 0.0
+        elif draw < 0.4:
+            case["w_max"] = _near(rng, float(rng.choice([0.0, 0.06, 1.0])), 0.05)
+        else:
+            case["w_max"] = _value(rng, 0.07, 1.0)
     return case
 
 
@@ -660,12 +750,16 @@ def _two_nodes_gagge_ji(rng):
     # it as given. length_time_simulation is a float, which upstream ceils
     # (models/two_nodes_gagge_ji.py:190), down to 0 or below, which gives
     # empty series. Every other keyword argument is left out a third of the
-    # time, for its default.
+    # time, for its default. Now and then the inputs are those at which the
+    # register measured upstream's raises: body_weight or p_atm 0, a zero
+    # divisor (deviation two_nodes_gagge_ji-4), and tdb 1e5, met 1e6 or
+    # initial_skin_temp 1000, where the clothing-temperature loop raises
+    # StopIteration (deviation two_nodes_gagge_ji-5).
     case = {
-        "tdb": _value(rng, 0.0, 50.0),
+        "tdb": 1e5 if rng.random() < 0.01 else _value(rng, 0.0, 50.0),
         "tr": _value(rng, 0.0, 60.0),
         "v": _value(rng, 0.0, 3.0),
-        "met": _value(rng, 0.7, 4.0),
+        "met": 1e6 if rng.random() < 0.01 else _value(rng, 0.7, 4.0),
         "clo": _value(rng, 0.0, 2.0) if rng.random() < 0.9 else 0.0,
         "vapor_pressure": _value(rng, 0.0, 70.0),
         "position": str(
@@ -684,9 +778,9 @@ def _two_nodes_gagge_ji(rng):
     optional = {
         "wme": lambda: _value(rng, 0.0, 1.0),
         "body_surface_area": lambda: _value(rng, 1.4, 2.2),
-        "p_atm": lambda: _value(rng, 60000.0, 110000.0),
-        "body_weight": lambda: _value(rng, 40.0, 120.0),
-        "initial_skin_temp": lambda: _value(rng, 30.0, 38.0),
+        "p_atm": lambda: 0.0 if rng.random() < 0.03 else _value(rng, 60000.0, 110000.0),
+        "body_weight": lambda: 0.0 if rng.random() < 0.03 else _value(rng, 40.0, 120.0),
+        "initial_skin_temp": lambda: 1000.0 if rng.random() < 0.03 else _value(rng, 30.0, 38.0),
         "initial_core_temp": lambda: _value(rng, 35.5, 38.5),
         "acclimatized": lambda: bool(rng.random() < 0.5),
     }
@@ -697,16 +791,18 @@ def _two_nodes_gagge_ji(rng):
 
 
 def _two_nodes_gagge_sleep(rng):
-    # The model checks no range, so the draws cover its branches: the 0.1 m/s
-    # floor on v, clo at or below 0 (naked skin) and above, the wettedness cap
-    # (hot, humid nights), shivering (cold nights) and ltime above 1, which
-    # repeats the clothing-temperature loop. The six series are scalars a
-    # third of the time, which upstream returns as scalars, and otherwise
-    # lists of 1 to 20 minutes, mixed with scalars where the length is 1
-    # (decision 276). tdb never equals temp_skin_neutral at the first minute,
-    # where chc is 0 and upstream raises ZeroDivisionError (deviation
-    # two_nodes_gagge_sleep-4). Every keyword argument is left out a third of
-    # the time, for its default.
+    # The draws cover the model's branches: the 0.1 m/s floor on v, clo at or
+    # below 0 (naked skin) and above, the wettedness cap (hot, humid nights),
+    # shivering (cold nights) and ltime above 1, which repeats the
+    # clothing-temperature loop. The six series are scalars a third of the
+    # time, which upstream returns as scalars, and otherwise lists of 1 to 20
+    # minutes, mixed with scalars where the length is 1 (decision 276). Every
+    # keyword argument is left out a third of the time, for its default. Now
+    # and then upstream raises: thickness_quilt comes within 0.5 cm of 0
+    # (classes_input.py:801-802), ltime is -1 or 0
+    # (models/two_nodes_gagge_sleep.py:86-88), and tdb equals
+    # temp_skin_neutral at the first minute, where chc is 0 and the kernel
+    # raises ZeroDivisionError (deviation two_nodes_gagge_sleep-4).
     hot = rng.random() < 0.3
     duration = 1 if rng.random() < 1 / 3 else int(rng.integers(1, 21))
     scalar = duration == 1 and rng.random() < 0.5
@@ -721,7 +817,7 @@ def _two_nodes_gagge_sleep(rng):
     optional = {
         "wme": lambda: _value(rng, 0.0, 0.3),
         "p_atm": lambda: _value(rng, 60000.0, 110000.0),
-        "ltime": lambda: int(rng.integers(1, 6)),
+        "ltime": lambda: int(rng.integers(-1, 1)) if rng.random() < 0.1 else int(rng.integers(1, 6)),
         "height": lambda: _value(rng, 140.0, 200.0),
         "weight": lambda: _value(rng, 40.0, 120.0),
         "c_sw": lambda: _value(rng, 100.0, 250.0),
@@ -737,17 +833,17 @@ def _two_nodes_gagge_sleep(rng):
     for key in optional:
         if rng.random() < 2 / 3:
             case[key] = optional[key]()
-    while True:
-        series = {}
-        for key, (low, high) in draws.items():
-            values = [_value(rng, low, high) for _ in range(duration)]
-            if key == "clo" and rng.random() < 0.1:
-                values = [0.0] * duration
-            one = scalar or (duration == 1 and rng.random() < 0.5)
-            series[key] = values[0] if one else values
-        tdb = series["tdb"]
-        if (tdb[0] if isinstance(tdb, list) else tdb) != case.get("temp_skin_neutral", 33.7):
-            break
+    series = {}
+    for key, (low, high) in draws.items():
+        values = [_value(rng, low, high) for _ in range(duration)]
+        if key == "clo" and rng.random() < 0.1:
+            values = [0.0] * duration
+        if key == "thickness_quilt" and rng.random() < 0.1:
+            values = [_near(rng, 0.0, 0.5) for _ in range(duration)]
+        if key == "tdb" and rng.random() < 0.05:
+            values[0] = case.get("temp_skin_neutral", 33.7)
+        one = scalar or (duration == 1 and rng.random() < 0.5)
+        series[key] = values[0] if one else values
     return {**series, **case}
 
 
@@ -833,10 +929,10 @@ def _wbgt(rng):
     # Upstream checks no range (models/wbgt.py:70-76, WBGTInputs at
     # classes_input.py:1021-1037), so twb, tg and tdb reach past the
     # validation table's 0-25 °C, 0-55 °C and 0-20 °C (ts_wbgt.json at
-    # validation data v1.1.0). tdb is left out half the time, and
-    # with_solar_load is True only with a tdb, since upstream raises without
-    # one (models/wbgt.py:82-83); half of the tdb cases leave it False, where
-    # tdb is ignored (:85-88).
+    # validation data v1.1.0). tdb is left out half the time; half of the tdb
+    # cases leave with_solar_load False, where tdb is ignored (:85-88), and a
+    # fifth of the others set it True without a tdb, where upstream raises
+    # (models/wbgt.py:82-83).
     inputs = {
         "twb": _value(rng, -30.0, 45.0),
         "tg": _value(rng, -30.0, 90.0),
@@ -844,6 +940,8 @@ def _wbgt(rng):
     if rng.random() < 0.5:
         inputs["tdb"] = _value(rng, -30.0, 60.0)
         inputs["with_solar_load"] = bool(rng.random() < 0.5)
+    elif rng.random() < 0.2:
+        inputs["with_solar_load"] = True
     inputs["round_output"] = bool(rng.random() < 0.5)
     return inputs
 
@@ -898,26 +996,28 @@ def _work_capacity_hothaps(rng):
 
 
 def _work_capacity_iso(rng):
-    # met stays in WorkCapacityStandardsInputs' 0-2500 W, outside which it
-    # raises (classes_input.py:1098-1099), mostly 100-600 W, and is the
-    # resting 117 W one case in twenty, where the limits coincide and the
-    # division is by zero (models/work_capacity_iso.py:51-55). wbgt reaches
-    # past each met's two limits, where capacity clips to 0 or 100 (:56).
+    # met is mostly 100-600 W, and reaches a little past
+    # WorkCapacityStandardsInputs' 0-2500 W on both sides, outside which it
+    # raises (classes_input.py:1098-1099); it is the resting 117 W one case in
+    # twenty, where the limits coincide and the division is by zero
+    # (models/work_capacity_iso.py:51-55). wbgt reaches past each met's two
+    # limits, where capacity clips to 0 or 100 (:56).
     if rng.random() < 0.05:
         met = 117.0
     elif rng.random() < 0.5:
         met = _value(rng, 100.0, 600.0)
     else:
-        met = _value(rng, 0.0, 2500.0)
+        met = _value(rng, -100.0, 2600.0)
     return {"wbgt": _value(rng, 0.0, 45.0), "met": met}
 
 
 def _work_capacity_niosh(rng):
-    # met stays in WorkCapacityStandardsInputs' 0-2500 W, outside which it
-    # raises (classes_input.py:1098-1099), mostly 100-600 W, and is the
-    # resting 117 W one case in twenty, where the limits coincide and the
-    # division is by zero, and 0 W one case in twenty, where np.log10 gives
-    # -inf (models/work_capacity_niosh.py:51-55). wbgt, up to 45 °C, reaches
+    # met is mostly 100-600 W, and reaches a little past
+    # WorkCapacityStandardsInputs' 0-2500 W on both sides, outside which it
+    # raises (classes_input.py:1098-1099); it is the resting 117 W one case in
+    # twenty, where the limits coincide and the division is by zero, and 0 W
+    # one case in twenty, where np.log10 gives -inf
+    # (models/work_capacity_niosh.py:51-55). wbgt, up to 45 °C, reaches
     # past both limits for met above 10.4 W, where 56.7 - 11.5 * log10(met)
     # (:53) falls below 45 °C, and capacity clips to 0 or 100 there (:56).
     draw = rng.random()
@@ -928,7 +1028,7 @@ def _work_capacity_niosh(rng):
     elif rng.random() < 0.5:
         met = _value(rng, 100.0, 600.0)
     else:
-        met = _value(rng, 0.0, 2500.0)
+        met = _value(rng, -100.0, 2600.0)
     return {"wbgt": _value(rng, 0.0, 45.0), "met": met}
 
 
@@ -936,6 +1036,34 @@ def _work_capacity_niosh(rng):
 # warnings: ankle_draft's where vr is outside 0-0.2 m/s
 # (models/ankle_draft.py:152-155). Any other raise stops the generator.
 GATED_RAISES = {"ankle_draft": ValueError}
+
+# The exception classes upstream raises past the bounds each model's generator
+# crosses (decision 318). A case that raises one records its class and message
+# as raises, in place of outputs and warnings, and the run prints each model's
+# messages for review, since a generator's mistake of a listed class reads as
+# a raise; any other class stops the generator. pet_steady's are decision
+# 283's: a zero divisor, a complex value compared, and minpack's error on a
+# complex residual.
+RAISES = {
+    "ankle_draft": (ValueError,),
+    "at": (ValueError,),
+    "esi": (ValueError,),
+    "heat_index_lu": (ValueError,),
+    "heat_index_schoen": (ValueError,),
+    "humidex": (ValueError,),
+    "ireq": (ValueError, ZeroDivisionError),
+    "pet_steady": (ZeroDivisionError, TypeError, minpack_error),
+    "phs": (ValueError,),
+    "ridge_regression_predict_t_re_t_sk": (ValueError,),
+    "sports_heat_stress_risk": (ValueError,),
+    "thi": (ValueError,),
+    "two_nodes_gagge": (ValueError,),
+    "two_nodes_gagge_ji": (ZeroDivisionError, StopIteration),
+    "two_nodes_gagge_sleep": (ValueError, ZeroDivisionError),
+    "wbgt": (ValueError,),
+    "work_capacity_iso": (ValueError,),
+    "work_capacity_niosh": (ValueError,),
+}
 
 # A model whose inner public-model call takes an input that the gate changes:
 # its gate-off case records, as gated_warnings, the warnings each inner call
@@ -1079,7 +1207,8 @@ def _run(model, function, inputs):
     the library returns those range rows whatever limit_inputs is (ADR 0024).
     For a model in GATED_INNER, they are its inner calls' warnings instead.
     For a model in OTYPES_PASS, the case records how many of its warnings come
-    from numpy's otypes run, which come first.
+    from numpy's otypes run, which come first. A case that raises one of the
+    model's RAISES records the exception instead.
     """
     otypes = []
     patch = contextlib.nullcontext()
@@ -1087,8 +1216,14 @@ def _run(model, function, inputs):
         path, name = OTYPES_PASS[model]
         kernel = getattr(importlib.import_module(path), name)
         patch = mock.patch.object(kernel, "pyfunc", _counted(kernel.pyfunc, otypes))
-    with patch:
-        result, emitted = _call(function, inputs)
+    try:
+        with patch:
+            result, emitted = _call(function, inputs)
+    except RAISES.get(model, ()) as error:
+        return {
+            "inputs": inputs,
+            "raises": {"type": type(error).__name__, "message": str(error)},
+        }
     case = {
         "inputs": inputs,
         "outputs": {
@@ -1222,7 +1357,10 @@ def main():
             _check_inputs(model, inputs)
             cases.append(_run(model, function, inputs))
         _write(out_dir / f"{model}.json", model, header, cases)
-        print(f"{model}: {len(cases)} cases")
+        raising = [case["raises"] for case in cases if "raises" in case]
+        print(f"{model}: {len(cases)} cases, {len(raising)} raising")
+        for raises in sorted({(r["type"], r["message"]) for r in raising}):
+            print("  raises %s: %s" % raises)
 
 
 if __name__ == "__main__":

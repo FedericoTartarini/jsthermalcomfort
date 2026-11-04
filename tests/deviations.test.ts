@@ -70,7 +70,7 @@ describe("parse_register", () => {
         status: "approved",
         doubtful: false,
         date: "2026-10-27",
-        parity: { outputs: [], warnings: [] },
+        parity: { outputs: [], warnings: [], throws: [] },
       },
     ]);
   });
@@ -125,12 +125,18 @@ describe("parse_register", () => {
           "approved",
           "warning `tr - tdb`, warning `pa (kPa)`, output `stress_category`",
         ),
+        row("utci-3", "approved", "throw `division by zero`, output `utci`"),
       ),
     );
     expect(failures).toEqual([]);
     expect(rows.map((r) => r.parity)).toEqual([
-      { outputs: ["utci"], warnings: [] },
-      { outputs: ["stress_category"], warnings: ["tr - tdb", "pa (kPa)"] },
+      { outputs: ["utci"], warnings: [], throws: [] },
+      {
+        outputs: ["stress_category"],
+        warnings: ["tr - tdb", "pa (kPa)"],
+        throws: [],
+      },
+      { outputs: ["utci"], warnings: [], throws: ["division by zero"] },
     ]);
   });
 
@@ -187,7 +193,11 @@ describe("parse_register", () => {
       FILE,
       register(row("utci-1", "approved", "warning `a \\| b`")),
     );
-    expect(rows[0]?.parity).toEqual({ outputs: [], warnings: ["a | b"] });
+    expect(rows[0]?.parity).toEqual({
+      outputs: [],
+      warnings: ["a | b"],
+      throws: [],
+    });
   });
 
   test("fails parity items not separated by a comma and a space, or repeated", () => {

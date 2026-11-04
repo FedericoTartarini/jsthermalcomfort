@@ -15,6 +15,7 @@ import {
   flag_mapping,
   nullable_mapping,
   read_data,
+  upstream_returns,
 } from "./harness.ts";
 import type { CompareOptions, UpstreamCase } from "./harness.ts";
 
@@ -29,7 +30,7 @@ const OPTIONS: CompareOptions = {
   rounded: [],
   tolerance: DEFAULT_TOLERANCE,
   warnings: false,
-  exempt: { outputs: [], warnings: [] },
+  exempt: { outputs: [], warnings: [], throws: [] },
   outputs: {
     f: { kind: "flag", nullable: true, unit: null },
     l: { kind: "label", nullable: true, unit: null },
@@ -177,7 +178,9 @@ describe("compare_case, with the mappings", () => {
   // that INFO with capacity's declaration removed, where the model would return
   // the NaN as it is.
   test("fails a model's NaN case once its declaration is removed", () => {
-    const [expected] = read_data(root, "work_capacity_hothaps").cases;
+    const [expected] = read_data(root, "work_capacity_hothaps").cases.filter(
+      upstream_returns,
+    );
     if (expected === undefined) throw new Error("no case 0");
     const result = work_capacity_hothaps(
       expected.inputs as Parameters<typeof work_capacity_hothaps>[0],

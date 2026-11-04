@@ -54,6 +54,23 @@ export interface UpstreamCase {
   readonly otypes_warnings?: number;
 }
 
+/**
+ * One seeded case for which upstream raises: its keyword arguments, and the
+ * exception's class and message, kept as reference and never compared
+ * (decisions 312, 318).
+ */
+export interface RaisingCase {
+  readonly inputs: UpstreamCase["inputs"];
+  readonly raises: { readonly type: string; readonly message: string };
+}
+
+/** Whether upstream returns for the case. */
+export function upstream_returns(
+  expected: UpstreamCase | RaisingCase,
+): expected is UpstreamCase {
+  return !("raises" in expected);
+}
+
 /** Where and with what the data were generated. */
 export interface Header {
   readonly machine: string;
@@ -68,7 +85,7 @@ export interface Header {
 export interface ParityData {
   readonly model: string;
   readonly header: Header;
-  readonly cases: readonly UpstreamCase[];
+  readonly cases: readonly (UpstreamCase | RaisingCase)[];
 }
 
 /** The pinned Python and package versions. */
@@ -371,6 +388,31 @@ export function compare_case(
   return failures;
 }
 
+/**
+ * Checks one case: the library throws exactly where upstream raises (decision
+ * 318), and where both return, the case compares (`compare_case`).
+ */
+export function case_failures(
+  expected: UpstreamCase | RaisingCase,
+  run: () => Readonly<Record<string, unknown>>,
+  options: CompareOptions,
+): string[] {
+  let actual: Readonly<Record<string, unknown>>;
+  try {
+    actual = run();
+  } catch (error) {
+    if (!upstream_returns(expected)) return [];
+    const exempt =
+      error instanceof Error && options.exempt.throws.includes(error.message);
+    return exempt ? [] : [`library threw ${String(error)}, upstream returned`];
+  }
+  if (!upstream_returns(expected)) {
+    const { type, message } = expected.raises;
+    return [`library returned, upstream raised ${type}: ${message}`];
+  }
+  return compare_case(expected, actual, options);
+}
+
 /** What the model's register and the shared register exempt. */
 export function exemptions(rows: readonly Row[], model: string): Parity {
   const files = [`docs/deviations/${model}.md`, "docs/deviations/_shared.md"];
@@ -378,6 +420,7 @@ export function exemptions(rows: readonly Row[], model: string): Parity {
   return {
     outputs: applying.flatMap((row) => row.parity.outputs),
     warnings: applying.flatMap((row) => row.parity.warnings),
+    throws: applying.flatMap((row) => row.parity.throws),
   };
 }
 
@@ -453,13 +496,7 @@ export function parity_failures(root: string, model: ParityModel): string[] {
   const tolerance = model.tolerance ?? DEFAULT_TOLERANCE;
   return data.cases.flatMap((expected, i) => {
     const at = `case ${i} ${JSON.stringify(expected.inputs)}`;
-    let actual: Readonly<Record<string, unknown>>;
-    try {
-      actual = model.run(expected.inputs);
-    } catch (error) {
-      return [`${at}: library threw ${String(error)}`];
-    }
-    return compare_case(expected, actual, {
+    return case_failures(expected, () => model.run(expected.inputs), {
       rounded: model.rounded(expected.inputs),
       tolerance,
       warnings: model.warnings,

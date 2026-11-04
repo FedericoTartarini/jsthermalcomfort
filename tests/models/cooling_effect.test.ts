@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import { cooling_effect, COOLING_EFFECT_INFO } from "../../src/models/index.ts";
 import { cooling_effect as from_root } from "../../src/index.ts";
-import { read_data } from "../parity/harness.ts";
+import { read_data, upstream_returns } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract, isDeepFrozen } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
@@ -144,7 +144,9 @@ describe("cooling_effect (JS-only)", () => {
   // Deviation cooling_effect-3: upstream warns twice where the library returns one row.
   test("gives one notice where upstream warns, over the parity data", () => {
     const root = fileURLToPath(new URL("../..", import.meta.url));
-    const { cases } = read_data(root, "cooling_effect");
+    const cases = read_data(root, "cooling_effect").cases.filter(
+      upstream_returns,
+    );
     const counts = cases.map(({ inputs, warnings }) => [
       call(inputs).warnings.length,
       warnings.length === 0 ? 0 : 1,

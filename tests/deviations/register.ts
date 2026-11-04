@@ -42,8 +42,18 @@ const STATUSES: Readonly<Record<string, Pick<Row, "status" | "doubtful">>> = {
   "pending (doubtful)": { status: "pending", doubtful: true },
 };
 
-// One parity item: output `name` or warning `key`, the name in a code span.
-const PARITY_ITEM = /^(output|warning) `([^`]+)`$/;
+// The Parity list each item's word adds its name to.
+const PARITY_LISTS = {
+  output: "outputs",
+  warning: "warnings",
+  throw: "throws",
+} as const;
+
+const PARITY_WORDS = Object.keys(PARITY_LISTS).join("|");
+
+// One parity item: output `name`, warning `key` or throw `message`, the name
+// in a code span.
+const PARITY_ITEM = new RegExp(`^(${PARITY_WORDS}) \`([^\`]+)\`$`);
 
 // A class/ADR cell that names a class or an addition from the README.
 const CLASS_ADR = /^(C|addition): (.+) \(ADR (\d{4})\)$/;
@@ -58,6 +68,8 @@ const CITATION = /\b[Dd]eviation ([a-z_][a-z0-9_]*-\d+)/g;
 export interface Parity {
   readonly outputs: readonly string[];
   readonly warnings: readonly string[];
+  /** The messages of throws the library adds where upstream returns. */
+  readonly throws: readonly string[];
 }
 
 /** One register row, with the file and line it is on. */
@@ -121,18 +133,19 @@ function is_part(text: string): text is Part {
 }
 
 function parse_parity(text: string): Parity | undefined {
-  if (text === "none") return { outputs: [], warnings: [] };
-  const items = text.split(/, (?=(?:output|warning) `)/);
+  const parity = { outputs: [], warnings: [], throws: [] } as {
+    [K in keyof Parity]: string[];
+  };
+  if (text === "none") return parity;
+  const items = text.split(new RegExp(`, (?=(?:${PARITY_WORDS}) \`)`));
   if (new Set(items).size !== items.length) return undefined;
-  const outputs: string[] = [];
-  const warnings: string[] = [];
   for (const item of items) {
     const match = PARITY_ITEM.exec(item);
     if (match === null) return undefined;
     const name = (match[2] ?? "").replaceAll("\\|", "|");
-    (match[1] === "output" ? outputs : warnings).push(name);
+    parity[PARITY_LISTS[match[1] as keyof typeof PARITY_LISTS]].push(name);
   }
-  return { outputs, warnings };
+  return parity;
 }
 
 /** Says what is wrong with a class/ADR cell, or nothing when it is valid. */

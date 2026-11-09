@@ -8,12 +8,13 @@ JavaScript port of pythermalcomfort (thermal comfort, thermal stress and thermop
 - Follow pythermalcomfort's current release: adopt its logic, reference values _and_ naming by default; when upstream renames something, rename here too. Deviate only where TypeScript requires it or as an approved v2 addition; each deviation gets a row in `docs/deviations/<model>.md`, whose TS site names the file and the symbol (ADRs 0019, 0027).
 - Every main model (`GLOSSARY.md`) moves to v2 TypeScript on a feature branch merged locally into `v2-typescript`, which reaches `main` through a reviewed pull request into `dev-v2`, together with the functions it calls directly; a function no model calls stays as it is, and JOS3 is deferred (ADR 0018). Change a model's inputs or returned values only after a pythermalcomfort release has (ADR 0016). `docs/adr/` is git-ignored, so from a worktree read it at the main checkout.
 - `lib/` is the published surface. Run `npm run build` after any change under `src/`: `prepack` only fires on publish, so a consumer linked with `file:` keeps seeing the stale build until you do.
+- Upstream sync: retargeting to a new pythermalcomfort release, which `.github/workflows/upstream-release.yml` reports weekly once it is on `main`; until then run `scripts/parity/check-upstream-release.sh` by hand. See `docs/agents/upstream-sync.md`.
 
 ## Agent skills
 
 ### Issue tracker
 
-Local markdown under `.scratch/<feature>/` (never GitHub Issues or PRs). See `docs/agents/issue-tracker.md`.
+Local markdown under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -22,7 +23,3 @@ Default vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 ### Domain docs
 
 Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
-
-### Upstream sync
-
-Retargeting to a new pythermalcomfort release, which `.github/workflows/upstream-release.yml` reports weekly once it is on `main`; until then run `scripts/parity/check-upstream-release.sh` by hand. See `docs/agents/upstream-sync.md`.

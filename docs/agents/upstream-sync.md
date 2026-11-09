@@ -36,7 +36,7 @@ Each change in the diff takes one class, ADR 0028's three layers plus docstrings
 | representation | A returned value's type, its "no value", the shape of the arguments                           | Checked against its R mapping in `docs/deviations/README.md`. An upstream value outside every mapping's domain needs a mapping first (ADR 0028).     |
 | docstring      | Docstrings, examples and references                                                           | Copied to TSDoc in the upstream docstring's order. An error in it is fixed and recorded as a register row (ADR 0025), and drafted upstream (step 8). |
 
-A rename is not representation: the library renames too (ADR 0028, `CLAUDE.md`). A new input or returned value is adopted now that the release has it (ADR 0016). A new main model migrates by ADR 0018.
+A rename is not representation: the library renames too (ADR 0028, `AGENTS.md`). A new input or returned value is adopted now that the release has it (ADR 0016). A new main model migrates by ADR 0018.
 
 ## 3. New NaN
 

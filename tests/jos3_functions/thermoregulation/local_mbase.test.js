@@ -1,5 +1,5 @@
 import { local_mbase } from "../../../src/jos3_functions/thermoregulation/local_mbase";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("local_mbase", () => {
   it.each([

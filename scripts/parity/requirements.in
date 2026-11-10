@@ -1,0 +1,3 @@
+# The upstream release the parity data pin (ADR 0016). Compiled into
+# requirements.txt with hashes; see README.md.
+pythermalcomfort==4.8.0

@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: "24.x"
           registry-url: "https://registry.npmjs.org/"
@@ -42,9 +42,9 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: "24.x"
           registry-url: "https://registry.npmjs.org/"
@@ -72,7 +72,10 @@ jobs:
       - run: npm publish --provenance --tag "${{ steps.disttag.outputs.tag }}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          generate_release_notes: true
-          prerelease: ${{ steps.disttag.outputs.prerelease }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ steps.disttag.outputs.prerelease }}
+        run: |
+          flags=(--generate-notes --verify-tag)
+          if [[ "$PRERELEASE" == true ]]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" "${flags[@]}"

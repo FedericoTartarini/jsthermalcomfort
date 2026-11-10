@@ -3,7 +3,7 @@ import {
   PRE_SHIV,
   set_pre_shiv,
 } from "../../../src/jos3_functions/thermoregulation/shivering";
-import { describe, it, expect, beforeEach } from "@jest/globals";
+import { describe, it, expect, beforeEach } from "vitest";
 import { $lerp } from "../../../src/supa";
 import * as math from "mathjs";
 

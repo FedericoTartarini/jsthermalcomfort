@@ -1,5 +1,5 @@
 import { JOS3 } from "../../src/models/JOS3.js";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import single_iteration from "./1_run_dict.json";
 import twenty_iterations from "./20_runs_dict.json";
 import getters from "./1_run_getters.json";
@@ -8,6 +8,17 @@ import * as math from "mathjs";
 import { BODY_NAMES } from "../../src/jos3_functions/matrix.js";
 
 describe("JOS3", () => {
+  // The reference-state search calls pmv_ppd_iso with limit_inputs False
+  // (jos3.py:569-578), so a neutral operative temperature above ISO 7730's
+  // tdb limit of 30 °C is still found. Upstream 4.7.0 gives 30.07333333333334
+  // for this body, measured in the parity image.
+  it("finds the reference operative temperature outside ISO 7730's limits", () => {
+    const jos = new JOS3(1.72, 74.43, 15, 20, "female", 2.59, "ganpule");
+    for (const to of jos.to.toArray()) {
+      expect(Math.abs(to - 30.07333333333334)).toBeLessThanOrEqual(1e-10);
+    }
+  });
+
   describe("state after single iteration", () => {
     describe("results should have correct values", () => {
       const jos = new JOS3(
@@ -132,5 +143,12 @@ describe("JOS3", () => {
         });
       }
     });
+  });
+
+  // Decisions 321 and 311: the next step's NaN temperature throws.
+  it("computes on a null pmv from pmv_ppd_iso as NaN", () => {
+    expect(() =>
+      new JOS3()._calculate_operative_temp_when_pmv_is_zero(0.1, 50, 1.2, -1),
+    ).toThrow(new RangeError("tdb must be a finite number."));
   });
 });

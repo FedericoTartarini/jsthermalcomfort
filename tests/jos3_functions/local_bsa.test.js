@@ -1,6 +1,6 @@
 import { local_bsa } from "../../src/jos3_functions/local_bsa";
 import JOS3Defaults from "../../src/jos3_functions/JOS3Defaults";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("local_bsa", () => {
   it("should use the correct defaults", () => {

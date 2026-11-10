@@ -1,6 +1,6 @@
 import JOS3Defaults from "../../src/jos3_functions/JOS3Defaults";
 import { bsa_rate } from "../../src/jos3_functions/bsa_rate";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("bsa_rate", () => {
   it("should use the correct default values", () => {

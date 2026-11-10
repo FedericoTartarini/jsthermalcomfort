@@ -1,0 +1,36 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/index.ts",
+    "src/models/index.ts",
+    "src/environment/index.ts",
+    "src/psychrometrics/index.ts",
+    "src/utilities/index.ts"
+  ],
+  "tsconfig": "configs/tsconfig.esm.json",
+  "out": "_site",
+  "readme": "docs/overview.md",
+  "projectDocuments": [
+    "docs/installation.md",
+    "docs/contributing.md",
+    "docs/authors.md",
+    "docs/surveys.md",
+    "docs/references.md",
+    "docs/changelog.md"
+  ],
+  "sortEntryPoints": false,
+  "sort": ["source-order"],
+  "externalPattern": [
+    "**/node_modules/**",
+    "**/src/models/JOS3.js",
+    "**/src/jos3_functions/**",
+    "**/src/supa.js",
+    "**/src/environment/f_svv.js",
+    "**/src/environment/mean_radiant_tmp.js",
+    "**/src/environment/running_mean_outdoor_temperature.js",
+    "**/src/environment/v_relative.js",
+    "**/src/utilities/utilities.js"
+  ],
+  "excludeExternals": true,
+  "treatValidationWarningsAsErrors": true
+}

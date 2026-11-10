@@ -19,7 +19,9 @@ import {
   shivering,
 } from "../jos3_functions/thermoregulation/shivering.js";
 import { basal_met } from "../jos3_functions/thermoregulation/basal_met.js";
-import { pmv } from "./pmv.js";
+import { pmv_ppd_iso, PMV_PPD_ISO_INFO } from "./pmv_ppd_iso.ts";
+import { toComputedOutputs } from "../_internal/modelInfo.ts";
+import { Standard } from "../utilities/options.ts";
 import { fixed_hc } from "../jos3_functions/thermoregulation/fixed_hc.js";
 import { conv_coef } from "../jos3_functions/thermoregulation/conv_coef.js";
 import { fixed_hr } from "../jos3_functions/thermoregulation/fixed_hr.js";
@@ -253,7 +255,19 @@ export class JOS3 {
     // Iterate until the PMV (Predicted Mean Vote) value is less than 0.001
     let vpmv;
     for (let i = 0; i < 100; i++) {
-      vpmv = pmv(to, to, va, rh, met, clo).pmv;
+      vpmv = toComputedOutputs(
+        PMV_PPD_ISO_INFO,
+        pmv_ppd_iso({
+          tdb: to,
+          tr: to,
+          vr: va,
+          rh,
+          met,
+          clo,
+          standard: Standard.iso_7730_2025,
+          limit_inputs: false,
+        }),
+      ).pmv;
 
       // Break the loop if the absolute value of PMV is less than 0.001
       if (math.abs(vpmv) < 0.001) {

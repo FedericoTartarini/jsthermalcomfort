@@ -1,0 +1,34 @@
+{
+  // Type-checks the TypeScript test files against the sources in src/.
+  // Run by `npm run check:types:tests`. Nothing else checks tests/: Vitest
+  // only strips types, so without this a `.test.ts` file would be TypeScript
+  // in name only. It also checks the Vitest config.
+  //
+  // tests/types/ is excluded because it checks the *built* package by name
+  // (see tests/types/tsconfig.json) rather than the sources.
+  "compilerOptions": {
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+
+    // The same strict set as configs/tsconfig.json (ADR 0020).
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
+
+    "types": ["node"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["**/*.ts", "../vitest.config.ts"],
+  "exclude": ["types"]
+}

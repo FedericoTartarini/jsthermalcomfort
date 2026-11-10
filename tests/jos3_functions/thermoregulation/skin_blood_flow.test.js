@@ -1,5 +1,5 @@
 import { skin_blood_flow } from "../../../src/jos3_functions/thermoregulation/skin_blood_flow";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $lerp } from "../../../src/supa";
 import * as math from "mathjs";
 

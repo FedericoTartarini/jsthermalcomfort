@@ -1,14 +1,27 @@
 {
   "include": ["./src/**/*"],
   "compilerOptions": {
+    "rootDir": "../src",
     "allowJs": true,
+    "rewriteRelativeImportExtensions": true,
+
+    // The strict set that `tsc --init` writes (ADR 0020), plus erasableSyntaxOnly.
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
+
     "declaration": true,
     "emitDeclarationOnly": false,
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
   },
-  "files": ["../src/index.js"]
+  "files": ["../src/index.ts"]
 }

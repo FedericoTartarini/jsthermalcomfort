@@ -1,5 +1,5 @@
 import { basal_met } from "../../../src/jos3_functions/thermoregulation/basal_met";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("basal_met", () => {
   it("should throw an error if an invalid bmr_equation is provided", () => {

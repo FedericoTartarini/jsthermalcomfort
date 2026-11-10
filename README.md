@@ -89,7 +89,7 @@ points at a _commit_, not a branch, so a release can be cut from any branch:
 ```
 main     ──●──●──●                 ← v1.4.0 tagged here
               \
-dev-v2         ●──●──●──●          ← v2.0.0-next.1 tagged here
+development    ●──●──●──●          ← v2.0.0-next.1 tagged here
 ```
 
 Both publish through the same workflow. What differs is the dist-tag, and that
@@ -126,7 +126,7 @@ Consumers opt in explicitly, and nobody on `^1.x` is affected:
 npm install jsthermalcomfort@next
 ```
 
-This is how work on `dev-v2` reaches front ends before the major release, so
+This is how work on `development` reaches front ends before the major release, so
 packaging problems surface before they reach everyone. Cut as many as you like
 — `next.1`, `next.2` and so on — each is a real installable package.
 
@@ -145,12 +145,12 @@ a preview ends up as the default install.
 
 ### One thing to be careful about
 
-**Do not tag a final version (no hyphen) from `dev-v2` while it is still work in
+**Do not tag a final version (no hyphen) from `development` while it is still work in
 progress.** Without a hyphen it publishes as `latest`, and `npm install
 jsthermalcomfort` starts handing out an unfinished major. It is not easily
 undone — npm allows unpublishing only within a short window.
 
-Prereleases from `dev-v2`; the final `vX.0.0` after `dev-v2` merges into `main`,
+Prereleases from `development`; the final `vX.0.0` after `development` merges into `main`,
 so `latest` and the default branch agree about what the current release is.
 
 Validation datasets for model tests are fetched from

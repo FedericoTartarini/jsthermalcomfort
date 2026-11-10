@@ -38,8 +38,8 @@
     "format": "npx prettier . --write",
     "check:format": "npx prettier . --check",
     "lint": "eslint",
-    "check:types": "./node_modules/.bin/tsc -p tests/types/tsconfig.json",
-    "check:types:tests": "./node_modules/.bin/tsc -p tests/tsconfig.json",
+    "check:types": "tsc -p tests/types/tsconfig.json",
+    "check:types:tests": "tsc -p tests/tsconfig.json",
     "prepare": "husky && npm run build"
   },
   "publishConfig": {

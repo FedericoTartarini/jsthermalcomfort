@@ -210,8 +210,8 @@ describe("test_utilities", () => {
     });
   });
 
-  // validate_type has no counterpart in src/; the other two are in
-  // src/_internal/.
+  // validate_type has no counterpart in src/; _check_ashrae55_compliance and
+  // adaptive_cooling_effect are in src/_internal/.
   test("test_internal_helpers_have_no_utility_shims", () => {
     const { utilities } = pkg.default;
     expect(utilities).not.toHaveProperty("validate_type");

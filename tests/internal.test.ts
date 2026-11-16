@@ -199,6 +199,34 @@ describe("test_internal", () => {
   });
 });
 
+// Mirrors the choice_field definition case of pythermalcomfort v4.8.1
+// tests/test_choice_field.py, through parseInputs. Upstream's field built by
+// choice_field() is an INFO.inputs entry written as a literal here, so its
+// assertions on the field's default and metadata have no counterpart.
+describe("test_choice_field", () => {
+  test("test_choice_field_default_and_metadata", () => {
+    const allowed = ["first", "second"];
+    const info = {
+      name: "Inputs",
+      inputs: {
+        custom_choice: {
+          kind: "choice",
+          allowed,
+          default: "second",
+          message: choiceFieldMessage("custom_choice", allowed),
+        },
+      },
+    } as const;
+    expect(parseInputs(info, {}).custom_choice).toBe("second");
+    expect(parseInputs(info, { custom_choice: "FIRST" }).custom_choice).toBe(
+      "FIRST",
+    );
+    const invalid = () => parseInputs(info, { custom_choice: "invalid" });
+    expect(invalid).toThrow(RangeError);
+    expect(invalid).toThrow("custom_choice must be one of");
+  });
+});
+
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("_check_ashrae55_compliance (JS-only)", () => {

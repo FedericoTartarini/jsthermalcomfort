@@ -174,9 +174,11 @@ describe("test_clothing", () => {
 });
 
 // Mirrors the clothing rows of pythermalcomfort v4.8.1
-// tests/test_utilities.py. Upstream's test also asserts a DeprecationWarning, because there
-// `utilities` is the old import path of a function moved to `clothing`; here
-// `utilities` is the functions' one namespace and nothing is deprecated.
+// tests/test_utilities.py, and its test_internal_helpers_have_no_utility_shims
+// on the utilities namespace. Upstream's test_moved_public_utility_shims also
+// asserts a DeprecationWarning, because there `utilities` is the old import
+// path of a function moved to `clothing`; here `utilities` is the functions'
+// one namespace and nothing is deprecated.
 describe("test_utilities", () => {
   describe("test_moved_public_utility_shims", () => {
     test.each([
@@ -206,6 +208,15 @@ describe("test_utilities", () => {
     ])("%s", (_id, call, expected) => {
       expectClose(call(), expected, 1e-8);
     });
+  });
+
+  // validate_type has no counterpart in src/; the other two are in
+  // src/_internal/.
+  test("test_internal_helpers_have_no_utility_shims", () => {
+    const { utilities } = pkg.default;
+    expect(utilities).not.toHaveProperty("validate_type");
+    expect(utilities).not.toHaveProperty("_check_ashrae55_compliance");
+    expect(utilities).not.toHaveProperty("adaptive_cooling_effect");
   });
 });
 

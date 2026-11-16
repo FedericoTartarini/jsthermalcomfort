@@ -33,24 +33,24 @@ export const TWO_NODES_GAGGE_INFO = deepFreeze({
     calculate_ce: { kind: "bool", default: false },
   },
   outputs: {
-    e_skin: { kind: "numeric", unit: "W/m²" },
-    e_rsw: { kind: "numeric", unit: "W/m²" },
-    e_max: { kind: "numeric", unit: "W/m²" },
-    q_sensible: { kind: "numeric", unit: "W/m²" },
-    q_skin: { kind: "numeric", unit: "W/m²" },
-    q_res: { kind: "numeric", unit: "W/m²" },
-    t_core: { kind: "numeric", unit: "°C" },
-    t_skin: { kind: "numeric", unit: "°C" },
-    m_bl: { kind: "numeric", unit: "kg/h/m²" },
-    m_rsw: { kind: "numeric", unit: "mL/h/m²" },
-    w: { kind: "numeric", unit: null },
-    w_max: { kind: "numeric", unit: null },
+    e_skin: { kind: "numeric", nullable: true, unit: "W/m²" },
+    e_rsw: { kind: "numeric", nullable: true, unit: "W/m²" },
+    e_max: { kind: "numeric", nullable: true, unit: "W/m²" },
+    q_sensible: { kind: "numeric", nullable: true, unit: "W/m²" },
+    q_skin: { kind: "numeric", nullable: true, unit: "W/m²" },
+    q_res: { kind: "numeric", nullable: true, unit: "W/m²" },
+    t_core: { kind: "numeric", nullable: true, unit: "°C" },
+    t_skin: { kind: "numeric", nullable: true, unit: "°C" },
+    m_bl: { kind: "numeric", nullable: true, unit: "kg/h/m²" },
+    m_rsw: { kind: "numeric", nullable: true, unit: "mL/h/m²" },
+    w: { kind: "numeric", nullable: true, unit: null },
+    w_max: { kind: "numeric", nullable: true, unit: null },
     set: { kind: "numeric", nullable: true, unit: "°C" },
     et: { kind: "numeric", nullable: true, unit: "°C" },
-    pmv_gagge: { kind: "numeric", unit: null },
+    pmv_gagge: { kind: "numeric", nullable: true, unit: null },
     pmv_set: { kind: "numeric", nullable: true, unit: null },
-    disc: { kind: "numeric", unit: null },
-    t_sens: { kind: "numeric", unit: null },
+    disc: { kind: "numeric", nullable: true, unit: null },
+    t_sens: { kind: "numeric", nullable: true, unit: null },
   },
 } as const satisfies ModelInfo);
 
@@ -336,6 +336,39 @@ export function _gagge_two_nodes_optimized(
   number,
   number,
 ] {
+  // A missing or infinite input never converges in the clothing temperature loop
+  // below, so return NaN for every output instead of raising StopIteration.
+  if (!(
+    Number.isFinite(tdb) &&
+    Number.isFinite(tr) &&
+    Number.isFinite(v) &&
+    Number.isFinite(met) &&
+    Number.isFinite(clo) &&
+    Number.isFinite(vapor_pressure)
+  )) {
+    const nan = NaN;
+    return [
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+      nan,
+    ];
+  }
+
   // Initial variables as defined in the ASHRAE 55-2020
   const air_speed = 0.1 > v ? 0.1 : v;
   const k_clo = 0.25;

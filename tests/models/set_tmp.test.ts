@@ -85,11 +85,24 @@ const out_rows = (["tdb", "tr", "v", "met", "clo"] as const).map(
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("set_tmp (JS-only)", () => {
-  // Decision 321; upstream's set is NaN here, measured on 4.8.0 in the parity image.
+  // Decision 321; upstream's set is NaN here, measured on 4.8.1 in the parity image.
   test("a null set from two_nodes_gagge gives upstream's NaN set, as null", () => {
     const cold = { tdb: -234, tr: -234, v: 0.1, rh: 0, met: 1.2, clo: 0.5 };
     expect(set_tmp({ ...cold, limit_inputs: false }).set).toBe(null);
   });
+
+  // Upstream's set is NaN where the vapour pressure is not finite, and tdb -241 raises StopIteration, measured on 4.8.1 in the parity image (models/two_nodes_gagge.py:248-278).
+  test.each([true, false])(
+    "a tdb of -238 gives a null set, with limit_inputs %s",
+    (limit_inputs) => {
+      const cold = { tdb: -238, tr: 25, v: 0.1, met: 1.2, clo: 0.5 };
+      for (const rh of [50, 0])
+        expect(set_tmp({ ...cold, rh, limit_inputs }).set).toBe(null);
+      expect(() =>
+        set_tmp({ ...cold, tdb: -241, rh: 50, limit_inputs }),
+      ).toThrow(new Error("Max iterations exceeded"));
+    },
+  );
 
   // models/set_tmp.py:86-87.
   test("the docstring's example gives its output", () => {

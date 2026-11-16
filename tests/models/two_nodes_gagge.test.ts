@@ -16,7 +16,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.twoNodes,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_two_nodes_gagge.py. A
+// Mirrors pythermalcomfort v4.8.1 tests/test_two_nodes_gagge.py. A
 // `pytest.raises(ValueError, match="w_max")` becomes a throw whose message
 // names w_max, of the class the library maps that case to.
 describe("test_two_nodes_gagge", () => {
@@ -66,9 +66,26 @@ describe("test_two_nodes_gagge", () => {
       });
     },
   );
+
+  // Deviation _shared-7: the parse throws RangeError for a NaN or infinite input.
+  test.each(
+    [NaN, Infinity].flatMap((bad) =>
+      (["tdb", "tr", "v", "rh"] as const).map((name) => [bad, name] as const),
+    ),
+  )("test_two_nodes_returns_nan_for_non_finite_inputs[%s-%s]", (bad, name) => {
+    const inputs = { tdb: 30, tr: 30, v: 0.2, rh: 50, met: 1.2, clo: 0.5 };
+    const reference = two_nodes_gagge(inputs);
+
+    expect(reference.disc).toBe(1.72);
+    expect(() => two_nodes_gagge({ ...inputs, [name]: bad })).toThrow(
+      RangeError,
+    );
+  });
 });
 
 const base = { tdb: 30, tr: 35, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+// p_sat_torr(-238) is Infinity, so the vapour pressure is not finite.
+const cold = { tdb: -238, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
 const position_message =
   "position must be one of ['sitting', 'standing', 'standing, forced convection']";
 const call = (inputs: unknown) =>
@@ -173,7 +190,7 @@ describe("two_nodes_gagge (JS-only)", () => {
     }
   });
 
-  // Upstream's set, et and pmv_set are nan at base with tdb and tr -235, rounded or not, measured on 4.8.0 in the parity image (models/two_nodes_gagge.py:496-542, :572-574).
+  // Upstream's set, et and pmv_set are nan at base with tdb and tr -235, rounded or not, measured on 4.8.1 in the parity image (models/two_nodes_gagge.py:496-542, :572-574).
   test("a tdb and tr of -235 give a null set, et and pmv_set", () => {
     for (const round_output of [true, false]) {
       const result = two_nodes_gagge({
@@ -186,6 +203,36 @@ describe("two_nodes_gagge (JS-only)", () => {
       expect(result.et).toBe(null);
       expect(result.pmv_set).toBe(null);
     }
+  });
+
+  // Upstream returns nan for all 18 outputs where the vapour pressure is not finite, measured on 4.8.1 in the parity image (models/two_nodes_gagge.py:248-278).
+  test.each([
+    [50, true],
+    [50, false],
+    [0, true],
+    [0, false],
+  ])(
+    "a tdb of -238 with rh %s gives null for every output, round_output %s",
+    (rh, round_output) => {
+      const result = two_nodes_gagge({ ...cold, rh, round_output });
+      expect(result).toEqual({
+        ...Object.fromEntries(
+          Object.keys(TWO_NODES_GAGGE_INFO.outputs).map((key) => [key, null]),
+        ),
+        warnings: [],
+      });
+      expect(
+        two_nodes_gagge({ ...cold, rh, round_output, calculate_ce: true }),
+      ).toEqual({ set: null, warnings: [] });
+    },
+  );
+
+  // Upstream raises StopIteration at tdb -241, where the vapour pressure is finite, measured on 4.8.1 (deviation two_nodes_gagge-7).
+  test("a tdb of -241 still throws Max iterations exceeded", () => {
+    for (const calculate_ce of [false, true])
+      expect(() => call({ ...cold, tdb: -241, calculate_ce })).toThrow(
+        new Error("Max iterations exceeded"),
+      );
   });
 
   // Deviation two_nodes_gagge-2.

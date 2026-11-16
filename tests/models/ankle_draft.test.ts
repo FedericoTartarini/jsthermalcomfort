@@ -14,7 +14,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.ankleDraft,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_ankle_draft.py. Upstream's
+// Mirrors pythermalcomfort v4.8.1 tests/test_ankle_draft.py. Upstream's
 // arrays are called element-wise, and a UserWarning becomes a range row.
 describe("test_ankle_draft", () => {
   test.each(reference_table.data)(

@@ -3,7 +3,7 @@ import { psy_ta_rh } from "../../src/psychrometrics/index.ts";
 import { psy_ta_rh as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 
-// Mirrors the psy_ta_rh case of pythermalcomfort v4.8.0
+// Mirrors the psy_ta_rh case of pythermalcomfort v4.8.1
 // tests/test_psychrometrics.py.
 describe("test_psychrometrics", () => {
   test("test_psy_ta_rh", () => {

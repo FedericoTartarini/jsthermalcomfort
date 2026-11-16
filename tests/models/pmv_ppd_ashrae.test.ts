@@ -41,7 +41,7 @@ const ashrae_rows = assertNonEmptyRows(
   "pmv_ppd_ashrae ASHRAE rows",
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_pmv_ppd_ashrae.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_pmv_ppd_ashrae.py.
 describe("test_pmv_ppd_ashrae", () => {
   test.each(ashrae_rows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;

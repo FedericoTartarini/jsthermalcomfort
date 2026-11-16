@@ -34,7 +34,7 @@ const iso_rows = assertNonEmptyRows(
   "pmv_ppd_iso ISO rows",
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_pmv_ppd_iso.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_pmv_ppd_iso.py.
 describe("test_pmv_ppd_iso", () => {
   test.each(iso_rows)("test_pmv_ppd: fixture case %#", (row) => {
     const { inputs, outputs } = row;

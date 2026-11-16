@@ -74,7 +74,7 @@ const position_message =
 const call = (inputs: unknown) =>
   two_nodes_gagge(inputs as Parameters<typeof two_nodes_gagge>[0]);
 
-// Mirrors the position cases of pythermalcomfort v4.8.0
+// Mirrors the position cases of pythermalcomfort v4.8.1
 // tests/test_choice_field.py through the model, whose inputs class receives
 // position (models/two_nodes_gagge.py:115).
 describe("test_choice_field", () => {
@@ -173,7 +173,7 @@ describe("two_nodes_gagge (JS-only)", () => {
     }
   });
 
-  // Upstream's set, et and pmv_set are nan at base with tdb and tr -235, rounded or not, measured on 4.8.0 in the parity image (models/two_nodes_gagge.py:464-510, :540-542).
+  // Upstream's set, et and pmv_set are nan at base with tdb and tr -235, rounded or not, measured on 4.8.0 in the parity image (models/two_nodes_gagge.py:496-542, :572-574).
   test("a tdb and tr of -235 give a null set, et and pmv_set", () => {
     for (const round_output of [true, false]) {
       const result = two_nodes_gagge({

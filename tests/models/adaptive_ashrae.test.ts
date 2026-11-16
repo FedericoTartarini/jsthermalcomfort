@@ -21,7 +21,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.adaptiveAshrae,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_adaptive_ashrae.py. The
+// Mirrors pythermalcomfort v4.8.1 tests/test_adaptive_ashrae.py. The
 // _check_ashrae55_compliance cases of tests/test_internal.py are in
 // tests/internal.test.ts, and test_t_o of tests/test_environment.py is in
 // tests/environment/operative_tmp.test.ts.

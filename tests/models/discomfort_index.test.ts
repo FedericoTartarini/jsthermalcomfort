@@ -14,7 +14,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.discomfortIndex,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_discomfort_index.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_discomfort_index.py.
 describe("test_discomfort_index", () => {
   test.each(reference_table.data)(
     "test_discomfort_index: fixture case %#",

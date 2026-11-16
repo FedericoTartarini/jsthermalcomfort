@@ -21,7 +21,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.utci,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_utci.py. A UserWarning becomes a
+// Mirrors pythermalcomfort v4.8.1 tests/test_utci.py. A UserWarning becomes a
 // range row, and a `match=` on its text becomes an assertion on the row's key.
 // Upstream's arrays are called element-wise.
 describe("test_utci", () => {

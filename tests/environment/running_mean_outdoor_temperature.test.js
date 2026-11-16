@@ -102,7 +102,7 @@ describe("running_mean_outdoor_temperature", () => {
   });
 });
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_environment.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_environment.py.
 describe("test_environment", () => {
   test("test_running_mean_outdoor_temperature", () => {
     expect(running_mean_outdoor_temperature([20, 20], 0.7)).toBe(20);
@@ -120,7 +120,7 @@ describe("test_environment", () => {
   });
 });
 
-// Mirrors the running_mean_outdoor_temperature row of pythermalcomfort v4.8.0
+// Mirrors the running_mean_outdoor_temperature row of pythermalcomfort v4.8.1
 // tests/test_utilities.py, with np.isclose's tolerance (atol 1e-8, rtol 1e-5).
 describe("test_utilities", () => {
   describe("test_moved_public_utility_shims", () => {

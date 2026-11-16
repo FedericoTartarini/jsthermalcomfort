@@ -17,7 +17,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.ePmv,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_e_pmv.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_e_pmv.py.
 describe("test_e_pmv", () => {
   test.each(reference_table.data)("test_e_pmv: case %#", (entry) => {
     const { inputs, outputs } = entry;

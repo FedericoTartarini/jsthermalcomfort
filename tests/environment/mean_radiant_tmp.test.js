@@ -131,7 +131,7 @@ describe("mean_radiant_tmp", () => {
   });
 });
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_environment.py, one array element
+// Mirrors pythermalcomfort v4.8.1 tests/test_environment.py, one array element
 // per case, with np.allclose's tolerance (atol 0.1, rtol 1e-5).
 describe("test_environment", () => {
   describe("test_t_mrt", () => {
@@ -158,7 +158,7 @@ describe("test_environment", () => {
   });
 });
 
-// Mirrors the mean_radiant_tmp row of pythermalcomfort v4.8.0
+// Mirrors the mean_radiant_tmp row of pythermalcomfort v4.8.1
 // tests/test_utilities.py, with np.allclose's tolerance (atol 0.1, rtol 1e-5).
 describe("test_utilities", () => {
   describe("test_moved_public_utility_shims", () => {

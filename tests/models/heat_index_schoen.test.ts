@@ -12,7 +12,7 @@ import { approx } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof heat_index_schoen>[0];
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_heat_index_schoen.py. Its
+// Mirrors pythermalcomfort v4.8.1 tests/test_heat_index_schoen.py. Its
 // is_equal is np.allclose with atol 1e-6 and the default rtol, 1e-5, and its
 // list and broadcast calls run element-wise.
 describe("test_heat_index_schoen", () => {

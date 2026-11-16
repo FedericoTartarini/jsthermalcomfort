@@ -2,11 +2,13 @@ import { describe, expect, test } from "vitest";
 import {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   clo_area_factor,
+  clo_correction_factor_environment,
   clo_dynamic_ashrae,
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
   clo_individual_garments,
   clo_insulation_air_layer,
+  clo_intrinsic_insulation_ensemble,
   clo_total_insulation,
 } from "../../src/utilities/index.ts";
 import { v_relative } from "../../src/environment/index.ts";
@@ -17,16 +19,15 @@ function expectClose(actual: number, expected: number, atol: number) {
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(atol);
 }
 
-// Mirrors pythermalcomfort's tests/test_clothing.py (v4.6.0), array inputs run
+// Mirrors pythermalcomfort v4.8.1 tests/test_clothing.py, array inputs run
 // element-wise.
 describe("test_clothing", () => {
-  test.todo(
-    "test_intrinsic_insulation_ensemble: clo_intrinsic_insulation_ensemble is not ported",
-  );
-
-  test.todo(
-    "test_clo_correction_factor_environment: clo_correction_factor_environment is not ported",
-  );
+  test("test_intrinsic_insulation_ensemble", () => {
+    expect(clo_intrinsic_insulation_ensemble([0.5, 0.5])).toBe(0.835 + 0.161);
+    expect(clo_intrinsic_insulation_ensemble([1, 1])).toBe(2 * 0.835 + 0.161);
+    expect(clo_intrinsic_insulation_ensemble(2)).toBe(2 * 0.835 + 0.161);
+    expect(clo_intrinsic_insulation_ensemble([0])).toBe(0.161);
+  });
 
   test("test_clo_area_factor", () => {
     expect(clo_area_factor(1)).toBe(1.28);
@@ -90,6 +91,43 @@ describe("test_clothing", () => {
     );
   });
 
+  test("test_clo_correction_factor_environment", () => {
+    const i_cl = [0.61, 0.71, 1.01];
+    i_cl.forEach((value) => {
+      expectClose(clo_correction_factor_environment(0.15, 0, value), 1, 0.001);
+    });
+
+    // compare the normal_clothing results with the figure in the standard
+    const v_walk = [1, 0.5, 0.25];
+    const normal = [0.503, 0.564, 0.618];
+    i_cl.forEach((value, i) => {
+      expectClose(
+        clo_correction_factor_environment(2, v_walk[i] ?? NaN, value),
+        normal[i] ?? NaN,
+        0.001,
+      );
+    });
+
+    // test that the nude function works as expected
+    expectClose(clo_correction_factor_environment(0.15, 0, 0), 1, 0.001);
+
+    // compare the nude results with the figure in the standard
+    const vr = [0.5, 2, 3];
+    const nude = [0.698, 0.394, 0.32];
+    vr.forEach((value, i) => {
+      expectClose(
+        clo_correction_factor_environment(value, 0.5, 0),
+        nude[i] ?? NaN,
+        0.001,
+      );
+    });
+
+    // test that the low_clothing function works as expected
+    [0.6, 0].forEach((value) => {
+      expectClose(clo_correction_factor_environment(0.15, 0, value), 1, 0.001);
+    });
+  });
+
   test("test_clo_dynamic_ashrae", () => {
     expect(clo_dynamic_ashrae(1, 1)).toBe(1);
     expect(clo_dynamic_ashrae(1, 0.5)).toBe(1);
@@ -135,8 +173,8 @@ describe("test_clothing", () => {
   });
 });
 
-// Mirrors the clothing rows of pythermalcomfort's tests/test_utilities.py
-// (v4.6.0). Upstream's test also asserts a DeprecationWarning, because there
+// Mirrors the clothing rows of pythermalcomfort v4.8.1
+// tests/test_utilities.py. Upstream's test also asserts a DeprecationWarning, because there
 // `utilities` is the old import path of a function moved to `clothing`; here
 // `utilities` is the functions' one namespace and nothing is deprecated.
 describe("test_utilities", () => {
@@ -144,6 +182,11 @@ describe("test_utilities", () => {
     test.each([
       ["clo_dynamic_ashrae", () => clo_dynamic_ashrae(1, 2), 0.8],
       ["clo_dynamic_iso", () => clo_dynamic_iso(1, 1.2, 0.2), 0.95486298],
+      [
+        "clo_intrinsic_insulation_ensemble",
+        () => clo_intrinsic_insulation_ensemble([0.2, 0.3]),
+        0.5785,
+      ],
       ["clo_area_factor", () => clo_area_factor(1), 1.28],
       [
         "clo_insulation_air_layer",
@@ -155,16 +198,59 @@ describe("test_utilities", () => {
         () => clo_total_insulation(1.7, 0.2, 0.1, 0.7, 1),
         1.59879185,
       ],
+      [
+        "clo_correction_factor_environment",
+        () => clo_correction_factor_environment(0.2, 0.1, 1),
+        0.94046579,
+      ],
     ])("%s", (_id, call, expected) => {
       expectClose(call(), expected, 1e-8);
     });
+  });
+});
 
-    test.todo(
-      "clo_intrinsic_insulation_ensemble: clo_intrinsic_insulation_ensemble is not ported",
-    );
+// JS-only. Expected values are pythermalcomfort 4.8.1's for the same inputs
+// (numpy 2.5.4, x86_64, in the parity image).
+describe("clo_intrinsic_insulation_ensemble", () => {
+  // A left-to-right sum gives 4.310949999999998.
+  test("sums the garments in numpy's pairwise order", () => {
+    expect(
+      clo_intrinsic_insulation_ensemble([
+        0.49, 0.06, 0.2, 0.24, 0.19, 0.36, 0.47, 0.48, 0.31, 0.17, 0.42, 0.23,
+        0.31, 0.12, 0.01, 0.48, 0.01, 0.17, 0.25,
+      ]),
+    ).toBe(4.310949999999999);
+  });
 
-    test.todo(
-      "clo_correction_factor_environment: clo_correction_factor_environment is not ported",
+  test("an empty ensemble is 0.161 clo", () => {
+    expect(clo_intrinsic_insulation_ensemble([])).toBe(0.161);
+  });
+
+  test("NaN propagates", () => {
+    expect(clo_intrinsic_insulation_ensemble([NaN])).toBeNaN();
+    expect(clo_intrinsic_insulation_ensemble(NaN)).toBeNaN();
+  });
+
+  // Deviation _shared-139, deviation _shared-140, deviation _shared-141,
+  // deviation _shared-145.
+  test.each([
+    [null],
+    [true],
+    ["2"],
+    [undefined],
+    [{}],
+    [[0.5, null]],
+    [[0.5, true]],
+    [["0.5"]],
+    [[[0.5], [0.5]]],
+    [[[0.5], [0.5, 1]]],
+    // A hole is not a number.
+    [[0.5, , 0.5]],
+  ])("throws TypeError for %j, naming clo_garments", (bad) => {
+    expect(() =>
+      clo_intrinsic_insulation_ensemble(bad as unknown as number[]),
+    ).toThrow(
+      new TypeError("clo_garments must be a number or an array of numbers."),
     );
   });
 });
@@ -356,6 +442,8 @@ describe("public API surface", () => {
     "clo_area_factor",
     "clo_insulation_air_layer",
     "clo_total_insulation",
+    "clo_intrinsic_insulation_ensemble",
+    "clo_correction_factor_environment",
   ] as const)("%s is exported from the root and from utilities", (name) => {
     expect(typeof pkg[name]).toBe("function");
     expect(pkg.default.utilities[name]).toBe(pkg[name]);
@@ -383,6 +471,12 @@ describe("argument types", () => {
       args: [1.0, 0.26, 0.06, 0.7, 0.3],
       params: ["i_t", "vr", "v_walk", "i_a_static", "i_cl"],
       required: 5,
+    },
+    {
+      fn: clo_correction_factor_environment,
+      args: [0.2, 0.1, 1],
+      params: ["vr", "v_walk", "i_cl"],
+      required: 3,
     },
     {
       fn: clo_dynamic_ashrae,
@@ -418,7 +512,8 @@ describe("argument types", () => {
   // deviation _shared-108, deviation _shared-109, deviation _shared-110,
   // deviation _shared-111, deviation _shared-112, deviation _shared-113,
   // deviation _shared-114, deviation _shared-115, deviation _shared-116,
-  // deviation _shared-117, deviation _shared-118, deviation _shared-119.
+  // deviation _shared-117, deviation _shared-118, deviation _shared-119,
+  // deviation _shared-142, deviation _shared-143, deviation _shared-144.
   test.each(cases)(
     "$name throws TypeError for an argument of the wrong type, naming it",
     ({ fn, args, params }) => {

@@ -1,3 +1,4 @@
+import dsumpw from "@stdlib/blas-ext-base-dsumpw";
 import { v_relative } from "../environment/v_relative.js";
 import { met_to_w_m2 } from "./met_to_w_m2.ts";
 import { Standard } from "./options.ts";
@@ -31,6 +32,38 @@ function _correction_normal_clothing(_vr: number, _vw: number): number {
       0.492 * _vw +
       0.176 * _vw ** 2,
   );
+}
+
+/**
+ * Calculate the intrinsic insulation of a clothing ensemble based on individual
+ * garments.
+ *
+ * This equation is in accordance with the ISO 9920:2009 standard
+ * [ISO9920](../../docs/references.md#iso9920) Section 4.3. It should be noted
+ * that this equation is only valid for clothing ensembles with rather uniform
+ * insulation values across the body.
+ *
+ * @param clo_garments - list of floats containing the clothing insulation for
+ * each individual garment
+ * @returns intrinsic insulation of the clothing ensemble, [clo]
+ */
+export function clo_intrinsic_insulation_ensemble(
+  clo_garments: number | readonly number[],
+): number {
+  const garments =
+    typeof (clo_garments as unknown) === "number"
+      ? [clo_garments as number]
+      : clo_garments;
+  if (!Array.isArray(garments)) {
+    throw notOfType("clo_garments", "a number or an array of numbers");
+  }
+  for (const clo of garments) {
+    if (typeof (clo as unknown) !== "number")
+      throw notOfType("clo_garments", "a number or an array of numbers");
+  }
+  // numpy's add.reduce starts from its identity 0.0, where dsumpw starts from the first element.
+  const sum = 0 + dsumpw(garments.length, Float64Array.from(garments), 1);
+  return sum * 0.835 + 0.161;
 }
 
 /**
@@ -142,6 +175,50 @@ export function clo_total_insulation(
   const normal_clothing = i_t * _correction_normal_clothing(vr, v_walk);
   if (i_cl <= 0.6) return ((0.6 - i_cl) * nude + i_cl * normal_clothing) / 0.6;
   return normal_clothing;
+}
+
+/**
+ * Return the correction factor for the total insulation of the clothing ensemble
+ * (`I`:sub:`T`) or the basic/intrinsic insulation (`I`:sub:`cl`).
+ *
+ * This correction factor takes into account of the fact that the values of
+ * (`I`:sub:`T`) and (`I`:sub:`cl`) are estimated in static conditions. In real
+ * environments the person may be walking, activity may pump air through the clothing,
+ * etc.
+ *
+ * @param vr - relative air speed, [m/s]
+ * @param v_walk - walking speed, [m/s]
+ * @param i_cl - intrinsic insulation of the clothing ensemble, this is the thermal insulation
+ * from the skin surface to the outer clothing surface [clo]
+ * @returns correction factor for the total insulation of the clothing ensemble
+ * (`I`:sub:`T,r` / (`I`:sub:`T`)) or the basic/intrinsic insulation
+ * (`I`:sub:`cl,r` / (`I`:sub:`cl`))
+ */
+export function clo_correction_factor_environment(
+  vr: number,
+  v_walk: number,
+  i_cl: number,
+): number {
+  for (const [key, value] of Object.entries({ vr, v_walk, i_cl })) {
+    if (typeof (value as unknown) !== "number")
+      throw notOfType(key, "a number");
+  }
+
+  function correction_low_clothing(
+    _vr: number,
+    _vw: number,
+    _i_cl: number,
+  ): number {
+    return (
+      ((0.6 - _i_cl) * _correction_nude(_vr, _vw) +
+        _i_cl * _correction_normal_clothing(_vr, _vw)) /
+      0.6
+    );
+  }
+
+  if (i_cl === 0) return _correction_nude(vr, v_walk);
+  if (i_cl <= 0.6) return correction_low_clothing(vr, v_walk, i_cl);
+  return _correction_normal_clothing(vr, v_walk);
 }
 
 /**

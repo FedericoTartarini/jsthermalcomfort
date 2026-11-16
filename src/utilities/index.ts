@@ -9,10 +9,12 @@ import { units_converter } from "./units_converter.ts";
 import { Postures, Sex, Standard, Units, WorkIntensity } from "./options.ts";
 import {
   clo_area_factor,
+  clo_correction_factor_environment,
   clo_dynamic_ashrae,
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
   clo_insulation_air_layer,
+  clo_intrinsic_insulation_ensemble,
   clo_total_insulation,
 } from "./clothing.ts";
 
@@ -22,7 +24,9 @@ export {
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
   clo_area_factor,
+  clo_correction_factor_environment,
   clo_insulation_air_layer,
+  clo_intrinsic_insulation_ensemble,
   clo_total_insulation,
   units_converter,
   met_typical_tasks,
@@ -48,7 +52,9 @@ export default {
   clo_dynamic_iso,
   clo_dynamic_iso_vr,
   clo_area_factor,
+  clo_correction_factor_environment,
   clo_insulation_air_layer,
+  clo_intrinsic_insulation_ensemble,
   clo_total_insulation,
   units_converter,
   met_typical_tasks,

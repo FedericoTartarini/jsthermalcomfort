@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   # No `branches` filter: a stacked PR (one whose base is another feature
   # branch) would otherwise get no checks at all, which reads as passing
   # rather than as skipped. See #200.

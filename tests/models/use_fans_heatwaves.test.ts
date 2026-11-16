@@ -130,7 +130,7 @@ describe("use_fans_heatwaves (JS-only)", () => {
     });
   });
 
-  // Upstream returns NaN for all 16 outputs where the vapour pressure is not finite, and tdb -241 raises StopIteration, measured on 4.8.1 (models/two_nodes_gagge.py:248-278).
+  // Upstream returns NaN for all 16 outputs where the vapour pressure is not finite, measured on 4.8.1 in the parity image (models/two_nodes_gagge.py:248-278).
   test.each([true, false])(
     "a tdb of -238 gives null for every output, with limit_inputs %s",
     (limit_inputs) => {
@@ -140,9 +140,17 @@ describe("use_fans_heatwaves (JS-only)", () => {
         for (const key of Object.keys(USE_FANS_HEATWAVES_INFO.outputs))
           expect(result).toHaveProperty(key, null);
       }
-      expect(() =>
-        use_fans_heatwaves({ ...cold, tdb: -241, rh: 50, limit_inputs }),
-      ).toThrow(new Error("Max iterations exceeded"));
+    },
+  );
+
+  // Upstream raises StopIteration at tdb -241, where the vapour pressure is finite, measured on 4.8.1 in the parity image (deviation two_nodes_gagge-7).
+  test.each([true, false])(
+    "a tdb of -241 still throws Max iterations exceeded, with limit_inputs %s",
+    (limit_inputs) => {
+      const cold = { tdb: -241, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
+      expect(() => use_fans_heatwaves({ ...cold, limit_inputs })).toThrow(
+        new Error("Max iterations exceeded"),
+      );
     },
   );
 

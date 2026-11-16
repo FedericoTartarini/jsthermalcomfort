@@ -84,7 +84,7 @@ describe("test_two_nodes_gagge", () => {
 });
 
 const base = { tdb: 30, tr: 35, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
-// p_sat_torr(-238) is Infinity, so the vapour pressure is not finite.
+// p_sat_torr(-238) overflows to Infinity (psychrometrics/p_sat_torr.py:23), so the vapour pressure is not finite.
 const cold = { tdb: -238, tr: 25, v: 0.1, rh: 50, met: 1.2, clo: 0.5 };
 const position_message =
   "position must be one of ['sitting', 'standing', 'standing, forced convection']";
@@ -227,7 +227,7 @@ describe("two_nodes_gagge (JS-only)", () => {
     },
   );
 
-  // Upstream raises StopIteration at tdb -241, where the vapour pressure is finite, measured on 4.8.1 (deviation two_nodes_gagge-7).
+  // Upstream raises StopIteration at tdb -241, where the vapour pressure is finite, measured on 4.8.1 in the parity image (deviation two_nodes_gagge-7).
   test("a tdb of -241 still throws Max iterations exceeded", () => {
     for (const calculate_ce of [false, true])
       expect(() => call({ ...cold, tdb: -241, calculate_ce })).toThrow(

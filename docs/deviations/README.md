@@ -3,7 +3,7 @@
 Every difference between this library and pythermalcomfort v4.8.1, whose `.py` is the only standard, is a whitelisted mechanical translation, a representation mapping or a row in a register here (ADRs 0019, 0027, 0028). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
 
 - `<model>.md` holds one main model's rows, named after upstream's function (`utci.md`). A model's ticket creates its register when it migrates the model. A model with no register here has not been migrated yet, and its differences from upstream are not recorded yet.
-- `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the inputs parse, `classifyFromBins`, `ModelInfo`) and the helpers the models call.
+- `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the inputs parse, `classifyFromBins`, `ModelInfo`) and the helpers, whether a model calls them or not.
 
 `tests/deviations.test.ts` checks the registers against the code.
 

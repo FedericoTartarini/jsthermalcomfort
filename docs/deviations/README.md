@@ -7,6 +7,51 @@ Every difference between this library and pythermalcomfort v4.8.1, whose `.py` i
 
 `tests/deviations.test.ts` checks the registers against the code.
 
+## The registers
+
+Each register is on GitHub, on the `main` branch:
+
+- [`_shared`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/_shared.md)
+- [`adaptive_ashrae`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/adaptive_ashrae.md)
+- [`adaptive_en`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/adaptive_en.md)
+- [`ankle_draft`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/ankle_draft.md)
+- [`at`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/at.md)
+- [`clo_tout`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/clo_tout.md)
+- [`cooling_effect`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/cooling_effect.md)
+- [`discomfort_index`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/discomfort_index.md)
+- [`esi`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/esi.md)
+- [`heat_index_lu`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/heat_index_lu.md)
+- [`heat_index_rothfusz`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/heat_index_rothfusz.md)
+- [`heat_index_schoen`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/heat_index_schoen.md)
+- [`humidex`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/humidex.md)
+- [`ireq`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/ireq.md)
+- [`net`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/net.md)
+- [`pet_steady`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/pet_steady.md)
+- [`phs`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/phs.md)
+- [`pmv_a`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/pmv_a.md)
+- [`pmv_athb`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/pmv_athb.md)
+- [`pmv_e`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/pmv_e.md)
+- [`pmv_ppd_ashrae`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/pmv_ppd_ashrae.md)
+- [`pmv_ppd_iso`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/pmv_ppd_iso.md)
+- [`ridge_regression_predict_t_re_t_sk`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/ridge_regression_predict_t_re_t_sk.md)
+- [`set_tmp`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/set_tmp.md)
+- [`solar_gain`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/solar_gain.md)
+- [`sports_heat_stress_risk`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/sports_heat_stress_risk.md)
+- [`thi`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/thi.md)
+- [`two_nodes_gagge`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/two_nodes_gagge.md)
+- [`two_nodes_gagge_ji`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/two_nodes_gagge_ji.md)
+- [`two_nodes_gagge_sleep`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/two_nodes_gagge_sleep.md)
+- [`use_fans_heatwaves`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/use_fans_heatwaves.md)
+- [`utci`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/utci.md)
+- [`vertical_tmp_grad_ppd`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/vertical_tmp_grad_ppd.md)
+- [`wbgt`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/wbgt.md)
+- [`wci`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/wci.md)
+- [`wind_chill_temperature`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/wind_chill_temperature.md)
+- [`work_capacity_dunne`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/work_capacity_dunne.md)
+- [`work_capacity_hothaps`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/work_capacity_hothaps.md)
+- [`work_capacity_iso`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/work_capacity_iso.md)
+- [`work_capacity_niosh`](https://github.com/FedericoTartarini/jsthermalcomfort/blob/main/docs/deviations/work_capacity_niosh.md)
+
 ## Kinds of difference
 
 **Whitelist (W).** A mechanical translation is not a deviation and gets no row (ADR 0019):
@@ -71,7 +116,7 @@ The library converts at one place too, `buildOutputs` in `src/_internal/modelInf
 
 A register is a Markdown file with a title, a line naming the model, one table with these columns, in this order, and a Notes section after it where the register has notes:
 
-```md
+```text
 | id  | part | upstream site | TS site | reason | class/ADR | status | date | parity |
 | --- | ---- | ------------- | ------- | ------ | --------- | ------ | ---- | ------ |
 ```

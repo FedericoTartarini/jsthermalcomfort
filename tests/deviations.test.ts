@@ -8,6 +8,7 @@ import {
   find_citations,
   parse_register,
   read_approved,
+  register_files,
 } from "./deviations/register.ts";
 
 // The register format, the TS site's symbol and the comment form are defined
@@ -382,6 +383,21 @@ describe("the repository", () => {
     expect([classes.size, additions.size]).toEqual([11, 7]);
     expect(classes.get("loop cap")).toBe("0015");
     expect(additions.get("gate-off rows")).toBe("0024");
+  });
+
+  // The README is a page of the documentation site, which deploys from main
+  // (.github/workflows/deploy-docs.yml), and no register is a page of the
+  // site, so the README links each register on GitHub's main branch.
+  test("the README links every register on GitHub's main branch", () => {
+    const readme = readFileSync(`${root}docs/deviations/README.md`, "utf8");
+    const links = [
+      ...readme.matchAll(
+        /\[`([^`]+)`\]\(https:\/\/github\.com\/FedericoTartarini\/jsthermalcomfort\/blob\/main\/docs\/deviations\/([^)]+)\)/g,
+      ),
+    ].map(([, label, file]) => [label, file]);
+    expect(links).toEqual(
+      register_files(root).map((file) => [file.replace(/\.md$/, ""), file]),
+    );
   });
 
   test("every register agrees with the code", () => {

@@ -16,6 +16,7 @@
     "docs/authors.md",
     "docs/surveys.md",
     "docs/references.md",
+    "docs/deviations/README.md",
     "docs/changelog.md"
   ],
   "sortEntryPoints": false,

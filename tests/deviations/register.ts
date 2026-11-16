@@ -472,6 +472,13 @@ export function check_symbols(root: string, rows: readonly Row[]): string[] {
   return failures;
 }
 
+/** Lists the register files under docs/deviations/, the README aside, sorted. */
+export function register_files(root: string): string[] {
+  return readdirSync(join(root, REGISTERS))
+    .filter((name) => name.endsWith(".md") && name !== "README.md")
+    .sort();
+}
+
 /** Reads every register under docs/deviations/, the README aside. */
 export function read_registers(root: string): Parsed {
   const approved = read_approved(
@@ -479,8 +486,7 @@ export function read_registers(root: string): Parsed {
   );
   const rows: Row[] = [];
   const failures: string[] = [];
-  for (const name of readdirSync(join(root, REGISTERS)).sort()) {
-    if (!name.endsWith(".md") || name === "README.md") continue;
+  for (const name of register_files(root)) {
     const file = `${REGISTERS}/${name}`;
     const text = readFileSync(join(root, file), "utf8");
     const parsed = parse_register(file, text, approved);

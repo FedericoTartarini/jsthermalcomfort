@@ -1,5 +1,5 @@
 import dsumpw from "@stdlib/blas-ext-base-dsumpw";
-import { v_relative } from "../environment/v_relative.js";
+import { v_relative } from "../environment/v_relative.ts";
 import { met_to_w_m2 } from "./met_to_w_m2.ts";
 import { Standard } from "./options.ts";
 import { notOfType } from "../_internal/errors.ts";

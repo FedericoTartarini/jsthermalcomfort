@@ -1,9 +1,9 @@
-import { f_svv } from "./f_svv.js";
-import { mean_radiant_tmp } from "./mean_radiant_tmp.js";
+import { f_svv } from "./f_svv.ts";
+import { mean_radiant_tmp } from "./mean_radiant_tmp.ts";
 import { operative_tmp } from "./operative_tmp.ts";
-import { running_mean_outdoor_temperature } from "./running_mean_outdoor_temperature.js";
+import { running_mean_outdoor_temperature } from "./running_mean_outdoor_temperature.ts";
 import { transpose_sharp_altitude } from "./transpose_sharp_altitude.ts";
-import { v_relative } from "./v_relative.js";
+import { v_relative } from "./v_relative.ts";
 
 export {
   f_svv,

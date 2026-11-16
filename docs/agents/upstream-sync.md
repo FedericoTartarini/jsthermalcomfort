@@ -29,12 +29,12 @@ Then cross-check the diff against the "pythermalcomfort changes to port" issue i
 
 Each change in the diff takes one class, ADR 0028's three layers plus docstrings, and each class lands in a ticket: the retarget ticket, or an alignment ticket it names. An open ticket whose model or helper vY changes gains a note naming the change.
 
-| Class          | What it covers                                                                                | What the library does                                                                                                                                |
-| -------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| computation    | What is computed, the branches, the order of operations, which inputs give NaN or raise       | Ported line for line, at the same place. A changed returned value is a breaking change (`!`).                                                        |
-| mechanism      | numpy broadcasting, numba, `np.vectorize`, dataclass validation, Python's calling conventions | Translated into TypeScript idiom; often nothing changes.                                                                                             |
-| representation | A returned value's type, its "no value", the shape of the arguments                           | Checked against its R mapping in `docs/deviations/README.md`. An upstream value outside every mapping's domain needs a mapping first (ADR 0028).     |
-| docstring      | Docstrings, examples and references                                                           | Copied to TSDoc in the upstream docstring's order. An error in it is fixed and recorded as a register row (ADR 0025), and drafted upstream (step 8). |
+| Class          | What it covers                                                                                | What the library does                                                                                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| computation    | What is computed, the branches, the order of operations, which inputs give NaN or raise       | Ported line for line, at the same place, and the parity draws reach the inputs it changes (steps 3 and 4). A changed returned value is a breaking change (`!`). |
+| mechanism      | numpy broadcasting, numba, `np.vectorize`, dataclass validation, Python's calling conventions | Translated into TypeScript idiom; often nothing changes.                                                                                                        |
+| representation | A returned value's type, its "no value", the shape of the arguments                           | Checked against its R mapping in `docs/deviations/README.md`. An upstream value outside every mapping's domain needs a mapping first (ADR 0028).                |
+| docstring      | Docstrings, examples and references                                                           | Copied to TSDoc in the upstream docstring's order. An error in it is fixed and recorded as a register row (ADR 0025), and drafted upstream (step 8).            |
 
 A rename is not representation: the library renames too (ADR 0028, `AGENTS.md`). A new input or returned value is adopted now that the release has it (ADR 0016). A new main model migrates by ADR 0018.
 
@@ -44,11 +44,12 @@ The parity suite catches a NaN only where its data reach one. Read the diff for 
 
 1. find an input that gives NaN, measured in the parity image;
 2. declare the output `nullable` in its model's `INFO.outputs`;
-3. pin it by a unit test that asserts `null` at that input, as `tests/models/at.test.ts` does for `at`.
+3. pin it by a unit test that asserts `null` at that input, as `tests/models/at.test.ts` does for `at`;
+4. widen the model's draws in `scripts/parity/generate.py` across the bound of the inputs that give it, so the parity data compare it too, as `GUARD_TDB_BOUNDS` does for v4.8.1's `two_nodes_gagge` guard.
 
 ## 4. New or moved raises
 
-The generator samples both sides of each bound where upstream raises for an input's value, and the harness requires the library to throw exactly where upstream raises and to return exactly where it returns (`scripts/parity/README.md`, "What is generated and compared"). For a raise vY adds or moves, widen the model's draws in `scripts/parity/generate.py` across the new bound and add its class to the model's entry in `RAISES` (`GATED_RAISES` for a raise after the range warnings under `limit_inputs`); any other raise stops the script. The regenerated data then hold the raise-agreement cases on both sides of it. Choice-string, type and array-shape checks and non-finite inputs are not generated, and the mirrored tests cover them.
+The generator samples both sides of each bound where upstream raises for an input's value, and the harness requires the library to throw exactly where upstream raises and to return exactly where it returns (`scripts/parity/README.md`, "What is generated and compared"). For a raise vY adds or moves, by a check or by a computation change (v4.8.1's `two_nodes_gagge` guard returns NaN at `tdb` -238 °C, where v4.8.0's loop raised `StopIteration`), widen the model's draws in `scripts/parity/generate.py` across the new bound and add its class to the model's entry in `RAISES` (`GATED_RAISES` for a raise after the range warnings under `limit_inputs`); any other raise stops the script. The regenerated data then hold the raise-agreement cases on both sides of it. Choice-string, type and array-shape checks and non-finite inputs are not generated, and the mirrored tests cover them.
 
 ## 5. Parity pins and data
 

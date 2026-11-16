@@ -169,7 +169,7 @@ describe("cooling_effect (JS-only)", () => {
       call(inputs).warnings.length,
       warnings.length === 0 ? 0 : 1,
     ]);
-    expect(counts.filter(([, upstream]) => upstream === 1)).toHaveLength(120);
+    expect(counts.filter(([, upstream]) => upstream === 1)).toHaveLength(135);
     for (const [library, upstream] of counts) expect(library).toBe(upstream);
   });
 

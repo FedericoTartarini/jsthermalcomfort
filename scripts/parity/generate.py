@@ -74,6 +74,15 @@ def _across(rng, p, bounds, width, draw):
     return draw
 
 
+# The tdb bounds of two_nodes_gagge's guard (models/two_nodes_gagge.py:248-278):
+# between them rh * p_sat_torr(tdb) / 100 (:131) is not finite and the kernel
+# returns NaN for every output, and below the lower one its clothing-temperature
+# loop can raise StopIteration (:386), as at -241 °C. The lower bound moves with rh, from
+# -240.831 °C at rh 1 to -240.871 at rh 105; the upper one is -235 °C, where the
+# vapour pressure is 0 (measured on 4.8.1 in the parity image).
+GUARD_TDB_BOUNDS = [-240.85, -235.0]
+
+
 def _rh(rng):
     """rh in [0, 100], at each bound now and then, and a tenth of the time
     within 5 % of a bound, past which upstream raises."""
@@ -184,14 +193,18 @@ def _cooling_effect(rng):
     # vr reaches the 0.1 m/s still-air cut-off from both sides, and the hot,
     # humid cases where the still-air SET root is not bracketed, which return 0
     # with upstream's warning; units comes in either case, as upstream
-    # upper-cases it.
+    # upper-cases it. Now and then an SI tdb is near one of GUARD_TDB_BOUNDS.
     units = str(rng.choice(["SI", "IP", "si", "ip"]))
     if units.upper() == "SI":
         tdb, tr, vr = (5.0, 50.0), (5.0, 60.0), (0.0, 3.0)
     else:
         tdb, tr, vr = (41.0, 122.0), (41.0, 140.0), (0.0, 9.8)
     return {
-        "tdb": _value(rng, *tdb),
+        "tdb": (
+            _across(rng, 0.05, GUARD_TDB_BOUNDS, 1.0, _value(rng, *tdb))
+            if units.upper() == "SI"
+            else _value(rng, *tdb)
+        ),
         "tr": _value(rng, *tr),
         "vr": _value(rng, vr[0], vr[1] / 10) if rng.random() < 0.2 else _value(rng, *vr),
         "rh": _value(rng, 0.0, 100.0),
@@ -610,9 +623,10 @@ def _set_tmp(rng):
     # the library's SET once drifted from upstream's by up to 6.4 °C
     # (tdb 42-49 °C, tr 57-66 °C; docs/deviations/set_tmp.md, Notes).
     # position comes in any case, as two_nodes_gagge's check accepts.
-    # calculate_ce takes the SET path, which ignores position.
+    # calculate_ce takes the SET path, which ignores position. Now and then tdb
+    # is near one of GUARD_TDB_BOUNDS.
     return {
-        "tdb": _value(rng, 5.0, 50.0),
+        "tdb": _across(rng, 0.05, GUARD_TDB_BOUNDS, 1.0, _value(rng, 5.0, 50.0)),
         "tr": _value(rng, 5.0, 67.0),
         "v": _value(rng, -0.1, 4.0),
         "rh": _value(rng, 0.0, 100.0),
@@ -703,9 +717,10 @@ def _two_nodes_gagge(rng):
     # cap in (0.06, 1], or, a fifth of the time, within 0.05 of 0, 0.06 or 1,
     # where GaggeTwoNodesInputs raises outside 0 and (0.06, 1]
     # (classes_input.py:725-740). calculate_ce takes the SET path, which ignores
-    # position, the two maxima, w_max and round_output.
+    # position, the two maxima, w_max and round_output. Now and then tdb is near
+    # one of GUARD_TDB_BOUNDS.
     case = {
-        "tdb": _value(rng, 0.0, 50.0),
+        "tdb": _across(rng, 0.05, GUARD_TDB_BOUNDS, 1.0, _value(rng, 0.0, 50.0)),
         "tr": _value(rng, 0.0, 60.0),
         "v": _value(rng, 0.0, 4.0),
         "rh": _value(rng, 0.0, 100.0),
@@ -852,9 +867,10 @@ def _use_fans_heatwaves(rng):
     # rh 0-100 %, met 0.7-2 met, clo 0-1 clo), so NaN positions and every
     # check's warning are compared too, and reach the heat strain each maximum
     # gives: skin blood flow, skin wettedness and regulatory sweating. position
-    # comes in any case, as two_nodes_gagge's check accepts.
+    # comes in any case, as two_nodes_gagge's check accepts. Now and then tdb is
+    # near one of GUARD_TDB_BOUNDS.
     return {
-        "tdb": _value(rng, 15.0, 55.0),
+        "tdb": _across(rng, 0.05, GUARD_TDB_BOUNDS, 1.0, _value(rng, 15.0, 55.0)),
         "tr": _value(rng, 15.0, 60.0),
         "v": _value(rng, 0.0, 5.0),
         "rh": _value(rng, -5.0, 105.0),
@@ -1043,10 +1059,12 @@ GATED_RAISES = {"ankle_draft": ValueError}
 # messages for review, since a generator's mistake of a listed class reads as
 # a raise; any other class stops the generator. pet_steady's are decision
 # 283's: a zero divisor, a complex value compared, and minpack's error on a
-# complex residual.
+# complex residual. The StopIteration of the four models that run
+# two_nodes_gagge's kernel is its loop's, below GUARD_TDB_BOUNDS.
 RAISES = {
     "ankle_draft": (ValueError,),
     "at": (ValueError,),
+    "cooling_effect": (StopIteration,),
     "esi": (ValueError,),
     "heat_index_lu": (ValueError,),
     "heat_index_schoen": (ValueError,),
@@ -1055,11 +1073,13 @@ RAISES = {
     "pet_steady": (ZeroDivisionError, TypeError, minpack_error),
     "phs": (ValueError,),
     "ridge_regression_predict_t_re_t_sk": (ValueError,),
+    "set_tmp": (StopIteration,),
     "sports_heat_stress_risk": (ValueError,),
     "thi": (ValueError,),
-    "two_nodes_gagge": (ValueError,),
+    "two_nodes_gagge": (ValueError, StopIteration),
     "two_nodes_gagge_ji": (ZeroDivisionError, StopIteration),
     "two_nodes_gagge_sleep": (ValueError, ZeroDivisionError),
+    "use_fans_heatwaves": (StopIteration,),
     "wbgt": (ValueError,),
     "work_capacity_iso": (ValueError,),
     "work_capacity_niosh": (ValueError,),

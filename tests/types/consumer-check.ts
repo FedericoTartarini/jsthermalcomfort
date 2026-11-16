@@ -774,7 +774,7 @@ const two_nodes: SET | GaggeTwoNodes = two_nodes_gagge(two_nodes_inputs);
 const two_nodes_set: number | null = two_nodes.set;
 // @ts-expect-error a boolean calculate_ce returns the union, not GaggeTwoNodes.
 const two_nodes_union: GaggeTwoNodes = two_nodes_gagge(two_nodes_inputs);
-const two_nodes_w: number = two_nodes_gagge({
+const two_nodes_w: number | null = two_nodes_gagge({
   tdb: 25,
   tr: 25,
   v: 0.1,
@@ -782,7 +782,7 @@ const two_nodes_w: number = two_nodes_gagge({
   clo: 0.5,
   met: 1.2,
 }).w;
-const two_nodes_skin: number = two_nodes_gagge({
+const two_nodes_skin: number | null = two_nodes_gagge({
   ...two_nodes_inputs,
   calculate_ce: false,
 }).e_skin;

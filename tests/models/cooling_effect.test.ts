@@ -131,6 +131,19 @@ describe("cooling_effect (JS-only)", () => {
     expect(isDeepFrozen(result)).toBe(true);
   });
 
+  // Upstream's brentq raises ValueError on the NaN SET of a non-finite vapour pressure, and tdb -241 raises StopIteration, measured on 4.8.1 (models/two_nodes_gagge.py:248-278, deviation cooling_effect-3).
+  test("a tdb of -238 returns 0 with upstream's notice", () => {
+    const cold = { tdb: -238, tr: 25, vr: 0.8, met: 1.2, clo: 0.5 };
+    for (const rh of [50, 0])
+      expect(cooling_effect({ ...cold, rh })).toEqual({
+        ce: 0,
+        warnings: [notice],
+      });
+    expect(() => cooling_effect({ ...cold, tdb: -241, rh: 50 })).toThrow(
+      new Error("Max iterations exceeded"),
+    );
+  });
+
   // Upstream returns before solving when vr <= 0.1 (models/cooling_effect.py:187-188).
   test("still air returns 0 without a notice", () => {
     for (const vr of [0, 0.05, 0.1])

@@ -47,7 +47,7 @@ const position_message =
   "position must be one of ['sitting', 'standing', 'standing, forced convection']";
 
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
-// parity image, and the flags on 4.8.0.
+// parity image, and the flags on 4.8.1.
 describe("use_fans_heatwaves (JS-only)", () => {
   // models/use_fans_heatwaves.py:91-92.
   test("the docstring's example gives its e_skin", () => {
@@ -129,6 +129,22 @@ describe("use_fans_heatwaves (JS-only)", () => {
       warnings: [],
     });
   });
+
+  // Upstream returns NaN for all 16 outputs where the vapour pressure is not finite, and tdb -241 raises StopIteration, measured on 4.8.1 (models/two_nodes_gagge.py:248-278).
+  test.each([true, false])(
+    "a tdb of -238 gives null for every output, with limit_inputs %s",
+    (limit_inputs) => {
+      const cold = { tdb: -238, tr: 25, v: 0.1, met: 1.2, clo: 0.5 };
+      for (const rh of [50, 0]) {
+        const result = use_fans_heatwaves({ ...cold, rh, limit_inputs });
+        for (const key of Object.keys(USE_FANS_HEATWAVES_INFO.outputs))
+          expect(result).toHaveProperty(key, null);
+      }
+      expect(() =>
+        use_fans_heatwaves({ ...cold, tdb: -241, rh: 50, limit_inputs }),
+      ).toThrow(new Error("Max iterations exceeded"));
+    },
+  );
 
   // classes_input.py:138-139: BaseInputs skips None, which the kernel takes as standing.
   test("null for position computes as standing", () => {

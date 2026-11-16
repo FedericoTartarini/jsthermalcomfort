@@ -12,7 +12,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.setTmp,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_set.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_set.py.
 // Upstream's arrays are called element-wise.
 describe("test_set", () => {
   test.each(reference_table.data)("test_set_url: fixture case %#", (entry) => {
@@ -106,7 +106,7 @@ describe("set_tmp (JS-only)", () => {
     ).toBe(true);
   });
 
-  // models/two_nodes_gagge.py:133-146, :337-342: the SET path passes 1 as position, which computes as standing.
+  // models/two_nodes_gagge.py:133-146, :369-374: the SET path passes 1 as position, which computes as standing.
   test.each(["sitting", "standing"])(
     "calculate_ce takes the SET path, whatever the position, %s",
     (position) => {

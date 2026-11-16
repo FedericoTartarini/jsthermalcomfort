@@ -4,7 +4,7 @@ import { transpose_sharp_altitude as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_environment.py,
+// Mirrors pythermalcomfort v4.8.1 tests/test_environment.py,
 // test_transpose_sharp_altitude; its keyword calls are positional here.
 describe("test_environment", () => {
   test("test_transpose_sharp_altitude", () => {

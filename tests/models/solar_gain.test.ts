@@ -12,7 +12,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.solarGain,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_solar_gain.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_solar_gain.py.
 describe("test_solar_gain", () => {
   test.each(reference_table.data)(
     "test_solar_gain: fixture case %#",

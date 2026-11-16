@@ -20,7 +20,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.verticalTmpGradPpd,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_vertical_tmp_grad_ppd.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_vertical_tmp_grad_ppd.py.
 // Upstream's arrays are called element-wise, and a UserWarning becomes a range row.
 describe("test_vertical_tmp_grad_ppd", () => {
   test.each(reference_table.data)(

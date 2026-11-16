@@ -35,7 +35,7 @@ const fields = [
   "skin_blood_flow",
 ] as const;
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_two_nodes_gagge_sleep.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_two_nodes_gagge_sleep.py.
 describe("test_two_nodes_gagge_sleep", () => {
   test("test_two_nodes_gagge_sleep_single_input", () => {
     const result = two_nodes_gagge_sleep({

@@ -15,7 +15,7 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.adaptiveEn,
 );
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_adaptive_en.py.
+// Mirrors pythermalcomfort v4.8.1 tests/test_adaptive_en.py.
 // Upstream's arrays are called element-wise, and a UserWarning becomes a range row.
 describe("test_adaptive_en", () => {
   test.each(reference_table.data)(

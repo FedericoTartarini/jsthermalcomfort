@@ -30,7 +30,7 @@ import {
   WORK_CAPACITY_HOTHAPS_INFO,
 } from "../src/models/index.ts";
 
-// Mirrors pythermalcomfort v4.8.0 tests/test_internal.py, which tests
+// Mirrors pythermalcomfort v4.8.1 tests/test_internal.py, which tests
 // _internal directly, so it imports the kernels' own file (seam S2). A
 // UserWarning becomes a range row (deviation _shared-3), and a `match=` on its
 // text becomes assertions on the row's key, value and bound.

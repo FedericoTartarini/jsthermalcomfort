@@ -4,7 +4,7 @@ import { body_surface_area as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 
-// Mirrors the body_surface_area cases of pythermalcomfort v4.8.0
+// Mirrors the body_surface_area cases of pythermalcomfort v4.8.1
 // tests/test_utilities.py; its keyword call is positional here.
 describe("test_utilities", () => {
   test("test_body_surface_area", () => {

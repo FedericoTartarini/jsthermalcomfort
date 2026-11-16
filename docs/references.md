@@ -1,6 +1,6 @@
 # References
 
-The works the docstrings cite, under pythermalcomfort v4.8.0's labels (`docs/documentation/references.rst`). A citation links to its entry.
+The works the docstrings cite, under pythermalcomfort v4.8.1's labels (`docs/documentation/references.rst`). A citation links to its entry.
 
 ## 11079ISO2007
 

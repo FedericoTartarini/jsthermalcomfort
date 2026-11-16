@@ -74,7 +74,7 @@ Upstream's `tests/conftest.py` pins a ref of `validation-data-comfort-models`. W
 Drafts live in `.scratch/<feature>/upstream/NN-pythermalcomfort-<slug>.md`. A draft filed upstream is a new file, `.scratch/<feature>/upstream/filing/NN-<slug>.md`, and `.scratch/<feature>/upstream/filing/README.md` is the record of filed drafts: each one's issue number, the old drafts it replaces, and the checks made on it. An old draft that a filed draft replaces stays where it is and is not re-run.
 
 - An unfiled draft: re-run its reproduction under vY in the parity image, and move its links to vY's tag with their new lines. A draft vY settles is reworded or dropped.
-- A filed draft stays as it was filed, links included, since its text is what the issue says. Check whether vY settles its issue: the issue's state on GitHub, and whether each line the draft links, at whatever commit the link pins, holds the same text at vY (a line that only moved counts as the same). Record the result, with vY and the date, in `.scratch/<feature>/upstream/filing/README.md`.
+- A filed draft stays as it was filed, links included, since its text is what the issue says. Check whether vY settles its issue: the issue's state on GitHub, and whether vY still holds the text of each line the draft links, as that line read at the commit its link pins; a line that only moved still holds it. Record the result, with vY and the date, in `.scratch/<feature>/upstream/filing/README.md`.
 
 Before drafting anything new, search upstream's open and closed issues and pull requests.
 

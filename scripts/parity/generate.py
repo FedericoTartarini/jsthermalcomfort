@@ -1059,8 +1059,12 @@ GATED_RAISES = {"ankle_draft": ValueError}
 # messages for review, since a generator's mistake of a listed class reads as
 # a raise; any other class stops the generator. pet_steady's are decision
 # 283's: a zero divisor, a complex value compared, and minpack's error on a
-# complex residual. The StopIteration of the four models that run
-# two_nodes_gagge's kernel is its loop's, below GUARD_TDB_BOUNDS.
+# complex residual. The StopIteration of cooling_effect, set_tmp,
+# two_nodes_gagge and use_fans_heatwaves is the kernel's loop's, where the tdb
+# the kernel is given is below the lower of GUARD_TDB_BOUNDS; cooling_effect's
+# brentq also gives it tdb - 40 (models/cooling_effect.py:197, :209), so
+# cooling_effect raises for some tdb above both bounds too (measured on 4.8.1
+# in the parity image).
 RAISES = {
     "ankle_draft": (ValueError,),
     "at": (ValueError,),

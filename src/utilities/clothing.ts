@@ -61,7 +61,8 @@ export function clo_intrinsic_insulation_ensemble(
     if (typeof (clo as unknown) !== "number")
       throw notOfType("clo_garments", "a number or an array of numbers");
   }
-  // numpy's add.reduce starts from its identity 0.0, where dsumpw starts from the first element.
+  // numpy's add.reduce starts from its identity 0.0, where dsumpw starts from
+  // the first element (ADR 0026; the note in docs/deviations/_shared.md).
   const sum = 0 + dsumpw(garments.length, Float64Array.from(garments), 1);
   return sum * 0.835 + 0.161;
 }

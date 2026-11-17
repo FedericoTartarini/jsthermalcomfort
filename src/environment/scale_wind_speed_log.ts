@@ -192,9 +192,11 @@ export function scale_wind_speed_log(
 }
 
 /**
- * One subtract, multiply or divide as numpy runs it under `np.errstate(invalid="raise",
- * over="raise")`: NaN from operands that are not NaN, or ±Infinity from finite
- * ones, throws numpy's message (deviation _shared-168).
+ * One subtract, multiply or divide as numpy runs it under
+ * `np.errstate(divide="raise", invalid="raise", over="raise", under="ignore")`:
+ * NaN from operands that are not NaN, or ±Infinity from finite ones, throws
+ * numpy's message (deviation _shared-168). The checks above leave no zero
+ * divisor and no log of zero, so `divide="raise"` has no counterpart here.
  */
 function raising(
   a: number,

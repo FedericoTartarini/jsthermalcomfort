@@ -23,8 +23,7 @@ const grid = TDB.flatMap((tdb) =>
   RH.flatMap((rh) => P_ATM.map((p_atm) => ({ tdb, rh, p_atm }))),
 );
 
-// What upstream's tests leave out, measured on pythermalcomfort 4.8.1 in the
-// parity image.
+// What upstream's tests leave out.
 describe("hr_to_rh (JS-only)", () => {
   // The same p_sat(tdb) sits on both sides of the round trip and cancels,
   // so the inverse is exact to floating point.
@@ -36,8 +35,9 @@ describe("hr_to_rh (JS-only)", () => {
     },
   );
 
-  // Reference values from pythermalcomfort.utilities.hr_to_rh, which they
-  // equal within 1.5e-14 % rh.
+  // Reference values measured on pythermalcomfort 4.8.1's
+  // psychrometrics.hr_to_rh in the parity image. The library returns them
+  // within 1.5e-14 % rh.
   it.each([
     { hr: 0.01, tdb: 25, p_atm: 101325, expected: 50.58961491444707 },
     { hr: 0.005, tdb: 20, p_atm: 101325, expected: 34.54929239449113 },

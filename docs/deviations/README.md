@@ -73,6 +73,7 @@ Each register is on GitHub, on the `main` branch:
 12. A docstring's examples are TypeScript calls, with upstream's inputs and outputs (ADR 0025).
 13. A docstring's prose types, such as "float or list of floats", are dropped, since the signature gives the type (ADR 0025).
 14. A helper, like every JavaScript function, ignores surplus arguments, where Python raises `TypeError` for a call that does not bind (ADR 0022).
+15. Each `*_INFO` constant has the one-sentence TSDoc `Describes the standards, inputs and outputs of {@link <model>}.`, which replaces none of upstream's text, as `*_INFO` has no upstream counterpart (ADR 0025, 2026-11-18 amendment).
 
 **Deviation classes (C).** The user approved each class once, and every instance gets a row that names its class:
 

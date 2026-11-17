@@ -190,6 +190,14 @@ One comment may cite several rows, each with its own `deviation`: `deviation utc
 
 Run it alone with `npm test -- tests/deviations.test.ts`.
 
-## Upstream tests with no counterpart
+## Mirrored tests that depart from upstream's
 
-Upstream's `tests/test_classes_return.py` tests `AutoStrMixin`'s `str`, `repr` and `getitem`. It has no counterpart here, since Python's presentation has no JavaScript equivalent (`.scratch/v2-all-models/decisions.md`, decision 99).
+The header of `tests/models/testUtils.ts` sets how a test mirrors upstream's. This section lists each mirrored test that departs from its upstream test on purpose, and each upstream test or module with no mirror. Upstream's tests are cited from its repository root, and its modules from `pythermalcomfort/`, at v4.8.1.
+
+- `tests/test_at.py:31`, `test_at_q`, calls `is_equal(result, 25.3, 0.1)` without `assert`, and 4.8.1 returns 30.9. `tests/models/at.test.ts` asserts 30.9 (`.scratch/v2-all-models/decisions.md`, decision 253; [pythermalcomfort#527](https://github.com/pythermalcomfort/pythermalcomfort/issues/527)).
+- `tests/test_esi.py:36`, `:37` and `:38`, `test_esi_boundary_conditions`, never assert their 16.5, 19.5 and 18.0 (`:49`), and 4.8.1 returns 19.9, 33.1 and 24.8. `tests/models/esi.test.ts` asserts 19.9, 33.1 and 24.8 (decision 253; [pythermalcomfort#527](https://github.com/pythermalcomfort/pythermalcomfort/issues/527)).
+- `tests/test_choice_field.py:55`, the four `series` cases of `test_choice_fields_preserve_valid_values`, pass a pandas Series, which has no JavaScript counterpart. They are todos in `tests/models/phs.test.ts`, `tests/models/ridge_regression_predict_t_re_t_sk.test.ts`, `tests/models/two_nodes_gagge.test.ts` and `tests/models/work_capacity_dunne.test.ts`.
+- `tests/test_environment.py:292`, `test_legacy_scale_wind_speed_log_shims`, reads the deprecated alias `scale_wind_speed_log` from `pythermalcomfort.utils` (`[package]`) and from `pythermalcomfort.utils.scale_wind_speed_log` (`[submodule]`). ADR 0010 keeps no deprecated alias, so the library has none (`_shared-169`), and the test is a todo in `tests/environment/scale_wind_speed_log.test.ts`.
+- `tests/test_classes_return.py` tests `AutoStrMixin`'s `str`, `repr` and `getitem`. It has no counterpart here, since Python's presentation has no JavaScript equivalent (decision 99).
+- `plots` (`plots/matplotlib/`) is not ported, since it depends on matplotlib and pandas. Its tests, the seven `tests/test_plot_*.py`, have no counterpart here.
+- `cli` (`cli.py` and `__main__.py`) is not ported. Its `main` prints `argv` and returns 0 (`cli.py:20-30`), and it has no upstream test.

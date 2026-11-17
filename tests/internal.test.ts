@@ -222,6 +222,7 @@ describe("test_choice_field", () => {
       "FIRST",
     );
     const invalid = () => parseInputs(info, { custom_choice: "invalid" });
+    // ValueError upstream, classes_input.py:184 (deviation _shared-180).
     expect(invalid).toThrow(RangeError);
     expect(invalid).toThrow("custom_choice must be one of");
   });

@@ -114,6 +114,7 @@ import {
   HEAT_INDEX_SCHOEN_INFO,
   HUMIDEX_INFO,
   IREQ_INFO,
+  JOS3,
   RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO,
   NET_INFO,
   PHS_INFO,
@@ -198,7 +199,10 @@ import * as jsthermalcomfort from "jsthermalcomfort";
 // @ts-expect-error PMV_CATEGORY_BINS_ISO is no longer exported.
 import { PMV_CATEGORY_BINS_ISO } from "jsthermalcomfort";
 // Each subpath entry carries the same declarations as the root.
-import { utci as utciFromModels } from "jsthermalcomfort/models";
+import {
+  utci as utciFromModels,
+  JOS3 as JOS3FromModels,
+} from "jsthermalcomfort/models";
 import { p_sat } from "jsthermalcomfort/psychrometrics";
 import {
   BodySurfaceAreaEquations,
@@ -1399,3 +1403,11 @@ let skin_head = DefaultSkinTemperature.head;
 skin_head = 36;
 // @ts-expect-error the object is readonly.
 DefaultSkinTemperature.head = 36;
+
+// JOS3 is a named export of the root and of the models subpath, typed from
+// its JSDoc: the subpath's JOS3 is assignable to the root's, and a wrong
+// argument type fails.
+const jos3: JOS3 = new JOS3FromModels(1.72, 74.43);
+jos3.simulate(1, 60);
+// @ts-expect-error height is a number.
+new JOS3("1.72");

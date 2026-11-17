@@ -197,6 +197,7 @@ export {
   HUMIDEX_INFO,
   ireq,
   IREQ_INFO,
+  JOS3,
   net,
   NET_INFO,
   phs,

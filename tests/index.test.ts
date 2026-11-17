@@ -1,5 +1,6 @@
 import { expect, describe, it } from "vitest";
 import jsthermalcomfort, * as namedExports from "../src/index.ts";
+import * as modelsExports from "../src/models/index.ts";
 
 describe("NPM Package", () => {
   it("should be an object", () => {
@@ -126,8 +127,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.models).toHaveProperty("use_fans_heatwaves");
   });
 
-  it("should have models.JOS3", () => {
+  it("should have models.JOS3, and at the root and the models subpath", () => {
     expect(jsthermalcomfort.models).toHaveProperty("JOS3");
+    expect(namedExports.JOS3).toBe(jsthermalcomfort.models.JOS3);
+    expect(modelsExports.JOS3).toBe(jsthermalcomfort.models.JOS3);
   });
 
   it("should have utilities.body_surface_area", () => {

@@ -55,9 +55,9 @@ function _to17array(inp) {
   }
 
   if (math.isCollection(inp)) {
-    const size = math.size(inp).toArray();
+    const size = math.size(inp).valueOf();
 
-    if (!math.equal(size, [17])) {
+    if (size.length !== 1 || size[0] !== 17) {
       throw new Error("Input list is not of length 17");
     }
 

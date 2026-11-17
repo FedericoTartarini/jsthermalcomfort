@@ -19,6 +19,33 @@ describe("JOS3", () => {
     }
   });
 
+  // Upstream's setters take a list or a numpy array of 17 values, one per
+  // body part (jos3.py:1427-1439, jos3_functions/construction.py:63
+  // `to_array_body_parts`), as upstream's examples/calc_jos3.py:89 sets
+  // `model.v`.
+  describe("a per-body-part setter takes an array or a Matrix", () => {
+    const v = [
+      0.2, 0.4, 0.4, 0.1, 0.1, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.1, 0.1, 0.1, 0.1,
+      0.1, 0.1,
+    ];
+
+    it.each([
+      ["an array", v],
+      ["a Matrix", math.matrix(v)],
+    ])("%s", (_, input) => {
+      const jos = new JOS3();
+      jos.v = input;
+      expect(jos.v.toArray()).toStrictEqual(v);
+    });
+
+    it("throws for an array that is not 17 long", () => {
+      const jos = new JOS3();
+      expect(() => {
+        jos.v = [0.1, 0.2];
+      }).toThrow("Input list is not of length 17");
+    });
+  });
+
   describe("state after single iteration", () => {
     describe("results should have correct values", () => {
       const jos = new JOS3(

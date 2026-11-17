@@ -1,4 +1,4 @@
-import { JOS3 } from "../../src/models/JOS3.js";
+import { JOS3 } from "../../src/models/index.ts";
 import { describe, it, expect } from "vitest";
 import single_iteration from "./1_run_dict.json";
 import twenty_iterations from "./20_runs_dict.json";

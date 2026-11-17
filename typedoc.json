@@ -13,6 +13,7 @@
   "readme": "docs/overview.md",
   "projectDocuments": [
     "docs/installation.md",
+    "docs/migration-v2.md",
     "docs/contributing.md",
     "docs/authors.md",
     "docs/surveys.md",

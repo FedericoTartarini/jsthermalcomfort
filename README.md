@@ -71,6 +71,13 @@ In a browser without a bundler, import from jsDelivr in a module script:
 </script>
 ```
 
+# Migrating from 1.4.0
+
+2.0.0 changes how every function is called and imported. The migration guide gives the rules that apply to every function, then each 1.4.0 function's before and after.
+
+- Guide: [`docs/migration-v2.md`](docs/migration-v2.md)
+- Online docs version: [Migrating from 1.4.0 to 2.0.0](https://federicotartarini.github.io/jsthermalcomfort/documents/migration-v2.html)
+
 # Contributing
 
 Contributions are welcome.

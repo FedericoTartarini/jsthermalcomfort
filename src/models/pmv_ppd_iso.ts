@@ -46,6 +46,7 @@ const STANDARDS = deepFreeze([
   Standard.iso_7730_2005,
 ] as const);
 
+/** Describes the standards, inputs and outputs of {@link pmv_ppd_iso}. */
 export const PMV_PPD_ISO_INFO = deepFreeze({
   name: "pmv_ppd_iso",
   label: "PMV / PPD (ISO 7730)",
@@ -114,7 +115,10 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type PMVPPDInputs = InputsOf<typeof PMV_PPD_ISO_INFO>;
 
 /**

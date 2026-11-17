@@ -20,6 +20,7 @@ import { round } from "../_internal/round.ts";
 import { _as_flag } from "../_internal/validation.ts";
 import { Standard } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link vertical_tmp_grad_ppd}. */
 export const VERTICAL_TMP_GRAD_PPD_INFO = deepFreeze({
   name: "vertical_tmp_grad_ppd",
   label: "Vertical air temperature gradient",
@@ -53,7 +54,10 @@ export const VERTICAL_TMP_GRAD_PPD_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type VerticalTGradPPDInputs = InputsOf<
   typeof VERTICAL_TMP_GRAD_PPD_INFO
 >;

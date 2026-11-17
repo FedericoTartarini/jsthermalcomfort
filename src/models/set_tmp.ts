@@ -19,6 +19,7 @@ import type {
 import { round } from "../_internal/round.ts";
 import { Postures } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link set_tmp}. */
 export const SET_TMP_INFO = deepFreeze({
   name: "set_tmp",
   label: "Standard Effective Temperature",
@@ -51,7 +52,10 @@ export const SET_TMP_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type SETInputs = InputsOf<typeof SET_TMP_INFO>;
 
 /**

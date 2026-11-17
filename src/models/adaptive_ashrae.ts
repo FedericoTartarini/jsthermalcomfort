@@ -21,6 +21,7 @@ import { units_converter } from "../utilities/units_converter.ts";
 const SLOPE = 0.31;
 const INTERCEPT = 17.8;
 
+/** Describes the standards, inputs and outputs of {@link adaptive_ashrae}. */
 export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
   name: "adaptive_ashrae",
   label: "Adaptive (ASHRAE 55)",
@@ -53,7 +54,10 @@ export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
 
 /**

@@ -15,6 +15,7 @@ import type {
 import { round } from "../_internal/round.ts";
 import { Standard } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link pmv_a}. */
 export const PMV_A_INFO = deepFreeze({
   name: "pmv_a",
   label: "Adaptive PMV",
@@ -63,7 +64,10 @@ export const PMV_A_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type APMVInputs = InputsOf<typeof PMV_A_INFO>;
 
 /**

@@ -8,6 +8,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 
+/** Describes the standards, inputs and outputs of {@link two_nodes_gagge_sleep}. */
 export const TWO_NODES_GAGGE_SLEEP_INFO = deepFreeze({
   name: "two_nodes_gagge_sleep",
   label: "Gagge two-node model for sleep",
@@ -57,7 +58,10 @@ export const TWO_NODES_GAGGE_SLEEP_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type GaggeTwoNodesSleepInputs<
   Series extends number | readonly number[] = number | readonly number[],
 > = InputsOf<typeof TWO_NODES_GAGGE_SLEEP_INFO, Series>;

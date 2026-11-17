@@ -67,6 +67,7 @@ const _R_T_DTCDT = 9;
 const _P_CR = _PHI_SALT * _pv_star(_T_CR); // core vapor pressure
 const _LAT_HEAT = _latent_heat_vap(310.0); // latent heat of vaporization at 310 K
 
+/** Describes the standards, inputs and outputs of {@link heat_index_lu}. */
 export const HEAT_INDEX_LU_INFO = deepFreeze({
   name: "heat_index_lu",
   label: "Heat Index (Lu and Romps)",
@@ -82,7 +83,10 @@ export const HEAT_INDEX_LU_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type HILuInputs = InputsOf<typeof HEAT_INDEX_LU_INFO>;
 
 /**

@@ -22,6 +22,7 @@ const DISCOMFORT_CATEGORIES = deepFreeze({
   right: false,
 } as const satisfies ClassifierBins);
 
+/** Describes the standards, inputs and outputs of {@link discomfort_index}. */
 export const DISCOMFORT_INDEX_INFO = deepFreeze({
   name: "discomfort_index",
   label: "Discomfort Index (DI)",
@@ -41,7 +42,10 @@ export const DISCOMFORT_INDEX_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type DIInputs = InputsOf<typeof DISCOMFORT_INDEX_INFO>;
 
 /**

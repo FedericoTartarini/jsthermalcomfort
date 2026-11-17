@@ -5,6 +5,7 @@ import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { met_to_w_m2 } from "../utilities/constants.ts";
 
+/** Describes the standards, inputs and outputs of {@link pmv_athb}. */
 export const PMV_ATHB_INFO = deepFreeze({
   name: "pmv_athb",
   label: "Adaptive thermal heat balance PMV",
@@ -23,7 +24,10 @@ export const PMV_ATHB_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type ATHBInputs = InputsOf<typeof PMV_ATHB_INFO>;
 
 /**

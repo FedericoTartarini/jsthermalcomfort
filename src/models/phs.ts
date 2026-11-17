@@ -51,6 +51,7 @@ const STANDARDS = deepFreeze([
   Standard.iso_7933_2004,
 ] as const);
 
+/** Describes the standards, inputs and outputs of {@link phs}. */
 export const PHS_INFO = deepFreeze({
   name: "phs",
   label: "Predicted Heat Strain (PHS)",
@@ -143,7 +144,10 @@ export const PHS_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type PHSInputs = InputsOf<typeof PHS_INFO>;
 
 /**

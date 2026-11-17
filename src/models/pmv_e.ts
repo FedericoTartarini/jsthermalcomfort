@@ -15,6 +15,7 @@ import type {
 import { round } from "../_internal/round.ts";
 import { Standard } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link pmv_e}. */
 export const PMV_E_INFO = deepFreeze({
   name: "pmv_e",
   label: "Adjusted PMV with expectancy factor",
@@ -67,7 +68,10 @@ export const PMV_E_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type EPMVInputs = InputsOf<typeof PMV_E_INFO>;
 
 /**

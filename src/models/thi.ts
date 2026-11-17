@@ -3,6 +3,7 @@ import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
+/** Describes the standards, inputs and outputs of {@link thi}. */
 export const THI_INFO = deepFreeze({
   name: "thi",
   label: "Temperature-Humidity Index (THI)",
@@ -17,7 +18,10 @@ export const THI_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type THIInputs = InputsOf<typeof THI_INFO>;
 
 /**

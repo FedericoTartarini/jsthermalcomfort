@@ -25,6 +25,7 @@ const _P_ATM = TWO_NODES_GAGGE_INFO.inputs.p_atm.default;
 // "standing" branch) regardless of the position argument, so this matches it
 const _POSITION_STANDING_CODE = 1;
 
+/** Describes the standards, inputs and outputs of {@link cooling_effect}. */
 export const COOLING_EFFECT_INFO = deepFreeze({
   name: "cooling_effect",
   label: "Cooling Effect",
@@ -44,7 +45,10 @@ export const COOLING_EFFECT_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type CEInputs = InputsOf<typeof COOLING_EFFECT_INFO>;
 
 /**

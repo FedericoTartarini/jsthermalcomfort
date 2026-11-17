@@ -51,6 +51,7 @@ const _FP_TABLE_SITTING = [
   [0.3, 0.24, 0.168, 0.152, 0.152, 0.164, 0.177],
 ];
 
+/** Describes the standards, inputs and outputs of {@link solar_gain}. */
 export const SOLAR_GAIN_INFO = deepFreeze({
   name: "solar_gain",
   label: "Solar gain on people",
@@ -95,7 +96,10 @@ export const SOLAR_GAIN_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO>;
 
 /**

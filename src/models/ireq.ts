@@ -12,6 +12,7 @@ import { _valid_range } from "../_internal/validation.ts";
 import { met_to_w_m2 } from "../utilities/constants.ts";
 import { Standard } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link ireq}. */
 export const IREQ_INFO = deepFreeze({
   name: "ireq",
   label: "Required Clothing Insulation (IREQ)",
@@ -66,7 +67,10 @@ export const IREQ_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type IREQInputs = InputsOf<typeof IREQ_INFO>;
 
 /**

@@ -11,6 +11,7 @@ import { p_sat_torr } from "../psychrometrics/p_sat_torr.ts";
 import { met_to_w_m2 } from "../utilities/constants.ts";
 import { Postures } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link two_nodes_gagge}. */
 export const TWO_NODES_GAGGE_INFO = deepFreeze({
   name: "two_nodes_gagge",
   label: "Gagge et al. two-node model",
@@ -54,7 +55,10 @@ export const TWO_NODES_GAGGE_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type GaggeTwoNodesInputs = InputsOf<typeof TWO_NODES_GAGGE_INFO>;
 
 /**

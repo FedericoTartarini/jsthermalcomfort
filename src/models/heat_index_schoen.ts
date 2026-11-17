@@ -9,6 +9,7 @@ import {
 } from "../_internal/validation.ts";
 import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.ts";
 
+/** Describes the standards, inputs and outputs of {@link heat_index_schoen}. */
 export const HEAT_INDEX_SCHOEN_INFO = deepFreeze({
   name: "heat_index_schoen",
   label: "Heat Index (Schoen)",
@@ -29,7 +30,10 @@ export const HEAT_INDEX_SCHOEN_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type HISchoenInputs = InputsOf<typeof HEAT_INDEX_SCHOEN_INFO>;
 
 /**

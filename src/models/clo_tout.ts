@@ -5,6 +5,7 @@ import { round } from "../_internal/round.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
 
+/** Describes the standards, inputs and outputs of {@link clo_tout}. */
 export const CLO_TOUT_INFO = deepFreeze({
   name: "clo_tout",
   label: "Clothing prediction",
@@ -18,7 +19,10 @@ export const CLO_TOUT_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO>;
 
 /**

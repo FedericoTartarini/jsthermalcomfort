@@ -30,6 +30,7 @@ const STRESS_CATEGORIES = deepFreeze({
   right: true,
 } as const satisfies ClassifierBins);
 
+/** Describes the standards, inputs and outputs of {@link utci}. */
 export const UTCI_INFO = deepFreeze({
   name: "utci",
   label: "UTCI",
@@ -69,7 +70,10 @@ export const UTCI_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type UTCIInputs = InputsOf<typeof UTCI_INFO>;
 
 /**

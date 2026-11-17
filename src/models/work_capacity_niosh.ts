@@ -7,6 +7,7 @@ import type { ModelInfo } from "../_internal/modelInfo.ts";
 import type { WorkCapacity } from "./work_capacity_dunne.ts";
 import type { WorkCapacityStandardsInputs } from "./work_capacity_iso.ts";
 
+/** Describes the standards, inputs and outputs of {@link work_capacity_niosh}. */
 export const WORK_CAPACITY_NIOSH_INFO = deepFreeze({
   name: "work_capacity_niosh",
   label: "Work Capacity (NIOSH)",

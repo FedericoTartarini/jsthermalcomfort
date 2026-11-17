@@ -4,6 +4,7 @@ import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { psy_ta_rh } from "../psychrometrics/psy_ta_rh.ts";
 
+/** Describes the standards, inputs and outputs of {@link at}. */
 export const AT_INFO = deepFreeze({
   name: "at",
   label: "Apparent Temperature",
@@ -20,7 +21,10 @@ export const AT_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type ATInputs = InputsOf<typeof AT_INFO>;
 
 /**

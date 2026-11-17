@@ -13,6 +13,7 @@ import {
   HEAT_INDEX_RISK_CATEGORIES,
 } from "../_internal/validation.ts";
 
+/** Describes the standards, inputs and outputs of {@link heat_index_rothfusz}. */
 export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
   name: "heat_index_rothfusz",
   label: "Heat Index (Rothfusz)",
@@ -34,7 +35,10 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
 
 /**

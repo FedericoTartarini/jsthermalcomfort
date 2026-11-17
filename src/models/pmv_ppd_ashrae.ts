@@ -40,6 +40,7 @@ const TSV_CATEGORIES = deepFreeze({
 
 const STANDARDS = deepFreeze([Standard.ashrae_55_2023] as const);
 
+/** Describes the standards, inputs and outputs of {@link pmv_ppd_ashrae}. */
 export const PMV_PPD_ASHRAE_INFO = deepFreeze({
   name: "pmv_ppd_ashrae",
   label: "PMV / PPD (ASHRAE 55)",
@@ -90,7 +91,10 @@ export const PMV_PPD_ASHRAE_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type PMVPPDAshraeInputs = InputsOf<typeof PMV_PPD_ASHRAE_INFO>;
 
 /**

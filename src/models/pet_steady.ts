@@ -17,6 +17,7 @@ import { p_sat } from "../psychrometrics/p_sat.ts";
 import { body_surface_area } from "../utilities/body_surface_area.ts";
 import { Postures, Sex } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link pet_steady}. */
 export const PET_STEADY_INFO = deepFreeze({
   name: "pet_steady",
   label: "Physiological Equivalent Temperature (PET)",
@@ -41,7 +42,10 @@ export const PET_STEADY_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type PETSteadyInputs = InputsOf<typeof PET_STEADY_INFO>;
 
 /**

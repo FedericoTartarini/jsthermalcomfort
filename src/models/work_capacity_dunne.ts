@@ -7,6 +7,7 @@ import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { WorkIntensity } from "../utilities/options.ts";
 import type { WORK_CAPACITY_HOTHAPS_INFO } from "./work_capacity_hothaps.ts";
 
+/** Describes the standards, inputs and outputs of {@link work_capacity_dunne}. */
 export const WORK_CAPACITY_DUNNE_INFO = deepFreeze({
   name: "work_capacity_dunne",
   label: "Work Capacity (Dunne)",
@@ -23,7 +24,10 @@ export const WORK_CAPACITY_DUNNE_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type WorkCapacityDunneInputs = InputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
 
 /**

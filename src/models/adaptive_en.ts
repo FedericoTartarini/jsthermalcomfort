@@ -16,6 +16,7 @@ import { units_converter } from "../utilities/units_converter.ts";
 const SLOPE = 0.33;
 const INTERCEPT = 18.8;
 
+/** Describes the standards, inputs and outputs of {@link adaptive_en}. */
 export const ADAPTIVE_EN_INFO = deepFreeze({
   name: "adaptive_en",
   label: "Adaptive (EN 16798-1)",
@@ -47,7 +48,10 @@ export const ADAPTIVE_EN_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type ENInputs = InputsOf<typeof ADAPTIVE_EN_INFO>;
 
 /**

@@ -11,6 +11,7 @@ import { Postures } from "../utilities/options.ts";
 const _POSITION_SITTING = 0;
 const _POSITION_STANDING = 1;
 
+/** Describes the standards, inputs and outputs of {@link two_nodes_gagge_ji}. */
 export const TWO_NODES_GAGGE_JI_INFO = deepFreeze({
   name: "two_nodes_gagge_ji",
   label: "Gagge-Ji two-node model",
@@ -38,7 +39,10 @@ export const TWO_NODES_GAGGE_JI_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type GaggeTwoNodesJiInputs = InputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
 
 /**

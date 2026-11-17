@@ -128,6 +128,7 @@ export const Sports = deepFreeze({
   WALKING: new _SportsValues(0.5, 5.0, 0.5, 180),
 });
 
+/** Describes the standards, inputs and outputs of {@link sports_heat_stress_risk}. */
 export const SPORTS_HEAT_STRESS_RISK_INFO = deepFreeze({
   name: "sports_heat_stress_risk",
   label: "Sports heat stress risk",
@@ -153,7 +154,10 @@ export const SPORTS_HEAT_STRESS_RISK_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type SportsHeatStressInputs = InputsOf<
   typeof SPORTS_HEAT_STRESS_RISK_INFO
 >;

@@ -3,6 +3,7 @@ import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 
+/** Describes the standards, inputs and outputs of {@link net}. */
 export const NET_INFO = deepFreeze({
   name: "net",
   label: "Normal Effective Temperature (NET)",
@@ -18,7 +19,10 @@ export const NET_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type NETInputs = InputsOf<typeof NET_INFO>;
 
 /**

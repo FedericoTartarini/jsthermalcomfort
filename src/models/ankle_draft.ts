@@ -21,6 +21,7 @@ import { _as_flag } from "../_internal/validation.ts";
 import { Standard, Units } from "../utilities/options.ts";
 import { units_converter } from "../utilities/units_converter.ts";
 
+/** Describes the standards, inputs and outputs of {@link ankle_draft}. */
 export const ANKLE_DRAFT_INFO = deepFreeze({
   name: "ankle_draft",
   label: "Ankle draft",
@@ -54,7 +55,10 @@ export const ANKLE_DRAFT_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type AnkleDraftInputs = InputsOf<typeof ANKLE_DRAFT_INFO>;
 
 /**

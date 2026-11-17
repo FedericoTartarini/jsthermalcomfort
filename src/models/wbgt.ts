@@ -4,6 +4,7 @@ import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { Standard } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link wbgt}. */
 export const WBGT_INFO = deepFreeze({
   name: "wbgt",
   label: "Wet Bulb Globe Temperature (WBGT)",
@@ -20,7 +21,10 @@ export const WBGT_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type WBGTInputs = InputsOf<typeof WBGT_INFO>;
 
 /**

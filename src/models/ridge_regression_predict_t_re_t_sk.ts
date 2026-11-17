@@ -91,6 +91,7 @@ const _THERMONEUTRAL_RH = 50.0; // %
 const _BASELINE_T_RE_INITIAL = 37.0; // °C, initial rectal temperature for baseline
 const _BASELINE_T_SK_INITIAL = 32.0; // °C, initial skin temperature for baseline
 
+/** Describes the standards, inputs and outputs of {@link ridge_regression_predict_t_re_t_sk}. */
 export const RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO = deepFreeze({
   name: "ridge_regression_predict_t_re_t_sk",
   label: "Ridge Regression Body Temperature Prediction",
@@ -125,7 +126,10 @@ export const RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type RidgeRegressionInputs = InputsOf<
   typeof RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO
 >;

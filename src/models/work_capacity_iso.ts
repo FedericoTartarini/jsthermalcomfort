@@ -6,6 +6,7 @@ import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo } from "../_internal/modelInfo.ts";
 import type { WorkCapacity } from "./work_capacity_dunne.ts";
 
+/** Describes the standards, inputs and outputs of {@link work_capacity_iso}. */
 export const WORK_CAPACITY_ISO_INFO = deepFreeze({
   name: "work_capacity_iso",
   label: "Work Capacity (ISO)",
@@ -19,7 +20,10 @@ export const WORK_CAPACITY_ISO_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type WorkCapacityStandardsInputs = InputsOf<
   typeof WORK_CAPACITY_ISO_INFO
 >;

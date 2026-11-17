@@ -17,6 +17,7 @@ import { round } from "../_internal/round.ts";
 import { _as_flag, _valid_range } from "../_internal/validation.ts";
 import { Postures } from "../utilities/options.ts";
 
+/** Describes the standards, inputs and outputs of {@link use_fans_heatwaves}. */
 export const USE_FANS_HEATWAVES_INFO = deepFreeze({
   name: "use_fans_heatwaves",
   label: "Use of fans during heatwaves",
@@ -73,7 +74,10 @@ export const USE_FANS_HEATWAVES_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type UseFansHeatwavesInputs = InputsOf<typeof USE_FANS_HEATWAVES_INFO>;
 
 /**

@@ -4,6 +4,7 @@ import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { dew_point_tmp } from "../psychrometrics/dew_point_tmp.ts";
 
+/** Describes the standards, inputs and outputs of {@link humidex}. */
 export const HUMIDEX_INFO = deepFreeze({
   name: "humidex",
   label: "Humidex",
@@ -25,7 +26,10 @@ export const HUMIDEX_INFO = deepFreeze({
   },
 } as const satisfies ModelInfo);
 
-/** @interface */
+/**
+ * @interface
+ * @hidden
+ */
 export type HumidexInputs = InputsOf<typeof HUMIDEX_INFO>;
 
 /**

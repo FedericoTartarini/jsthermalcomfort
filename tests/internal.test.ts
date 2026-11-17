@@ -730,6 +730,33 @@ describe("parseInputs, instance (JS-only)", () => {
   });
 });
 
+// Upstream rounds with numpy, so `round` must round half to even on the
+// scaled value exactly as `np.round` does.
+describe("round (JS-only)", () => {
+  test.each([
+    [26.25, 1, 26.2],
+    [26.35, 1, 26.4],
+    [-2.5, 0, -2],
+    [-1.5, 0, -2],
+    [0.5, 0, 0],
+    [1.5, 0, 2],
+    [2.5, 0, 2],
+    [26.26, 1, 26.3],
+    [-26.26, 1, -26.3],
+  ])("round(%p, %p) is %p", (number, precision, expected) => {
+    expect(round(number, precision)).toBe(expected);
+  });
+
+  test("keeps the sign of a negative value that rounds to zero, like numpy", () => {
+    expect(round(-0.4, 0)).toBe(-0);
+    expect(round(-0.5, 0)).toBe(-0);
+  });
+
+  test("passes NaN through", () => {
+    expect(round(NaN, 1)).toBeNaN();
+  });
+});
+
 // Python's builtin round(x, n), measured on Python 3.12.15 in the parity image
 // (decision 83).
 describe("pythonRound (JS-only)", () => {

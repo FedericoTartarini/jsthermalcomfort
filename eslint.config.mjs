@@ -13,10 +13,6 @@ export const UNLINTED = [
   "src/supa.js",
   "tests/models/JOS3.test.js",
   "tests/jos3_functions/",
-  // Hold only functions no model calls, so they stay JavaScript with JSDoc
-  // (decision 103), with their tests.
-  "src/utilities/utilities.js",
-  "tests/utilities/utilities.test.js",
   // Meant to be reported: tests/eslint.test.ts lints it with the list lifted.
   "tests/eslint/fixture.ts",
   // A CommonJS consumer of the packed package, which CI runs outside the

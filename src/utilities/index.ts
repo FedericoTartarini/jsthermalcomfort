@@ -3,7 +3,7 @@ import {
   clo_typical_ensembles,
   clo_individual_garments,
   CLO_INDIVIDUAL_GARMENT_GROUPS,
-} from "./utilities.js";
+} from "./reference_tables.ts";
 import { body_surface_area } from "./body_surface_area.ts";
 import { units_converter } from "./units_converter.ts";
 import { Postures, Sex, Standard, Units, WorkIntensity } from "./options.ts";

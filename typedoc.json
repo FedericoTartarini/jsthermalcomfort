@@ -25,8 +25,7 @@
     "**/node_modules/**",
     "**/src/models/JOS3.js",
     "**/src/jos3_functions/**",
-    "**/src/supa.js",
-    "**/src/utilities/utilities.js"
+    "**/src/supa.js"
   ],
   "excludeExternals": true,
   "treatValidationWarningsAsErrors": true

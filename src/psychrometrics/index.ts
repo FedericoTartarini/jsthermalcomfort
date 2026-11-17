@@ -1,3 +1,4 @@
+import { antoine } from "./antoine.ts";
 import { p_sat } from "./p_sat.ts";
 import { p_sat_torr } from "./p_sat_torr.ts";
 import { enthalpy_air } from "./enthalpy_air.ts";
@@ -12,6 +13,7 @@ import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
 export type { PsychrometricValues } from "./psy_ta_rh.ts";
 
 export {
+  antoine,
   p_sat,
   p_sat_torr,
   psy_ta_rh,
@@ -31,6 +33,7 @@ export {
  * @hidden
  */
 export default {
+  antoine,
   p_sat,
   p_sat_torr,
   psy_ta_rh,

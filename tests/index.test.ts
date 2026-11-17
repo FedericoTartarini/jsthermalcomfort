@@ -165,6 +165,10 @@ describe("NPM Package", () => {
     );
   });
 
+  it("should have psychrometrics.antoine", () => {
+    expect(jsthermalcomfort.psychrometrics).toHaveProperty("antoine");
+  });
+
   it("should have psychrometrics.p_sat", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("p_sat");
   });

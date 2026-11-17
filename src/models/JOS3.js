@@ -108,8 +108,6 @@ function _to17array(inp) {
  * some variable names differ from those used in the original paper.
  *
  * @public
- * @memberof models
- * @docname JOS3
  */
 export class JOS3 {
   /**
@@ -147,29 +145,43 @@ export class JOS3 {
     ex_output = [],
   ) {
     // Initialize basic attributes
+    /** @hidden */
     this._height = height;
+    /** @hidden */
     this._weight = weight;
+    /** @hidden */
     this._fat = fat;
+    /** @hidden */
     this._age = age;
+    /** @hidden */
     this._sex = sex;
+    /** @hidden */
     this._ci = ci;
+    /** @hidden */
     this._bmr_equation = bmr_equation;
+    /** @hidden */
     this._bsa_equation = bsa_equation;
+    /** @hidden */
     this._ex_output = ex_output;
 
     // Calculate body surface area (bsa) rate
+    /** @hidden */
     this._bsa_rate = bsa_rate(height, weight, bsa_equation);
 
     // Calculate local body surface area
+    /** @hidden */
     this._bsa = local_bsa(height, weight, bsa_equation);
 
     // Calculate basal blood flow (BFB) rate [-]
+    /** @hidden */
     this._bfb_rate = bfb_rate(height, weight, bsa_equation, age, ci);
 
     // Calculate thermal conductance (CDT) [W/K]
+    /** @hidden */
     this._cdt = conductance(height, weight, bsa_equation, fat);
 
     // Calculate thermal capacity [J/K]
+    /** @hidden */
     this._cap = capacity(height, weight, bsa_equation, age, ci);
 
     // Set initial core and skin temperature set points [°C]
@@ -177,6 +189,7 @@ export class JOS3 {
     this.setpt_sk = math.multiply(math.ones(17), JOS3Defaults.skin_temperature);
 
     // Initialize body temperature [°C]
+    /** @hidden */
     this._bodytemp = math.multiply(
       math.ones(NUM_NODES),
       JOS3Defaults.other_body_temperature,
@@ -184,27 +197,39 @@ export class JOS3 {
 
     // Initialize environmental conditions and other factors
     // (Default values of input conditions)
+    /** @hidden */
     this._ta = math.multiply(
       math.ones(17),
       JOS3Defaults.dry_bulb_air_temperature,
     );
+    /** @hidden */
     this._tr = math.multiply(
       math.ones(17),
       JOS3Defaults.mean_radiant_temperature,
     );
+    /** @hidden */
     this._rh = math.multiply(math.ones(17), JOS3Defaults.relative_humidity);
+    /** @hidden */
     this._va = math.multiply(math.ones(17), JOS3Defaults.air_speed);
+    /** @hidden */
     this._clo = math.multiply(math.ones(17), JOS3Defaults.clothing_insulation);
+    /** @hidden */
     this._iclo = math.multiply(
       math.ones(17),
       JOS3Defaults.clothing_vapor_permeation_efficiency,
     );
+    /** @hidden */
     this._par = JOS3Defaults.physical_activity_ratio;
+    /** @hidden */
     this._posture = JOS3Defaults.posture;
+    /** @hidden */
     this._hc = null; // Convective heat transfer coefficient
+    /** @hidden */
     this._hr = null; // Radiative heat transfer coefficient
     this.ex_q = math.zeros(NUM_NODES); // External heat gain
+    /** @hidden */
     this._t = 0; // Elapsed time
+    /** @hidden */
     this._cycle = 0; // Cycle time
     this.model_name = "JOS3"; // Model name
     this.options = {
@@ -221,6 +246,7 @@ export class JOS3 {
     set_pre_shiv(0);
 
     // Initialize history to store model parameters
+    /** @hidden */
     this._history = [];
 
     // Set elapsed time and cycle time to 0

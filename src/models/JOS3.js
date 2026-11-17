@@ -94,8 +94,7 @@ function _to17array(inp) {
  *
  * The model output includes local and mean skin temperature, local core temperature,
  * local and mean skin wettedness, and heat loss from the skin etc.
- * The model output can be accessed using "dict_results()" method and be converted to a csv file
- * using "to_csv" method.
+ * The model output can be accessed using "dict_results()" method.
  * Each output parameter also can be accessed using getter methods.
  * (ex. X.t_skin, X.t_skin_mean, X.t_core)
  *
@@ -119,16 +118,16 @@ export class JOS3 {
    * body temperature, basal metabolic rate, body surface area, and
    * other related parameters.
    *
-   * @param {number} [height] - body height, in [m].
-   * @param {number} [weight] - body weight, in [kg].
-   * @param {number} [fat] - fat percentage, in [%].
-   * @param {number} [age] - age, in [years].
-   * @param {"male" | "female"} [sex] - sex.
-   * @param {number} [ci] - Cardiac index, in [L/min/m2].
+   * @param {number} [height] - body height, in [m]. Defaults to 1.72.
+   * @param {number} [weight] - body weight, in [kg]. Defaults to 74.43.
+   * @param {number} [fat] - fat percentage, in [%]. Defaults to 15.
+   * @param {number} [age] - age, in [years]. Defaults to 20.
+   * @param {"male" | "female"} [sex] - sex. Defaults to "male".
+   * @param {number} [ci] - Cardiac index, in [L/min/m2]. Defaults to 2.59.
    * @param {"harris-benedict" | "harris-benedict_origin" | "japanese" | "ganpule"} [bmr_equation] - The equation used
-   * to calculate basal metabolic rate (BMR).
+   * to calculate basal metabolic rate (BMR). Defaults to "harris-benedict".
    * @param {"dubois" | "fujimoto" | "kruazumi" | "takahira"} [bsa_equation] - The equation used to calculate body
-   * surface area (bsa).
+   * surface area (bsa). Defaults to "dubois".
    * @param {[] | "all"} [ex_output] - This is used when you want to display results other than the default output
    * parameters (ex.skin temperature); by default, JOS outputs only the most necessary parameters in order to reduce
    * the computational load.

@@ -344,3 +344,5 @@ The other six keys are unchanged: `Bra`, `Slippers`, `Boots`, `Sweatpants`, `Ove
 - **clothing:** `clo_area_factor`, `clo_correction_factor_environment`, `clo_dynamic_iso_vr`, `clo_insulation_air_layer`, `clo_intrinsic_insulation_ensemble` and `clo_total_insulation`.
 - **psychrometrics:** `antoine`, `hr_to_rh`, `rh_from_dew_point`, `rh_from_vapour_pressure` and `rh_from_wet_bulb`.
 - **utilities:** the constants `Standard`, `Units`, `Postures`, `Sex`, `WorkIntensity`, `BodySurfaceAreaEquations`, `DefaultSkinTemperature`, `CLO_INDIVIDUAL_GARMENT_GROUPS` and `f_r_garments`, and the physical constants `c_to_k`, `cp_air`, `cp_vapour`, `cp_water`, `g`, `h_fg`, `met_to_w_m2` and `r_air`.
+
+Every export but `JOS3` is written in TypeScript. Its type declarations pass a strict TypeScript build without `skipLibCheck`, where 1.4.0's `pet_steady.d.ts` failed with `TS1110` (#196).

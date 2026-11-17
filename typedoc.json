@@ -1,7 +1,6 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": [
-    "src/index.ts",
     "src/models/index.ts",
     "src/environment/index.ts",
     "src/clothing/index.ts",
@@ -21,6 +20,16 @@
     "docs/deviations/README.md",
     "docs/changelog.md"
   ],
+  "includeVersion": true,
+  "navigationLinks": {
+    "GitHub": "https://github.com/FedericoTartarini/jsthermalcomfort",
+    "npm": "https://www.npmjs.com/package/jsthermalcomfort",
+    "LinkedIn": "https://www.linkedin.com/in/federico-tartarini-39bab3149/",
+    "Google Scholar": "https://scholar.google.com/citations?user=29_An_8AAAAJ"
+  },
+  "useFirstParagraphOfCommentAsSummary": true,
+  "searchInComments": true,
+  "searchInDocuments": true,
   "sortEntryPoints": false,
   "sort": ["source-order"],
   "externalPattern": [

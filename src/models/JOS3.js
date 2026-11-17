@@ -46,7 +46,7 @@ import { sum_bf } from "../jos3_functions/thermoregulation/sum_bf.js";
 /**
  * Create an array of shape (17,) with the given input.
  *
- * @param inp {number | number[] | object}
+ * @param inp {number | number[] | object | math.Matrix}
  * @returns {math.Matrix}
  */
 function _to17array(inp) {

@@ -30,6 +30,23 @@ describe("test_environment", () => {
   });
 });
 
+// Mirrors the transpose_sharp_altitude row of pythermalcomfort v4.8.1
+// tests/test_utilities.py, with np.testing.assert_allclose's tolerance (rtol
+// 1e-7, atol 1e-3), without upstream's DeprecationWarning from an old import
+// path the library does not serve (deviation _shared-182).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("transpose_sharp_altitude", () => {
+      const expected = [13.064, 7.435];
+      expect(
+        transpose_sharp_altitude(120, 75).map((value, i) =>
+          approx(value, expected[i] ?? NaN, { rel: 1e-7, abs: 1e-3 }),
+        ),
+      ).toEqual([true, true]);
+    });
+  });
+});
+
 // What upstream's test leaves out, measured on pythermalcomfort 4.6.2 in the
 // parity image, the unrounded values on 4.8.0.
 describe("transpose_sharp_altitude (JS-only)", () => {

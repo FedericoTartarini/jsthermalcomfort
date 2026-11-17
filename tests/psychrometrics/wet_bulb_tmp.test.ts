@@ -12,6 +12,20 @@ describe("test_psychrometrics", () => {
   });
 });
 
+// Mirrors the wet_bulb_tmp row of pythermalcomfort v4.8.1
+// tests/test_utilities.py, with np.testing.assert_allclose's tolerance (rtol
+// 1e-7, atol 1e-8), without upstream's DeprecationWarning from an old import
+// path the library does not serve (deviation _shared-187).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("wet_bulb_tmp", () => {
+      expect(
+        approx(wet_bulb_tmp(25, 50), 17.99814747, { rel: 1e-7, abs: 1e-8 }),
+      ).toBe(true);
+    });
+  });
+});
+
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("wet_bulb_tmp (JS-only)", () => {

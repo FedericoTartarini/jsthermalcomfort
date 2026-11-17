@@ -4,8 +4,22 @@ import { p_sat_torr as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
 
-// pythermalcomfort v4.7.0's tests have no case for p_sat_torr; these are
-// measured on it in the parity image.
+// Mirrors the p_sat_torr row of pythermalcomfort v4.8.1
+// tests/test_utilities.py, with np.testing.assert_allclose's tolerance (rtol
+// 1e-7, atol 1e-8), without upstream's DeprecationWarning from an old import
+// path the library does not serve (deviation _shared-184).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("p_sat_torr", () => {
+      expect(
+        approx(p_sat_torr(25), 23.75744972, { rel: 1e-7, abs: 1e-8 }),
+      ).toBe(true);
+    });
+  });
+});
+
+// What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
+// parity image.
 describe("p_sat_torr (JS-only)", () => {
   // A call with arguments the type rejects, to test the runtime.
   const call =

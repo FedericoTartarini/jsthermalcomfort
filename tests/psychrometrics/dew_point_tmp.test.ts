@@ -63,6 +63,20 @@ describe("test_psychrometrics", () => {
   });
 });
 
+// Mirrors the dew_point_tmp row of pythermalcomfort v4.8.1
+// tests/test_utilities.py, with np.testing.assert_allclose's tolerance (rtol
+// 1e-7, atol 1e-8), without upstream's DeprecationWarning from an old import
+// path the library does not serve (deviation _shared-188).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("dew_point_tmp", () => {
+      expect(
+        approx(dew_point_tmp(25, 50), 13.8515836, { rel: 1e-7, abs: 1e-8 }),
+      ).toBe(true);
+    });
+  });
+});
+
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("dew_point_tmp (JS-only)", () => {

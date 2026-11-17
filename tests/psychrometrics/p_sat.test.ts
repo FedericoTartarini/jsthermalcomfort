@@ -11,6 +11,20 @@ describe("test_psychrometrics", () => {
   });
 });
 
+// Mirrors the p_sat row of pythermalcomfort v4.8.1 tests/test_utilities.py,
+// with np.testing.assert_allclose's tolerance (rtol 1e-7, atol 1e-5), without
+// upstream's DeprecationWarning from an old import path the library does not
+// serve (deviation _shared-183).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("p_sat", () => {
+      expect(approx(p_sat(25), 3169.21647014, { rel: 1e-7, abs: 1e-5 })).toBe(
+        true,
+      );
+    });
+  });
+});
+
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("p_sat (JS-only)", () => {

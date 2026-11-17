@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { operative_tmp } from "../../src/environment/index.ts";
 import { operative_tmp as from_root } from "../../src/index.ts";
+import { approx } from "../models/testUtils.ts";
 
 // Mirrors pythermalcomfort v4.8.1 tests/test_environment.py, test_t_o; its
 // keyword calls are positional here.
@@ -18,6 +19,29 @@ describe("test_environment", () => {
     expect(operative_tmp(20, 30, 0.1, "ASHRAE")).toBe(25);
     expect(operative_tmp(20, 30, 0.3, "ASHRAE")).toBe(24);
     expect(operative_tmp(20, 30, 0.7, "ASHRAE")).toBe(23);
+  });
+});
+
+// Mirrors the operative_tmp row of pythermalcomfort v4.8.1
+// tests/test_utilities.py, one call per element, with
+// np.testing.assert_allclose's tolerance (rtol 1e-7, atol 0.01), without
+// upstream's DeprecationWarning from an old import path the library does not
+// serve (deviation _shared-181).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("operative_tmp", () => {
+      for (const [tdb, expected] of [
+        [25, 26.83],
+        [20, 23.66],
+      ] as const) {
+        expect(
+          approx(operative_tmp(tdb, 30, 0.3), expected, {
+            rel: 1e-7,
+            abs: 0.01,
+          }),
+        ).toBe(true);
+      }
+    });
   });
 });
 

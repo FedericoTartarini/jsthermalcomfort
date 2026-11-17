@@ -1,6 +1,21 @@
-import { expect, describe, it } from "vitest";
+import { expect, describe, it, test } from "vitest";
 import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
 import { hr_to_rh } from "../../src/psychrometrics/index.ts";
+import { approx } from "../models/testUtils.ts";
+
+// Mirrors the hr_to_rh row of pythermalcomfort v4.8.1 tests/test_utilities.py,
+// with np.testing.assert_allclose's tolerance (rtol 1e-7, atol 1e-8), without
+// upstream's DeprecationWarning from an old import path the library does not
+// serve (deviation _shared-186).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("hr_to_rh", () => {
+      expect(
+        approx(hr_to_rh(0.01, 25), 50.58961491, { rel: 1e-7, abs: 1e-8 }),
+      ).toBe(true);
+    });
+  });
+});
 
 const TDB = [0, 5, 10, 15, 20, 25, 30, 35, 40];
 const RH = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];

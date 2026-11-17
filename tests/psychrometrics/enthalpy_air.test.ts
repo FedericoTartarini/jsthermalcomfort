@@ -17,6 +17,20 @@ describe("test_psychrometrics", () => {
   });
 });
 
+// Mirrors the enthalpy_air row of pythermalcomfort v4.8.1
+// tests/test_utilities.py, with np.testing.assert_allclose's tolerance (rtol
+// 1e-7, atol 1e-8), without upstream's DeprecationWarning from an old import
+// path the library does not serve (deviation _shared-189).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("enthalpy_air", () => {
+      expect(
+        approx(enthalpy_air(25, 0.01), 50561.25, { rel: 1e-7, abs: 1e-8 }),
+      ).toBe(true);
+    });
+  });
+});
+
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("enthalpy_air (JS-only)", () => {

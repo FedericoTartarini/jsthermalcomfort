@@ -17,6 +17,26 @@ describe("test_psychrometrics", () => {
   });
 });
 
+// Mirrors the psy_ta_rh row of pythermalcomfort v4.8.1 tests/test_utilities.py,
+// its six fields, with np.testing.assert_allclose's tolerance (rtol 1e-7, atol
+// 1e-5), without upstream's DeprecationWarning from an old import path the
+// library does not serve (deviation _shared-185).
+describe("test_utilities", () => {
+  describe("test_moved_public_utility_shims", () => {
+    test("psy_ta_rh", () => {
+      const tolerance = { rel: 1e-7, abs: 1e-5 };
+      expect(psy_ta_rh(25, 50)).toEqual({
+        p_sat: expect.toBeApprox(3169.21647014, tolerance),
+        p_vap: expect.toBeApprox(1584.60823507, tolerance),
+        hr: expect.toBeApprox(0.0098816, tolerance),
+        wet_bulb_tmp: expect.toBeApprox(17.99814747, tolerance),
+        dew_point_tmp: expect.toBeApprox(13.8515836, tolerance),
+        h: expect.toBeApprox(50259.78815634, tolerance),
+      });
+    });
+  });
+});
+
 // What upstream's tests leave out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("psy_ta_rh (JS-only)", () => {

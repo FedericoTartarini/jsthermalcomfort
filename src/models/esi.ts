@@ -45,6 +45,7 @@ export type ESI = OutputsOf<typeof ESI_INFO>;
  * To access the `esi` value, use the `esi` attribute of the returned `ESI` instance, e.g., `result.esi`.
  *
  * - `esi` - Environmental Stress Index.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

@@ -118,6 +118,7 @@ export type GaggeTwoNodesSleep<
  * - `met_shivering` - Metabolic rate due to shivering, [W/m2].
  * - `alfa` - Dynamic fraction of total body mass assigned to the skin node (dimensionless).
  * - `skin_blood_flow` - Skin-blood-flow rate per unit surface area, [kg/h/m2].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  */
 export function two_nodes_gagge_sleep(
   inputs: GaggeTwoNodesSleepInputs<number>,

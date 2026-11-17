@@ -72,6 +72,7 @@ export type ATHB = OutputsOf<typeof PMV_ATHB_INFO>;
  * @returns Dataclass containing the results of the ATHB calculation. See {@link ATHB} for more details.
  *
  * - `athb_pmv` - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

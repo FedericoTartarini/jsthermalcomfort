@@ -145,6 +145,7 @@ export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  *   outside the applicability limits.
  * - `heat_strain_sweating` - 1.0 if regulatory sweating (m_rsw) reaches its maximum value, otherwise 0.0,
  *   or NaN outside the applicability limits.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

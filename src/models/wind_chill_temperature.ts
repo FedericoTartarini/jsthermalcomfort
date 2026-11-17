@@ -46,6 +46,7 @@ export type WCT = OutputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
  * To access the `wct` value, use the `wct` attribute of the returned `WCT` instance, e.g., `result.wct`.
  *
  * - `wct` - Wind Chill Temperature, [°C].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

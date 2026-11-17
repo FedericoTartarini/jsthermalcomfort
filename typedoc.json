@@ -21,6 +21,7 @@
     "docs/deviations/README.md",
     "docs/changelog.md"
   ],
+  "customCss": "docs/custom.css",
   "includeVersion": true,
   "navigationLinks": {
     "GitHub": "https://github.com/FedericoTartarini/jsthermalcomfort",

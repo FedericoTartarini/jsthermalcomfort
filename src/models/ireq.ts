@@ -121,6 +121,7 @@ export type IREQ = OutputsOf<typeof IREQ_INFO>;
  * - `icl_neutral` - Neutral intrinsic clothing insulation, [clo].
  * - `dle_min` - Duration limited exposure for the minimal criterion, [h].
  * - `dle_neutral` - Duration limited exposure for the neutral criterion, [h].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `TypeError` If an input has an unsupported type, or if ``limit_inputs`` or
  * ``round_output`` are not booleans.

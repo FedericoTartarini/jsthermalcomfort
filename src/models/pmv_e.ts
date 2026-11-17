@@ -130,6 +130,7 @@ export type EPMV = OutputsOf<typeof PMV_E_INFO>;
  * To access the `e_pmv` value, use the `e_pmv` attribute of the returned `EPMV` instance, e.g., `result.e_pmv`.
  *
  * - `e_pmv` - Adjusted Predicted Mean Votes with Expectancy Factor.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

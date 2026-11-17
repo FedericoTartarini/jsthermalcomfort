@@ -117,6 +117,7 @@ export type UTCI = OutputsOf<typeof UTCI_INFO>;
  *
  * - `utci` - Universal Thermal Climate Index, [°C] or in [°F].
  * - `stress_category` - UTCI categorized in terms of thermal stress [Blazejczyk2013](../../docs/references.md#blazejczyk2013).
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @remarks
  * All four applicability limits applied when ``limit_inputs=True`` (air temperature,

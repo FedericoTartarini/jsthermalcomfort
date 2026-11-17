@@ -105,6 +105,7 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  * - `tmp_cmf_cat_i_low` - Lower acceptable comfort temperature for category I, default in [°C] or in [°F].
  * - `tmp_cmf_cat_ii_low` - Lower acceptable comfort temperature for category II, default in [°C] or in [°F].
  * - `tmp_cmf_cat_iii_low` - Lower acceptable comfort temperature for category III, default in [°C] or in [°F].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

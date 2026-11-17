@@ -57,6 +57,7 @@ export type WCI = OutputsOf<typeof WCI_INFO>;
  * To access the `wci` value, use the `wci` attribute of the returned `WCI` instance, e.g., `result.wci`.
  *
  * - `wci` - Wind Chill Index, [W/m^2].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

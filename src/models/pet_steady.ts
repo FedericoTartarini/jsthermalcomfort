@@ -95,6 +95,7 @@ export type PETSteady = OutputsOf<typeof PET_STEADY_INFO>;
  * To access the `pet` value, use the `pet` attribute of the returned `PETSteady` instance, e.g., `result.pet`.
  *
  * - `pet` - Physiological Equivalent Temperature.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

@@ -190,6 +190,7 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  * - `ppd` - Predicted Percentage of Dissatisfied.
  * - `tsv` - Predicted thermal sensation vote.
  * - `category`
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

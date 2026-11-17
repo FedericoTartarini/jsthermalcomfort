@@ -74,6 +74,7 @@ Each register is on GitHub, on the `main` branch:
 13. A docstring's prose types, such as "float or list of floats", are dropped, since the signature gives the type (ADR 0025).
 14. A helper, like every JavaScript function, ignores surplus arguments, where Python raises `TypeError` for a call that does not bind (ADR 0022).
 15. Each `*_INFO` constant has the one-sentence TSDoc `Describes the standards, inputs and outputs of {@link <model>}.`, which replaces none of upstream's text, as `*_INFO` has no upstream counterpart (ADR 0025, 2026-11-18 amendment).
+16. Each model's `@returns` list ends with the line ``- `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.``, the text of `ModelOutputs.warnings`, which replaces none of upstream's text, as `warnings` has no upstream counterpart (ADR 0025, 2026-11-18 amendment).
 
 **Deviation classes (C).** The user approved each class once, and every instance gets a row that names its class:
 
@@ -141,7 +142,7 @@ Every cell is filled. A pipe inside a cell is escaped as `\|`, code spans includ
 
 ### The TS site's symbol
 
-A model file holds upstream's docstrings and code comments, and at most a one-sentence why-comment (ADRs 0019 and 0025, 2026-10-27 amendments), besides the one-sentence TSDoc of its `*_INFO` (ADR 0025, 2026-11-18 amendment), so a row names its symbol instead of relying on a citation at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelOutputs`).
+A model file holds upstream's docstrings and code comments, and at most a one-sentence why-comment (ADRs 0019 and 0025, 2026-10-27 amendments), besides the one-sentence TSDoc of its `*_INFO` and the `warnings` line of its `@returns` list (ADR 0025, 2026-11-18 amendment), so a row names its symbol instead of relying on a citation at its site. The symbol is resolved as TypeScript resolves it: a top-level declaration of the file, then a property of its type at each dot. A value's members are its value's (`HEAT_INDEX_ROTHFUSZ_INFO.inputs.tdb`); an interface's or a type's are its instances', inherited members included (`HI.warnings`, declared on `ModelOutputs`).
 
 ### Notes
 

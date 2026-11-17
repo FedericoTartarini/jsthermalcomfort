@@ -46,6 +46,7 @@ export type CloTOut = OutputsOf<typeof CLO_TOUT_INFO>;
  * To access the `clo_tout` value, use the `clo_tout` attribute of the returned `CloTOut` instance, e.g., `result.clo_tout`.
  *
  * - `clo_tout` - Representative clothing insulation Icl.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `TypeError` If `tout` is not a number, or `units` is not a string.
  * @throws `RangeError` If an invalid unit is provided.

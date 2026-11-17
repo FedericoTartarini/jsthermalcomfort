@@ -56,6 +56,7 @@ export type WorkCapacityStandardsInputs = InputsOf<
  * `result.capacity`.
  *
  * - `capacity` - Work capacity affected by heat.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  */
 export function work_capacity_iso(
   inputs: WorkCapacityStandardsInputs,

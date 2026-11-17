@@ -68,6 +68,7 @@ export type WBGT = OutputsOf<typeof WBGT_INFO>;
  * `result.wbgt`.
  *
  * - `wbgt` - Wet Bulb Globe Temperature Index.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

@@ -49,6 +49,7 @@ export const WORK_CAPACITY_NIOSH_INFO = deepFreeze({
  * `result.capacity`.
  *
  * - `capacity` - Work capacity affected by heat.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  */
 export function work_capacity_niosh(
   inputs: WorkCapacityStandardsInputs,

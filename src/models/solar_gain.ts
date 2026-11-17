@@ -163,6 +163,7 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  * - `erf` - Solar gain to the human body using the Effective Radiant Field [W/m2].
  * - `delta_mrt` - Delta mean radiant temperature. The amount by which the mean radiant
  *   temperature of the space should be increased if no solar radiation is present.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `TypeError` If the posture is not a string.
  * @throws `RangeError` If the posture is not one of 'standing', 'supine', or 'sitting'.

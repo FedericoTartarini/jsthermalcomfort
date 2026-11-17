@@ -1,0 +1,12 @@
+/*
+ * A model's Returns shows its `@returns` list, with each output's description.
+ * This hides the list of the outputs type's properties that follows it, which
+ * repeats those names without descriptions (ADR 0020's 2026-11-18 amendment).
+ */
+.tsd-signatures
+  > li
+  > .tsd-description
+  > .tsd-returns-title
+  ~ ul.tsd-parameters {
+  display: none;
+}

@@ -113,6 +113,7 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  *   not, and NaN where the inputs are outside the applicability limits.
  * - `acceptability_90` - 1.0 if the operative temperature is acceptable for 90% of occupants, 0.0 if
  *   not, and NaN where the inputs are outside the applicability limits.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

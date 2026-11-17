@@ -114,6 +114,7 @@ export type APMV = OutputsOf<typeof PMV_A_INFO>;
  * e.g., `result.a_pmv`.
  *
  * - `a_pmv` - Predicted Mean Vote.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

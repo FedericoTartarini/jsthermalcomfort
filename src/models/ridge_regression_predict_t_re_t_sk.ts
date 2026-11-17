@@ -185,6 +185,7 @@ export type PredictedBodyTemperatures = OutputsOf<
  *   - If scalar inputs are provided, this is a 1D array of shape (`duration`,).
  * - `t_sk` - Predicted mean skin temperature history.
  *   - If scalar inputs are provided, this is a 1D array of shape (`duration`,).
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `RangeError` If sex contains invalid values (must be "male"/"female" or Sex enum members).
  * @throws `TypeError` If only one of t_re or t_sk is provided.

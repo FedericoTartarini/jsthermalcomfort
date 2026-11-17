@@ -139,6 +139,7 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * - `pmv_set` - PMV SET.
  * - `disc` - Thermal discomfort.
  * - `t_sens` - Predicted Thermal Sensation.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

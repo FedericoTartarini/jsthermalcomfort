@@ -208,6 +208,7 @@ export type SportsHeatStressRisk = OutputsOf<
  * - `t_high` - Temperature threshold for high risk level, [°C].
  * - `t_extreme` - Temperature threshold for extreme risk level, [°C].
  * - `recommendation` - Heat stress management recommendations for the calculated risk level.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `RangeError` If the risk level could not be determined due to NaN thresholds or if the internal
  * solver fails to produce thresholds that allow a risk determination.

@@ -110,6 +110,7 @@ export type HILu = OutputsOf<typeof HEAT_INDEX_LU_INFO>;
  *
  * - `hi` - Heat Index, [°C].
  * - `stress_category`
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

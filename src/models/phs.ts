@@ -241,6 +241,7 @@ export type PHS = OutputsOf<typeof PHS_INFO>;
  * - `evap_load_wm2_min` - Accumulated evaporative load per unit area over the simulated duration, [W·min·m⁻²].
  *   Computed as the running sum of the instantaneous evaporative heat flux (W·m⁻²)
  *   at each 1 minute step. Intended for chaining simulation segments.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

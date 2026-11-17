@@ -100,6 +100,7 @@ export type CE = OutputsOf<typeof COOLING_EFFECT_INFO>;
  * To access the `ce` value, use the `ce` attribute of the returned `CE` instance, e.g., `result.ce`.
  *
  * - `ce` - Cooling Effect value.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @remarks
  * > [!NOTE]

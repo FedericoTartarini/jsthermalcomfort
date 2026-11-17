@@ -46,6 +46,7 @@ export type THI = OutputsOf<typeof THI_INFO>;
  * instance, e.g., `result.thi`.
  *
  * - `thi` - Temperature-Humidity Index (THI).
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  */
 export function thi(inputs: THIInputs): THI {
   // Validate inputs using the THIInputs class

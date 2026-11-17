@@ -169,6 +169,7 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * - `compliance` - 1.0 if PMV is within the acceptable range (-0.5 < PMV < 0.5) according to
  *   ASHRAE Standard 55-2023, 0.0 if not, and NaN where the inputs are outside the
  *   applicability limits (``limit_inputs=True``).
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

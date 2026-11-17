@@ -62,6 +62,7 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  *
  * - `humidex` - Humidex value, [°C].
  * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016).
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

@@ -113,6 +113,7 @@ export type AnkleDraft = OutputsOf<typeof ANKLE_DRAFT_INFO>;
  * - `acceptability` - 1.0 if the air speed at the ankle level is acceptable according to ASHRAE 55
  *   (PPD_ad ≤ 20 %), 0.0 if not, and NaN where the inputs are outside the
  *   applicability limits.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

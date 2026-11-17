@@ -96,6 +96,7 @@ export type SETInputs = InputsOf<typeof SET_TMP_INFO>;
  * To access the `set` value, use the corresponding attribute of the returned `SET` instance, e.g., `result.set`.
  *
  * - `set` - Standard effective temperature, [°C].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

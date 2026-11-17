@@ -119,6 +119,7 @@ export type VerticalTGradPPD = OutputsOf<typeof VERTICAL_TMP_GRAD_PPD_INFO>;
  * - `ppd_vg` - Predicted Percentage of Dissatisfied occupants with vertical temperature gradient.
  * - `acceptability` - 1.0 if the vertical air temperature difference is acceptable (PPD_vg ≤ 5 %),
  *   0.0 if not, and NaN where the inputs are outside the applicability limits.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

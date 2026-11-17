@@ -60,6 +60,7 @@ export type AT = OutputsOf<typeof AT_INFO>;
  * @returns Dataclass containing the apparent temperature, [°C]. See {@link AT} for more details.
  *
  * - `at` - Apparent temperature, [°C]
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

@@ -79,6 +79,7 @@ export type DI = OutputsOf<typeof DISCOMFORT_INDEX_INFO>;
  *
  * - `di` - Discomfort Index, [°C].
  * - `discomfort_condition` - Classification of the thermal comfort conditions according to the discomfort index.
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

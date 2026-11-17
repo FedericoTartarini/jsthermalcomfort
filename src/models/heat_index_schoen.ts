@@ -55,6 +55,7 @@ export type HISchoenInputs = InputsOf<typeof HEAT_INDEX_SCHOEN_INFO>;
  *
  * - `hi` - Heat Index, [°C].
  * - `stress_category`
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

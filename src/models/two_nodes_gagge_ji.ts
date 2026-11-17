@@ -88,6 +88,7 @@ export type GaggeTwoNodesJi = OutputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
  *
  * - `t_core` - Core temperature, [°C].
  * - `t_skin` - Skin temperature, [°C].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

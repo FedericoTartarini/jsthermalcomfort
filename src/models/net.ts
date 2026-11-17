@@ -60,6 +60,7 @@ export type NET = OutputsOf<typeof NET_INFO>;
  * To access the `net` value, use the `net` attribute of the returned `NET` instance, e.g., `result.net`.
  *
  * - `net` - Normal Effective Temperature, [°C].
+ * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
  * ```ts

@@ -1,8 +1,17 @@
 import { describe, expect, test } from "vitest";
-import { body_surface_area } from "../../src/utilities/index.ts";
+import {
+  body_surface_area,
+  BodySurfaceAreaEquations,
+} from "../../src/utilities/index.ts";
 import { body_surface_area as from_root } from "../../src/index.ts";
 import { approx } from "../models/testUtils.ts";
 import { DEFAULT_TOLERANCE } from "../parity/harness.ts";
+
+// A call with arguments the type rejects, to test the runtime.
+const call =
+  (...args: unknown[]) =>
+  () =>
+    (body_surface_area as (...a: unknown[]) => unknown)(...args);
 
 // Mirrors the body_surface_area cases of pythermalcomfort v4.8.1
 // tests/test_utilities.py; its keyword call is positional here.
@@ -23,21 +32,13 @@ describe("test_utilities", () => {
     expect(
       approx(body_surface_area(85, 1.65, "kurazumi"), 1.89, { rel: 1e-2 }),
     ).toBe(true);
-    expect(() => body_surface_area(70, 1.8, "invalid_formula")).toThrow(
-      RangeError,
-    );
+    expect(call(70, 1.8, "invalid_formula")).toThrow(RangeError);
   });
 });
 
 // What upstream's test leaves out, measured on pythermalcomfort 4.7.0 in the
 // parity image.
 describe("body_surface_area (JS-only)", () => {
-  // A call with arguments the type rejects, to test the runtime.
-  const call =
-    (...args: unknown[]) =>
-    () =>
-      (body_surface_area as (...a: unknown[]) => unknown)(...args);
-
   test.each([
     [80, 1.8, undefined, 1.9917607971689137],
     [70, 1.8, "dubois", 1.8818742624749278],
@@ -52,6 +53,29 @@ describe("body_surface_area (JS-only)", () => {
 
   test("is exported from the root entry", () => {
     expect(from_root).toBe(body_surface_area);
+  });
+
+  // Upstream's members, in its order (utilities.py:60-66).
+  test("BodySurfaceAreaEquations holds upstream's members, frozen", () => {
+    expect(Object.entries(BodySurfaceAreaEquations)).toEqual([
+      ["dubois", "dubois"],
+      ["takahira", "takahira"],
+      ["fujimoto", "fujimoto"],
+      ["kurazumi", "kurazumi"],
+    ]);
+    expect(Object.isFrozen(BodySurfaceAreaEquations)).toBe(true);
+  });
+
+  // The upstream values of the string cases above.
+  test.each([
+    [70, 1.8, BodySurfaceAreaEquations.dubois, 1.8818742624749278],
+    [75, 1.75, BodySurfaceAreaEquations.takahira, 1.919372906042847],
+    [80, 1.7, BodySurfaceAreaEquations.fujimoto, 1.8723162568631528],
+    [85, 1.65, BodySurfaceAreaEquations.kurazumi, 1.8926645519678011],
+  ] as const)("(%d, %d) takes the constant for %s", (w, h, f, expected) => {
+    expect(
+      approx(body_surface_area(w, h, f), expected, DEFAULT_TOLERANCE),
+    ).toBe(true);
   });
 
   // ValueError, raised for any other formula, a different case included

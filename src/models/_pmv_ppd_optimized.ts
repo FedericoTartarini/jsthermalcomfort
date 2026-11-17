@@ -1,4 +1,4 @@
-import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
+import { met_to_w_m2 } from "../utilities/constants.ts";
 
 export function _pmv_ppd_optimized(
   tdb: number,

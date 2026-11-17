@@ -1,6 +1,5 @@
 import { notOfType } from "../_internal/errors.ts";
-
-const c_to_k = 273.15;
+import { c_to_k } from "../utilities/constants.ts";
 
 /**
  * Calculate vapour pressure of water at different temperatures.

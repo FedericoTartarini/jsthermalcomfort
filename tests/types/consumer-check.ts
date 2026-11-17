@@ -200,7 +200,12 @@ import { PMV_CATEGORY_BINS_ISO } from "jsthermalcomfort";
 // Each subpath entry carries the same declarations as the root.
 import { utci as utciFromModels } from "jsthermalcomfort/models";
 import { p_sat } from "jsthermalcomfort/psychrometrics";
-import { Standard as standardFromUtilities } from "jsthermalcomfort/utilities";
+import {
+  BodySurfaceAreaEquations,
+  body_surface_area,
+  DefaultSkinTemperature,
+  Standard as standardFromUtilities,
+} from "jsthermalcomfort/utilities";
 // The exports map seals every file behind the entries. If this stops being an
 // error, tsc fails with "Unused '@ts-expect-error' directive".
 // @ts-expect-error a deep import is not exported.
@@ -1367,3 +1372,23 @@ const hi_as_lu: HILu = heat_index_result;
 heat_index_lu({ tdb: 25, rh: 50, limit_inputs: false });
 // @ts-expect-error rh is a required quantity.
 heat_index_lu({ tdb: 25 });
+
+// body_surface_area's formula takes BodySurfaceAreaEquations' constants or
+// their strings, and nothing else.
+const bsa_constant: number = body_surface_area(
+  70,
+  1.75,
+  BodySurfaceAreaEquations.takahira,
+);
+const bsa_string: number = body_surface_area(70, 1.75, "kurazumi");
+// @ts-expect-error "Dubois" is not one of BodySurfaceAreaEquations' strings.
+body_surface_area(70, 1.75, "Dubois");
+// @ts-expect-error the constant is frozen.
+BodySurfaceAreaEquations.dubois = "takahira";
+
+// DefaultSkinTemperature's fields are numbers, as upstream's floats, and
+// readonly.
+let skin_head = DefaultSkinTemperature.head;
+skin_head = 36;
+// @ts-expect-error the object is readonly.
+DefaultSkinTemperature.head = 36;

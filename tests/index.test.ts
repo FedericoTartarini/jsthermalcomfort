@@ -165,6 +165,24 @@ describe("NPM Package", () => {
     );
   });
 
+  it.each([
+    "c_to_k",
+    "cp_vapour",
+    "cp_water",
+    "cp_air",
+    "h_fg",
+    "r_air",
+    "g",
+    "met_to_w_m2",
+    "BodySurfaceAreaEquations",
+    "f_r_garments",
+    "DefaultSkinTemperature",
+  ] as const)("should have utilities.%s, and at the root", (name) => {
+    expect(jsthermalcomfort.utilities).toHaveProperty(name);
+    expect(namedExports).toHaveProperty(name);
+    expect(namedExports[name]).toBe(jsthermalcomfort.utilities[name]);
+  });
+
   it("should have psychrometrics.antoine", () => {
     expect(jsthermalcomfort.psychrometrics).toHaveProperty("antoine");
   });

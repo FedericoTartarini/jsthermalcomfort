@@ -16,7 +16,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { pythonRound } from "../_internal/round.ts";
-import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
+import { met_to_w_m2 } from "../utilities/constants.ts";
 import { Standard } from "../utilities/options.ts";
 
 // Fixed PHS inputs used by the threshold solvers. These mirror the values that

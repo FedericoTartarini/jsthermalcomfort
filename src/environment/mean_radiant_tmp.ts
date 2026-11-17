@@ -1,8 +1,5 @@
 import { notOfType } from "../_internal/errors.ts";
-
-const c_to_k = 273.15;
-const cp_air = 1004;
-const g = 9.81; // m/s2
+import { c_to_k, cp_air, g } from "../utilities/constants.ts";
 
 /**
  * Convert the globe temperature reading into mean radiant temperature in accordance

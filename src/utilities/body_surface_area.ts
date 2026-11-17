@@ -1,4 +1,5 @@
 import { notOfType } from "../_internal/errors.ts";
+import { BodySurfaceAreaEquations } from "./options.ts";
 
 /**
  * Calculate the body surface area (BSA) in square meters.
@@ -23,7 +24,7 @@ import { notOfType } from "../_internal/errors.ts";
 export function body_surface_area(
   weight: number,
   height: number,
-  formula = "dubois",
+  formula: (typeof BodySurfaceAreaEquations)[keyof typeof BodySurfaceAreaEquations] = BodySurfaceAreaEquations.dubois,
 ): number {
   for (const [key, value] of Object.entries({ weight, height })) {
     if (typeof (value as unknown) !== "number") {
@@ -33,18 +34,21 @@ export function body_surface_area(
   if (typeof (formula as unknown) !== "string") {
     throw notOfType("formula", "a string");
   }
-  if (formula === "dubois") {
+  // The type admits the four strings only, but a JavaScript caller can pass
+  // any string, which falls through to upstream's error.
+  const given: string = formula;
+  if (given === BodySurfaceAreaEquations.dubois) {
     return 0.202 * weight ** 0.425 * height ** 0.725;
   }
-  if (formula === "takahira") {
+  if (given === BodySurfaceAreaEquations.takahira) {
     return 0.2042 * weight ** 0.425 * height ** 0.725;
   }
-  if (formula === "fujimoto") {
+  if (given === BodySurfaceAreaEquations.fujimoto) {
     return 0.1882 * weight ** 0.444 * height ** 0.663;
   }
-  if (formula === "kurazumi") {
+  if (given === BodySurfaceAreaEquations.kurazumi) {
     return 0.244 * weight ** 0.383 * height ** 0.693;
   }
-  const invalid_formula_msg = `Formula '${formula}' for calculating body surface area is not recognized.`;
+  const invalid_formula_msg = `Formula '${given}' for calculating body surface area is not recognized.`;
   throw new RangeError(invalid_formula_msg);
 }

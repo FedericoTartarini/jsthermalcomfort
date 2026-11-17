@@ -9,7 +9,7 @@ import type {
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { _valid_range } from "../_internal/validation.ts";
-import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
+import { met_to_w_m2 } from "../utilities/constants.ts";
 import { Standard } from "../utilities/options.ts";
 
 export const IREQ_INFO = deepFreeze({

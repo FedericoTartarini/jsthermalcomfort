@@ -146,6 +146,91 @@ export const clo_individual_garments: Readonly<Record<string, number>> =
   });
 
 /**
+ * This dictionary contains the reflection coefficients, Fr, for different
+ * special materials
+ *
+ * Upstream's `f_r_garments` (`utilities.py:268-281`), frozen (deviation
+ * _shared-171).
+ *
+ * @example
+ * ```ts
+ * import { f_r_garments } from "jsthermalcomfort/utilities";
+ *
+ * console.log(f_r_garments["Cotton with aluminium paint"]); // 0.42
+ * ```
+ */
+export const f_r_garments: Readonly<Record<string, number>> = Object.freeze({
+  "Cotton with aluminium paint": 0.42,
+  "Viscose with glossy aluminium foil": 0.19,
+  "Aramid (Kevlar) with glossy aluminium foil": 0.14,
+  "Wool with glossy aluminium foil": 0.12,
+  "Cotton with glossy aluminium foil": 0.04,
+  "Viscose vacuum metallized with aluminium": 0.06,
+  "Aramid vacuum metallized with aluminium": 0.04,
+  "Wool vacuum metallized with aluminium": 0.05,
+  "Cotton vacuum metallized with aluminium": 0.05,
+  "Glass fiber vacuum metallized with aluminium": 0.07,
+});
+
+/**
+ * Default skin temperature in degree Celsius for 17 local body parts.
+ *
+ * The data comes from Hui Zhang's experiments
+ * https://escholarship.org/uc/item/3f4599hx
+ *
+ * Upstream's `DefaultSkinTemperature` (`utilities.py:284-307`), a
+ * `NamedTuple` class, becomes a frozen object of its defaults, in its field
+ * order (deviation _shared-172).
+ *
+ * @example
+ * ```ts
+ * import { DefaultSkinTemperature } from "jsthermalcomfort/utilities";
+ *
+ * console.log(DefaultSkinTemperature.head); // 35.3
+ * ```
+ */
+export const DefaultSkinTemperature: Readonly<
+  Record<
+    | "head"
+    | "neck"
+    | "chest"
+    | "back"
+    | "pelvis"
+    | "left_shoulder"
+    | "left_arm"
+    | "left_hand"
+    | "right_shoulder"
+    | "right_arm"
+    | "right_hand"
+    | "left_thigh"
+    | "left_leg"
+    | "left_foot"
+    | "right_thigh"
+    | "right_leg"
+    | "right_foot",
+    number
+  >
+> = Object.freeze({
+  head: 35.3,
+  neck: 35.6,
+  chest: 35.1,
+  back: 35.3,
+  pelvis: 35.3,
+  left_shoulder: 34.2,
+  left_arm: 34.6,
+  left_hand: 34.4,
+  right_shoulder: 34.2,
+  right_arm: 34.6,
+  right_hand: 34.4,
+  left_thigh: 34.3,
+  left_leg: 32.8,
+  left_foot: 33.3,
+  right_thigh: 34.3,
+  right_leg: 32.8,
+  right_foot: 33.3,
+});
+
+/**
  * The keys of `clo_individual_garments` grouped under the eight headings of
  * ASHRAE 55's garment insulation table, in the table's order, with the chairs
  * as a last group in the chair table's order. The headings and rows are those

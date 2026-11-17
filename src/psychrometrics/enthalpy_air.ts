@@ -1,8 +1,5 @@
 import { notOfType } from "../_internal/errors.ts";
-
-const cp_vapour = 1805.0;
-const cp_air = 1004;
-const h_fg = 2501000;
+import { cp_air, cp_vapour, h_fg } from "../utilities/constants.ts";
 
 /**
  * Calculate air enthalpy.

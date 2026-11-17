@@ -3,12 +3,15 @@ import {
   CLO_INDIVIDUAL_GARMENT_GROUPS,
   clo_individual_garments,
   clo_typical_ensembles,
+  DefaultSkinTemperature,
+  f_r_garments,
   met_typical_tasks,
 } from "../../src/utilities/index.ts";
 
-// JS-only: upstream has no test of `met_typical_tasks`, `clo_typical_ensembles`
-// or `clo_individual_garments`. The expected entries are copied from
-// pythermalcomfort v4.8.1 `utilities.py:160-266`, in its order.
+// JS-only: upstream has no test of `met_typical_tasks`, `clo_typical_ensembles`,
+// `clo_individual_garments`, `f_r_garments` or `DefaultSkinTemperature`. The
+// expected entries are copied from pythermalcomfort v4.8.1
+// `utilities.py:160-307`, in its order.
 
 // An ES module is strict-mode code, so a write to a frozen table throws.
 function expectFrozen(table: object) {
@@ -153,6 +156,57 @@ describe("clo_individual_garments", () => {
 
   test("is frozen", () => {
     expectFrozen(clo_individual_garments);
+  });
+});
+
+// deviation _shared-171
+describe("f_r_garments", () => {
+  test("holds upstream's entries in upstream's order", () => {
+    expect(Object.entries(f_r_garments)).toEqual([
+      ["Cotton with aluminium paint", 0.42],
+      ["Viscose with glossy aluminium foil", 0.19],
+      ["Aramid (Kevlar) with glossy aluminium foil", 0.14],
+      ["Wool with glossy aluminium foil", 0.12],
+      ["Cotton with glossy aluminium foil", 0.04],
+      ["Viscose vacuum metallized with aluminium", 0.06],
+      ["Aramid vacuum metallized with aluminium", 0.04],
+      ["Wool vacuum metallized with aluminium", 0.05],
+      ["Cotton vacuum metallized with aluminium", 0.05],
+      ["Glass fiber vacuum metallized with aluminium", 0.07],
+    ]);
+  });
+
+  test("is frozen", () => {
+    expectFrozen(f_r_garments);
+  });
+});
+
+// deviation _shared-172
+describe("DefaultSkinTemperature", () => {
+  test("holds upstream's defaults in upstream's field order", () => {
+    expect(Object.entries(DefaultSkinTemperature)).toEqual([
+      ["head", 35.3],
+      ["neck", 35.6],
+      ["chest", 35.1],
+      ["back", 35.3],
+      ["pelvis", 35.3],
+      ["left_shoulder", 34.2],
+      ["left_arm", 34.6],
+      ["left_hand", 34.4],
+      ["right_shoulder", 34.2],
+      ["right_arm", 34.6],
+      ["right_hand", 34.4],
+      ["left_thigh", 34.3],
+      ["left_leg", 32.8],
+      ["left_foot", 33.3],
+      ["right_thigh", 34.3],
+      ["right_leg", 32.8],
+      ["right_foot", 33.3],
+    ]);
+  });
+
+  test("is frozen", () => {
+    expectFrozen(DefaultSkinTemperature);
   });
 });
 

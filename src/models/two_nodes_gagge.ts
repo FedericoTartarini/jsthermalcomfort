@@ -8,7 +8,7 @@ import type {
 } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
 import { p_sat_torr } from "../psychrometrics/p_sat_torr.ts";
-import { met_to_w_m2 } from "../utilities/met_to_w_m2.ts";
+import { met_to_w_m2 } from "../utilities/constants.ts";
 import { Postures } from "../utilities/options.ts";
 
 export const TWO_NODES_GAGGE_INFO = deepFreeze({

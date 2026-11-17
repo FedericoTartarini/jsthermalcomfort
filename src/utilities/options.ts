@@ -59,6 +59,20 @@ export const Postures = Object.freeze({
 } as const);
 
 /**
+ * Body Surface Area Equations.
+ *
+ * Upstream's `BodySurfaceAreaEquations` (`utilities.py:60-66`);
+ * `body_surface_area`'s `formula` accepts either
+ * `BodySurfaceAreaEquations.takahira` or `"takahira"`.
+ */
+export const BodySurfaceAreaEquations = Object.freeze({
+  dubois: "dubois",
+  takahira: "takahira",
+  fujimoto: "fujimoto",
+  kurazumi: "kurazumi",
+} as const);
+
+/**
  * Enumeration for work intensity levels.
  *
  * Upstream's `WorkIntensity` (`classes_input.py:41-46`); a parameter accepts

@@ -65,7 +65,7 @@ describe("eslint config", () => {
     for (const file of [
       "vitest.config.ts",
       "src/index.ts",
-      "src/utilities/clothing.ts",
+      "src/clothing/clo_dynamic_iso.ts",
       "tests/index.test.ts",
       "tests/types/consumer-check.ts",
     ])

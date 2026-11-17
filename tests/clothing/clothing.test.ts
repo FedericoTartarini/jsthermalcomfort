@@ -8,7 +8,7 @@ import {
   clo_insulation_air_layer,
   clo_intrinsic_insulation_ensemble,
   clo_total_insulation,
-} from "../../src/utilities/index.ts";
+} from "../../src/clothing/index.ts";
 import { v_relative } from "../../src/environment/index.ts";
 import * as pkg from "../../src/index.ts";
 
@@ -172,11 +172,12 @@ describe("test_clothing", () => {
 });
 
 // Mirrors the clothing rows of pythermalcomfort v4.8.1
-// tests/test_utilities.py, and its test_internal_helpers_have_no_utility_shims
-// on the utilities namespace. Upstream's test_moved_public_utility_shims also
-// asserts a DeprecationWarning, because there `utilities` is the old import
-// path of a function moved to `clothing`; here `utilities` is the functions'
-// one namespace and nothing is deprecated.
+// tests/test_utilities.py, calling each function from the `clothing`
+// namespace that each case names, without upstream's DeprecationWarning from
+// an old import path the library does not serve (deviation _shared-173,
+// deviation _shared-174, deviation _shared-175, deviation _shared-176,
+// deviation _shared-177, deviation _shared-178, deviation _shared-179); and
+// its test_internal_helpers_have_no_utility_shims on the utilities namespace.
 describe("test_utilities", () => {
   describe("test_moved_public_utility_shims", () => {
     test.each([
@@ -400,13 +401,18 @@ describe("public API surface", () => {
     "clo_total_insulation",
     "clo_intrinsic_insulation_ensemble",
     "clo_correction_factor_environment",
-  ] as const)("%s is exported from the root and from utilities", (name) => {
-    expect(typeof pkg[name]).toBe("function");
-    expect(pkg.default.utilities[name]).toBe(pkg[name]);
-  });
+  ] as const)(
+    "%s is exported from the root and from clothing, not from utilities",
+    (name) => {
+      expect(typeof pkg[name]).toBe("function");
+      expect(pkg.default.clothing[name]).toBe(pkg[name]);
+      expect(pkg.default.utilities).not.toHaveProperty(name);
+    },
+  );
 
   test("clo_dynamic, which upstream split in two, is gone", () => {
     expect(pkg).not.toHaveProperty("clo_dynamic");
+    expect(pkg.default.clothing).not.toHaveProperty("clo_dynamic");
     expect(pkg.default.utilities).not.toHaveProperty("clo_dynamic");
   });
 });

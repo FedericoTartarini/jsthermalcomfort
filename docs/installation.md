@@ -2,7 +2,7 @@
 npm install jsthermalcomfort
 ```
 
-Import functions by name, from the package root or from a subpath: `jsthermalcomfort/models`, `jsthermalcomfort/environment`, `jsthermalcomfort/psychrometrics` or `jsthermalcomfort/utilities`.
+Import functions by name, from the package root or from a subpath: `jsthermalcomfort/models`, `jsthermalcomfort/environment`, `jsthermalcomfort/clothing`, `jsthermalcomfort/psychrometrics` or `jsthermalcomfort/utilities`.
 
 ```javascript
 import { pmv_ppd_iso } from "jsthermalcomfort";

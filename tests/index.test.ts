@@ -14,6 +14,10 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.environment).toBeInstanceOf(Object);
   });
 
+  it("should have the clothing functions", () => {
+    expect(jsthermalcomfort.clothing).toBeInstanceOf(Object);
+  });
+
   it("should have the psychrometrics functions", () => {
     expect(jsthermalcomfort.psychrometrics).toBeInstanceOf(Object);
   });
@@ -130,14 +134,6 @@ describe("NPM Package", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("body_surface_area");
   });
 
-  it("should have utilities.clo_dynamic_ashrae", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_ashrae");
-  });
-
-  it("should have utilities.clo_dynamic_iso", () => {
-    expect(jsthermalcomfort.utilities).toHaveProperty("clo_dynamic_iso");
-  });
-
   it("should have utilities.units_converter", () => {
     expect(jsthermalcomfort.utilities).toHaveProperty("units_converter");
   });
@@ -216,6 +212,29 @@ describe("NPM Package", () => {
       expect(jsthermalcomfort.utilities).not.toHaveProperty(name);
     },
   );
+
+  const clothing_functions = [
+    "clo_area_factor",
+    "clo_correction_factor_environment",
+    "clo_dynamic_ashrae",
+    "clo_dynamic_iso",
+    "clo_dynamic_iso_vr",
+    "clo_insulation_air_layer",
+    "clo_intrinsic_insulation_ensemble",
+    "clo_total_insulation",
+  ] as const;
+
+  it.each(clothing_functions)(
+    "should have clothing.%s, and at the root",
+    (name) => {
+      expect(jsthermalcomfort.clothing).toHaveProperty(name);
+      expect(namedExports[name]).toBe(jsthermalcomfort.clothing[name]);
+    },
+  );
+
+  it.each(clothing_functions)("should not have utilities.%s", (name) => {
+    expect(jsthermalcomfort.utilities).not.toHaveProperty(name);
+  });
 
   it("should not have psychrometrics.t_mrt", () => {
     expect(jsthermalcomfort.psychrometrics).not.toHaveProperty("t_mrt");

@@ -21,6 +21,10 @@
       "types": "./lib/esm/types/environment/index.d.ts",
       "default": "./lib/esm/environment/index.js"
     },
+    "./clothing": {
+      "types": "./lib/esm/types/clothing/index.d.ts",
+      "default": "./lib/esm/clothing/index.js"
+    },
     "./psychrometrics": {
       "types": "./lib/esm/types/psychrometrics/index.d.ts",
       "default": "./lib/esm/psychrometrics/index.js"

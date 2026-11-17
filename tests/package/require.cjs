@@ -21,6 +21,7 @@ assert.equal(typeof root.default.models.utci, "function");
 for (const subpath of [
   "models",
   "environment",
+  "clothing",
   "psychrometrics",
   "utilities",
 ]) {

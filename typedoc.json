@@ -4,6 +4,7 @@
     "src/index.ts",
     "src/models/index.ts",
     "src/environment/index.ts",
+    "src/clothing/index.ts",
     "src/psychrometrics/index.ts",
     "src/utilities/index.ts"
   ],

@@ -8,11 +8,8 @@ import {
   PMV_PPD_ISO_INFO,
   UTCI_INFO,
 } from "../../src/models/index.ts";
-import {
-  clo_dynamic_ashrae,
-  Standard,
-  Units,
-} from "../../src/utilities/index.ts";
+import { Standard, Units } from "../../src/utilities/index.ts";
+import { clo_dynamic_ashrae } from "../../src/clothing/index.ts";
 import { v_relative } from "../../src/environment/index.ts";
 import { pmv_ppd_ashrae as from_root } from "../../src/index.ts";
 import { ASHRAE_55_LIMITS } from "../../src/_internal/ashrae55.ts";

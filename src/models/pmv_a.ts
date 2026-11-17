@@ -114,7 +114,7 @@ export type APMV = OutputsOf<typeof PMV_A_INFO>;
  * @example
  * ```ts
  * import { pmv_a } from "jsthermalcomfort/models";
- * import { clo_dynamic_iso } from "jsthermalcomfort/utilities";
+ * import { clo_dynamic_iso } from "jsthermalcomfort/clothing";
  * import { v_relative } from "jsthermalcomfort/environment";
  *
  * const v = 0.1;

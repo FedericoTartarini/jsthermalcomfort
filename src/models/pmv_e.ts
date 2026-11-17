@@ -130,7 +130,7 @@ export type EPMV = OutputsOf<typeof PMV_E_INFO>;
  * @example
  * ```ts
  * import { pmv_e } from "jsthermalcomfort/models";
- * import { clo_dynamic_iso } from "jsthermalcomfort/utilities";
+ * import { clo_dynamic_iso } from "jsthermalcomfort/clothing";
  * import { v_relative } from "jsthermalcomfort/environment";
  *
  * const tdb = 28;

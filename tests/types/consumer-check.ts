@@ -206,6 +206,11 @@ import {
   DefaultSkinTemperature,
   Standard as standardFromUtilities,
 } from "jsthermalcomfort/utilities";
+import { clo_dynamic_iso as clo_dynamic_iso_from_clothing } from "jsthermalcomfort/clothing";
+// The clothing functions moved to `clothing` with no alias (ADR 0010). If this
+// stops being an error, tsc fails with "Unused '@ts-expect-error' directive".
+// @ts-expect-error utilities no longer exports clo_dynamic_iso.
+import { clo_dynamic_iso as clo_dynamic_iso_from_utilities } from "jsthermalcomfort/utilities";
 // The exports map seals every file behind the entries. If this stops being an
 // error, tsc fails with "Unused '@ts-expect-error' directive".
 // @ts-expect-error a deep import is not exported.
@@ -750,7 +755,7 @@ clo_typical_ensembles["Typical winter indoor clothing"] = 1.1;
 // A group's garments index clo_individual_garments and read it as numbers;
 // the groups are frozen, so a write to their garments is a type error. The
 // table is typed Record<string, number>, so its keys type as string: that each
-// garment is a real key is held by tests/utilities/clothing.test.ts.
+// garment is a real key is held by tests/utilities/reference_tables.test.ts.
 const garment_clo: number[] = CLO_INDIVIDUAL_GARMENT_GROUPS.flatMap(
   ({ garments }) => garments.map((garment) => clo_individual_garments[garment]),
 );
@@ -760,6 +765,8 @@ CLO_INDIVIDUAL_GARMENT_GROUPS[0].garments.push("Bra"); // eslint-disable-line @t
 // A subpath export is the root's export, so their types are interchangeable.
 const sameUtci: typeof utci = utciFromModels;
 const samePSat: typeof jsthermalcomfort.p_sat = p_sat;
+const sameCloDynamicIso: typeof jsthermalcomfort.clo_dynamic_iso =
+  clo_dynamic_iso_from_clothing;
 const same_standard: typeof Standard = standardFromUtilities;
 
 // two_nodes_gagge returns SET for calculate_ce: true, GaggeTwoNodes for false or

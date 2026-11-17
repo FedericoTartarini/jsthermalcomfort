@@ -45,7 +45,7 @@ A model's table at `docs/deviations/<model>.md` of every deviation and addition.
 _Avoid_: deviation list, ledger, changelog
 
 **Whitelist**:
-The approved list of mechanical translations from upstream's Python, such as an inputs object for keyword arguments or `Math` for numpy math. They are not deviations and get no register row (ADR 0019).
+The approved list of mechanical translations from upstream's Python, such as an inputs object for keyword arguments or `Math` for numpy math, and of v2 documentation that replaces none of upstream's text, such as each `*_INFO`'s one-sentence TSDoc. They are not deviations and get no register row (ADR 0019).
 _Avoid_: allowlist, translation rules
 
 **Deviation class**:

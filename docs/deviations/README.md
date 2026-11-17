@@ -1,6 +1,6 @@
 # Deviation registers
 
-Every difference between this library and pythermalcomfort v4.8.1, whose `.py` is the only standard, is a whitelisted mechanical translation, a representation mapping or a row in a register here (ADRs 0019, 0027, 0028). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
+Every difference between this library and pythermalcomfort v4.8.1, whose `.py` is the only standard, is a whitelisted mechanical translation or v2 documentation that replaces none of upstream's text, a representation mapping or a row in a register here (ADRs 0019, 0027, 0028). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).
 
 - `<model>.md` holds one main model's rows, named after upstream's function (`utci.md`). A model's ticket creates its register when it migrates the model. A model with no register here has not been migrated yet, and its differences from upstream are not recorded yet. `JOS3.md` is the exception: JOS3 stays JavaScript (ADR 0018), and its register holds only the differences in its comments.
 - `_shared.md` holds the rows that belong to no single model: library-wide constants (`Units`), the shared infrastructure (the inputs parse, `classifyFromBins`, `ModelInfo`) and the helpers, whether a model calls them or not.
@@ -57,7 +57,7 @@ Each register is on GitHub, on the `main` branch:
 
 ## Kinds of difference
 
-**Whitelist (W).** A mechanical translation is not a deviation and gets no row (ADR 0019):
+**Whitelist (W).** A mechanical translation, or v2 documentation that replaces none of upstream's text, is not a deviation and gets no row (ADR 0019):
 
 1. A model's keyword arguments become one inputs object with the same keys and defaults (ADR 0002). A helper keeps upstream's positional order and defaults (ADR 0022).
 2. Upstream's input dataclass becomes the model's `INFO.inputs`, the inputs type derived from it, and a parse function (ADR 0022).

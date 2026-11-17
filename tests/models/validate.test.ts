@@ -42,7 +42,8 @@ describe("validateResult (Testing the Test)", () => {
       validateResult(model_result, expected_output, tolerances, {});
     }).not.toThrow();
 
-    const failing_result = { a: 25.500002 };
+    // Outside np.isclose's band, 1e-6 + 1e-5 * 25.5.
+    const failing_result = { a: 25.501 };
     expect(() => {
       validateResult(failing_result, expected_output, tolerances, {});
     }).toThrow();

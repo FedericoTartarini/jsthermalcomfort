@@ -92,15 +92,36 @@ describe("validateResult — numeric comparison", () => {
     }).toThrow();
   });
 
+  // At an expected 100 with tol 1e-6, the band is 1e-6 + 1e-3.
+  test("allows upstream's np.isclose band, tol plus 1e-5 of the expected value", () => {
+    expect.hasAssertions();
+    expect(() => {
+      validateResult({ a: 100.0005 }, { a: 100 }, { a: 1e-6 }, {});
+    }).not.toThrow();
+    expect(() => {
+      validateResult({ a: 100.002 }, { a: 100 }, { a: 1e-6 }, {});
+    }).toThrow();
+  });
+
+  test("allows exactly tol around an expected 0", () => {
+    expect.hasAssertions();
+    expect(() => {
+      validateResult({ a: 0.1 }, { a: 0 }, { a: 0.1 }, {});
+    }).not.toThrow();
+    expect(() => {
+      validateResult({ a: 0.1 + 1e-14 }, { a: 0 }, { a: 0.1 }, {});
+    }).toThrow();
+  });
+
   test("falls back to upstream's default tolerance 1e-6 when tolerances is missing", () => {
     expect.hasAssertions();
     // Within default tolerance — passes.
     expect(() => {
       validateResult({ a: 1.0000005 }, { a: 1.0 }, undefined, {});
     }).not.toThrow();
-    // Outside default tolerance — throws.
+    // Outside the band, 1e-6 + 1e-5 * 1 — throws.
     expect(() => {
-      validateResult({ a: 1.00001 }, { a: 1.0 }, undefined, {});
+      validateResult({ a: 1.00002 }, { a: 1.0 }, undefined, {});
     }).toThrow();
   });
 
@@ -108,7 +129,7 @@ describe("validateResult — numeric comparison", () => {
     expect.hasAssertions();
     expect(() => {
       validateResult(
-        { a: 1.0, b: 1.00001 },
+        { a: 1.0, b: 1.00002 },
         { a: 1.0, b: 1.0 },
         { a: 0.1 },
         {},

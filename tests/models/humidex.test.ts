@@ -40,20 +40,20 @@ describe("test_humidex", () => {
     // I got these values from
     // https://publications.gc.ca/collections/collection_2018/eccc/En57-23-1-79-eng.pdf
     let result = humidex({ tdb: 21, rh: 100, model: "masterson" });
-    expect(approx(result.humidex, 29.3, { rel: 1e-9, abs: 0.1 })).toBe(true);
+    expect(approx(result.humidex, 29.3, { abs: 0.1 })).toBe(true);
     expect(result.discomfort).toBe("Little or no discomfort");
 
     result = humidex({ tdb: 34, rh: 100, model: "masterson" });
-    expect(approx(result.humidex, 58.9, { rel: 1e-9, abs: 0.01 })).toBe(true);
+    expect(approx(result.humidex, 58.9, { abs: 0.01 })).toBe(true);
 
     result = humidex({ tdb: 43, rh: 20, model: "masterson" });
-    expect(approx(result.humidex, 47.1, { rel: 1e-9, abs: 0.01 })).toBe(true);
+    expect(approx(result.humidex, 47.1, { abs: 0.01 })).toBe(true);
 
     result = humidex({ tdb: 30, rh: 30, model: "masterson" });
-    expect(approx(result.humidex, 31.5, { rel: 1e-9, abs: 0.01 })).toBe(true);
+    expect(approx(result.humidex, 31.5, { abs: 0.01 })).toBe(true);
 
     result = humidex({ tdb: 31, rh: 55, model: "masterson" });
-    expect(approx(result.humidex, 39.3, { rel: 1e-9, abs: 0.01 })).toBe(true);
+    expect(approx(result.humidex, 39.3, { abs: 0.01 })).toBe(true);
   });
 });
 

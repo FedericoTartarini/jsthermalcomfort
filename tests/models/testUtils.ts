@@ -19,8 +19,8 @@
  * - Same inputs, same expected values. Compare numbers with `approx`, with
  *   upstream's tolerance where it states one (`pytest.approx(..., abs=...)`,
  *   a fixture's `tolerance`), 1e-6 otherwise, which is also
- *   `validateResult`'s default for a key the fixture's `tolerance` does not
- *   name. An expected value is read through the representation mappings
+ *   `validateResult`'s default atol for a key the fixture's `tolerance` does
+ *   not name. An expected value is read through the representation mappings
  *   (ADR 0028): a flag's 1.0, 0.0 or NaN as `true`, `false` or `null`, a
  *   nullable output's NaN as `null`.
  * - Array or vector inputs run element-wise: one scalar case per element,
@@ -83,9 +83,15 @@ export const v2_infos = Object.entries(pkg as Record<string, unknown>)
  * `np.isclose` and `np.allclose` rtol 1e-5 and atol 1e-8,
  * `np.testing.assert_allclose` rtol 1e-7 and atol 0, and `pytest.approx`
  * rel 1e-6 (its absolute 1e-12 taken as 0, since it takes the larger of the
- * two rather than their sum). A NaN, an infinity or a nullable output's `null`
- * is close to nothing, where `np.isclose` takes an infinity as close to
- * itself.
+ * two rather than their sum), so a `pytest.approx` that passes only `rel`
+ * passes `abs: 0` here. `math.isclose(a, b, abs_tol=t)` allows
+ * `max(rel_tol * max(|a|, |b|), t)`, rel_tol 1e-9 by default: where `t` is the
+ * larger term for every case, it becomes `{ abs: t }`, rel 0. Sources for the
+ * numpy and Python defaults, read 2026-11-17: numpy.org/doc/stable, the
+ * `numpy.isclose` page (NumPy v2.5), and docs.python.org/3/library/math.html,
+ * `math.isclose` (Python 3.15). A NaN, an infinity or a nullable output's
+ * `null` is close to nothing, where `np.isclose` takes an infinity as close
+ * to itself.
  *
  * @param actual - the value under test
  * @param expected - the reference value
@@ -253,6 +259,11 @@ export async function loadTestData(
 /**
  * Validates the model's output against the expected outputs using specified tolerances.
  *
+ * A number passes within upstream's `is_equal` band, `np.isclose(a, b,
+ * atol=tol)` for a scalar and `np.allclose` for an array (`tests/conftest.py:114`
+ * and `:109`, v4.8.1), with numpy's default rtol 1e-5 (see `approx`):
+ * `|actual - expected| <= tol + 1e-5 * |expected|`.
+ *
  * @param {*} model_result - The output from the model function, which can be either a primitive value or an object.
  * @param {Object} expected_outputs - An object containing the expected outputs, with keys matching those in model_result.
  * @param {Object} tolerances - An object specifying tolerance values for numeric comparisons for each key.
@@ -301,6 +312,8 @@ export function validateResult(
 
       // Use the specified tolerance if available, otherwise upstream's 1e-6
       const tol = tolerances?.[key] ?? 1e-6;
+      // Upstream's np.isclose band, as the TSDoc above states.
+      const isclose_tolerance = { rel: 1e-5, abs: tol };
 
       // Handle arrays
       if (Array.isArray(expected_value)) {
@@ -318,9 +331,7 @@ export function validateResult(
               // null - 0, false - 0, [] - 0, "1" - 1 all evaluate to a
               // tolerable difference in plain Math.abs comparison.
               expect(typeof act).toBe("number");
-              expect(Math.abs((act as number) - exp)).toBeLessThanOrEqual(
-                tol + Number.EPSILON * 100,
-              );
+              expect(act).toEqual(expect.toBeApprox(exp, isclose_tolerance));
             }
           } else {
             expect(act).toEqual(exp);
@@ -333,9 +344,9 @@ export function validateResult(
         } else {
           // typeof guard prevents JS coercion false-passes (see array branch).
           expect(typeof actual_value).toBe("number");
-          expect(
-            Math.abs((actual_value as number) - expected_value),
-          ).toBeLessThanOrEqual(tol + Number.EPSILON * 100);
+          expect(actual_value).toEqual(
+            expect.toBeApprox(expected_value, isclose_tolerance),
+          );
         }
       } else {
         // For booleans or other types

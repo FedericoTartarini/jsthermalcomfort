@@ -17,20 +17,29 @@ const call =
 // tests/test_utilities.py; its keyword call is positional here.
 describe("test_utilities", () => {
   test("test_body_surface_area", () => {
-    expect(approx(body_surface_area(80, 1.8), 1.9917, { rel: 1e-2 })).toBe(
-      true,
-    );
     expect(
-      approx(body_surface_area(70, 1.8, "dubois"), 1.88, { rel: 1e-2 }),
+      approx(body_surface_area(80, 1.8), 1.9917, { rel: 1e-2, abs: 0 }),
     ).toBe(true);
     expect(
-      approx(body_surface_area(75, 1.75, "takahira"), 1.91, { rel: 1e-2 }),
+      approx(body_surface_area(70, 1.8, "dubois"), 1.88, { rel: 1e-2, abs: 0 }),
     ).toBe(true);
     expect(
-      approx(body_surface_area(80, 1.7, "fujimoto"), 1.872, { rel: 1e-2 }),
+      approx(body_surface_area(75, 1.75, "takahira"), 1.91, {
+        rel: 1e-2,
+        abs: 0,
+      }),
     ).toBe(true);
     expect(
-      approx(body_surface_area(85, 1.65, "kurazumi"), 1.89, { rel: 1e-2 }),
+      approx(body_surface_area(80, 1.7, "fujimoto"), 1.872, {
+        rel: 1e-2,
+        abs: 0,
+      }),
+    ).toBe(true);
+    expect(
+      approx(body_surface_area(85, 1.65, "kurazumi"), 1.89, {
+        rel: 1e-2,
+        abs: 0,
+      }),
     ).toBe(true);
     expect(call(70, 1.8, "invalid_formula")).toThrow(RangeError);
   });

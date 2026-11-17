@@ -198,8 +198,12 @@ describe("test_two_nodes_gagge_ji", () => {
       const t_core_last = result.t_core.at(-1) ?? NaN;
       const t_skin_last = result.t_skin.at(-1) ?? NaN;
 
-      expect(approx(t_core_last, expected_t_core, { rel: 1e-3 })).toBe(true);
-      expect(approx(t_skin_last, expected_t_skin, { rel: 1e-3 })).toBe(true);
+      expect(approx(t_core_last, expected_t_core, { rel: 1e-3, abs: 0 })).toBe(
+        true,
+      );
+      expect(approx(t_skin_last, expected_t_skin, { rel: 1e-3, abs: 0 })).toBe(
+        true,
+      );
     },
   );
 
@@ -244,12 +248,12 @@ describe("test_two_nodes_gagge_ji", () => {
     const expected_t_skin = 34.596;
 
     for (const { t_core, t_skin } of result) {
-      expect(approx(t_core.at(-1) ?? NaN, expected_t_core, { rel: 1e-3 })).toBe(
-        true,
-      );
-      expect(approx(t_skin.at(-1) ?? NaN, expected_t_skin, { rel: 1e-3 })).toBe(
-        true,
-      );
+      expect(
+        approx(t_core.at(-1) ?? NaN, expected_t_core, { rel: 1e-3, abs: 0 }),
+      ).toBe(true);
+      expect(
+        approx(t_skin.at(-1) ?? NaN, expected_t_skin, { rel: 1e-3, abs: 0 }),
+      ).toBe(true);
     }
   });
 

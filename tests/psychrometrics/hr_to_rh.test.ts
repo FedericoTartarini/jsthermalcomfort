@@ -1,6 +1,5 @@
 import { expect, describe, it, test } from "vitest";
-import { psy_ta_rh } from "../../src/psychrometrics/psy_ta_rh.ts";
-import { hr_to_rh } from "../../src/psychrometrics/index.ts";
+import { hr_to_rh, psy_ta_rh } from "../../src/psychrometrics/index.ts";
 import { approx } from "../models/testUtils.ts";
 
 // Mirrors the hr_to_rh row of pythermalcomfort v4.8.1 tests/test_utilities.py,
@@ -24,7 +23,9 @@ const grid = TDB.flatMap((tdb) =>
   RH.flatMap((rh) => P_ATM.map((p_atm) => ({ tdb, rh, p_atm }))),
 );
 
-describe("hr_to_rh", () => {
+// What upstream's tests leave out, measured on pythermalcomfort 4.8.1 in the
+// parity image.
+describe("hr_to_rh (JS-only)", () => {
   // The same p_sat(tdb) sits on both sides of the round trip and cancels,
   // so the inverse is exact to floating point.
   it.each(grid)(

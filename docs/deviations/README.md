@@ -7,6 +7,8 @@ Every difference between this library and pythermalcomfort v4.8.1, whose `.py` i
 
 `tests/deviations.test.ts` checks the registers against the code.
 
+The documentation site gives each function its own page, where upstream's site has one page per category, since every built-in TypeDoc router gives a function its own page (ADR 0020). This is not in the code, so it has no row. A module's page stands in for upstream's category page: it opens with one sentence and lists upstream's functions in the order of upstream's page.
+
 ## The registers
 
 Each register is on GitHub, on the `main` branch:

@@ -1,3 +1,11 @@
+/**
+ * Functions for environmental calculations.
+ *
+ * @sortStrategy kind
+ * @packageDocumentation
+ */
+// `kind` keeps the export order below, whose functions follow the page
+// order of pythermalcomfort v4.8.1's `docs/documentation/environment.rst`.
 import { f_svv } from "./f_svv.ts";
 import { mean_radiant_tmp } from "./mean_radiant_tmp.ts";
 import { operative_tmp } from "./operative_tmp.ts";
@@ -9,13 +17,13 @@ import { v_relative } from "./v_relative.ts";
 export type { ScaleWindSpeedLog } from "./scale_wind_speed_log.ts";
 
 export {
-  f_svv,
   mean_radiant_tmp,
   operative_tmp,
   running_mean_outdoor_temperature,
-  scale_wind_speed_log,
   transpose_sharp_altitude,
+  f_svv,
   v_relative,
+  scale_wind_speed_log,
 };
 
 /**
@@ -25,11 +33,11 @@ export {
  * @hidden
  */
 export default {
-  f_svv,
   mean_radiant_tmp,
   operative_tmp,
   running_mean_outdoor_temperature,
-  scale_wind_speed_log,
   transpose_sharp_altitude,
+  f_svv,
   v_relative,
+  scale_wind_speed_log,
 };

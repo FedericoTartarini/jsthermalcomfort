@@ -151,7 +151,7 @@ export type { MyNewModelInputs, MyNewModel } from "./my_new_model.ts";
 
 The type names are upstream's input class and dataclass.
 
-then add `my_new_model` and `MY_NEW_MODEL_INFO` to both the `export { … }` list and the default export there. The package root re-exports the subpath indexes, so nothing else needs editing.
+then add `my_new_model` and `MY_NEW_MODEL_INFO` to both the `export { … }` list and the default export there, at the model's place on upstream's `docs/documentation/models.rst`, since the export order is the order of the `models` page on the site. The package root re-exports the subpath indexes, so nothing else needs editing.
 
 ### 4. Test It
 

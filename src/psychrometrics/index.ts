@@ -1,3 +1,11 @@
+/**
+ * Functions for calculating psychrometric properties of moist air.
+ *
+ * @sortStrategy kind
+ * @packageDocumentation
+ */
+// `kind` keeps the export order below, whose functions follow the page
+// order of pythermalcomfort v4.8.1's `docs/documentation/psychrometrics.rst`.
 import { antoine } from "./antoine.ts";
 import { p_sat } from "./p_sat.ts";
 import { p_sat_torr } from "./p_sat_torr.ts";
@@ -13,17 +21,17 @@ import { rh_from_vapour_pressure } from "./rh_from_vapour_pressure.ts";
 export type { PsychrometricValues } from "./psy_ta_rh.ts";
 
 export {
-  antoine,
   p_sat,
   p_sat_torr,
+  antoine,
   psy_ta_rh,
-  enthalpy_air,
-  wet_bulb_tmp,
-  dew_point_tmp,
   hr_to_rh,
   rh_from_dew_point,
   rh_from_wet_bulb,
   rh_from_vapour_pressure,
+  wet_bulb_tmp,
+  dew_point_tmp,
+  enthalpy_air,
 };
 
 /**
@@ -33,15 +41,15 @@ export {
  * @hidden
  */
 export default {
-  antoine,
   p_sat,
   p_sat_torr,
+  antoine,
   psy_ta_rh,
-  enthalpy_air,
-  wet_bulb_tmp,
-  dew_point_tmp,
   hr_to_rh,
   rh_from_dew_point,
   rh_from_wet_bulb,
   rh_from_vapour_pressure,
+  wet_bulb_tmp,
+  dew_point_tmp,
+  enthalpy_air,
 };

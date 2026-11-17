@@ -33,6 +33,22 @@
   "searchInDocuments": true,
   "sortEntryPoints": false,
   "sort": ["source-order"],
+  "notRenderedTags": [
+    "@showCategories",
+    "@showGroups",
+    "@hideCategories",
+    "@hideGroups",
+    "@disableGroups",
+    "@expand",
+    "@preventExpand",
+    "@expandType",
+    "@summary",
+    "@group",
+    "@groupDescription",
+    "@category",
+    "@categoryDescription",
+    "@sortStrategy"
+  ],
   "externalPattern": [
     "**/node_modules/**",
     "**/src/jos3_functions/**",

@@ -1,3 +1,12 @@
+/**
+ * Helper functions for unit conversions, data processing, and common
+ * calculations.
+ *
+ * @sortStrategy kind
+ * @packageDocumentation
+ */
+// `kind` keeps the export order below, whose functions follow the page order
+// of pythermalcomfort v4.8.1's `docs/documentation/utilities_functions.rst`.
 import {
   met_typical_tasks,
   clo_typical_ensembles,

@@ -29,7 +29,9 @@ const { testData: reference_table, tolerances: tolerance } = await loadTestData(
 // As upstream, the rows without a standard and those whose label lower-cases to "iso" (tests/test_pmv_ppd_iso.py:25-27).
 const iso_rows = assertNonEmptyRows(
   reference_table.data.filter(
-    ({ inputs }) => (inputs.standard ?? "ISO") === "ISO",
+    ({ inputs }) =>
+      ("standard" in inputs ? String(inputs.standard) : "iso").toLowerCase() ===
+      "iso",
   ),
   "pmv_ppd_iso ISO rows",
 );

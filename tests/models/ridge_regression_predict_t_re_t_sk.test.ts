@@ -75,7 +75,9 @@ describe("test_ridge_regression_body_temperature_predictor", () => {
     (sex, age, height, weight, tdb, rh, final_t_re, final_t_sk) => {
       const duration = 540;
       const result = call({ sex, age, height, weight, tdb, rh, duration });
+      expect(Array.isArray(result.t_re)).toBe(true);
       expect(result.t_re).toHaveLength(duration);
+      expect(Array.isArray(result.t_sk)).toBe(true);
       expect(result.t_sk).toHaveLength(duration);
 
       expect(approx(result.t_re.at(-1) ?? NaN, final_t_re, { abs: 1e-2 })).toBe(

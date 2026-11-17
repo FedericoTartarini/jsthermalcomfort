@@ -26,9 +26,6 @@
  * - Array or vector inputs run element-wise: one scalar case per element,
  *   the expected outputs indexed the same way. `loadTestData` does this for
  *   fixture rows (see `expandArrayRows`).
- * - A fixture test runs every row its upstream counterpart means to run, even
- *   where upstream's filter misses rows (the PMV tests match lowercase
- *   `"iso"`/`"ashrae"` against the fixture's uppercase labels).
  * - Error classes follow ADR 0022: `TypeError` for a wrong type, `RangeError`
  *   for a value outside its range or option set, `Error` otherwise. Assert
  *   the message too where upstream matches one (`pytest.raises(match=...)`).

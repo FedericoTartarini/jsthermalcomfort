@@ -185,6 +185,7 @@ describe("NPM Package", () => {
     "f_svv",
     "mean_radiant_tmp",
     "running_mean_outdoor_temperature",
+    "scale_wind_speed_log",
     "v_relative",
   ] as const)("should have environment.%s, and at the root", (name) => {
     expect(jsthermalcomfort.environment).toHaveProperty(name);

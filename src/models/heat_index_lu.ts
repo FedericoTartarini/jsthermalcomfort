@@ -90,7 +90,7 @@ export const HEAT_INDEX_LU_INFO = deepFreeze({
 export type HILuInputs = InputsOf<typeof HEAT_INDEX_LU_INFO>;
 
 /**
- * Dataclass to represent the Heat Index (HI).
+ * Object to represent the Heat Index (HI).
  *
  * @interface
  */
@@ -103,10 +103,10 @@ export type HILu = OutputsOf<typeof HEAT_INDEX_LU_INFO>;
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Heat Index. See {@link HILu} for more details.
- * To access the `hi` value, use the `hi` attribute of the returned `HI` instance, e.g., `result.hi`.
+ * @returns An object containing the Heat Index. See {@link HILu} for more details.
+ * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].
  * - `stress_category`

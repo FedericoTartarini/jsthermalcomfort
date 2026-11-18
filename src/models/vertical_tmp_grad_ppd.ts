@@ -63,7 +63,7 @@ export type VerticalTGradPPDInputs = InputsOf<
 >;
 
 /**
- * Dataclass to represent the Predicted Percentage of Dissatisfied (PPD) with
+ * Object to represent the Predicted Percentage of Dissatisfied (PPD) with
  * vertical temperature gradient.
  *
  * @interface
@@ -99,26 +99,26 @@ export type VerticalTGradPPD = OutputsOf<typeof VERTICAL_TMP_GRAD_PPD_INFO>;
  *
  * > [!NOTE]
  * > this is the basic insulation also known as the intrinsic clothing insulation value of the
- * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > clothing ensemble (`I`<sub>cl,r</sub>), this is the thermal insulation from the skin
  * > surface to the outer clothing surface, including enclosed air layers, under actual
- * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > environmental conditions. This value is not the total insulation (`I`<sub>T,r</sub>).
  * > The dynamic clothing insulation, clo, can be calculated using the function
  * > `clo_dynamic_ashrae`.
  * @param inputs.vertical_tmp_grad - Vertical temperature gradient between the feet and the head, [°C/m].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
- * function returns nan. If False, returns values even if input values are
- * outside the applicability limits of the model. Defaults to True. The
+ * function returns `null`. If false, returns values even if input values are
+ * outside the applicability limits of the model. Defaults to true. The
  * applicability limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
  * 0 <= vr [m/s] <= 0.2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
  *
- * @returns A dataclass containing the Predicted Percentage of Dissatisfied occupants with vertical temperature gradient and acceptability.
+ * @returns An object containing the Predicted Percentage of Dissatisfied occupants with vertical temperature gradient and acceptability.
  * See {@link VerticalTGradPPD} for more details.
- * To access the `ppd_vg` and `acceptability` values, use the corresponding attributes of the returned `VerticalTGradPPD` instance, e.g., `result.ppd_vg`.
+ * To access the `ppd_vg` and `acceptability` values, use the corresponding properties of the returned `VerticalTGradPPD` object, e.g., `result.ppd_vg`.
  *
  * - `ppd_vg` - Predicted Percentage of Dissatisfied occupants with vertical temperature gradient.
  * - `acceptability` - 1.0 if the vertical air temperature difference is acceptable (PPD_vg ≤ 5 %),
- *   0.0 if not, and NaN where the inputs are outside the applicability limits.
+ *   0.0 if not, and `null` where the inputs are outside the applicability limits.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example

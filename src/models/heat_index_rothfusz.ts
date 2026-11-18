@@ -42,7 +42,7 @@ export const HEAT_INDEX_ROTHFUSZ_INFO = deepFreeze({
 export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
 
 /**
- * Dataclass to represent the Heat Index (HI).
+ * Object to represent the Heat Index (HI).
  *
  * @interface
  */
@@ -55,19 +55,19 @@ export type HI = OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * Stress categories are always determined from the unrounded heat index.
- * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, limits the inputs to the standard applicability limits. Defaults to true.
  *
  * > [!NOTE]
  * > By default, if the inputs are outside the standard applicability limits the
- * > function returns NaN. If False returns heat index
+ * > function returns `null`. If false returns heat index
  * > values even if input values are outside the applicability limits of the model.
  * >
  * > The applicability limit is tdb >= 27°C.
  *
- * @returns A dataclass containing the Heat Index. See {@link HI} for more details.
- * To access the `hi` value, use the `hi` attribute of the returned `HI` instance, e.g., `result.hi`.
+ * @returns An object containing the Heat Index. See {@link HI} for more details.
+ * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].
  * - `stress_category`

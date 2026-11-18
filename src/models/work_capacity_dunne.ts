@@ -31,7 +31,7 @@ export const WORK_CAPACITY_DUNNE_INFO = deepFreeze({
 export type WorkCapacityDunneInputs = InputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
 
 /**
- * Dataclass to represent work loss.
+ * Object to represent work loss.
  *
  * @interface
  */
@@ -62,9 +62,9 @@ export type WorkCapacity = OutputsOf<typeof WORK_CAPACITY_HOTHAPS_INFO>;
  * > Dunne et al [Dunne2013](../../docs/references.md#dunne2013) suggests that heavy intensity work is 350-500 kcal/h, moderate
  * > is 200-350 kcal/h, and light is less than 100-200 kcal/h.
  *
- * @returns A dataclass containing the work capacity. See
+ * @returns An object containing the work capacity. See
  * {@link WorkCapacity} for more details. To access the
- * `capacity` value, use the `capacity` attribute of the returned `WorkCapacity` instance, e.g.,
+ * `capacity` value, use the `capacity` property of the returned `WorkCapacity` object, e.g.,
  * `result.capacity`.
  *
  * - `capacity` - Work capacity affected by heat.

@@ -75,7 +75,7 @@ export const PMV_E_INFO = deepFreeze({
 export type EPMVInputs = InputsOf<typeof PMV_E_INFO>;
 
 /**
- * Dataclass to represent the Adjusted Predicted Mean Votes with Expectancy Factor
+ * Object to represent the Adjusted Predicted Mean Votes with Expectancy Factor
  * (ePMV).
  *
  * @interface
@@ -109,9 +109,9 @@ export type EPMV = OutputsOf<typeof PMV_E_INFO>;
  *
  * > [!NOTE]
  * > this is the basic insulation also known as the intrinsic clothing insulation value of the
- * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > clothing ensemble (`I`<sub>cl,r</sub>), this is the thermal insulation from the skin
  * > surface to the outer clothing surface, including enclosed air layers, under actual
- * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > environmental conditions. This value is not the total insulation (`I`<sub>T,r</sub>).
  * > The dynamic clothing insulation, clo, can be calculated using the function
  * > `clo_dynamic_iso`.
  * @param inputs.e_coefficient - Expectancy factor.
@@ -119,15 +119,15 @@ export type EPMV = OutputsOf<typeof PMV_E_INFO>;
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
  * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
- * function returns nan. If False, returns the e_pmv value even if input values are
- * outside the applicability limits of the model. Defaults to True.
+ * function returns `null`. If false, returns the e_pmv value even if input values are
+ * outside the applicability limits of the model. Defaults to true.
  *
  * > [!NOTE]
  * > The ISO 7730 [7730ISO2005](../../docs/references.md#7730iso2005) [7730ISO2025](../../docs/references.md#7730iso2025) limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
  * > 0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, and -2 <= PMV <= 2.
  *
- * @returns A dataclass containing the Adjusted Predicted Mean Votes with Expectancy Factor. See {@link EPMV} for more details.
- * To access the `e_pmv` value, use the `e_pmv` attribute of the returned `EPMV` instance, e.g., `result.e_pmv`.
+ * @returns An object containing the Adjusted Predicted Mean Votes with Expectancy Factor. See {@link EPMV} for more details.
+ * To access the `e_pmv` value, use the `e_pmv` property of the returned `EPMV` object, e.g., `result.e_pmv`.
  *
  * - `e_pmv` - Adjusted Predicted Mean Votes with Expectancy Factor.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

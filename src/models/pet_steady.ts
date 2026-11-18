@@ -49,7 +49,7 @@ export const PET_STEADY_INFO = deepFreeze({
 export type PETSteadyInputs = InputsOf<typeof PET_STEADY_INFO>;
 
 /**
- * Dataclass to represent the Physiological Equivalent Temperature (PET).
+ * Object to represent the Physiological Equivalent Temperature (PET).
  *
  * @interface
  */
@@ -91,8 +91,8 @@ export type PETSteady = OutputsOf<typeof PET_STEADY_INFO>;
  * @param inputs.height - Height of the person, [m]. Defaults to 1.8.
  * @param inputs.wme - External work, [met]. Defaults to 0.
  *
- * @returns A dataclass containing the Physiological Equivalent Temperature. See {@link PETSteady} for more details.
- * To access the `pet` value, use the `pet` attribute of the returned `PETSteady` instance, e.g., `result.pet`.
+ * @returns An object containing the Physiological Equivalent Temperature. See {@link PETSteady} for more details.
+ * To access the `pet` value, use the `pet` property of the returned `PETSteady` object, e.g., `result.pet`.
  *
  * - `pet` - Physiological Equivalent Temperature.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
@@ -269,7 +269,7 @@ function _pet_steady_vectorised(
    * @param _rh - relative humidity, [%]
    * @param _met - metabolic rate, [W/m2]
    * @param _clo - clothing insulation, [clo]
-   * @param actual_environment - True=solve 3eqs/3unknowns, False=solve for PET
+   * @param actual_environment - true=solve 3eqs/3unknowns, false=solve for PET
    * @returns PET or energy balance.
    */
   function solve_pet(

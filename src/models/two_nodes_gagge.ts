@@ -62,7 +62,7 @@ export const TWO_NODES_GAGGE_INFO = deepFreeze({
 export type GaggeTwoNodesInputs = InputsOf<typeof TWO_NODES_GAGGE_INFO>;
 
 /**
- * Dataclass to represent the results of the two-node model of human temperature
+ * Object to represent the results of the two-node model of human temperature
  * regulation.
  *
  * @interface
@@ -70,7 +70,7 @@ export type GaggeTwoNodesInputs = InputsOf<typeof TWO_NODES_GAGGE_INFO>;
 export type GaggeTwoNodes = OutputsOf<typeof TWO_NODES_GAGGE_INFO>;
 
 /**
- * Dataclass to represent the Standard Effective Temperature (SET).
+ * Object to represent the Standard Effective Temperature (SET).
  *
  * - `set` - Standard effective temperature, [°C].
  *
@@ -110,16 +110,16 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * @param inputs.p_atm - Atmospheric pressure, default value 101325 [Pa]. Defaults to 101325.
  * @param inputs.position - Select either "sitting" or "standing". Defaults to "standing".
  * @param inputs.max_skin_blood_flow - Maximum blood flow from the core to the skin, [kg/h/m2]. Defaults to 90.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [mL/h/m2]. Defaults to 500.
  * @param inputs.w_max - Maximum skin wettedness (w) adimensional, greater than 0.06 and at most 1. 0.06
  * is the wettedness from skin diffusion alone, without sweating, so it is
  * excluded. Defaults to False, which computes it from `v` and `clo`. False and 0
  * both mean the value is computed; True and NaN are rejected.
  *
- * @returns A dataclass containing the results of the two-node model of human temperature regulation.
+ * @returns An object containing the results of the two-node model of human temperature regulation.
  * See {@link GaggeTwoNodes} for more details.
- * To access the results, use the corresponding attributes of the returned `GaggeTwoNodes` instance, e.g., `result.e_skin`.
+ * To access the results, use the corresponding properties of the returned `GaggeTwoNodes` object, e.g., `result.e_skin`.
  *
  * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.
  * - `e_rsw` - Rate of evaporative heat loss from sweat evaporation, [W/m2].

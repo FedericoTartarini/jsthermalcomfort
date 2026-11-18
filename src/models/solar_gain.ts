@@ -103,7 +103,7 @@ export const SOLAR_GAIN_INFO = deepFreeze({
 export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO>;
 
 /**
- * Dataclass to represent the solar gain to the human body.
+ * Object to represent the solar gain to the human body.
  *
  * @interface
  */
@@ -154,11 +154,11 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  *
  * @param inputs.posture - Default 'sitting' list of available options 'standing', 'supine' or 'sitting'.
  * @param inputs.floor_reflectance - Floor reflectance. It is assumed to be constant and equal to 0.6. Defaults to 0.6.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the solar gain to the human body and delta mean radiant temperature.
+ * @returns An object containing the solar gain to the human body and delta mean radiant temperature.
  * See {@link SolarGain} for more details.
- * To access the `erf` and `delta_mrt` values, use the corresponding attributes of the returned `SolarGain` instance, e.g., `result.erf`.
+ * To access the `erf` and `delta_mrt` values, use the corresponding properties of the returned `SolarGain` object, e.g., `result.erf`.
  *
  * - `erf` - Solar gain to the human body using the Effective Radiant Field [W/m2].
  * - `delta_mrt` - Delta mean radiant temperature. The amount by which the mean radiant

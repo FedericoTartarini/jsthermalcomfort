@@ -26,7 +26,7 @@ export const ESI_INFO = deepFreeze({
 export type ESIInputs = InputsOf<typeof ESI_INFO>;
 
 /**
- * Dataclass to represent the Environmental Stress Index (ESI).
+ * Object to represent the Environmental Stress Index (ESI).
  *
  * @interface
  */
@@ -39,10 +39,10 @@ export type ESI = OutputsOf<typeof ESI_INFO>;
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
  * @param inputs.sol_radiation_global - Global solar radiation, [W/m2].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Environmental Stress Index. See {@link ESI} for more details.
- * To access the `esi` value, use the `esi` attribute of the returned `ESI` instance, e.g., `result.esi`.
+ * @returns An object containing the Environmental Stress Index. See {@link ESI} for more details.
+ * To access the `esi` value, use the `esi` property of the returned `ESI` object, e.g., `result.esi`.
  *
  * - `esi` - Environmental Stress Index.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

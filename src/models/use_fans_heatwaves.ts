@@ -81,7 +81,7 @@ export const USE_FANS_HEATWAVES_INFO = deepFreeze({
 export type UseFansHeatwavesInputs = InputsOf<typeof USE_FANS_HEATWAVES_INFO>;
 
 /**
- * Dataclass to represent the results of using fans during heatwaves.
+ * Object to represent the results of using fans during heatwaves.
  *
  * @interface
  */
@@ -114,16 +114,16 @@ export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  * @param inputs.position - Select either "sitting" or "standing". Defaults to "standing".
  * @param inputs.max_skin_blood_flow - Maximum blood flow from the core to the skin. Defaults to 80.
  * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
- * function returns nan. If False, returns values even if input values are
- * outside the applicability limits of the model. Defaults to True. The
+ * function returns `null`. If false, returns values even if input values are
+ * outside the applicability limits of the model. Defaults to true. The
  * applicability limits are 20 <= tdb [°C] <= 50, 20 <= tr [°C] <= 50,
  * 0.1 <= v [m/s] <= 4.5, 0.7 <= met [met] <= 2, and 0 <= clo [clo] <= 1.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [mL/h/m2]. Defaults to 500.
  *
- * @returns A dataclass containing the results of using fans during heatwaves.
+ * @returns An object containing the results of using fans during heatwaves.
  * See {@link UseFansHeatwaves} for more details.
- * To access the results, use the corresponding attributes of the returned `UseFansHeatwaves` instance, e.g., `result.e_skin`.
+ * To access the results, use the corresponding properties of the returned `UseFansHeatwaves` object, e.g., `result.e_skin`.
  *
  * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.
  * - `e_rsw` - Rate of evaporative heat loss from sweat evaporation, [W/m2].
@@ -138,13 +138,13 @@ export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  * - `w` - Skin wettedness, adimensional. Ranges from 0 to 1.
  * - `w_max` - Skin wettedness (w) practical upper limit, adimensional. Ranges from 0 to 1.
  * - `heat_strain` - 1.0 if the model predicts that the person may be experiencing heat strain, 0.0
- *   if not, and NaN where the inputs are outside the applicability limits.
- * - `heat_strain_blood_flow` - 1.0 if skin blood flow (m_bl) reaches its maximum value, otherwise 0.0, or NaN
+ *   if not, and `null` where the inputs are outside the applicability limits.
+ * - `heat_strain_blood_flow` - 1.0 if skin blood flow (m_bl) reaches its maximum value, otherwise 0.0, or `null`
  *   outside the applicability limits.
- * - `heat_strain_w` - 1.0 if skin wettedness (w) reaches its maximum value, otherwise 0.0, or NaN
+ * - `heat_strain_w` - 1.0 if skin wettedness (w) reaches its maximum value, otherwise 0.0, or `null`
  *   outside the applicability limits.
  * - `heat_strain_sweating` - 1.0 if regulatory sweating (m_rsw) reaches its maximum value, otherwise 0.0,
- *   or NaN outside the applicability limits.
+ *   or `null` outside the applicability limits.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example

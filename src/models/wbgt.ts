@@ -28,7 +28,7 @@ export const WBGT_INFO = deepFreeze({
 export type WBGTInputs = InputsOf<typeof WBGT_INFO>;
 
 /**
- * Dataclass to represent the Wet Bulb Globe Temperature (WBGT) index.
+ * Object to represent the Wet Bulb Globe Temperature (WBGT) index.
  *
  * @interface
  */
@@ -59,12 +59,12 @@ export type WBGT = OutputsOf<typeof WBGT_INFO>;
  * @param inputs.tg - Globe temperature, [°C].
  * @param inputs.tdb - Dry bulb air temperature, [°C]. This value is needed as input if the person is
  * exposed to direct solar radiation.
- * @param inputs.with_solar_load - True if the globe sensor is exposed to direct solar radiation. Defaults to False.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.with_solar_load - true if the globe sensor is exposed to direct solar radiation. Defaults to false.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Wet Bulb Globe Temperature Index. See
+ * @returns An object containing the Wet Bulb Globe Temperature Index. See
  * {@link WBGT} for more details. To access the
- * `wbgt` value, use the `wbgt` attribute of the returned `WBGT` instance, e.g.,
+ * `wbgt` value, use the `wbgt` property of the returned `WBGT` object, e.g.,
  * `result.wbgt`.
  *
  * - `wbgt` - Wet Bulb Globe Temperature Index.

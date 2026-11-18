@@ -26,7 +26,7 @@ export const NET_INFO = deepFreeze({
 export type NETInputs = InputsOf<typeof NET_INFO>;
 
 /**
- * Dataclass to represent the Normal Effective Temperature (NET).
+ * Object to represent the Normal Effective Temperature (NET).
  *
  * @interface
  */
@@ -54,10 +54,10 @@ export type NET = OutputsOf<typeof NET_INFO>;
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
  * @param inputs.v - Wind speed [m/s] at 1.2 m above the ground.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Normal Effective Temperature. See {@link NET} for more details.
- * To access the `net` value, use the `net` attribute of the returned `NET` instance, e.g., `result.net`.
+ * @returns An object containing the Normal Effective Temperature. See {@link NET} for more details.
+ * To access the `net` value, use the `net` property of the returned `NET` object, e.g., `result.net`.
  *
  * - `net` - Normal Effective Temperature, [°C].
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

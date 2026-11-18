@@ -25,7 +25,7 @@ export const WCI_INFO = deepFreeze({
 export type WCIInputs = InputsOf<typeof WCI_INFO>;
 
 /**
- * Dataclass to represent the Wind Chill Index (WCI).
+ * Object to represent the Wind Chill Index (WCI).
  *
  * @interface
  */
@@ -51,10 +51,10 @@ export type WCI = OutputsOf<typeof WCI_INFO>;
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.v - Wind speed 10m above ground level, [m/s].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Wind Chill Index. See {@link WCI} for more details.
- * To access the `wci` value, use the `wci` attribute of the returned `WCI` instance, e.g., `result.wci`.
+ * @returns An object containing the Wind Chill Index. See {@link WCI} for more details.
+ * To access the `wci` value, use the `wci` property of the returned `WCI` object, e.g., `result.wci`.
  *
  * - `wci` - Wind Chill Index, [W/m^2].
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

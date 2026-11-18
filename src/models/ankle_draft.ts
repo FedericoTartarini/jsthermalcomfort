@@ -62,7 +62,7 @@ export const ANKLE_DRAFT_INFO = deepFreeze({
 export type AnkleDraftInputs = InputsOf<typeof ANKLE_DRAFT_INFO>;
 
 /**
- * Dataclass to store the results of the ankle draft calculation.
+ * Object to store the results of the ankle draft calculation.
  *
  * @interface
  */
@@ -94,24 +94,24 @@ export type AnkleDraft = OutputsOf<typeof ANKLE_DRAFT_INFO>;
  *
  * > [!NOTE]
  * > this is the basic insulation also known as the intrinsic clothing insulation value of the
- * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > clothing ensemble (`I`<sub>cl,r</sub>), this is the thermal insulation from the skin
  * > surface to the outer clothing surface, including enclosed air layers, under actual
- * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > environmental conditions. This value is not the total insulation (`I`<sub>T,r</sub>).
  * > The dynamic clothing insulation, clo, can be calculated using the function
  * > `clo_dynamic_ashrae`.
  * @param inputs.v_ankle - Air speed at 0.1 m (4 in.) above the floor, default in [m/s] or [fps] if `units` = 'IP'.
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
- * function returns nan. If False, returns values even if input values are
- * outside the applicability limits of the model. Defaults to True. The
+ * function returns `null`. If false, returns values even if input values are
+ * outside the applicability limits of the model. Defaults to true. The
  * applicability limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
  * 0 <= vr [m/s] <= 0.2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
  *
- * @returns Dataclass containing the results of the ankle draft calculation. See {@link AnkleDraft} for more details.
+ * @returns Object containing the results of the ankle draft calculation. See {@link AnkleDraft} for more details.
  *
  * - `ppd_ad` - Predicted Percentage of Dissatisfied occupants with ankle draft, [%].
  * - `acceptability` - 1.0 if the air speed at the ankle level is acceptable according to ASHRAE 55
- *   (PPD_ad ≤ 20 %), 0.0 if not, and NaN where the inputs are outside the
+ *   (PPD_ad ≤ 20 %), 0.0 if not, and `null` where the inputs are outside the
  *   applicability limits.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *

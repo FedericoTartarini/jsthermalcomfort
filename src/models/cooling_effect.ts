@@ -52,7 +52,7 @@ export const COOLING_EFFECT_INFO = deepFreeze({
 export type CEInputs = InputsOf<typeof COOLING_EFFECT_INFO>;
 
 /**
- * Dataclass to represent the Cooling Effect (CE).
+ * Object to represent the Cooling Effect (CE).
  *
  * @interface
  */
@@ -87,17 +87,17 @@ export type CE = OutputsOf<typeof COOLING_EFFECT_INFO>;
  *
  * > [!NOTE]
  * > this is the basic insulation also known as the intrinsic clothing insulation value of the
- * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > clothing ensemble (`I`<sub>cl,r</sub>), this is the thermal insulation from the skin
  * > surface to the outer clothing surface, including enclosed air layers, under actual
- * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > environmental conditions. This value is not the total insulation (`I`<sub>T,r</sub>).
  * > The dynamic clothing insulation, clo, can be calculated using the function
  * > `clo_dynamic_ashrae`.
  * @param inputs.wme - External work, [met]. Defaults to 0.
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
  *
- * @returns A dataclass containing the Cooling Effect value. See {@link CE} for more details.
- * To access the `ce` value, use the `ce` attribute of the returned `CE` instance, e.g., `result.ce`.
+ * @returns An object containing the Cooling Effect value. See {@link CE} for more details.
+ * To access the `ce` value, use the `ce` property of the returned `CE` object, e.g., `result.ce`.
  *
  * - `ce` - Cooling Effect value.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

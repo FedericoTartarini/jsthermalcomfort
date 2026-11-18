@@ -122,7 +122,7 @@ export const PMV_PPD_ISO_INFO = deepFreeze({
 export type PMVPPDInputs = InputsOf<typeof PMV_PPD_ISO_INFO>;
 
 /**
- * Dataclass to represent the Predicted Mean Vote (PMV) and Predicted Percentage of
+ * Object to represent the Predicted Mean Vote (PMV) and Predicted Percentage of
  * Dissatisfied (PPD).
  *
  * @interface
@@ -153,14 +153,14 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  *
  * > [!NOTE]
  * > this is the basic insulation also known as the intrinsic clothing insulation value of the
- * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > clothing ensemble (`I`<sub>cl,r</sub>), this is the thermal insulation from the skin
  * > surface to the outer clothing surface, including enclosed air layers, under actual
- * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > environmental conditions. This value is not the total insulation (`I`<sub>T,r</sub>).
  * > The dynamic clothing insulation, clo, can be calculated using the function
  * > `clo_dynamic_iso`.
  * @param inputs.wme - External work, [met]. Defaults to 0.
  * @param inputs.standard - The ISO 7730 edition to reference. Supported values are "7730-2005"
- * and "7730-2025"; any other value raises a ``ValueError``. The two
+ * and "7730-2025"; any other value throws a ``RangeError``. The two
  * editions currently use identical PMV/PPD equations and applicability
  * limits, so this parameter does not affect the numerical result. It is
  * retained to record the intended edition, reject unsupported edition
@@ -169,22 +169,22 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  * Defaults to "7730-2025", the current edition of the standard.
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
- * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, limits the inputs to the standard applicability limits. Defaults to true.
  *
  * > [!NOTE]
  * > By default, if the inputs are outside the standard applicability limits the
- * > function returns nan. If False returns pmv and ppd values even if input values are
+ * > function returns `null`. If false returns pmv and ppd values even if input values are
  * > outside the applicability limits of the model.
  * >
  * > The ISO 7730 limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
  * > 0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700,
  * > and -2 <= PMV <= 2.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Predicted Mean Vote and Predicted Percentage of
+ * @returns An object containing the Predicted Mean Vote and Predicted Percentage of
  * Dissatisfied. See {@link PMVPPD} for
  * more details. To access the `pmv`, `ppd`, `tsv` values, use the corresponding
- * attributes of the returned `PMVPPD` instance, e.g., `result.pmv`.
+ * properties of the returned `PMVPPD` object, e.g., `result.pmv`.
  *
  * - `pmv` - Predicted Mean Vote.
  * - `ppd` - Predicted Percentage of Dissatisfied.

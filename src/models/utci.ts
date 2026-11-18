@@ -77,7 +77,7 @@ export const UTCI_INFO = deepFreeze({
 export type UTCIInputs = InputsOf<typeof UTCI_INFO>;
 
 /**
- * Dataclass to represent the Universal Thermal Climate Index (UTCI).
+ * Object to represent the Universal Thermal Climate Index (UTCI).
  *
  * @interface
  */
@@ -103,31 +103,31 @@ export type UTCI = OutputsOf<typeof UTCI_INFO>;
  * @param inputs.rh - Relative humidity, [%].
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system. Defaults to 'SI'.
  * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
- * function returns nan. If False, returns UTCI values even if input values are
+ * function returns `null`. If false, returns UTCI values even if input values are
  * outside the applicability limits of the model. The valid input ranges are
  * -50 <= tdb [°C] <= 50, -30 <= tr - tdb [°C] <= 70,
  * 0.5 <= v [m/s] <= 17.0, 0 <= rh [%] <= 100, and water vapour pressure
- * between 0 and 5 kPa (inclusive). Defaults to True.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * between 0 and 5 kPa (inclusive). Defaults to true.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Universal Thermal Climate Index and stress category.
+ * @returns An object containing the Universal Thermal Climate Index and stress category.
  * See {@link UTCI} for more details. To access the
- * `utci` and `stress_category` values, use the corresponding attributes of the
- * returned `UTCI` instance, e.g., `result.utci`.
+ * `utci` and `stress_category` values, use the corresponding properties of the
+ * returned `UTCI` object, e.g., `result.utci`.
  *
  * - `utci` - Universal Thermal Climate Index, [°C] or in [°F].
  * - `stress_category` - UTCI categorized in terms of thermal stress [Blazejczyk2013](../../docs/references.md#blazejczyk2013).
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @remarks
- * All four applicability limits applied when ``limit_inputs=True`` (air temperature,
+ * All four applicability limits applied when ``limit_inputs=true`` (air temperature,
  * ``tr - tdb``, wind speed and humidity) are the input checks of the official UTCI
  * program, ``UTCI_a002.f90`` (version a 0.002, October 2009), available at
  * https://utci.org/resources/UTCI%20Program%20Code.zip. That program accepts wind
  * speeds up to 30 m/s, but its documentation and input prompt give 17 m/s, the limit
  * used here.
  * High relative humidity can exceed the vapour-pressure limit even when air
- * temperature is within range. Setting ``limit_inputs=False`` permits polynomial
+ * temperature is within range. Setting ``limit_inputs=false`` permits polynomial
  * extrapolation, which can produce unrealistic temperatures and stress categories.
  * The original approximation can also have a non-monotonic wind-speed response;
  * this function does not alter the polynomial to enforce monotonicity.

@@ -31,7 +31,7 @@ export const PMV_ATHB_INFO = deepFreeze({
 export type ATHBInputs = InputsOf<typeof PMV_ATHB_INFO>;
 
 /**
- * Dataclass to store the results of the Adaptive Thermal Heat Balance (ATHB)
+ * Object to store the results of the Adaptive Thermal Heat Balance (ATHB)
  * calculation.
  *
  * @interface
@@ -61,15 +61,15 @@ export type ATHB = OutputsOf<typeof PMV_ATHB_INFO>;
  * > `v_relative`.
  * @param inputs.rh - Relative humidity, [%].
  * @param inputs.met - Metabolic rate, [met].
- * @param inputs.clo - Clothing insulation, in [clo]. If `clo` is set to False, the clothing insulation
- * value will be calculated using the equation provided in the paper. Defaults to False.
+ * @param inputs.clo - Clothing insulation, in [clo]. If `clo` is set to false, the clothing insulation
+ * value will be calculated using the equation provided in the paper. Defaults to false.
  * @param inputs.t_running_mean - Running mean temperature, in [°C].
  *
  * > [!NOTE]
  * > The running mean temperature can be calculated using the function
  * > `running_mean_outdoor_temperature`.
  *
- * @returns Dataclass containing the results of the ATHB calculation. See {@link ATHB} for more details.
+ * @returns Object containing the results of the ATHB calculation. See {@link ATHB} for more details.
  *
  * - `athb_pmv` - Predicted Mean Vote calculated with the Adaptive Thermal Heat Balance framework.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

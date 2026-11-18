@@ -87,9 +87,9 @@ export class _SportsValues {
 /**
  * Namespace of predefined sport values.
  *
- * Use attributes like `Sports.RUNNING` to obtain a `_SportsValues` instance. This
+ * Use properties like `Sports.RUNNING` to obtain a `_SportsValues` instance. This
  * class uses a frozen dataclass decorator to prevent modification of the namespace.
- * Attributes are class-level constants, not instance fields.
+ * Properties are class-level constants, not instance fields.
  */
 export const Sports = deepFreeze({
   ABSEILING: new _SportsValues(0.6, 6.0, 0.5, 120),
@@ -163,7 +163,7 @@ export type SportsHeatStressInputs = InputsOf<
 >;
 
 /**
- * Dataclass to represent the Sports Heat Stress Risk calculation results.
+ * Object to represent the Sports Heat Stress Risk calculation results.
  *
  * @interface
  */
@@ -190,16 +190,16 @@ export type SportsHeatStressRisk = OutputsOf<
  * @param inputs.vr - Relative air speed [m/s]. If the input `vr`
  * is lower than the minimum relative air speed defined for the selected
  * sport (`sport.vr`), then `sport.vr` will be used for the calculation.
- * @param inputs.sport - Sport-specific activity dataclass with fields `clo` (clothing insulation),
+ * @param inputs.sport - Sport-specific activity object with fields `clo` (clothing insulation),
  * `met` (metabolic rate), `vr` (minimum relative air speed),
  * and `duration` (activity duration). Use one of the predefined entries from
  * the {@link Sports} class, e.g., `Sports.RUNNING`, `Sports.SOCCER`,
  * `Sports.TENNIS`, etc.
  *
- * @returns A dataclass containing the heat stress risk assessment results.
+ * @returns An object containing the heat stress risk assessment results.
  * See {@link SportsHeatStressRisk} for
- * more details. To access individual values, use the corresponding attributes
- * of the returned instance, e.g., `result.risk_level_interpolated`.
+ * more details. To access individual values, use the corresponding properties
+ * of the returned object, e.g., `result.risk_level_interpolated`.
  *
  * - `risk_level_interpolated` - Interpolated risk level (1.0-4.9), [dimensionless].
  *   Risk levels: 1-<2 = low, 2-<3 = moderate, 3-<4 = high,
@@ -311,7 +311,7 @@ export function sports_heat_stress_risk(
  * Run the PHS scalar kernel for a single condition.
  *
  * Equivalent to `phs(..., posture="standing", acclimatized=100, i_mst=0.4,
- * limit_inputs=False, round_output=False)` but skips input validation and the
+ * limit_inputs=false, round_output=false)` but skips input validation and the
  * parallel array wrapper, which dominate the runtime for a single condition. Used
  * by the `brentq` objectives in `_calc_risk_single_value`, which call PHS many
  * times per condition.

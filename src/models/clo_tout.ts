@@ -26,7 +26,7 @@ export const CLO_TOUT_INFO = deepFreeze({
 export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO>;
 
 /**
- * Dataclass to represent the clothing insulation Icl as a function of outdoor air
+ * Object to represent the clothing insulation Icl as a function of outdoor air
  * temperature.
  *
  * @interface
@@ -42,8 +42,8 @@ export type CloTOut = OutputsOf<typeof CLO_TOUT_INFO>;
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
  *
- * @returns A dataclass containing the representative clothing insulation Icl. See {@link CloTOut} for more details.
- * To access the `clo_tout` value, use the `clo_tout` attribute of the returned `CloTOut` instance, e.g., `result.clo_tout`.
+ * @returns An object containing the representative clothing insulation Icl. See {@link CloTOut} for more details.
+ * To access the `clo_tout` value, use the `clo_tout` property of the returned `CloTOut` object, e.g., `result.clo_tout`.
  *
  * - `clo_tout` - Representative clothing insulation Icl.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

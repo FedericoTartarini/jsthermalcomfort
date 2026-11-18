@@ -151,7 +151,7 @@ export const PHS_INFO = deepFreeze({
 export type PHSInputs = InputsOf<typeof PHS_INFO>;
 
 /**
- * Dataclass to represent the Predicted Heat Strain (PHS).
+ * Object to represent the Predicted Heat Strain (PHS).
  *
  * @interface
  */
@@ -181,14 +181,14 @@ export type PHS = OutputsOf<typeof PHS_INFO>;
  * @param inputs.clo - Clothing insulation, [clo].
  * @param inputs.posture - a string value presenting posture of person "sitting", "standing", or "crouching"
  * @param inputs.wme - external work, [met] default 0
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * @param inputs.standard - Select the model you want to use to calculate the PHS. The default option is
  * "7933-2023", and the other option is "7933-2004".
- * @param inputs.limit_inputs - If True, limits the input parameters to the standard's applicability limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, limits the input parameters to the standard's applicability limits. Defaults to true.
  *
  * > [!NOTE]
  * > By default, if the inputs are outside the standard applicability limits the
- * > function returns nan. If False returns values even if input values are
+ * > function returns `null`. If false returns values even if input values are
  * > outside the applicability limits of the model.
  * >
  * > The 7933 limits are 15 <= tdb [°C] <= 50, 0 <= (tr - tdb) [°C] <= 60,
@@ -208,9 +208,9 @@ export type PHS = OutputsOf<typeof PHS_INFO>;
  * 0.42 in the 2023 standard.
  * @param inputs.t_sk - Mean skin temperature when worker starts working, [°C]. Defaults to 34.1.
  * @param inputs.t_cr - Mean core temperature when worker starts working, [°C]. Defaults to 36.8.
- * @param inputs.t_re - Mean rectal temperature when worker starts working, [°C]. If None in the 2004 standard,
+ * @param inputs.t_re - Mean rectal temperature when worker starts working, [°C]. If `undefined` in the 2004 standard,
  * then t_re = t_cr, whereas in the 2023 standard t_re = 36.8 °C
- * @param inputs.t_cr_eq - Mean core temperature as a function of met when worker starts working, [°C]. If None in the 2004
+ * @param inputs.t_cr_eq - Mean core temperature as a function of met when worker starts working, [°C]. If `undefined` in the 2004
  * standard, then t_cr_eq = t_cr, whereas in the 2023 standard t_cr_eq = 36.8 °C.
  * @param inputs.t_sk_t_cr_wg - Initial weighting fraction for skin/core temperature coupling, dimensionless.
  * @param inputs.sweat_rate_watt - Initial instantaneous regulatory sweat (evaporative) rate at the skin, per unit area,
@@ -221,8 +221,8 @@ export type PHS = OutputsOf<typeof PHS_INFO>;
  * sum over minutes (units W·min·m⁻²). It is intended for carry over between consecutive
  * simulation segments.
  *
- * @returns A dataclass containing the Predicted Heat Strain. See {@link PHS} for more details.
- * To access the individual attributes, use the corresponding attribute of the returned `PHS` instance, e.g., `result.t_re`.
+ * @returns An object containing the Predicted Heat Strain. See {@link PHS} for more details.
+ * To access the individual properties, use the corresponding property of the returned `PHS` object, e.g., `result.t_re`.
  *
  * - `t_re` - Rectal temperature, [°C].
  * - `t_sk` - Skin temperature, [°C].
@@ -285,7 +285,7 @@ export type PHS = OutputsOf<typeof PHS_INFO>;
  * });
  * console.log(result.t_re); // 37.843744854847046
  * // second simulation - using previous results as initial values
- * // NOTE: when chaining runs, prefer round_output=False to avoid rounding drift.
+ * // NOTE: when chaining runs, prefer round_output=false to avoid rounding drift.
  * result = phs({
  *   tdb: 40,
  *   tr: 40,

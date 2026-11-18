@@ -43,9 +43,9 @@ export const WORK_CAPACITY_NIOSH_INFO = deepFreeze({
  * @param inputs.wbgt - Wet bulb globe temperature, [°C].
  * @param inputs.met - Metabolic heat production in Watts
  *
- * @returns A dataclass containing the work capacity. See
+ * @returns An object containing the work capacity. See
  * {@link WorkCapacity} for more details. To access the
- * `capacity` value, use the `capacity` attribute of the returned `WorkCapacity` instance, e.g.,
+ * `capacity` value, use the `capacity` property of the returned `WorkCapacity` object, e.g.,
  * `result.capacity`.
  *
  * - `capacity` - Work capacity affected by heat.

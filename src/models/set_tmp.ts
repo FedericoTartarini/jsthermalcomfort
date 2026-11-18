@@ -83,17 +83,17 @@ export type SETInputs = InputsOf<typeof SET_TMP_INFO>;
  * > `body_surface_area`.
  * @param inputs.p_atm - Atmospheric pressure, default value 101325 [Pa]
  * @param inputs.position - Select either "sitting" or "standing". Defaults to "standing".
- * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, limits the inputs to the standard applicability limits. Defaults to true.
  *
  * > [!NOTE]
  * > By default, if the inputs are outside the standard applicability limits the
- * > function returns nan. If False returns values regardless of the input values.
+ * > function returns `null`. If false returns values regardless of the input values.
  * > The limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
  * > 0 <= v [m/s] <= 2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Standard Effective Temperature. See {@link SET} for more details.
- * To access the `set` value, use the corresponding attribute of the returned `SET` instance, e.g., `result.set`.
+ * @returns An object containing the Standard Effective Temperature. See {@link SET} for more details.
+ * To access the `set` value, use the corresponding property of the returned `SET` object, e.g., `result.set`.
  *
  * - `set` - Standard effective temperature, [°C].
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

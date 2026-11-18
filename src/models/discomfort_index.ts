@@ -49,7 +49,7 @@ export const DISCOMFORT_INDEX_INFO = deepFreeze({
 export type DIInputs = InputsOf<typeof DISCOMFORT_INDEX_INFO>;
 
 /**
- * Dataclass to represent the Discomfort Index (DI) and its classification.
+ * Object to represent the Discomfort Index (DI) and its classification.
  *
  * @interface
  */
@@ -74,8 +74,8 @@ export type DI = OutputsOf<typeof DISCOMFORT_INDEX_INFO>;
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
  *
- * @returns A dataclass containing the Discomfort Index and its classification. See {@link DI} for more details.
- * To access the `di` and `discomfort_condition` values, use the respective attributes of the returned `DI` instance, e.g., `result.di`.
+ * @returns An object containing the Discomfort Index and its classification. See {@link DI} for more details.
+ * To access the `di` and `discomfort_condition` values, use the respective properties of the returned `DI` object, e.g., `result.di`.
  *
  * - `di` - Discomfort Index, [°C].
  * - `discomfort_condition` - Classification of the thermal comfort conditions according to the discomfort index.

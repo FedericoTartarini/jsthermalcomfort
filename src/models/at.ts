@@ -28,7 +28,7 @@ export const AT_INFO = deepFreeze({
 export type ATInputs = InputsOf<typeof AT_INFO>;
 
 /**
- * Dataclass to store the results of the Apparent Temperature (AT) calculation.
+ * Object to store the results of the Apparent Temperature (AT) calculation.
  *
  * @interface
  */
@@ -55,9 +55,9 @@ export type AT = OutputsOf<typeof AT_INFO>;
  * @param inputs.rh - Relative humidity, [%]
  * @param inputs.v - Wind speed 10m above ground level, [m/s]
  * @param inputs.q - Net radiation absorbed per unit area of body surface [W/m2]
- * @param inputs.round_output - If True, rounds the output value; if False, does not round it.
+ * @param inputs.round_output - If true, rounds the output value; if false, does not round it.
  *
- * @returns Dataclass containing the apparent temperature, [°C]. See {@link AT} for more details.
+ * @returns Object containing the apparent temperature, [°C]. See {@link AT} for more details.
  *
  * - `at` - Apparent temperature, [°C]
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

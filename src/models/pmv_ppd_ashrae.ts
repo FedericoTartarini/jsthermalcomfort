@@ -98,7 +98,7 @@ export const PMV_PPD_ASHRAE_INFO = deepFreeze({
 export type PMVPPDAshraeInputs = InputsOf<typeof PMV_PPD_ASHRAE_INFO>;
 
 /**
- * Dataclass to represent the Predicted Mean Vote (PMV) and Predicted Percentage of
+ * Object to represent the Predicted Mean Vote (PMV) and Predicted Percentage of
  * Dissatisfied (PPD) calculated in accordance with ASHRAE Standard 55.
  *
  * @interface
@@ -132,20 +132,20 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  *
  * > [!NOTE]
  * > this is the basic insulation also known as the intrinsic clothing insulation value of the
- * > clothing ensemble (`I`:sub:`cl,r`), this is the thermal insulation from the skin
+ * > clothing ensemble (`I`<sub>cl,r</sub>), this is the thermal insulation from the skin
  * > surface to the outer clothing surface, including enclosed air layers, under actual
- * > environmental conditions. This value is not the total insulation (`I`:sub:`T,r`).
+ * > environmental conditions. This value is not the total insulation (`I`<sub>T,r</sub>).
  * > The dynamic clothing insulation, clo, can be calculated using the function
  * > `clo_dynamic_ashrae`.
  * @param inputs.wme - External work, [met]. Defaults to 0.
  * @param inputs.standard - Select the version of the ASHRAE 55 Standard to use. Currently, the only option available is "55-2023".
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system. Supported values are
  * 'SI' and 'IP'. Defaults to 'SI'.
- * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, limits the inputs to the standard applicability limits. Defaults to true.
  *
  * > [!NOTE]
  * > By default, if the inputs are outside the standard applicability limits, the
- * > function returns NaN. If False returns pmv and ppd
+ * > function returns `null`. If false returns pmv and ppd
  * > values even if input values are outside the applicability limits of the model.
  * >
  * > The ASHRAE 55 2020 limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
@@ -156,19 +156,19 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * over the airspeed, the ASHRAE 55 imposes an upper limit for v which varies as a
  * function of the operative temperature, for more information please consult the
  * Standard.
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Predicted Mean Vote and Predicted Percentage of
+ * @returns An object containing the Predicted Mean Vote and Predicted Percentage of
  * Dissatisfied. See {@link PMVPPDAshrae} for
  * more details. To access the `pmv`, `ppd`, `tsv`, and `compliance` values, use the corresponding
- * attributes of the returned `PMVPPDAshrae` instance, e.g., `result.pmv`, `result.compliance`.
+ * properties of the returned `PMVPPDAshrae` object, e.g., `result.pmv`, `result.compliance`.
  *
  * - `pmv` - Predicted Mean Vote.
  * - `ppd` - Predicted Percentage of Dissatisfied.
  * - `tsv` - Predicted thermal sensation vote.
  * - `compliance` - 1.0 if PMV is within the acceptable range (-0.5 < PMV < 0.5) according to
- *   ASHRAE Standard 55-2023, 0.0 if not, and NaN where the inputs are outside the
- *   applicability limits (``limit_inputs=True``).
+ *   ASHRAE Standard 55-2023, 0.0 if not, and `null` where the inputs are outside the
+ *   applicability limits (``limit_inputs=true``).
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example

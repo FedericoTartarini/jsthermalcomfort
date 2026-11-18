@@ -71,7 +71,7 @@ export const PMV_A_INFO = deepFreeze({
 export type APMVInputs = InputsOf<typeof PMV_A_INFO>;
 
 /**
- * A dataclass to store the results of the adaptive Predicted Mean Vote (aPMV)
+ * An object to store the results of the adaptive Predicted Mean Vote (aPMV)
  * model.
  *
  * @interface
@@ -102,15 +102,15 @@ export type APMV = OutputsOf<typeof PMV_A_INFO>;
  * @param inputs.a_coefficient - Adaptive coefficient.
  * @param inputs.wme - External work, [met], default is 0.
  * @param inputs.units - Units system, 'SI' or 'IP'. Defaults to 'SI'.
- * @param inputs.limit_inputs - If True, returns nan for inputs outside standard limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, returns `null` for inputs outside standard limits. Defaults to true.
  *
  * > [!NOTE]
  * > ISO 7730 [7730ISO2005](../../docs/references.md#7730iso2005) [7730ISO2025](../../docs/references.md#7730iso2025) limits: 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40, 0 <= vr [m/s] <= 1,
  * > 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, -2 <= PMV <= 2.
  *
- * @returns A dataclass containing the Predicted Mean Vote (a_pmv). See
+ * @returns An object containing the Predicted Mean Vote (a_pmv). See
  * {@link APMV} for more details.
- * To access the `a_pmv` value, use the `a_pmv` attribute of the returned `APMV` instance,
+ * To access the `a_pmv` value, use the `a_pmv` property of the returned `APMV` object,
  * e.g., `result.a_pmv`.
  *
  * - `a_pmv` - Predicted Mean Vote.

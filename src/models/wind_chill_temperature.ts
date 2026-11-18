@@ -25,7 +25,7 @@ export const WIND_CHILL_TEMPERATURE_INFO = deepFreeze({
 export type WCTInputs = InputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
 
 /**
- * Dataclass to represent the Wind Chill Temperature (WCT).
+ * Object to represent the Wind Chill Temperature (WCT).
  *
  * @interface
  */
@@ -40,10 +40,10 @@ export type WCT = OutputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.v - Wind speed 10m above ground level, [km/h].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Wind Chill Temperature. See {@link WCT} for more details.
- * To access the `wct` value, use the `wct` attribute of the returned `WCT` instance, e.g., `result.wct`.
+ * @returns An object containing the Wind Chill Temperature. See {@link WCT} for more details.
+ * To access the `wct` value, use the `wct` property of the returned `WCT` object, e.g., `result.wct`.
  *
  * - `wct` - Wind Chill Temperature, [°C].
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

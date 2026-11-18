@@ -61,7 +61,7 @@ export const ADAPTIVE_ASHRAE_INFO = deepFreeze({
 export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
 
 /**
- * A dataclass to store the results of the adaptive thermal comfort model based on
+ * An object to store the results of the adaptive thermal comfort model based on
  * ASHRAE 55.
  *
  * @interface
@@ -92,17 +92,17 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  *
  * @param inputs.v - Air speed, default in [m/s] or [fps] if `units` = 'IP'.
  * @param inputs.units - Units system, 'SI' or 'IP'. Defaults to 'SI'.
- * @param inputs.limit_inputs - If True, returns nan for inputs outside standard limits. Defaults to True.
+ * @param inputs.limit_inputs - If true, returns `null` for inputs outside standard limits. Defaults to true.
  *
  * > [!NOTE]
  * > ASHRAE 55 2020 limits: 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40, 0 <= v [m/s] <= 2, 10 <= t_running_mean [°C] <= 33.5.
  *
- * @param inputs.round_output - If True, rounds the five reported temperatures to one decimal place, after the
+ * @param inputs.round_output - If true, rounds the five reported temperatures to one decimal place, after the
  * conversion to °F when ``units='IP'``. The comfort bounds and the acceptability
  * flags are always calculated from unrounded values, so ``round_output`` never
- * changes ``acceptability_80`` or ``acceptability_90``. Defaults to True.
+ * changes ``acceptability_80`` or ``acceptability_90``. Defaults to true.
  *
- * @returns A dataclass containing the results. See {@link AdaptiveASHRAE} for more details.
+ * @returns An object containing the results. See {@link AdaptiveASHRAE} for more details.
  *
  * - `tmp_cmf` - Comfort temperature at a specific running mean temperature, default in [°C] or [°F].
  * - `tmp_cmf_80_low` - Lower acceptable comfort temperature for 80% occupants, default in [°C] or [°F].
@@ -110,9 +110,9 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * - `tmp_cmf_90_low` - Lower acceptable comfort temperature for 90% occupants, default in [°C] or [°F].
  * - `tmp_cmf_90_up` - Upper acceptable comfort temperature for 90% occupants, default in [°C] or [°F].
  * - `acceptability_80` - 1.0 if the operative temperature is acceptable for 80% of occupants, 0.0 if
- *   not, and NaN where the inputs are outside the applicability limits.
+ *   not, and `null` where the inputs are outside the applicability limits.
  * - `acceptability_90` - 1.0 if the operative temperature is acceptable for 90% of occupants, 0.0 if
- *   not, and NaN where the inputs are outside the applicability limits.
+ *   not, and `null` where the inputs are outside the applicability limits.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example
@@ -139,7 +139,7 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * // { tmp_cmf: 75.2, tmp_cmf_80_low: 68.9, tmp_cmf_80_up: 81.5, tmp_cmf_90_low: 70.7, tmp_cmf_90_up: 79.7, acceptability_80: true, acceptability_90: true, warnings: [] }
  *
  * adaptive_ashrae({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
- * // { tmp_cmf: NaN, ... acceptability_90: null, warnings: [...] }
+ * // { tmp_cmf: null, ... acceptability_90: null, warnings: [...] }
  * // The adaptive thermal comfort model can only be used if the running mean temperature is higher than 10°C.
  * ```
  */

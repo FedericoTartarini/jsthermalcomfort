@@ -67,7 +67,7 @@ export type GaggeTwoNodesSleepInputs<
 > = InputsOf<typeof TWO_NODES_GAGGE_SLEEP_INFO, Series>;
 
 /**
- * Dataclass to represent the results of the two-node sleep model.
+ * Object to represent the results of the two-node sleep model.
  *
  * @interface
  */
@@ -104,9 +104,9 @@ export type GaggeTwoNodesSleep<
  * @param inputs.skin_blood_flow - Skin-blood-flow rate per unit surface area, [kg/h/m2]. Defaults to 6.3.
  * @param inputs.met_shivering - Metabolic rate due to shivering, [W/m2]. Defaults to 0.
  *
- * @returns A dataclass containing the results of the Gagge two-node model for sleep thermal environment.
+ * @returns An object containing the results of the Gagge two-node model for sleep thermal environment.
  * See {@link GaggeTwoNodesSleep} for more details.
- * To access the results, use the corresponding attributes of the returned instance, e.g. `result.e_skin`.
+ * To access the results, use the corresponding properties of the returned object, e.g. `result.e_skin`.
  *
  * - `set` - Standard Effective Temperature (SET).
  * - `t_core` - Core temperature, [°C].

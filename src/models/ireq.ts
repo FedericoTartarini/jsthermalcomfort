@@ -74,7 +74,7 @@ export const IREQ_INFO = deepFreeze({
 export type IREQInputs = InputsOf<typeof IREQ_INFO>;
 
 /**
- * Dataclass to represent the IREQ calculation results.
+ * Object to represent the IREQ calculation results.
  *
  * @interface
  */
@@ -98,9 +98,9 @@ export type IREQ = OutputsOf<typeof IREQ_INFO>;
  * @param inputs.p - Air permeability of clothing, [l/(m2 s)].
  * @param inputs.walk_sp - Walking speed, [m/s].
  * @param inputs.wme - External work, [met]. Defaults to 0.
- * @param inputs.limit_inputs - When True, results outside the ISO 11079 applicability limits are set
- * to nan. Non-physical negative clothing insulation outputs are also set
- * to nan. Defaults to True.
+ * @param inputs.limit_inputs - When true, results outside the ISO 11079 applicability limits are set
+ * to `null`. Non-physical negative clothing insulation outputs are also set
+ * to `null`. Defaults to true.
  *
  * > [!NOTE]
  * > The ISO 11079 applicability limits used by this function are
@@ -108,10 +108,10 @@ export type IREQ = OutputsOf<typeof IREQ_INFO>;
  * > from met to W/m2, tdb <= 10 [°C], 0.4 <= vr [m/s] <= 18, and
  * > minimum_walking_speed <= walk_sp [m/s] <= 1.2, where
  * > minimum_walking_speed = min(0.0052 * (met [W/m2] - 58), 1.2).
- * @param inputs.round_output - When True, rounds numeric output values to one decimal place. Defaults
- * to True.
+ * @param inputs.round_output - When true, rounds numeric output values to one decimal place. Defaults
+ * to true.
  *
- * @returns A dataclass containing ``ireq_min``, ``ireq_neutral``, ``icl_min``,
+ * @returns An object containing ``ireq_min``, ``ireq_neutral``, ``icl_min``,
  * ``icl_neutral``, ``dle_min``, and ``dle_neutral``. See
  * {@link IREQ} for more details.
  *

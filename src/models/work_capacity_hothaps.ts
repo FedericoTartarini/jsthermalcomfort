@@ -74,9 +74,9 @@ export type WorkCapacityHothapsInputs = InputsOf<
  * @param inputs.work_intensity - Which work intensity to use for the calculation, choice of "heavy",
  * "moderate" or "light".
  *
- * @returns A dataclass containing the work capacity. See
+ * @returns An object containing the work capacity. See
  * {@link WorkCapacity} for more details. To access the
- * `capacity` value, use the `capacity` attribute of the returned `WorkCapacity` instance, e.g.,
+ * `capacity` value, use the `capacity` property of the returned `WorkCapacity` object, e.g.,
  * `result.capacity`.
  *
  * - `capacity` - Work capacity affected by heat.

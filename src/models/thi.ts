@@ -25,7 +25,7 @@ export const THI_INFO = deepFreeze({
 export type THIInputs = InputsOf<typeof THI_INFO>;
 
 /**
- * Dataclass to represent the Temperature-Humidity Index (THI).
+ * Object to represent the Temperature-Humidity Index (THI).
  *
  * @interface
  */
@@ -38,12 +38,12 @@ export type THI = OutputsOf<typeof THI_INFO>;
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Temperature-Humidity Index.
+ * @returns An object containing the Temperature-Humidity Index.
  * See {@link THI} for more details.
- * To access the `thi` value, use the `thi` attribute of the returned `THI`
- * instance, e.g., `result.thi`.
+ * To access the `thi` value, use the `thi` property of the returned `THI`
+ * object, e.g., `result.thi`.
  *
  * - `thi` - Temperature-Humidity Index (THI).
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

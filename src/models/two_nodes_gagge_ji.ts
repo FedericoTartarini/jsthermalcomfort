@@ -46,7 +46,7 @@ export const TWO_NODES_GAGGE_JI_INFO = deepFreeze({
 export type GaggeTwoNodesJiInputs = InputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
 
 /**
- * Dataclass to represent the results of the Gagge-Ji model of human temperature.
+ * Object to represent the results of the Gagge-Ji model of human temperature.
  *
  * @interface
  */
@@ -80,11 +80,11 @@ export type GaggeTwoNodesJi = OutputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
  * @param inputs.length_time_simulation - Length of the simulation, [minutes]. Defaults to 120 minutes.
  * @param inputs.initial_skin_temp - Initial skin temperature, [°C]. Defaults to 36.8 °C.
  * @param inputs.initial_core_temp - Initial core temperature, [°C]. Defaults to 36.49 °C.
- * @param inputs.acclimatized - If True, the model assumes the person is acclimatized to heat. Defaults to True.
+ * @param inputs.acclimatized - If true, the model assumes the person is acclimatized to heat. Defaults to true.
  *
- * @returns A dataclass containing the simulated core and skin temperatures over time. See {@link GaggeTwoNodesJi} for more details.
- * To access the individual attributes, use the corresponding attribute of the returned
- * instance, e.g. `result.t_core` or `result.t_skin`.
+ * @returns An object containing the simulated core and skin temperatures over time. See {@link GaggeTwoNodesJi} for more details.
+ * To access the individual properties, use the corresponding property of the returned
+ * object, e.g. `result.t_core` or `result.t_skin`.
  *
  * - `t_core` - Core temperature, [°C].
  * - `t_skin` - Skin temperature, [°C].

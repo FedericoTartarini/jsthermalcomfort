@@ -47,11 +47,11 @@ export type HISchoenInputs = InputsOf<typeof HEAT_INDEX_SCHOEN_INFO>;
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * Stress categories are always determined from the unrounded heat index.
  *
- * @returns A dataclass containing the Heat Index. See {@link HI} for more details.
- * To access the `hi` value, use the `hi` attribute of the returned `HI` instance, e.g., `result.hi`.
+ * @returns An object containing the Heat Index. See {@link HI} for more details.
+ * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].
  * - `stress_category`

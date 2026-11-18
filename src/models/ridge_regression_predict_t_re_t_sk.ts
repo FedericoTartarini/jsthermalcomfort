@@ -135,7 +135,7 @@ export type RidgeRegressionInputs = InputsOf<
 >;
 
 /**
- * Dataclass for returning predicted temperature history.
+ * Object for returning predicted temperature history.
  *
  * @interface
  */
@@ -171,11 +171,11 @@ export type PredictedBodyTemperatures = OutputsOf<
  * @param inputs.t_sk - Initial mean skin temperature (°C). If provided, the baseline simulation
  * at 23°C, 50% RH for 120 minutes is skipped, and this value is used
  * as the starting mean skin temperature for the main simulation.
- * @param inputs.limit_inputs - If True, limits the inputs to the standard applicability limits. Defaults to True.
- * @param inputs.round_output - If True, rounds outputs to 2 decimal places; otherwise leaves full precision.
- * Defaults to True.
+ * @param inputs.limit_inputs - If true, limits the inputs to the standard applicability limits. Defaults to true.
+ * @param inputs.round_output - If true, rounds outputs to 2 decimal places; otherwise leaves full precision.
+ * Defaults to true.
  *
- * @returns A dataclass containing the predicted rectal (`t_re`) and skin (`t_sk`)
+ * @returns An object containing the predicted rectal (`t_re`) and skin (`t_sk`)
  * temperature history in °C. See
  * {@link PredictedBodyTemperatures}
  * for more details. The outputs are numpy arrays. For scalar inputs, the shape
@@ -200,8 +200,8 @@ export type PredictedBodyTemperatures = OutputsOf<
  * - **Ambient Temperature**: 0 to 60 °C
  * - **Relative Humidity**: 0 to 100 %
  *
- * If inputs fall outside applicability limits and `limit_inputs=True`, the
- * corresponding output time series are filled with NaN for all time steps.
+ * If inputs fall outside applicability limits and `limit_inputs=true`, the
+ * corresponding output time series are filled with `null` for all time steps.
  *
  * The model does not have inputs such as: air velocity, radiative heat transfer,
  * clothing level and an individual's activity level due to there being little

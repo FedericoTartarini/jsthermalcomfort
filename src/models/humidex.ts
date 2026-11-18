@@ -33,7 +33,7 @@ export const HUMIDEX_INFO = deepFreeze({
 export type HumidexInputs = InputsOf<typeof HUMIDEX_INFO>;
 
 /**
- * Dataclass to represent the Humidex and its discomfort category.
+ * Object to represent the Humidex and its discomfort category.
  *
  * @interface
  */
@@ -55,10 +55,10 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  * > The 'rana' model is the Humidex model proposed by [Rana et al. (2013)](https://doi.org/10.1016/j.enbuild.2013.04.019).
  * > The 'masterson' model is the Humidex model proposed by Masterton and Richardson (1979) [Masterson1979](../../docs/references.md#masterson1979).
  *
- * @param inputs.round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
+ * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns A dataclass containing the Humidex value and its discomfort category. See {@link Humidex} for more details.
- * To access the `humidex` and `discomfort` values, use the respective attributes of the returned `Humidex` instance, e.g., `result.humidex`.
+ * @returns An object containing the Humidex value and its discomfort category. See {@link Humidex} for more details.
+ * To access the `humidex` and `discomfort` values, use the respective properties of the returned `Humidex` object, e.g., `result.humidex`.
  *
  * - `humidex` - Humidex value, [°C].
  * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016).

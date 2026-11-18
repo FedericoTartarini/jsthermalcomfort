@@ -55,7 +55,7 @@ export const ADAPTIVE_EN_INFO = deepFreeze({
 export type ENInputs = InputsOf<typeof ADAPTIVE_EN_INFO>;
 
 /**
- * Dataclass to store the results of the adaptive thermal comfort calculation based
+ * Object to store the results of the adaptive thermal comfort calculation based
  * on EN 16798-1 2019.
  *
  * @interface
@@ -84,21 +84,21 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  * > \>= 1.2 m/s).
  *
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
- * @param inputs.limit_inputs - If True, returns NaN for inputs outside the standard applicability limits.
+ * @param inputs.limit_inputs - If true, returns `null` for inputs outside the standard applicability limits.
  * The applicability limits are 10 <= t_running_mean [°C] <= 30.
- * @param inputs.round_output - If True, rounds the returned comfort temperature and category bounds to one decimal
+ * @param inputs.round_output - If true, rounds the returned comfort temperature and category bounds to one decimal
  * place in the output unit (rounding is applied after any IP unit conversion).
- * If False, returns the unrounded values.
+ * If false, returns the unrounded values.
  *
- * @returns A dataclass containing the results. See {@link AdaptiveEN} for more details.
+ * @returns An object containing the results. See {@link AdaptiveEN} for more details.
  *
  * - `tmp_cmf` - Comfort temperature at that specific running mean temperature, default in [°C] or in [°F].
  * - `acceptability_cat_i` - 1.0 if the indoor conditions comply with comfort category I, 0.0 if not, and
- *   NaN where the inputs are outside the applicability limits.
+ *   `null` where the inputs are outside the applicability limits.
  * - `acceptability_cat_ii` - 1.0 if the indoor conditions comply with comfort category II, 0.0 if not, and
- *   NaN where the inputs are outside the applicability limits.
+ *   `null` where the inputs are outside the applicability limits.
  * - `acceptability_cat_iii` - 1.0 if the indoor conditions comply with comfort category III, 0.0 if not, and
- *   NaN where the inputs are outside the applicability limits.
+ *   `null` where the inputs are outside the applicability limits.
  * - `tmp_cmf_cat_i_up` - Upper acceptable comfort temperature for category I, default in [°C] or in [°F].
  * - `tmp_cmf_cat_ii_up` - Upper acceptable comfort temperature for category II, default in [°C] or in [°F].
  * - `tmp_cmf_cat_iii_up` - Upper acceptable comfort temperature for category III, default in [°C] or in [°F].
@@ -126,7 +126,7 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  *
  * results = adaptive_en({ tdb: 25, tr: 25, t_running_mean: 9, v: 0.1 });
  * console.log(results);
- * // { tmp_cmf: NaN, acceptability_cat_i: null, ... }
+ * // { tmp_cmf: null, acceptability_cat_i: null, ... }
  * // The adaptive thermal comfort model can only be used
  * // if the running mean temperature is between 10 °C and 30 °C.
  * ```

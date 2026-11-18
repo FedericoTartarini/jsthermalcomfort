@@ -64,6 +64,8 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016).
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
+ * @throws `RangeError` If `rh` is below 0 or above 100, or `model` is a string other than 'rana' and 'masterson'.
+ *
  * @example
  * ```ts
  * import { humidex } from "jsthermalcomfort/models";

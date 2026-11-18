@@ -7,7 +7,7 @@ Every difference between this library and pythermalcomfort v4.8.1, whose `.py` i
 
 `tests/deviations.test.ts` checks the registers against the code.
 
-The documentation site gives each function its own page, where upstream's site has one page per category, since every built-in TypeDoc router gives a function its own page (ADR 0020). This is not in the code, so it has no row. A module's page stands in for upstream's category page: it opens with one sentence and lists upstream's functions in the order of upstream's page. Where only the category page's own text conveys a statement of the 1.4.0 site, the module's comment holds that text after its opening sentence: the `models` comment holds the definition of PMV (`docs/documentation/models.rst:221-222`).
+The documentation site gives each function its own page, where upstream's site has one page per category, since every built-in TypeDoc router gives a function its own page (ADR 0020). This is not in the code, so it has no row. A module's page stands in for upstream's category page: it opens with one sentence and lists upstream's functions in the order of upstream's page. Where only the category page's own text conveys a statement of the 1.4.0 site, the module's comment holds that text after its opening sentence: the `models` comment holds the Heat Index section's text (`docs/documentation/models.rst:134-141`), with its `:py:class:` references as `{@link}`, and the definition of PMV (`:221-222`), in the order of upstream's page.
 
 ## The registers
 

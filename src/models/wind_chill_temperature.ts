@@ -37,6 +37,13 @@ export type WCT = OutputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
  * We validated the implementation of this model by comparing the results with the Wind Chill
  * Temperature Calculator on [Calculator.net](https://www.calculator.net/wind-chill-calculator.html)
  *
+ * The formula is the one the US National Weather Service and Environment Canada adopted for the winter
+ * of 2001-2002 ([JAG/TI](https://web.archive.org/web/20090816055959id_/http://www.ofcm.gov/jagti/r19-ti-plan/pdf/entire_r19_ti.pdf)).
+ * The WCT is how cold people feel when outside, based on the rate of heat loss from exposed skin caused
+ * by wind and cold. It is defined only for air temperatures at or below 10 °C (50 °F) and wind speeds
+ * above 4.8 km/h (3 mph) ([NWS](https://www.weather.gov/safety/cold-wind-chill-chart)); the function
+ * checks neither limit and returns a value outside them as well.
+ *
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.v - Wind speed 10m above ground level, [km/h].

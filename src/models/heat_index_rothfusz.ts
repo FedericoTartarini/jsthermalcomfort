@@ -70,7 +70,9 @@ export type HI = OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].
- * - `stress_category`
+ * - `stress_category` - Heat stress category of the unrounded heat index: "no risk" up to 27 °C, "caution"
+ *   up to 32 °C, "extreme caution" up to 41 °C, "danger" up to 54 °C and "extreme danger" up to 1000 °C,
+ *   each limit included; `null` where `hi` is `null` or the unrounded heat index is above 1000 °C.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @example

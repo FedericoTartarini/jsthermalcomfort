@@ -70,6 +70,8 @@ export type WBGT = OutputsOf<typeof WBGT_INFO>;
  * - `wbgt` - Wet Bulb Globe Temperature Index.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
+ * @throws `TypeError` If `with_solar_load` is true and `tdb` is left out or `null`.
+ *
  * @example
  * ```ts
  * import { wbgt } from "jsthermalcomfort/models";

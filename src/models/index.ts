@@ -2,6 +2,17 @@
  * Implementation of various thermal comfort models like PMV/PPD, Adaptive,
  * SET, PHS, etc.
  *
+ * ## Heat Index (HI)
+ *
+ * The Heat Index (HI) is a commonly used metric to estimate apparent temperature (AT) incorporating the effects of humidity based on Steadman’s model [Steadman1979](../../docs/references.md#steadman1979) of human thermoregulation.
+ *
+ * Lu and Romps (2022) [lu](../../docs/references.md#lu) found that Steadman’s model produces unrealistic results under extreme conditions, such as excessively hot and humid or cold and dry environments, rendering the heat index undefined.
+ * For instance, at 80% relative humidity, the heat index is only valid within a temperature range of 288–304 K.
+ * To address this issue, Lu and Romps (2022) [lu](../../docs/references.md#lu) developed a new model that extends the range of validity of the heat index.
+ *
+ * pythermalcomfort therefore includes two equations to calculate the Heat Index. One in accordance with the new Lu and Romps (2022) model which is an extension of the first version of Steadman’s (1979) apparent temperature {@link heat_index_lu}.
+ * The other is developed by Rothfusz (1990) and it is a simplified model derived by multiple regression analysis in temperature and relative humidity from the first version of Steadman’s (1979) apparent temperature (AT) [Rothfusz1990](../../docs/references.md#rothfusz1990) {@link heat_index_rothfusz}.
+ *
  * ## Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
  *
  * The Predicted Mean Vote (PMV) is an index that aims to predict the mean value of thermal sensation votes from a large group of people, based on a seven-point scale ranging from "cold" (-3) to "hot" (+3).

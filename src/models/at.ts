@@ -55,7 +55,7 @@ export type AT = OutputsOf<typeof AT_INFO>;
  * @param inputs.rh - Relative humidity, [%]
  * @param inputs.v - Wind speed 10m above ground level, [m/s]
  * @param inputs.q - Net radiation absorbed per unit area of body surface [W/m2]
- * @param inputs.round_output - If true, rounds the output value; if false, does not round it.
+ * @param inputs.round_output - If true, rounds the output value; if false, does not round it. Defaults to true.
  *
  * @returns Object containing the apparent temperature, [°C]. See {@link AT} for more details.
  *

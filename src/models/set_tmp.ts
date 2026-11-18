@@ -91,6 +91,8 @@ export type SETInputs = InputsOf<typeof SET_TMP_INFO>;
  * > The limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
  * > 0 <= v [m/s] <= 2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
+ * @param inputs.calculate_ce - If true, calculates `set` as {@link two_nodes_gagge} does with
+ * `calculate_ce` true. Defaults to false.
  *
  * @returns An object containing the Standard Effective Temperature. See {@link SET} for more details.
  * To access the `set` value, use the corresponding property of the returned `SET` object, e.g., `result.set`.

@@ -116,6 +116,10 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * is the wettedness from skin diffusion alone, without sweating, so it is
  * excluded. Defaults to False, which computes it from `v` and `clo`. False and 0
  * both mean the value is computed; True and NaN are rejected.
+ * @param inputs.calculate_ce - If true, returns only `set`, unrounded, as the cooling effect needs it
+ * (see {@link cooling_effect}): for the standing position whatever `position` is, with the
+ * default `max_skin_blood_flow`, `max_sweating` and `w_max`, and without the correction of the
+ * convective heat transfer coefficient for a metabolic rate above 0.85 met. Defaults to false.
  *
  * @returns An object containing the results of the two-node model of human temperature regulation.
  * See {@link GaggeTwoNodes} for more details.

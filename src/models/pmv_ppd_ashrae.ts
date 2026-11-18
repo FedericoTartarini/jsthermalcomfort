@@ -114,6 +114,11 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * this is then subtracted from both the air and mean radiant temperatures, and the
  * differences are used as input to the PMV model, while the airspeed is set to 0.1m/s.
  *
+ * The ASHRAE 55 Standard limits the use of the PMV model to air speeds up to 0.10 m/s
+ * (20 fpm). When air speeds exceed 0.10 m/s (20 fpm), the comfort zone boundaries are
+ * adjusted based on the SET model. This change was introduced by
+ * [Addendum C to Standard 55-2020](https://www.ashrae.org/file%20library/technical%20resources/standards%20and%20guidelines/standards%20addenda/55_2020_c_20210430.pdf).
+ *
  * @param inputs
  * @param inputs.tdb - Dry bulb air temperature, [°C] in [°F] if `units` = 'IP'
  * @param inputs.tr - Mean radiant temperature, [°C] in [°F] if `units` = 'IP'
@@ -157,6 +162,7 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * function of the operative temperature, for more information please consult the
  * Standard.
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
+ * `pmv` is rounded to 2 decimal places and `ppd` to 1.
  *
  * @returns An object containing the Predicted Mean Vote and Predicted Percentage of
  * Dissatisfied. See {@link PMVPPDAshrae} for

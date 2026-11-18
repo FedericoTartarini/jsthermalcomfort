@@ -101,6 +101,7 @@ export type AnkleDraft = OutputsOf<typeof ANKLE_DRAFT_INFO>;
  * > `clo_dynamic_ashrae`.
  * @param inputs.v_ankle - Air speed at 0.1 m (4 in.) above the floor, default in [m/s] or [fps] if `units` = 'IP'.
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * Defaults to 'SI'.
  * @param inputs.limit_inputs - By default, if the inputs are outside the standard applicability limits the
  * function returns `null`. If false, returns values even if input values are
  * outside the applicability limits of the model. Defaults to true. The

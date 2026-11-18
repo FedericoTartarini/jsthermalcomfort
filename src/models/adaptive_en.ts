@@ -84,11 +84,12 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  * > \>= 1.2 m/s).
  *
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
+ * Defaults to 'SI'.
  * @param inputs.limit_inputs - If true, returns `null` for inputs outside the standard applicability limits.
- * The applicability limits are 10 <= t_running_mean [°C] <= 30.
+ * The applicability limits are 10 <= t_running_mean [°C] <= 30. Defaults to true.
  * @param inputs.round_output - If true, rounds the returned comfort temperature and category bounds to one decimal
  * place in the output unit (rounding is applied after any IP unit conversion).
- * If false, returns the unrounded values.
+ * If false, returns the unrounded values. Defaults to true.
  *
  * @returns An object containing the results. See {@link AdaptiveEN} for more details.
  *

@@ -2,6 +2,11 @@
  * Implementation of various thermal comfort models like PMV/PPD, Adaptive,
  * SET, PHS, etc.
  *
+ * ## Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
+ *
+ * The Predicted Mean Vote (PMV) is an index that aims to predict the mean value of thermal sensation votes from a large group of people, based on a seven-point scale ranging from "cold" (-3) to "hot" (+3).
+ * It was developed by Fanger [Fanger1970](../../docs/references.md#fanger1970).
+ *
  * @sortStrategy kind
  * @packageDocumentation
  */

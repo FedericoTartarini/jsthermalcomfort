@@ -117,6 +117,9 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  * mean radiant temperature of the space should be increased if no solar radiation is
  * present.
  *
+ * More information on the calculation procedure can be found in Appendix C of
+ * [55ASHRAE2023](../../docs/references.md#55ashrae2023).
+ *
  * @param inputs
  * @param inputs.sol_altitude - Solar altitude, degrees from horizontal [deg]. Ranges between 0 and 90.
  * @param inputs.sharp - Solar horizontal angle relative to the front of the person (SHARP) [deg].
@@ -147,6 +150,8 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  * @param inputs.asw - The average short-wave absorptivity of the occupant. It will range widely,
  * depending on the color of the skin of the occupant as well as the color and
  * amount of clothing covering the body. Defaults to 0.7.
+ * A value of 0.7 shall be used unless more specific information about the
+ * clothing or skin color of the occupants is available.
  *
  * > [!NOTE]
  * > Short-wave absorptivity typically ranges from 0.57 to 0.84, depending

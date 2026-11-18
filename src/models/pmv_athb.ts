@@ -87,7 +87,7 @@ export type ATHB = OutputsOf<typeof PMV_ATHB_INFO>;
  *   met: 1.2,
  *   t_running_mean: 20,
  * });
- * console.log(results.athb_pmv); // returns the PMV value
+ * console.log(results.athb_pmv); // 0.206
  *
  * // for multiple points
  * const points = [
@@ -95,7 +95,7 @@ export type ATHB = OutputsOf<typeof PMV_ATHB_INFO>;
  *   { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, t_running_mean: 20 },
  *   { tdb: 25, tr: 25, vr: 0.1, rh: 50, met: 1.2, t_running_mean: 20 },
  * ].map((inputs) => pmv_athb(inputs));
- * console.log(points.map((result) => result.athb_pmv));
+ * console.log(points.map((result) => result.athb_pmv)); // [0.206, 0.206, 0.206]
  * ```
  */
 export function pmv_athb(inputs: ATHBInputs): ATHB {

@@ -180,6 +180,7 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  * > 0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700,
  * > and -2 <= PMV <= 2.
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
+ * `pmv` is rounded to 2 decimal places and `ppd` to 1.
  *
  * @returns An object containing the Predicted Mean Vote and Predicted Percentage of
  * Dissatisfied. See {@link PMVPPD} for

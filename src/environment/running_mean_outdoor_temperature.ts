@@ -9,9 +9,8 @@ import { units_converter } from "../utilities/units_converter.ts";
  * temperature.
  *
  * @param temp_array - array containing the mean daily temperature in descending order (i.e. from
- * newest/yesterday to oldest) :math:`[t_{day-1}, t_{day-2}, ... ,
- * t_{day-n}]`.
- * Where :math:`t_{day-1}` is yesterday's daily mean temperature. The EN
+ * newest/yesterday to oldest) `[t_{day-1}, t_{day-2}, ... , t_{day-n}]`.
+ * Where `t_{day-1}` is yesterday's daily mean temperature. The EN
  * 16798-1 2019 [16798EN2019](../../docs/references.md#16798en2019) states that n should be equal to 7
  * @param alpha - constant between 0 and 1. The EN 16798-1 2019 [16798EN2019](../../docs/references.md#16798en2019) recommends a value of 0.8,
  * while the ASHRAE 55 2020 recommends to choose values between 0.9 and 0.6,

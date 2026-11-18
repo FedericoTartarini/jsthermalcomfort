@@ -8,7 +8,7 @@ What a review checks a change against. Prettier, ESLint over `src/` and `tests/`
 - **Names, files, file order, exports:** ADR 0021, with its 2026-10-27 amendment.
 - **Inputs, `INFO.inputs`, error classes and messages:** ADR 0022, with its 2026-10-27 amendment.
 - **Outputs:** ADR 0023, with its 2026-10-27 amendment. **Model info and warnings rows:** ADR 0024, with its 2026-10-27 amendment.
-- **TSDoc, mapped from upstream's docstring:** ADR 0025, with its 2026-10-26 and 2026-10-27 amendments.
+- **TSDoc, mapped from upstream's docstring:** ADR 0025, with its amendments of 2026-10-26 to 2026-11-18; the 2026-11-18 amendment's table rewrites Python's terms and reStructuredText markup, and `tests/wording.test.ts` checks it.
 - **The add-a-model steps:** `docs/contributing.md`, with `heat_index_rothfusz` as the worked example.
 - **Arithmetic on upstream's executed path:** ADR 0009.
 - **Mirrored tests:** the header of `tests/models/testUtils.ts`.

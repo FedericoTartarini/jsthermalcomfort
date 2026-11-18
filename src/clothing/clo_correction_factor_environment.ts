@@ -6,10 +6,10 @@ import {
 
 /**
  * Return the correction factor for the total insulation of the clothing ensemble
- * (`I`:sub:`T`) or the basic/intrinsic insulation (`I`:sub:`cl`).
+ * (`I`<sub>T</sub>) or the basic/intrinsic insulation (`I`<sub>cl</sub>).
  *
  * This correction factor takes into account of the fact that the values of
- * (`I`:sub:`T`) and (`I`:sub:`cl`) are estimated in static conditions. In real
+ * (`I`<sub>T</sub>) and (`I`<sub>cl</sub>) are estimated in static conditions. In real
  * environments the person may be walking, activity may pump air through the clothing,
  * etc.
  *
@@ -18,8 +18,8 @@ import {
  * @param i_cl - intrinsic insulation of the clothing ensemble, this is the thermal insulation
  * from the skin surface to the outer clothing surface [clo]
  * @returns correction factor for the total insulation of the clothing ensemble
- * (`I`:sub:`T,r` / (`I`:sub:`T`)) or the basic/intrinsic insulation
- * (`I`:sub:`cl,r` / (`I`:sub:`cl`))
+ * (`I`<sub>T,r</sub> / (`I`<sub>T</sub>)) or the basic/intrinsic insulation
+ * (`I`<sub>cl,r</sub> / (`I`<sub>cl</sub>))
  */
 export function clo_correction_factor_environment(
   vr: number,

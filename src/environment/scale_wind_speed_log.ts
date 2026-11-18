@@ -1,7 +1,7 @@
 import { notOfType } from "../_internal/errors.ts";
 import { round } from "../_internal/round.ts";
 
-/** Dataclass to represent the output of scale_wind_speed_log. */
+/** Object to represent the output of scale_wind_speed_log. */
 export interface ScaleWindSpeedLog {
   readonly v_z2: number;
 }
@@ -18,17 +18,16 @@ export interface ScaleWindSpeedLog {
  * studies to estimate wind speeds at different heights based on a known reference
  * height. The formula is given by:
  *
- * .. math::
- *     v(h) = v_{ref} \times \frac{\ln((h - d)/z0)}{\ln((h_{ref} - d)/z0)}
+ * `v(h) = v_ref × ln((h - d)/z0) / ln((h_ref - d)/z0)`
  *
  * where:
  *
- * - :math:`v(h)` is the wind speed at height :math:`h`
- * - :math:`v_{ref}` is the wind speed at the reference height :math:`h_{ref}` (commonly 10 m)
- * - :math:`h` is the height at which the wind speed is to be estimated
- * - :math:`h_{ref}` is the reference height (10 m)
- * - :math:`z0` is the surface roughness length, which characterizes the roughness of the terrain
- * - :math:`d` is the zero-plane displacement height, which accounts for flow obstruction by vegetation or buildings
+ * - `v(h)` is the wind speed at height `h`
+ * - `v_ref` is the wind speed at the reference height `h_ref` (commonly 10 m)
+ * - `h` is the height at which the wind speed is to be estimated
+ * - `h_ref` is the reference height (10 m)
+ * - `z0` is the surface roughness length, which characterizes the roughness of the terrain
+ * - `d` is the zero-plane displacement height, which accounts for flow obstruction by vegetation or buildings
  *
  * > [!NOTE]
  * > This function assumes neutral atmospheric stability conditions. For
@@ -66,8 +65,8 @@ export interface ScaleWindSpeedLog {
  * but those values were capped at 0.5 m because the target height is only 2 m
  * (Section 2.4). They are not displacement heights of real buildings, which are
  * usually several metres in a city.
- * @param round_output - If True, rounds output value. If False, it does not round it. Defaults to True.
- * @returns Dataclass with attribute ``v_z2`` containing the scaled wind speed(s)
+ * @param round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
+ * @returns Object with property ``v_z2`` containing the scaled wind speed(s)
  * at the target height z2, [m/s].
  *
  * - `v_z2` - Wind speed at the target height z2, [m/s].

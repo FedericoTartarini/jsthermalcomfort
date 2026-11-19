@@ -38,7 +38,7 @@
     "clean": "rm -rf ./lib",
     "build": "npm run clean && tsc -p ./configs/tsconfig.esm.json",
     "test": "vitest run",
-    "docs": "typedoc",
+    "docs": "npm run build && typedoc",
     "format": "npx prettier . --write",
     "check:format": "npx prettier . --check",
     "lint": "eslint",

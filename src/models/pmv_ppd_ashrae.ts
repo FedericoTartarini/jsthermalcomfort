@@ -171,7 +171,9 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  *
  * - `pmv` - Predicted Mean Vote.
  * - `ppd` - Predicted Percentage of Dissatisfied.
- * - `tsv` - Predicted thermal sensation vote.
+ * - `tsv` - Predicted thermal sensation vote. The returned `pmv` gives "Cold" up to −2.5, "Cool" up to
+ *   −1.5, "Slightly Cool" up to −0.5, "Neutral" up to 0.5, "Slightly Warm" up to 1.5, "Warm" up to 2.5
+ *   and "Hot" up to 10, each limit included, and `null` where `pmv` is `null` or above 10.
  * - `compliance` - 1.0 if PMV is within the acceptable range (-0.5 < PMV < 0.5) according to
  *   ASHRAE Standard 55-2023, 0.0 if not, and `null` where the inputs are outside the
  *   applicability limits (``limit_inputs=true``).

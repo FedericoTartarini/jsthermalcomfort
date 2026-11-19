@@ -189,7 +189,10 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  *
  * - `pmv` - Predicted Mean Vote.
  * - `ppd` - Predicted Percentage of Dissatisfied.
- * - `tsv` - Predicted thermal sensation vote.
+ * - `tsv` - Predicted thermal sensation vote. The returned `pmv` gives "Cold" below −2.5, "Cool" from
+ *   −2.5, "Slightly Cool" from −1.5, "Neutral" from −0.5, "Slightly Warm" from 0.5, "Warm" from 1.5 and
+ *   "Hot" from 2.5 to below 10, each limit included in the range above it, and `null` where `pmv` is
+ *   `null` or at least 10.
  * - `category`
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *

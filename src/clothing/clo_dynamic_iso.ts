@@ -9,10 +9,12 @@ import { clo_total_insulation } from "./clo_total_insulation.ts";
 /**
  * Estimates the dynamic intrinsic clothing insulation (I_cl,r). The activity
  * as well as the air speed modify the insulation characteristics of the
- * clothing. Consequently, ISO 7730 states that I_cl shall be corrected. Both
- * editions of ISO 7730 give the correction equations in their (informative)
- * Annex C, adapted from the ISO 9920:2007 standard, which is what is
- * implemented here.
+ * clothing. Consequently, ISO 7730 states that I_cl shall be corrected
+ * [7730ISO2005](../../docs/references.md#7730iso2005)
+ * [7730ISO2025](../../docs/references.md#7730iso2025). Both editions of ISO
+ * 7730 give the correction equations in their (informative) Annex C, adapted
+ * from the ISO 9920:2007 standard [ISO9920](../../docs/references.md#iso9920),
+ * which is what is implemented here.
  *
  * Note: the walking speed is not a function input; it is estimated from the
  * metabolic rate using the formula given in ISO 7730 Annex C / ISO 9920 for

@@ -7,6 +7,10 @@ import { round } from "../_internal/round.ts";
  * used in the ASHRAE 55:2023 and ISO 7730 [7730ISO2005](../../docs/references.md#7730iso2005)
  * [7730ISO2025](../../docs/references.md#7730iso2025) standards.
  *
+ * The relative air speed caused by the body movement is assumed to be 0 for
+ * metabolic rates equal to or lower than 1 met, and otherwise equal to
+ * 0.3 × (met − 1), [m/s].
+ *
  * @param v - air speed measured by the sensor, [m/s]
  * @param met - metabolic rate, [met]
  * @returns relative air speed, [m/s]

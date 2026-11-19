@@ -29,6 +29,12 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["**/*.ts", "../vitest.config.ts"],
+  // The docs plugin has no test, so it is listed here; its `// @ts-check`
+  // turns on checking for it.
+  "include": [
+    "**/*.ts",
+    "../vitest.config.ts",
+    "../scripts/typedoc-plugin.mjs"
+  ],
   "exclude": ["types"]
 }

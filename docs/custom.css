@@ -1,17 +1,4 @@
 /*
- * A model's Returns shows its `@returns` list, with each output's description.
- * This hides the list of the outputs type's properties that follows it, which
- * repeats those names without descriptions (ADR 0020's 2026-11-18 amendment).
- */
-.tsd-signatures
-  > li
-  > .tsd-description
-  > .tsd-returns-title
-  ~ ul.tsd-parameters {
-  display: none;
-}
-
-/*
  * A model's page shows its call as `pmv_ppd_iso(inputs)`, and its inputs and
  * outputs object types only in the lists under Parameters and Returns (ADR
  * 0020's 2026-11-20 amendment). TypeDoc 0.28's default theme writes an object
@@ -68,4 +55,48 @@
 /* Returns: the heading without the outputs object type. */
 .tsd-returns-title:has(> .tsd-kind-property) > * {
   display: none;
+}
+
+/*
+ * Returns of a union of objects (`two_nodes_gagge`'s third overload): each
+ * item shows only its property list, not the object type written before it.
+ * The type's non-breaking spaces get font size 0, and the flex item draws its
+ * own marker at 1rem, the theme's 16px body size (TypeDoc 0.28 style.css).
+ */
+.tsd-signatures
+  > li
+  > .tsd-description
+  > ul
+  > li:has(> .tsd-kind-property):has(> ul.tsd-parameters) {
+  display: flex;
+  align-items: baseline;
+  font-size: 0;
+}
+.tsd-signatures
+  > li
+  > .tsd-description
+  > ul
+  > li:has(> .tsd-kind-property):has(> ul.tsd-parameters)
+  > :not(ul.tsd-parameters) {
+  display: none;
+}
+.tsd-signatures
+  > li
+  > .tsd-description
+  > ul
+  > li:has(> .tsd-kind-property):has(> ul.tsd-parameters)::before {
+  content: "\25E6";
+  flex: none;
+  width: 1.25rem;
+  margin-left: -1.25rem;
+  font-size: 1rem;
+}
+.tsd-signatures
+  > li
+  > .tsd-description
+  > ul
+  > li:has(> .tsd-kind-property)
+  > ul.tsd-parameters {
+  flex: auto;
+  font-size: 1rem;
 }

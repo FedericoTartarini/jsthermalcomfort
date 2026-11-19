@@ -4,8 +4,8 @@ import { v2_infos } from "./testUtils.ts";
 
 /**
  * The line that ends each model's `@returns` list: the text of
- * `ModelOutputs.warnings`, since the site hides the outputs type's own list
- * (ADR 0025's 2026-11-18 amendment).
+ * `ModelOutputs.warnings`, which the docs plugin shows as the description of
+ * `warnings` under Returns (ADR 0025's 2026-11-20 amendment).
  */
 const warnings_line = (() => {
   const source = readFileSync(

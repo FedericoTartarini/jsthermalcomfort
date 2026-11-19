@@ -56,5 +56,6 @@
     "**/src/supa.js"
   ],
   "excludeExternals": true,
+  "plugin": ["./scripts/typedoc-plugin.mjs"],
   "treatValidationWarningsAsErrors": true
 }

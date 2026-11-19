@@ -74,6 +74,7 @@ describe("eslint config", () => {
       ...UNLINTED,
       "src/jos3_functions/matrix.js",
       "scripts/check-mirrored.mts",
+      "scripts/typedoc-plugin.mjs",
       ".scratch/",
     ])
       expect(await eslint.isPathIgnored(file)).toBe(true);

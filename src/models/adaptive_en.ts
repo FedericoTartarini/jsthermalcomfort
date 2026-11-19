@@ -59,6 +59,7 @@ export type ENInputs = InputsOf<typeof ADAPTIVE_EN_INFO>;
  * on EN 16798-1 2019.
  *
  * @interface
+ * @hidden
  */
 export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
 
@@ -91,7 +92,7 @@ export type AdaptiveEN = OutputsOf<typeof ADAPTIVE_EN_INFO>;
  * place in the output unit (rounding is applied after any IP unit conversion).
  * If false, returns the unrounded values. Defaults to true.
  *
- * @returns An object containing the results. See {@link AdaptiveEN} for more details.
+ * @returns An object containing the results. See `AdaptiveEN` for more details.
  *
  * - `tmp_cmf` - Comfort temperature at that specific running mean temperature, default in [°C] or in [°F].
  * - `acceptability_cat_i` - 1.0 if the indoor conditions comply with comfort category I, 0.0 if not, and

@@ -49,6 +49,7 @@ export type GaggeTwoNodesJiInputs = InputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
  * Object to represent the results of the Gagge-Ji model of human temperature.
  *
  * @interface
+ * @hidden
  */
 export type GaggeTwoNodesJi = OutputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
 
@@ -82,7 +83,7 @@ export type GaggeTwoNodesJi = OutputsOf<typeof TWO_NODES_GAGGE_JI_INFO>;
  * @param inputs.initial_core_temp - Initial core temperature, [°C]. Defaults to 36.49 °C.
  * @param inputs.acclimatized - If true, the model assumes the person is acclimatized to heat. Defaults to true.
  *
- * @returns An object containing the simulated core and skin temperatures over time. See {@link GaggeTwoNodesJi} for more details.
+ * @returns An object containing the simulated core and skin temperatures over time. See `GaggeTwoNodesJi` for more details.
  * To access the individual properties, use the corresponding property of the returned
  * object, e.g. `result.t_core` or `result.t_skin`.
  *

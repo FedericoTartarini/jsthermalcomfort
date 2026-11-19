@@ -29,6 +29,7 @@ export type NETInputs = InputsOf<typeof NET_INFO>;
  * Object to represent the Normal Effective Temperature (NET).
  *
  * @interface
+ * @hidden
  */
 export type NET = OutputsOf<typeof NET_INFO>;
 
@@ -56,7 +57,7 @@ export type NET = OutputsOf<typeof NET_INFO>;
  * @param inputs.v - Wind speed [m/s] at 1.2 m above the ground.
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns An object containing the Normal Effective Temperature. See {@link NET} for more details.
+ * @returns An object containing the Normal Effective Temperature. See `NET` for more details.
  * To access the `net` value, use the `net` property of the returned `NET` object, e.g., `result.net`.
  *
  * - `net` - Normal Effective Temperature, [°C].

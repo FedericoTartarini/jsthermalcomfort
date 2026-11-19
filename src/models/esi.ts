@@ -29,6 +29,7 @@ export type ESIInputs = InputsOf<typeof ESI_INFO>;
  * Object to represent the Environmental Stress Index (ESI).
  *
  * @interface
+ * @hidden
  */
 export type ESI = OutputsOf<typeof ESI_INFO>;
 
@@ -41,7 +42,7 @@ export type ESI = OutputsOf<typeof ESI_INFO>;
  * @param inputs.sol_radiation_global - Global solar radiation, [W/m2].
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns An object containing the Environmental Stress Index. See {@link ESI} for more details.
+ * @returns An object containing the Environmental Stress Index. See `ESI` for more details.
  * To access the `esi` value, use the `esi` property of the returned `ESI` object, e.g., `result.esi`.
  *
  * - `esi` - Environmental Stress Index.

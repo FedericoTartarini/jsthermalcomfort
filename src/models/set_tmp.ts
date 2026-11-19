@@ -94,7 +94,7 @@ export type SETInputs = InputsOf<typeof SET_TMP_INFO>;
  * @param inputs.calculate_ce - If true, calculates `set` as {@link two_nodes_gagge} does with
  * `calculate_ce` true. Defaults to false.
  *
- * @returns An object containing the Standard Effective Temperature. See {@link SET} for more details.
+ * @returns An object containing the Standard Effective Temperature. See `SET` for more details.
  * To access the `set` value, use the corresponding property of the returned `SET` object, e.g., `result.set`.
  *
  * - `set` - Standard effective temperature, [°C].

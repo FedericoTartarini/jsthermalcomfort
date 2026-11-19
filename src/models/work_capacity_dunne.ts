@@ -34,6 +34,7 @@ export type WorkCapacityDunneInputs = InputsOf<typeof WORK_CAPACITY_DUNNE_INFO>;
  * Object to represent work loss.
  *
  * @interface
+ * @hidden
  */
 // Typed from hothaps' INFO, whose capacity can be NaN where dunne's cannot.
 export type WorkCapacity = OutputsOf<typeof WORK_CAPACITY_HOTHAPS_INFO>;
@@ -63,7 +64,7 @@ export type WorkCapacity = OutputsOf<typeof WORK_CAPACITY_HOTHAPS_INFO>;
  * > is 200-350 kcal/h, and light is less than 100-200 kcal/h.
  *
  * @returns An object containing the work capacity. See
- * {@link WorkCapacity} for more details. To access the
+ * `WorkCapacity` for more details. To access the
  * `capacity` value, use the `capacity` property of the returned `WorkCapacity` object, e.g.,
  * `result.capacity`.
  *

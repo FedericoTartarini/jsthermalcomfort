@@ -28,6 +28,7 @@ export type WCIInputs = InputsOf<typeof WCI_INFO>;
  * Object to represent the Wind Chill Index (WCI).
  *
  * @interface
+ * @hidden
  */
 export type WCI = OutputsOf<typeof WCI_INFO>;
 
@@ -53,7 +54,7 @@ export type WCI = OutputsOf<typeof WCI_INFO>;
  * @param inputs.v - Wind speed 10m above ground level, [m/s].
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns An object containing the Wind Chill Index. See {@link WCI} for more details.
+ * @returns An object containing the Wind Chill Index. See `WCI` for more details.
  * To access the `wci` value, use the `wci` property of the returned `WCI` object, e.g., `result.wci`.
  *
  * - `wci` - Wind Chill Index, [W/m^2].

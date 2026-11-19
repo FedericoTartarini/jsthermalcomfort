@@ -106,6 +106,7 @@ export type SolarGainInputs = InputsOf<typeof SOLAR_GAIN_INFO>;
  * Object to represent the solar gain to the human body.
  *
  * @interface
+ * @hidden
  */
 export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
 
@@ -162,7 +163,7 @@ export type SolarGain = OutputsOf<typeof SOLAR_GAIN_INFO>;
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
  * @returns An object containing the solar gain to the human body and delta mean radiant temperature.
- * See {@link SolarGain} for more details.
+ * See `SolarGain` for more details.
  * To access the `erf` and `delta_mrt` values, use the corresponding properties of the returned `SolarGain` object, e.g., `result.erf`.
  *
  * - `erf` - Solar gain to the human body using the Effective Radiant Field [W/m2].

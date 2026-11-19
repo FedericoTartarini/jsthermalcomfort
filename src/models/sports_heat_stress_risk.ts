@@ -166,6 +166,7 @@ export type SportsHeatStressInputs = InputsOf<
  * Object to represent the Sports Heat Stress Risk calculation results.
  *
  * @interface
+ * @hidden
  */
 export type SportsHeatStressRisk = OutputsOf<
   typeof SPORTS_HEAT_STRESS_RISK_INFO
@@ -197,7 +198,7 @@ export type SportsHeatStressRisk = OutputsOf<
  * `Sports.TENNIS`, etc.
  *
  * @returns An object containing the heat stress risk assessment results.
- * See {@link SportsHeatStressRisk} for
+ * See `SportsHeatStressRisk` for
  * more details. To access individual values, use the corresponding properties
  * of the returned object, e.g., `result.risk_level_interpolated`.
  *

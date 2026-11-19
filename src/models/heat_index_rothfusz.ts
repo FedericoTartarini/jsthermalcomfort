@@ -45,6 +45,7 @@ export type HIInputs = InputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  * Object to represent the Heat Index (HI).
  *
  * @interface
+ * @hidden
  */
 export type HI = OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
 
@@ -66,7 +67,7 @@ export type HI = OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  * >
  * > The applicability limit is tdb >= 27°C.
  *
- * @returns An object containing the Heat Index. See {@link HI} for more details.
+ * @returns An object containing the Heat Index. See `HI` for more details.
  * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].

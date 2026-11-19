@@ -31,6 +31,7 @@ export type WBGTInputs = InputsOf<typeof WBGT_INFO>;
  * Object to represent the Wet Bulb Globe Temperature (WBGT) index.
  *
  * @interface
+ * @hidden
  */
 export type WBGT = OutputsOf<typeof WBGT_INFO>;
 
@@ -63,7 +64,7 @@ export type WBGT = OutputsOf<typeof WBGT_INFO>;
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
  * @returns An object containing the Wet Bulb Globe Temperature Index. See
- * {@link WBGT} for more details. To access the
+ * `WBGT` for more details. To access the
  * `wbgt` value, use the `wbgt` property of the returned `WBGT` object, e.g.,
  * `result.wbgt`.
  *

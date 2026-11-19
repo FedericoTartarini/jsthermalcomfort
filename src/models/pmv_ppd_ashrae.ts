@@ -102,6 +102,7 @@ export type PMVPPDAshraeInputs = InputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * Dissatisfied (PPD) calculated in accordance with ASHRAE Standard 55.
  *
  * @interface
+ * @hidden
  */
 export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
 
@@ -165,7 +166,7 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * `pmv` is rounded to 2 decimal places and `ppd` to 1.
  *
  * @returns An object containing the Predicted Mean Vote and Predicted Percentage of
- * Dissatisfied. See {@link PMVPPDAshrae} for
+ * Dissatisfied. See `PMVPPDAshrae` for
  * more details. To access the `pmv`, `ppd`, `tsv`, and `compliance` values, use the corresponding
  * properties of the returned `PMVPPDAshrae` object, e.g., `result.pmv`, `result.compliance`.
  *

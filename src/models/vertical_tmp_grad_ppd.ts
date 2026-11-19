@@ -67,6 +67,7 @@ export type VerticalTGradPPDInputs = InputsOf<
  * vertical temperature gradient.
  *
  * @interface
+ * @hidden
  */
 export type VerticalTGradPPD = OutputsOf<typeof VERTICAL_TMP_GRAD_PPD_INFO>;
 
@@ -113,7 +114,7 @@ export type VerticalTGradPPD = OutputsOf<typeof VERTICAL_TMP_GRAD_PPD_INFO>;
  * 0 <= vr [m/s] <= 0.2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
  *
  * @returns An object containing the Predicted Percentage of Dissatisfied occupants with vertical temperature gradient and acceptability.
- * See {@link VerticalTGradPPD} for more details.
+ * See `VerticalTGradPPD` for more details.
  * To access the `ppd_vg` and `acceptability` values, use the corresponding properties of the returned `VerticalTGradPPD` object, e.g., `result.ppd_vg`.
  *
  * - `ppd_vg` - Predicted Percentage of Dissatisfied occupants with vertical temperature gradient.

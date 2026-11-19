@@ -154,6 +154,7 @@ export type PHSInputs = InputsOf<typeof PHS_INFO>;
  * Object to represent the Predicted Heat Strain (PHS).
  *
  * @interface
+ * @hidden
  */
 export type PHS = OutputsOf<typeof PHS_INFO>;
 
@@ -221,7 +222,7 @@ export type PHS = OutputsOf<typeof PHS_INFO>;
  * sum over minutes (units W·min·m⁻²). It is intended for carry over between consecutive
  * simulation segments.
  *
- * @returns An object containing the Predicted Heat Strain. See {@link PHS} for more details.
+ * @returns An object containing the Predicted Heat Strain. See `PHS` for more details.
  * To access the individual properties, use the corresponding property of the returned `PHS` object, e.g., `result.t_re`.
  *
  * - `t_re` - Rectal temperature, [°C].

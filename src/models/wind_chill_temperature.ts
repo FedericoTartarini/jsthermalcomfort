@@ -28,6 +28,7 @@ export type WCTInputs = InputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
  * Object to represent the Wind Chill Temperature (WCT).
  *
  * @interface
+ * @hidden
  */
 export type WCT = OutputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
 
@@ -49,7 +50,7 @@ export type WCT = OutputsOf<typeof WIND_CHILL_TEMPERATURE_INFO>;
  * @param inputs.v - Wind speed 10m above ground level, [km/h].
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns An object containing the Wind Chill Temperature. See {@link WCT} for more details.
+ * @returns An object containing the Wind Chill Temperature. See `WCT` for more details.
  * To access the `wct` value, use the `wct` property of the returned `WCT` object, e.g., `result.wct`.
  *
  * - `wct` - Wind Chill Temperature, [°C].

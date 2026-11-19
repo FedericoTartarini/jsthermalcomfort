@@ -70,6 +70,7 @@ export type GaggeTwoNodesSleepInputs<
  * Object to represent the results of the two-node sleep model.
  *
  * @interface
+ * @hidden
  */
 export type GaggeTwoNodesSleep<
   Series extends number | readonly number[] = number | readonly number[],
@@ -105,7 +106,7 @@ export type GaggeTwoNodesSleep<
  * @param inputs.met_shivering - Metabolic rate due to shivering, [W/m2]. Defaults to 0.
  *
  * @returns An object containing the results of the Gagge two-node model for sleep thermal environment.
- * See {@link GaggeTwoNodesSleep} for more details.
+ * See `GaggeTwoNodesSleep` for more details.
  * To access the results, use the corresponding properties of the returned object, e.g. `result.e_skin`.
  *
  * - `set` - Standard Effective Temperature (SET).

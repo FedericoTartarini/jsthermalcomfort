@@ -77,6 +77,7 @@ export type IREQInputs = InputsOf<typeof IREQ_INFO>;
  * Object to represent the IREQ calculation results.
  *
  * @interface
+ * @hidden
  */
 export type IREQ = OutputsOf<typeof IREQ_INFO>;
 
@@ -113,7 +114,7 @@ export type IREQ = OutputsOf<typeof IREQ_INFO>;
  *
  * @returns An object containing ``ireq_min``, ``ireq_neutral``, ``icl_min``,
  * ``icl_neutral``, ``dle_min``, and ``dle_neutral``. See
- * {@link IREQ} for more details.
+ * `IREQ` for more details.
  *
  * - `ireq_min` - Minimal required clothing insulation, [clo].
  * - `ireq_neutral` - Neutral required clothing insulation, [clo].

@@ -50,7 +50,7 @@ export type HISchoenInputs = InputsOf<typeof HEAT_INDEX_SCHOEN_INFO>;
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  * Stress categories are always determined from the unrounded heat index.
  *
- * @returns An object containing the Heat Index. See {@link HI} for more details.
+ * @returns An object containing the Heat Index. See `HI` for more details.
  * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].

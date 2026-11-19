@@ -80,6 +80,7 @@ export type UTCIInputs = InputsOf<typeof UTCI_INFO>;
  * Object to represent the Universal Thermal Climate Index (UTCI).
  *
  * @interface
+ * @hidden
  */
 export type UTCI = OutputsOf<typeof UTCI_INFO>;
 
@@ -111,7 +112,7 @@ export type UTCI = OutputsOf<typeof UTCI_INFO>;
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
  * @returns An object containing the Universal Thermal Climate Index and stress category.
- * See {@link UTCI} for more details. To access the
+ * See `UTCI` for more details. To access the
  * `utci` and `stress_category` values, use the corresponding properties of the
  * returned `UTCI` object, e.g., `result.utci`.
  *

@@ -28,6 +28,7 @@ export type THIInputs = InputsOf<typeof THI_INFO>;
  * Object to represent the Temperature-Humidity Index (THI).
  *
  * @interface
+ * @hidden
  */
 export type THI = OutputsOf<typeof THI_INFO>;
 
@@ -41,7 +42,7 @@ export type THI = OutputsOf<typeof THI_INFO>;
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
  * @returns An object containing the Temperature-Humidity Index.
- * See {@link THI} for more details.
+ * See `THI` for more details.
  * To access the `thi` value, use the `thi` property of the returned `THI`
  * object, e.g., `result.thi`.
  *

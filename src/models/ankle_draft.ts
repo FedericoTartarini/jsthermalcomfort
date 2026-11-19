@@ -65,6 +65,7 @@ export type AnkleDraftInputs = InputsOf<typeof ANKLE_DRAFT_INFO>;
  * Object to store the results of the ankle draft calculation.
  *
  * @interface
+ * @hidden
  */
 export type AnkleDraft = OutputsOf<typeof ANKLE_DRAFT_INFO>;
 
@@ -108,7 +109,7 @@ export type AnkleDraft = OutputsOf<typeof ANKLE_DRAFT_INFO>;
  * applicability limits are 10 <= tdb [°C] <= 40, 10 <= tr [°C] <= 40,
  * 0 <= vr [m/s] <= 0.2, 1 <= met [met] <= 4, and 0 <= clo [clo] <= 1.5.
  *
- * @returns Object containing the results of the ankle draft calculation. See {@link AnkleDraft} for more details.
+ * @returns Object containing the results of the ankle draft calculation. See `AnkleDraft` for more details.
  *
  * - `ppd_ad` - Predicted Percentage of Dissatisfied occupants with ankle draft, [%].
  * - `acceptability` - 1.0 if the air speed at the ankle level is acceptable according to ASHRAE 55

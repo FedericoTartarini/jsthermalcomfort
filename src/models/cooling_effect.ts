@@ -55,6 +55,7 @@ export type CEInputs = InputsOf<typeof COOLING_EFFECT_INFO>;
  * Object to represent the Cooling Effect (CE).
  *
  * @interface
+ * @hidden
  */
 export type CE = OutputsOf<typeof COOLING_EFFECT_INFO>;
 
@@ -96,7 +97,7 @@ export type CE = OutputsOf<typeof COOLING_EFFECT_INFO>;
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
  *
- * @returns An object containing the Cooling Effect value. See {@link CE} for more details.
+ * @returns An object containing the Cooling Effect value. See `CE` for more details.
  * To access the `ce` value, use the `ce` property of the returned `CE` object, e.g., `result.ce`.
  *
  * - `ce` - Cooling Effect value. Default in [°C] or [°F] if `units` = 'IP'.

@@ -65,6 +65,7 @@ export type ASHRAEInputs = InputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * ASHRAE 55.
  *
  * @interface
+ * @hidden
  */
 export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
 
@@ -102,7 +103,7 @@ export type AdaptiveASHRAE = OutputsOf<typeof ADAPTIVE_ASHRAE_INFO>;
  * flags are always calculated from unrounded values, so ``round_output`` never
  * changes ``acceptability_80`` or ``acceptability_90``. Defaults to true.
  *
- * @returns An object containing the results. See {@link AdaptiveASHRAE} for more details.
+ * @returns An object containing the results. See `AdaptiveASHRAE` for more details.
  *
  * - `tmp_cmf` - Comfort temperature at a specific running mean temperature, default in [°C] or [°F].
  * - `tmp_cmf_80_low` - Lower acceptable comfort temperature for 80% occupants, default in [°C] or [°F].

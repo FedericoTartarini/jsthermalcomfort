@@ -30,6 +30,7 @@ export type CloTOutInputs = InputsOf<typeof CLO_TOUT_INFO>;
  * temperature.
  *
  * @interface
+ * @hidden
  */
 export type CloTOut = OutputsOf<typeof CLO_TOUT_INFO>;
 
@@ -42,7 +43,7 @@ export type CloTOut = OutputsOf<typeof CLO_TOUT_INFO>;
  * @param inputs.units - Select the SI (International System of Units) or the IP (Imperial Units) system.
  * Supported values are 'SI' and 'IP'. Defaults to 'SI'.
  *
- * @returns An object containing the representative clothing insulation Icl. See {@link CloTOut} for more details.
+ * @returns An object containing the representative clothing insulation Icl. See `CloTOut` for more details.
  * To access the `clo_tout` value, use the `clo_tout` property of the returned `CloTOut` object, e.g., `result.clo_tout`.
  *
  * - `clo_tout` - Representative clothing insulation Icl.

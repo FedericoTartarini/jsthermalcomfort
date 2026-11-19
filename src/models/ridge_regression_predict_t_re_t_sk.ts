@@ -138,6 +138,7 @@ export type RidgeRegressionInputs = InputsOf<
  * Object for returning predicted temperature history.
  *
  * @interface
+ * @hidden
  */
 export type PredictedBodyTemperatures = OutputsOf<
   typeof RIDGE_REGRESSION_PREDICT_T_RE_T_SK_INFO
@@ -177,7 +178,7 @@ export type PredictedBodyTemperatures = OutputsOf<
  *
  * @returns An object containing the predicted rectal (`t_re`) and skin (`t_sk`)
  * temperature history in °C. See
- * {@link PredictedBodyTemperatures}
+ * `PredictedBodyTemperatures`
  * for more details. The outputs are numpy arrays. For scalar inputs, the shape
  * is (`duration`,).
  *

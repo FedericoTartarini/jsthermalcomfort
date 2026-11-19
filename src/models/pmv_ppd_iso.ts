@@ -126,6 +126,7 @@ export type PMVPPDInputs = InputsOf<typeof PMV_PPD_ISO_INFO>;
  * Dissatisfied (PPD).
  *
  * @interface
+ * @hidden
  */
 export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
 
@@ -183,7 +184,7 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  * `pmv` is rounded to 2 decimal places and `ppd` to 1.
  *
  * @returns An object containing the Predicted Mean Vote and Predicted Percentage of
- * Dissatisfied. See {@link PMVPPD} for
+ * Dissatisfied. See `PMVPPD` for
  * more details. To access the `pmv`, `ppd`, `tsv` values, use the corresponding
  * properties of the returned `PMVPPD` object, e.g., `result.pmv`.
  *

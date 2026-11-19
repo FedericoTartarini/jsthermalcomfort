@@ -75,6 +75,7 @@ export type APMVInputs = InputsOf<typeof PMV_A_INFO>;
  * model.
  *
  * @interface
+ * @hidden
  */
 export type APMV = OutputsOf<typeof PMV_A_INFO>;
 
@@ -109,7 +110,7 @@ export type APMV = OutputsOf<typeof PMV_A_INFO>;
  * > 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, -2 <= PMV <= 2.
  *
  * @returns An object containing the Predicted Mean Vote (a_pmv). See
- * {@link APMV} for more details.
+ * `APMV` for more details.
  * To access the `a_pmv` value, use the `a_pmv` property of the returned `APMV` object,
  * e.g., `result.a_pmv`.
  *

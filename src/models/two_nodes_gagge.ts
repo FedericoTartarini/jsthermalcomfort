@@ -66,6 +66,7 @@ export type GaggeTwoNodesInputs = InputsOf<typeof TWO_NODES_GAGGE_INFO>;
  * regulation.
  *
  * @interface
+ * @hidden
  */
 export type GaggeTwoNodes = OutputsOf<typeof TWO_NODES_GAGGE_INFO>;
 
@@ -75,6 +76,7 @@ export type GaggeTwoNodes = OutputsOf<typeof TWO_NODES_GAGGE_INFO>;
  * - `set` - Standard effective temperature, [°C].
  *
  * @interface
+ * @hidden
  */
 export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
 
@@ -122,7 +124,7 @@ export type SET = Pick<GaggeTwoNodes, "set" | "warnings">;
  * convective heat transfer coefficient for a metabolic rate above 0.85 met. Defaults to false.
  *
  * @returns An object containing the results of the two-node model of human temperature regulation.
- * See {@link GaggeTwoNodes} for more details.
+ * See `GaggeTwoNodes` for more details.
  * To access the results, use the corresponding properties of the returned `GaggeTwoNodes` object, e.g., `result.e_skin`.
  *
  * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.

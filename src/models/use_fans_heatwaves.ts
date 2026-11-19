@@ -84,6 +84,7 @@ export type UseFansHeatwavesInputs = InputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  * Object to represent the results of using fans during heatwaves.
  *
  * @interface
+ * @hidden
  */
 export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
 
@@ -122,7 +123,7 @@ export type UseFansHeatwaves = OutputsOf<typeof USE_FANS_HEATWAVES_INFO>;
  * @param inputs.max_sweating - Maximum rate at which regulatory sweat is generated, [mL/h/m2]. Defaults to 500.
  *
  * @returns An object containing the results of using fans during heatwaves.
- * See {@link UseFansHeatwaves} for more details.
+ * See `UseFansHeatwaves` for more details.
  * To access the results, use the corresponding properties of the returned `UseFansHeatwaves` object, e.g., `result.e_skin`.
  *
  * - `e_skin` - Total rate of evaporative heat loss from skin, [W/m2]. Equal to e_rsw + e_diff.

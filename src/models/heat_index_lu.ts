@@ -93,6 +93,7 @@ export type HILuInputs = InputsOf<typeof HEAT_INDEX_LU_INFO>;
  * Object to represent the Heat Index (HI).
  *
  * @interface
+ * @hidden
  */
 export type HILu = OutputsOf<typeof HEAT_INDEX_LU_INFO>;
 
@@ -105,7 +106,7 @@ export type HILu = OutputsOf<typeof HEAT_INDEX_LU_INFO>;
  * @param inputs.rh - Relative humidity, [%].
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns An object containing the Heat Index. See {@link HILu} for more details.
+ * @returns An object containing the Heat Index. See `HILu` for more details.
  * To access the `hi` value, use the `hi` property of the returned `HI` object, e.g., `result.hi`.
  *
  * - `hi` - Heat Index, [°C].

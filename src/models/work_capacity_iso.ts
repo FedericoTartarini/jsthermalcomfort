@@ -51,7 +51,7 @@ export type WorkCapacityStandardsInputs = InputsOf<
  * @param inputs.met - Metabolic heat production in Watts
  *
  * @returns An object containing the work capacity. See
- * {@link WorkCapacity} for more details. To access the
+ * `WorkCapacity` for more details. To access the
  * `capacity` value, use the `capacity` property of the returned `WorkCapacity` object, e.g.,
  * `result.capacity`.
  *

@@ -79,6 +79,7 @@ export type EPMVInputs = InputsOf<typeof PMV_E_INFO>;
  * (ePMV).
  *
  * @interface
+ * @hidden
  */
 export type EPMV = OutputsOf<typeof PMV_E_INFO>;
 
@@ -126,7 +127,7 @@ export type EPMV = OutputsOf<typeof PMV_E_INFO>;
  * > The ISO 7730 [7730ISO2005](../../docs/references.md#7730iso2005) [7730ISO2025](../../docs/references.md#7730iso2025) limits are 10 <= tdb [°C] <= 30, 10 <= tr [°C] <= 40,
  * > 0 <= vr [m/s] <= 1, 0.8 <= met [met] <= 4, 0 <= clo [clo] <= 2, 0 <= pa [Pa] <= 2700, and -2 <= PMV <= 2.
  *
- * @returns An object containing the Adjusted Predicted Mean Votes with Expectancy Factor. See {@link EPMV} for more details.
+ * @returns An object containing the Adjusted Predicted Mean Votes with Expectancy Factor. See `EPMV` for more details.
  * To access the `e_pmv` value, use the `e_pmv` property of the returned `EPMV` object, e.g., `result.e_pmv`.
  *
  * - `e_pmv` - Adjusted Predicted Mean Votes with Expectancy Factor.

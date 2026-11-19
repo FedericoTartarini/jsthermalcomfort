@@ -36,6 +36,7 @@ export type HumidexInputs = InputsOf<typeof HUMIDEX_INFO>;
  * Object to represent the Humidex and its discomfort category.
  *
  * @interface
+ * @hidden
  */
 export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
 
@@ -57,7 +58,7 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  *
  * @param inputs.round_output - If true, rounds output value. If false, it does not round it. Defaults to true.
  *
- * @returns An object containing the Humidex value and its discomfort category. See {@link Humidex} for more details.
+ * @returns An object containing the Humidex value and its discomfort category. See `Humidex` for more details.
  * To access the `humidex` and `discomfort` values, use the respective properties of the returned `Humidex` object, e.g., `result.humidex`.
  *
  * - `humidex` - Humidex value, [°C].

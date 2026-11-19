@@ -31,6 +31,7 @@ export type ATInputs = InputsOf<typeof AT_INFO>;
  * Object to store the results of the Apparent Temperature (AT) calculation.
  *
  * @interface
+ * @hidden
  */
 export type AT = OutputsOf<typeof AT_INFO>;
 
@@ -57,7 +58,7 @@ export type AT = OutputsOf<typeof AT_INFO>;
  * @param inputs.q - Net radiation absorbed per unit area of body surface [W/m2]
  * @param inputs.round_output - If true, rounds the output value; if false, does not round it. Defaults to true.
  *
- * @returns Object containing the apparent temperature, [°C]. See {@link AT} for more details.
+ * @returns Object containing the apparent temperature, [°C]. See `AT` for more details.
  *
  * - `at` - Apparent temperature, [°C]
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.

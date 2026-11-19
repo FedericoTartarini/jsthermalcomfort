@@ -52,6 +52,7 @@ export type DIInputs = InputsOf<typeof DISCOMFORT_INDEX_INFO>;
  * Object to represent the Discomfort Index (DI) and its classification.
  *
  * @interface
+ * @hidden
  */
 export type DI = OutputsOf<typeof DISCOMFORT_INDEX_INFO>;
 
@@ -74,7 +75,7 @@ export type DI = OutputsOf<typeof DISCOMFORT_INDEX_INFO>;
  * @param inputs.tdb - Dry bulb air temperature, [°C].
  * @param inputs.rh - Relative humidity, [%].
  *
- * @returns An object containing the Discomfort Index and its classification. See {@link DI} for more details.
+ * @returns An object containing the Discomfort Index and its classification. See `DI` for more details.
  * To access the `di` and `discomfort_condition` values, use the respective properties of the returned `DI` object, e.g., `result.di`.
  *
  * - `di` - Discomfort Index, [°C].

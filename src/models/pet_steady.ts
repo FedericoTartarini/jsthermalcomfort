@@ -52,6 +52,7 @@ export type PETSteadyInputs = InputsOf<typeof PET_STEADY_INFO>;
  * Object to represent the Physiological Equivalent Temperature (PET).
  *
  * @interface
+ * @hidden
  */
 export type PETSteady = OutputsOf<typeof PET_STEADY_INFO>;
 
@@ -91,7 +92,7 @@ export type PETSteady = OutputsOf<typeof PET_STEADY_INFO>;
  * @param inputs.height - Height of the person, [m]. Defaults to 1.8.
  * @param inputs.wme - External work, [met]. Defaults to 0.
  *
- * @returns An object containing the Physiological Equivalent Temperature. See {@link PETSteady} for more details.
+ * @returns An object containing the Physiological Equivalent Temperature. See `PETSteady` for more details.
  * To access the `pet` value, use the `pet` property of the returned `PETSteady` object, e.g., `result.pet`.
  *
  * - `pet` - Physiological Equivalent Temperature.

@@ -57,5 +57,7 @@
   ],
   "excludeExternals": true,
   "plugin": ["./scripts/typedoc-plugin.mjs"],
+  "router": "jsthermalcomfort",
+  "theme": "jsthermalcomfort",
   "treatValidationWarningsAsErrors": true
 }

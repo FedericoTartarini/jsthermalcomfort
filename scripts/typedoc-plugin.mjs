@@ -22,13 +22,27 @@
  * such as `PHS_LIMITS_ISO_7933`, follows in the same form; a constant that
  * holds a classifier the model info already prints gets one sentence naming
  * it instead. None of these constants keeps its own page.
+ *
+ * The `models` page ends with the section "Model info and warnings", built
+ * from the exports declared in `src/_internal/`, which only `models`
+ * re-exports. It lists each such export with a page of its own, as
+ * `classifyFromBins`, and writes out in full each such type, such as
+ * `ModelWarning`, which has no page; a link to such a type opens the section
+ * at it. `typedoc.json` selects the router and the theme defined
+ * here.
  */
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { inspect } from "node:util";
 import {
   Comment,
   CommentTag,
   Converter,
+  DefaultTheme,
+  DefaultThemeRenderContext,
+  i18n,
+  JSX,
+  KindRouter,
   ReflectionKind,
   ReflectionSymbolId,
   Slugger,
@@ -36,7 +50,7 @@ import {
 import ts from "typescript";
 
 /**
- * @import { Application, CommentDisplayPart, ContainerReflection, DeclarationReflection, ProjectReflection, Reflection, SomeType } from "typedoc"
+ * @import { Application, CommentDisplayPart, ContainerReflection, DeclarationReflection, NavigationElement, PageEvent, ProjectReflection, Reflection, SomeType } from "typedoc"
  */
 
 /**
@@ -565,8 +579,240 @@ function placeModelInfo(app, project, exportsByModule) {
   for (const reflection of moved.keys()) project.removeReflection(reflection);
 }
 
+/** The heading of the `models` page's last section. */
+const SHARED_SECTION = "Model info and warnings";
+
+/** The folder whose exports every model shares, with a trailing slash. */
+const SHARED_FOLDER = fileURLToPath(
+  new URL("../src/_internal/", import.meta.url),
+).replaceAll("\\", "/");
+
+/**
+ * Whether a reflection is a module's export declared in `src/_internal/`, as
+ * `ModelWarning` and `classifyFromBins` are.
+ *
+ * @param {Reflection} reflection
+ * @returns {reflection is DeclarationReflection}
+ */
+function isShared(reflection) {
+  return (
+    reflection.isDeclaration() &&
+    reflection.parent?.kindOf(ReflectionKind.Module) === true &&
+    (reflection.sources?.[0]?.fullFileName.startsWith(SHARED_FOLDER) ?? false)
+  );
+}
+
+/**
+ * Whether a reflection is a shared interface or type alias, which has no page
+ * of its own.
+ *
+ * @param {Reflection} reflection
+ * @returns {reflection is DeclarationReflection}
+ */
+function isSharedType(reflection) {
+  return (
+    isShared(reflection) &&
+    reflection.kindOf(ReflectionKind.Interface | ReflectionKind.TypeAlias)
+  );
+}
+
+/**
+ * Takes each shared export out of its module's groups, so that the module's
+ * page lists it only in the section "Model info and warnings".
+ *
+ * @param {ProjectReflection} project
+ */
+function ungroupShared(project) {
+  for (const module of project.getReflectionsByKind(ReflectionKind.Module)) {
+    if (!module.isDeclaration() || module.groups === undefined) continue;
+    for (const group of module.groups)
+      group.children = group.children.filter((child) => !isShared(child));
+    module.groups = module.groups.filter((group) => group.children.length > 0);
+  }
+}
+
+/** Gives a shared type no page, so it is written out on its module's page. */
+class SiteRouter extends KindRouter {
+  /** @param {Reflection} target */
+  getPageKind(target) {
+    return isSharedType(target) ? undefined : super.getPageKind(target);
+  }
+}
+
+/**
+ * A shared type's header: `interface` with its properties, as the type's own
+ * page would show it, or `type` with its definition. The default theme
+ * prints a type shown on another page as a property, `NumericField: any`
+ * (`.scratch/v2-release-checks/evidence/model-pages/`, patch 26).
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {DeclarationReflection} type
+ * @returns {JSX.Element}
+ */
+function typeHeader(context, type) {
+  const preview = context.reflectionPreview(type);
+  if (preview !== undefined) return preview;
+  const isAlias = type.kindOf(ReflectionKind.TypeAlias);
+  return JSX.createElement(
+    "div",
+    { class: "tsd-signature" },
+    JSX.createElement(
+      "span",
+      { class: "tsd-signature-keyword" },
+      isAlias ? "type" : "interface",
+    ),
+    " ",
+    JSX.createElement(
+      "span",
+      { class: ReflectionKind.classString(type.kind) },
+      type.name,
+    ),
+    isAlias && type.type !== undefined
+      ? [
+          " ",
+          JSX.createElement("span", { class: "tsd-signature-symbol" }, "="),
+          " ",
+          context.type(type.type),
+        ]
+      : null,
+  );
+}
+
+/**
+ * The section "Model info and warnings" of a module's page: a summary of each
+ * shared export with its own page, then each shared type in full.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {DeclarationReflection | ProjectReflection} module
+ * @returns {JSX.Element | null}
+ */
+function sharedSection(context, module) {
+  const shared = (module.children ?? []).filter(isShared);
+  if (shared.length === 0) return null;
+  const withPage = shared.filter((reflection) => !isSharedType(reflection));
+  const types = shared.filter(isSharedType);
+  context.page.startNewSection(SHARED_SECTION);
+  const anchor = context.slugger.slug(SHARED_SECTION);
+  // The markup of the theme's member groups (`members` in TypeDoc 0.28).
+  return JSX.createElement(
+    "details",
+    { class: "tsd-panel-group tsd-member-group tsd-accordion", open: true },
+    JSX.createElement(
+      "summary",
+      {
+        class: "tsd-accordion-summary",
+        "data-key": `section-${SHARED_SECTION}`,
+      },
+      context.icons.chevronDown(),
+      JSX.createElement(
+        "h2",
+        { class: "tsd-anchor-link", id: anchor },
+        SHARED_SECTION,
+        JSX.createElement(
+          "a",
+          {
+            href: `#${anchor}`,
+            "aria-label": i18n.theme_permalink(),
+            class: "tsd-anchor-icon",
+          },
+          context.icons.anchor(),
+        ),
+      ),
+    ),
+    JSX.createElement(
+      "section",
+      null,
+      withPage.length > 0
+        ? JSX.createElement(
+            "dl",
+            { class: "tsd-member-summaries" },
+            withPage.map((reflection) =>
+              context.moduleMemberSummary(reflection),
+            ),
+          )
+        : null,
+      types.map((type) => context.member(type)),
+    ),
+  );
+}
+
+/**
+ * The default theme's partials, with a module's page ending in its shared
+ * section and a shared type's header naming its kind.
+ */
+class SiteRenderContext extends DefaultThemeRenderContext {
+  /** @param {ConstructorParameters<typeof DefaultThemeRenderContext>} args */
+  constructor(...args) {
+    super(...args);
+    const moduleReflection = this.moduleReflection;
+    this.moduleReflection = (
+      /** @type {DeclarationReflection | ProjectReflection} */ module,
+    ) =>
+      JSX.createElement(
+        JSX.Fragment,
+        null,
+        moduleReflection(module),
+        sharedSection(this, module),
+      );
+    const memberDeclaration = this.memberDeclaration;
+    this.memberDeclaration = (/** @type {DeclarationReflection} */ props) => {
+      if (!isSharedType(props)) return memberDeclaration(props);
+      // The default partial's content (TypeDoc 0.28), with typeHeader's
+      // header; no shared type has type parameters.
+      return JSX.createElement(
+        JSX.Fragment,
+        null,
+        typeHeader(this, props),
+        this.commentSummary(props),
+        props.type ? this.typeDeclaration(props, props.type) : null,
+        this.commentTags(props),
+        this.memberSources(props),
+      );
+    };
+  }
+}
+
+/**
+ * The navigation's entries without those for a reflection that has no page,
+ * whose URL holds an anchor on another page. TypeDoc 0.28 lists such a
+ * module child too: without this, the navigation held an entry for each of
+ * the 17 shared types (ticket 41 in `.scratch/v2-release-checks/issues/`).
+ *
+ * @param {NavigationElement[]} elements
+ * @returns {NavigationElement[]}
+ */
+function pagesOnly(elements) {
+  return elements
+    .filter((element) => !element.path?.includes("#"))
+    .map((element) =>
+      element.children === undefined
+        ? element
+        : { ...element, children: pagesOnly(element.children) },
+    );
+}
+
+/** The default theme with the site's partials and navigation. */
+class SiteTheme extends DefaultTheme {
+  /** @param {ProjectReflection} project */
+  buildNavigation(project) {
+    return pagesOnly(super.buildNavigation(project));
+  }
+
+  /** @param {PageEvent<Reflection>} pageEvent */
+  getRenderContext(pageEvent) {
+    return new SiteRenderContext(
+      this.router,
+      this,
+      pageEvent,
+      this.application.options,
+    );
+  }
+}
+
 /** @param {Application} app */
 export async function load(app) {
+  app.renderer.defineRouter("jsthermalcomfort", SiteRouter);
+  app.renderer.defineTheme("jsthermalcomfort", SiteTheme);
   const exportsByModule = await packageExports();
   app.internationalization.addTranslations("en", {
     tag_modelInfo: "Model info",
@@ -588,6 +834,7 @@ export async function load(app) {
         ReflectionKind.Function,
       ))
         if (fn.isDeclaration()) joinReturnsToOutputs(app, fn);
+      ungroupShared(context.project);
     },
     -150,
   );

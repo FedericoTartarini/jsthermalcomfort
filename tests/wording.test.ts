@@ -48,6 +48,9 @@ const FORBIDDEN: readonly {
       /\b(?!(?:Error|TypeError|RangeError|SyntaxError|ReferenceError|EvalError|URIError|AggregateError)\b)\w+Error\b/g,
   },
   { rule: "`:sub:` becomes `<sub>`", pattern: /:sub:/g },
+  // Upstream's subscripted insulation symbols, such as (I :sub:`cl,r`),
+  // written with an underscore in place of `<sub>`.
+  { rule: "`:sub:` becomes `<sub>`, not an underscore", pattern: /\bI_\w/g },
   { rule: "`:math:` becomes a code span", pattern: /:math:/g },
   { rule: "`.. math::` becomes a code span", pattern: /\.\. math::/g },
 ];
@@ -176,6 +179,7 @@ describe("the wording patterns", () => {
     "any other value raises a ``ValueError``.",
     "Python raises ZeroDivisionError here",
     "(`I`:sub:`T`)",
+    "insulation (I_cl,r)",
     "the wind speed at height :math:`h`",
     ".. math::",
   ])("flag %j", (text) => {

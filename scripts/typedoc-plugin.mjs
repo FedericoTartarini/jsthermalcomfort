@@ -57,6 +57,12 @@
  * `title` of its frontmatter, is the `#` heading it opens with; its file
  * still names its page.
  *
+ * The header's Documentation link opens the project's page, `modules.html`,
+ * as the overview of the documentation that pythermalcomfort's Documentation
+ * link opens: the left column's groups in its order, each module with its
+ * summary and its members that have a page, in the order of the module's own
+ * page, then the hand-written pages by title.
+ *
  * A template of TypeDoc's that the theme wraps, editing the markup it
  * returns (`wrapTemplate`, `editMarkup`), fails the docs build naming the
  * template when that markup is not what the edit expects, as after a TypeDoc
@@ -75,6 +81,7 @@ import {
   i18n,
   JSX,
   KindRouter,
+  PageKind,
   ReflectionKind,
   ReflectionSymbolId,
   Slugger,
@@ -806,7 +813,20 @@ function permalink(context, anchor) {
  */
 function titledSection(context, title, content) {
   context.page.startNewSection(title);
-  const anchor = context.slugger.slug(title);
+  return sectionMarkup(context, title, context.slugger.slug(title), content);
+}
+
+/**
+ * A section's markup, as {@link titledSection} gives it, without starting a
+ * section of "On This Page".
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} title
+ * @param {string} anchor The id of the section's heading.
+ * @param {() => JSX.Children} content
+ * @returns {JSX.Element}
+ */
+function sectionMarkup(context, title, anchor, content) {
   return JSX.createElement(
     "details",
     { class: "tsd-panel-group tsd-member-group tsd-accordion", open: true },
@@ -946,6 +966,164 @@ function categorizedList(context, module) {
       );
     }),
   );
+}
+
+/**
+ * Whether the page is the documentation's overview: the project's own page,
+ * `modules.html`, which the header's Documentation link opens. The home page
+ * shows the project's readme, and `hierarchy.html` its class hierarchy.
+ *
+ * @param {PageEvent<Reflection>} page
+ * @returns {boolean}
+ */
+function isOverview(page) {
+  return page.model.isProject() && page.pageKind === PageKind.Reflection;
+}
+
+/**
+ * A module's members that have a page, in the order its own page lists them:
+ * a categorized module's as {@link categorizedList} does, any other's by the
+ * theme's groups by kind (`moduleReflection` in TypeDoc 0.28, for a module
+ * without categories), then those of its section "Model info and warnings".
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {DeclarationReflection} module
+ * @returns {Reflection[]}
+ */
+function membersWithPage(context, module) {
+  const children = module.children ?? [];
+  // A second name, so that the type guard does not narrow `module` to `never`.
+  /** @type {Reflection} */
+  const reflection = module;
+  /** @type {Reflection[]} */
+  const own = isCategorized(reflection)
+    ? children.filter((child) => !isShared(child))
+    : (module.groups ?? []).flatMap((group) => group.children);
+  return [...own, ...children.filter(isShared)].filter((member) =>
+    context.router.hasOwnDocument(member),
+  );
+}
+
+/**
+ * A module in the overview: its name, linked to its page, which "On This
+ * Page" lists; its summary; and its members that have a page, each linked.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {DeclarationReflection} module
+ * @returns {JSX.Element}
+ */
+function overviewModule(context, module) {
+  const anchor = context.slugger.slug(module.name);
+  context.page.pageHeadings.push({ link: `#${anchor}`, text: module.name });
+  return JSX.createElement(
+    JSX.Fragment,
+    null,
+    JSX.createElement(
+      "h3",
+      { class: "tsd-anchor-link", id: anchor },
+      JSX.createElement("a", { href: context.urlTo(module) }, module.name),
+      permalink(context, anchor),
+    ),
+    context.commentShortSummary(module),
+    JSX.createElement(
+      "ul",
+      { class: "site-overview-members" },
+      membersWithPage(context, module).map((member) =>
+        JSX.createElement(
+          "li",
+          null,
+          JSX.createElement("a", { href: context.urlTo(member) }, member.name),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * The documentation's overview, in place of the project page's list of
+ * modules and documents: each group of {@link NAVIGATION_GROUPS} as a
+ * section, in the left column's order. A module is shown by
+ * {@link overviewModule}, a hand-written page as a link with its title. A
+ * group of pages only is one entry of "On This Page", since its pages are
+ * elsewhere. An entry the project lacks is left out; `siteNavigation` fails
+ * the docs build for it.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {ProjectReflection} project
+ * @returns {JSX.Element}
+ */
+function overview(context, project) {
+  /** @type {Map<string, DeclarationReflection>} */
+  const modules = new Map();
+  for (const child of project.children ?? [])
+    if (child.kindOf(ReflectionKind.Module)) modules.set(child.name, child);
+  return JSX.createElement(
+    JSX.Fragment,
+    null,
+    NAVIGATION_GROUPS.map(([label, keys]) => {
+      /** @type {DeclarationReflection[]} */
+      const groupModules = [];
+      /** @type {Reflection[]} */
+      const pages = [];
+      for (const key of keys) {
+        const module = modules.get(key);
+        const page =
+          module === undefined ? documentOf(project, key) : undefined;
+        if (module !== undefined) groupModules.push(module);
+        else if (page !== undefined) pages.push(page);
+      }
+      const content = () =>
+        JSX.createElement(
+          "section",
+          { class: "site-overview" },
+          groupModules.map((module) => overviewModule(context, module)),
+          pages.length > 0
+            ? JSX.createElement(
+                "ul",
+                { class: "site-overview-pages" },
+                pages.map((page) =>
+                  JSX.createElement(
+                    "li",
+                    null,
+                    JSX.createElement(
+                      "a",
+                      { href: context.urlTo(page) },
+                      page.name,
+                    ),
+                  ),
+                ),
+              )
+            : null,
+        );
+      if (groupModules.length > 0)
+        return titledSection(context, label, content);
+      context.page.startNewSection("");
+      const anchor = context.slugger.slug(label);
+      context.page.pageHeadings.push({ link: `#${anchor}`, text: label });
+      return sectionMarkup(context, label, anchor, content);
+    }),
+  );
+}
+
+/**
+ * The browser tab's title of the documentation's overview, edited from what
+ * TypeDoc's `defaultLayout` template returns: "Documentation" before the
+ * project's name, as a hand-written page's title stands before it.
+ *
+ * @param {JSX.Element} markup
+ * @param {unknown} _template The page's template, which this edit leaves.
+ * @param {PageEvent<Reflection>} props
+ * @returns {JSX.Element}
+ */
+function overviewTab(markup, _template, props) {
+  if (!isOverview(props)) return markup;
+  const title = expectElement(
+    markup,
+    (element) => element.tag === "title",
+    "the browser tab's title, a title element",
+  );
+  title.children = ["Documentation | ", ...title.children];
+  return markup;
 }
 
 /**
@@ -1514,7 +1692,9 @@ function hasLeftColumn(page) {
 /**
  * The page's title, edited from what TypeDoc's `header` template returns: a
  * reflection's title loses the kind word TypeDoc puts before its name
- * ("Function pmv_ppd_iso"). The project's and a document's titles carry none.
+ * ("Function pmv_ppd_iso"), and the documentation's overview is titled
+ * "Documentation" in place of the project's name. The project's and a
+ * document's titles carry no kind word.
  *
  * @param {JSX.Element} markup
  * @param {PageEvent<Reflection>} props
@@ -1522,12 +1702,17 @@ function hasLeftColumn(page) {
  */
 function pageTitle(markup, props) {
   const model = props.model;
-  if (model.isProject() || model.isDocument()) return markup;
+  if (!isOverview(props) && (model.isProject() || model.isDocument()))
+    return markup;
   const title = expectElement(
     markup,
     (element) => element.tag === "h1",
     "the page's title, an h1 element",
   );
+  if (isOverview(props)) {
+    title.children = ["Documentation"];
+    return markup;
+  }
   const kind = `${ReflectionKind.singularString(model.kind)} `;
   if (title.children[0] !== kind)
     throw new UnexpectedMarkup(
@@ -1564,8 +1749,9 @@ function menuLinks(context) {
  * a module's page ending in its shared section, a shared type's header
  * naming its kind, a function's page listing its sections under "On This
  * Page", the site's header with the theme button in place of the
- * "Settings" panel, page titles without a kind word, and the left column
- * without the project's link.
+ * "Settings" panel, page titles without a kind word, the left column
+ * without the project's link, and the project's page as the documentation's
+ * overview, titled "Documentation" in its heading and its browser tab.
  */
 class SiteRenderContext extends DefaultThemeRenderContext {
   /** @param {ConstructorParameters<typeof DefaultThemeRenderContext>} args */
@@ -1575,14 +1761,16 @@ class SiteRenderContext extends DefaultThemeRenderContext {
     this.moduleReflection = (
       /** @type {DeclarationReflection | ProjectReflection} */ module,
     ) =>
-      JSX.createElement(
-        JSX.Fragment,
-        null,
-        isCategorized(module)
-          ? categorizedList(this, module)
-          : moduleReflection(module),
-        sharedSection(this, module),
-      );
+      module.isProject()
+        ? overview(this, module)
+        : JSX.createElement(
+            JSX.Fragment,
+            null,
+            isCategorized(module)
+              ? categorizedList(this, module)
+              : moduleReflection(module),
+            sharedSection(this, module),
+          );
     const memberDeclaration = this.memberDeclaration;
     this.memberDeclaration = (/** @type {DeclarationReflection} */ props) => {
       if (!isSharedType(props)) return memberDeclaration(props);
@@ -1643,6 +1831,14 @@ class SiteRenderContext extends DefaultThemeRenderContext {
       leftColumn,
     );
     this.navigation = navigation;
+    /** @type {DefaultThemeRenderContext["defaultLayout"]} */
+    const defaultLayout = wrapTemplate(
+      this,
+      "defaultLayout",
+      this.defaultLayout,
+      overviewTab,
+    );
+    this.defaultLayout = defaultLayout;
   }
 }
 

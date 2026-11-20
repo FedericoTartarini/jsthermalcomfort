@@ -207,3 +207,24 @@
     grid-template-areas: "content toc";
   }
 }
+
+/*
+ * The documentation's overview (`modules.html`): a module's members, and
+ * the hand-written pages, in columns, as many as the width holds; one column
+ * at phone width. A name longer than its column wraps rather than running
+ * into the next column.
+ */
+.site-overview-members,
+.site-overview-pages {
+  columns: 18rem auto;
+  column-gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1.5rem;
+}
+.site-overview-members li,
+.site-overview-pages li {
+  break-inside: avoid;
+  padding: 0.1rem 0;
+  overflow-wrap: anywhere;
+}

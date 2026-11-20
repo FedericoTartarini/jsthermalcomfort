@@ -279,18 +279,31 @@ pre,
   align-self: stretch;
   margin: 0 auto 0 1rem;
 }
+/*
+ * The current section's bar sits just under its link's text, as on
+ * pythermalcomfort's site, clear of the thermal sensation band.
+ */
 .tsd-page-toolbar .site-pages a {
+  --site-page-link-padding: 0.85rem;
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 0 0.85rem;
+  padding: 0 var(--site-page-link-padding);
   font-size: 0.95rem;
   color: var(--color-text-aside);
-  border-bottom: 3px solid transparent;
 }
 .tsd-page-toolbar .site-pages a.current {
   color: var(--color-text);
   font-weight: 700;
-  border-bottom-color: var(--color-text);
+}
+.tsd-page-toolbar .site-pages a.current::after {
+  content: "";
+  position: absolute;
+  left: var(--site-page-link-padding);
+  right: var(--site-page-link-padding);
+  top: calc(50% + 0.85em);
+  height: 3px;
+  background: var(--color-link);
 }
 #tsd-sidebar-links a.current {
   text-decoration: underline;
@@ -299,12 +312,28 @@ pre,
 #tsd-search-trigger {
   opacity: 1;
 }
+/*
+ * Search, the theme button and each icon link are 2.5rem squares, TypeDoc's
+ * `.tsd-widget` size, 0.5rem apart, so the icons on the right are as evenly
+ * spaced as the page links on the left.
+ */
+.site-theme,
 #tsd-toolbar-links {
-  gap: 0.75rem;
+  margin-left: -0.5rem;
+}
+#tsd-toolbar-links {
+  gap: 0.5rem;
   margin-right: 0;
 }
 #tsd-toolbar-links a {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+#tsd-toolbar-links a:hover {
+  background: var(--color-background-secondary);
 }
 .tsd-page-toolbar #tsd-toolbar-links a,
 .tsd-navigation #tsd-sidebar-links a {
@@ -341,9 +370,31 @@ pre,
 .site-theme-button[data-theme="dark"] [data-theme-value="dark"] {
   display: block;
 }
+/*
+ * Between phone width and 1100px the header has no room for the icon links:
+ * they move to the top of the left column, or under "On this page" on a page
+ * without one, and the page links close up.
+ */
+@media (min-width: 770px) and (max-width: 1099px) {
+  #tsd-toolbar-links {
+    display: none;
+  }
+  .tsd-page-toolbar .site-pages a {
+    --site-page-link-padding: 0.6rem;
+  }
+  #tsd-sidebar-links {
+    margin-bottom: 1rem;
+  }
+  #tsd-sidebar-links a.tsd-nav-link[href^="https:"] {
+    display: flex;
+  }
+}
 @media (max-width: 769px) {
   .tsd-toolbar-contents {
     gap: 0.5rem;
+  }
+  .site-theme {
+    margin-left: 0;
   }
   .site-pages {
     display: none;
@@ -389,6 +440,18 @@ pre,
     .container-main {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     grid-template-areas: "content sidebar";
+  }
+}
+/* Below 1100px such a page keeps the icon links under "On this page". */
+@media (min-width: 770px) and (max-width: 1099px) {
+  :root:has(meta[name="site-layout"][content="no-left-column"]) .site-menu {
+    display: block;
+    margin-top: 1.5rem;
+  }
+  :root:has(meta[name="site-layout"][content="no-left-column"])
+    .site-menu
+    > nav:not(#tsd-sidebar-links) {
+    display: none;
   }
 }
 @media (min-width: 1200px) {

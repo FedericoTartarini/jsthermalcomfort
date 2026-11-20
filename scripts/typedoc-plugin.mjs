@@ -41,6 +41,17 @@
  * `ModelWarning`, which has no page; a link to such a type opens the section
  * at it. `typedoc.json` selects the router and the theme defined
  * here.
+ *
+ * Every page's header holds the site's name, the version linked to the
+ * changelog, the page links Installation, Documentation, Contributing and
+ * Authors, search, the theme button and `navigationLinks` as icons. The theme
+ * button drives TypeDoc's own theme control, moved from the "Settings" panel,
+ * which goes; `docs/site.js` cycles it.
+ *
+ * A template of TypeDoc's that the theme wraps, editing the markup it
+ * returns (`wrapTemplate`, `editMarkup`), fails the docs build naming the
+ * template when that markup is not what the edit expects, as after a TypeDoc
+ * upgrade.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -926,6 +937,139 @@ function listInExportOrder(app, project) {
 }
 
 /**
+ * Thrown by the edit of a wrapped template when the markup that TypeDoc's
+ * template returned is not what the edit expects; `what` names what is
+ * missing.
+ */
+class UnexpectedMarkup extends Error {
+  /** @param {string} what */
+  constructor(what) {
+    super(what);
+    this.name = "UnexpectedMarkup";
+  }
+}
+
+/**
+ * The first element in a markup tree that passes `test`.
+ *
+ * @param {JSX.Children} node
+ * @param {(element: JSX.Element) => boolean} test
+ * @returns {JSX.Element | undefined}
+ */
+function findElement(node, test) {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const found = findElement(child, test);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  if (typeof node !== "object" || node === null) return undefined;
+  if (test(node)) return node;
+  return findElement(node.children, test);
+}
+
+/**
+ * The first element in a markup tree that passes `test`; else throws
+ * {@link UnexpectedMarkup} with `what`.
+ *
+ * @param {JSX.Children} node
+ * @param {(element: JSX.Element) => boolean} test
+ * @param {string} what
+ * @returns {JSX.Element}
+ */
+function expectElement(node, test, what) {
+  const found = findElement(node, test);
+  if (found === undefined) throw new UnexpectedMarkup(what);
+  return found;
+}
+
+/**
+ * Tests an element by its `id`.
+ *
+ * @param {string} id
+ * @returns {(element: JSX.Element) => boolean}
+ */
+const withId = (id) => (element) =>
+  /** @type {Record<string, unknown> | null} */ (element.props)?.id === id;
+
+/**
+ * Tests an element by one of its classes.
+ *
+ * @param {string} name
+ * @returns {(element: JSX.Element) => boolean}
+ */
+const withClass = (name) => (element) =>
+  String(
+    /** @type {Record<string, unknown> | null} */ (element.props)?.class ?? "",
+  )
+    .split(" ")
+    .includes(name);
+
+/** @type {WeakMap<object, Set<string>>} */
+const reported = new WeakMap();
+
+/**
+ * Logs `message` as an error once per render, which fails the docs build.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} message
+ */
+function reportOnce(context, message) {
+  const seen = reported.get(context.theme) ?? new Set();
+  reported.set(context.theme, seen);
+  if (seen.has(message)) return;
+  seen.add(message);
+  context.theme.application.logger.error(
+    `${message} (first on ${context.page.url})`,
+  );
+}
+
+/**
+ * Runs `edit` on the markup that TypeDoc's template `name` returned. When the
+ * edit throws {@link UnexpectedMarkup}, logs an error that names the template,
+ * which fails the docs build, and returns `undefined`.
+ *
+ * @template T
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} name
+ * @param {() => T} edit
+ * @returns {T | undefined}
+ */
+function editMarkup(context, name, edit) {
+  try {
+    return edit();
+  } catch (error) {
+    if (!(error instanceof UnexpectedMarkup)) throw error;
+    reportOnce(
+      context,
+      `TypeDoc's "${name}" template returned markup that scripts/typedoc-plugin.mjs does not expect: ${error.message} is missing`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * TypeDoc's template `name`, `template`, wrapped: `edit` changes the markup
+ * the template returns. Markup the edit does not expect, as after a TypeDoc
+ * upgrade, fails the docs build naming the template, and the page keeps
+ * TypeDoc's markup.
+ *
+ * @template {unknown[]} A
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} name
+ * @param {(...args: A) => JSX.Element} template
+ * @param {(markup: JSX.Element, ...args: A) => JSX.Element} edit
+ * @returns {(...args: A) => JSX.Element}
+ */
+function wrapTemplate(context, name, template, edit) {
+  return (...args) => {
+    const markup = template(...args);
+    return editMarkup(context, name, () => edit(markup, ...args)) ?? markup;
+  };
+}
+
+/**
  * The section headings of a signature's body, in the page's order: each `h4`
  * outside a list, which leaves out the headings of a parameter's or an
  * output's own comment. A heading without an id, such as Parameters or
@@ -933,8 +1077,9 @@ function listInExportOrder(app, project) {
  * heading. A heading that repeats the one before it, as a second `@throws`
  * tag's does, is not listed again.
  *
- * Logs an error for a heading that starts with no text, as one would after a
- * TypeDoc upgrade that changes the theme's markup.
+ * Throws {@link UnexpectedMarkup} for a heading that starts with no text, as
+ * one would after a TypeDoc upgrade that changes the theme's markup, since the
+ * table of contents could not name it.
  *
  * @param {DefaultThemeRenderContext} context
  * @param {JSX.Children} node
@@ -949,12 +1094,10 @@ function sectionHeadings(context, node, headings = []) {
   if (typeof node !== "object" || node === null) return headings;
   if (node.tag === "h4") {
     const text = node.children.find((c) => typeof c === "string");
-    if (typeof text !== "string" || text.trim() === "") {
-      context.theme.application.logger.error(
-        `${context.model.getFullName()}: a section heading has no text, so the page's table of contents cannot name it`,
+    if (typeof text !== "string" || text.trim() === "")
+      throw new UnexpectedMarkup(
+        `the text at the start of a section heading (h4) of ${context.model.getFullName()}`,
       );
-      return headings;
-    }
     const props = /** @type {Record<string, unknown>} */ (node.props ??= {});
     if (props.id === undefined) {
       const anchor = context.slugger.slug(text);
@@ -972,10 +1115,315 @@ function sectionHeadings(context, node, headings = []) {
 }
 
 /**
+ * The header's page links, as pythermalcomfort's site has them: each label
+ * with the document it opens, or `undefined` for the project's own page, the
+ * documentation's overview.
+ *
+ * @type {ReadonlyArray<readonly [string, string | undefined]>}
+ */
+const PAGE_LINKS = [
+  ["Installation", "installation"],
+  ["Documentation", undefined],
+  ["Contributing", "contributing"],
+  ["Authors", "authors"],
+];
+
+/**
+ * A 16 by 16 icon for each of `typedoc.json`'s `navigationLinks`, by its
+ * label: GitHub's mark, and simple glyphs for npm, LinkedIn and Google
+ * Scholar.
+ *
+ * @type {Readonly<Record<string, string>>}
+ */
+const LINK_ICONS = {
+  GitHub:
+    "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z",
+  npm: "M1 1h14v14H1zM3.5 3.5v9h4.5v-7h2.5v7h2V3.5z",
+  LinkedIn:
+    "M1.5 1h13c.28 0 .5.22.5.5v13a.5.5 0 01-.5.5h-13a.5.5 0 01-.5-.5v-13c0-.28.22-.5.5-.5zM3.2 6.2v6.6h2.1V6.2zm1.05-3.3a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4zM6.7 6.2v6.6h2.1V9.5c0-.9.2-1.7 1.3-1.7s1.1 1 1.1 1.8v3.2h2.1V9.2c0-1.8-.4-3.2-2.5-3.2-1 0-1.7.5-2 1.1V6.2z",
+  "Google Scholar":
+    "M8 1L0 6.5l3 2.05V12c0 1.66 2.24 3 5 3s5-1.34 5-3V8.55L16 6.5zM8 13c-1.66 0-3-.67-3-1.5V9.9l3 2.05 3-2.05v1.6c0 .83-1.34 1.5-3 1.5z",
+};
+
+/**
+ * The theme button's icon for each value of TypeDoc's theme control: a
+ * half-filled circle for the system theme, a sun and a moon, as the theme
+ * switch of pythermalcomfort's site shows.
+ *
+ * @type {Readonly<Record<string, string>>}
+ */
+const THEME_ICONS = {
+  os: "M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5v11a5.5 5.5 0 010-11z",
+  light:
+    "M8 11.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM0 8a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H.75A.75.75 0 010 8zm13 0a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 0113 8zM2.34 2.34a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06L2.34 3.4a.75.75 0 010-1.06zm9.2 9.2a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM2.34 13.66a.75.75 0 010-1.06l1.06-1.06a.75.75 0 011.06 1.06L3.4 13.66a.75.75 0 01-1.06 0zm9.2-9.2a.75.75 0 010-1.06l1.06-1.06a.75.75 0 011.06 1.06l-1.06 1.06a.75.75 0 01-1.06 0z",
+  dark: "M8 1a7 7 0 1 0 7 7 5.5 5.5 0 0 1-7-7z",
+};
+
+/**
+ * An icon drawn in the text's colour, hidden from a screen reader, which
+ * reads the name of the link or button around it.
+ *
+ * @param {string} path
+ * @param {Record<string, string>} [props]
+ * @returns {JSX.Element}
+ */
+function icon(path, props = {}) {
+  return JSX.createElement(
+    "svg",
+    {
+      viewBox: "0 0 16 16",
+      width: "18",
+      height: "18",
+      "aria-hidden": "true",
+      ...props,
+    },
+    JSX.createElement("path", { d: path, fill: "currentColor" }),
+  );
+}
+
+/**
+ * The label of the header link whose section holds the page: a page link's
+ * document, or Documentation for every other page but the home page.
+ *
+ * @param {PageEvent<Reflection>} page
+ * @returns {string | undefined}
+ */
+function headerSection(page) {
+  if (page.url === "index.html") return undefined;
+  const model = page.model;
+  const own = PAGE_LINKS.find(
+    ([, name]) =>
+      name !== undefined && model.isDocument() && model.name === name,
+  );
+  return own ? own[0] : "Documentation";
+}
+
+/**
+ * The header's page links, the link of the page's section marked `current`.
+ * A document that `typedoc.json` does not list fails the docs build.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {string | undefined} linkClass
+ * @returns {JSX.Element[]}
+ */
+function pageLinks(context, linkClass) {
+  const page = context.page;
+  const section = headerSection(page);
+  return PAGE_LINKS.flatMap(([label, name]) => {
+    const target =
+      name === undefined
+        ? page.project
+        : page.project.documents?.find((doc) => doc.name === name);
+    if (target === undefined) {
+      reportOnce(
+        context,
+        `The header links the document "${name}", which typedoc.json's projectDocuments does not list`,
+      );
+      return [];
+    }
+    const current = section === label;
+    return [
+      JSX.createElement(
+        "a",
+        {
+          // `urlTo` gives "" for the page itself.
+          href: context.urlTo(target) || context.relativeURL(page.url),
+          class:
+            [linkClass, current ? "current" : undefined]
+              .filter(Boolean)
+              .join(" ") || undefined,
+          "aria-current": current
+            ? target === page.model
+              ? "page"
+              : "true"
+            : undefined,
+        },
+        label,
+      ),
+    ];
+  });
+}
+
+/**
+ * `typedoc.json`'s `navigationLinks`, each as its icon from
+ * {@link LINK_ICONS}, named for a screen reader by its label, or with the
+ * label shown when `withText` is set. A link without an icon fails the docs
+ * build.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {{ withText?: boolean, linkClass?: string }} [options]
+ * @returns {JSX.Element[]}
+ */
+function iconLinks(context, { withText = false, linkClass } = {}) {
+  return Object.entries(context.options.getValue("navigationLinks")).flatMap(
+    ([label, url]) => {
+      const path = LINK_ICONS[label];
+      if (path === undefined) {
+        reportOnce(
+          context,
+          `typedoc.json's navigationLinks entry "${label}" has no icon in LINK_ICONS in scripts/typedoc-plugin.mjs`,
+        );
+        return [];
+      }
+      return [
+        JSX.createElement(
+          "a",
+          withText
+            ? { href: url, class: linkClass }
+            : {
+                href: url,
+                class: linkClass,
+                "aria-label": label,
+                title: label,
+              },
+          icon(path),
+          withText ? label : null,
+        ),
+      ];
+    },
+  );
+}
+
+/**
+ * The theme button and TypeDoc's own theme control, taken from the
+ * "Settings" panel that TypeDoc's `settings` template returns and hidden. The
+ * button stays hidden until `docs/site.js` finds the control; that script
+ * cycles the control's values. `undefined` when the panel holds no `select`,
+ * which fails the docs build.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {() => JSX.Element} settings TypeDoc's `settings` template.
+ * @returns {JSX.Element | undefined}
+ */
+function themeButton(context, settings) {
+  const control = editMarkup(context, "settings", () =>
+    expectElement(
+      settings(),
+      (element) => element.tag === "select",
+      "the theme control (a select element)",
+    ),
+  );
+  if (control === undefined) return undefined;
+  control.props = { ...control.props, hidden: true };
+  return JSX.createElement(
+    "div",
+    { class: "site-theme" },
+    JSX.createElement(
+      "button",
+      {
+        type: "button",
+        class: "tsd-widget site-theme-button",
+        hidden: true,
+        "aria-label": "Theme",
+      },
+      Object.entries(THEME_ICONS).map(([value, path]) =>
+        icon(path, { class: "site-theme-icon", "data-theme-value": value }),
+      ),
+    ),
+    control,
+  );
+}
+
+/**
+ * The site's header, edited from what TypeDoc's `toolbar` template returns:
+ * the site's name; the version, which opens the changelog; the page links;
+ * search; the theme button; and `navigationLinks` as icons. At phone width
+ * TypeDoc's style sheet hides `#tsd-toolbar-links` and shows the menu
+ * button, and the page and icon links are in the menu (`menuLinks`).
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {JSX.Element} markup
+ * @param {PageEvent<Reflection>} props
+ * @param {() => JSX.Element} settings TypeDoc's `settings` template.
+ * @returns {JSX.Element}
+ */
+function siteHeader(context, markup, props, settings) {
+  const contents = expectElement(
+    markup,
+    withClass("tsd-toolbar-contents"),
+    "the element of class tsd-toolbar-contents",
+  );
+  const title = expectElement(
+    contents.children,
+    withClass("title"),
+    "the site's name, of class title",
+  );
+  const links = expectElement(
+    contents.children,
+    withId("tsd-toolbar-links"),
+    "the element of id tsd-toolbar-links",
+  );
+  const search = ["tsd-search-trigger", "tsd-search"].map((id) =>
+    expectElement(contents.children, withId(id), `the element of id ${id}`),
+  );
+  const menu = expectElement(
+    contents.children,
+    withId("tsd-toolbar-menu-trigger"),
+    "the element of id tsd-toolbar-menu-trigger",
+  );
+  const project = props.project;
+  const changelog = project.documents?.find((doc) => doc.name === "changelog");
+  if (changelog === undefined)
+    reportOnce(
+      context,
+      `The header's version links the document "changelog", which typedoc.json's projectDocuments does not list`,
+    );
+  title.children = [project.name];
+  links.children = iconLinks(context);
+  contents.children = [
+    title,
+    project.packageVersion && changelog
+      ? JSX.createElement(
+          "a",
+          {
+            href: context.urlTo(changelog) || context.relativeURL(props.url),
+            class: "site-version",
+            title: "Changelog",
+          },
+          project.packageVersion,
+        )
+      : null,
+    JSX.createElement(
+      "nav",
+      { class: "site-pages", "aria-label": "Site" },
+      pageLinks(context, undefined),
+    ),
+    ...search,
+    themeButton(context, settings) ?? null,
+    links,
+    menu,
+  ];
+  return markup;
+}
+
+/**
+ * The menu's links at phone width, in place of TypeDoc's `sidebarLinks`
+ * template: the header's page links, then `navigationLinks` with their icons
+ * and labels. TypeDoc's style sheet shows a `.tsd-navigation .tsd-nav-link`
+ * at phone width only.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @returns {JSX.Element}
+ */
+function menuLinks(context) {
+  return JSX.createElement(
+    "nav",
+    {
+      id: "tsd-sidebar-links",
+      class: "tsd-navigation site-menu-links",
+      "aria-label": "Site",
+    },
+    pageLinks(context, "tsd-nav-link"),
+    iconLinks(context, { withText: true, linkClass: "tsd-nav-link" }),
+  );
+}
+
+/**
  * The default theme's partials, with a categorized module's page as one list,
  * a module's page ending in its shared section, a shared type's header
- * naming its kind, and a function's page
- * listing its sections under "On This Page".
+ * naming its kind, a function's page listing its sections under "On This
+ * Page", and the site's header with the theme button in place of the
+ * "Settings" panel.
  */
 class SiteRenderContext extends DefaultThemeRenderContext {
   /** @param {ConstructorParameters<typeof DefaultThemeRenderContext>} args */
@@ -1023,9 +1471,25 @@ class SiteRenderContext extends DefaultThemeRenderContext {
         return body;
       // A function's table of contents lists its sections only, not the
       // headings in a comment's text, such as a constant's under Model info.
-      headings.splice(start, Infinity, ...sectionHeadings(this, body));
+      const sections = editMarkup(this, "memberSignatureBody", () =>
+        sectionHeadings(this, body),
+      );
+      if (sections) headings.splice(start, Infinity, ...sections);
       return body;
     };
+    // The theme control moves from the "Settings" panel into the header, and
+    // the panel goes; "On this page" stays in the right column.
+    const settings = this.settings;
+    this.settings = () => JSX.createElement(JSX.Fragment, null);
+    /** @type {DefaultThemeRenderContext["toolbar"]} */
+    const toolbar = wrapTemplate(
+      this,
+      "toolbar",
+      this.toolbar,
+      (markup, props) => siteHeader(this, markup, props, settings),
+    );
+    this.toolbar = toolbar;
+    this.sidebarLinks = () => menuLinks(this);
   }
 }
 

@@ -121,3 +121,76 @@
   border-left: 2px solid var(--color-accent);
   padding-left: 1rem;
 }
+
+/*
+ * The header, which the plugin's `siteHeader` builds in TypeDoc's
+ * `.tsd-toolbar-contents`: the site's name, the version and the page links
+ * on the left, then search, the theme button and the icon links in
+ * `#tsd-toolbar-links`. At phone width TypeDoc's style sheet hides
+ * `#tsd-toolbar-links` and shows the menu button, and the page and icon links
+ * are in the menu, `#tsd-sidebar-links`. The page link of the section shown
+ * is underlined.
+ */
+.tsd-toolbar-contents {
+  gap: 1rem;
+}
+.tsd-toolbar-contents > .title,
+.site-version {
+  margin-right: 0;
+  white-space: nowrap;
+}
+.site-pages {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0 auto 0 1rem;
+}
+.site-pages a.current,
+#tsd-sidebar-links a.current {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+#tsd-toolbar-links {
+  gap: 0.75rem;
+  margin-right: 0;
+}
+#tsd-toolbar-links a {
+  display: inline-flex;
+}
+/* TypeDoc's style sheet shows these at phone width only, with `display`. */
+#tsd-sidebar-links a {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/*
+ * The theme button shows the icon of the theme chosen; `docs/site.js` sets
+ * its `data-theme` and shows it once it finds TypeDoc's theme control.
+ */
+.site-theme-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+.site-theme-button[hidden],
+.site-theme-icon {
+  display: none;
+}
+.site-theme-button[data-theme="os"] [data-theme-value="os"],
+.site-theme-button[data-theme="light"] [data-theme-value="light"],
+.site-theme-button[data-theme="dark"] [data-theme-value="dark"] {
+  display: block;
+}
+
+@media (max-width: 769px) {
+  .tsd-toolbar-contents {
+    gap: 0.5rem;
+  }
+  .site-pages {
+    display: none;
+  }
+  #tsd-search-trigger {
+    margin-left: auto;
+  }
+}

@@ -22,6 +22,7 @@
     "docs/changelog.md"
   ],
   "customCss": "docs/custom.css",
+  "customJs": "docs/site.js",
   "includeVersion": true,
   "navigationLinks": {
     "GitHub": "https://github.com/FedericoTartarini/jsthermalcomfort",

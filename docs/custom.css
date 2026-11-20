@@ -60,8 +60,11 @@
   display: none;
 }
 
-/* Returns: the heading without the outputs object type. */
-.tsd-returns-title:has(> .tsd-kind-property) > * {
+/*
+ * Returns: the heading without the outputs object type; the plugin's
+ * permalink stays.
+ */
+.tsd-returns-title:has(> .tsd-kind-property) > :not(.tsd-anchor-icon) {
   display: none;
 }
 

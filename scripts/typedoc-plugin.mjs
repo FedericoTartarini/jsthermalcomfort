@@ -23,6 +23,10 @@
  * holds a classifier the model info already prints gets one sentence naming
  * it instead. None of these constants keeps its own page.
  *
+ * A function's page lists its sections under "On This Page", in the page's
+ * order: Parameters, Returns, Example and its other sections, and on a
+ * model's page Model info last.
+ *
  * The `models` page ends with the section "Model info and warnings", built
  * from the exports declared in `src/_internal/`, which only `models`
  * re-exports. It lists each such export with a page of its own, as
@@ -50,7 +54,7 @@ import {
 import ts from "typescript";
 
 /**
- * @import { Application, CommentDisplayPart, ContainerReflection, DeclarationReflection, NavigationElement, PageEvent, ProjectReflection, Reflection, SomeType } from "typedoc"
+ * @import { Application, CommentDisplayPart, ContainerReflection, DeclarationReflection, NavigationElement, PageEvent, PageHeading, ProjectReflection, Reflection, SignatureReflection, SomeType } from "typedoc"
  */
 
 /**
@@ -682,6 +686,25 @@ function typeHeader(context, type) {
 }
 
 /**
+ * The permalink the theme puts at the end of a heading.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} anchor
+ * @returns {JSX.Element}
+ */
+function permalink(context, anchor) {
+  return JSX.createElement(
+    "a",
+    {
+      href: `#${anchor}`,
+      "aria-label": i18n.theme_permalink(),
+      class: "tsd-anchor-icon",
+    },
+    context.icons.anchor(),
+  );
+}
+
+/**
  * The section "Model info and warnings" of a module's page: a summary of each
  * shared export with its own page, then each shared type in full.
  *
@@ -711,15 +734,7 @@ function sharedSection(context, module) {
         "h2",
         { class: "tsd-anchor-link", id: anchor },
         SHARED_SECTION,
-        JSX.createElement(
-          "a",
-          {
-            href: `#${anchor}`,
-            "aria-label": i18n.theme_permalink(),
-            class: "tsd-anchor-icon",
-          },
-          context.icons.anchor(),
-        ),
+        permalink(context, anchor),
       ),
     ),
     JSX.createElement(
@@ -740,8 +755,55 @@ function sharedSection(context, module) {
 }
 
 /**
+ * The section headings of a signature's body, in the page's order: each `h4`
+ * outside a list, which leaves out the headings of a parameter's or an
+ * output's own comment. A heading without an id, such as Parameters or
+ * Returns, gets the id and the permalink that the theme gives a block tag's
+ * heading. A heading that repeats the one before it, as a second `@throws`
+ * tag's does, is not listed again.
+ *
+ * Logs an error for a heading that starts with no text, as one would after a
+ * TypeDoc upgrade that changes the theme's markup.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {JSX.Children} node
+ * @param {PageHeading[]} headings
+ * @returns {PageHeading[]}
+ */
+function sectionHeadings(context, node, headings = []) {
+  if (Array.isArray(node)) {
+    for (const child of node) sectionHeadings(context, child, headings);
+    return headings;
+  }
+  if (typeof node !== "object" || node === null) return headings;
+  if (node.tag === "h4") {
+    const text = node.children.find((c) => typeof c === "string");
+    if (typeof text !== "string" || text.trim() === "") {
+      context.theme.application.logger.error(
+        `${context.model.getFullName()}: a section heading has no text, so the page's table of contents cannot name it`,
+      );
+      return headings;
+    }
+    const props = /** @type {Record<string, unknown>} */ (node.props ??= {});
+    if (props.id === undefined) {
+      const anchor = context.slugger.slug(text);
+      props.id = anchor;
+      props.class = [props.class, "tsd-anchor-link"].filter(Boolean).join(" ");
+      node.children.push(permalink(context, anchor));
+    }
+    if (headings.at(-1)?.text !== text)
+      headings.push({ link: `#${props.id}`, text });
+    return headings;
+  }
+  // A list holds a parameter's or an output's own headings.
+  if (node.tag === "ul") return headings;
+  return sectionHeadings(context, node.children, headings);
+}
+
+/**
  * The default theme's partials, with a module's page ending in its shared
- * section and a shared type's header naming its kind.
+ * section, a shared type's header naming its kind, and a function's page
+ * listing its sections under "On This Page".
  */
 class SiteRenderContext extends DefaultThemeRenderContext {
   /** @param {ConstructorParameters<typeof DefaultThemeRenderContext>} args */
@@ -771,6 +833,24 @@ class SiteRenderContext extends DefaultThemeRenderContext {
         this.commentTags(props),
         this.memberSources(props),
       );
+    };
+    const memberSignatureBody = this.memberSignatureBody;
+    this.memberSignatureBody = (
+      /** @type {SignatureReflection} */ props,
+      /** @type {{ hideSources?: boolean } | undefined} */ options,
+    ) => {
+      const headings = this.page.pageHeadings;
+      const start = headings.length;
+      const body = memberSignatureBody(props, options);
+      if (
+        props.parent !== this.model ||
+        !this.model.kindOf(ReflectionKind.Function)
+      )
+        return body;
+      // A function's table of contents lists its sections only, not the
+      // headings in a comment's text, such as a constant's under Model info.
+      headings.splice(start, Infinity, ...sectionHeadings(this, body));
+      return body;
     };
   }
 }

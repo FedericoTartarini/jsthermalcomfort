@@ -11,10 +11,10 @@
  *   4. Frame and columns      10. A module's page
  *   5. Left column and        11. The documentation's overview
  *      "On this page"         12. The home page
- *   6. Notes and warnings
+ *   6. Notes and warnings     13. The footer
  *
- * A part a later change adds, such as the footer, gets a section of its own
- * at the end. Phone width is TypeDoc's: up to 769px.
+ * A part a later change adds gets a section of its own at the end. Phone
+ * width is TypeDoc's: up to 769px.
  */
 
 /*
@@ -948,5 +948,38 @@ dl.tsd-member-summaries ~ .tsd-member .tsd-member {
   }
   :root:has(meta[name="site-page"][content="home"]) #key-features + ul {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/*
+ * 13. The footer, which the plugin's `footerLines` writes into TypeDoc's
+ * `footer`: the copyright line, the build's date and, on a hand-written page,
+ * "Edit on GitHub", in small muted text on one line within the frame, "Edit
+ * on GitHub" at its right end; at phone width one line each. TypeDoc caps the
+ * footer's height at `--dim-footer-height`, which three lines exceed.
+ */
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.5rem;
+  max-height: none;
+  /* The frame's left and right edges: 88rem wide and centred, 1.25rem in. */
+  padding: 1.25rem max(1.25rem, calc((100% - 88rem) / 2));
+  font-size: 0.85rem;
+  color: var(--color-text-aside);
+}
+footer > p {
+  margin: 0;
+}
+footer > .site-edit {
+  margin-left: auto;
+}
+@media (max-width: 769px) {
+  footer {
+    flex-direction: column;
+  }
+  footer > .site-edit {
+    margin-left: 0;
   }
 }

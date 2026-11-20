@@ -75,6 +75,11 @@
  * links their `@font-face` rules, so that no page asks another host for a
  * font.
  *
+ * Every page's footer, in place of "Generated using TypeDoc", holds the
+ * copyright line of `LICENSE` and the date of the build; a hand-written page's
+ * footer also links "Edit on GitHub" to its file on the branch the site is
+ * deployed from.
+ *
  * A template of TypeDoc's that the theme wraps, editing the markup it
  * returns (`wrapTemplate`, `editMarkup`), fails the docs build naming the
  * template when that markup is not what the edit expects, as after a TypeDoc
@@ -2224,6 +2229,113 @@ function copyFonts(app, out) {
   writeFileSync(join(out, FONTS_CSS), css.join("\n"));
 }
 
+/** The repository's root, the folder above `scripts/`. */
+const REPO_ROOT = fileURLToPath(new URL("../", import.meta.url));
+
+/**
+ * The branch the site is deployed from, which "Edit on GitHub" opens:
+ * `.github/workflows/deploy-docs.yml` builds the site after a push to `main`.
+ */
+const DEPLOYED_BRANCH = "main";
+
+/**
+ * What every page's footer says, read when the site's rendering begins: the
+ * copyright line of `LICENSE`, as written there, the date of the build, and
+ * the repository that `typedoc.json`'s `navigationLinks` names as GitHub. A
+ * `LICENSE` without a line starting "Copyright", or no GitHub link, fails the
+ * docs build.
+ *
+ * @typedef {{ copyright: string, built: Date, repository: string }} FooterFacts
+ * @param {Application} app
+ * @returns {FooterFacts}
+ */
+function footerFacts(app) {
+  const copyright =
+    readFileSync(join(REPO_ROOT, "LICENSE"), "utf8")
+      .split("\n")
+      .find((line) => line.startsWith("Copyright"))
+      ?.trim() ?? "";
+  if (copyright === "")
+    app.logger.error(
+      'The footer: LICENSE has no line starting "Copyright", which the footer quotes',
+    );
+  const repository = app.options.getValue("navigationLinks").GitHub ?? "";
+  if (repository === "")
+    app.logger.error(
+      'The footer: typedoc.json\'s navigationLinks has no GitHub link, which "Edit on GitHub" opens',
+    );
+  return { copyright, built: new Date(), repository };
+}
+
+/**
+ * The file a hand-written page shows, from the repository's root, such as
+ * `docs/installation.md`: `typedoc.json`'s `readme` for the home page, a
+ * document's own file for each of its `projectDocuments`. `undefined` for a
+ * page built from the source comments.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @returns {string | undefined}
+ */
+function pageSource(context) {
+  const page = context.page;
+  const path = isHome(page)
+    ? context.options.getValue("readme")
+    : page.model.isDocument()
+      ? page.model.project.files.getReflectionPath(page.model)
+      : undefined;
+  if (path === undefined || !existsSync(path)) return undefined;
+  return relative(REPO_ROOT, path).split(sep).join("/");
+}
+
+/**
+ * The footer's lines, as pythermalcomfort's site has them: the copyright
+ * line, "Last updated on" with the build's date (in UTC, written as Sphinx
+ * writes it, "Nov 05, 2026"), and on a hand-written page "Edit on GitHub",
+ * which opens the page's file on {@link DEPLOYED_BRANCH} in GitHub's editor.
+ * TypeDoc's "Generated using TypeDoc" goes, by `typedoc.json`'s
+ * `hideGenerator`.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {FooterFacts} facts
+ * @returns {JSX.Element}
+ */
+function footerLines(context, { copyright, built, repository }) {
+  const date = built.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const source = pageSource(context);
+  return JSX.createElement(
+    JSX.Fragment,
+    null,
+    JSX.createElement("p", { class: "site-copyright" }, copyright),
+    JSX.createElement(
+      "p",
+      { class: "site-updated" },
+      "Last updated on ",
+      JSX.createElement(
+        "time",
+        { datetime: built.toISOString().slice(0, 10) },
+        date,
+      ),
+      ".",
+    ),
+    source === undefined
+      ? null
+      : JSX.createElement(
+          "p",
+          { class: "site-edit" },
+          JSX.createElement(
+            "a",
+            { href: `${repository}/edit/${DEPLOYED_BRANCH}/${source}` },
+            "Edit on GitHub",
+          ),
+        ),
+  );
+}
+
 /** @param {Application} app */
 export async function load(app) {
   app.renderer.defineRouter("jsthermalcomfort", SiteRouter);
@@ -2253,6 +2365,16 @@ export async function load(app) {
   );
   app.renderer.on(RendererEvent.END, (event) =>
     copyFonts(app, event.outputDirectory),
+  );
+  /** @type {FooterFacts | undefined} */
+  let footer;
+  app.renderer.on(RendererEvent.BEGIN, () => {
+    footer = footerFacts(app);
+  });
+  app.renderer.hooks.on("footer.end", (context) =>
+    footer === undefined
+      ? JSX.createElement(JSX.Fragment, null)
+      : footerLines(context, footer),
   );
   app.converter.on(Converter.EVENT_BEGIN, (context) => {
     for (const name of hiddenTypeNames(context.programs))

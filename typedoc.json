@@ -25,6 +25,7 @@
   "customJs": "docs/site.js",
   "headings": { "readme": false, "document": false },
   "includeVersion": true,
+  "hideGenerator": true,
   "navigationLinks": {
     "GitHub": "https://github.com/FedericoTartarini/jsthermalcomfort",
     "npm": "https://www.npmjs.com/package/jsthermalcomfort",

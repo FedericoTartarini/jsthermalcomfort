@@ -3,6 +3,15 @@
 // has run. Each part below names what it relies on in `main.js` (read from
 // TypeDoc 0.28.20) and what a reader sees when that stops working; a part that
 // stops working leaves TypeDoc's default page, never a broken one.
+//
+// The two parts are two of the four places ADR 0020's amendment headed
+// "site-design grill" lets the site go beyond TypeDoc's documented API: the
+// theme button and the collapsed list. The other two are the templates the
+// plugin wraps (`scripts/typedoc-plugin.mjs`), which fail the docs build when
+// TypeDoc's markup changes, and the left column's group labels and missing
+// kind icons (`docs/custom.css`, section 5), which show as TypeDoc draws them.
+// After a TypeDoc upgrade a person looks at the views `docs/contributing.md`
+// lists, since the docs build cannot check these.
 
 // The theme button in the header cycles system, light and dark, starting at
 // system, through TypeDoc's own theme control, the hidden select `#tsd-theme`

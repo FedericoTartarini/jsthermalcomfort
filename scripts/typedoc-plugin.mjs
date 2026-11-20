@@ -2081,7 +2081,8 @@ function withoutKinds(elements) {
 /**
  * The left column: each group of {@link NAVIGATION_GROUPS} as an entry with
  * its label and neither a link nor children, which TypeDoc's `main.js` draws
- * as a plain `span` (TypeDoc 0.28.20), then the group's modules and pages; a
+ * as a `span` with a folder icon that `docs/custom.css` hides (TypeDoc
+ * 0.28.20), then the group's modules and pages; a
  * page is listed by its name, which is its `title`. A module or a page that
  * no group lists, or an entry of a group that the project lacks, fails the
  * docs build.

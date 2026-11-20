@@ -185,6 +185,23 @@ npm run docs
 
 You can then open `_site/index.html` in your browser to verify the changes.
 
+### 3. Check the Site After a TypeDoc Upgrade
+
+`package.json` admits TypeDoc's patch releases only. The site's look relies on TypeDoc's markup and its browser script `main.js` in four places, which the comments at the top of `docs/custom.css` and `docs/site.js` name. When a template the plugin wraps returns markup the plugin does not expect, `npm run docs` fails and names the template. The theme button, the left column's labels and kind icons, and the collapsed modules fall back to TypeDoc's default look instead, which the build cannot see.
+
+After any TypeDoc upgrade, build the site and look at these pages of `_site/` in the light and the dark theme, in a window 1400 px and 390 px wide:
+
+- the home page, `index.html`;
+- the `models` page, `modules/models.html`;
+- the page of a model, `functions/models.pmv_ppd_iso.html`;
+- the page of a helper, `functions/clothing.clo_correction_factor_environment.html`.
+
+On them, check that:
+
+- the theme button in the header cycles system, light and dark, and keeps the choice on the next page;
+- the left column shows the labels "Modules" and "Guides and notes", no kind icon, and only the module of the function page shown open;
+- under Parameters and after Returns no object type is written out, and the inputs and outputs are a table of name and type, then description.
+
 ---
 
 ## Developer Workflow

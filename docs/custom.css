@@ -15,6 +15,26 @@
  *
  * A part a later change adds gets a section of its own at the end. Phone
  * width is TypeDoc's: up to 769px.
+ *
+ * Four parts go beyond TypeDoc's documented API (ADR 0020's amendment headed
+ * "site-design grill"), each read from TypeDoc 0.28.20:
+ *
+ *   - The header, the left column's top, the page titles and the hooks of
+ *     section 9 come from templates the plugin wraps, editing the markup
+ *     TypeDoc returns by its position. If an upgrade changes that markup, the
+ *     docs build fails naming the template, so no page is built without them.
+ *   - The theme button (section 3) drives TypeDoc's hidden `#tsd-theme`
+ *     select through `docs/site.js`. If `main.js` stops handling that
+ *     select, the button is hidden and the page follows the system theme.
+ *   - The left column's group labels and its missing kind icons (section 5)
+ *     rely on how `main.js` draws an entry. If that changes, the labels and
+ *     the entries show as TypeDoc draws them, kind icons included.
+ *   - The collapsed list of a module's functions is set by `docs/site.js`
+ *     after `main.js` has drawn the left column. If that changes, the left
+ *     column shows TypeDoc's default list, with the modules `main.js` opens.
+ *
+ * None of the last three fails the build; after a TypeDoc upgrade a person
+ * looks at the views `docs/contributing.md` lists.
  */
 
 /*
@@ -381,7 +401,10 @@ pre,
  * an entry with neither a link nor children, which TypeDoc's `main.js` draws
  * as a `span` with a folder icon (TypeDoc 0.28.20); the icon is hidden. If a
  * TypeDoc upgrade draws such an entry otherwise, a label shows as TypeDoc
- * draws it. A module's functions are listed in the code face.
+ * draws it. The plugin gives no entry a kind, and `main.js` draws a kind icon
+ * only for an entry with one; if an upgrade draws icons otherwise, the
+ * entries show TypeDoc's kind icons. A module's functions are listed in the
+ * code face.
  */
 #tsd-nav-container > li > span {
   display: block;

@@ -173,6 +173,17 @@ pre,
   padding-top: 0.4rem;
   border-top: 2px solid var(--site-rule-heavy);
 }
+/*
+ * A group's heading, such as Functions or "Model info and warnings", fills
+ * its summary, so that its rule spans the column, without TypeDoc's chevron
+ * before it; a click on the heading still folds the group.
+ */
+.tsd-panel-group > .tsd-accordion-summary > h2 {
+  flex: 1;
+}
+.tsd-panel-group > .tsd-accordion-summary > svg {
+  display: none;
+}
 .tsd-typography h3,
 .tsd-panel > h3 {
   font-size: 1.1rem;
@@ -420,6 +431,21 @@ pre,
 }
 .tsd-page-navigation .tsd-accordion-summary > svg {
   display: none;
+}
+/*
+ * A heading in "On this page", such as a category of the `models` page, is a
+ * label like the left column's, smaller than the names under it.
+ */
+.tsd-page-navigation-section > summary {
+  margin-top: 0.5rem;
+  padding-left: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text-aside);
+}
+.tsd-page-navigation-section > div {
+  margin-left: 0.75rem;
 }
 /* In the phone menu, the left column follows the page and icon links. */
 @media (max-width: 769px) {
@@ -765,14 +791,93 @@ li.tsd-parameter > .tsd-comment > :last-child {
 }
 
 /*
- * 10. A module's page. On the `models` page, a left border marks an
- * introduction and the models under it, so that the models listed next read
- * as outside that group. The plugin's `categorizedList` sets the class
- * `site-category`, not the theme.
+ * 10. A module's page: its members as an index table, one row each, the name
+ * linked to its page, then its summary; at phone width the summary goes under
+ * the name. TypeDoc 0.28 writes the members as `dl.tsd-member-summaries`, a
+ * `dt` and a `dd` each, only on a module's page; if an upgrade changes that,
+ * the page shows TypeDoc's list. Names only: the kind icons are hidden, in
+ * the table and in "On this page".
+ */
+dl.tsd-member-summaries {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  border-top: 1px solid var(--color-accent);
+  margin: 0.5rem 0 1rem;
+}
+dl.tsd-member-summaries > dt,
+dl.tsd-member-summaries > dd {
+  margin: 0;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--color-accent);
+}
+dl.tsd-member-summaries .tsd-member-summary-name {
+  display: inline;
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+dl.tsd-member-summaries > dt a:not(.tsd-anchor-icon) {
+  font-family: var(--site-font-code);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+dl.tsd-member-summaries > dd {
+  padding-left: 1rem;
+  font-size: 0.95rem;
+}
+dl.tsd-member-summaries > dd p {
+  margin: 0;
+}
+dl.tsd-member-summaries > dd p + p {
+  margin-top: 0.5rem;
+}
+dl.tsd-member-summaries .tsd-kind-icon,
+.container-main:has(dl.tsd-member-summaries)
+  .tsd-page-navigation
+  .tsd-kind-icon {
+  display: none;
+}
+/*
+ * Without its icon, a property in "On this page" (a key of a type under
+ * "Model info and warnings") is set in under its type. TypeDoc 0.28 labels
+ * the icon by its kind; if that changes, the property is not set in.
+ */
+.container-main:has(dl.tsd-member-summaries)
+  .tsd-page-navigation
+  a:has(> .tsd-kind-icon[aria-label="Property"]) {
+  padding-left: 1.5rem;
+}
+/*
+ * "Model info and warnings": each type's name and each key's in the code
+ * face, a key set in under its type, as in "On this page".
+ */
+dl.tsd-member-summaries ~ .tsd-member h3 {
+  font-family: var(--site-font-code);
+  font-size: 1rem;
+  font-weight: 600;
+}
+dl.tsd-member-summaries ~ .tsd-member .tsd-member {
+  margin-left: 1.5rem;
+}
+/*
+ * On the `models` page, a left border marks an introduction and the models
+ * under it, so that the models listed next read as outside that group. The
+ * plugin's `categorizedList` sets the class `site-category`, not the theme.
  */
 .site-category {
   border-left: 2px solid var(--color-accent);
   padding-left: 1rem;
+}
+@media (max-width: 769px) {
+  dl.tsd-member-summaries {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  dl.tsd-member-summaries > dt {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  dl.tsd-member-summaries > dd {
+    padding-left: 0;
+  }
 }
 
 /*

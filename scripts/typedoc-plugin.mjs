@@ -27,6 +27,13 @@
  * order: Parameters, Returns, Example and its other sections, and on a
  * model's page Model info last.
  *
+ * An input with a default value is optional, as one marked `?` is, and
+ * carries the "Optional" tag under Parameters. Under Parameters and in the
+ * Returns heading the markup gains the hooks the site's style sheet draws the
+ * inputs and outputs as a table with: the symbol between a helper's input and
+ * its type as a `span`, as TypeDoc writes it for a model's input, and the
+ * returned type in a `span` of its own.
+ *
  * A module whose members carry `@category` tags, as `models` does, lists its
  * members as one list in the order of its index file's exports, a class
  * such as `JOS3` among the functions. Each run of members in one category
@@ -93,6 +100,8 @@ import {
   JSX,
   KindRouter,
   PageKind,
+  ParameterReflection,
+  ReflectionFlag,
   ReflectionKind,
   ReflectionSymbolId,
   RendererEvent,
@@ -684,6 +693,25 @@ function ungroupShared(project) {
       group.children = group.children.filter((child) => !isShared(child));
     module.groups = module.groups.filter((group) => group.children.length > 0);
   }
+}
+
+/**
+ * Flags as optional each parameter that has a default value, so that it
+ * carries the "Optional" tag under Parameters, as an input marked `?` does. A
+ * caller may leave out either, and TypeDoc 0.28's call line already writes
+ * both as `name?:`; its Parameters list tags only the second.
+ *
+ * @param {ProjectReflection} project
+ */
+function flagDefaultsOptional(project) {
+  for (const parameter of project.getReflectionsByKind(
+    ReflectionKind.Parameter,
+  ))
+    if (
+      parameter instanceof ParameterReflection &&
+      parameter.defaultValue !== undefined
+    )
+      parameter.setFlag(ReflectionFlag.Optional, true);
 }
 
 /** The folder of the hand-written pages that `typedoc.json` lists. */
@@ -1375,6 +1403,116 @@ function sectionHeadings(context, node, headings = []) {
 }
 
 /**
+ * Every element in a markup tree that passes `test`, outermost first; the
+ * children of a found element are not searched.
+ *
+ * @param {JSX.Children} node
+ * @param {(element: JSX.Element) => boolean} test
+ * @param {JSX.Element[]} found
+ * @returns {JSX.Element[]}
+ */
+function findElements(node, test, found = []) {
+  if (Array.isArray(node)) {
+    for (const child of node) findElements(child, test, found);
+    return found;
+  }
+  if (typeof node !== "object" || node === null) return found;
+  if (test(node)) found.push(node);
+  else findElements(node.children, test, found);
+  return found;
+}
+
+/**
+ * The elements among `children`, nested arrays included, in order.
+ *
+ * @param {JSX.Children[]} children
+ * @returns {JSX.Element[]}
+ */
+function childElements(children) {
+  return findElements(children, () => true);
+}
+
+/**
+ * Where the text `: ` after a parameter's name sits among `children`, nested
+ * arrays included: the array that holds it and its index.
+ *
+ * @param {JSX.Children[]} children
+ * @returns {{ children: JSX.Children[], index: number } | undefined}
+ */
+function nameSeparator(children) {
+  for (const [index, child] of children.entries()) {
+    if (Array.isArray(child)) {
+      const found = nameSeparator(child);
+      if (found) return found;
+    } else if (
+      typeof child === "object" &&
+      child !== null &&
+      withClass("tsd-kind-parameter")(child)
+    )
+      return children[index + 1] === ": "
+        ? { children, index: index + 1 }
+        : undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Under Parameters, TypeDoc 0.28 writes a model's input as the name and a
+ * symbol `span` (`?: ` or `: `) in an `h5`, and a helper's input as the name
+ * and the text `: ` in a `span`. The text here becomes a symbol `span` too, so
+ * that the site's style sheet sets the type under the name in both.
+ *
+ * Throws {@link UnexpectedMarkup} for an item of the list that does not start
+ * with a `span` holding the name and the text `: `.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {JSX.Children} body
+ */
+function parameterSymbols(context, body) {
+  for (const list of findElements(body, withClass("tsd-parameter-list")))
+    for (const item of childElements(list.children)) {
+      const span = childElements(item.children)[0];
+      const what = `the name and ": " at the start of an item under Parameters of ${context.model.getFullName()}`;
+      if (span?.tag !== "span") throw new UnexpectedMarkup(what);
+      const found = nameSeparator(span.children);
+      if (!found) throw new UnexpectedMarkup(what);
+      found.children[found.index] = JSX.createElement(
+        "span",
+        { class: "tsd-signature-symbol" },
+        ": ",
+      );
+    }
+}
+
+/**
+ * TypeDoc 0.28 writes the Returns heading as its text, a space and the
+ * returned type. The type goes into a `span` of class `site-returns-type`, so
+ * that the site's style sheet can hide an object type, whose keys are listed
+ * under the heading, with the spaces that indent it, and set any other type
+ * in the code face.
+ *
+ * Throws {@link UnexpectedMarkup} for a Returns heading that does not start
+ * with its text and a space.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {JSX.Children} body
+ */
+function returnsType(context, body) {
+  for (const heading of findElements(body, withClass("tsd-returns-title"))) {
+    const [text, space, ...type] = heading.children;
+    if (typeof text !== "string" || text.trim() === "" || space !== " ")
+      throw new UnexpectedMarkup(
+        `the text and a space at the start of the Returns heading of ${context.model.getFullName()}`,
+      );
+    heading.children = [
+      text,
+      space,
+      JSX.createElement("span", { class: "site-returns-type" }, ...type),
+    ];
+  }
+}
+
+/**
  * The header's page links, as pythermalcomfort's site has them: each label
  * with the file of the document it opens (as {@link documentFile} names it),
  * or `undefined` for the project's own page, the documentation's overview.
@@ -1760,7 +1898,8 @@ function menuLinks(context) {
  * The default theme's partials, with a categorized module's page as one list,
  * a module's page ending in its shared section, a shared type's header
  * naming its kind, a function's page listing its sections under "On This
- * Page", the site's header with the theme button in place of the
+ * Page", a signature's inputs and Returns heading with the style sheet's
+ * hooks, the site's header with the theme button in place of the
  * "Settings" panel, page titles without a kind word, the left column
  * without the project's link, and the project's page as the documentation's
  * overview, titled "Documentation" in its heading and its browser tab.
@@ -1806,6 +1945,10 @@ class SiteRenderContext extends DefaultThemeRenderContext {
       const headings = this.page.pageHeadings;
       const start = headings.length;
       const body = memberSignatureBody(props, options);
+      editMarkup(this, "memberSignatureBody", () => {
+        parameterSymbols(this, body);
+        returnsType(this, body);
+      });
       if (
         props.parent !== this.model ||
         !this.model.kindOf(ReflectionKind.Function)
@@ -2115,6 +2258,7 @@ export async function load(app) {
       ))
         if (fn.isDeclaration()) joinReturnsToOutputs(app, fn);
       ungroupShared(context.project);
+      flagDefaultsOptional(context.project);
     },
     -150,
   );

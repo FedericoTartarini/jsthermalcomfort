@@ -528,45 +528,181 @@ pre > button {
 }
 
 /*
- * 9. A function's page shows TypeDoc's call line, its inputs and outputs
- * written out with their types, and lists an object's keys once, under
- * Parameters and Returns (ADR 0020's 2026-11-20 amendments). TypeDoc 0.28's
- * default theme also writes an object type out inline, one
- * `.tsd-kind-property` span per key, as direct children of a `span` that is
- * the first child of a `.tsd-parameter-list > li` and of
- * `h4.tsd-returns-title`; the rules below hide those two copies. A function
- * whose inputs and outputs are not objects has none of them, so its page is
- * left as it is. If a TypeDoc upgrade changes this markup, a page shows the
- * object types again under Parameters or after Returns, or a blank or shifted
- * item under Parameters.
+ * 9. A function's page, drawn as a datasheet: the call line as a block set
+ * apart from the text, the inputs under Parameters and the outputs under
+ * Returns as a two-column table (the name and type, then the description),
+ * an "Optional" tag on each optional input, and a heavy rule above each
+ * section heading. A model's page, a helper's page and the methods of
+ * `JOS3`'s page share these rules.
+ *
+ * The page shows TypeDoc's call line, its inputs and outputs written out with
+ * their types, and lists an object's keys once, under Parameters and Returns
+ * (ADR 0020's 2026-11-20 amendments). TypeDoc 0.28's default theme also
+ * writes an object type out inline, one `.tsd-kind-property` span per key, as
+ * direct children of a `span` that is the first child of a
+ * `.tsd-parameter-list > li` and of the `span.site-returns-type` that the
+ * plugin puts around the type in `h4.tsd-returns-title`; the rules below hide
+ * those two copies. If a TypeDoc upgrade changes this markup, a page shows
+ * the object types again under Parameters or after Returns, or its inputs and
+ * outputs as TypeDoc's lists.
  */
 
 /*
- * Parameters: the list of inputs follows the heading, without the `inputs`
- * object type or the bullet of the item that held it. The item takes the
- * theme's own rule for `li.tsd-parameter-signature`.
+ * The call line: a bordered block with an accent rule on its left, as is a
+ * constant's or a property's declaration. A line wider than the block
+ * scrolls inside it (TypeDoc's `overflow-x`).
  */
-.tsd-parameter-list > li:has(> span:first-child > .tsd-kind-property) {
-  list-style: none;
-  margin-left: -20px;
+.tsd-signatures .tsd-signature,
+.tsd-panel > .tsd-signature {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-accent);
+  border-left: 3px solid var(--color-link);
+  border-radius: 0;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.65;
 }
+.tsd-signature .tsd-kind-call-signature {
+  font-weight: 600;
+}
+.tsd-signature .tsd-kind-parameter,
+.tsd-signature .tsd-kind-property {
+  font-weight: 500;
+}
+.tsd-signatures > li > .tsd-description {
+  margin-top: 1rem;
+}
+
+/*
+ * A section heading of a signature's body, which the plugin lists under "On
+ * this page": each `h4` outside a list, that is Parameters, Returns, Example,
+ * the other block tags and Model info.
+ */
+.tsd-signatures > li > .tsd-description h4:not(.tsd-description ul *) {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 2rem 0 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 2px solid var(--site-rule-heavy);
+}
+/* An output that is not an object has no name: its type follows Returns. */
+.tsd-returns-title > .site-returns-type {
+  margin-left: 0.4rem;
+  font-family: var(--site-font-code);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/*
+ * Parameters: the inputs follow the heading, without the `inputs` object
+ * type or the item that held it; a helper's input is an item of the list
+ * itself.
+ */
 .tsd-parameter-list > li > span:first-child:has(> .tsd-kind-property) {
   display: none;
 }
+.tsd-parameter-list > li:has(> ul.tsd-parameters) {
+  display: block;
+  padding: 0;
+  border: 0;
+}
+.tsd-parameter-list:has(> li > ul.tsd-parameters) {
+  border-top: 0;
+}
 
 /*
- * Returns: the heading without the outputs object type; the plugin's
- * permalink stays.
+ * Returns: the heading without the outputs object type, or the spaces that
+ * indent it; the plugin's permalink stays.
  */
-.tsd-returns-title:has(> .tsd-kind-property) > :not(.tsd-anchor-icon) {
+.tsd-returns-title > .site-returns-type:has(> .tsd-kind-property) {
   display: none;
+}
+
+/*
+ * The table: one row per input or output. A model's row is TypeDoc's
+ * `li.tsd-parameter`, an `h5` and the description; a helper's input is a
+ * `.tsd-parameter-list > li`, a `span` and the description. In both the name
+ * stands above the type, without the symbol between them (`: `, `?: `), which
+ * the plugin writes as a `span` in a helper's input too; a default value
+ * follows the type. The tags TypeDoc writes before the name, "Optional" and
+ * "Readonly", sit at the right of the name. At phone width the description
+ * follows the name and type.
+ */
+.tsd-parameter-list,
+ul.tsd-parameters {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--color-accent);
+}
+.tsd-parameter-list > li,
+ul.tsd-parameters > li.tsd-parameter {
+  display: grid;
+  grid-template-columns: minmax(9rem, 12.5rem) minmax(0, 1fr);
+  column-gap: 1.25rem;
+  margin: 0;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--color-accent);
+}
+.tsd-parameter-list > li > span:first-child,
+li.tsd-parameter > h5 {
+  margin: 0;
+  font-family: var(--site-font-code);
+  font-size: 0.84rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--color-text-aside);
+  overflow-wrap: anywhere;
+}
+.tsd-parameter-list > li > span:first-child > .tsd-kind-parameter,
+li.tsd-parameter > h5 > .tsd-kind-property {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tsd-parameter-list
+  > li
+  > span:first-child
+  > .tsd-kind-parameter
+  + .tsd-signature-symbol,
+li.tsd-parameter > h5 > .tsd-kind-property + .tsd-signature-symbol {
+  display: none;
+}
+.tsd-parameter-list > li > span:first-child > .tsd-tag,
+li.tsd-parameter > h5 > .tsd-tag {
+  float: right;
+  margin: 0.15rem 0 0 0.25rem;
+  padding: 0 0.45rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-background-secondary);
+  font-family: var(--site-font-text);
+  font-size: 0.72rem;
+  color: var(--color-text-aside);
+}
+.tsd-parameter-list > li > .tsd-comment > :first-child,
+li.tsd-parameter > .tsd-comment > :first-child {
+  margin-top: 0;
+}
+.tsd-parameter-list > li > .tsd-comment > :last-child,
+li.tsd-parameter > .tsd-comment > :last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 769px) {
+  .tsd-parameter-list > li,
+  ul.tsd-parameters > li.tsd-parameter {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.25rem;
+  }
 }
 
 /*
  * Returns of a union of objects (`two_nodes_gagge`'s third overload): each
- * item shows only its property list, not the object type written before it.
- * The type's non-breaking spaces get font size 0, and the flex item draws its
- * own marker at 1rem, the theme's 16px body size (TypeDoc 0.28 style.css).
+ * item shows only its table of outputs, not the object type written before
+ * it, after a marker. The type's non-breaking spaces get font size 0, and the
+ * flex item draws its own marker at 1rem, the body size.
  */
 .tsd-signatures
   > li
@@ -576,6 +712,14 @@ pre > button {
   display: flex;
   align-items: baseline;
   font-size: 0;
+}
+.tsd-signatures
+  > li
+  > .tsd-description
+  > ul
+  > li:has(> .tsd-kind-property):has(> ul.tsd-parameters)
+  + li {
+  margin-top: 1rem;
 }
 .tsd-signatures
   > li
@@ -604,6 +748,20 @@ pre > button {
   > ul.tsd-parameters {
   flex: auto;
   font-size: 1rem;
+}
+
+/*
+ * Model info: the name of the model info and of each of the model's own
+ * constants in the code face, above its value as a code block.
+ */
+.tsd-tag-modelInfo > h5 {
+  margin: 1.25rem 0 0.5rem;
+  font-family: var(--site-font-code);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.tsd-tag-modelInfo > h4 + h5 {
+  margin-top: 0.75rem;
 }
 
 /*

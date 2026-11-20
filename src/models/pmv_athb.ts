@@ -98,6 +98,8 @@ export type ATHB = OutputsOf<typeof PMV_ATHB_INFO>;
  * ].map((inputs) => pmv_athb(inputs));
  * console.log(points.map((result) => result.athb_pmv)); // [0.206, 0.206, 0.206]
  * ```
+ *
+ * @category Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
  */
 export function pmv_athb(inputs: ATHBInputs): ATHB {
   // Validate inputs using the ATHBInputs class

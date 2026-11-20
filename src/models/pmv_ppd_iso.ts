@@ -236,6 +236,8 @@ export type PMVPPD = OutputsOf<typeof PMV_PPD_ISO_INFO>;
  * console.log(result.map(({ pmv }) => pmv)); // [-0, 0.41]
  * console.log(result.map(({ ppd }) => ppd)); // [5, 8.5]
  * ```
+ *
+ * @category Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
  */
 export function pmv_ppd_iso(inputs: PMVPPDInputs): PMVPPD {
   // Validate inputs using the PMVPPDInputs class

@@ -111,3 +111,13 @@
   flex: auto;
   font-size: 1rem;
 }
+
+/*
+ * On the `models` page, a left border marks an introduction and the models
+ * under it, so that the models listed next read as outside that group. The
+ * plugin's `categorizedList` sets the class `site-category`, not the theme.
+ */
+.site-category {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1rem;
+}

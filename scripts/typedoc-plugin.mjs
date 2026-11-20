@@ -27,6 +27,13 @@
  * order: Parameters, Returns, Example and its other sections, and on a
  * model's page Model info last.
  *
+ * A module whose members carry `@category` tags, as `models` does, lists its
+ * members as one list in the order of its index file's exports, a class
+ * such as `JOS3` among the functions. Each run of members in one category
+ * sits under the category's title and its `@categoryDescription`, as an
+ * introduction sits above its models on upstream's page
+ * (`docs/documentation/models.rst:131-160` and `:218-298` at v4.8.1).
+ *
  * The `models` page ends with the section "Model info and warnings", built
  * from the exports declared in `src/_internal/`, which only `models`
  * re-exports. It lists each such export with a page of its own, as
@@ -54,7 +61,7 @@ import {
 import ts from "typescript";
 
 /**
- * @import { Application, CommentDisplayPart, ContainerReflection, DeclarationReflection, NavigationElement, PageEvent, PageHeading, ProjectReflection, Reflection, SignatureReflection, SomeType } from "typedoc"
+ * @import { Application, CommentDisplayPart, ContainerReflection, DeclarationReflection, NavigationElement, PageEvent, PageHeading, ProjectReflection, Reflection, ReflectionCategory, SignatureReflection, SomeType } from "typedoc"
  */
 
 /**
@@ -234,24 +241,25 @@ function joinReturnsToOutputs(app, fn) {
             Comment.cloneDisplayParts(item.description),
           );
       }
-      object.children?.sort(
-        (a, b) => rank(order, a.name) - rank(order, b.name),
-      );
+      object.children?.sort(byNameIn(order));
     }
     tag.content = head;
   }
 }
 
 /**
- * A name's place in the list, with names it does not hold after the rest.
+ * A comparison that sorts reflections by their names' places in the list,
+ * with names it does not hold after the rest.
  *
  * @param {readonly (string | undefined)[]} order
- * @param {string} name
- * @returns {number}
+ * @returns {(a: Reflection, b: Reflection) => number}
  */
-function rank(order, name) {
-  const index = order.indexOf(name);
-  return index === -1 ? order.length : index;
+function byNameIn(order) {
+  const rank = (/** @type {string} */ name) => {
+    const index = order.indexOf(name);
+    return index === -1 ? order.length : index;
+  };
+  return (a, b) => rank(a.name) - rank(b.name);
 }
 
 /** The width in columns within which a printed value keeps a line. */
@@ -705,6 +713,53 @@ function permalink(context, anchor) {
 }
 
 /**
+ * A titled section of a module's page, which "On This Page" lists under its
+ * title, in the markup of the theme's member groups (`members` and
+ * `moduleReflection` in TypeDoc 0.28).
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} title
+ * @param {() => JSX.Children} content Called once the section has started,
+ *   so that the headings it adds are listed under the title.
+ * @returns {JSX.Element}
+ */
+function titledSection(context, title, content) {
+  context.page.startNewSection(title);
+  const anchor = context.slugger.slug(title);
+  return JSX.createElement(
+    "details",
+    { class: "tsd-panel-group tsd-member-group tsd-accordion", open: true },
+    JSX.createElement(
+      "summary",
+      { class: "tsd-accordion-summary", "data-key": `section-${title}` },
+      context.icons.chevronDown(),
+      JSX.createElement(
+        "h2",
+        { class: "tsd-anchor-link", id: anchor },
+        title,
+        permalink(context, anchor),
+      ),
+    ),
+    content(),
+  );
+}
+
+/**
+ * The summaries of a module's members, as the theme lists them.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {DeclarationReflection[]} members
+ * @returns {JSX.Element}
+ */
+function memberSummaries(context, members) {
+  return JSX.createElement(
+    "dl",
+    { class: "tsd-member-summaries" },
+    members.map((member) => context.moduleMemberSummary(member)),
+  );
+}
+
+/**
  * The section "Model info and warnings" of a module's page: a summary of each
  * shared export with its own page, then each shared type in full.
  *
@@ -717,41 +772,157 @@ function sharedSection(context, module) {
   if (shared.length === 0) return null;
   const withPage = shared.filter((reflection) => !isSharedType(reflection));
   const types = shared.filter(isSharedType);
-  context.page.startNewSection(SHARED_SECTION);
-  const anchor = context.slugger.slug(SHARED_SECTION);
-  // The markup of the theme's member groups (`members` in TypeDoc 0.28).
-  return JSX.createElement(
-    "details",
-    { class: "tsd-panel-group tsd-member-group tsd-accordion", open: true },
-    JSX.createElement(
-      "summary",
-      {
-        class: "tsd-accordion-summary",
-        "data-key": `section-${SHARED_SECTION}`,
-      },
-      context.icons.chevronDown(),
-      JSX.createElement(
-        "h2",
-        { class: "tsd-anchor-link", id: anchor },
-        SHARED_SECTION,
-        permalink(context, anchor),
-      ),
-    ),
+  return titledSection(context, SHARED_SECTION, () =>
     JSX.createElement(
       "section",
       null,
-      withPage.length > 0
-        ? JSX.createElement(
-            "dl",
-            { class: "tsd-member-summaries" },
-            withPage.map((reflection) =>
-              context.moduleMemberSummary(reflection),
-            ),
-          )
-        : null,
+      withPage.length > 0 ? memberSummaries(context, withPage) : null,
       types.map((type) => context.member(type)),
     ),
   );
+}
+
+/**
+ * Whether a reflection is a module whose members carry `@category` tags,
+ * which makes its page one list of its members.
+ *
+ * @param {Reflection} reflection
+ * @returns {reflection is DeclarationReflection}
+ */
+function isCategorized(reflection) {
+  return (
+    reflection.isDeclaration() &&
+    reflection.kindOf(ReflectionKind.Module) &&
+    (reflection.categories?.length ?? 0) > 0
+  );
+}
+
+/**
+ * A categorized module's page, in place of the theme's groups by kind: its
+ * comment, then one list of its members other than the shared ones, in the
+ * order of its index file's exports. Each run of members in one category
+ * sits under the category's title and its `@categoryDescription`.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {DeclarationReflection} module
+ * @returns {JSX.Element}
+ */
+function categorizedList(context, module) {
+  const uncategorized = context.options.getValue("defaultCategory");
+  /** @type {Map<Reflection, ReflectionCategory>} */
+  const categoryOf = new Map();
+  for (const category of module.categories ?? [])
+    if (category.title !== uncategorized)
+      for (const child of category.children) categoryOf.set(child, category);
+  /** @type {{ category: ReflectionCategory | undefined, members: DeclarationReflection[] }[]} */
+  const runs = [];
+  for (const child of module.children ?? []) {
+    if (isShared(child)) continue;
+    const category = categoryOf.get(child);
+    const run = runs.at(-1);
+    if (run !== undefined && run.category === category) run.members.push(child);
+    else runs.push({ category, members: [child] });
+  }
+  return JSX.createElement(
+    JSX.Fragment,
+    null,
+    // The module's comment as the default `moduleReflection` partial shows
+    // it (TypeDoc 0.28).
+    module.hasComment(context.options.getValue("notRenderedTags"))
+      ? JSX.createElement(
+          "section",
+          { class: "tsd-panel tsd-comment" },
+          context.commentSummary(module),
+          context.commentTags(module),
+        )
+      : null,
+    runs.map(({ category, members }, index) => {
+      if (category === undefined) {
+        // A run after the first follows a titled section, and "On This
+        // Page" lists it apart from that section.
+        if (index > 0) context.page.startNewSection("");
+        return JSX.createElement(
+          "section",
+          { class: "tsd-panel-group tsd-member-group" },
+          memberSummaries(context, members),
+        );
+      }
+      return titledSection(context, category.title, () =>
+        JSX.createElement(
+          "section",
+          { class: "site-category" },
+          category.description
+            ? JSX.createElement(
+                "div",
+                { class: "tsd-comment tsd-typography" },
+                JSX.createElement(JSX.Raw, {
+                  html: context.markdown(category.description),
+                }),
+              )
+            : null,
+          memberSummaries(context, members),
+        ),
+      );
+    }),
+  );
+}
+
+/**
+ * The names a file exports by value, in the order of its `export { … }`
+ * lists.
+ *
+ * @param {string} file
+ * @returns {string[]}
+ */
+function exportedNames(file) {
+  const source = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+  );
+  return source.statements.flatMap((statement) =>
+    ts.isExportDeclaration(statement) &&
+    !statement.isTypeOnly &&
+    statement.exportClause !== undefined &&
+    ts.isNamedExports(statement.exportClause)
+      ? statement.exportClause.elements.map((element) => element.name.text)
+      : [],
+  );
+}
+
+/**
+ * Sorts a categorized module's children in the order of its index file's
+ * exports, which its `@sortStrategy` sorted by kind, so that its page and its
+ * navigation list a class among the functions at its export's place. Logs an
+ * error for a category with no `@categoryDescription`, as a misspelled
+ * `@category` title makes.
+ *
+ * @param {Application} app
+ * @param {ProjectReflection} project
+ */
+function listInExportOrder(app, project) {
+  const uncategorized = app.options.getValue("defaultCategory");
+  for (const module of project.getReflectionsByKind(ReflectionKind.Module)) {
+    if (!isCategorized(module)) continue;
+    for (const category of module.categories ?? [])
+      if (
+        category.title !== uncategorized &&
+        category.description === undefined
+      )
+        app.logger.error(
+          `${module.getFullName()}: the category "${category.title}" of ${category.children.map((c) => c.name).join(", ")} has no @categoryDescription`,
+        );
+    const file = module.sources?.[0]?.fullFileName;
+    if (file === undefined) {
+      app.logger.error(
+        `${module.getFullName()}: its index file is unknown, so its members cannot be listed in export order`,
+      );
+      continue;
+    }
+    const byExport = byNameIn(exportedNames(file));
+    module.children?.sort(byExport);
+    module.childrenIncludingDocuments?.sort(byExport);
+  }
 }
 
 /**
@@ -801,8 +972,9 @@ function sectionHeadings(context, node, headings = []) {
 }
 
 /**
- * The default theme's partials, with a module's page ending in its shared
- * section, a shared type's header naming its kind, and a function's page
+ * The default theme's partials, with a categorized module's page as one list,
+ * a module's page ending in its shared section, a shared type's header
+ * naming its kind, and a function's page
  * listing its sections under "On This Page".
  */
 class SiteRenderContext extends DefaultThemeRenderContext {
@@ -816,7 +988,9 @@ class SiteRenderContext extends DefaultThemeRenderContext {
       JSX.createElement(
         JSX.Fragment,
         null,
-        moduleReflection(module),
+        isCategorized(module)
+          ? categorizedList(this, module)
+          : moduleReflection(module),
         sharedSection(this, module),
       );
     const memberDeclaration = this.memberDeclaration;
@@ -920,5 +1094,12 @@ export async function load(app) {
       ungroupShared(context.project);
     },
     -150,
+  );
+  // In TypeDoc 0.28, after CategoryPlugin (-200), which sets a module's
+  // categories.
+  app.converter.on(
+    Converter.EVENT_RESOLVE_END,
+    (context) => listInExportOrder(app, context.project),
+    -250,
   );
 }

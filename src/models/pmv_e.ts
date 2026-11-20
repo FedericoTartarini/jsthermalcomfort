@@ -160,6 +160,8 @@ export type EPMV = OutputsOf<typeof PMV_E_INFO>;
  * });
  * console.log(results.e_pmv); // 0.48
  * ```
+ *
+ * @category Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
  */
 export function pmv_e(inputs: EPMVInputs): EPMV {
   // Validate inputs using the EPMVInputs class

@@ -225,6 +225,8 @@ export type PMVPPDAshrae = OutputsOf<typeof PMV_PPD_ASHRAE_INFO>;
  * console.log(result.map(({ tsv }) => tsv)); // ["Neutral", "Neutral", "Slightly Warm"]
  * console.log(result.map(({ compliance }) => compliance)); // [true, true, false]
  * ```
+ *
+ * @category Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
  */
 export function pmv_ppd_ashrae(inputs: PMVPPDAshraeInputs): PMVPPDAshrae {
   // Validate inputs using the PMVPPDInputs class

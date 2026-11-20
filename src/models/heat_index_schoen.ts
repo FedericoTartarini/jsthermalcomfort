@@ -65,6 +65,8 @@ export type HISchoenInputs = InputsOf<typeof HEAT_INDEX_SCHOEN_INFO>;
  * console.log(result.hi); // 30
  * console.log(result.stress_category); // "caution"
  * ```
+ *
+ * @category Heat Index (HI)
  */
 export function heat_index_schoen(inputs: HISchoenInputs): HI {
   // Validate inputs using the HIInputs class

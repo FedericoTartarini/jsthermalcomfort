@@ -145,6 +145,8 @@ export type APMV = OutputsOf<typeof PMV_A_INFO>;
  * console.log(results); // { a_pmv: 0.71, warnings: [] }
  * console.log(results.a_pmv); // 0.71
  * ```
+ *
+ * @category Predicted Mean Vote (PMV) and Predicted Percentage of Dissatisfied (PPD)
  */
 export function pmv_a(inputs: APMVInputs): APMV {
   // Validate inputs using the APMVInputs class

@@ -120,6 +120,8 @@ export type HILu = OutputsOf<typeof HEAT_INDEX_LU_INFO>;
  * const result = heat_index_lu({ tdb: 25, rh: 50 });
  * console.log(result.hi); // 25
  * ```
+ *
+ * @category Heat Index (HI)
  */
 export function heat_index_lu(inputs: HILuInputs): HILu {
   // Validate inputs using the HIInputs class

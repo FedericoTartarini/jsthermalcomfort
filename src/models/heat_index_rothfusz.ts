@@ -84,6 +84,8 @@ export type HI = OutputsOf<typeof HEAT_INDEX_ROTHFUSZ_INFO>;
  * console.log(result.hi); // 29.7
  * console.log(result.stress_category); // "caution"
  * ```
+ *
+ * @category Heat Index (HI)
  */
 export function heat_index_rothfusz(inputs: HIInputs): HI {
   // Validate inputs using the HIInputs class

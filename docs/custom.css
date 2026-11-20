@@ -1,51 +1,15 @@
 /*
- * A model's page shows its call as `pmv_ppd_iso(inputs)`, and its inputs and
- * outputs object types only in the lists under Parameters and Returns (ADR
- * 0020's 2026-11-20 amendment); a helper that returns an object shows its
- * parameters' names, `psy_ta_rh(tdb, rh, p_atm)`. TypeDoc 0.28's default
- * theme writes an object type out inline, one `.tsd-kind-property` span per
- * key. Those spans are direct children of the call line `.tsd-signature`, of
- * a `span` that is the first child of a `.tsd-parameter-list > li`, and of
- * `h4.tsd-returns-title`. A helper whose inputs and outputs are not objects
+ * A function's page shows TypeDoc's call line, its inputs and outputs written
+ * out with their types, and lists an object's keys once, under Parameters and
+ * Returns (ADR 0020's 2026-11-20 amendments). TypeDoc 0.28's default theme
+ * also writes an object type out inline, one `.tsd-kind-property` span per
+ * key, as direct children of a `span` that is the first child of a
+ * `.tsd-parameter-list > li` and of `h4.tsd-returns-title`; the rules below
+ * hide those two copies. A function whose inputs and outputs are not objects
  * has none of them, so its page is left as it is. If a TypeDoc upgrade
- * changes this markup, a model's page shows the full object types again, a
- * call line with parts missing, or a blank or shifted item under Parameters.
+ * changes this markup, a page shows the object types again under Parameters
+ * or after Returns, or a blank or shifted item under Parameters.
  */
-
-/*
- * The call line keeps the name, `(`, each parameter's name and the permalink,
- * at the theme's 14px for `.tsd-signature`, with `, ` after each name but the
- * last and `)` after the last.
- */
-.tsd-signatures > li > .tsd-signature:has(> .tsd-kind-property) {
-  font-size: 0;
-}
-.tsd-signatures > li > .tsd-signature:has(> .tsd-kind-property) > br {
-  display: none;
-}
-.tsd-signatures
-  > li
-  > .tsd-signature:has(> .tsd-kind-property)
-  > :is(
-    .tsd-kind-call-signature,
-    .tsd-kind-call-signature + .tsd-signature-symbol,
-    .tsd-kind-parameter,
-    .tsd-anchor-icon
-  ) {
-  font-size: 14px;
-}
-.tsd-signatures
-  > li
-  > .tsd-signature:has(> .tsd-kind-property)
-  > .tsd-kind-parameter::after {
-  content: ", ";
-}
-.tsd-signatures
-  > li
-  > .tsd-signature:has(> .tsd-kind-property)
-  > .tsd-kind-parameter:not(:has(~ .tsd-kind-parameter))::after {
-  content: ")";
-}
 
 /*
  * Parameters: the list of inputs follows the heading, without the `inputs`

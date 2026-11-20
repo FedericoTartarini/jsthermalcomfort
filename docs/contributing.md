@@ -187,7 +187,7 @@ You can then open `_site/index.html` in your browser to verify the changes.
 
 ### 3. Check the Site After a TypeDoc Upgrade
 
-`package.json` admits TypeDoc's patch releases only. The site's look relies on TypeDoc's markup and its browser script `main.js` in four places, which the comments at the top of `docs/custom.css` and `docs/site.js` name. When a template the plugin wraps returns markup the plugin does not expect, `npm run docs` fails and names the template. The theme button, the left column's labels and kind icons, and the collapsed modules fall back to TypeDoc's default look instead, which the build cannot see.
+`package.json` admits TypeDoc's patch releases only. The site's look relies on TypeDoc's markup and its browser script `main.js` beyond TypeDoc's API in the places the comment at the top of `docs/custom.css` lists. When a template the plugin wraps returns markup the plugin does not expect, `npm run docs` fails and names the template. The theme button, the left column's labels and kind icons, the collapsed modules and the object types hidden under Parameters and after Returns fall back to TypeDoc's default look instead, which the build cannot see.
 
 After any TypeDoc upgrade, build the site and look at these pages of `_site/` in the light and the dark theme, in a window 1400 px and 390 px wide:
 

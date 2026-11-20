@@ -52,17 +52,18 @@
  * Every page's header holds the site's name, the version linked to the
  * changelog, the page links Installation, Documentation, Contributing and
  * Authors, search, the theme button and `navigationLinks` as icons. The theme
- * button drives TypeDoc's own theme control, moved from the "Settings" panel,
- * which goes; `docs/site.js` cycles it.
+ * button drives TypeDoc's own theme control, which stays in TypeDoc's
+ * "Settings" panel, hidden with the panel; `docs/site.js` cycles it.
  *
  * The left column lists "Modules", each module by the subpath a program
  * imports it from, then "Guides and notes", each hand-written page by its
  * title, both in pythermalcomfort's order, with no kind icon; `docs/site.js`
  * keeps every module collapsed but the one of the function page shown. The
- * home page and the header's other pages have no left column on a wide
- * screen, and the home page is marked for its own look. A page's title names no kind, and a hand-written page's title, the
- * `title` of its frontmatter, is the `#` heading it opens with; its file
- * still names its page.
+ * home page, Installation, Contributing and Authors have no left column on a
+ * wide screen, and the home page is marked for its own look. A page's title
+ * names no kind, and a hand-written page's title, the `title` of its
+ * frontmatter, is the `#` heading it opens with; its file still names its
+ * page.
  *
  * The header's Documentation link opens the project's page, `modules.html`,
  * as the overview of the documentation that pythermalcomfort's Documentation
@@ -80,10 +81,11 @@
  * footer also links "Edit on GitHub" to its file on the branch the site is
  * deployed from.
  *
- * A template of TypeDoc's that the theme wraps, editing the markup it
- * returns (`wrapTemplate`, `editMarkup`), fails the docs build naming the
- * template when that markup is not what the edit expects, as after a TypeDoc
- * upgrade.
+ * A template of TypeDoc's that the theme wraps (`wrapTemplate`, `editMarkup`)
+ * finds the elements it edits by their id, class or tag, and in places by
+ * their order, and fails the docs build naming the template when they are
+ * not there, as after a TypeDoc upgrade. The top of `docs/custom.css` lists
+ * every place the site relies on TypeDoc beyond its API.
  */
 import {
   copyFileSync,
@@ -733,7 +735,19 @@ const DOCS_FOLDER = fileURLToPath(new URL("../docs/", import.meta.url));
 function documentFile(doc) {
   const path = doc.project.files.getReflectionPath(doc);
   if (path === undefined) return undefined;
-  return relative(DOCS_FOLDER, path).split(sep).join("/").replace(/\.md$/, "");
+  return slashPath(DOCS_FOLDER, path).replace(/\.md$/, "");
+}
+
+/**
+ * The path of `to` from the folder `from`, with `/` between folders on every
+ * system.
+ *
+ * @param {string} from
+ * @param {string} to
+ * @returns {string}
+ */
+function slashPath(from, to) {
+  return relative(from, to).split(sep).join("/");
 }
 
 /**
@@ -1517,16 +1531,21 @@ function returnsType(context, body) {
   }
 }
 
+/** The project's own page, the documentation's overview, in {@link PAGE_LINKS}. */
+const PROJECT_PAGE = Symbol("the project's page");
+
 /**
- * The header's page links, as pythermalcomfort's site has them: each label
- * with the file of the document it opens (as {@link documentFile} names it),
- * or `undefined` for the project's own page, the documentation's overview.
+ * The header's page links, in the order of pythermalcomfort's header
+ * (https://pythermalcomfort.readthedocs.io/en/latest/, version 4.8.1, checked
+ * 2026-11-20; the pages of the toctrees in `docs/index.rst:9-26` at v4.8.1):
+ * each label with the file of the document it opens (as
+ * {@link documentFile} names it), or {@link PROJECT_PAGE}.
  *
- * @type {ReadonlyArray<readonly [string, string | undefined]>}
+ * @type {ReadonlyArray<readonly [string, string | typeof PROJECT_PAGE]>}
  */
 const PAGE_LINKS = [
   ["Installation", "installation"],
-  ["Documentation", undefined],
+  ["Documentation", PROJECT_PAGE],
   ["Contributing", "contributing"],
   ["Authors", "authors"],
 ];
@@ -1551,7 +1570,9 @@ const LINK_ICONS = {
 /**
  * The theme button's icon for each value of TypeDoc's theme control: a
  * half-filled circle for the system theme, a sun and a moon, as the theme
- * switch of pythermalcomfort's site shows.
+ * switch of pythermalcomfort's site shows them (`fa-circle-half-stroke`,
+ * `fa-sun` and `fa-moon` in https://pythermalcomfort.readthedocs.io/en/latest/,
+ * version 4.8.1, checked 2026-11-20).
  *
  * @type {Readonly<Record<string, string>>}
  */
@@ -1594,9 +1615,7 @@ function icon(path, props = {}) {
 function ownPageLink(model) {
   if (!model.isDocument()) return undefined;
   const file = documentFile(model);
-  return PAGE_LINKS.find(
-    ([, linked]) => linked !== undefined && linked === file,
-  )?.[0];
+  return PAGE_LINKS.find(([, linked]) => linked === file)?.[0];
 }
 
 /**
@@ -1607,8 +1626,39 @@ function ownPageLink(model) {
  * @returns {string | undefined}
  */
 function headerSection(page) {
-  if (page.url === "index.html") return undefined;
+  if (isHome(page)) return undefined;
   return ownPageLink(page.model) ?? "Documentation";
+}
+
+/**
+ * The hand-written page of `file` that `linker` links. A page that
+ * `typedoc.json`'s `projectDocuments` does not list fails the docs build.
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {string} file
+ * @param {string} linker
+ * @returns {Reflection | undefined}
+ */
+function linkedDocument(context, file, linker) {
+  const doc = documentOf(context.page.project, file);
+  if (doc === undefined)
+    reportOnce(
+      context,
+      `${linker} links the document docs/${file}.md, which typedoc.json's projectDocuments does not list`,
+    );
+  return doc;
+}
+
+/**
+ * The link from the page shown to `target`, which is the page itself when
+ * `urlTo` gives "".
+ *
+ * @param {DefaultThemeRenderContext} context
+ * @param {Reflection} target
+ * @returns {string}
+ */
+function hrefTo(context, target) {
+  return context.urlTo(target) || context.relativeURL(context.page.url);
 }
 
 /**
@@ -1624,21 +1674,16 @@ function pageLinks(context, linkClass) {
   const section = headerSection(page);
   return PAGE_LINKS.flatMap(([label, file]) => {
     const target =
-      file === undefined ? page.project : documentOf(page.project, file);
-    if (target === undefined) {
-      reportOnce(
-        context,
-        `The header links the document docs/${file}.md, which typedoc.json's projectDocuments does not list`,
-      );
-      return [];
-    }
+      file === PROJECT_PAGE
+        ? page.project
+        : linkedDocument(context, file, "The header");
+    if (target === undefined) return [];
     const current = section === label;
     return [
       JSX.createElement(
         "a",
         {
-          // `urlTo` gives "" for the page itself.
-          href: context.urlTo(target) || context.relativeURL(page.url),
+          href: hrefTo(context, target),
           class:
             [linkClass, current ? "current" : undefined]
               .filter(Boolean)
@@ -1696,26 +1741,33 @@ function iconLinks(context, { withText = false, linkClass } = {}) {
 }
 
 /**
- * The theme button and TypeDoc's own theme control, taken from the
- * "Settings" panel that TypeDoc's `settings` template returns and hidden. The
- * button stays hidden until `docs/site.js` finds the control; that script
- * cycles the control's values. `undefined` when the panel holds no `select`,
- * which fails the docs build.
+ * TypeDoc's "Settings" panel, as its `settings` template returns it, hidden
+ * and of class `site-settings`: the header's theme button drives the panel's
+ * theme control, `#tsd-theme`, and `docs/site.js` shows the panel when the
+ * button cannot. A panel without that control fails the docs build.
  *
- * @param {DefaultThemeRenderContext} context
- * @param {() => JSX.Element} settings TypeDoc's `settings` template.
- * @returns {JSX.Element | undefined}
+ * @param {JSX.Element} markup
+ * @returns {JSX.Element}
  */
-function themeButton(context, settings) {
-  const control = editMarkup(context, "settings", () =>
-    expectElement(
-      settings(),
-      (element) => element.tag === "select",
-      "the theme control (a select element)",
-    ),
+function hiddenSettings(markup) {
+  expectElement(
+    markup,
+    withId("tsd-theme"),
+    "the theme control, of id tsd-theme",
   );
-  if (control === undefined) return undefined;
-  control.props = { ...control.props, hidden: true };
+  const props = /** @type {Record<string, unknown>} */ (markup.props ??= {});
+  props.class = [props.class, "site-settings"].filter(Boolean).join(" ");
+  props.hidden = true;
+  return markup;
+}
+
+/**
+ * The theme button, hidden until `docs/site.js` finds TypeDoc's theme
+ * control, whose values that script cycles.
+ *
+ * @returns {JSX.Element}
+ */
+function themeButton() {
   return JSX.createElement(
     "div",
     { class: "site-theme" },
@@ -1731,7 +1783,6 @@ function themeButton(context, settings) {
         icon(path, { class: "site-theme-icon", "data-theme-value": value }),
       ),
     ),
-    control,
   );
 }
 
@@ -1745,10 +1796,9 @@ function themeButton(context, settings) {
  * @param {DefaultThemeRenderContext} context
  * @param {JSX.Element} markup
  * @param {PageEvent<Reflection>} props
- * @param {() => JSX.Element} settings TypeDoc's `settings` template.
  * @returns {JSX.Element}
  */
-function siteHeader(context, markup, props, settings) {
+function siteHeader(context, markup, props) {
   const contents = expectElement(
     markup,
     withClass("tsd-toolbar-contents"),
@@ -1773,12 +1823,11 @@ function siteHeader(context, markup, props, settings) {
     "the element of id tsd-toolbar-menu-trigger",
   );
   const project = props.project;
-  const changelog = documentOf(project, "changelog");
-  if (changelog === undefined)
-    reportOnce(
-      context,
-      `The header's version links the document docs/changelog.md, which typedoc.json's projectDocuments does not list`,
-    );
+  const changelog = linkedDocument(
+    context,
+    "changelog",
+    "The header's version",
+  );
   title.children = [project.name];
   links.children = iconLinks(context);
   contents.children = [
@@ -1787,7 +1836,7 @@ function siteHeader(context, markup, props, settings) {
       ? JSX.createElement(
           "a",
           {
-            href: context.urlTo(changelog) || context.relativeURL(props.url),
+            href: hrefTo(context, changelog),
             class: "site-version",
             title: "Changelog",
           },
@@ -1800,7 +1849,7 @@ function siteHeader(context, markup, props, settings) {
       pageLinks(context, undefined),
     ),
     ...search,
-    themeButton(context, settings) ?? null,
+    themeButton(),
     links,
     menu,
   ];
@@ -1832,8 +1881,10 @@ function leftColumn(markup) {
 
 /**
  * Whether the page shows the left column on a wide screen: every page but the
- * home page and the header's other pages, as on pythermalcomfort's site
- * (`installation.html` and `authors.html`, checked 2026-11-20). A page
+ * home page, Installation, Contributing and Authors. On pythermalcomfort's
+ * site the home page, `installation.html` and `authors.html` have none
+ * (https://pythermalcomfort.readthedocs.io/en/latest/, version 4.8.1, checked
+ * 2026-11-20; `docs/conf.py:73-78` at v4.8.1). A page
  * without it carries `<meta name="site-layout" content="no-left-column">`,
  * which `docs/custom.css` reads.
  *
@@ -1841,7 +1892,7 @@ function leftColumn(markup) {
  * @returns {boolean}
  */
 function hasLeftColumn(page) {
-  return page.url !== "index.html" && ownPageLink(page.model) === undefined;
+  return !isHome(page) && ownPageLink(page.model) === undefined;
 }
 
 /**
@@ -1916,8 +1967,8 @@ function menuLinks(context) {
  * a module's page ending in its shared section, a shared type's header
  * naming its kind, a function's page listing its sections under "On This
  * Page", a signature's inputs and Returns heading with the style sheet's
- * hooks, the site's header with the theme button in place of the
- * "Settings" panel, page titles without a kind word, the left column
+ * hooks, the site's header with the theme button, the "Settings" panel
+ * hidden, page titles without a kind word, the left column
  * without the project's link, and the project's page as the documentation's
  * overview, titled "Documentation" in its heading and its browser tab.
  */
@@ -1979,16 +2030,20 @@ class SiteRenderContext extends DefaultThemeRenderContext {
       if (sections) headings.splice(start, Infinity, ...sections);
       return body;
     };
-    // The theme control moves from the "Settings" panel into the header, and
-    // the panel goes; "On this page" stays in the right column.
-    const settings = this.settings;
-    this.settings = () => JSX.createElement(JSX.Fragment, null);
+    /** @type {DefaultThemeRenderContext["settings"]} */
+    const settings = wrapTemplate(
+      this,
+      "settings",
+      this.settings,
+      hiddenSettings,
+    );
+    this.settings = settings;
     /** @type {DefaultThemeRenderContext["toolbar"]} */
     const toolbar = wrapTemplate(
       this,
       "toolbar",
       this.toolbar,
-      (markup, props) => siteHeader(this, markup, props, settings),
+      (markup, props) => siteHeader(this, markup, props),
     );
     this.toolbar = toolbar;
     this.sidebarLinks = () => menuLinks(this);
@@ -2071,7 +2126,7 @@ const NAVIGATION_GROUPS = [
  * @returns {NavigationElement[]}
  */
 function withoutKinds(elements) {
-  return elements.map(({ kind, icon, children, ...element }) =>
+  return elements.map(({ kind, icon: kindIcon, children, ...element }) =>
     children === undefined
       ? element
       : { ...element, children: withoutKinds(children) },
@@ -2176,22 +2231,29 @@ const FONTS_CSS = `${FONTS_DIR}/fonts.css`;
  * `assets/fonts/<family>/`, and its styles' `@font-face` rules, as the package
  * writes them with their font files' paths changed to that folder, go to
  * `assets/fonts/fonts.css`, which every page links. A package, a style or a
- * font file that is missing, or a rule naming its file otherwise than
- * `./files/<name>`, fails the docs build.
+ * font file that is missing, a package that does not export `./LICENSE`, or
+ * a rule naming its file otherwise than `./files/<name>`, fails the docs
+ * build.
  *
  * @param {Application} app
  * @param {string} out The site's directory.
  */
 function copyFonts(app, out) {
   const css = [];
+  mkdirSync(join(out, FONTS_DIR), { recursive: true });
   for (const [pkg, styles] of FONTS) {
     const family = pkg.slice(pkg.indexOf("/") + 1);
     let root;
     try {
       root = dirname(fileURLToPath(import.meta.resolve(`${pkg}/LICENSE`)));
-    } catch {
+    } catch (error) {
+      const problem = {
+        ERR_MODULE_NOT_FOUND: "is not installed",
+        ERR_PACKAGE_PATH_NOT_EXPORTED: "does not export ./LICENSE",
+      }[String(/** @type {{ code?: unknown }} */ (error).code)];
+      if (problem === undefined) throw error;
       app.logger.error(
-        `The fonts: ${pkg}, which FONTS in scripts/typedoc-plugin.mjs names, is not installed`,
+        `The fonts: ${pkg}, which FONTS in scripts/typedoc-plugin.mjs names, ${problem}`,
       );
       continue;
     }
@@ -2285,15 +2347,19 @@ function pageSource(context) {
       ? page.model.project.files.getReflectionPath(page.model)
       : undefined;
   if (path === undefined || !existsSync(path)) return undefined;
-  return relative(REPO_ROOT, path).split(sep).join("/");
+  return slashPath(REPO_ROOT, path);
 }
 
 /**
- * The footer's lines, as pythermalcomfort's site has them: the copyright
- * line, "Last updated on" with the build's date (in UTC, written as Sphinx
- * writes it, "Nov 05, 2026"), and on a hand-written page "Edit on GitHub",
- * which opens the page's file on {@link DEPLOYED_BRANCH} in GitHub's editor.
- * TypeDoc's "Generated using TypeDoc" goes, by `typedoc.json`'s
+ * The footer's lines: the copyright line; "Last updated on" with the build's
+ * date in UTC, written in the form of pythermalcomfort's
+ * `html_last_updated_fmt`, "%b %d, %Y" (`docs/conf.py:70` at v4.8.1), such as
+ * "Nov 05, 2026"; and on a hand-written page "Edit on GitHub", which opens
+ * the page's file on {@link DEPLOYED_BRANCH} in GitHub's editor.
+ * pythermalcomfort's site shows the first two at the foot of a page and
+ * "Edit on GitHub" in its right column
+ * (https://pythermalcomfort.readthedocs.io/en/latest/, version 4.8.1, checked
+ * 2026-11-20). TypeDoc's "Generated using TypeDoc" goes, by `typedoc.json`'s
  * `hideGenerator`.
  *
  * @param {DefaultThemeRenderContext} context

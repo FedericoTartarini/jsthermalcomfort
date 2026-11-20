@@ -16,25 +16,28 @@
  * A part a later change adds gets a section of its own at the end. Phone
  * width is TypeDoc's: up to 769px.
  *
- * Four parts go beyond TypeDoc's documented API (ADR 0020's amendment headed
- * "site-design grill"), each read from TypeDoc 0.28.20:
+ * Where the site relies on TypeDoc beyond its documented API, read from
+ * TypeDoc 0.28.20, and what a reader sees when an upgrade breaks it:
  *
- *   - The header, the left column's top, the page titles and the hooks of
- *     section 9 come from templates the plugin wraps, editing the markup
- *     TypeDoc returns by its position. If an upgrade changes that markup, the
- *     docs build fails naming the template, so no page is built without them.
- *   - The theme button (section 3) drives TypeDoc's hidden `#tsd-theme`
- *     select through `docs/site.js`. If `main.js` stops handling that
- *     select, the button is hidden and the page follows the system theme.
- *   - The left column's group labels and its missing kind icons (section 5)
- *     rely on how `main.js` draws an entry. If that changes, the labels and
- *     the entries show as TypeDoc draws them, kind icons included.
- *   - The collapsed list of a module's functions is set by `docs/site.js`
- *     after `main.js` has drawn the left column. If that changes, the left
- *     column shows TypeDoc's default list, with the modules `main.js` opens.
+ *   - Templates the plugin wraps (the header, the left column's top, the
+ *     page titles, the "Settings" panel and the hooks of section 9) find
+ *     TypeDoc's elements by id, class or tag, and in places by their order:
+ *     the docs build fails, naming the template.
+ *   - The theme button (section 3) drives TypeDoc's `#tsd-theme` select,
+ *     hidden in its "Settings" panel, through `docs/site.js`: the button is
+ *     hidden and the panel shows TypeDoc's select.
+ *   - The left column's group labels and missing kind icons (section 5),
+ *     from how `main.js` draws an entry: TypeDoc's labels and kind icons.
+ *   - The collapsed modules, set by `docs/site.js` after `main.js` draws the
+ *     left column: TypeDoc's default list.
+ *   - Section 9 hides the object types TypeDoc writes out under Parameters
+ *     and after Returns by the structure of its markup: they show again.
  *
- * None of the last three fails the build; after a TypeDoc upgrade a person
- * looks at the views `docs/contributing.md` lists.
+ * The first four are the exceptions of ADR 0020's amendment headed
+ * "site-design grill"; the last is the CSS of its amendment headed
+ * "model-page grill". Only
+ * the first fails the build; after a TypeDoc upgrade a person looks at the
+ * views `docs/contributing.md` lists.
  */
 
 /*
@@ -317,7 +320,8 @@ pre,
 }
 /*
  * The theme button shows the icon of the theme chosen; `docs/site.js` sets
- * its `data-theme` and shows it once it finds TypeDoc's theme control.
+ * its `data-theme` and shows it once it finds TypeDoc's theme control, or
+ * else shows TypeDoc's "Settings" panel, which the plugin hides.
  */
 .site-theme-button {
   display: inline-flex;

@@ -1,71 +1,64 @@
-// The site's browser script, which `typedoc.json` loads as `customJs`. TypeDoc
-// adds it after its own `main.js`, both deferred, so it runs once `main.js`
-// has run. Each part below names what it relies on in `main.js` (read from
-// TypeDoc 0.28.20) and what a reader sees when that stops working; a part that
-// stops working leaves TypeDoc's default page, never a broken one.
-//
-// The two parts are two of the four places ADR 0020's amendment headed
-// "site-design grill" lets the site go beyond TypeDoc's documented API: the
-// theme button and the collapsed list. The other two are the templates the
-// plugin wraps (`scripts/typedoc-plugin.mjs`), which fail the docs build when
-// TypeDoc's markup changes, and the left column's group labels and missing
-// kind icons (`docs/custom.css`, section 5), which show as TypeDoc draws them.
-// After a TypeDoc upgrade a person looks at the views `docs/contributing.md`
-// lists, since the docs build cannot check these.
+// The site's browser script, which `typedoc.json` loads as `customJs`, after
+// TypeDoc's `main.js`. Its two parts rely on `main.js` beyond TypeDoc's API
+// (read from TypeDoc 0.28.20); each names what it relies on, and when that
+// stops working the part leaves TypeDoc's default look. The top of
+// `docs/custom.css` lists every place the site relies on TypeDoc beyond its
+// API.
 
-// The theme button in the header cycles system, light and dark, starting at
-// system, through TypeDoc's own theme control, the hidden select `#tsd-theme`
-// with the values "os", "light" and "dark", which the docs plugin moved there
-// from the "Settings" panel.
+// The header's theme button cycles system, light and dark through TypeDoc's
+// theme control `#tsd-theme` (values "os", "light" and "dark"), which stays
+// in TypeDoc's "Settings" panel, hidden with the panel by the docs plugin.
+// It relies on `main.js` setting the control from the `localStorage` key
+// `tsd-theme` and, on its `change` event, storing the value there and setting
+// it as `data-theme` on the root element.
 //
-// It relies on `main.js` finding that select by its id, setting its value
-// from the `localStorage` key `tsd-theme` on load, and, on its `change`
-// event, storing the value under that key and setting it as `data-theme` on
-// the root element. The stored value keeps the choice on the next page and
-// after a reload.
-//
-// When the select is not found, or a change does not set `data-theme`, the
-// button stays hidden or is hidden again, and the page follows the system
-// theme.
+// When the control is missing, its value is unknown or differs from
+// `data-theme`, or a change sets no `data-theme`, the button is hidden and
+// the "Settings" panel shown, with the theme TypeDoc set from the stored
+// choice.
 (function () {
   "use strict";
   var NEXT = { os: "light", light: "dark", dark: "os" };
   var NAMES = { os: "system", light: "light", dark: "dark" };
   var root = document.documentElement;
+  var control = document.getElementById("tsd-theme");
+  var button = document.querySelector(".site-theme-button");
+  var settings = document.querySelector(".site-settings");
 
-  function followSystem(button) {
+  function fallBack() {
     if (button) button.hidden = true;
-    root.dataset.theme = "os";
+    if (settings) settings.hidden = false;
   }
 
-  function show(button, value) {
+  function show(value) {
     var label = "Theme: " + NAMES[value] + ". Change theme";
     button.dataset.theme = value;
     button.title = label;
     button.setAttribute("aria-label", label);
   }
 
-  var control = document.getElementById("tsd-theme");
-  var button = document.querySelector(".site-theme-button");
-  if (!(control instanceof HTMLSelectElement) || !button) {
-    followSystem(button);
+  if (
+    !(control instanceof HTMLSelectElement) ||
+    !button ||
+    !Object.prototype.hasOwnProperty.call(NEXT, control.value) ||
+    root.dataset.theme !== control.value
+  ) {
+    fallBack();
     return;
   }
-  if (!Object.prototype.hasOwnProperty.call(NEXT, control.value)) {
-    followSystem(button);
-    return;
-  }
-  show(button, control.value);
+  show(control.value);
   button.hidden = false;
   button.addEventListener("click", function () {
-    var value = NEXT[control.value] || "os";
+    var before = control.value;
+    var value = NEXT[before];
     control.value = value;
     control.dispatchEvent(new Event("change"));
     if (root.dataset.theme !== value) {
-      followSystem(button);
+      control.value = before;
+      fallBack();
       return;
     }
-    show(button, value);
+    show(value);
   });
 })();
 

@@ -60,7 +60,7 @@
  * title, both in pythermalcomfort's order, with no kind icon; `docs/site.js`
  * keeps every module collapsed but the one of the function page shown. The
  * home page and the header's other pages have no left column on a wide
- * screen. A page's title names no kind, and a hand-written page's title, the
+ * screen, and the home page is marked for its own look. A page's title names no kind, and a hand-written page's title, the
  * `title` of its frontmatter, is the `#` heading it opens with; its file
  * still names its page.
  *
@@ -1840,6 +1840,18 @@ function hasLeftColumn(page) {
 }
 
 /**
+ * Whether the page is the home page, which shows `docs/overview.md`. It
+ * carries `<meta name="site-page" content="home">`, which `docs/custom.css`
+ * reads for the home page's large title and its features grid.
+ *
+ * @param {PageEvent<Reflection>} page
+ * @returns {boolean}
+ */
+function isHome(page) {
+  return page.url === "index.html";
+}
+
+/**
  * The page's title, edited from what TypeDoc's `header` template returns: a
  * reflection's title loses the kind word TypeDoc puts before its name
  * ("Function pmv_ppd_iso"), and the documentation's overview is titled
@@ -2234,6 +2246,9 @@ export async function load(app) {
             name: "site-layout",
             content: "no-left-column",
           }),
+      isHome(context.page)
+        ? JSX.createElement("meta", { name: "site-page", content: "home" })
+        : null,
     ),
   );
   app.renderer.on(RendererEvent.END, (event) =>

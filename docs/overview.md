@@ -2,24 +2,6 @@
 
 The `jsthermalcomfort` JavaScript library is a comprehensive toolkit for calculating thermal comfort indices, heat/cold stress metrics, and thermophysiological responses based on international standards and peer-reviewed research. Designed for researchers, engineers, and building-science professionals, it simplifies complex calculations while promoting accuracy and standards compliance in web-based applications.
 
-## Cite jsthermalcomfort
-
-If you use `jsthermalcomfort` in your research, please cite the original `pythermalcomfort` paper (which this library implements) as follows:
-
-> Tartarini, F., Schiavon, S., 2020. pythermalcomfort: A Python package for thermal comfort research. SoftwareX 12, 100578. [https://doi.org/10.1016/j.softx.2020.100578](https://doi.org/10.1016/j.softx.2020.100578)
-
-## Key Features
-
-- **Comprehensive:** Includes a wide range of thermal comfort models (PMV/PPD, Adaptive, SET, etc.) and utilities.
-- **Standard-compliant:** Implements equations from major international standards (ASHRAE 55, ISO 7730, ISO 7933).
-- **Fast:** Optimized for performance, allowing for large-scale simulations in the browser or Node.js.
-- **Easy to use:** Simple API with clear documentation and examples.
-- **Cross-platform:** Works in any modern web browser and Node.js environments.
-
-## Why Use jsthermalcomfort?
-
-Thermal comfort analysis often requires complex calculations based on multiple parameters. `jsthermalcomfort` provides a reliable and easy-to-use platform for these calculations, ensuring that researchers and practitioners can focus on their results rather than the underlying math. It is based on the well-tested `pythermalcomfort` library, ensuring high accuracy and reliability for building science applications.
-
 ## Installation
 
 ```bash
@@ -27,11 +9,6 @@ npm install jsthermalcomfort
 ```
 
 To upgrade from 1.4.0, follow the [migration guide](./migration-v2.md).
-
-## Requirements
-
-- Node.js (for server-side usage) or a modern web browser.
-- No external dependencies are required for core functionality.
 
 ## Quick Start
 
@@ -53,6 +30,29 @@ console.log(`PMV: ${results.pmv}, PPD: ${results.ppd}%`);
 ```
 
 A helper takes positional arguments, and like every JavaScript function it ignores surplus ones. To pass one as a callback, wrap it: `hrs.map((hr) => hr_to_rh(hr, tdb))`, since `hrs.map(hr_to_rh)` would pass each element's index as `tdb`.
+
+## Cite jsthermalcomfort
+
+If you use `jsthermalcomfort` in your research, please cite the original `pythermalcomfort` paper (which this library implements) as follows:
+
+> Tartarini, F., Schiavon, S., 2020. pythermalcomfort: A Python package for thermal comfort research. SoftwareX 12, 100578. [https://doi.org/10.1016/j.softx.2020.100578](https://doi.org/10.1016/j.softx.2020.100578)
+
+## Key Features
+
+- **Comprehensive:** Includes a wide range of thermal comfort models (PMV/PPD, Adaptive, SET, etc.) and utilities.
+- **Standard-compliant:** Implements equations from major international standards (ASHRAE 55, ISO 7730, ISO 7933).
+- **Fast:** Optimized for performance, allowing for large-scale simulations in the browser or Node.js.
+- **Easy to use:** Simple API with clear documentation and examples.
+- **Cross-platform:** Works in any modern web browser and Node.js environments.
+
+## Why Use jsthermalcomfort?
+
+Thermal comfort analysis often requires complex calculations based on multiple parameters. `jsthermalcomfort` provides a reliable and easy-to-use platform for these calculations, ensuring that researchers and practitioners can focus on their results rather than the underlying math. It is based on the well-tested `pythermalcomfort` library, ensuring high accuracy and reliability for building science applications.
+
+## Requirements
+
+- Node.js (for server-side usage) or a modern web browser.
+- No external dependencies are required for core functionality.
 
 ## Support jsthermalcomfort
 

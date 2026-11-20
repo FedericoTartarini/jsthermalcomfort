@@ -10,7 +10,7 @@
  *   3. Header                 9. A function's page
  *   4. Frame and columns      10. A module's page
  *   5. Left column and        11. The documentation's overview
- *      "On this page"
+ *      "On this page"         12. The home page
  *   6. Notes and warnings
  *
  * A part a later change adds, such as the footer, gets a section of its own
@@ -899,4 +899,54 @@ dl.tsd-member-summaries ~ .tsd-member .tsd-member {
   break-inside: avoid;
   padding: 0.1rem 0;
   overflow-wrap: anywhere;
+}
+
+/*
+ * 12. The home page, which the plugin marks with
+ * `<meta name="site-page" content="home">`: a large title and opening
+ * paragraph, and the key features as a grid, as many columns as the width
+ * holds, one at phone width.
+ */
+:root:has(meta[name="site-page"][content="home"])
+  .tsd-typography
+  > h1:first-child {
+  font-size: 3.2rem;
+  letter-spacing: -0.03em;
+  margin-top: 0.75rem;
+}
+:root:has(meta[name="site-page"][content="home"])
+  .tsd-typography
+  > h1:first-child
+  + p {
+  font-size: 1.2rem;
+  line-height: 1.55;
+  max-width: 44rem;
+}
+:root:has(meta[name="site-page"][content="home"]) #key-features + ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0 1.5rem;
+}
+:root:has(meta[name="site-page"][content="home"]) #key-features + ul > li {
+  border-top: 1px solid var(--color-accent);
+  padding: 0.5rem 0 0.75rem;
+}
+:root:has(meta[name="site-page"][content="home"])
+  #key-features
+  + ul
+  > li
+  > strong {
+  display: block;
+}
+@media (max-width: 769px) {
+  :root:has(meta[name="site-page"][content="home"])
+    .tsd-typography
+    > h1:first-child {
+    font-size: 2.3rem;
+  }
+  :root:has(meta[name="site-page"][content="home"]) #key-features + ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

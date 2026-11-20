@@ -4,6 +4,7 @@ import { enthalpy_air } from "./enthalpy_air.ts";
 import { p_sat } from "./p_sat.ts";
 import { wet_bulb_tmp } from "./wet_bulb_tmp.ts";
 
+/** @hidden */
 export interface PsychrometricValues {
   readonly p_sat: number;
   readonly p_vap: number;

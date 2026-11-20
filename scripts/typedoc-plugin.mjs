@@ -111,8 +111,8 @@ function returnedObjects(type) {
 }
 
 /**
- * Splits the content of a `@returns` tag into the text before its list and
- * the parts of each `- ` item.
+ * Splits the content of a `@returns` tag into the text before its list, if
+ * any, and the parts of each `- ` item.
  *
  * @param {readonly CommentDisplayPart[]} content
  * @returns {{ head: CommentDisplayPart[], items: CommentDisplayPart[][] }}
@@ -128,8 +128,11 @@ function splitItems(content) {
       continue;
     }
     part.text.split(/\n(?=- )/).forEach((piece, i) => {
-      if (i > 0) items.push([]);
-      const text = i > 0 ? piece.slice(2) : piece;
+      const atContentStart = head.length === 0 && items.length === 0;
+      // The list may open the content, with no text before it.
+      const opensItem = i > 0 || (atContentStart && piece.startsWith("- "));
+      if (opensItem) items.push([]);
+      const text = opensItem ? piece.slice(2) : piece;
       if (text !== "") (items.at(-1) ?? head).push({ kind: "text", text });
     });
   }

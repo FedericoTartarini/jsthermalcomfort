@@ -1,7 +1,11 @@
 import { notOfType } from "../_internal/errors.ts";
 import { round } from "../_internal/round.ts";
 
-/** Object to represent the output of scale_wind_speed_log. */
+/**
+ * Object to represent the output of scale_wind_speed_log.
+ *
+ * @hidden
+ */
 export interface ScaleWindSpeedLog {
   readonly v_z2: number;
 }

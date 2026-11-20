@@ -59,3 +59,48 @@
     show(button, value);
   });
 })();
+
+// The left column keeps a module's list of functions collapsed, except the
+// module of the function page shown: on a module's own page, a document or
+// the home page every module is collapsed.
+//
+// It relies on `main.js` drawing the left column from `navigation.js` into
+// `#tsd-nav-container`, after this script may have run, with each module as a
+// `details` element whose `summary` holds the module's link, and the link of
+// the page shown having the class `current`; and on `main.js` having opened
+// the details around that link and those it remembers as opened before it
+// adds them, so that the open state set here is the last one.
+//
+// When the column has no `details`, or a `details` has no `summary`, nothing
+// changes: the left column shows TypeDoc's default list, with the modules
+// that `main.js` opens.
+(function () {
+  "use strict";
+  var column = document.getElementById("tsd-nav-container");
+  if (!column) return;
+
+  function collapse() {
+    var modules = column.querySelectorAll("details");
+    var current = column.querySelector("a.current");
+    for (var i = 0; i < modules.length; i++)
+      if (!modules[i].querySelector(":scope > summary")) return;
+    for (var j = 0; j < modules.length; j++) {
+      var summary = modules[j].querySelector(":scope > summary");
+      modules[j].open =
+        current !== null &&
+        modules[j].contains(current) &&
+        !summary.contains(current);
+    }
+  }
+
+  if (column.querySelector("details")) {
+    collapse();
+    return;
+  }
+  var observer = new MutationObserver(function () {
+    if (!column.querySelector("details")) return;
+    observer.disconnect();
+    collapse();
+  });
+  observer.observe(column, { childList: true, subtree: true });
+})();

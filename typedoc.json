@@ -23,6 +23,7 @@
   ],
   "customCss": "docs/custom.css",
   "customJs": "docs/site.js",
+  "headings": { "readme": false, "document": false },
   "includeVersion": true,
   "navigationLinks": {
     "GitHub": "https://github.com/FedericoTartarini/jsthermalcomfort",

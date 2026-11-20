@@ -48,12 +48,22 @@
  * button drives TypeDoc's own theme control, moved from the "Settings" panel,
  * which goes; `docs/site.js` cycles it.
  *
+ * The left column lists "Modules", each module by the subpath a program
+ * imports it from, then "Guides and notes", each hand-written page by its
+ * title, both in pythermalcomfort's order, with no kind icon; `docs/site.js`
+ * keeps every module collapsed but the one of the function page shown. The
+ * home page and the header's other pages have no left column on a wide
+ * screen. A page's title names no kind, and a hand-written page's title, the
+ * `title` of its frontmatter, is the `#` heading it opens with; its file
+ * still names its page.
+ *
  * A template of TypeDoc's that the theme wraps, editing the markup it
  * returns (`wrapTemplate`, `editMarkup`), fails the docs build naming the
  * template when that markup is not what the edit expects, as after a TypeDoc
  * upgrade.
  */
 import { readFileSync } from "node:fs";
+import { relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inspect } from "node:util";
 import {
@@ -657,11 +667,71 @@ function ungroupShared(project) {
   }
 }
 
-/** Gives a shared type no page, so it is written out on its module's page. */
+/** The folder of the hand-written pages that `typedoc.json` lists. */
+const DOCS_FOLDER = fileURLToPath(new URL("../docs/", import.meta.url));
+
+/**
+ * A hand-written page's file under `docs/`, without its extension, such as
+ * `installation` or `deviations/README`. The site finds a page by its file,
+ * since the page's name is the `title` of its frontmatter.
+ *
+ * @param {Reflection} doc
+ * @returns {string | undefined}
+ */
+function documentFile(doc) {
+  const path = doc.project.files.getReflectionPath(doc);
+  if (path === undefined) return undefined;
+  return relative(DOCS_FOLDER, path).split(sep).join("/").replace(/\.md$/, "");
+}
+
+/**
+ * The hand-written page of `file` (as {@link documentFile} names it), or
+ * `undefined` when `typedoc.json`'s `projectDocuments` does not list it.
+ *
+ * @param {ProjectReflection} project
+ * @param {string} file
+ * @returns {Reflection | undefined}
+ */
+function documentOf(project, file) {
+  return project.documents?.find((doc) => documentFile(doc) === file);
+}
+
+/**
+ * Fails the docs build for a hand-written page whose name, the `title` of its
+ * frontmatter, which the left column and the browser tab show, is not the
+ * text of the `#` heading the page opens with.
+ *
+ * @param {Application} app
+ * @param {ProjectReflection} project
+ */
+function checkDocumentTitles(app, project) {
+  for (const doc of project.documents ?? []) {
+    const text = doc.content.map((part) => part.text).join("");
+    const heading = /^# (.+)/.exec(text.trimStart())?.[1]?.trim();
+    if (heading !== doc.name)
+      app.logger.error(
+        `docs/${documentFile(doc)}.md: the title in its frontmatter, "${doc.name}", is not the text of the # heading it opens with${heading === undefined ? " (none)" : `, "${heading}"`}`,
+      );
+  }
+}
+
+/**
+ * Gives a shared type no page, so it is written out on its module's page, and
+ * names a hand-written page's file after its own file, as TypeDoc does for a
+ * page without a `title`: `documents/deviations_README.html`.
+ */
 class SiteRouter extends KindRouter {
   /** @param {Reflection} target */
   getPageKind(target) {
     return isSharedType(target) ? undefined : super.getPageKind(target);
+  }
+
+  /** @param {Reflection} reflection */
+  getIdealBaseName(reflection) {
+    const file = reflection.isDocument() ? documentFile(reflection) : undefined;
+    return file === undefined
+      ? super.getIdealBaseName(reflection)
+      : `documents/${file.replaceAll("/", "_")}`;
   }
 }
 
@@ -1116,8 +1186,8 @@ function sectionHeadings(context, node, headings = []) {
 
 /**
  * The header's page links, as pythermalcomfort's site has them: each label
- * with the document it opens, or `undefined` for the project's own page, the
- * documentation's overview.
+ * with the file of the document it opens (as {@link documentFile} names it),
+ * or `undefined` for the project's own page, the documentation's overview.
  *
  * @type {ReadonlyArray<readonly [string, string | undefined]>}
  */
@@ -1182,6 +1252,21 @@ function icon(path, props = {}) {
 }
 
 /**
+ * The label of the header's page link that opens `model`, a document, or
+ * `undefined`.
+ *
+ * @param {Reflection} model
+ * @returns {string | undefined}
+ */
+function ownPageLink(model) {
+  if (!model.isDocument()) return undefined;
+  const file = documentFile(model);
+  return PAGE_LINKS.find(
+    ([, linked]) => linked !== undefined && linked === file,
+  )?.[0];
+}
+
+/**
  * The label of the header link whose section holds the page: a page link's
  * document, or Documentation for every other page but the home page.
  *
@@ -1190,12 +1275,7 @@ function icon(path, props = {}) {
  */
 function headerSection(page) {
   if (page.url === "index.html") return undefined;
-  const model = page.model;
-  const own = PAGE_LINKS.find(
-    ([, name]) =>
-      name !== undefined && model.isDocument() && model.name === name,
-  );
-  return own ? own[0] : "Documentation";
+  return ownPageLink(page.model) ?? "Documentation";
 }
 
 /**
@@ -1209,15 +1289,13 @@ function headerSection(page) {
 function pageLinks(context, linkClass) {
   const page = context.page;
   const section = headerSection(page);
-  return PAGE_LINKS.flatMap(([label, name]) => {
+  return PAGE_LINKS.flatMap(([label, file]) => {
     const target =
-      name === undefined
-        ? page.project
-        : page.project.documents?.find((doc) => doc.name === name);
+      file === undefined ? page.project : documentOf(page.project, file);
     if (target === undefined) {
       reportOnce(
         context,
-        `The header links the document "${name}", which typedoc.json's projectDocuments does not list`,
+        `The header links the document docs/${file}.md, which typedoc.json's projectDocuments does not list`,
       );
       return [];
     }
@@ -1362,11 +1440,11 @@ function siteHeader(context, markup, props, settings) {
     "the element of id tsd-toolbar-menu-trigger",
   );
   const project = props.project;
-  const changelog = project.documents?.find((doc) => doc.name === "changelog");
+  const changelog = documentOf(project, "changelog");
   if (changelog === undefined)
     reportOnce(
       context,
-      `The header's version links the document "changelog", which typedoc.json's projectDocuments does not list`,
+      `The header's version links the document docs/changelog.md, which typedoc.json's projectDocuments does not list`,
     );
   title.children = [project.name];
   links.children = iconLinks(context);
@@ -1397,6 +1475,69 @@ function siteHeader(context, markup, props, settings) {
 }
 
 /**
+ * The left column, edited from what TypeDoc's `navigation` template returns:
+ * the list that TypeDoc's `main.js` fills, `#tsd-nav-container`, without the
+ * link to the project's page above it, since the header's site name links the
+ * home page.
+ *
+ * @param {JSX.Element} markup
+ * @returns {JSX.Element}
+ */
+function leftColumn(markup) {
+  const list = expectElement(
+    markup,
+    withId("tsd-nav-container"),
+    "the element of id tsd-nav-container",
+  );
+  if (!markup.children.includes(list))
+    throw new UnexpectedMarkup(
+      "the element of id tsd-nav-container, as a child of the navigation,",
+    );
+  markup.children = [list];
+  return markup;
+}
+
+/**
+ * Whether the page shows the left column on a wide screen: every page but the
+ * home page and the header's other pages, as on pythermalcomfort's site
+ * (`installation.html` and `authors.html`, checked 2026-11-20). A page
+ * without it carries `<meta name="site-layout" content="no-left-column">`,
+ * which `docs/custom.css` reads.
+ *
+ * @param {PageEvent<Reflection>} page
+ * @returns {boolean}
+ */
+function hasLeftColumn(page) {
+  return page.url !== "index.html" && ownPageLink(page.model) === undefined;
+}
+
+/**
+ * The page's title, edited from what TypeDoc's `header` template returns: a
+ * reflection's title loses the kind word TypeDoc puts before its name
+ * ("Function pmv_ppd_iso"). The project's and a document's titles carry none.
+ *
+ * @param {JSX.Element} markup
+ * @param {PageEvent<Reflection>} props
+ * @returns {JSX.Element}
+ */
+function pageTitle(markup, props) {
+  const model = props.model;
+  if (model.isProject() || model.isDocument()) return markup;
+  const title = expectElement(
+    markup,
+    (element) => element.tag === "h1",
+    "the page's title, an h1 element",
+  );
+  const kind = `${ReflectionKind.singularString(model.kind)} `;
+  if (title.children[0] !== kind)
+    throw new UnexpectedMarkup(
+      `the kind word "${kind.trim()}" at the start of the page's title`,
+    );
+  title.children = title.children.slice(1);
+  return markup;
+}
+
+/**
  * The menu's links at phone width, in place of TypeDoc's `sidebarLinks`
  * template: the header's page links, then `navigationLinks` with their icons
  * and labels. TypeDoc's style sheet shows a `.tsd-navigation .tsd-nav-link`
@@ -1422,8 +1563,9 @@ function menuLinks(context) {
  * The default theme's partials, with a categorized module's page as one list,
  * a module's page ending in its shared section, a shared type's header
  * naming its kind, a function's page listing its sections under "On This
- * Page", and the site's header with the theme button in place of the
- * "Settings" panel.
+ * Page", the site's header with the theme button in place of the
+ * "Settings" panel, page titles without a kind word, and the left column
+ * without the project's link.
  */
 class SiteRenderContext extends DefaultThemeRenderContext {
   /** @param {ConstructorParameters<typeof DefaultThemeRenderContext>} args */
@@ -1490,6 +1632,17 @@ class SiteRenderContext extends DefaultThemeRenderContext {
     );
     this.toolbar = toolbar;
     this.sidebarLinks = () => menuLinks(this);
+    /** @type {DefaultThemeRenderContext["header"]} */
+    const header = wrapTemplate(this, "header", this.header, pageTitle);
+    this.header = header;
+    /** @type {DefaultThemeRenderContext["navigation"]} */
+    const navigation = wrapTemplate(
+      this,
+      "navigation",
+      this.navigation,
+      leftColumn,
+    );
+    this.navigation = navigation;
   }
 }
 
@@ -1512,11 +1665,113 @@ function pagesOnly(elements) {
     );
 }
 
+/**
+ * The left column's groups, each a label and its entries in pythermalcomfort's
+ * order (`docs/documentation/index.rst` at v4.8.1, which also lists `plots`
+ * and `met`, with no counterpart here): a module by its name, the subpath a
+ * program imports it from, then a hand-written page by its file (as
+ * {@link documentFile} names it). The migration guide and the deviation
+ * registers, which upstream lacks, close the list. The header's pages are not
+ * listed.
+ *
+ * @type {ReadonlyArray<readonly [string, readonly string[]]>}
+ */
+const NAVIGATION_GROUPS = [
+  [
+    "Modules",
+    ["models", "utilities", "environment", "psychrometrics", "clothing"],
+  ],
+  [
+    "Guides and notes",
+    [
+      "surveys",
+      "references",
+      "examples",
+      "changelog",
+      "migration-v2",
+      "deviations/README",
+    ],
+  ],
+];
+
+/**
+ * The navigation's entries without a kind, so that TypeDoc's `main.js` draws
+ * no kind icon beside them (TypeDoc 0.28.20 draws one only for an entry with a
+ * `kind`).
+ *
+ * @param {NavigationElement[]} elements
+ * @returns {NavigationElement[]}
+ */
+function withoutKinds(elements) {
+  return elements.map(({ kind, icon, children, ...element }) =>
+    children === undefined
+      ? element
+      : { ...element, children: withoutKinds(children) },
+  );
+}
+
+/**
+ * The left column: each group of {@link NAVIGATION_GROUPS} as an entry with
+ * its label and neither a link nor children, which TypeDoc's `main.js` draws
+ * as a plain `span` (TypeDoc 0.28.20), then the group's modules and pages; a
+ * page is listed by its name, which is its `title`. A module or a page that
+ * no group lists, or an entry of a group that the project lacks, fails the
+ * docs build.
+ *
+ * @param {DefaultTheme} theme
+ * @param {ProjectReflection} project
+ * @param {NavigationElement[]} elements TypeDoc's navigation.
+ * @returns {NavigationElement[]}
+ */
+function siteNavigation(theme, project, elements) {
+  const error = (/** @type {string} */ message) =>
+    theme.application.logger.error(`The left column: ${message}`);
+  /** @type {Map<string, string>} */
+  const keyOfPath = new Map();
+  for (const child of project.children ?? [])
+    if (child.kindOf(ReflectionKind.Module))
+      keyOfPath.set(theme.router.getFullUrl(child), child.name);
+  for (const doc of project.documents ?? []) {
+    const file = documentFile(doc);
+    if (file !== undefined) keyOfPath.set(theme.router.getFullUrl(doc), file);
+  }
+  const headerPages = new Set(PAGE_LINKS.map(([, file]) => file));
+  /** @type {Map<string, NavigationElement>} */
+  const byKey = new Map();
+  for (const element of elements) {
+    const key =
+      element.path === undefined ? undefined : keyOfPath.get(element.path);
+    if (key === undefined || !headerPages.has(key))
+      byKey.set(key ?? element.text, element);
+  }
+  /** @type {NavigationElement[]} */
+  const column = [];
+  for (const [label, keys] of NAVIGATION_GROUPS) {
+    column.push({ text: label });
+    for (const key of keys) {
+      const element = byKey.get(key);
+      if (element === undefined)
+        error(`"${label}" lists ${key}, which the project does not have`);
+      else column.push(element);
+      byKey.delete(key);
+    }
+  }
+  for (const key of byKey.keys())
+    error(
+      `${key} is in no group of NAVIGATION_GROUPS in scripts/typedoc-plugin.mjs`,
+    );
+  return withoutKinds(column);
+}
+
 /** The default theme with the site's partials and navigation. */
 class SiteTheme extends DefaultTheme {
   /** @param {ProjectReflection} project */
   buildNavigation(project) {
-    return pagesOnly(super.buildNavigation(project));
+    return siteNavigation(
+      this,
+      project,
+      pagesOnly(super.buildNavigation(project)),
+    );
   }
 
   /** @param {PageEvent<Reflection>} pageEvent */
@@ -1538,13 +1793,22 @@ export async function load(app) {
   app.internationalization.addTranslations("en", {
     tag_modelInfo: "Model info",
   });
+  app.renderer.hooks.on("head.end", (context) =>
+    hasLeftColumn(context.page)
+      ? JSX.createElement(JSX.Fragment, null)
+      : JSX.createElement("meta", {
+          name: "site-layout",
+          content: "no-left-column",
+        }),
+  );
   app.converter.on(Converter.EVENT_BEGIN, (context) => {
     for (const name of hiddenTypeNames(context.programs))
       context.inlineType.add(name);
   });
-  app.converter.on(Converter.EVENT_RESOLVE_BEGIN, (context) =>
-    placeModelInfo(app, context.project, exportsByModule),
-  );
+  app.converter.on(Converter.EVENT_RESOLVE_BEGIN, (context) => {
+    placeModelInfo(app, context.project, exportsByModule);
+    checkDocumentTitles(app, context.project);
+  });
   // In TypeDoc 0.28, after GroupPlugin (-100), which sorts every reflection's
   // children, and before LinkResolverPlugin (-300), which resolves the links
   // in the moved descriptions.

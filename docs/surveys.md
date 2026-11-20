@@ -1,3 +1,7 @@
+---
+title: Surveys to assess thermal comfort
+---
+
 # Surveys to assess thermal comfort
 
 Occupant thermal environment surveys provide a practical method to assess comfort conditions within the satisfaction ranges outlined in this standard.

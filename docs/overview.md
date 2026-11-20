@@ -26,6 +26,8 @@ Thermal comfort analysis often requires complex calculations based on multiple p
 npm install jsthermalcomfort
 ```
 
+To upgrade from 1.4.0, follow the [migration guide](./migration-v2.md).
+
 ## Requirements
 
 - Node.js (for server-side usage) or a modern web browser.

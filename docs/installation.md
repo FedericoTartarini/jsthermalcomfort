@@ -1,3 +1,9 @@
+---
+title: Installation
+---
+
+# Installation
+
 ```bash
 npm install jsthermalcomfort
 ```

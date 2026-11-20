@@ -158,3 +158,52 @@
     margin-left: auto;
   }
 }
+
+/*
+ * The left column's group labels, "Modules" and "Guides and notes": the
+ * plugin's `siteNavigation` gives each an entry with neither a link nor
+ * children, which TypeDoc's `main.js` draws as a `span` with a folder icon
+ * (TypeDoc 0.28.20); the icon is hidden. If a TypeDoc upgrade draws such an
+ * entry otherwise, a label shows as TypeDoc draws it.
+ */
+#tsd-nav-container > li > span {
+  display: block;
+  margin: 1rem 0 0.25rem;
+  font-weight: 600;
+}
+#tsd-nav-container > li:first-child > span {
+  margin-top: 0;
+}
+#tsd-nav-container > li > span > .tsd-kind-icon {
+  display: none;
+}
+/* In the phone menu, the left column follows the page and icon links. */
+@media (max-width: 769px) {
+  #tsd-sidebar-links {
+    margin-bottom: 1rem;
+  }
+}
+
+/*
+ * The home page and the header's other pages, which the plugin marks with
+ * `<meta name="site-layout" content="no-left-column">`, have no left column
+ * on a wide screen: "On this page" moves to the right. At phone width the
+ * menu still holds the navigation.
+ */
+@media (min-width: 770px) {
+  :root:has(meta[name="site-layout"][content="no-left-column"]) .site-menu {
+    display: none;
+  }
+  :root:has(meta[name="site-layout"][content="no-left-column"])
+    .container-main {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-areas: "content sidebar";
+  }
+}
+@media (min-width: 1200px) {
+  :root:has(meta[name="site-layout"][content="no-left-column"])
+    .container-main {
+    grid-template-columns: minmax(0, 3.5fr) minmax(0, 20rem);
+    grid-template-areas: "content toc";
+  }
+}

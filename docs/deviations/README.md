@@ -1,3 +1,7 @@
+---
+title: Deviation registers
+---
+
 # Deviation registers
 
 Every difference between this library and pythermalcomfort v4.8.1, whose `.py` is the only standard, is a whitelisted mechanical translation or v2 documentation that replaces none of upstream's text, a representation mapping or a row in a register here (ADRs 0019, 0027, 0028). The user approves each class and addition once, and reviews each row outside them and each row flagged as doubtful (ADR 0019).

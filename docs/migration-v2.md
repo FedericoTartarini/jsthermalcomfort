@@ -1,3 +1,7 @@
+---
+title: Migrating from 1.4.0 to 2.0.0
+---
+
 # Migrating from 1.4.0 to 2.0.0
 
 2.0.0 follows pythermalcomfort v4.8.1: its function names, its inputs and its values, with the additions the deviation registers list. Change a 1.4.0 call in two steps: apply the rules below, which hold for every function, then look up the function in the tables further down.

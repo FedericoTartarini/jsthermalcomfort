@@ -57,13 +57,24 @@
  * `title` of its frontmatter, is the `#` heading it opens with; its file
  * still names its page.
  *
+ * The site's two typefaces come from their `@fontsource` packages: the docs
+ * build copies their font files and licences into the site and every page
+ * links their `@font-face` rules, so that no page asks another host for a
+ * font.
+ *
  * A template of TypeDoc's that the theme wraps, editing the markup it
  * returns (`wrapTemplate`, `editMarkup`), fails the docs build naming the
  * template when that markup is not what the edit expects, as after a TypeDoc
  * upgrade.
  */
-import { readFileSync } from "node:fs";
-import { relative, sep } from "node:path";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inspect } from "node:util";
 import {
@@ -77,6 +88,7 @@ import {
   KindRouter,
   ReflectionKind,
   ReflectionSymbolId,
+  RendererEvent,
   Slugger,
 } from "typedoc";
 import ts from "typescript";
@@ -1785,6 +1797,82 @@ class SiteTheme extends DefaultTheme {
   }
 }
 
+/**
+ * The site's two typefaces, each a `@fontsource` package (OFL-1.1) among the
+ * development dependencies, with the styles `docs/custom.css` uses: a style
+ * is the package's CSS file of that name, `400.css` or `400-italic.css`.
+ *
+ * @type {ReadonlyArray<readonly [string, readonly string[]]>}
+ */
+const FONTS = [
+  ["@fontsource/atkinson-hyperlegible-next", ["400", "400-italic", "700"]],
+  ["@fontsource/ibm-plex-mono", ["400", "400-italic", "500", "600"]],
+];
+
+/** Where the site keeps its fonts, and the stylesheet that names them. */
+const FONTS_DIR = "assets/fonts";
+const FONTS_CSS = `${FONTS_DIR}/fonts.css`;
+
+/**
+ * Copies {@link FONTS} into the built site, so that no page asks another host
+ * for a font: each package's font files and `LICENSE` go to
+ * `assets/fonts/<family>/`, and its styles' `@font-face` rules, as the package
+ * writes them with their font files' paths changed to that folder, go to
+ * `assets/fonts/fonts.css`, which every page links. A package, a style or a
+ * font file that is missing, or a rule naming its file otherwise than
+ * `./files/<name>`, fails the docs build.
+ *
+ * @param {Application} app
+ * @param {string} out The site's directory.
+ */
+function copyFonts(app, out) {
+  const css = [];
+  for (const [pkg, styles] of FONTS) {
+    const family = pkg.slice(pkg.indexOf("/") + 1);
+    let root;
+    try {
+      root = dirname(fileURLToPath(import.meta.resolve(`${pkg}/LICENSE`)));
+    } catch {
+      app.logger.error(
+        `The fonts: ${pkg}, which FONTS in scripts/typedoc-plugin.mjs names, is not installed`,
+      );
+      continue;
+    }
+    const dir = join(out, FONTS_DIR, family);
+    mkdirSync(dir, { recursive: true });
+    copyFileSync(join(root, "LICENSE"), join(dir, "LICENSE"));
+    for (const style of styles) {
+      const source = join(root, `${style}.css`);
+      if (!existsSync(source)) {
+        app.logger.error(
+          `The fonts: ${pkg} has no style ${style} (${style}.css), which FONTS in scripts/typedoc-plugin.mjs names`,
+        );
+        continue;
+      }
+      /** @type {string[]} */
+      const missing = [];
+      const rules = readFileSync(source, "utf8").replace(
+        /url\(([^)]*)\)/g,
+        (whole, /** @type {string} */ url) => {
+          const name = /^\.\/files\/([\w.-]+)$/.exec(url)?.[1];
+          if (name === undefined || !existsSync(join(root, "files", name))) {
+            missing.push(url);
+            return whole;
+          }
+          copyFileSync(join(root, "files", name), join(dir, name));
+          return `url(./${family}/${name})`;
+        },
+      );
+      if (missing.length > 0)
+        app.logger.error(
+          `The fonts: ${pkg}/${style}.css names ${missing.length} font files that are not in the package's files folder, first ${missing[0]}`,
+        );
+      css.push(`/* ${pkg}/${style}.css */\n${rules.trim()}\n`);
+    }
+  }
+  writeFileSync(join(out, FONTS_CSS), css.join("\n"));
+}
+
 /** @param {Application} app */
 export async function load(app) {
   app.renderer.defineRouter("jsthermalcomfort", SiteRouter);
@@ -1794,12 +1882,23 @@ export async function load(app) {
     tag_modelInfo: "Model info",
   });
   app.renderer.hooks.on("head.end", (context) =>
-    hasLeftColumn(context.page)
-      ? JSX.createElement(JSX.Fragment, null)
-      : JSX.createElement("meta", {
-          name: "site-layout",
-          content: "no-left-column",
-        }),
+    JSX.createElement(
+      JSX.Fragment,
+      null,
+      JSX.createElement("link", {
+        rel: "stylesheet",
+        href: context.relativeURL(FONTS_CSS),
+      }),
+      hasLeftColumn(context.page)
+        ? null
+        : JSX.createElement("meta", {
+            name: "site-layout",
+            content: "no-left-column",
+          }),
+    ),
+  );
+  app.renderer.on(RendererEvent.END, (event) =>
+    copyFonts(app, event.outputDirectory),
   );
   app.converter.on(Converter.EVENT_BEGIN, (context) => {
     for (const name of hiddenTypeNames(context.programs))

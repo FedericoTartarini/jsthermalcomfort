@@ -1,14 +1,543 @@
 /*
- * A function's page shows TypeDoc's call line, its inputs and outputs written
- * out with their types, and lists an object's keys once, under Parameters and
- * Returns (ADR 0020's 2026-11-20 amendments). TypeDoc 0.28's default theme
- * also writes an object type out inline, one `.tsd-kind-property` span per
- * key, as direct children of a `span` that is the first child of a
- * `.tsd-parameter-list > li` and of `h4.tsd-returns-title`; the rules below
- * hide those two copies. A function whose inputs and outputs are not objects
- * has none of them, so its page is left as it is. If a TypeDoc upgrade
- * changes this markup, a page shows the object types again under Parameters
- * or after Returns, or a blank or shifted item under Parameters.
+ * The site's look, variant D of the site-design prototype (ADR 0020's
+ * 2026-11-20 amendment headed "site-design grill"), over TypeDoc 0.28's
+ * default theme, whose style sheet sits in the cascade layer `typedoc`, so
+ * that a rule here wins over it whatever its selector. One section per part
+ * of a page, each with its own phone-width rules:
+ *
+ *   1. Colours and fonts      6. Notes and warnings
+ *   2. Text                   7. Code
+ *   3. Header                 8. Tables
+ *   4. Frame and columns      9. A function's page
+ *   5. Left column and        10. A module's page
+ *      "On this page"
+ *
+ * A part a later change adds, such as the footer, gets a section of its own
+ * at the end. Phone width is TypeDoc's: up to 769px.
+ */
+
+/*
+ * 1. Colours and fonts.
+ *
+ * TypeDoc's style sheet switches each `--color-*` between its `--light-*` and
+ * `--dark-*` value, by the system's preference and by the theme the header's
+ * button sets (`data-theme` on the root); the values below replace TypeDoc's,
+ * so every part of a page TypeDoc draws follows the theme. A colour the site
+ * adds that differs by theme is a `--light-site-*` and `--dark-site-*` pair,
+ * switched the same way in the four blocks after them; a colour the same in
+ * both themes is a `--site-*` token. Text and links have a contrast of at
+ * least 4.5:1 on their backgrounds in both themes.
+ */
+:root {
+  --light-color-background: #fbfcfd;
+  --light-color-background-secondary: #eef2f5;
+  --light-color-background-active: #dbe2e8;
+  --light-color-accent: #dbe2e8;
+  --light-color-active-menu-item: var(--light-color-background-secondary);
+  --light-color-text: #16202a;
+  --light-color-contrast-text: #16202a;
+  --light-color-text-aside: #586572;
+  --light-color-link: #1a5c96;
+  --light-color-ts-keyword: #586572;
+  --light-color-ts-function: #1a5c96;
+  --light-color-ts-call-signature: #1a5c96;
+  --light-color-ts-parameter: #16202a;
+  --light-color-ts-property: #16202a;
+  /* TypeDoc's own, each the nearest shade at 4.5:1 on the backgrounds. */
+  --light-color-ts-enum: #7d6e15;
+  --light-color-ts-variable: #465fea;
+  --light-color-ts-class: #1f6fc0;
+  --light-color-ts-reference: #c23b63;
+  --light-color-ts-type-alias: #d3126f;
+  --light-color-alert-note: #2b5fa8;
+  --light-color-alert-tip: #2b5fa8;
+  --light-color-alert-important: #2b5fa8;
+  --light-color-alert-warning: #b0531b;
+  --light-color-alert-caution: #b0531b;
+  /*
+   * highlight.css's background of a code block: in each theme the shade
+   * nearest the secondary background at which every colour highlight.css
+   * gives the site's code has a contrast of at least 4.5:1.
+   */
+  --light-code-background: #fcfdfd;
+  --light-site-rule-heavy: #16202a;
+
+  --dark-color-background: #0f151b;
+  --dark-color-background-secondary: #18212a;
+  --dark-color-background-active: #27323d;
+  --dark-color-accent: #27323d;
+  --dark-color-active-menu-item: var(--dark-color-background-secondary);
+  --dark-color-text: #e4eaf0;
+  --dark-color-contrast-text: #e4eaf0;
+  --dark-color-text-aside: #9aa8b5;
+  --dark-color-link: #8ec5f2;
+  --dark-color-ts-keyword: #9aa8b5;
+  --dark-color-ts-function: #8ec5f2;
+  --dark-color-ts-call-signature: #8ec5f2;
+  --dark-color-ts-parameter: #e4eaf0;
+  --dark-color-ts-property: #e4eaf0;
+  --dark-color-alert-note: #8ec5f2;
+  --dark-color-alert-tip: #8ec5f2;
+  --dark-color-alert-important: #8ec5f2;
+  --dark-color-alert-warning: #f0a868;
+  --dark-color-alert-caution: #f0a868;
+  --dark-code-background: #12181f;
+  --dark-site-rule-heavy: #9aa8b5;
+
+  /* The 7-point thermal sensation scale, cold to hot. */
+  --site-sensation-cold: #2b5fa8;
+  --site-sensation-cool: #4f8fcf;
+  --site-sensation-slightly-cool: #9cc8e6;
+  --site-sensation-neutral: #bfe0c4;
+  --site-sensation-slightly-warm: #f5cf8a;
+  --site-sensation-warm: #ec9550;
+  --site-sensation-hot: #c8432f;
+
+  /* `assets/fonts/fonts.css`, which the docs build writes, names the faces. */
+  --site-font-text: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --site-font-code: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  --dim-toolbar-contents-height: 3.5rem;
+  --dim-toolbar-border-bottom-width: 5px;
+
+  --site-rule-heavy: var(--light-site-rule-heavy);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --site-rule-heavy: var(--light-site-rule-heavy);
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --site-rule-heavy: var(--dark-site-rule-heavy);
+  }
+}
+/*
+ * TypeDoc 0.28.20's blocks for a theme the button sets switch no
+ * `--color-alert-*`, so a note kept the system's theme's colours; they are
+ * switched here.
+ */
+:root[data-theme="light"] {
+  --site-rule-heavy: var(--light-site-rule-heavy);
+  --color-alert-note: var(--light-color-alert-note);
+  --color-alert-tip: var(--light-color-alert-tip);
+  --color-alert-important: var(--light-color-alert-important);
+  --color-alert-warning: var(--light-color-alert-warning);
+  --color-alert-caution: var(--light-color-alert-caution);
+}
+:root[data-theme="dark"] {
+  --site-rule-heavy: var(--dark-site-rule-heavy);
+  --color-alert-note: var(--dark-color-alert-note);
+  --color-alert-tip: var(--dark-color-alert-tip);
+  --color-alert-important: var(--dark-color-alert-important);
+  --color-alert-warning: var(--dark-color-alert-warning);
+  --color-alert-caution: var(--dark-color-alert-caution);
+}
+
+/* 2. Text: 16px Atkinson Hyperlegible Next; identifiers in IBM Plex Mono. */
+body {
+  font-family: var(--site-font-text);
+  font-size: 16px;
+  line-height: 1.6;
+}
+code,
+pre,
+.tsd-signature {
+  font-family: var(--site-font-code);
+}
+/* A long word, such as a URL, wraps rather than widen the page. */
+.col-content {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.tsd-breadcrumb {
+  font-size: 0.85rem;
+}
+.tsd-breadcrumb li:last-child::after {
+  content: none;
+}
+.tsd-page-title h1,
+.tsd-typography h1 {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0.25rem 0 1rem;
+  letter-spacing: -0.01em;
+}
+.tsd-typography h2,
+.tsd-panel-group > summary h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+  padding-top: 0.4rem;
+  border-top: 2px solid var(--site-rule-heavy);
+}
+.tsd-typography h3,
+.tsd-panel > h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+/* TypeDoc indents a panel's heading by 1.5rem; it starts at the text's edge. */
+.tsd-panel > h1,
+.tsd-panel > h2,
+.tsd-panel > h3 {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+@media (max-width: 769px) {
+  .tsd-page-title h1,
+  .tsd-typography h1 {
+    font-size: 1.7rem;
+  }
+}
+
+/*
+ * 3. Header, which the plugin's `siteHeader` builds in TypeDoc's
+ * `.tsd-toolbar-contents`: the site's name, the version and the page links
+ * on the left, then search, the theme button and the icon links in
+ * `#tsd-toolbar-links`. At phone width TypeDoc's style sheet hides
+ * `#tsd-toolbar-links` and shows the menu button, and the page and icon links
+ * are in the menu, `#tsd-sidebar-links`. The page link of the section shown
+ * is marked: a bar under it in the header, an underline in the menu. The
+ * header's bottom border is the thermal sensation scale, 7 equal steps;
+ * TypeDoc counts the border's width in the header's height.
+ */
+.tsd-page-toolbar {
+  background: var(--color-background);
+  border-bottom-style: solid;
+  border-image: linear-gradient(
+      to right,
+      var(--site-sensation-cold) 0 14.28%,
+      var(--site-sensation-cool) 0 28.57%,
+      var(--site-sensation-slightly-cool) 0 42.86%,
+      var(--site-sensation-neutral) 0 57.14%,
+      var(--site-sensation-slightly-warm) 0 71.43%,
+      var(--site-sensation-warm) 0 85.71%,
+      var(--site-sensation-hot) 0
+    )
+    1;
+}
+.tsd-toolbar-contents {
+  gap: 1rem;
+}
+.tsd-toolbar-contents > .title,
+.site-version {
+  margin-right: 0;
+  white-space: nowrap;
+}
+.tsd-toolbar-contents > .title {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.tsd-page-toolbar .site-version {
+  margin-left: -0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-aside);
+}
+.tsd-page-toolbar .site-version:hover {
+  color: var(--color-link);
+}
+.site-pages {
+  display: flex;
+  align-self: stretch;
+  margin: 0 auto 0 1rem;
+}
+.tsd-page-toolbar .site-pages a {
+  display: flex;
+  align-items: center;
+  padding: 0 0.85rem;
+  font-size: 0.95rem;
+  color: var(--color-text-aside);
+  border-bottom: 3px solid transparent;
+}
+.tsd-page-toolbar .site-pages a.current {
+  color: var(--color-text);
+  font-weight: 700;
+  border-bottom-color: var(--color-text);
+}
+#tsd-sidebar-links a.current {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+#tsd-search-trigger {
+  opacity: 1;
+}
+#tsd-toolbar-links {
+  gap: 0.75rem;
+  margin-right: 0;
+}
+#tsd-toolbar-links a {
+  display: inline-flex;
+}
+.tsd-page-toolbar #tsd-toolbar-links a,
+.tsd-navigation #tsd-sidebar-links a {
+  color: var(--color-text-aside);
+}
+.tsd-page-toolbar #tsd-toolbar-links a:hover {
+  color: var(--color-text);
+}
+/* TypeDoc's style sheet shows these at phone width only, with `display`. */
+#tsd-sidebar-links a {
+  align-items: center;
+  gap: 0.5rem;
+}
+/*
+ * The theme button shows the icon of the theme chosen; `docs/site.js` sets
+ * its `data-theme` and shows it once it finds TypeDoc's theme control.
+ */
+.site-theme-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+.site-theme-button:hover {
+  background: var(--color-background-secondary);
+}
+.site-theme-button[hidden],
+.site-theme-icon {
+  display: none;
+}
+.site-theme-button[data-theme="os"] [data-theme-value="os"],
+.site-theme-button[data-theme="light"] [data-theme-value="light"],
+.site-theme-button[data-theme="dark"] [data-theme-value="dark"] {
+  display: block;
+}
+@media (max-width: 769px) {
+  .tsd-toolbar-contents {
+    gap: 0.5rem;
+  }
+  .site-pages {
+    display: none;
+  }
+  #tsd-search-trigger {
+    margin-left: auto;
+  }
+}
+
+/*
+ * 4. Frame and columns: the header and the columns share one frame, 88rem
+ * wide and centred. From 1200px the left column, the page and "On this page"
+ * are 15rem, 54rem and 14rem wide.
+ */
+.container {
+  max-width: 88rem;
+  padding: 0 1.25rem;
+}
+@media (min-width: 1200px) {
+  .container-main {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 54rem) minmax(0, 14rem);
+    column-gap: 2.5rem;
+    justify-content: center;
+  }
+  .page-menu {
+    padding-left: 0;
+  }
+  .col-content {
+    padding: 0;
+  }
+}
+/*
+ * The home page and the header's other pages, which the plugin marks with
+ * `<meta name="site-layout" content="no-left-column">`, have no left column
+ * on a wide screen: "On this page" moves to the right. At phone width the
+ * menu still holds the navigation.
+ */
+@media (min-width: 770px) {
+  :root:has(meta[name="site-layout"][content="no-left-column"]) .site-menu {
+    display: none;
+  }
+  :root:has(meta[name="site-layout"][content="no-left-column"])
+    .container-main {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-areas: "content sidebar";
+  }
+}
+@media (min-width: 1200px) {
+  :root:has(meta[name="site-layout"][content="no-left-column"])
+    .container-main {
+    grid-template-columns: minmax(0, 3.5fr) minmax(0, 20rem);
+    grid-template-areas: "content toc";
+  }
+}
+
+/*
+ * 5. Left column and "On this page". The left column's group labels,
+ * "Modules" and "Guides and notes": the plugin's `siteNavigation` gives each
+ * an entry with neither a link nor children, which TypeDoc's `main.js` draws
+ * as a `span` with a folder icon (TypeDoc 0.28.20); the icon is hidden. If a
+ * TypeDoc upgrade draws such an entry otherwise, a label shows as TypeDoc
+ * draws it. A module's functions are listed in the code face.
+ */
+#tsd-nav-container > li > span {
+  display: block;
+  margin: 1rem 0 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-aside);
+}
+#tsd-nav-container > li:first-child > span {
+  margin-top: 0;
+}
+#tsd-nav-container > li > span > .tsd-kind-icon {
+  display: none;
+}
+.tsd-navigation a,
+.tsd-navigation summary > a {
+  font-size: 0.9rem;
+  padding: 0.1rem 0.4rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  border-radius: 4px;
+}
+.tsd-nested-navigation a {
+  font-family: var(--site-font-code);
+  font-size: 0.82rem;
+}
+.tsd-navigation a.current {
+  box-shadow: inset 2px 0 0 var(--color-link);
+  font-weight: 700;
+}
+.tsd-accordion-summary > svg {
+  width: 14px;
+  height: 14px;
+}
+.tsd-page-navigation h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-aside);
+}
+.tsd-page-navigation .tsd-accordion-details {
+  border-left: 1px solid var(--color-accent);
+}
+.tsd-page-navigation a {
+  font-size: 0.88rem;
+  padding: 0.1rem 0 0.1rem 0.75rem;
+  color: var(--color-text);
+}
+.tsd-page-navigation .tsd-accordion-summary > svg {
+  display: none;
+}
+/* In the phone menu, the left column follows the page and icon links. */
+@media (max-width: 769px) {
+  #tsd-sidebar-links {
+    margin-bottom: 1rem;
+  }
+}
+
+/*
+ * 6. Notes and warnings: a note, a tip and an important note on a cool tint,
+ * a warning and a caution on a warm one, each tint a step of the thermal
+ * sensation scale over the page's background. The label runs into the text.
+ */
+.tsd-alert {
+  border-left: 3px solid var(--alert-color);
+  background: color-mix(
+    in srgb,
+    var(--site-sensation-slightly-cool) 18%,
+    var(--color-background)
+  );
+  border-radius: 0 6px 6px 0;
+  padding: 0.5rem 0.8rem;
+  margin: 0.6rem 0;
+  font-size: 0.95rem;
+}
+.tsd-alert-warning,
+.tsd-alert-caution {
+  background: color-mix(
+    in srgb,
+    var(--site-sensation-slightly-warm) 25%,
+    var(--color-background)
+  );
+}
+.tsd-alert-title {
+  gap: 0.25rem;
+  margin: 0 0.4rem 0 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.tsd-alert-title svg {
+  width: 14px;
+  height: 14px;
+}
+.tsd-alert-title span {
+  margin-left: 0;
+}
+.tsd-alert-title + p {
+  display: inline;
+}
+.tsd-alert > p {
+  margin: 0.35rem 0 0;
+}
+
+/*
+ * 7. Code: a block has one background, highlight.css's, on the `pre`; the
+ * `code` inside it has none, which highlight.css also gives every `code`, so
+ * no box sits behind each line. Code in text sits on the page's secondary
+ * background. The copy button TypeDoc's `main.js` adds to a block takes the
+ * page's colours.
+ */
+pre {
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  padding: 0.85rem 1rem;
+}
+pre > code {
+  background: transparent;
+}
+:not(pre) > code {
+  background: var(--color-background-secondary);
+  font-size: 0.86em;
+  border-radius: 3px;
+  padding: 0.05rem 0.25rem;
+}
+pre > button {
+  font-family: var(--site-font-text);
+  font-size: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/*
+ * 8. Tables on the hand-written pages: a full grid. A table wider than the
+ * page scrolls on its own, so the page does not.
+ */
+.tsd-typography table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  font-size: 0.92rem;
+}
+.tsd-typography th,
+.tsd-typography td {
+  border: 1px solid var(--color-accent);
+  padding: 0.35rem 0.65rem;
+}
+.tsd-typography thead th {
+  background: var(--color-background-secondary);
+  font-weight: 700;
+  text-align: left;
+}
+
+/*
+ * 9. A function's page shows TypeDoc's call line, its inputs and outputs
+ * written out with their types, and lists an object's keys once, under
+ * Parameters and Returns (ADR 0020's 2026-11-20 amendments). TypeDoc 0.28's
+ * default theme also writes an object type out inline, one
+ * `.tsd-kind-property` span per key, as direct children of a `span` that is
+ * the first child of a `.tsd-parameter-list > li` and of
+ * `h4.tsd-returns-title`; the rules below hide those two copies. A function
+ * whose inputs and outputs are not objects has none of them, so its page is
+ * left as it is. If a TypeDoc upgrade changes this markup, a page shows the
+ * object types again under Parameters or after Returns, or a blank or shifted
+ * item under Parameters.
  */
 
 /*
@@ -77,133 +606,12 @@
 }
 
 /*
- * On the `models` page, a left border marks an introduction and the models
- * under it, so that the models listed next read as outside that group. The
- * plugin's `categorizedList` sets the class `site-category`, not the theme.
+ * 10. A module's page. On the `models` page, a left border marks an
+ * introduction and the models under it, so that the models listed next read
+ * as outside that group. The plugin's `categorizedList` sets the class
+ * `site-category`, not the theme.
  */
 .site-category {
   border-left: 2px solid var(--color-accent);
   padding-left: 1rem;
-}
-
-/*
- * The header, which the plugin's `siteHeader` builds in TypeDoc's
- * `.tsd-toolbar-contents`: the site's name, the version and the page links
- * on the left, then search, the theme button and the icon links in
- * `#tsd-toolbar-links`. At phone width TypeDoc's style sheet hides
- * `#tsd-toolbar-links` and shows the menu button, and the page and icon links
- * are in the menu, `#tsd-sidebar-links`. The page link of the section shown
- * is underlined.
- */
-.tsd-toolbar-contents {
-  gap: 1rem;
-}
-.tsd-toolbar-contents > .title,
-.site-version {
-  margin-right: 0;
-  white-space: nowrap;
-}
-.site-pages {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin: 0 auto 0 1rem;
-}
-.site-pages a.current,
-#tsd-sidebar-links a.current {
-  text-decoration: underline;
-  text-underline-offset: 0.3em;
-}
-#tsd-toolbar-links {
-  gap: 0.75rem;
-  margin-right: 0;
-}
-#tsd-toolbar-links a {
-  display: inline-flex;
-}
-/* TypeDoc's style sheet shows these at phone width only, with `display`. */
-#tsd-sidebar-links a {
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/*
- * The theme button shows the icon of the theme chosen; `docs/site.js` sets
- * its `data-theme` and shows it once it finds TypeDoc's theme control.
- */
-.site-theme-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-}
-.site-theme-button[hidden],
-.site-theme-icon {
-  display: none;
-}
-.site-theme-button[data-theme="os"] [data-theme-value="os"],
-.site-theme-button[data-theme="light"] [data-theme-value="light"],
-.site-theme-button[data-theme="dark"] [data-theme-value="dark"] {
-  display: block;
-}
-
-@media (max-width: 769px) {
-  .tsd-toolbar-contents {
-    gap: 0.5rem;
-  }
-  .site-pages {
-    display: none;
-  }
-  #tsd-search-trigger {
-    margin-left: auto;
-  }
-}
-
-/*
- * The left column's group labels, "Modules" and "Guides and notes": the
- * plugin's `siteNavigation` gives each an entry with neither a link nor
- * children, which TypeDoc's `main.js` draws as a `span` with a folder icon
- * (TypeDoc 0.28.20); the icon is hidden. If a TypeDoc upgrade draws such an
- * entry otherwise, a label shows as TypeDoc draws it.
- */
-#tsd-nav-container > li > span {
-  display: block;
-  margin: 1rem 0 0.25rem;
-  font-weight: 600;
-}
-#tsd-nav-container > li:first-child > span {
-  margin-top: 0;
-}
-#tsd-nav-container > li > span > .tsd-kind-icon {
-  display: none;
-}
-/* In the phone menu, the left column follows the page and icon links. */
-@media (max-width: 769px) {
-  #tsd-sidebar-links {
-    margin-bottom: 1rem;
-  }
-}
-
-/*
- * The home page and the header's other pages, which the plugin marks with
- * `<meta name="site-layout" content="no-left-column">`, have no left column
- * on a wide screen: "On this page" moves to the right. At phone width the
- * menu still holds the navigation.
- */
-@media (min-width: 770px) {
-  :root:has(meta[name="site-layout"][content="no-left-column"]) .site-menu {
-    display: none;
-  }
-  :root:has(meta[name="site-layout"][content="no-left-column"])
-    .container-main {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    grid-template-areas: "content sidebar";
-  }
-}
-@media (min-width: 1200px) {
-  :root:has(meta[name="site-layout"][content="no-left-column"])
-    .container-main {
-    grid-template-columns: minmax(0, 3.5fr) minmax(0, 20rem);
-    grid-template-areas: "content toc";
-  }
 }

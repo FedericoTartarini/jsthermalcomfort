@@ -5,12 +5,13 @@
  * that a rule here wins over it whatever its selector. One section per part
  * of a page, each with its own phone-width rules:
  *
- *   1. Colours and fonts      6. Notes and warnings
- *   2. Text                   7. Code
- *   3. Header                 8. Tables
- *   4. Frame and columns      9. A function's page
- *   5. Left column and        10. A module's page
+ *   1. Colours and fonts      7. Code
+ *   2. Text                   8. Tables
+ *   3. Header                 9. A function's page
+ *   4. Frame and columns      10. A module's page
+ *   5. Left column and        11. The documentation's overview
  *      "On this page"
+ *   6. Notes and warnings
  *
  * A part a later change adds, such as the footer, gets a section of its own
  * at the end. Phone width is TypeDoc's: up to 769px.
@@ -614,4 +615,25 @@ pre > button {
 .site-category {
   border-left: 2px solid var(--color-accent);
   padding-left: 1rem;
+}
+
+/*
+ * 11. The documentation's overview (`modules.html`): a module's members, and
+ * the hand-written pages, in columns, as many as the width holds; one column
+ * at phone width. A name longer than its column wraps rather than running
+ * into the next column.
+ */
+.site-overview-members,
+.site-overview-pages {
+  columns: 18rem auto;
+  column-gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1.5rem;
+}
+.site-overview-members li,
+.site-overview-pages li {
+  break-inside: avoid;
+  padding: 0.1rem 0;
+  overflow-wrap: anywhere;
 }

@@ -84,7 +84,7 @@ function _to17array(inp) {
  * such as body height, weight, age, sex, etc.
  *
  * Environmental conditions such as air temperature, mean radiant temperature, air velocity, etc.
- * can be set using the setter methods. (ex. X.tdb, X.tr X.v)
+ * can be set using the setter methods. (ex. `X.tdb`, `X.tr`, `X.v`)
  * If you want to set the different conditions in each body part, set them
  * as a 17 lengths of list, dictionary, or numpy array format.
  *

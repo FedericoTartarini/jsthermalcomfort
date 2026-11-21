@@ -970,7 +970,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set tdb(inp) {
     this._ta = _to17array(inp);
@@ -986,7 +986,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set tr(inp) {
     this._tr = _to17array(inp);
@@ -1009,7 +1009,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set to(inp) {
     this._ta = _to17array(inp);
@@ -1026,7 +1026,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set rh(inp) {
     this._rh = _to17array(inp);
@@ -1042,7 +1042,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set v(inp) {
     this._va = _to17array(inp);
@@ -1058,7 +1058,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | string}
+   * @param {number | string} inp
    */
   set posture(inp) {
     if (inp === 0) {
@@ -1090,7 +1090,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set clo(inp) {
     this._clo = _to17array(inp);
@@ -1106,7 +1106,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number}
+   * @param {number} inp
    */
   set par(inp) {
     this._par = inp;
@@ -1122,7 +1122,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {math.Matrix}
+   * @param {math.Matrix} inp
    */
   set body_temp(inp) {
     this._bodytemp = inp.clone();
@@ -1227,7 +1227,7 @@ export class JOS3 {
   }
 
   /**
-   * @param inp {number | number[] | object | math.Matrix}
+   * @param {number | number[] | object | math.Matrix} inp
    */
   set t_skin(inp) {
     this._bodytemp = math.subset(

@@ -106,6 +106,97 @@ function _to17array(inp) {
  * Note: To maintain consistency in variable names for jsthermalcomfort and pythermalcomfort,
  * some variable names differ from those used in the original paper.
  *
+ * **Attributes**
+ *
+ * - `tdb` - Dry bulb air temperature.
+ * - `tr` - Mean radiant temperature.
+ * - `to` - Operative temperature.
+ * - `rh` - Relative humidity.
+ * - `v` - Air velocity.
+ * - `clo` - Clothing insulation.
+ * - `posture` - Posture of the subject.
+ * - `par` - Physical activity ratio.
+ * - `body_temp` - Body temperature.
+ * - `bsa` - Body surface area.
+ * - `r_t` - Dry heat resistances between skin and ambience.
+ * - `r_et` - Evaporative heat resistances between skin and ambience.
+ * - `w` - Skin wettedness.
+ * - `w_mean` - Mean skin wettedness.
+ * - `t_skin_mean` - Mean skin temperature.
+ * - `t_skin` - Skin temperature.
+ * - `t_core` - Core temperature.
+ * - `t_cb` - Central blood temperature.
+ * - `t_artery` - Arterial blood temperature.
+ * - `t_vein` - Venous blood temperature.
+ * - `t_superficial_vein` - Superficial venous blood temperature.
+ * - `t_muscle` - Muscle temperature.
+ * - `t_fat` - Fat temperature.
+ * - `body_names` - Names of the body parts.
+ * - `results` - Dictionary of the simulation results.
+ * - `bmr` - Basal metabolic rate.
+ *
+ * **Returns**
+ *
+ * - `cardiac_output` - cardiac output (the sum of the whole blood flow) [L/h]
+ * - `dt` - time step [sec]
+ * - `q_res` - heat loss by respiration [W]
+ * - `q_skin2env` - total heat loss from the skin (each body part) [W]
+ * - `q_thermogenesis_total` - total thermogenesis of the whole body [W]
+ * - `simulation_time` - simulation times [sec]
+ * - `t_core` - core temperature (each body part) [°C]
+ * - `t_skin` - skin temperature (each body part) [°C]
+ * - `t_skin_mean` - mean skin temperature [°C]
+ * - `w` - skin wettedness (each body part) [-]
+ * - `w_mean` - mean skin wettedness [-]
+ * - `weight_loss_by_evap_and_res` - weight loss by the evaporation and respiration of the whole body [g/sec]
+ * - `age` - age [years]
+ * - `bf_ava_foot` - AVA blood flow rate of one foot [L/h]
+ * - `bf_ava_hand` - AVA blood flow rate of one hand [L/h]
+ * - `bf_core` - core blood flow rate (each body part) [L/h]
+ * - `bf_fat` - fat blood flow rate (each body part) [L/h]
+ * - `bf_muscle` - muscle blood flow rate (each body part) [L/h]
+ * - `bf_skin` - skin blood flow rate (each body part) [L/h]
+ * - `bsa` - body surface area (each body part) [m2]
+ * - `clo` - clothing insulation (each body part) [clo]
+ * - `e_max` - maximum evaporative heat loss from the skin (each body part) [W]
+ * - `e_skin` - evaporative heat loss from the skin (each body part) [W]
+ * - `e_sweat` - evaporative heat loss from the skin by only sweating (each body part) [W]
+ * - `fat` - body fat rate [%]
+ * - `height` - body height [m]
+ * - `par` - physical activity ratio [-]
+ * - `q_bmr_core` - core thermogenesis by basal metabolism (each body part) [W]
+ * - `q_bmr_fat` - fat thermogenesis by basal metabolism (each body part) [W]
+ * - `q_bmr_muscle` - muscle thermogenesis by basal metabolism (each body part) [W]
+ * - `q_bmr_skin` - skin thermogenesis by basal metabolism (each body part) [W]
+ * - `q_nst` - core thermogenesis by non-shivering (each body part) [W]
+ * - `q_res_latent` - latent heat loss by respiration (each body part) [W]
+ * - `q_res_sensible` - sensible heat loss by respiration (each body part) [W]
+ * - `q_shiv` - core or muscle thermogenesis by shivering (each body part) [W]
+ * - `q_skin2env_latent` - latent heat loss from the skin (each body part) [W]
+ * - `q_skin2env_sensible` - sensible heat loss from the skin (each body part) [W]
+ * - `q_thermogenesis_core` - core total thermogenesis (each body part) [W]
+ * - `q_thermogenesis_fat` - fat total thermogenesis (each body part) [W]
+ * - `q_thermogenesis_muscle` - muscle total thermogenesis (each body part) [W]
+ * - `q_thermogenesis_skin` - skin total thermogenesis (each body part) [W]
+ * - `q_work` - core or muscle thermogenesis by work (each body part) [W]
+ * - `r_et` - total clothing evaporative heat resistance (each body part) [(m2*kPa)/W]
+ * - `r_t` - total clothing heat resistance (each body part) [(m2*K)/W]
+ * - `rh` - relative humidity (each body part) [%]
+ * - `sex` - sex
+ * - `t_artery` - arterial temperature (each body part) [°C]
+ * - `t_cb` - central blood temperature [°C]
+ * - `t_core_set` - core set point temperature (each body part) [°C]
+ * - `t_fat` - fat temperature (each body part) [°C]
+ * - `t_muscle` - muscle temperature (each body part) [°C]
+ * - `t_skin_set` - skin set point temperature (each body part) [°C]
+ * - `t_superficial_vein` - superficial vein temperature (each body part) [°C]
+ * - `t_vein` - vein temperature (each body part) [°C]
+ * - `tdb` - dry bulb air temperature (each body part) [°C]
+ * - `to` - operative temperature (each body part) [°C]
+ * - `tr` - mean radiant temperature (each body part) [°C]
+ * - `v` - air velocity (each body part) [m/s]
+ * - `weight` - body weight [kg]
+ *
  * @public
  */
 export class JOS3 {
@@ -184,7 +275,9 @@ export class JOS3 {
     this._cap = capacity(height, weight, bsa_equation, age, ci);
 
     // Set initial core and skin temperature set points [°C]
+    /** @hidden */
     this.setpt_cr = math.multiply(math.ones(17), JOS3Defaults.core_temperature);
+    /** @hidden */
     this.setpt_sk = math.multiply(math.ones(17), JOS3Defaults.skin_temperature);
 
     // Initialize body temperature [°C]
@@ -225,12 +318,15 @@ export class JOS3 {
     this._hc = null; // Convective heat transfer coefficient
     /** @hidden */
     this._hr = null; // Radiative heat transfer coefficient
+    /** @hidden */
     this.ex_q = math.zeros(NUM_NODES); // External heat gain
     /** @hidden */
     this._t = 0; // Elapsed time
     /** @hidden */
     this._cycle = 0; // Cycle time
+    /** @hidden */
     this.model_name = "JOS3"; // Model name
+    /** @hidden */
     this.options = {
       nonshivering_thermogenesis: true,
       cold_acclimated: false,
@@ -964,6 +1060,7 @@ export class JOS3 {
    * Dry-bulb air temperature.
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get tdb() {
     return this._ta;
@@ -971,6 +1068,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set tdb(inp) {
     this._ta = _to17array(inp);
@@ -980,6 +1078,7 @@ export class JOS3 {
    * Mean radiant temperature [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get tr() {
     return this._tr;
@@ -987,6 +1086,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set tr(inp) {
     this._tr = _to17array(inp);
@@ -996,6 +1096,7 @@ export class JOS3 {
    * Operative temperature [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get to() {
     const hc = fixed_hc(
@@ -1010,6 +1111,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set to(inp) {
     this._ta = _to17array(inp);
@@ -1020,6 +1122,7 @@ export class JOS3 {
    * Relative humidity [%].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get rh() {
     return this._rh;
@@ -1027,6 +1130,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set rh(inp) {
     this._rh = _to17array(inp);
@@ -1036,6 +1140,7 @@ export class JOS3 {
    * Air velocity [m/s].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get v() {
     return this._va;
@@ -1043,6 +1148,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set v(inp) {
     this._va = _to17array(inp);
@@ -1052,6 +1158,7 @@ export class JOS3 {
    * Current JOS3 posture.
    *
    * @return {string}
+   * @hidden
    */
   get posture() {
     return this._posture;
@@ -1059,6 +1166,7 @@ export class JOS3 {
 
   /**
    * @param {number | string} inp
+   * @hidden
    */
   set posture(inp) {
     if (inp === 0) {
@@ -1084,6 +1192,7 @@ export class JOS3 {
    * Clothing insulation [clo].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get clo() {
     return this._clo;
@@ -1091,6 +1200,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set clo(inp) {
     this._clo = _to17array(inp);
@@ -1100,6 +1210,7 @@ export class JOS3 {
    * Physical activity ratio [-].This equals the ratio of metabolic rate to basal metabolic rate. par of sitting quietly is 1.2.
    *
    * @return {number}
+   * @hidden
    */
   get par() {
     return this._par;
@@ -1107,6 +1218,7 @@ export class JOS3 {
 
   /**
    * @param {number} inp
+   * @hidden
    */
   set par(inp) {
     this._par = inp;
@@ -1116,6 +1228,7 @@ export class JOS3 {
    * All segment temperatures of JOS-3.
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get body_temp() {
     return this._bodytemp;
@@ -1123,6 +1236,7 @@ export class JOS3 {
 
   /**
    * @param {math.Matrix} inp
+   * @hidden
    */
   set body_temp(inp) {
     this._bodytemp = inp.clone();
@@ -1132,6 +1246,7 @@ export class JOS3 {
    * Body surface areas by local body segments [m2].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get bsa() {
     return this._bsa.clone();
@@ -1141,6 +1256,7 @@ export class JOS3 {
    * Dry heat resistances between the skin and ambience areas by local body segments [(m2*K)/W].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get r_t() {
     const hc = fixed_hc(
@@ -1157,6 +1273,7 @@ export class JOS3 {
    * w (Evaporative) heat resistances between the skin and ambience areas by local body segments [(m2*kPa)/W].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get r_et() {
     const hc = fixed_hc(
@@ -1171,6 +1288,7 @@ export class JOS3 {
    * Skin wettedness on local body segments [-].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get w() {
     const err_cr = math.subtract(this.t_core, this.setpt_cr);
@@ -1194,6 +1312,7 @@ export class JOS3 {
    * Mean skin wettedness of the whole body [-].
    *
    * @return {number}
+   * @hidden
    */
   get w_mean() {
     const wet = this.w;
@@ -1205,6 +1324,7 @@ export class JOS3 {
    * Mean skin temperature of the whole body [°C].
    *
    * @return {number}
+   * @hidden
    */
   get t_skin_mean() {
     return (
@@ -1221,6 +1341,7 @@ export class JOS3 {
    * Skin temperatures by the local body segments [°C].
    *
    * @returns {math.Matrix}
+   * @hidden
    */
   get t_skin() {
     return math.subset(this._bodytemp, math.index(INDEX["skin"]));
@@ -1228,6 +1349,7 @@ export class JOS3 {
 
   /**
    * @param {number | number[] | object | math.Matrix} inp
+   * @hidden
    */
   set t_skin(inp) {
     this._bodytemp = math.subset(
@@ -1241,6 +1363,7 @@ export class JOS3 {
    * Skin temperatures by the local body segments [°C].
    *
    * @returns {math.Matrix}
+   * @hidden
    */
   get t_core() {
     return math.subset(this._bodytemp, math.index(INDEX["core"]));
@@ -1250,6 +1373,7 @@ export class JOS3 {
    * Temperature at central blood pool [°C].
    *
    * @return {number}
+   * @hidden
    */
   get t_cb() {
     return this._bodytemp.get([0]);
@@ -1259,6 +1383,7 @@ export class JOS3 {
    * Arterial temperatures by the local body segments [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get t_artery() {
     return math.subset(this._bodytemp, math.index(INDEX["artery"]));
@@ -1268,6 +1393,7 @@ export class JOS3 {
    * Vein temperatures by the local body segments [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get t_vein() {
     return math.subset(this._bodytemp, math.index(INDEX["vein"]));
@@ -1277,6 +1403,7 @@ export class JOS3 {
    * Superficial vein temperatures by the local body segments [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get t_superficial_vein() {
     return math.subset(this._bodytemp, math.index(INDEX["sfvein"]));
@@ -1286,6 +1413,7 @@ export class JOS3 {
    * Muscle temperatures of head and pelvis [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get t_muscle() {
     return math.subset(this._bodytemp, math.index(INDEX["muscle"]));
@@ -1295,6 +1423,7 @@ export class JOS3 {
    * Fat temperatures of head and pelvis [°C].
    *
    * @return {math.Matrix}
+   * @hidden
    */
   get t_fat() {
     return math.subset(this._bodytemp, math.index(INDEX["fat"]));
@@ -1304,6 +1433,7 @@ export class JOS3 {
    * JOS3 body names
    *
    * @return {string[]}
+   * @hidden
    */
   get body_names() {
     return BODY_NAMES;
@@ -1321,6 +1451,7 @@ export class JOS3 {
   /**
    * Basal metabolic rate.
    * @returns {number}
+   * @hidden
    */
   get bmr() {
     const tcr = basal_met(

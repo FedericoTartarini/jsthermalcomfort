@@ -21,7 +21,7 @@ title: Authors
 
 ## Contact us
 
-If you need help, would like to ask a question about the tool, give us a feedback, or suggest a new feature you can now use [GitHub discussions](https://github.com/FedericoTartarini/jsthermalcomfort/discussions).
+If you need help, would like to ask a question about the tool, give us a feedback, or suggest a new feature you can now use [GitHub issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues).
 
 ## Bug reports
 

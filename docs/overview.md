@@ -92,8 +92,7 @@ Before submitting a pull request, please ensure:
 
 ## Where to get help
 
-- Open an issue on [GitHub Issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues) for bug reports and feature requests.
-- Participate in the [Discussions section](https://github.com/FedericoTartarini/jsthermalcomfort/discussions) for general questions and feedback.
+- Open an issue on [GitHub Issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues) for bug reports, feature requests, general questions and feedback.
 
 ## License
 

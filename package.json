@@ -34,6 +34,7 @@
       "default": "./lib/esm/utilities/index.js"
     }
   },
+  "sideEffects": false,
   "scripts": {
     "clean": "rm -rf ./lib",
     "build": "npm run clean && tsc -p ./configs/tsconfig.esm.json",

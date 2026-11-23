@@ -600,6 +600,7 @@ export function _gagge_two_nodes_optimized(
   let delta = 0.0001;
   let dx = 100.0;
   let set_old = round(t_skin - q_skin / h_d_s, 2);
+  let iterations = 0;
   while (Math.abs(dx) > 0.01) {
     const err_1 =
       q_skin -
@@ -617,6 +618,9 @@ export function _gagge_two_nodes_optimized(
     _set = set_old - (delta * err_1) / (err_2 - err_1);
     dx = _set - set_old;
     set_old = _set;
+    iterations += 1;
+    if (Math.abs(dx) > 0.01 && iterations === 1000)
+      throw new Error("Max iterations exceeded");
   }
 
   // calculate Effective Temperature (ET)
@@ -625,6 +629,7 @@ export function _gagge_two_nodes_optimized(
   let et_old = t_skin - q_skin / h_d;
   delta = 0.0001;
   dx = 100.0;
+  iterations = 0;
   while (Math.abs(dx) > 0.01) {
     const err_1 =
       q_skin -
@@ -642,6 +647,9 @@ export function _gagge_two_nodes_optimized(
     et = et_old - (delta * err_1) / (err_2 - err_1);
     dx = et - et_old;
     et_old = et;
+    iterations += 1;
+    if (Math.abs(dx) > 0.01 && iterations === 1000)
+      throw new Error("Max iterations exceeded");
   }
 
   const tbm_l = (0.194 / met_to_w_m2) * rm + 36.301; // lower limit for evaporative regulation

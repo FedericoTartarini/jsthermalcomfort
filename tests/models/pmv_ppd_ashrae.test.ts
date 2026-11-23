@@ -438,6 +438,24 @@ describe("pmv_ppd_ashrae (JS-only)", () => {
         new TypeError(message("7730")),
       );
     });
+
+    // Deviation two_nodes_gagge-15: upstream did not return for these inputs within 60 s, measured on 4.8.1 in the parity image. The limits follow cooling_effect (models/pmv_ppd_ashrae.py:193, :212), so limit_inputs does not stop the call.
+    test("a negative clo whose two-node loop does not converge throws", () => {
+      expect(
+        call({
+          tdb: 36.85753577854484,
+          tr: 40,
+          vr: 1.770373122766614,
+          rh: 7.891225372441113,
+          met: 1.5739740137942135,
+          clo: -0.48546948563307524,
+          wme: 0.1,
+          limit_inputs: true,
+          round_output: false,
+          airspeed_control: true,
+        }),
+      ).toThrow(new Error("Max iterations exceeded"));
+    });
   });
 
   // Deviation pmv_ppd_ashrae-1.

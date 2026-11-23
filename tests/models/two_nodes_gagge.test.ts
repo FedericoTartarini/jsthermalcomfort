@@ -235,6 +235,20 @@ describe("two_nodes_gagge (JS-only)", () => {
       );
   });
 
+  // Deviation two_nodes_gagge-15: upstream did not return for these inputs within 120 s, measured on 4.8.1 in the parity image.
+  test("a loop that has not converged after 1000 iterations throws", () => {
+    expect(() =>
+      call({
+        tdb: 11.837991976644844,
+        tr: 35.48612581565976,
+        v: 0.341676564887166,
+        rh: 1.5204613329842687,
+        met: 2.9781816066242754,
+        clo: -0.989995970400741,
+      }),
+    ).toThrow(new Error("Max iterations exceeded"));
+  });
+
   // Deviation two_nodes_gagge-2.
   test("returns no warnings, as upstream emits none", () => {
     expect(call(base).warnings).toEqual([]);

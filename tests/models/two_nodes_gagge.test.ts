@@ -249,6 +249,13 @@ describe("two_nodes_gagge (JS-only)", () => {
     ).toThrow(new Error("Max iterations exceeded"));
   });
 
+  // Deviation two_nodes_gagge-15: upstream returns set -72.51 and et 39125895.62 for these inputs, measured on 4.8.1 in the parity image; without the cap the library's longer loop ends after 1348 iterations.
+  test("a loop that converges after more than 1000 iterations throws too", () => {
+    expect(() =>
+      call({ tdb: 25, tr: 25, v: 1, rh: 10, met: 1, clo: -0.8 }),
+    ).toThrow(new Error("Max iterations exceeded"));
+  });
+
   // Deviation two_nodes_gagge-2.
   test("returns no warnings, as upstream emits none", () => {
     expect(call(base).warnings).toEqual([]);

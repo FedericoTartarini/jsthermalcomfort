@@ -201,21 +201,31 @@ describe("humidex (JS-only)", () => {
     });
   });
 
-  // Where the classifier gives no label, the model returns upstream's default.
-  test("classifyFromBins of the returned humidex gives the returned discomfort", () => {
+  // The tests above pin the label where the classifier gives none.
+  test("classifyFromBins of the returned humidex gives the returned discomfort, and no label only where humidex is null or above 1000", () => {
     const { classifier } = HUMIDEX_INFO.outputs.discomfort;
+    const tdbs = [
+      ...Array.from({ length: 33 }, (_, i) => -20 + 2.5 * i),
+      200,
+      300,
+      -237.8,
+    ];
     for (const model of ["rana", "masterson"] as const)
       for (const round_output of [true, false])
-        for (let tdb = -20; tdb <= 60; tdb += 2.5)
+        for (const tdb of tdbs)
           for (let rh = 0; rh <= 100; rh += 5) {
             const result = humidex({ tdb, rh, model, round_output });
             const label =
               result.humidex === null
                 ? NaN
                 : classifyFromBins(result.humidex, classifier);
-            expect(result.discomfort).toBe(
-              typeof label === "string" ? label : "Heat stroke probable",
-            );
+            if (typeof label === "string") {
+              expect(result.discomfort).toBe(label);
+            } else {
+              expect(result.humidex === null || result.humidex > 1000).toBe(
+                true,
+              );
+            }
           }
   });
 

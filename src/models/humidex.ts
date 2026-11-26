@@ -1,8 +1,23 @@
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { parseInputs } from "../_internal/define.ts";
 import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
+import { _mapping } from "../_internal/validation.ts";
 import { dew_point_tmp } from "../psychrometrics/dew_point_tmp.ts";
+
+const STRESS_CATEGORIES = deepFreeze({
+  edges: [30, 35, 40, 45, 54, 1000],
+  labels: [
+    "Little or no discomfort",
+    "Noticeable discomfort",
+    "Evident discomfort",
+    "Intense discomfort; avoid exertion",
+    "Dangerous discomfort",
+    "Heat stroke probable",
+  ],
+  right: true,
+} as const satisfies ClassifierBins);
 
 /** Describes the standards, inputs and outputs of {@link humidex}. */
 export const HUMIDEX_INFO = deepFreeze({
@@ -22,7 +37,13 @@ export const HUMIDEX_INFO = deepFreeze({
   },
   outputs: {
     humidex: { kind: "numeric", nullable: true, unit: "°C" },
-    discomfort: { kind: "label", unit: null },
+    discomfort: {
+      kind: "label",
+      nullable: true,
+      unit: null,
+      // The masks' thresholds, published as bins (deviation humidex-1).
+      classifier: STRESS_CATEGORIES,
+    },
   },
 } as const satisfies ModelInfo);
 
@@ -62,7 +83,8 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  * To access the `humidex` and `discomfort` values, use the respective properties of the returned `Humidex` object, e.g., `result.humidex`.
  *
  * - `humidex` - Humidex value, [°C].
- * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016).
+ * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016);
+ *   `null` where `humidex` is `null` or above 1000 °C.
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `RangeError` If `rh` is below 0 or above 100, or `model` is a string other than 'rana' and 'masterson'.
@@ -114,13 +136,11 @@ export function humidex(inputs: HumidexInputs): Humidex {
     hi = round(hi, 1);
   }
 
-  let stress_category = "Heat stroke probable";
-  if (hi <= 30) stress_category = "Little or no discomfort";
-  if (hi > 30 && hi <= 35) stress_category = "Noticeable discomfort";
-  if (hi > 35 && hi <= 40) stress_category = "Evident discomfort";
-  if (hi > 40 && hi <= 45)
-    stress_category = "Intense discomfort; avoid exertion";
-  if (hi > 45 && hi <= 54) stress_category = "Dangerous discomfort";
+  // The masks become the info's classifier, with no default label (deviation humidex-9).
+  const stress_category = _mapping(
+    hi,
+    HUMIDEX_INFO.outputs.discomfort.classifier,
+  );
 
   return buildOutputs(
     HUMIDEX_INFO,

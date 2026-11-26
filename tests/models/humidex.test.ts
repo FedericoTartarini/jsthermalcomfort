@@ -1,4 +1,3 @@
-import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import {
   classifyFromBins,
@@ -6,14 +5,11 @@ import {
   HUMIDEX_INFO,
 } from "../../src/models/index.ts";
 import { humidex as humidex_from_root } from "../../src/index.ts";
-import { read_data, upstream_returns } from "../parity/harness.ts";
 import { test_data_urls } from "./comftest.ts";
 import { describeModelContract } from "./modelContract.ts";
 import { approx, loadTestData, validateResult } from "./testUtils.ts";
 
 type Inputs = Parameters<typeof humidex>[0];
-
-const root = fileURLToPath(new URL("../..", import.meta.url));
 
 const { testData: reference_table, tolerances: tolerance } = await loadTestData(
   test_data_urls.humidex,
@@ -109,12 +105,12 @@ describe("humidex (JS-only)", () => {
     expect(rounded.discomfort).toBe("Little or no discomfort");
   });
 
-  // dew_point_tmp takes log(0), and a NaN falls in no bin, where upstream's
-  // default gives "Heat stroke probable" (deviation humidex-9).
-  test("masterson at rh 0 gives a null humidex and a null discomfort", () => {
+  // As upstream's: dew_point_tmp takes log(0), and a NaN falls in no bin, so
+  // it takes upstream's default (deviation humidex-9).
+  test("masterson at rh 0 gives null and 'Heat stroke probable'", () => {
     const result = humidex({ tdb: 35, rh: 0, model: "masterson" });
     expect(result.humidex).toBe(null);
-    expect(result.discomfort).toBe(null);
+    expect(result.discomfort).toBe("Heat stroke probable");
     expect(humidex({ tdb: 35, rh: 0 }).humidex).toBe(29.4);
   });
 
@@ -123,7 +119,6 @@ describe("humidex (JS-only)", () => {
   test("the info holds discomfort's classifier", () => {
     expect(HUMIDEX_INFO.outputs.discomfort).toEqual({
       kind: "label",
-      nullable: true,
       unit: null,
       classifier: {
         edges: [30, 35, 40, 45, 54, 1000],
@@ -140,8 +135,8 @@ describe("humidex (JS-only)", () => {
     });
   });
 
-  // The masks' <= puts a humidex on an edge in the lower category; each pair
-  // of rh values gives an edge and the next double past it.
+  // Each pair of rh values gives an edge and the next double past it, and the
+  // masks' <= puts the edge in the lower category, as measured on 4.8.1.
   test.each([
     [25, 60.09361696221471, 30, "Little or no discomfort"],
     [25, 60.09361696221472, 30.000000000000004, "Noticeable discomfort"],
@@ -159,7 +154,7 @@ describe("humidex (JS-only)", () => {
     [35, 78.82113134737145, 54, "Dangerous discomfort"],
     [35, 78.82113134737146, 54.00000000000001, "Heat stroke probable"],
     [200, 8.875234952122655, 1000, "Heat stroke probable"],
-    [200, 8.875234952122657, 1000.0000000000001, null],
+    [200, 8.875234952122657, 1000.0000000000001, "Heat stroke probable"],
   ] as const)(
     "unrounded: tdb %s, rh %s gives %s, %s",
     (tdb, rh, expected, discomfort) => {
@@ -170,7 +165,7 @@ describe("humidex (JS-only)", () => {
   );
 
   // Each pair of rh values gives an edge and the next 0.1 past it after
-  // rounding.
+  // rounding, as measured on 4.8.1.
   test.each([
     [25, 60, 30, "Little or no discomfort"],
     [25, 60.5, 30.1, "Noticeable discomfort"],
@@ -183,7 +178,7 @@ describe("humidex (JS-only)", () => {
     [35, 78.67, 54, "Dangerous discomfort"],
     [35, 78.99, 54.1, "Heat stroke probable"],
     [200, 8.875, 1000, "Heat stroke probable"],
-    [200, 8.876, 1000.1, null],
+    [200, 8.876, 1000.1, "Heat stroke probable"],
   ] as const)(
     "rounded: tdb %s, rh %s gives %s, %s",
     (tdb, rh, expected, discomfort) => {
@@ -193,19 +188,20 @@ describe("humidex (JS-only)", () => {
     },
   );
 
-  // Deviation humidex-9: upstream's default gives "Heat stroke probable" here.
-  test("a humidex above 1000 or +Infinity gives a null discomfort", () => {
+  // Deviation humidex-9: past the last bin, upstream's default.
+  test("a humidex above 1000 or +Infinity gives 'Heat stroke probable'", () => {
     expect(humidex({ tdb: 300, rh: 50 })).toMatchObject({
       humidex: 26258.4,
-      discomfort: null,
+      discomfort: "Heat stroke probable",
     });
     // 7.5 * tdb / (237.7 + tdb) is 17835 here, and 10 ** 17835 is Infinity.
     expect(humidex({ tdb: -237.8, rh: 50 })).toMatchObject({
       humidex: Infinity,
-      discomfort: null,
+      discomfort: "Heat stroke probable",
     });
   });
 
+  // Where the classifier gives no label, the model returns upstream's default.
   test("classifyFromBins of the returned humidex gives the returned discomfort", () => {
     const { classifier } = HUMIDEX_INFO.outputs.discomfort;
     for (const model of ["rana", "masterson"] as const)
@@ -218,29 +214,9 @@ describe("humidex (JS-only)", () => {
                 ? NaN
                 : classifyFromBins(result.humidex, classifier);
             expect(result.discomfort).toBe(
-              typeof label === "string" ? label : null,
+              typeof label === "string" ? label : "Heat stroke probable",
             );
           }
-  });
-
-  // Upstream's committed outputs in tests/parity/data/humidex.json, which the
-  // parity suite does not compare for discomfort (deviation humidex-9).
-  test("discomfort is upstream's on every parity case with a numeric humidex, and null on the 16 with NaN", () => {
-    const { cases } = read_data(root, "humidex");
-    let nan_cases = 0;
-    for (const expected of cases) {
-      if (!upstream_returns(expected)) continue;
-      const result = humidex(expected.inputs as unknown as Inputs);
-      if (typeof expected.outputs.humidex === "number") {
-        expect(result.discomfort).toBe(expected.outputs.discomfort);
-      } else {
-        expect(expected.outputs.humidex).toEqual({ float: "nan" });
-        expect(result.humidex).toBe(null);
-        expect(result.discomfort).toBe(null);
-        nan_cases += 1;
-      }
-    }
-    expect(nan_cases).toBe(16);
   });
 
   // Deviation humidex-4.

@@ -39,7 +39,6 @@ export const HUMIDEX_INFO = deepFreeze({
     humidex: { kind: "numeric", nullable: true, unit: "°C" },
     discomfort: {
       kind: "label",
-      nullable: true,
       unit: null,
       // The masks' thresholds, published as bins (deviation humidex-1).
       classifier: STRESS_CATEGORIES,
@@ -83,8 +82,7 @@ export type Humidex = OutputsOf<typeof HUMIDEX_INFO>;
  * To access the `humidex` and `discomfort` values, use the respective properties of the returned `Humidex` object, e.g., `result.humidex`.
  *
  * - `humidex` - Humidex value, [°C].
- * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016);
- *   `null` where `humidex` is `null` or above 1000 °C.
+ * - `discomfort` - Degree of comfort or discomfort as defined in Havenith and Fiala (2016).
  * - `warnings` - Added: the call's {@link ModelWarning} rows, in the order of its checks.
  *
  * @throws `RangeError` If `rh` is below 0 or above 100, or `model` is a string other than 'rana' and 'masterson'.
@@ -136,11 +134,10 @@ export function humidex(inputs: HumidexInputs): Humidex {
     hi = round(hi, 1);
   }
 
-  // The masks become the info's classifier, with no default label (deviation humidex-9).
-  const stress_category = _mapping(
-    hi,
-    HUMIDEX_INFO.outputs.discomfort.classifier,
-  );
+  // The masks are the info's classifier, and full_like's string the default (deviation humidex-9).
+  const category = _mapping(hi, HUMIDEX_INFO.outputs.discomfort.classifier);
+  const stress_category =
+    typeof category === "string" ? category : "Heat stroke probable";
 
   return buildOutputs(
     HUMIDEX_INFO,

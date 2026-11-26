@@ -930,13 +930,11 @@ adaptive_en({ ...en_inputs, standard: "16798-1-2019" });
 
 // humidex takes one inputs object (ADR 0002), with its inputs and result types
 // named after upstream's HumidexInputs and Humidex, and returns a readonly
-// result whose discomfort is null where its classifier gives no label.
+// result whose discomfort is a label.
 const humidex_inputs: HumidexInputs = { tdb: 25, rh: 50, model: "masterson" };
 const humidex_result: Humidex = humidex(humidex_inputs);
 const humidex_value: number | null = humidex_result.humidex;
-const humidex_discomfort: string | null = humidex_result.discomfort;
-// @ts-expect-error the discomfort can be null, so it is not only a string.
-const humidex_discomfort_string: string = humidex_result.discomfort;
+const humidex_discomfort: string = humidex_result.discomfort;
 // @ts-expect-error the result is readonly.
 humidex_result.humidex = 1;
 // @ts-expect-error model is 'rana' or 'masterson'.

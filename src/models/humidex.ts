@@ -1,8 +1,23 @@
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { parseInputs } from "../_internal/define.ts";
 import { buildOutputs, deepFreeze } from "../_internal/modelInfo.ts";
 import type { InputsOf, ModelInfo, OutputsOf } from "../_internal/modelInfo.ts";
 import { round } from "../_internal/round.ts";
+import { _mapping } from "../_internal/validation.ts";
 import { dew_point_tmp } from "../psychrometrics/dew_point_tmp.ts";
+
+const STRESS_CATEGORIES = deepFreeze({
+  edges: [30, 35, 40, 45, 54, 1000],
+  labels: [
+    "Little or no discomfort",
+    "Noticeable discomfort",
+    "Evident discomfort",
+    "Intense discomfort; avoid exertion",
+    "Dangerous discomfort",
+    "Heat stroke probable",
+  ],
+  right: true,
+} as const satisfies ClassifierBins);
 
 /** Describes the standards, inputs and outputs of {@link humidex}. */
 export const HUMIDEX_INFO = deepFreeze({
@@ -22,7 +37,11 @@ export const HUMIDEX_INFO = deepFreeze({
   },
   outputs: {
     humidex: { kind: "numeric", nullable: true, unit: "°C" },
-    discomfort: { kind: "label", unit: null },
+    discomfort: {
+      kind: "label",
+      unit: null,
+      classifier: STRESS_CATEGORIES,
+    },
   },
 } as const satisfies ModelInfo);
 
@@ -114,13 +133,10 @@ export function humidex(inputs: HumidexInputs): Humidex {
     hi = round(hi, 1);
   }
 
-  let stress_category = "Heat stroke probable";
-  if (hi <= 30) stress_category = "Little or no discomfort";
-  if (hi > 30 && hi <= 35) stress_category = "Noticeable discomfort";
-  if (hi > 35 && hi <= 40) stress_category = "Evident discomfort";
-  if (hi > 40 && hi <= 45)
-    stress_category = "Intense discomfort; avoid exertion";
-  if (hi > 45 && hi <= 54) stress_category = "Dangerous discomfort";
+  // The masks are the info's classifier, and full_like's string the default (deviation humidex-9).
+  const category = _mapping(hi, HUMIDEX_INFO.outputs.discomfort.classifier);
+  const stress_category =
+    typeof category === "string" ? category : "Heat stroke probable";
 
   return buildOutputs(
     HUMIDEX_INFO,

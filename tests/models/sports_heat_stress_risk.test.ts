@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   _SportsValues,
+  classifyFromBins,
   phs,
   Sports,
   sports_heat_stress_risk,
@@ -1078,4 +1079,119 @@ describe("sports_heat_stress_risk (JS-only)", () => {
   test("is exported from the package root as from its subpath", () => {
     expect(from_root).toBe(sports_heat_stress_risk);
   });
+
+  // Deviation sports_heat_stress_risk-1: the thresholds of _get_recommendation's chain (models/sports_heat_stress_risk.py:455-462), closed by 5.0.
+  test("recommendation's classifier holds _get_recommendation's edges, labels and right", () => {
+    expect(SPORTS_HEAT_STRESS_RISK_INFO.outputs.recommendation).toEqual({
+      kind: "label",
+      unit: null,
+      classifier: {
+        edges: [2.0, 3.0, 4.0, 5.0],
+        labels: [
+          "Increase hydration & modify clothing",
+          "Increase frequency and/or duration of rest breaks",
+          "Apply active cooling strategies",
+          "Consider suspending play",
+        ],
+        right: false,
+      },
+    });
+  });
+
+  // Upstream's committed outputs in tests/parity/data/sports_heat_stress_risk.json,
+  // one case at 1.0, on each edge it reaches and just below it, and at its cap of 4.9.
+  test.each([
+    [
+      {
+        tdb: 15.8,
+        tr: 19.6,
+        rh: 85.1,
+        vr: 0.2800253993194213,
+        sport: "EQUESTRIAN",
+      },
+      1.0,
+      "Increase hydration & modify clothing",
+    ],
+    [
+      {
+        tdb: 34.3,
+        tr: -1.8,
+        rh: 21.32927640542731,
+        vr: 2.8503680872928254,
+        sport: "OZTAG",
+      },
+      1.9,
+      "Increase hydration & modify clothing",
+    ],
+    [
+      {
+        tdb: 34.7,
+        tr: -2.6858816035786983,
+        rh: 50.3,
+        vr: 1.621229707027143,
+        sport: "SOFTBALL",
+      },
+      2.0,
+      "Increase frequency and/or duration of rest breaks",
+    ],
+    [
+      { tdb: 37.553430840377786, tr: 38.5, rh: 59.9, vr: 1.6, sport: "OZTAG" },
+      2.9,
+      "Increase frequency and/or duration of rest breaks",
+    ],
+    [
+      {
+        tdb: 32.92770695452489,
+        tr: 69.65986990791248,
+        rh: 56.4,
+        vr: 2.6,
+        sport: "ROWING",
+      },
+      3.0,
+      "Apply active cooling strategies",
+    ],
+    [
+      {
+        tdb: 43.3,
+        tr: 34.5,
+        rh: 3.531149285584223,
+        vr: 2.900797571381035,
+        sport: "RUGBY_LEAGUE",
+      },
+      3.9,
+      "Apply active cooling strategies",
+    ],
+    [
+      {
+        tdb: 38.41598197596822,
+        tr: 10.8,
+        rh: 65.25461630718884,
+        vr: 2.926457968415234,
+        sport: "ARCHERY",
+      },
+      4.0,
+      "Consider suspending play",
+    ],
+    [
+      { tdb: 54.8, tr: 81.6, rh: 53.490033139669926, vr: 3.7, sport: "TOUCH" },
+      4.9,
+      "Consider suspending play",
+    ],
+  ] as const)(
+    "%o returns risk level %s, which the info's classifier classifies as the recommendation returned",
+    ({ sport, ...inputs }, risk_level, recommendation) => {
+      const result = sports_heat_stress_risk({
+        ...inputs,
+        sport: Sports[sport],
+      });
+      expect(result.risk_level_interpolated).toBe(risk_level);
+      expect(result.recommendation).toBe(recommendation);
+      expect(
+        classifyFromBins(
+          result.risk_level_interpolated,
+          SPORTS_HEAT_STRESS_RISK_INFO.outputs.recommendation.classifier,
+        ),
+      ).toBe(recommendation);
+    },
+  );
 });

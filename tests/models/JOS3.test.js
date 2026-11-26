@@ -1,5 +1,5 @@
-import { JOS3 } from "../../src/models/JOS3.js";
-import { describe, it, expect } from "@jest/globals";
+import { JOS3 } from "../../src/models/index.ts";
+import { describe, it, expect } from "vitest";
 import single_iteration from "./1_run_dict.json";
 import twenty_iterations from "./20_runs_dict.json";
 import getters from "./1_run_getters.json";
@@ -8,6 +8,44 @@ import * as math from "mathjs";
 import { BODY_NAMES } from "../../src/jos3_functions/matrix.js";
 
 describe("JOS3", () => {
+  // The reference-state search calls pmv_ppd_iso with limit_inputs False
+  // (jos3.py:569-578), so a neutral operative temperature above ISO 7730's
+  // tdb limit of 30 °C is still found. Upstream 4.7.0 gives 30.07333333333334
+  // for this body, measured in the parity image.
+  it("finds the reference operative temperature outside ISO 7730's limits", () => {
+    const jos = new JOS3(1.72, 74.43, 15, 20, "female", 2.59, "ganpule");
+    for (const to of jos.to.toArray()) {
+      expect(Math.abs(to - 30.07333333333334)).toBeLessThanOrEqual(1e-10);
+    }
+  });
+
+  // Upstream's setters take a list or a numpy array of 17 values, one per
+  // body part (jos3.py:1427-1439, jos3_functions/construction.py:63
+  // `to_array_body_parts`), as upstream's examples/calc_jos3.py:89 sets
+  // `model.v`.
+  describe("a per-body-part setter takes an array or a Matrix", () => {
+    const v = [
+      0.2, 0.4, 0.4, 0.1, 0.1, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.1, 0.1, 0.1, 0.1,
+      0.1, 0.1,
+    ];
+
+    it.each([
+      ["an array", v],
+      ["a Matrix", math.matrix(v)],
+    ])("%s", (_, input) => {
+      const jos = new JOS3();
+      jos.v = input;
+      expect(jos.v.toArray()).toStrictEqual(v);
+    });
+
+    it("throws for an array that is not 17 long", () => {
+      const jos = new JOS3();
+      expect(() => {
+        jos.v = [0.1, 0.2];
+      }).toThrow("Input list is not of length 17");
+    });
+  });
+
   describe("state after single iteration", () => {
     describe("results should have correct values", () => {
       const jos = new JOS3(
@@ -132,5 +170,12 @@ describe("JOS3", () => {
         });
       }
     });
+  });
+
+  // Decisions 321 and 311: the next step's NaN temperature throws.
+  it("computes on a null pmv from pmv_ppd_iso as NaN", () => {
+    expect(() =>
+      new JOS3()._calculate_operative_temp_when_pmv_is_zero(0.1, 50, 1.2, -1),
+    ).toThrow(new RangeError("tdb must be a finite number."));
   });
 });

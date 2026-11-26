@@ -1,5 +1,5 @@
 import { resp_heat_loss } from "../../../src/jos3_functions/thermoregulation/resp_heat_loss";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("resp_heat_loss", () => {
   it("should return the correct values", () => {

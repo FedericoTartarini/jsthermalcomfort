@@ -33,46 +33,57 @@ Please cite us if you use this package: [Tartarini, F., Schiavon, S., 2020. pyth
 npm install jsthermalcomfort
 ```
 
-If you want to use jsthermalcomfort package without installing it on your local machine, you can import with:
-
-[`https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/`](https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/)
-
-Example:
+Import functions by name, from the package root or from a subpath: `jsthermalcomfort/models`, `jsthermalcomfort/environment`, `jsthermalcomfort/clothing`, `jsthermalcomfort/psychrometrics` or `jsthermalcomfort/utilities`.
 
 ```javascript
-import {
-  models,
-  utilities,
-  psychrometrics,
-} from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js";
+import { pmv_ppd_iso } from "jsthermalcomfort";
+import { utci } from "jsthermalcomfort/models";
+
+const { pmv, ppd } = pmv_ppd_iso({
+  tdb: 25,
+  tr: 25,
+  vr: 0.1,
+  rh: 50,
+  met: 1.2,
+  clo: 0.5,
+});
+console.log(pmv, ppd); // 0.08 5.1
+
+const result = utci({ tdb: 25, tr: 25, v: 1, rh: 50 });
+console.log(result.utci, result.stress_category); // 24.6 no thermal stress
 ```
 
-You can also import it in the website directly, and caution that you need to mark the script as module:
+In a browser without a bundler, import from jsDelivr in a module script:
 
 ```html
 <script type="module">
-  import {
-    models,
-    utilities,
-    psychrometrics,
-  } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort/lib/esm/index.js";
+  import { pmv_ppd_iso } from "https://cdn.jsdelivr.net/npm/jsthermalcomfort@2/+esm";
+
+  const { pmv, ppd } = pmv_ppd_iso({
+    tdb: 25,
+    tr: 25,
+    vr: 0.1,
+    rh: 50,
+    met: 1.2,
+    clo: 0.5,
+  });
+  console.log(pmv, ppd); // 0.08 5.1
 </script>
 ```
 
-# Examples and Tutorials
+# Migrating from 1.4.0
 
-We developed a few [examples](https://github.com/FedericoTartarini/jsthermalcomfort/tree/main/docs/examples) files on how to use some of the functions.
+2.0.0 changes how every function is called and imported. The migration guide gives the rules that apply to every function, then each 1.4.0 function's before and after.
 
-Here is a list of examples running in the browser:
-
-- [PHS](/docs/examples/phs.html)
+- Guide: [`docs/migration-v2.md`](docs/migration-v2.md)
+- Online docs version: [Migrating from 1.4.0 to 2.0.0](https://federicotartarini.github.io/jsthermalcomfort/documents/migration-v2.html)
 
 # Contributing
 
 Contributions are welcome.
 
-- Contributor guide: [`docs_theme/contributing.md`](docs_theme/contributing.md)
-- Online docs version: [Contributing](https://federicotartarini.github.io/jsthermalcomfort/contributing.html)
+- Contributor guide: [`docs/contributing.md`](docs/contributing.md)
+- Online docs version: [Contributing](https://federicotartarini.github.io/jsthermalcomfort/documents/contributing.html)
 - Bug reports and feature requests: [GitHub Issues](https://github.com/FedericoTartarini/jsthermalcomfort/issues)
 
 ## Local development (quick start)
@@ -97,7 +108,7 @@ points at a _commit_, not a branch, so a release can be cut from any branch:
 ```
 main     ──●──●──●                 ← v1.4.0 tagged here
               \
-dev-v2         ●──●──●──●          ← v2.0.0-next.1 tagged here
+development    ●──●──●──●          ← v2.0.0-next.1 tagged here
 ```
 
 Both publish through the same workflow. What differs is the dist-tag, and that
@@ -134,7 +145,7 @@ Consumers opt in explicitly, and nobody on `^1.x` is affected:
 npm install jsthermalcomfort@next
 ```
 
-This is how work on `dev-v2` reaches front ends before the major release, so
+This is how work on `development` reaches front ends before the major release, so
 packaging problems surface before they reach everyone. Cut as many as you like
 — `next.1`, `next.2` and so on — each is a real installable package.
 
@@ -153,18 +164,20 @@ a preview ends up as the default install.
 
 ### One thing to be careful about
 
-**Do not tag a final version (no hyphen) from `dev-v2` while it is still work in
+**Do not tag a final version (no hyphen) from `development` while it is still work in
 progress.** Without a hyphen it publishes as `latest`, and `npm install
 jsthermalcomfort` starts handing out an unfinished major. It is not easily
 undone — npm allows unpublishing only within a short window.
 
-Prereleases from `dev-v2`; the final `vX.0.0` after `dev-v2` merges into `main`,
+Prereleases from `development`; the final `vX.0.0` after `development` merges into `main`,
 so `latest` and the default branch agree about what the current release is.
 
 Validation datasets for model tests are fetched from
 `FedericoTartarini/validation-data-comfort-models` on GitHub (no submodule needed).
-By default tests use the `main` branch. To pin tests to a specific ref (tag/branch/commit), set
-`VALIDATION_DATA_REF` when running tests:
+By default tests use the `v1.1.0` tag, the ref pythermalcomfort's own tests pin
+(`unit_test_data_prefix` in its `tests/conftest.py`); bump it together with
+upstream. To run the tests against another ref (tag/branch/commit), set
+`VALIDATION_DATA_REF`:
 
 ```bash
 VALIDATION_DATA_REF=main npm test

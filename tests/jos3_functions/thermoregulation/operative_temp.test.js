@@ -1,5 +1,5 @@
 import { operative_temp } from "../../../src/jos3_functions/thermoregulation/operative_temp";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $lerp } from "../../../src/supa";
 import * as math from "mathjs";
 

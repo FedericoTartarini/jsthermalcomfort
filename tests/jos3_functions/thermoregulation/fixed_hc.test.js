@@ -1,7 +1,7 @@
 import JOS3Defaults from "../../../src/jos3_functions/JOS3Defaults";
 import { conv_coef } from "../../../src/jos3_functions/thermoregulation/conv_coef";
 import { fixed_hc } from "../../../src/jos3_functions/thermoregulation/fixed_hc";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import * as math from "mathjs";
 
 describe("fixed_hc", () => {

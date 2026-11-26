@@ -6,7 +6,8 @@
 /lib
 /tmp
 /out-tsc
-/docs
+/docs/adr/
+/_site/
 
 # Runtime data
 pids
@@ -92,3 +93,5 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
+# Agent config
+.claude/

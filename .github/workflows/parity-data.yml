@@ -1,0 +1,27 @@
+name: Parity data
+
+# Generates the parity suite's data, the one canonical source of them
+# (scripts/parity/README.md). Run by hand; the user reviews the uploaded JSON
+# and commits it to tests/parity/data/.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    # x64 in actions/runner-images' README. The data are x86_64 only.
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v7
+      # The image pins Python, installs the hashed lockfile and sets
+      # NUMBA_CPU_NAME and NPY_DISABLE_CPU_FEATURES, as local runs do.
+      - run: docker build --platform linux/amd64 -t jsthermalcomfort-parity scripts/parity
+      - run: docker run --rm --platform linux/amd64 -v "$PWD:/work" jsthermalcomfort-parity python -I scripts/parity/generate.py parity-data
+      - uses: actions/upload-artifact@v7
+        with:
+          name: parity-data
+          path: parity-data/
+          if-no-files-found: error

@@ -1,7 +1,7 @@
 import { fixed_hr } from "../../../src/jos3_functions/thermoregulation/fixed_hr";
 import { rad_coef } from "../../../src/jos3_functions/thermoregulation/rad_coef";
 import JOS3Defaults from "../../../src/jos3_functions/JOS3Defaults";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("fixed_hr", () => {
   it("should return expected values", () => {

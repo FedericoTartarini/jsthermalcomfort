@@ -1,6 +1,6 @@
 import { bfb_rate } from "../../src/jos3_functions/bfb_rate";
 import JOS3Defaults from "../../src/jos3_functions/JOS3Defaults";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 
 describe("bfb_rate", () => {
   it("should use appropriate defaults", () => {

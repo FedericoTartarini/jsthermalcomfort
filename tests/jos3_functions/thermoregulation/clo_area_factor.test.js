@@ -1,5 +1,5 @@
 import { clo_area_factor } from "../../../src/jos3_functions/thermoregulation/clo_area_factor";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $lerp } from "../../../src/supa";
 import * as math from "mathjs";
 

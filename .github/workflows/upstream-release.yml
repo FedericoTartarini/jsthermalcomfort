@@ -1,0 +1,22 @@
+name: Upstream release
+
+# Fails when PyPI's latest pythermalcomfort differs from the parity pin; see
+# docs/agents/upstream-sync.md.
+on:
+  schedule:
+    # Mondays, 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v7
+      # curl and jq are in the image (actions/runner-images,
+      # images/ubuntu/Ubuntu2404-Readme.md).
+      - run: bash scripts/parity/check-upstream-release.sh

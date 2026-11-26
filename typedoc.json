@@ -1,0 +1,66 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/models/index.ts",
+    "src/environment/index.ts",
+    "src/clothing/index.ts",
+    "src/psychrometrics/index.ts",
+    "src/utilities/index.ts"
+  ],
+  "tsconfig": "configs/tsconfig.esm.json",
+  "out": "_site",
+  "readme": "docs/overview.md",
+  "projectDocuments": [
+    "docs/installation.md",
+    "docs/migration-v2.md",
+    "docs/contributing.md",
+    "docs/authors.md",
+    "docs/surveys.md",
+    "docs/references.md",
+    "docs/examples.md",
+    "docs/deviations/README.md",
+    "docs/changelog.md"
+  ],
+  "customCss": "docs/custom.css",
+  "customJs": "docs/site.js",
+  "headings": { "readme": false, "document": false },
+  "includeVersion": true,
+  "hideGenerator": true,
+  "navigationLinks": {
+    "GitHub": "https://github.com/FedericoTartarini/jsthermalcomfort",
+    "npm": "https://www.npmjs.com/package/jsthermalcomfort",
+    "LinkedIn": "https://www.linkedin.com/in/federico-tartarini",
+    "Google Scholar": "https://scholar.google.com/citations?view_op=list_works&hl=en&hl=en&user=QcamSPwAAAAJ"
+  },
+  "useFirstParagraphOfCommentAsSummary": true,
+  "searchInComments": true,
+  "searchInDocuments": true,
+  "sortEntryPoints": false,
+  "sort": ["source-order"],
+  "notRenderedTags": [
+    "@showCategories",
+    "@showGroups",
+    "@hideCategories",
+    "@hideGroups",
+    "@disableGroups",
+    "@expand",
+    "@preventExpand",
+    "@expandType",
+    "@summary",
+    "@group",
+    "@groupDescription",
+    "@category",
+    "@categoryDescription",
+    "@sortStrategy"
+  ],
+  "externalPattern": [
+    "**/node_modules/**",
+    "**/src/jos3_functions/**",
+    "**/src/supa.js"
+  ],
+  "excludeExternals": true,
+  "plugin": ["./scripts/typedoc-plugin.mjs"],
+  "router": "jsthermalcomfort",
+  "theme": "jsthermalcomfort",
+  "treatValidationWarningsAsErrors": true
+}

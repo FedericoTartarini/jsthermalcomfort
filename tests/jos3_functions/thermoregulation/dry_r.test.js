@@ -1,5 +1,5 @@
 import { dry_r } from "../../../src/jos3_functions/thermoregulation/dry_r";
-import { describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { $lerp } from "../../../src/supa";
 import * as math from "mathjs";
 

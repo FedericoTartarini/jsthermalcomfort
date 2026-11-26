@@ -69,7 +69,7 @@ export function conductance(
   // It is assumed that the inner is vascular radius, 2.5mm and the outer is
   // stolwijk's core radius.
   // The heat transfer coefficient of the core is assumed as the Michel's
-  // counter-flow model 0.66816 [W/(m･K)].
+  // counter-flow model 0.66816 [W/(m·K)].
   let cdt_ves_cr = math.matrix([
     0, 0, 0, 0, 0, 0.586, 0.383, 1.534, 0.586, 0.383, 1.534, 0.81, 0.435, 1.816,
     0.81, 0.435, 1.816,
@@ -83,7 +83,7 @@ export function conductance(
 
   // art to vein (counter-flow) [W/K]
   // The data has been derived Mitchell's model.
-  // The values = 15.869 [W/(m･K)] * the segment length [m]
+  // The values = 15.869 [W/(m·K)] * the segment length [m]
   let cdt_art_vein = math.matrix([
     0, 0, 0, 0, 0, 0.537, 0.351, 0.762, 0.537, 0.351, 0.762, 0.826, 0.444,
     0.992, 0.826, 0.444, 0.992,

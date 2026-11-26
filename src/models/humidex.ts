@@ -40,7 +40,6 @@ export const HUMIDEX_INFO = deepFreeze({
     discomfort: {
       kind: "label",
       unit: null,
-      // The masks' thresholds, published as bins (deviation humidex-1).
       classifier: STRESS_CATEGORIES,
     },
   },

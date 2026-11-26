@@ -166,7 +166,6 @@ export const SPORTS_HEAT_STRESS_RISK_INFO = deepFreeze({
     recommendation: {
       kind: "label",
       unit: null,
-      // _get_recommendation's thresholds, published as bins (deviation sports_heat_stress_risk-1).
       classifier: RECOMMENDATION_CATEGORIES,
     },
   },

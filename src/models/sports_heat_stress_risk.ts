@@ -5,6 +5,7 @@ import {
   PHS_INFO,
 } from "./phs.ts";
 import { brentq } from "../_internal/brentq.ts";
+import type { ClassifierBins } from "../_internal/classifierBins.ts";
 import { parseInputs } from "../_internal/define.ts";
 import { notOfType } from "../_internal/errors.ts";
 import { floatRepr } from "../_internal/floatRepr.ts";
@@ -16,6 +17,7 @@ import type {
   OutputsOf,
 } from "../_internal/modelInfo.ts";
 import { pythonRound } from "../_internal/round.ts";
+import { _mapping } from "../_internal/validation.ts";
 import { met_to_w_m2 } from "../utilities/constants.ts";
 import { Standard } from "../utilities/options.ts";
 
@@ -128,6 +130,17 @@ export const Sports = deepFreeze({
   WALKING: new _SportsValues(0.5, 5.0, 0.5, 180),
 });
 
+const RECOMMENDATION_CATEGORIES = deepFreeze({
+  edges: [2.0, 3.0, 4.0, 5.0],
+  labels: [
+    "Increase hydration & modify clothing",
+    "Increase frequency and/or duration of rest breaks",
+    "Apply active cooling strategies",
+    "Consider suspending play",
+  ],
+  right: false,
+} as const satisfies ClassifierBins);
+
 /** Describes the standards, inputs and outputs of {@link sports_heat_stress_risk}. */
 export const SPORTS_HEAT_STRESS_RISK_INFO = deepFreeze({
   name: "sports_heat_stress_risk",
@@ -150,7 +163,12 @@ export const SPORTS_HEAT_STRESS_RISK_INFO = deepFreeze({
     t_medium: { kind: "numeric", unit: "°C" },
     t_high: { kind: "numeric", unit: "°C" },
     t_extreme: { kind: "numeric", unit: "°C" },
-    recommendation: { kind: "label", unit: null },
+    recommendation: {
+      kind: "label",
+      unit: null,
+      // _get_recommendation's thresholds, published as bins (deviation sports_heat_stress_risk-1).
+      classifier: RECOMMENDATION_CATEGORIES,
+    },
   },
 } as const satisfies ModelInfo);
 
@@ -551,13 +569,12 @@ export function _calc_risk_single_value(
  * risk level.
  */
 function _get_recommendation(risk_level: number): string {
-  if (risk_level < 2.0) {
-    return "Increase hydration & modify clothing";
-  } else if (risk_level < 3.0) {
-    return "Increase frequency and/or duration of rest breaks";
-  } else if (risk_level < 4.0) {
-    return "Apply active cooling strategies";
-  } else {
-    return "Consider suspending play";
-  }
+  // The chain's thresholds are the info's classifier, and its else the fallback (deviation sports_heat_stress_risk-15).
+  const recommendation = _mapping(
+    risk_level,
+    SPORTS_HEAT_STRESS_RISK_INFO.outputs.recommendation.classifier,
+  );
+  return typeof recommendation === "string"
+    ? recommendation
+    : "Consider suspending play";
 }
